@@ -9,7 +9,7 @@ import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomButton from "src/components/Helpers/CustomButton";
 import routes from "src/components/Helpers/Routes";
-import { CustomDialogTransition, isFieldNotTouched, serializedAsset } from "src/constants/helpers";
+import { CustomDialogTransition, isFieldNotTouched, productInventory, serializedAsset } from "src/constants/helpers";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import { Route } from "workbox-routing";
 
@@ -39,7 +39,7 @@ const NonSerializedAssetProductInventory = ({ onSuccess, onClose, productId, pro
         }
         if (productId) {
             axiosInstance()
-                .put(`/product-inventory/product/${productId}`, tempInventory)
+                .put(`${productInventory.api}/product/${productId}`, tempInventory)
                 .then(({ data: { data } }) => {
                     setSubmitting(false);
                     onSuccess();

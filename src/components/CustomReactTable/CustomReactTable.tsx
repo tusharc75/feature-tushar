@@ -16,27 +16,28 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import CustomReactTableHeaderOptions from './CustomReactTableHeaderOptions';
 import { isMobile, isTablet } from "react-device-detect";
+import Checkbox from "@material-ui/core/Checkbox"
 
 const IndeterminateCheckbox = React.forwardRef(
-    ({ indeterminate, ...rest }: any, ref) => {
+    ({ indeterminate, from, ...rest }: any, ref) => {
         const defaultRef = React.useRef()
         const resolvedRef: any = ref || defaultRef
-
         useEffect(() => {
             resolvedRef.current.indeterminate = indeterminate
         }, [resolvedRef, indeterminate])
-
         return (
-            // <Checkbox
-            //     size="small"
-            //     ref={resolvedRef} {...rest}
-            //     defaultChecked={false}
-            //     color="primary"
-            //     inputProps={{ 'aria-label': 'secondary checkbox' }}
-            // />
-            <>
-                <input type="checkbox" ref={resolvedRef} {...rest} />
-            </>
+            <Checkbox
+                size="small"
+                ref={resolvedRef}
+                {...rest}
+                defaultChecked={false}
+                color="primary"
+                style={from === "Header" ? { padding: "0px", color: 'white' } : { padding: "0px" }}
+                inputProps={{ 'aria-label': 'secondary checkbox' }}
+            />
+            // <>
+            //     <input type="checkbox" ref={resolvedRef} {...rest} />
+            // </>
         )
     }
 )
@@ -104,9 +105,9 @@ export default function CustomReactTable({
                         color: "black"
                     }}>
                         {
-                            isAllRowsExpanded ? <FaAngleDown className="cursor-pointer" onClick={() => {
+                            isAllRowsExpanded ? <FaAngleDown style={{ color: "white" }} className="cursor-pointer" onClick={() => {
                                 toggleAllRowsExpanded(false);
-                            }} /> : <FaAngleRight className="cursor-pointer" onClick={() => {
+                            }} /> : <FaAngleRight style={{ color: "white" }} className="cursor-pointer" onClick={() => {
                                 toggleAllRowsExpanded(true);
                             }} />
                         }
@@ -168,7 +169,7 @@ export default function CustomReactTable({
                 // to render a checkbox
                 Header: ({ getToggleAllRowsSelectedProps }) => (
                     <div>
-                        <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+                        <IndeterminateCheckbox from="Header" {...getToggleAllRowsSelectedProps()} />
                     </div>
                 ),
                 // The cell can use the individual row's getToggleRowSelectedProps method
@@ -176,7 +177,7 @@ export default function CustomReactTable({
                 Cell: ({ row }) => (
                     row?.original?.hideSelection ? null :
                         <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : "" }}>
-                            <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+                            <IndeterminateCheckbox from="Cell"  {...row.getToggleRowSelectedProps()} />
                         </div>
                 ),
             },
@@ -289,35 +290,26 @@ export default function CustomReactTable({
     // }, [setPageSize,])
 
     useEffect(() => {
-
         let flatSelectedData = [];
-
         Object.keys(selectedRowIds).forEach((key) => {
-
             const splittedArray = key.split(".");
-
             if (splittedArray.length === 0) {
                 const { subRows, ...rest } = data[key];
                 flatSelectedData.push({ ...rest })
             } else {
                 let dataToStore = null;
-
                 splittedArray.forEach((f, index) => {
-
                     if (index === 0) {
                         dataToStore = { ...data[f] };
                     } else {
                         dataToStore = { ...dataToStore["subRows"][f] };
                     }
                 })
-
                 const { subRows, ...rest } = dataToStore;
                 flatSelectedData.push({ ...rest })
             }
         })
-
         onSelect([...flatSelectedData]);
-
     }, [selectedRowIds]);
 
     // Render the UI for your table
@@ -356,25 +348,21 @@ export default function CustomReactTable({
                             <>
                                 <TableRow {...headerGroup.getHeaderGroupProps()} key={index} className="tr">
                                     {headerGroup.headers.map(column => (
-                                        <TableCell {...column.getHeaderProps()} className="th text-truncate">
+                                        <TableCell {...column.getHeaderProps()} className="th text-truncate table-header">
                                             <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
                                                 <span>
                                                     {column.render('Header')}
                                                 </span>
-
                                                 {column.isSorted
                                                     ? column.isSortedDesc
                                                         ? <ExpandLessIcon fontSize="small" />
                                                         : <ExpandMoreIcon fontSize="small" />
                                                     : ''}
                                             </div>
-
                                             <div {...column.getResizerProps()} className="resizer" />
-
                                         </TableCell>
                                     ))}
                                 </TableRow>
-
                                 <TableRow {...headerGroup.getHeaderGroupProps()} className="tr">
                                     {headerGroup.headers.map(column => (
                                         <TableCell {...column.getHeaderProps()} className="th text-truncate bg-white">
@@ -382,7 +370,6 @@ export default function CustomReactTable({
                                         </TableCell>
                                     ))}
                                 </TableRow>
-
                             </>
                         ))}
                     </TableHead>
@@ -412,9 +399,7 @@ export default function CustomReactTable({
                             })
                         }
                     </TableBody>
-
-                    {
-                        rows?.length > 0 &&
+                    {rows?.length > 0 &&
                         <TableFooter style={{ overflowY: "auto", overflowX: "hidden" }} className="footer">
                             {footerGroups.map(group => (
                                 <TableRow {...group.getFooterGroupProps()} className="tr">
@@ -442,7 +427,6 @@ export default function CustomReactTable({
                 }}
                 rowsPerPageOptions={gridPageSizes}
             /> */}
-
         </>
     )
 }

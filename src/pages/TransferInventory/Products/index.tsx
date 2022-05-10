@@ -1,8 +1,7 @@
 import React, { useReducer, useState, useEffect, useContext } from 'react';
-import { Button, Box, CircularProgress } from '@material-ui/core';
+import { Button, Box, IconButton } from '@material-ui/core';
 import { useHistory, Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
-import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -10,13 +9,13 @@ import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCell
 import CustomAgGrid, { reducer as gridReducer, intialState as gridState } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { IoRemoveCircleOutline } from 'react-icons/io5';
-import { MdAdd, MdDone } from 'react-icons/md';
 import { useData } from 'src/StateProvider/Provider';
 import AddInventory from './AddInventory';
-import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE } from 'src/constants/helpers';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 
 const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -34,7 +33,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const [state, dispatch] = useReducer(gridReducer, gridState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const [isAdding, setIsAdding] = useState(false);
-  const [columns, setColumns] = useState([])
+  const [columns, setColumns] = useState(null)
 
   const history = useHistory();
 
@@ -43,20 +42,21 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   }, []);
 
   const fetchFields = async () => {
+    const column = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true')
     const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
     productFields?.forEach((e) => {
       if (e?.fieldData?.fieldName === "productName") {
-        columns.push({ field: "productName", headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
+        column.push({ field: "productName", primaryField: true, headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
       }
       if (e?.fieldData?.fieldName === "productNumber") {
-        columns.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+        column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
       if (e?.fieldData?.fieldName === "serializedProduct") {
-        columns.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+        column.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
       }
     })
-    columns.push({
+    column.push({
       field: 'qty',
       headerName: 'Quantity',
       show: true,
@@ -65,26 +65,33 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       cellEditor: 'numericCellEditor',
       editable: permissions?.transferInventory?.isUpdate
     });
-    setColumns([...columns])
+    setColumns([...column])
   }
 
   useEffect(() => {
-    if (!transferInventoryData) return;
-    let timeout = setTimeout(fetchProducts, 200);
-    return () => clearTimeout(timeout);
+    fetchProducts()
   }, [transferInventoryData]);
 
-  const fetchProducts = () => {
+  const fetchProducts = async () => {
     setNextStep(false);
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
+
+    const { data: { data: deliveryTicketList } } = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.transferInventory}&refrenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`);
+    var deliveryTicketProduct = []
+    deliveryTicketList?.forEach((e) => {
+      if (e?.products && e?.products?.length) {
+        deliveryTicketProduct = [...deliveryTicketProduct, ...e?.products]
+      }
+    })
+
     axiosInstance()
-      .get(`${routes.transferInventory.path}/${transferInventoryData._id}/product`)
+      .get(`${routes.transferInventory.path}/${transferInventoryData?._id}/product`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'loading', loading: true });
-        let rows = data?.products.map((u: any) => {
+        let rows = data?.products?.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u?.product;
           finalObject['productName'] = u?.productDetail?.productName;
@@ -92,6 +99,10 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           finalObject['serializedProduct'] = u?.productDetail?.serializedProduct;
           finalObject['qty'] = u.qty;
           finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
+          finalObject['isChecked'] = false;
+          finalObject['allowedToEdit'] = false;
+          finalObject['canDelete'] = !data?.assets?.some((e) => e._id === u._id) && !deliveryTicketProduct?.some((e) => e.product === u?.product);
+          finalObject['hideSelection'] = !finalObject['canDelete'];
           return {
             ...finalObject
           };
@@ -158,19 +169,17 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   );
 
   const ActionRenderer = (params) =>
-    [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) ? (
-      <>
-        <GridDeleteIcon
-          hasDeletePermission={permissions?.transferInventory?.isUpdate}
-          ownerId={transferInventoryData?.createdBy.user._id}
-          userId={user?.user?._id}
-          onDelete={() => {
-            setShowConfirmBox(true);
-            setRemoveData([params.data._id]);
-          }}
-          entity=""
-        />
-      </>
+    params?.data?.canDelete ? (
+      <IconButton
+        onClick={() => {
+          setShowConfirmBox(true);
+          setRemoveData([params.data._id]);
+        }}
+        size="small"
+        color="primary"
+      >
+        <DeleteIcon color="error" fontSize="small" />
+      </IconButton>
     ) : null;
 
   const frameworkComponents = {
@@ -181,6 +190,14 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   };
 
   const onCellValueChanged = ({ data }) => {
+    if (data.canDelete === false) {
+      toastConfig.setToastConfig({
+        type: 'warning',
+        message: "Qty can't be updated",
+        open: true
+      });
+      return;
+    }
     if (Number(data.qty) > Number(data.inventory)) {
       toastConfig.setToastConfig({
         type: 'warning',
@@ -189,14 +206,14 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       });
       return;
     }
-    updateQTY(data?._id, data.qty);
+    updateQty(data?._id, data.qty);
   };
 
   const closeDialog = () => {
     setAddInventoryDialog(false);
   };
 
-  const updateQTY = (id: string, qty: string) => {
+  const updateQty = (id: string, qty: string) => {
     axiosInstance()
       .put(`${routes.transferInventory.path}/${transferInventoryData._id}/product`, {
         ids: [id],
@@ -213,91 +230,96 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   return (
     <React.Fragment>
       {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) && (
-        <Box display="flex" justifyContent="space-between" mx="4px">
+        <Box display="flex" justifyContent="space-between" p={1}>
           <Button
-            variant={isMobile ? 'text' : 'contained'}
+            variant={'contained'}
             color="primary"
             size="small"
-            style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
             onClick={() => {
               setAddInventoryDialog(true);
             }}
           >
-            {isMobile && !isTablet ? <MdAdd size={22} /> : `Add Product`}
+            {`Add Product`}
           </Button>
-
           <Box display="flex">
             <Button
-              variant={isMobile ? 'text' : 'contained'}
+              variant="outlined"
               size="small"
               color="primary"
-              style={isMobile && !isTablet ? { color: 'var(--danger-light)' } : {}}
               disabled={selectedRecords.length === 0}
               onClick={() => {
                 setShowConfirmBox(true);
                 setRemoveData(selectedRecords.map((inv: any) => inv?._id));
               }}
             >
-              {isMobile && !isTablet ? <IoRemoveCircleOutline size={22} /> : 'Remove Product'}
+              {'Remove'}
             </Button>
           </Box>
         </Box>
       )}
       <Box mt={1}>
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={allowedToEdit}
-            allowSwipe={allowedToEdit}
-            permissions={permissions?.transferInventory}
-            primaryField={columns?.find((d: any) => d.primaryField)}
-            onClick={(data) => {
-              history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(data) => {
-              // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => { }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            chips={[
-              {
-                label: 'Quantity: ',
-                field: 'qty'
-              }
-            ]}
-            additionalDetails={[]}
-            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-            onCreate={false}
-            showClone={false}
-            onClone={(data) => { }}
-            renderedFrom={renderedFrom}
-          />
-        ) : (
-          <CustomAgGridEditable
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={allowedToEdit}
-            actionWidth={120}
-            allowSelection={allowedToEdit}
-            isClientSideGrid={true}
-            loading={loading}
-            onCellValueChanged={onCellValueChanged}
-            renderedFrom={renderedFrom}
-            refreshGrid={() => { }}
-          />
-        )}
+        {columns ?
+          isMobile && !isTablet ? (
+            <CustomSwipableList
+              allowSelection={allowedToEdit}
+              allowSwipe={allowedToEdit}
+              permissions={permissions?.transferInventory}
+              primaryField={columns?.find((d: any) => d.primaryField)}
+              onClick={(data) => {
+                history.push(`${routes.productDetail.path}/${data._id}`);
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => { }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              chips={[
+                {
+                  label: 'Quantity: ',
+                  field: 'qty'
+                },
+                {
+                  label: 'Serialized Product: ',
+                  field: 'serializedProduct'
+                }
+              ]}
+              additionalDetails={[]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={false}
+              showClone={false}
+              onClone={(data) => { }}
+              renderedFrom={renderedFrom}
+            />
+          ) : (
+            <CustomAgGridEditable
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowAction={allowedToEdit}
+              actionWidth={120}
+              allowSelection={allowedToEdit}
+              isClientSideGrid={true}
+              loading={loading}
+              onCellValueChanged={onCellValueChanged}
+              renderedFrom={renderedFrom}
+              refreshGrid={() => { }}
+            />
+          )
+          : <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        }
       </Box>
       {openAddNewInventory && transferInventoryData?.transferFromPlant?.optionValue && (
         <AddInventory
@@ -313,7 +335,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         <ConfirmationDialog
           okBtnLoading={isRemovingInventory}
           open={showConfirmBox}
-          message={`Are you sure you want to remove inventory(s)?`}
+          message={`Are you sure you want to remove product(s)?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

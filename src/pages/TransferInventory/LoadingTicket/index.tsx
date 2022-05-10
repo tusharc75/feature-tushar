@@ -19,6 +19,7 @@ import {
   DELIVERY_TICKET_TYPE,
   gridLoadingTimeout,
   deliveryTicket,
+  transferInventory,
   TRANSFER_INVENTORY_STATUS
 } from 'src/constants/helpers';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
@@ -26,7 +27,8 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import { uniq, map, groupBy } from 'lodash';
 import { AiFillFilePdf } from 'react-icons/ai';
 
-const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, renderedFrom, updateTransferInventoryStatus }) => {
+const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -35,7 +37,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
-  const [uniqueLoadingTickets, setUniqueLoadingTickets] = useState([]);
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
   const [downloadingFile, setDownlodingFile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,21 +45,9 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
     fetchProducts();
   }, []);
 
-  // useEffect(() => {
-  //   if (!transferInventoryData) return;
-  //   if (transferInventoryData.status === TRANSFER_INVENTORY_STATUS.delivered) return;
-  //   if (dataRows && dataRows.length === 0) return;
-
-  //   const deliveredAssets = dataRows.filter((d) => d?.loadingTicketStatus === 'Delivered');
-
-  //   if (deliveredAssets.length === dataRows.length) {
-  //     updateTransferInventoryStatus(TRANSFER_INVENTORY_STATUS.delivered);
-  //   }
-  // }, [transferInventoryData, dataRows]);
-
   const columns = [
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'inventoryRenderer' },
+    { field: 'assetNumber', primaryField: true, headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'inventoryRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
     { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
@@ -131,6 +120,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
         obj['type'] = 'Asset';
         obj['productName'] = product?.productDetail?.productName;
         obj['productId'] = product?.productDetail?._id;
+        obj['isChecked'] = false;
         rows.push(obj);
       });
       products
@@ -143,15 +133,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
           obj['type'] = 'Product';
           obj['productName'] = product?.productDetail?.productName;
           obj['productId'] = product?.product;
+          obj['isChecked'] = false;
           rows.push(obj);
         });
 
-      const uniqueIdsForTickets = [];
-
       deliveryTicketList?.map((obj) => {
-        if (uniqueIdsForTickets.includes(obj?._id) === false) {
-          uniqueIdsForTickets.push(obj?._id);
-        }
         rows.map((d, index) => {
           if (obj?.productInventory?.some((p) => p?.optionValue === d?._id)) {
             rows[index]['loadingTicket'] = obj?.ticketName;
@@ -166,7 +152,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
         });
       });
 
-      setUniqueLoadingTickets(uniqueIdsForTickets);
+      if (transferInventoryData.status !== TRANSFER_INVENTORY_STATUS.delivered) {
+        if (rows?.filter((d) => d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === rows?.length) {
+          updateStatus(TRANSFER_INVENTORY_STATUS.delivered)
+        }
+      };
 
       dispatch({ type: 'initialize', data: rows, count: rows.length });
       setTimeout(() => {
@@ -245,71 +235,68 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
 
   return (
     <Fragment>
-      <Box p={1}>
-        <Box display="flex" justifyContent="flex-end">
+      <Box display="flex" justifyContent="flex-end" p={1}>
+        <Button
+          onClick={() => {
+            setDownlodingFile(true);
+            axiosInstance().get(`${transferInventory.api}/${transferInventoryData._id}/pdf`)
+              .then(({ data }) => {
+                axiosInstance()
+                  .get(`user/download?fileName=${data.data.fileName}`, {
+                    responseType: 'blob'
+                  })
+                  .then(({ data }) => {
+                    const file = new Blob([data], { type: 'application/pdf' });
+                    const fileURL = URL.createObjectURL(file);
+                    const pdfWindow = window.open();
+                    pdfWindow.location.href = fileURL;
+                    toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+                    setDownlodingFile(false);
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                    setDownlodingFile(false);
+                  });
+              })
+              .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              });
+          }}
+          variant={'outlined'}
+          color="primary"
+          type="button"
+          size="small"
+          disabled={downloadingFile || dataRows.length === 0}
+          startIcon={<AiFillFilePdf />}
+        >
+          {downloadingFile ? 'Please wait...' : 'Preview'}
+        </Button>
+        <Box ml={1}>
           <Button
-            onClick={() => {
-              setDownlodingFile(true);
-              axiosInstance()
-                .post(`/delivery-ticket/pdf`, { ids: uniqueLoadingTickets })
-                .then(({ data }) => {
-                  axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                      responseType: 'blob'
-                    })
-                    .then(({ data }) => {
-                      const file = new Blob([data], { type: 'application/pdf' });
-                      const fileURL = URL.createObjectURL(file);
-                      const pdfWindow = window.open();
-                      pdfWindow.location.href = fileURL;
-                      toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                      setDownlodingFile(false);
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                      setDownlodingFile(false);
-                    });
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                });
-            }}
-            variant={isMobile && !isTablet ? 'text' : 'outlined'}
+            variant={'outlined'}
             color="primary"
-            type="button"
+            disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
+            onClick={handleLoadingTicketDialog}
             size="small"
-            disabled={downloadingFile || dataRows.length === 0}
-            startIcon={<AiFillFilePdf />}
           >
-            {downloadingFile ? 'Please wait...' : 'Preview'}
+            {`Create Loading Ticket`}
           </Button>
-          <Box ml={1}>
-            <Button
-              variant={'outlined'}
-              color="primary"
-              disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
-              onClick={handleLoadingTicketDialog}
-              size="small"
-            >
-              {`Create Loading Ticket`}
-            </Button>
-            <Box component="span" ml={1} />
-            <Button
-              variant={'outlined'}
-              color="primary"
-              onClick={() => {
-                setShowConfirmBoxReceive(true);
-              }}
-              disabled={
-                selectedRecords.length === 0 ||
-                selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
-              }
-              size="small"
-            >
-              {`Receive`}
-            </Button>
-          </Box>
+          <Box component="span" ml={1} />
+          <Button
+            variant={'outlined'}
+            color="primary"
+            onClick={() => {
+              setShowConfirmBoxReceive(true);
+            }}
+            disabled={
+              selectedRecords.length === 0 ||
+              selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+            }
+            size="small"
+          >
+            {`Receive`}
+          </Button>
         </Box>
       </Box>
       <Box>
@@ -319,9 +306,14 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
               allowSelection={allowedToEdit}
               allowSwipe={true}
               permissions={true}
-              primaryField={columns?.find((d) => d.field)}
+              primaryField={columns?.find((d: any) => d.primaryField)}
               onClick={(data) => {
-                history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
+                if (data.type === "Asset") {
+                  history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
+                }
+                else {
+                  history.push(`${routes.productDetail.path}/${data._id}`);
+                }
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
@@ -334,6 +326,14 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
               loading={loading}
               additionalDetails={[]}
               chips={[
+                {
+                  label: 'Type : ',
+                  field: 'type'
+                },
+                {
+                  label: 'Qty : ',
+                  field: 'qty'
+                },
                 {
                   label: 'Status : ',
                   field: 'status'
@@ -393,7 +393,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, statusOptions, re
         <ConfirmationDialog
           okBtnLoading={isLoading}
           open={showConfirmBoxReceive}
-          message={`Are you sure you want to receive assets?`}
+          message={`Are you sure you want to received?`}
           onClose={() => {
             setShowConfirmBoxReceive(false);
           }}

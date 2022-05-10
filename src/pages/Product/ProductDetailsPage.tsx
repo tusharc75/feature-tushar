@@ -14,7 +14,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { product, serializedAsset, warehouse } from '../../constants/helpers';
+import { product, productInventory, serializedAsset, warehouse } from '../../constants/helpers';
 import CreateProduct from '../../components/Product/CreateProduct';
 import BoxWithBorder from '../../components/BoxWithBorder';
 import DeleteButton from '../../components/Helpers/DeleteButton';
@@ -297,7 +297,7 @@ const ProductDetailsPage = () => {
         });
     } else {
       axiosInstance()
-        .get(`/product-inventory/product/${id}`)
+        .get(`${productInventory.api}/product/${id}`)
         .then(async ({ data: { data } }) => {
           setProductWarehouseData(data);
           setInventoriesData(data);
@@ -308,7 +308,6 @@ const ProductDetailsPage = () => {
           toastConfig.setToastConfig(err);
         });
     }
-
   };
 
   const getColumns = () => {

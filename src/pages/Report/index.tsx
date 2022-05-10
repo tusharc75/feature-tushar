@@ -53,6 +53,8 @@ const Report = () => {
   const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [reportList, setReportList] = React.useState([]);
   const [selectedReportView, setSelectedReportView] = React.useState(null);
+  const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
+
   // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
   const { getColumnData } = useColumns();
@@ -120,6 +122,25 @@ const Report = () => {
       fetchResourceData();
     }
   }, [page, sorting, search, limit, filters, pageSizes]);
+
+  React.useEffect(() => {
+    // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
+    // const selectedDataNames = Object.keys(selectedData);
+    if (!selectedData) return;
+    setSelectedData((prevState: any) => {
+      const dataKeys = Object.keys(prevState);
+      const selectedKeys = Object.keys(selectedResources);
+
+      if (selectedResources.length > 0 && dataKeys.length > 0) {
+        dataKeys.forEach((key) => {
+          if (selectedKeys.includes(key) && prevState?.hasOwnProperty(key)) {
+            delete prevState[key];
+          }
+        });
+      }
+      return prevState;
+    });
+  }, [selectedData, selectedResources]);
 
   /**
    * Fetch resource data for selected filters,
@@ -373,6 +394,9 @@ const Report = () => {
                 setStatusPeriod={setStatusPeriod}
                 statusPeriodDate={statusPeriodDate}
                 setStatusPeriodDate={setStatusPeriodDate}
+                statusTimeFrame={statusTimeFrame}
+                setStatusTimeFrame={setStatusTimeFrame}
+                selectedData={selectedData}
               />
             ) : (
               <div>
