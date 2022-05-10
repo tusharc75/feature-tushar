@@ -24,13 +24,18 @@ import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import Products from './Products';
-import Processing from './SerializesAssets';
+import SerializesAssets from './SerializesAssets';
 import LoadingTicket from './LoadingTicket';
 import { camelCase } from 'lodash';
+import ContentFullScreen from '../../components/ContentFullScreen';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
   const toastConfig = useContext(CustomToastContext);
+
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const isTabletScreen = useMediaQuery('(max-width:960px)');
+
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -42,7 +47,6 @@ const TransferInventoryDetailPage = () => {
   const [headingLabel, setHeadingLabel] = useState('');
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [isDeleting, setDeleting] = useState(false);
   const [transferInventoryData, setTransferInventoryData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -55,6 +59,7 @@ const TransferInventoryDetailPage = () => {
   const [nextStep, setNextStep] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -263,7 +268,6 @@ const TransferInventoryDetailPage = () => {
                 />
                 <div className={'uio'}> </div>
               </Tabs>
-
               <TabPanel value={tabValue} index={0}>
                 <Box>
                   {loading || !transferInventoryData ? (
@@ -275,91 +279,92 @@ const TransferInventoryDetailPage = () => {
                   )}
                 </Box>
               </TabPanel>
-
               <TabPanel value={tabValue} index={1}>
-                <Box my={2}>
-                  <Steps
-                    steps={transferInventorySteps}
-                    currentStep={currentStep}
-                    setCurrentStep={setCurrentStep}
-                    isNextStep={false}
-                    nextStep={nextStep}
-                    updateStatus={updateProcessStatus}
-                    isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
-                  />
-                  <Box my={1}>
-                    {currentStep === 0 && (
-                      <Products
-                        transferInventoryData={transferInventoryData}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
-                    {currentStep === 1 && (
-                      <Processing
-                        transferInventoryData={transferInventoryData}
-                        updateTransferInventoryStatus={updateStatus}
-                        currentStep={currentStep}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-2`}
-                        statusOptions={statusOptions}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
-                    {currentStep === 2 && (
-                      <LoadingTicket
-                        transferInventoryData={transferInventoryData}
-                        updateStatus={updateStatus}
-                        renderedFrom={`${renderedFrom}_grid-3`}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
-                  </Box>
-                </Box>
+                {transferInventoryData &&
+                  <Paper>
+                    <Steps
+                      steps={transferInventorySteps}
+                      currentStep={currentStep}
+                      setCurrentStep={setCurrentStep}
+                      isNextStep={false}
+                      nextStep={nextStep}
+                      updateStatus={updateProcessStatus}
+                      isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
+                      setStepFullScreen={() => setStepFullScreen(true)}
+                    />
+                    <ContentFullScreen title={transferInventorySteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                      {currentStep === 0 && (
+                        <Products
+                          transferInventoryData={transferInventoryData}
+                          setNextStep={setNextStep}
+                          renderedFrom={`${renderedFrom}_grid-1`}
+                          allowedToEdit={allowedToEdit}
+                        />
+                      )}
+                      {currentStep === 1 && (
+                        <SerializesAssets
+                          transferInventoryData={transferInventoryData}
+                          setNextStep={setNextStep}
+                          renderedFrom={`${renderedFrom}_grid-2`}
+                          allowedToEdit={allowedToEdit}
+                          stepFullScreen={stepFullScreen}
+                          isTabletScreen={isTabletScreen}
+                          isSmallScreen={isSmallScreen}
+                          showActivity={showActivity}
+                        />
+                      )}
+                      {currentStep === 2 && (
+                        <LoadingTicket
+                          transferInventoryData={transferInventoryData}
+                          updateStatus={updateStatus}
+                          renderedFrom={`${renderedFrom}_grid-3`}
+                          allowedToEdit={allowedToEdit}
+                        />
+                      )}
+                    </ContentFullScreen>
+                  </Paper>
+                }
               </TabPanel>
             </Paper>
           </div>
           <Box my={1} />
         </div>
         <div className="position-relative">
-          <HideWhenOffline>
-            <Paper>
-              {!isSmallScreen && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
-              )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    {transferInventoryData && (
-                      <div>
-                        <Activity
-                          resourceId={transferInventoryData?._id}
-                          resource={transferInventory.resource}
-                          // restrictedAddActivities={
-                          //   permissions && permissions['transferInventory'] && permissions['rentalManagement'].isUpdate
-                          //   ? []
-                          //   : ['Attachment', 'Case']
-                          // }
-                          relatedTo={[
-                            {
-                              access: true,
-                              referenceId: transferInventoryData?._id,
-                              type: 'transferInventory'
-                            }
-                          ]}
-                          handleActivityRefresh={() => { }}
-                          emails={[]}
-                        />
-                      </div>
-                    )}
-                  </Grid>
+          <Paper>
+            {!isSmallScreen && (
+              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>
+            )}
+            <div style={{ display: showActivity ? 'block' : 'none' }}>
+              <Grid container>
+                <Grid item xs={12}>
+                  {transferInventoryData && (
+                    <div>
+                      <Activity
+                        resourceId={transferInventoryData?._id}
+                        resource={transferInventory.resource}
+                        // restrictedAddActivities={
+                        //   permissions && permissions['transferInventory'] && permissions['rentalManagement'].isUpdate
+                        //   ? []
+                        //   : ['Attachment', 'Case']
+                        // }
+                        relatedTo={[
+                          {
+                            access: true,
+                            referenceId: transferInventoryData?._id,
+                            type: 'transferInventory'
+                          }
+                        ]}
+                        handleActivityRefresh={() => { }}
+                        emails={[]}
+                      />
+                    </div>
+                  )}
                 </Grid>
-              </div>
-            </Paper>
-          </HideWhenOffline>
+              </Grid>
+            </div>
+          </Paper>
         </div>
       </div>
       {showConfirmBox && (
