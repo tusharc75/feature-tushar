@@ -202,9 +202,7 @@ const InventoryProduct = () => {
           <Fragment>
             {params.value}
             <Tooltip className="cursor-info" title={`info`}>
-              <IconButton onClick={() => infoHandler(params)}>
-                <InfoIcon color="primary" />
-              </IconButton>
+                <InfoIcon style={{margin:'0.2rem'}}  color="primary" onClick={()=>infoHandler(params)}/>
             </Tooltip>
           </Fragment>
         </>

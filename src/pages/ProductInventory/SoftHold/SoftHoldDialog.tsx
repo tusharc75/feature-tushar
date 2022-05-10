@@ -6,6 +6,15 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import axiosInstance from 'src/axios/axiosInstance';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import Paper from '@material-ui/core/Paper';
+import { Link } from 'react-router-dom'
+import routes from "../../../components/Helpers/Routes"
 
 const SoftHoldDialog = ({ open, close, params }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -22,6 +31,15 @@ const SoftHoldDialog = ({ open, close, params }) => {
   useEffect(() => {
     softHoldDataFetch();
   }, []);
+
+  const createData = (transferNumber, assetsCount, id) => {
+    return { transferNumber, assetsCount, id };
+  };
+
+  const rows = softHoldData.map((i, index) => {
+    return createData(i.transferNumber, i.assetsCount,i._id);
+  });
+
 
   return (
     <>
@@ -46,75 +64,30 @@ const SoftHoldDialog = ({ open, close, params }) => {
           <Box marginY={2}>
             <Grid spacing={3} container>
               <>
-                <Grid item xs={6} sm={6} md={6}>
-                  <Box
-                    style={{ maxHeight: '350px', overflow: 'auto' }}
-                    bgcolor="white"
-                    border={1}
-                    mt={1}
-                    mb={1}
-                    borderColor="grey.300"
-                    width={'100%'}
-                  >
-                    <Box p={0}>
-                      <Typography className="m-2 text-center" variant="subtitle1">
-                        Transfer Number
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={6} sm={6} md={6}>
-                  <Box
-                    style={{ maxHeight: '350px', overflow: 'auto' }}
-                    bgcolor="white"
-                    border={1}
-                    mt={1}
-                    mb={1}
-                    borderColor="grey.300"
-                    width={'100%'}
-                  >
-                    <Box p={0}>
-                      <Typography className="m-2 text-center" variant="subtitle1">
-                        AssetsCount
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-                {softHoldData?.length > 0 &&
-                  softHoldData.map((i, index) => (
-                    <>
-                      <Grid key={index} item xs={6} sm={6} md={6}>
-                        <Box
-                          style={{ maxHeight: '350px', overflow: 'auto' }}
-                          bgcolor="white"
-                          border={1}
-                          mt={1}
-                          mb={1}
-                          borderColor="grey.300"
-                          width={'100%'}
-                        >
-                          <Box p={0}>
-                            <Typography className="m-2 text-center">{i.transferNumber}</Typography>
-                          </Box>
-                        </Box>
-                      </Grid>
-                      <Grid key={index} item xs={6} sm={6} md={6}>
-                        <Box
-                          style={{ maxHeight: '350px', overflow: 'auto' }}
-                          bgcolor="white"
-                          border={1}
-                          mt={1}
-                          mb={1}
-                          borderColor="grey.300"
-                          width={'100%'}
-                        >
-                          <Box p={0}>
-                            <Typography className="m-2 text-center">{i.assetsCount}</Typography>
-                          </Box>
-                        </Box>
-                      </Grid>
-                    </>
-                  ))}
+                <TableContainer component={Paper}>
+                  <Table aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                        <span style={{color:'black'}}>Transfer Number</span>
+                        </TableCell>
+                        <TableCell align="right"><span style={{color:'black'}}>Assets Count</span></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {rows.map((row, index) => (
+                        <TableRow key={row.transferNumber}>
+                          <TableCell component="th" scope="row">
+                          <Link className="link text-truncate" to={`${routes.transferInventoryDetail.path}/${row.id}`}>
+                            {row.transferNumber}
+                            </Link>
+                          </TableCell>
+                          <TableCell align="right">{row.assetsCount}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </>
             </Grid>
           </Box>
