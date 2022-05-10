@@ -232,7 +232,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                         disabled={selectedRecords.length === 0 || disableCreateAsset}
                         onClick={() => { setShowCreateAssetDialog(true) }}
                     >
-                        {`Create Asset`}
+                        {`Receiving`}
                     </Button>
                     <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && !isMobile && (
@@ -363,7 +363,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                     dispatch({ type: "initialize", data: [], count: 0 });
                     fetchProduct()
                 }}
-                title="Create Asset"
+                title="Receiving"
                 productList={selectedRecords.filter(d => (d.qty !== d.actualReceived))}
                 purchaseOrderData={purchaseOrderData}
                 handleUpdateData={handleUpdateData}

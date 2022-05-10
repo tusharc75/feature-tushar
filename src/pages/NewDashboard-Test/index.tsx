@@ -75,7 +75,6 @@ const DashbaordNew = () => {
   }, []);
 
   const fetchDashboards = () => {
-    axiosInstance().get('/');
     axiosInstance()
       .get('/dashboard-master')
       .then(({ data: { data } }) => {

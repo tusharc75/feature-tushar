@@ -358,7 +358,7 @@ const Note = () => {
                     options={resourceData}
                     getOptionLabel={(option: any) => option.name}
                     getOptionSelected={(option: any, value: any) => option.name === value.name}
-                    style={{ width: "250px" }}
+                    style={{ width: isMobile && !isTablet ? '60%' : "250px" }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
@@ -370,13 +370,21 @@ const Note = () => {
                       }
                     }}
                     size="small"
-                    renderInput={(params) => <TextField {...params} label={`${resource.optionLabel}`} variant="outlined" />}
+                    renderInput={(params) =>
+                      isMobile && !isTablet ? (
+                        <TextField {...params} label={`${resource.optionLabel}`}
+                          size="small"
+                          variant="outlined" className={isMobile ? 'serchBox' : ''} />
+                      ) : (
+                        <TextField {...params} label={`${resource.optionLabel}`} variant="outlined" />
+                      )
+                    }
                   />
                 )}
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Grid style={{ width: "100%", display: "flex" }}>
+                  <Grid style={{ width: isMobile && !isTablet ? '75%' : "100%", display: "flex" }}>
                     <SearchFilter
                       handleChangeFilter={handleChangeFilter}
                       filter={filter}
