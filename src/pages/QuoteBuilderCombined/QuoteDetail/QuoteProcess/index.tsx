@@ -1740,7 +1740,7 @@ export default function QuoteProcess(props) {
         <Dialog
           open={showTotalSalesDialog}
           aria-labelledby="customized-dialog-title"
-          maxWidth="sm"
+          maxWidth="md"
           onClose={() => {
             setShowTotalSalesDialog(false);
           }}
@@ -1758,6 +1758,7 @@ export default function QuoteProcess(props) {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
+            showRequiredLabel={false}
           />
           <CustomDialogContent>
             <Grid item className="quoteHeader">

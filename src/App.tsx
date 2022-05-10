@@ -458,7 +458,7 @@ function App() {
             <PrivateRoute exact path="/activity">
               <Activitydemo />
             </PrivateRoute>
-            <PrivateRoute exact path="/product-inventory">
+            <PrivateRoute exact path={routes.productInventory.path}>
               <InventoryProduct />
             </PrivateRoute>
             <PrivateRoute exact path={routes.activityEmail.path}>
