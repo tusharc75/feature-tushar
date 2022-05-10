@@ -371,7 +371,7 @@ const ReportFilters = (props: FiltersProps) => {
                           <Select
                             labelId="duration"
                             id="time-duration"
-                            value={field.timeFrame}
+                            value={statusTimeFrame}
                             onChange={(e) => {
                               handleDuration(e.target.value, field);
                               const tempArray = [...selectedResources];

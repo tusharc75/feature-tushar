@@ -75,6 +75,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
   const [allChecked, setAllChecked] = React.useState(false);
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState(null);
   const [reportName, setReportName] = React.useState(selectedReportView ? selectedReportView.name : '');
   const [lockedItem, setLockedItem] = React.useState({
     index: 0,
@@ -126,6 +127,11 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
   };
 
   const handleSaveChange = () => {
+    if (!reportName) {
+      setError('Report name is required')!;
+      return;
+    }
+
     const newColumns = [...sortedColumns];
     // newColumns.splice(lockedItem.index, 0, lockedItem.column);
     setColumns(newColumns);
@@ -163,14 +169,14 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
           columnState: columnState,
           name: reportName.trimEnd()
         })
-        .then(({data: {data}}) => {
+        .then(({ data: { data } }) => {
           setSubmitting(false);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: 'Settings saved successfully'
           });
-          setSelectedReportView(data)
+          setSelectedReportView(data);
           onClose();
         })
         .catch((error) => {
@@ -185,14 +191,14 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
           columnState: columnState,
           name: reportName.trimEnd()
         })
-        .then(({data: {data}}) => {
+        .then(({ data: { data } }) => {
           setSubmitting(false);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: 'Settings saved successfully'
           });
-          setSelectedReportView(data)
+          setSelectedReportView(data);
           onClose();
         })
         .catch((error) => {
@@ -234,8 +240,14 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
           fullWidth
           margin="dense"
           value={reportName}
+          error={Boolean(error)}
+          helperText={Boolean(error) && error}
           onChange={(e) => {
-            setReportName(e.target.value.trimStart());
+            const value = e.target.value.trimStart();
+            setReportName(value);
+            if (value) {
+              setError(null);
+            }
           }}
         />
         <List
@@ -283,7 +295,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
           variant="contained"
           color="primary"
           disableElevation
-          disabled={isSubmitting || !Boolean(reportName)}
+          disabled={isSubmitting}
           onClick={handleSaveChange}
         >
           Save changes
