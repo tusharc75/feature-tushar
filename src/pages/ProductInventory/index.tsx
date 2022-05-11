@@ -5,13 +5,13 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { GiStockpiles } from 'react-icons/gi';
-import { Box, TextField, IconButton } from '@material-ui/core';
+import { Box, TextField } from '@material-ui/core';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { serializedAsset, isObjectEmpty, gridLoadingTimeout, productInventory } from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -19,14 +19,15 @@ import { prepareDataForGrid } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
 import InfoIcon from '@material-ui/icons/Info';
-import Tooltip from '@material-ui/core/Tooltip';
-import SoftHoldDialog from './SoftHold/SoftHoldDialog';
-import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import SoftHoldDialog from './SoftHold';
 import { camelCase } from 'lodash';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
+import HtmlTooltip from "../../components/CustomTooltipTitle";
+import NoDataCell from "../../components/Helpers/NoDataCell";
 
 
 const InventoryProduct = () => {
+
   const renderedFrom = camelCase(routes?.productInventory.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
@@ -35,11 +36,12 @@ const InventoryProduct = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
   const [plantId, setPlantId] = useState(null);
-  const [softHold, setSoftHold] = useState(false);
   const [plantOptions, setPlantOptions] = useState([]);
   const [frameworkComponents, setFrameworkComponents] = useState({});
   const [columns, setColumns] = useState([]);
-  const [softHoldData, setSoftHoldData] = useState(null);
+
+  const [softHold, setSoftHold] = useState({ open: false, data: {} });
+
   const {
     state: { permissions }
   }: any = useData();
@@ -121,7 +123,7 @@ const InventoryProduct = () => {
     const queryString = getQueryString();
     if (plantId) {
       axiosInstance()
-        .get(`/product-inventory?wareHouse=${plantId}&${queryString}`)
+        .get(`${productInventory.api}?wareHouse=${plantId}&${queryString}`)
         .then(({ data }) => {
           let rows = data.data?.map((u) => {
             let finalObject = prepareDataForGrid(u);
@@ -181,7 +183,7 @@ const InventoryProduct = () => {
       minInventory: row?.data?.minInventory,
       maxInventory: row?.data?.maxInventory
     };
-    axiosInstance().put(`/product-inventory`, inputData);
+    axiosInstance().put(`${productInventory.api}`, inputData);
   };
 
   const ProductNameRenderer = (params) => (
@@ -191,24 +193,18 @@ const InventoryProduct = () => {
   );
 
   const infoHandler = (params) => {
-    setSoftHoldData(params);
-    setSoftHold(true);
+    setSoftHold({ open: true, data: params.data });
   };
 
   const SoftHoldRenderer = (params) => (
-    <>
-      {params.value ? (
-        <>
-          <Fragment>
-            {params.value}
-            <Tooltip className="cursor-info" title={`info`}>
-              <IconButton onClick={() => infoHandler(params)}>
-                <InfoIcon color="primary" />
-              </IconButton>
-            </Tooltip>
-          </Fragment>
-        </>
-      ) : null}
+    <> {params.value ? (
+      <Fragment>
+        {params.value}
+        <HtmlTooltip title={`Soft Hold History`}>
+          <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(params)} />
+        </HtmlTooltip>
+      </Fragment>
+    ) : <NoDataCell />}
     </>
   );
 
@@ -335,7 +331,11 @@ const InventoryProduct = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {softHold && <SoftHoldDialog open={softHold} close={() => setSoftHold(false)} params={softHoldData} />}
+        {softHold.open &&
+          <SoftHoldDialog
+            close={() => setSoftHold({ open: false, data: {} })}
+            data={softHold.data}
+          />}
       </div>
     </Fragment>
   );

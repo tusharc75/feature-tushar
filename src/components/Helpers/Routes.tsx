@@ -380,6 +380,10 @@ const routes = {
     title: (storedRoutes && storedRoutes.repairType && storedRoutes.repairType.title) ? storedRoutes.repairType?.title : RESOURCE_LABEL.repairType,
     path: "/repair-type/detail",
   },
+  cageManagement: {
+    title: (storedRoutes && storedRoutes.cageManagement && storedRoutes.cageManagement.title) ? storedRoutes.cageManagement?.title : RESOURCE_LABEL.cageManagement,
+    path: "/cage-management",
+  },
 };
 
 export default routes;

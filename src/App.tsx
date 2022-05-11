@@ -128,6 +128,7 @@ import RepairType from './pages/RepairType';
 import RepairTypeDetailsPage from './pages/RepairType/RepairTypeDetailsPage';
 import ResourceCalendar from './pages/ResourceCalender';
 import ResourceCalendarData from './pages/ResourceCalender/ResourceCalendar';
+import CageManagement from './pages/CageManagement';
 
 var notificationInterval: any = null;
 
@@ -457,7 +458,7 @@ function App() {
             <PrivateRoute exact path="/activity">
               <Activitydemo />
             </PrivateRoute>
-            <PrivateRoute exact path="/product-inventory">
+            <PrivateRoute exact path={routes.productInventory.path}>
               <InventoryProduct />
             </PrivateRoute>
             <PrivateRoute exact path={routes.activityEmail.path}>
@@ -706,6 +707,9 @@ function App() {
             </Route>
             <PrivateRoute exact path="/new-dashboard">
               <NewDashboard />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.cageManagement.path}`}>
+              <CageManagement />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
