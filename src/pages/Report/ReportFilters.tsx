@@ -198,7 +198,7 @@ const ReportFilters = (props: FiltersProps) => {
     const dateProperties = dateKeys.map((key) => key.split('_')[1]);
 
     dateProperties.forEach((key) => {
-      let err = {...errors};
+      let err = { ...errors };
 
       const from = new Date(allDateData[`from_${key}`]).getTime();
       const to = new Date(allDateData[`to_${key}`]).getTime();
@@ -520,39 +520,41 @@ const ReportFilters = (props: FiltersProps) => {
           </Grid>
         </Box>
         <Box mt={2}>
-          <Box height={'100%'} mb={2}>
-            <Autocomplete
-              options={reportList}
-              value={selectedReportView}
-              noOptionsText="No views were found"
-              onChange={(_, val) => {
-                setSelectedReportView(val);
-              }}
-              fullWidth
-              renderOption={(option) => (
-                <React.Fragment>
-                  <Box display={'flex'} width="100%" justifyContent="space-between">
-                    {option.name}
-                    {isDeleting ? (
-                      <CircularProgress size={18} color="inherit" />
-                    ) : (
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowConfirmDialog({ open: true, id: option._id, name: option.name });
-                        }}
-                      >
-                        <Delete color="error" />
-                      </IconButton>
-                    )}
-                  </Box>
-                </React.Fragment>
-              )}
-              getOptionLabel={(option) => option.name}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
-            />
-          </Box>
+          {!resource.includes('Purchase Order') && (
+            <Box height={'100%'} mb={2}>
+              <Autocomplete
+                options={reportList}
+                value={selectedReportView}
+                noOptionsText="No views were found"
+                onChange={(_, val) => {
+                  setSelectedReportView(val);
+                }}
+                fullWidth
+                renderOption={(option) => (
+                  <React.Fragment>
+                    <Box display={'flex'} width="100%" justifyContent="space-between">
+                      {option.name}
+                      {isDeleting ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowConfirmDialog({ open: true, id: option._id, name: option.name });
+                          }}
+                        >
+                          <Delete color="error" />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </React.Fragment>
+                )}
+                getOptionLabel={(option) => option.name}
+                renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
+              />
+            </Box>
+          )}
           <Button
             onClick={fetchReportData}
             startIcon={loading ? <CircularProgress color="inherit" size={18} /> : <List />}

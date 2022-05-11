@@ -102,6 +102,7 @@ import InventoryProduct from './pages/ProductInventory';
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import Report from './pages/Report';
+import PurchaseOrderReport from './pages/Report/PurchaseOrder';
 import ReportMaster from './pages/ReportMaster';
 import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import EcommercePolicy from './pages/EcommercePolicy';
@@ -662,6 +663,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.reports.path}/purchase-order/:type`}>
+              <PurchaseOrderReport />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />

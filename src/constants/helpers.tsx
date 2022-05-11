@@ -1710,13 +1710,15 @@ export const ACTIVITY_RESOURCE = {
 };
 
 export const REPORT_LIST = [
-  { title: sidebarResource.rentalManagement, key: 'rentalManagement' },
-  { title: sidebarResource.salesOrder, key: 'salesOrder' },
-  { title: sidebarResource.serializedAsset, key: 'serializedAsset' },
-  { title: sidebarResource.lead, key: 'lead' },
-  { title: sidebarResource.opportunity, key: 'opportunity' },
-  { title: sidebarResource.quoteBuilder, key: 'quoteBuilder' },
-  { title: sidebarResource.projectSales, key: 'projectSales' }
+  { title: sidebarResource.rentalManagement, permission: 'rentalManagement', key: 'rentalManagement', type: 'dynamic' },
+  { title: sidebarResource.salesOrder, permission: 'salesOrder', key: 'salesOrder', type: 'dynamic' },
+  { title: sidebarResource.serializedAsset, permission: 'serializedAsset', key: 'serializedAsset', type: 'dynamic' },
+  { title: sidebarResource.lead, permission: 'lead', key: 'lead', type: 'dynamic' },
+  { title: sidebarResource.opportunity, permission: 'opportunity', key: 'opportunity', type: 'dynamic' },
+  { title: sidebarResource.quoteBuilder, permission: 'quoteBuilder', key: 'quoteBuilder', type: 'dynamic' },
+  { title: sidebarResource.projectSales, permission: 'projectSales', key: 'projectSales', type: 'dynamic' },
+  { title: "Purchase Order Product", permission: 'purchaseOrder', key: 'purchaseOrderProduct', type: 'purchaseOrderProduct' },
+  { title: "Product Average Costing", permission: 'purchaseOrder', key: 'productAverageCost', type: 'productAverageCost' },
 ];
 
 export const RESOURCE_CALENDAR = [
