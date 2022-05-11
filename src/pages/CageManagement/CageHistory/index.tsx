@@ -23,9 +23,10 @@ import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import { isMobile, isTablet } from 'react-device-detect';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import { CustomDialogTransition, dateFormat } from "../../../constants/helpers";
+import { CustomDialogTransition, dateTimeFormat } from "../../../constants/helpers";
 import moment from "moment";
+import ArrowDropDownCircleIcon from '@material-ui/icons/ArrowDropDownCircle';
+import HtmlTooltip from "src/components/CustomTooltipTitle";
 
 const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) => {
 
@@ -88,23 +89,18 @@ const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) 
                             </ListItemAvatar>
                             <ListItemText
                                 primary={product?.productDetail?.productName}
-                                secondary={`Pick Up Date - ${moment(product?.pickUpDate).format(dateFormat)}`} />
+                                secondary={`Pick Up Date - ${moment(product?.pickUpDate).format(dateTimeFormat)}`} />
                             <Box display="flex" flexDirection="row"  >
-                                <IconButton
-                                    disabled
-                                    size="small">
-                                    <Box pl={1} pr={1}>
-                                        {`${product?.qty}`}
-                                    </Box>
-                                </IconButton>
                                 <Box pl={1}>
-                                    <IconButton
-                                        style={{ border: "1px solid", color: "red" }}
-                                        color="secondary"
-                                        size="small"
-                                        onClick={() => { handleDrop(product) }}>
-                                        <DeleteOutlineIcon fontSize="small" />
-                                    </IconButton>
+                                    <HtmlTooltip title="Drop">
+                                        <IconButton
+                                            style={{ border: "1px solid", color: "red" }}
+                                            color="secondary"
+                                            size="small"
+                                            onClick={() => { handleDrop(product) }}>
+                                            <ArrowDropDownCircleIcon fontSize="small" />
+                                        </IconButton>
+                                    </HtmlTooltip>
                                 </Box>
                             </Box>
                         </ListItem>
@@ -125,16 +121,7 @@ const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) 
                             </ListItemAvatar>
                             <ListItemText
                                 primary={product?.productDetail?.productName}
-                                secondary={`Pick Up Date - ${moment(product?.pickUpDate).format(dateFormat)} ${product?.dropDate !== undefined ? '  Drop Date - ' + moment(product?.dropDate).format(dateFormat) : ''}`} />
-                            <Box display="flex" flexDirection="row"  >
-                                <IconButton
-                                    disabled
-                                    size="small">
-                                    <Box pl={1} pr={1}>
-                                        {`${product?.qty}`}
-                                    </Box>
-                                </IconButton>
-                            </Box>
+                                secondary={`Pick Up Date - ${moment(product?.pickUpDate).format(dateTimeFormat)} ${product?.dropDate !== undefined ? '  Drop Date - ' + moment(product?.dropDate).format(dateTimeFormat) : ''}`} />
                         </ListItem>
                     ))}
                 </List>
