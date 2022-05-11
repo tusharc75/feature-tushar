@@ -293,7 +293,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               productAssets[index]['receivingTicketId'] = obj?._id;
               productAssets[index]['receivingTicketStatus'] = obj?.status;
             }
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['loadingTicketId']) {
+            if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['returnTicketId']) {
               productAssets[index]['returnTicket'] = obj?.ticketName;
               productAssets[index]['returnTicketId'] = obj?._id;
               productAssets[index]['returnTicketStatus'] = obj?.status;
@@ -572,9 +572,19 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     let data = {}
     const receivingTicketId = uniq(map(selectedRecords, 'receivingTicketId'));
     const returnTicketId = uniq(map(selectedRecords, 'returnTicketId'));
-    const ticketIds = [...receivingTicketId, ...returnTicketId]
+    const ticketIds: any = [];
+    receivingTicketId?.forEach((e) => {
+      if (e && e !== undefined) {
+        ticketIds.push(e)
+      }
+    })
+    returnTicketId?.forEach((e) => {
+      if (e && e !== undefined) {
+        ticketIds.push(e)
+      }
+    })
     if (ticketIds.length) {
-      data["_ids"] = ticketIds?.map((e) => e);
+      data["_ids"] = ticketIds;
       data["status"] = DELIVERY_TICKET_STATUS.delivered
       data["signatures"] = []
       axiosInstance().post(`${deliveryTicket.api}/updatebulk`, data).then(({ data: { data } }) => {

@@ -475,9 +475,9 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
             width={
               stepFullScreen ? "100%" :
                 isTabletScreen
-                  ? "calc(100vw - 20px)"
+                  ? "calc(100vw)"
                   : isSmallScreen
-                    ? "calc(100vw - 78px)"
+                    ? "calc(100vw)"
                     : showActivity ? "100%" : "calc(100vw - 103px)"
             }
             height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 350px)"}
