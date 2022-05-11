@@ -172,9 +172,9 @@ const ReportFilters = (props: FiltersProps) => {
     });
     setIsStatusPeriod(
       resource.includes('Serialized Asset') &&
-        Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
-        formValues?.hasOwnProperty('status') &&
-        formValues.status.length > 0
+      Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
+      formValues?.hasOwnProperty('status') &&
+      formValues.status.length > 0
     );
   }, [selectedResources, formValues]);
 
@@ -223,60 +223,60 @@ const ReportFilters = (props: FiltersProps) => {
         setStatusTimeFrame('1-month');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
 
         break;
       case '3-months':
         setStatusTimeFrame('3-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       case '6-months':
         setStatusTimeFrame('6-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       case '1-year':
         setStatusTimeFrame('1-year');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       default:

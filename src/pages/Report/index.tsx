@@ -63,41 +63,44 @@ const Report = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
-  const fetchGridColumns = () => {
+  const fetchGridColumns = async () => {
     setLoadingColumns(true);
-    axiosInstance()
-      .get(`/field?resource=${resourceStartCase}`)
-      .then(({ data: { data } }) => {
-        setResourceColumns(data);
-        setLoadingColumns(false);
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase]) {
-            o.fieldData.primaryField = true;
+    const { data: { data } }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`)
+    if (resourceStartCase === "Serialized Asset") {
+      const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`)
+      console.log(lookupResource)
+      if (lookupResource) {
+        data?.forEach((e) => {
+          if (e?.fieldData?.fieldName === "currentOwner") {
+            e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]]
           }
-          let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`].path);
-
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      })
-      .catch((error) => {
-        setLoadingColumns(false);
-        toastConfig.setToastConfig(error);
-      });
+        })
+      }
+    }
+    setResourceColumns(data);
+    setLoadingColumns(false);
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase]) {
+        o.fieldData.primaryField = true;
+      }
+      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`].path);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName);
+        }
+      }
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    columns = [...columns, ...getStaticFields()];
+    setColumns([...columns]);
+    setLoadingColumns(false);
   };
 
   React.useEffect(() => {
@@ -413,7 +416,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => {}}
+                      onEdit={() => { }}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -428,8 +431,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
