@@ -21,6 +21,7 @@ import MapView from './MapView';
 
 export type ChartDataType = {
   col: any;
+  graphType: string;
   chartType: string;
   filters: { key: string; title: string; multiple: boolean }[];
   chartTitle: string;
@@ -140,7 +141,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
 
   return (
     <Grid item xs={12} md={chart.col}>
-      {chart.chartType === 'cards' ? (
+      {chart.graphType === 'cards' ? (
         <Grid container spacing={1}>
           {loading
             ? [...Array(chart.numberOfCards).keys()].map((_, index) => (
@@ -236,7 +237,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
               <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
             ) : !chartData || chartData.length === 0 ? (
               <Loader noLoader={true} text="No Data Avaiable" style={{ minHeight: '100%' }} />
-            ) : chart.chartType !== 'list' ? (
+            ) : chart.graphType !== 'Table' ? (
               chart.hasTableView && tableView ? (
                 <TableView
                   id={chart.uniqueId}
@@ -246,7 +247,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   currency={globalFilters.currency || currency}
                   selectedDashboard={globalFilters?.dashboardType}
                 />
-              ) : chart.chartType === 'map' ? (
+              ) : chart.graphType === 'Map' ? (
                 <MapView height={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500} data={chartData} />
               ) : (
                 <Chart
@@ -292,7 +293,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           anchorEl={anchorElExport}
           setAnchorClose={setAnchorElExport}
           currency={globalFilters.currency || currency}
-          tableData={chartData ? (chart.chartType === 'list' ? chartData : chartData.tableData) : []}
+          tableData={chartData ? (chart.graphType === 'Table' ? chartData : chartData.tableData) : []}
           chart={chart}
           chartData={chartData}
         />
