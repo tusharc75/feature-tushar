@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, Link } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
@@ -86,7 +86,7 @@ const Report = () => {
             if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
               resourceFieldData.push(field);
               columns.push({
-                field: 'purchaseOrderNumber',
+                field: 'purchaseOrder',
                 headerName: field?.fieldData?.fieldLabel,
                 show: true,
                 disabled: false,
@@ -152,7 +152,7 @@ const Report = () => {
         tempFrameworkComponent = {
           ...tempFrameworkComponent
         };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
+        setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
         columns = [...columns];
       }
 
@@ -179,7 +179,7 @@ const Report = () => {
         tempFrameworkComponent = {
           ...tempFrameworkComponent
         };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
+        setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
         columns = [
           ...columns,
           {
@@ -246,6 +246,36 @@ const Report = () => {
     });
   }, [selectedData, selectedResources]);
 
+  const PurchaseOrderRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.purchaseOrderId}`}>
+      {params.value}
+    </Link>
+  );
+
+  const ProductRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+      {params.value}
+    </Link>
+  );
+
+  const PlantRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}>
+      {params.value}
+    </Link>
+  );
+  const SupplierRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`}>
+      {params.value}
+    </Link>
+  );
+
+  const customFrameworkComponents = {
+    purchaseOrderRenderer: PurchaseOrderRenderer,
+    productRenderer: ProductRenderer,
+    plantRenderer: PlantRenderer,
+    supplierRenderer: SupplierRenderer
+  };
+
   /**
    * Fetch resource data for selected filters,
    * @returns none if no data selected
@@ -267,7 +297,9 @@ const Report = () => {
     axiosInstance()
       .get(
         `${
-          resourceCamelCase === 'productAverageCosting' ? 'report/product-purchase-order' : 'product-inventory/report/purchase-order-price'
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? '/product-inventory/report/purchase-order-product-wise-report'
+            : 'product-inventory/report/purchase-order-price'
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -388,7 +420,7 @@ const Report = () => {
   };
 
   const exportData = () => {
-    if ((selectedData && Object.keys(selectedData).length === 0) || !selectedData || isExporting) return;
+    if (isExporting) return;
     toastConfig.setToastConfig({
       open: true,
       message: 'Please wait exporting data',
@@ -397,7 +429,13 @@ const Report = () => {
     setExporting(true);
     let filterQuery = getFilter();
     axiosInstance()
-      .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`)
+      .get(
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? '/product-inventory/report/purchase-order-product-wise-report/export'
+            : 'product-inventory/report/purchase-order-price/export'
+        }${filterQuery}`
+      )
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);
