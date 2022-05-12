@@ -65,16 +65,20 @@ const Report = () => {
 
   const fetchGridColumns = async () => {
     setLoadingColumns(true);
-    const { data: { data } }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`)
-    if (resourceStartCase === "Serialized Asset") {
-      const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`)
-      console.log(lookupResource)
+    const {
+      data: { data }
+    }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`);
+    if (resourceStartCase === 'Serialized Asset') {
+      const {
+        data: { data: lookupResource }
+      } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+      console.log(lookupResource);
       if (lookupResource) {
         data?.forEach((e) => {
-          if (e?.fieldData?.fieldName === "currentOwner") {
-            e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]]
+          if (e?.fieldData?.fieldName === 'currentOwner') {
+            e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
           }
-        })
+        });
       }
     }
     setResourceColumns(data);
@@ -282,7 +286,7 @@ const Report = () => {
   };
 
   const exportData = () => {
-    if ((selectedData && Object.keys(selectedData).length === 0) || !selectedData || isExporting) return;
+    if (isExporting) return;
     toastConfig.setToastConfig({
       open: true,
       message: 'Please wait exporting data',
@@ -333,7 +337,7 @@ const Report = () => {
                         className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
                         style={{ color: theme.palette.info.light }}
                       >
-                        Export All
+                        Export All ({dataRows?.length || 0})
                       </span>
                     </div>
                   )}
@@ -416,7 +420,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => { }}
+                      onEdit={() => {}}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -431,8 +435,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => { }}
-                      onClone={(data) => { }}
+                      onDelete={(data) => {}}
+                      onClone={(data) => {}}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
