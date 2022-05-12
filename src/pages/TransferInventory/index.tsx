@@ -15,7 +15,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import { transferInventory, isObjectEmpty, gridLoadingTimeout } from 'src/constants/helpers';
+import { transferInventory, isObjectEmpty, gridLoadingTimeout, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -120,20 +120,15 @@ const TransferInventory = () => {
       .then(({ data }) => {
         let rows = data.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-
-          finalObject['canDelete'] = permissions?.transferInventory?.isDelete;
-
+          finalObject['canDelete'] = (permissions?.transferInventory?.isDelete && u?.status === TRANSFER_INVENTORY_STATUS.new && u?.products?.length === 0)
+            && [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-
-          finalObject['allowedToEdit'] = permissions?.transferInventory?.isUpdate;
-
+          finalObject['allowedToEdit'] = permissions?.transferInventory?.isUpdate && [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
           return finalObject;
         });
-
         data.data = data.data?.map((u, i) => ({
           ...prepareDataForGrid(u, user)
         }));
-
         dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -241,7 +236,7 @@ const TransferInventory = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {permissions?.transferInventory?.isDelete && params?.data.status === 'New' && (
+      {(params?.data?.canDelete) && (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -491,7 +486,9 @@ const TransferInventory = () => {
                 dataRows={dataRows}
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
-                onEdit={() => { }}
+                onEdit={(data) => {
+                  history.push(`${routes.transferInventoryDetail.path}/${data._id}`);
+                }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {
                   setDeleteRecord(data);
