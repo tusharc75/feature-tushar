@@ -235,24 +235,21 @@ const CageManagement = () => {
                                 size={isMobile ? 'small' : 'medium'}
                                 onClick={() => { setHistoryDialog(true) }}
                             >
-                                <Badge badgeContent={cartProduct?.length} color="secondary">
-                                    <HistoryIcon />
-                                </Badge>
+                                <HistoryIcon />
                             </IconButton>
                         </Box>
                     </Grid>
                 </Grid>
             </div>
-            {
-                <ProductGridLayout
-                    renderedFrom={renderedFrom}
-                    setAssignHistoryProductQty={(data) => {
-                        setQtyDialog({ open: true, product: data })
-                    }}
-                    plantId={plantId}
-                    productCategory={productCategory}
-                    refreshData={refreshData}
-                    searchVal={searchVal} />
+            {<ProductGridLayout
+                renderedFrom={renderedFrom}
+                setAssignHistoryProductQty={(data) => {
+                    setQtyDialog({ open: true, product: data })
+                }}
+                plantId={plantId}
+                productCategory={productCategory}
+                refreshData={refreshData}
+                searchVal={searchVal} />
             }
             {scanDialog &&
                 <Scan

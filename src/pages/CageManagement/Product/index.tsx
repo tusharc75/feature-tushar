@@ -32,18 +32,18 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
 
 
     const ActionsRenderer = (params) => (
-        <HtmlTooltip title={params?.data?.inventory ? 'Add to Pickup' : 'No inventory'} >
+        <HtmlTooltip title={params?.data?.inventory ? 'Pickup' : 'No inventory'} >
             <span>
                 <IconButton
                     size="small"
                     disabled={!params.data?.inventory || params.data?.inventory === 0}
-                    aria-label="Add to Pickup"
+                    aria-label="Pickup"
                     onClick={() => {
                         setAssignHistoryProductQty(params.data)
                     }}
                     color={params?.data?.inventory ? "secondary" : "inherit"}
                 >
-                    <AddToPhotosOutlinedIcon />
+                    <AddToPhotosOutlinedIcon fontSize="small" />
                 </IconButton>
             </span>
         </HtmlTooltip>

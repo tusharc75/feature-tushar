@@ -50,7 +50,7 @@ const useClasses = makeStyles(() => ({
     display: 'none'
   },
   tableContainer: {
-    maxHeight: 600
+    maxHeight: "calc(100vh - 200px)"
   }
 }));
 

@@ -79,7 +79,7 @@ const AddInventory = (props: Props) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u._id;
           finalObject['qty'] = selectedData ? selectedData.qty : 0;
-          finalObject['inventory'] = u?.inventory && !isNaN(Number(u.inventory)) ? Number(u.inventory) : 0;
+          finalObject['inventory'] = u?.inventory ? (u?.inventory - (u?.softHold || 0)) : 0;
           return {
             ...finalObject
           };
