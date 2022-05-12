@@ -13,6 +13,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile } from 'react-device-detect';
+import { INVENTORY_STATUS } from 'src/constants/helpers';
 
 const SerialzedAssets = ({
   allowedToEdit,
@@ -62,17 +63,19 @@ const SerialzedAssets = ({
               <Link className="link" title={row.original.detail} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
                 <p>{row.original.detail}</p>
               </Link>
-              <HtmlTooltip title={`Remove`}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setShowConfirmBox(true);
-                    setDeleteData([row.original.assetId]);
-                  }}
-                >
-                  <Delete fontSize="small" color="error" />
-                </IconButton>
-              </HtmlTooltip>
+              {(allowedToEdit && row.original.status === INVENTORY_STATUS.reserved) &&
+                <HtmlTooltip title={`Remove`}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setShowConfirmBox(true);
+                      setDeleteData([row.original.assetId]);
+                    }}
+                  >
+                    <Delete fontSize="small" color="error" />
+                  </IconButton>
+                </HtmlTooltip>
+              }
             </Fragment>
           )}
         </div>
@@ -127,6 +130,7 @@ const SerialzedAssets = ({
           assetsData?.forEach((ele) => {
             const element = {};
             element['detail'] = ele?.assetDetail?.assetNumber;
+            element['status'] = ele?.assetDetail?.status;
             element['assetId'] = ele?.asset;
             element['type'] = 'asset';
             element['isValid'] = true;
@@ -236,48 +240,50 @@ const SerialzedAssets = ({
           </Grid>
         </Box>
       )} */}
-      <Box display="flex" justifyContent="flex-end" p={1}>
-        <Button
-          variant="contained"
-          color="primary"
-          type="button"
-          size="small"
-          disabled={disableAssignSerializedAssets()}
-          onClick={() => {
-            const product = [];
-            selectedRecords?.forEach((e) => {
-              if (e.type === 'product') {
-                product.push({
-                  _id: e._id,
-                  id: e.product,
-                  productName: e.detail,
-                  qty: e.qty - e.assetAssigned
-                });
-              }
-            });
-            setAddSerializedAssetDialog({ open: true, product: product });
-          }}
-        >
-          {'Assign ' + routes.serializedAsset.title}
-        </Button>
-        {selectedRecords.filter((e: any) => e.type === 'asset').length > 0 &&
-          <Box ml={1}>
-            <Button
-              variant="contained"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={selectedRecords.filter((e: any) => e.type === 'asset').length === 0}
-              onClick={() => {
-                const assets = selectedRecords.filter((e: any) => e.type === 'asset')
-                setShowConfirmBox(true);
-                setDeleteData(assets.map((a: any) => a.assetId));
-              }}
-            >
-              Remove
-            </Button>
-          </Box>}
-      </Box>
+      {allowedToEdit &&
+        <Box display="flex" justifyContent="flex-end" p={1}>
+          <Button
+            variant="contained"
+            color="primary"
+            type="button"
+            size="small"
+            disabled={disableAssignSerializedAssets()}
+            onClick={() => {
+              const product = [];
+              selectedRecords?.forEach((e) => {
+                if (e.type === 'product') {
+                  product.push({
+                    _id: e._id,
+                    id: e.product,
+                    productName: e.detail,
+                    qty: e.qty - e.assetAssigned
+                  });
+                }
+              });
+              setAddSerializedAssetDialog({ open: true, product: product });
+            }}
+          >
+            {'Assign ' + routes.serializedAsset.title}
+          </Button>
+          {selectedRecords.filter((e: any) => e.type === 'asset').length > 0 &&
+            <Box ml={1}>
+              <Button
+                variant="contained"
+                color="primary"
+                type="button"
+                size="small"
+                disabled={selectedRecords.filter((e: any) => e.type === 'asset').length === 0}
+                onClick={() => {
+                  const assets = selectedRecords.filter((e: any) => e.type === 'asset')
+                  setShowConfirmBox(true);
+                  setDeleteData(assets.map((a: any) => a.assetId));
+                }}
+              >
+                Remove
+              </Button>
+            </Box>}
+        </Box>
+      }
       <Box
         zIndex={5}
         width={
