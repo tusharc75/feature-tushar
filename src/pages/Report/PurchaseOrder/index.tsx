@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
-import { camelCase, filter, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
@@ -32,11 +32,11 @@ const Report = () => {
   const {
     state: { permissions }
   } = useData();
-  let { type } = useParams();
-  let history = useHistory();
+  const { type } = useParams();
+  const history = useHistory();
 
-  let resourceCamelCase = camelCase(type);
-  let resourceStartCase = startCase(type);
+  const resourceCamelCase = camelCase(type);
+  const resourceStartCase = startCase(type);
   const renderedFrom = `${type}_report`;
 
   const [showGrid, setShowGrid] = React.useState(false);
@@ -163,7 +163,7 @@ const Report = () => {
 
         productFields.forEach((o: any) => {
           if (o?.fieldData.fieldName === 'productCategory') {
-            console.log(o)
+            console.log(o);
             resourceFieldData.push(o);
           }
           let currentColumn = getColumnData('Product', o?.fieldData, routes['productDetail'].path);
@@ -189,13 +189,13 @@ const Report = () => {
             disabled: false,
             cellRenderer: 'commonRenderer'
           },
-          // {
-          //   field: 'unit',
-          //   headerName: 'Unit',
-          //   show: true,
-          //   disabled: false,
-          //   cellRenderer: 'commonRenderer'
-          // },
+          {
+            field: 'averagePrice',
+            headerName: 'Unit Price',
+            show: true,
+            disabled: false,
+            cellRenderer: 'commonRenderer'
+          },
           {
             field: 'totalPrice',
             headerName: 'Total',
@@ -265,9 +265,14 @@ const Report = () => {
     }
 
     axiosInstance()
-      .get(`${resourceCamelCase === "productAverageCosting" ? 'report/product-purchase-order' : "product-inventory/report/purchase-order-price"}${filterQuery}`, {
-        cancelToken: cancelTokenSource.token
-      })
+      .get(
+        `${
+          resourceCamelCase === 'productAverageCosting' ? 'report/product-purchase-order' : 'product-inventory/report/purchase-order-price'
+        }${filterQuery}`,
+        {
+          cancelToken: cancelTokenSource.token
+        }
+      )
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
@@ -434,7 +439,7 @@ const Report = () => {
                         className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
                         style={{ color: theme.palette.info.light }}
                       >
-                        Export All
+                        Export All ({dataRows?.length || 0})
                       </span>
                     </div>
                   )}
@@ -477,7 +482,7 @@ const Report = () => {
                 resourceColumns={resourceColumns}
                 betweenDate={betweenDate}
                 setBetweenDate={setBetweenDate}
-                resource={resourceStartCase}
+                resource={`Purchase Order ${resourceStartCase}`}
                 setSelectedData={setSelectedData}
                 loading={loading}
                 fetchReportData={fetchResourceData}
