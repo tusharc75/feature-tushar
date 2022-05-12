@@ -177,7 +177,6 @@ const Builder = (props: Props) => {
             <FormControlLabel
               control={
                 <Checkbox
-                  disabled={formValues.graphType === 'Map'}
                   checked={formValues.hasFilters}
                   onChange={(e) => handleChange('hasFilters', e.target.checked)}
                 />
@@ -187,7 +186,7 @@ const Builder = (props: Props) => {
             <FormControlLabel
               control={
                 <Checkbox
-                  disabled={formValues.graphType === 'Table' || formValues.graphType === 'Map'}
+                  disabled={formValues.graphType === 'Table'}
                   checked={formValues.hasTableView}
                   onChange={(e) => handleChange('hasTableView', e.target.checked)}
                 />
@@ -207,7 +206,6 @@ const Builder = (props: Props) => {
             <FormControlLabel
               control={
                 <Checkbox
-                  disabled={formValues.graphType === 'Map'}
                   checked={formValues.hasStatus}
                   onChange={(e) => handleChange('hasStatus', e.target.checked)}
                 />

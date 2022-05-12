@@ -415,9 +415,9 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
             zIndex={5}
             width={
               isTabletScreen
-                ? "calc(100vw - 20px)"
+                ? "calc(100vw)"
                 : isSmallScreen
-                  ? "calc(100vw - 78px)"
+                  ? "calc(100vw)"
                   : showActivity ? "100%" : "calc(100vw - 100px)"
             }
             height="calc(100vh - 350px)"

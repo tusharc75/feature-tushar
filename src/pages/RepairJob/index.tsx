@@ -527,8 +527,8 @@ const RepairJob = () => {
                   }
                 ]}
                 onCreate={false}
-                showClone={false}
-                onClone={() => { }}
+                showClone={true}
+                onClone={(data) => { setShowManageRepairJobDialog({ open: true, isClone: true, idToClone: data._id }); }}
                 renderedFrom={renderedFrom}
               /> :
               <CustomAgGrid

@@ -552,23 +552,16 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     let flatArrayNonSerializeAsset = treeToFlatArray(selectedRecords, "subRows").filter(f => f.type === "product" && !f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty);
     flatArrayNonSerializeAsset.forEach((element) => {
       if (element.type === "product" && element.realAssetQty > element.realAssetAssignedQty) {
-        const foundProduct = nonSerializeAssetProduct.filter((e) => e.materialId === element.materialId)
-        if (foundProduct.length) {
-          foundProduct[0].qty += element.realAssetQty - element.realAssetAssignedQty
-        }
-        else {
-          nonSerializeAssetProduct.push({
-            ...element,
-            _id: element._id,
-            id: element.materialId,
-            productName: element.productDetail?.productName,
-            qty: element.realAssetQty - element.realAssetAssignedQty
-          })
-        }
+        nonSerializeAssetProduct.push({
+          ...element,
+          _id: element._id,
+          id: element.materialId,
+          productName: element.productDetail?.productName,
+          qty: element.realAssetQty - element.realAssetAssignedQty
+        })
       }
     })
     setNonSerializedAssetProduct([...nonSerializeAssetProduct])
-
   }, [selectedRecords])
 
   const disableAssignSerializedAssets = () => {
@@ -760,9 +753,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             width={
               stepFullScreen ? "100%" :
                 isTabletScreen
-                  ? "calc(100vw - 20px)"
+                  ? "calc(100vw)"
                   : isSmallScreen
-                    ? "calc(100vw - 78px)"
+                    ? "calc(100vw)"
                     : showActivity ? "100%" : "calc(100vw - 103px)"
             }
             height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 350px)"}
@@ -814,7 +807,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             setSelectedRecords([])
             fetchProductInventory()
           }}
-
           products={isOffline ? [...assetAssignedProduct, ...nonSerializedAssetProduct] : nonSerializedAssetProduct}
           warehouse={rentalManagementData?.warehouse?.optionValue}
           referenceId={rentalManagementData?._id}

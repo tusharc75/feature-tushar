@@ -1,26 +1,26 @@
 import React from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, Link } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
-import { camelCase, filter, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
-import styles from '../Leads/Header.module.scss';
+import styles from 'src/pages/Leads/Header.module.scss';
 
-import routes from './../../components/Helpers/Routes';
-import axiosInstance from '../../axios/axiosInstance';
-import CustomContainer from '../../components/CustomContainer';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { useData } from '../../StateProvider/Provider';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
-import Loader from '../../components/Loader';
-import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import routes from 'src/components/Helpers/Routes';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomContainer from 'src/components/CustomContainer';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
+import { useData } from 'src/StateProvider/Provider';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
+import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from 'src/constants/helpers';
+import Loader from 'src/components/Loader';
+import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import ReportFilters from './ReportFilters';
+import ReportFilters from '../ReportFilters';
 
 let cancelTokenSource = null;
 
@@ -32,12 +32,12 @@ const Report = () => {
   const {
     state: { permissions }
   } = useData();
-  let { resource } = useParams();
-  let history = useHistory();
+  const { type } = useParams();
+  const history = useHistory();
 
-  let resourceCamelCase = camelCase(resource);
-  let resourceStartCase = startCase(resource);
-  const renderedFrom = `${resource}_report`;
+  const resourceCamelCase = camelCase(type);
+  const resourceStartCase = startCase(type);
+  const renderedFrom = `${type}_report`;
 
   const [showGrid, setShowGrid] = React.useState(false);
   const [selectedData, setSelectedData] = React.useState(null);
@@ -64,47 +64,154 @@ const Report = () => {
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
   const fetchGridColumns = async () => {
-    setLoadingColumns(true);
-    const {
-      data: { data }
-    }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`);
-    if (resourceStartCase === 'Serialized Asset') {
-      const {
-        data: { data: lookupResource }
-      } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
-      console.log(lookupResource);
-      if (lookupResource) {
-        data?.forEach((e) => {
-          if (e?.fieldData?.fieldName === 'currentOwner') {
-            e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+    try {
+      setLoadingColumns(true);
+      let columns = [];
+      let rendererNames = [];
+      let resourceFieldData = [];
+
+      if (resourceCamelCase === 'purchaseOrderProduct') {
+        let {
+          data: { data: POFields }
+        } = await axiosInstance().get(`/field?resource=Purchase Order`);
+        let {
+          data: { data: productFields }
+        } = await axiosInstance().get(`/field?resource=Product`);
+        let {
+          data: { data: POProductFields }
+        } = await axiosInstance().get(`/field?resource=Purchase Order Product`);
+
+        POFields.filter((field) => ['purchaseOrderNumber', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach(
+          (field: any) => {
+            if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
+              resourceFieldData.push(field);
+              columns.push({
+                field: 'purchaseOrder',
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: 'purchaseOrderRenderer'
+              });
+            }
+            if (field?.fieldData.fieldName === 'supplierAccount') {
+              resourceFieldData.push(field);
+              columns.push({
+                field: 'supplierAccount',
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: 'supplierRenderer'
+              });
+            }
+            if (field?.fieldData.fieldName === 'warehouse') {
+              resourceFieldData.push(field);
+              columns.push({
+                field: 'warehouse',
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: 'plantRenderer'
+              });
+            }
+          }
+        );
+        productFields
+          .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
+          .forEach((field: any) => {
+            if (field?.fieldData.fieldName === 'productName') {
+              columns.push({
+                field: 'productName',
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: 'productRenderer'
+              });
+            }
+            if (field?.fieldData.fieldName === 'productNumber') {
+              columns.push({
+                field: 'productNumber',
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: 'commonRenderer'
+              });
+            }
+          });
+
+        POProductFields.forEach((o) => {
+          let currentColumn = getColumnData('Purchase Order Product', o?.fieldData, '');
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
+            }
           }
         });
+
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
+        columns = [...columns];
       }
+
+      if (resourceCamelCase === 'productAverageCost') {
+        let {
+          data: { data: productFields }
+        } = await axiosInstance().get(`/field?resource=Product`);
+
+        productFields.forEach((o: any) => {
+          if (o?.fieldData.fieldName === 'productCategory') {
+            console.log(o);
+            resourceFieldData.push(o);
+          }
+          let currentColumn = getColumnData('Product', o?.fieldData, routes['productDetail'].path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
+            }
+          }
+        });
+
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
+        columns = [
+          ...columns,
+          {
+            field: 'totalQty',
+            headerName: 'Quantity',
+            show: true,
+            disabled: false,
+            cellRenderer: 'commonRenderer'
+          },
+          {
+            field: 'averagePrice',
+            headerName: 'Unit Price',
+            show: true,
+            disabled: false,
+            cellRenderer: 'commonRenderer'
+          },
+          {
+            field: 'totalPrice',
+            headerName: 'Total',
+            show: true,
+            disabled: false,
+            cellRenderer: 'commonRenderer'
+          }
+        ];
+      }
+      setResourceColumns(resourceFieldData);
+      setLoadingColumns(false);
+      setColumns(columns);
+    } catch (error) {
+      setLoadingColumns(false);
+      toastConfig.setToastConfig(error);
     }
-    setResourceColumns(data);
-    setLoadingColumns(false);
-    let columns = [];
-    let rendererNames = [];
-    data.forEach((o) => {
-      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase]) {
-        o.fieldData.primaryField = true;
-      }
-      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`].path);
-      if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData];
-        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName);
-        }
-      }
-    });
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-    tempFrameworkComponent = {
-      ...tempFrameworkComponent
-    };
-    setFrameWorkComponent({ ...tempFrameworkComponent });
-    columns = [...columns, ...getStaticFields()];
-    setColumns([...columns]);
-    setLoadingColumns(false);
   };
 
   React.useEffect(() => {
@@ -114,16 +221,6 @@ const Report = () => {
     }
   }, []);
 
-  React.useEffect(() => {
-    axiosInstance()
-      .get(`/report-colum-setting?resource=${resource}`)
-      .then(({ data: { data } }) => {
-        setReportList(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, [showGrid]);
   React.useEffect(() => {
     if (showGrid) {
       fetchResourceData();
@@ -149,6 +246,36 @@ const Report = () => {
     });
   }, [selectedData, selectedResources]);
 
+  const PurchaseOrderRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.purchaseOrderId}`}>
+      {params.value}
+    </Link>
+  );
+
+  const ProductRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+      {params.value}
+    </Link>
+  );
+
+  const PlantRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.warehouseDetail.path}/${params.data.warehouseId}`}>
+      {params.value}
+    </Link>
+  );
+  const SupplierRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`}>
+      {params.value}
+    </Link>
+  );
+
+  const customFrameworkComponents = {
+    purchaseOrderRenderer: PurchaseOrderRenderer,
+    productRenderer: ProductRenderer,
+    plantRenderer: PlantRenderer,
+    supplierRenderer: SupplierRenderer
+  };
+
   /**
    * Fetch resource data for selected filters,
    * @returns none if no data selected
@@ -168,9 +295,16 @@ const Report = () => {
     }
 
     axiosInstance()
-      .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report${filterQuery}`, {
-        cancelToken: cancelTokenSource.token
-      })
+      .get(
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? '/product-inventory/report/purchase-order-product-wise-report'
+            : 'product-inventory/report/purchase-order-price'
+        }${filterQuery}`,
+        {
+          cancelToken: cancelTokenSource.token
+        }
+      )
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
@@ -295,7 +429,13 @@ const Report = () => {
     setExporting(true);
     let filterQuery = getFilter();
     axiosInstance()
-      .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`)
+      .get(
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? '/product-inventory/report/purchase-order-product-wise-report/export'
+            : 'product-inventory/report/purchase-order-price/export'
+        }${filterQuery}`
+      )
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);
@@ -320,7 +460,7 @@ const Report = () => {
             <CustomBreadCrumbs
               routes={[
                 { title: 'Reports', path: '/reports' },
-                { title: routes[resourceCamelCase]?.title, path: '' }
+                { title: resourceStartCase, path: '' }
               ]}
             />
           </Grid>
@@ -380,7 +520,7 @@ const Report = () => {
                 resourceColumns={resourceColumns}
                 betweenDate={betweenDate}
                 setBetweenDate={setBetweenDate}
-                resource={sidebarResource[resourceCamelCase]}
+                resource={`Purchase Order ${resourceStartCase}`}
                 setSelectedData={setSelectedData}
                 loading={loading}
                 fetchReportData={fetchResourceData}
