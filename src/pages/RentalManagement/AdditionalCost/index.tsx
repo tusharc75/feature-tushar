@@ -238,7 +238,6 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
                         [{
                             label: `Description: `,
                             field: "description",
-                            forceShow: true
                         }]
                     }
                     onCreate={null}
