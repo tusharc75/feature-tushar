@@ -48,7 +48,6 @@ interface TabPanelProps {
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
-
   return (
     <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
       {children}
@@ -164,7 +163,7 @@ const ProjectSalesDetails = () => {
       setCopyOfProjectSalesData(modifiedData);
 
       setProjectSalesData(data);
-      currentTabIndex=== 0 && setCurrentTabIndex(0);
+      currentTabIndex === 0 && setCurrentTabIndex(0);
       handleMainPoints(data);
       const name = data.projectName;
 
@@ -468,8 +467,6 @@ const ProjectSalesDetails = () => {
                     {currentTabIndex === 0 && (
                       <Box>
                         <DetailsPage data={copyOfProjectSalesData} fields={fiteredFieldToShow} />
-
-                         
                       </Box>
                     )}
 
@@ -559,9 +556,8 @@ const ProjectSalesDetails = () => {
                 )}
               </Box>
             </Paper>
-            
+
             <Box my={1} />
-         
 
             {/*<Tabs*/}
             {/*    className="quote-tab"*/}
@@ -675,7 +671,7 @@ const ProjectSalesDetails = () => {
             </TabPanel>
           </div>
           <div className="position-relative">
-                          {/* {showActivity ?
+            {/* {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
                   <IoIosArrowDropright className="icon" />
@@ -699,33 +695,32 @@ const ProjectSalesDetails = () => {
                 <IoIosArrowDropleft className="icon" />
               </span>} */}
 
-                          <Paper>
-                            {!isSmallScreen && (
-                              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                              </span>
-                            )}
-                            <div style={{ display: showActivity ? 'block' : 'none' }}>
-                              <Activity
-                                resourceId={id}
-                                resource={projectSales.projectSalesRoute}
-                                relatedTo={[
-                                  {
-                                    type: projectSales.projectSalesResource,
-                                    referenceId: id,
-                                    access: true
-                                  }
-                                ]}
-                                handleActivityRefresh={() => {}}
-                                emails={[]}
-                              />
-                            </div>
-                          </Paper>
-                        </div>
+            <Paper>
+              {!isSmallScreen && (
+                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                </span>
+              )}
+              <div style={{ display: showActivity ? 'block' : 'none' }}>
+                <Activity
+                  resourceId={id}
+                  resource={projectSales.projectSalesRoute}
+                  relatedTo={[
+                    {
+                      type: projectSales.projectSalesResource,
+                      referenceId: id,
+                      access: true
+                    }
+                  ]}
+                  handleActivityRefresh={() => {}}
+                  emails={[]}
+                />
+              </div>
+            </Paper>
+          </div>
         </div>
-        
       </Fragment>
-      
+
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
