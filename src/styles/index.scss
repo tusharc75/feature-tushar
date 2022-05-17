@@ -1845,3 +1845,117 @@ svg.MuiSvgIcon-root {
     }
   }
 }
+
+// STYLE FOR CUSTOMER CONTACT DETAILS AND CUSTOMER ACCOUNT ACCRODION
+.modified_style_of_accordion {
+  .MuiAccordion-root {
+    border: 0;
+    box-shadow: none;
+    & .MuiButtonBase-root.MuiAccordionSummary-root {
+      background: #fff !important;
+      box-shadow: none !important;
+      color: #329592 !important;
+      border: 1px solid #eaeaea;
+      min-height: unset;
+      padding: 4px 0;
+      border-radius: 4px;
+      &[aria-expanded='true'] {
+        background-color: #41aeaa !important;
+        & * {
+          color: #fff;
+          fill: #fff;
+        }
+      }
+    }
+
+    & .MuiCollapse-root {
+      margin-top: 15px;
+      transition: margin 274ms;
+      & .MuiAccordionDetails-root {
+        padding: 0;
+        margin: 0;
+
+        .MuiCardContent-root.detailListing.custom_card_style_for_contact_details {
+          background-color: #ddf0f0;
+          padding: 20px 29px;
+          padding-bottom: 11px !important;
+          svg {
+            display: block;
+          }
+          .detailCardHeader {
+            margin-bottom: 15px;
+            padding: 0;
+          }
+          a {
+            color: var(--primary);
+            transition: color 0.4s;
+            &:hover {
+              color: var(--link);
+            }
+          }
+          .buttonClass li .MuiListItemText-root span {
+            display: inline-block;
+            background: #298b87;
+            padding: 5px 10px;
+            color: white;
+            line-height: 1;
+            border-radius: 2px;
+            margin-bottom: 5px;
+          }
+          .buttonClass li .MuiListItemAvatar-root {
+            margin-right: 5px;
+          }
+          .MuiListItem-root {
+            align-items: flex-start;
+            .MuiListItemAvatar-root svg {
+              margin-top: 8px;
+            }
+          }
+        }
+      }
+      .btn-view {
+        position: relative;
+        top: unset;
+        left: unset;
+        right: unset;
+        bottom: unset;
+        justify-content: flex-start;
+        background-color: #fff;
+        border: 2px solid #329592;
+        border-radius: 5px;
+        max-width: max-content;
+        padding: 8px 32px;
+        transition: background 0.4s;
+        margin: 15px 0 0 0;
+        &:hover {
+          background-color: var(--primary) !important;
+          border-color: transparent;
+        }
+        & span {
+          color: #59a4a1;
+          transition: color 0.4s, fill 0.3s;
+        }
+        & svg {
+          fill: #59a4a1;
+          transition: color 0.4s, fill 0.3s;
+          margin-left: 10px;
+        }
+        &:hover span {
+          color: #fff;
+        }
+        &:hover svg {
+          fill: #fff;
+        }
+      }
+    }
+    & .MuiCollapse-hidden {
+      margin: 0;
+      transition: margin 274ms;
+    }
+  }
+  @media all and (max-width: 600px) {
+    & {
+      padding: 0.3rem !important;
+    }
+  }
+}

@@ -105,8 +105,8 @@ const ContactDetailsPage = (props) => {
 
   const [showAddContact, setShowAddContact] = useState(false);
   const [showEntityRoleDialog, setShowEntityRoleDialog] = useState(false);
-  const [entityAccess, setEntityAccess] = useState([])
-  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([])
+  const [entityAccess, setEntityAccess] = useState([]);
+  const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
   let { id } = useParams();
 
@@ -164,27 +164,28 @@ const ContactDetailsPage = (props) => {
 
   const fetchLoggedInUserRole = async () => {
     let roleIds = [];
-    await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
-      data.entities.map((item) => {
-        item.role.forEach((role) => {
-          if (roleIds.includes(role?._id)) {
-
-          } else {
-            roleIds.push(role?._id)
-          }
-        })
-
+    await axiosInstance()
+      .get(`/user/${user.user?._id}`)
+      .then(({ data: { data } }) => {
+        data.entities.map((item) => {
+          item.role.forEach((role) => {
+            if (roleIds.includes(role?._id)) {
+            } else {
+              roleIds.push(role?._id);
+            }
+          });
+        });
+        setRoleAccessOfLoggedInUser(roleIds);
       })
-      setRoleAccessOfLoggedInUser(roleIds)
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
-  }
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const fetchLoggedInUserEntities = async () => {
     const entityIds = user.entity?.map((e) => e._id);
-    setEntityAccess(entityIds)
-  }
+    setEntityAccess(entityIds);
+  };
 
   const fetchContactData = async () => {
     setLoading(true);
@@ -620,14 +621,14 @@ const ContactDetailsPage = (props) => {
   };
 
   const handlePortalAccess = () => {
-    setShowEntityRoleDialog(true)
-  }
+    setShowEntityRoleDialog(true);
+  };
 
   const handleEcommerceAccess = async () => {
     axiosInstance()
       .put('/user/eCommerce-access', {
-        "eCommerceAccess": true,
-        "ids": [id]
+        eCommerceAccess: true,
+        ids: [id]
       })
       .then(({ data }) => {
         toastConfig.setToastConfig({
@@ -635,12 +636,12 @@ const ContactDetailsPage = (props) => {
           type: 'success',
           message: data.message
         });
-        fetchContactData()
+        fetchContactData();
       })
       .catch((err) => {
-        toastConfig.setToastConfig(err)
-      })
-  }
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   let filteredContactFields = contactFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
 
@@ -691,7 +692,7 @@ const ContactDetailsPage = (props) => {
           // contactResource={contactResource}
           accountResource={accountResource}
           contactResource={contactResource}
-        // contactApi={contactApi}
+          // contactApi={contactApi}
         />
       ) : openUpdateDialog ? (
         <ManageContact
@@ -716,7 +717,7 @@ const ContactDetailsPage = (props) => {
           // contactResource={contactResource}
           accountResource={accountResource}
           contactResource={contactResource}
-        // contactApi={contactApi}
+          // contactApi={contactApi}
         />
       ) : null}
 
@@ -738,30 +739,28 @@ const ContactDetailsPage = (props) => {
               // style={{ marginTop: "150px", minHeight: "200px" }}
               showHeading={true}
             >
-              {
-                permissions.eCommercePolicy?.isRead && contactResource === customerContact.contactResource &&
+              {permissions.eCommercePolicy?.isRead && contactResource === customerContact.contactResource && (
                 <Button
                   color="primary"
                   size="small"
-                  variant={isMobile ? "text" : "contained"}
+                  variant={isMobile ? 'text' : 'contained'}
                   disabled={contactData.relatedUser?.eCommerceAccess}
                   onClick={handleEcommerceAccess}
                 >
                   E-Commerce Access
                 </Button>
-              }
-              {
-                permissions.eCommercePolicy?.isRead && user.user?.userType === userType.brandAdmin &&
+              )}
+              {permissions.eCommercePolicy?.isRead && user.user?.userType === userType.brandAdmin && (
                 <Button
                   color="primary"
                   size="small"
-                  variant={isMobile ? "text" : "contained"}
+                  variant={isMobile ? 'text' : 'contained'}
                   disabled={contactData?.isUserExist}
                   onClick={handlePortalAccess}
                 >
                   Give Portal Access
                 </Button>
-              }
+              )}
               {contactPermissions.isUpdate && canEdit ? (
                 <Button
                   id="detailEditButton"
@@ -769,7 +768,7 @@ const ContactDetailsPage = (props) => {
                   color="primary"
                   size="small"
                   onClick={handleOpneUpdateDialog}
-                  className={isMobile ? accountClass.mobile_button_layout : ""}
+                  className={isMobile ? accountClass.mobile_button_layout : ''}
                   style={isMobile ? { color: '#43aeaa' } : {}}
                 >
                   {isMobile ? <BiEdit size={20} /> : 'Edit'}
@@ -777,9 +776,9 @@ const ContactDetailsPage = (props) => {
               ) : null}
 
               {contactPermissions.isDelete &&
-                contactData?.owner?.optionValue &&
-                user?.user?._id &&
-                contactData.owner.optionValue === user.user._id ? (
+              contactData?.owner?.optionValue &&
+              user?.user?._id &&
+              contactData.owner.optionValue === user.user._id ? (
                 <DeleteButton
                   id="detailDeleteButton"
                   text={isMobile ? <MdDelete size={20} /> : 'Delete'}
@@ -809,7 +808,7 @@ const ContactDetailsPage = (props) => {
               ) : (
                 <>
                   <Tabs
-                    className="oms-tab"
+                    className={`oms-tab`}
                     value={currentTabIndex}
                     onChange={(index, newValue) => {
                       setCurrentTabIndex(newValue);
@@ -841,20 +840,17 @@ const ContactDetailsPage = (props) => {
                       isInContact={true}
                     />
                   </Box>
-                 {(!isOffline && contactResource === "customerContact" && permissions?.hasOwnProperty("productInventory")) && <Box hidden={currentTabIndex !== 2}>
-                    <Warehouse
-                      reference={contactResource}
-                      api={contactApi}
-                      id={id}
-                      accountId={contactData?.accountName?.optionValue}
-                    />
-                  </Box>}
+                  {!isOffline && contactResource === 'customerContact' && permissions?.hasOwnProperty('productInventory') && (
+                    <Box hidden={currentTabIndex !== 2}>
+                      <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
+                    </Box>
+                  )}
                 </>
               )}
             </Box>
-            <div className="p-3">
+            <div className={`p-3 modified_style_of_accordion`}>
               {permissions?.opportunity?.isRead && (
-                <span id="opportunityAccordion">
+                <span id={`opportunityAccordion `}>
                   <OpportunityInAccordian
                     opportunityPermissions={permissions.opportunity}
                     opportunities={opportunities}
@@ -1042,7 +1038,7 @@ const ContactDetailsPage = (props) => {
                         access: true
                       }
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={[contactData?.email ?? '']}
                   />
                 </div>
@@ -1159,8 +1155,7 @@ const ContactDetailsPage = (props) => {
           />
         </FullScreenDialog>
       )}
-      {
-        showEntityRoleDialog &&
+      {showEntityRoleDialog && (
         <Dialog
           fullWidth
           maxWidth="xs"
@@ -1171,8 +1166,8 @@ const ContactDetailsPage = (props) => {
           <AssignEntityDialog
             entitiesDialogOpen={showEntityRoleDialog}
             onSuccess={() => {
-              setShowEntityRoleDialog(false)
-              fetchContactData()
+              setShowEntityRoleDialog(false);
+              fetchContactData();
             }}
             handleCloseDialog={() => setShowEntityRoleDialog(false)}
             assignedEntity={[]}
@@ -1185,7 +1180,7 @@ const ContactDetailsPage = (props) => {
             contactResource={contactResource}
           />
         </Dialog>
-      }
+      )}
       {openAdditionalDialog && (
         // <Dialog
         //   disableBackdropClick={true}
