@@ -112,9 +112,10 @@ const DashboardBuilder = () => {
   const updateDashboard = () => {
     setSubmitting(true);
     axiosInstance()
-      .put(`${baseURL}/${id}`, {
+      .put(`${baseURL}`, {
+        _id: id,
         name: name.trim(),
-        charts: formData
+        charts: formData.map((form) => ({...form, kpi: form.kpi.kpi}))
       })
       .then(() => {
         setToastConfig({
