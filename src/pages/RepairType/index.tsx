@@ -103,7 +103,8 @@ const RepairType = () => {
             let rows = dataToProcess.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some(s => s._id === u._id);
-                finalObject["canDelete"] = false;
+                finalObject["allowedToEdit"] = permissions?.repairType?.isUpdate;
+                finalObject["canDelete"] = permissions?.repairType?.isUpdate;;
                 let res = {
                     ...finalObject,
                 };

@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import clsx from "clsx";
+import React, { useContext, useEffect, useState } from 'react';
+import clsx from 'clsx';
 import {
   withStyles,
   Grid,
@@ -14,28 +14,32 @@ import {
   Tabs,
   Tab,
   Menu,
-  MenuItem, Button,
+  MenuItem,
+  Button
+} from '@material-ui/core';
+import { Skeleton } from '@material-ui/lab';
 
-} from "@material-ui/core";
-import { Skeleton } from "@material-ui/lab";
-import { Delete, ExpandMore, MoreVert } from "@material-ui/icons";
-import axiosInstance from "../../axios/axiosInstance";
-import CustomerContacts from "./CustomerContacts";
-import BoxWithBorder from "../../components/BoxWithBorder";
-import OpportunityAccordianProjectSales from "./OpportunityAccordingProjectSales";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import ManageContactDialog from "../Contact/ManageContact";
-import { customerAccount, customerContact } from "../../constants/helpers";
-import ManageAccountDialog from "../Account/ManageAccount";
-import ConfirmationDialogRaw from "../../components/Helpers/ConfirmationDialog";
-import QuotesAccordionInProjectSale from "./QuotesAccordionInProjectSale";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import { Delete, ExpandMore, MoreVert } from '@material-ui/icons';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+
+import axiosInstance from '../../axios/axiosInstance';
+import CustomerContacts from './CustomerContacts';
+import BoxWithBorder from '../../components/BoxWithBorder';
+import OpportunityAccordianProjectSales from './OpportunityAccordingProjectSales';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import ManageContactDialog from '../Contact/ManageContact';
+import { customerAccount, customerContact } from '../../constants/helpers';
+import ManageAccountDialog from '../Account/ManageAccount';
+import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
+import QuotesAccordionInProjectSale from './QuotesAccordionInProjectSale';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+
 import PropTypes from 'prop-types';
-import { MdDelete } from "react-icons/md";
-import { AiFillCaretLeft, AiFillCaretRight } from "react-icons/ai";
-import { isMobile, isTablet } from "react-device-detect";
-
+import { MdDelete } from 'react-icons/md';
+import { AiFillCaretLeft, AiFillCaretRight } from 'react-icons/ai';
+import { isMobile, isTablet } from 'react-device-detect';
 
 function TabPanel(props) {
   const { children, value, index, classes, ...other } = props;
@@ -46,102 +50,104 @@ function TabPanel(props) {
 TabPanel.propTypes = {
   children: PropTypes.node,
   index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired
 };
 
 function a11yProps(index) {
   return {
     id: `vertical-tab-${index}`,
-    'aria-controls': `vertical-tabpanel-${index}`,
+    'aria-controls': `vertical-tabpanel-${index}`
   };
 }
 
-
 const Accordion = withStyles({
   root: {
-    border: "1px solid rgba(0, 0, 0, .125)",
-    backgroundColor: "#F6F6F6",
+    border: '1px solid rgba(0, 0, 0, .125)',
+    backgroundColor: '#F6F6F6',
     // boxShadow: "none",
-    "&:not(:last-child)": {
-      borderBottom: 0,
+    '&:not(:last-child)': {
+      borderBottom: 0
     },
-    "&:before": {
-      display: "none",
+    '&:before': {
+      display: 'none'
     },
-    "&$expanded": {
-      margin: "auto",
+    '&$expanded': {
+      margin: 'auto'
     },
-    width: "100%"
+    width: '100%'
   },
-  expanded: {},
+  expanded: {}
 })(MuiAccordion);
 
 const AccordionSummary = withStyles({
   root: {
-    backgroundColor: "f5f5f5",
-    borderRadius: "10px 10px 0 0",
+    backgroundColor: 'f5f5f5',
+    borderRadius: '10px 10px 0 0',
     // borderBottom: "1px solid rgba(0, 0, 0, .125)",
     marginBottom: -1,
     minHeight: 46,
-    "&$expanded": {
-      minHeight: 46,
-    },
+    '&$expanded': {
+      minHeight: 46
+    }
   },
   content: {
-    "&$expanded": {
-      margin: "12px 0",
-    },
+    '&$expanded': {
+      margin: '12px 0'
+    }
   },
-  expanded: {},
+  expanded: {}
 })(MuiAccordionSummary);
 
 const AccordionDetails = withStyles((theme) => ({
   root: {
     padding: theme.spacing(2),
-    backgroundColor: "#fff",
-    borderRadius: "0 0 10px 10px"
-  },
+    backgroundColor: '#fff',
+    borderRadius: '0 0 10px 10px'
+  }
 }))(MuiAccordionDetails);
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    background: "#f5f5f5",
-    marginBottom: 12,
+    background: '#f5f5f5',
+    marginBottom: 12
   },
   expand: {
-    transform: "rotate(0deg)",
-    transition: theme.transitions.create("transform", {
-      duration: theme.transitions.duration.standard,
-    }),
+    transform: 'rotate(0deg)',
+    transition: theme.transitions.create('transform', {
+      duration: theme.transitions.duration.standard
+    })
   },
   expandOpen: {
-    transform: "rotate(180deg)",
+    transform: 'rotate(180deg)'
   },
   addBtn: {
     // marginLeft: "auto",
   },
   cusName: {
     fontWeight: 700,
-    color: "#43ADAA"
+    color: 'var(--primary)'
   },
   tabProject: {
     // position:"static",
-    // borderRadius:"40px !important",
-    backgroundColor: "#efefef !important",
+
+    borderRadius: '5px !important',
+    border: '1px solid #808080 !important',
+    marginLeft: '10px',
+    marginRight: '10px',
+    backgroundColor: '#fff !important',
     rippleVisible: {
-      animation: "none !important"
+      animation: 'none !important'
     },
-    "&.Mui-selected": {
-      backgroundColor: "#43AEAA !important",
-      color: "#ffff !important",
-      borderBottom: "0px solid #808080 !important",
-      borderTop: "0px solid #808080 !important",
-      "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child": {
-        display: "flex",
-        marginBottom: "0px",
-        position: "absolute",
-        left: "92.5%",
-      },
+    '&.Mui-selected': {
+      backgroundColor: '#43AEAA !important',
+      color: '#ffff !important',
+      border: '1px solid #43AEAA !important',
+      '&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child': {
+        display: 'flex',
+        marginBottom: '0px',
+        position: 'absolute',
+        left: '92.5%'
+      }
       //   "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child":{
       //     display:"flex",
       //     marginBottom:"0px",
@@ -149,35 +155,27 @@ const useStyles = makeStyles((theme) => ({
       //     left:"244px",
       //     color:"#43AEAA"
       // },
-
     },
-    "& span.MuiTab-wrapper": {
-      display: "flex",
-      flexDirection: "row-reverse",
+    '& span.MuiTab-wrapper': {
+      display: 'flex',
+      flexDirection: 'row-reverse'
       //  position:"static"
     },
 
-    "&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child": {
-      display: "none",
-
+    '&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child': {
+      display: 'none'
     },
 
-    "&.MuiTab-labelIcon .MuiTab-wrapper > *:after": {
-      position: "relative",
-      left: "30%"
+    '&.MuiTab-labelIcon .MuiTab-wrapper > *:after': {
+      position: 'relative',
+      left: '30%'
     },
-
-    margin: "0 -1px",
-    borderBottom: "0px solid #808080 !important",
-    borderTop: "0px solid #808080 !important",
     tab: {
-      "&.MuiTabPanel-root": {
+      '&.MuiTabPanel-root': {
         flex: 1
-
-      },
-    },
-  },
-
+      }
+    }
+  }
 }));
 
 const CustomerAccounts = (props) => {
@@ -198,7 +196,7 @@ const CustomerAccounts = (props) => {
     currency = null,
     marketSegmentId = null,
     subMarketSegmentId = null,
-    estimatedAmount = null,
+    estimatedAmount = null
   } = props;
 
   const classes = useStyles();
@@ -226,18 +224,14 @@ const CustomerAccounts = (props) => {
     setValue(newValue);
   };
 
-
-
-
-
   useEffect(() => {
     if (!users.length) return;
 
     const collabs = users.map((u, i) => ({
       optionValue: u._id,
-      optionLabel: u.firstName + " " + u.lastName,
+      optionLabel: u.firstName + ' ' + u.lastName,
       order: i,
-      default: false,
+      default: false
     }));
     setCollaborators(collabs);
   }, [users]);
@@ -257,7 +251,7 @@ const CustomerAccounts = (props) => {
 
     const dataObj = {
       opportunity: [id, ...existingData],
-      _id: projectId,
+      _id: projectId
     };
 
     axiosInstance()
@@ -265,8 +259,8 @@ const CustomerAccounts = (props) => {
       .then(() => {
         setToastConfig({
           message: `Opportunity added successfully`,
-          type: "success",
-          open: true,
+          type: 'success',
+          open: true
         });
         fetchProjectData();
       })
@@ -280,7 +274,7 @@ const CustomerAccounts = (props) => {
 
     const dataObj = {
       quoteBuilder: [id, ...existingData],
-      _id: projectId,
+      _id: projectId
     };
 
     axiosInstance()
@@ -288,8 +282,8 @@ const CustomerAccounts = (props) => {
       .then(() => {
         setToastConfig({
           message: `Quote added successfully`,
-          type: "success",
-          open: true,
+          type: 'success',
+          open: true
         });
         fetchProjectData();
       })
@@ -303,7 +297,7 @@ const CustomerAccounts = (props) => {
 
     const dataObj = {
       customerAccount: [id, ...existingData],
-      _id: projectId,
+      _id: projectId
     };
 
     axiosInstance()
@@ -311,8 +305,8 @@ const CustomerAccounts = (props) => {
       .then(() => {
         setToastConfig({
           message: `Customer Account added successfully`,
-          type: "success",
-          open: true,
+          type: 'success',
+          open: true
         });
         fetchProjectData();
       })
@@ -326,7 +320,7 @@ const CustomerAccounts = (props) => {
 
     const dataObj = {
       customerContact: [id, ...existingData],
-      _id: projectId,
+      _id: projectId
     };
 
     axiosInstance()
@@ -334,8 +328,8 @@ const CustomerAccounts = (props) => {
       .then(() => {
         setToastConfig({
           message: `Customer Contact added successfully`,
-          type: "success",
-          open: true,
+          type: 'success',
+          open: true
         });
         fetchProjectData();
       })
@@ -354,21 +348,19 @@ const CustomerAccounts = (props) => {
 
     // const id = currentAccount._id;
 
-    const newAccountData = customerAccounts
-      ?.filter((ca) => ca._id !== id)
-      .map((contact) => contact._id);
+    const newAccountData = customerAccounts?.filter((ca) => ca._id !== id).map((contact) => contact._id);
 
     setRemoving(true);
     axiosInstance()
       .put(`/project-sales/add-customer-account`, {
         customerAccount: newAccountData,
-        _id: projectId,
+        _id: projectId
       })
       .then(() => {
         setToastConfig({
           message: `Customer Account removed successfully`,
-          type: "success",
-          open: true,
+          type: 'success',
+          open: true
         });
         setRemoving(false);
         setShowConfirmBox(false);
@@ -391,21 +383,19 @@ const CustomerAccounts = (props) => {
 
     const id = contactDeleteRec._id;
 
-    const newContactData = customerContacts
-      ?.filter((c) => c._id !== id)
-      .map((contact) => contact._id);
+    const newContactData = customerContacts?.filter((c) => c._id !== id).map((contact) => contact._id);
 
     setRemoving(true);
     axiosInstance()
       .put(`/project-sales/add-customer-contact`, {
         customerContact: newContactData,
-        _id: projectId,
+        _id: projectId
       })
       .then(() => {
         setToastConfig({
           message: `Customer Contact removed successfully`,
-          type: "success",
-          open: true,
+          type: 'success',
+          open: true
         });
         setRemoving(false);
         setShowConfirmBox(false);
@@ -423,51 +413,41 @@ const CustomerAccounts = (props) => {
     setAnchorEl(null);
   };
 
-  const handleClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    type: string
-  ) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>, type: string) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
     setDialogType(type);
     renderMenu(accId);
   };
 
-  const renderMenu = (id: string = "") => {
+  const renderMenu = (id: string = '') => {
     return (
-      <Menu
-        id="menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-      >
+      <Menu id="menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem
           onClick={() => {
-            if (dialogType === "customer-contact") {
+            if (dialogType === 'customer-contact') {
               setShowContactCreateDialog(true);
             }
-            if (dialogType === "customer-account") {
+            if (dialogType === 'customer-account') {
               setShowAccountCreateDialog(true);
             }
             handleClose();
           }}
         >
-          {isMobile && !isTablet ? "New" : "Create New"}
-
+          {isMobile && !isTablet ? 'New' : 'Create New'}
         </MenuItem>
         <MenuItem
           onClick={() => {
-            if (dialogType === "customer-account") {
+            if (dialogType === 'customer-account') {
               handleOpenDialog(dialogType);
             }
-            if (dialogType === "customer-contact" && accId) {
+            if (dialogType === 'customer-contact' && accId) {
               handleOpenDialog(dialogType, accId);
             }
             handleClose();
           }}
         >
-          {isMobile && !isTablet ? "Add" : "Add Existing"}
+          {isMobile && !isTablet ? 'Add' : 'Add Existing'}
         </MenuItem>
       </Menu>
     );
@@ -481,19 +461,19 @@ const CustomerAccounts = (props) => {
           open={showAccountCreateDialog}
           onClose={(response) => {
             setShowAccountCreateDialog(false);
-            if (response && response["id"]) {
-              saveCustomerAccountToProject(response["id"]);
+            if (response && response['id']) {
+              saveCustomerAccountToProject(response['id']);
             }
             setDialogType(null);
             setAccId(null);
           }}
-          accountResource={"customerAccount"}
-          accountApi={"customer-account"}
+          accountResource={'customerAccount'}
+          accountApi={'customer-account'}
           isRedirectToDetailPage={false}
           collaborators={collaborators}
           owners={collaborators.map((u) => ({
             ...u,
-            default: u.optionValue === ownerId,
+            default: u.optionValue === ownerId
           }))}
           fromProject={true}
         />
@@ -519,31 +499,32 @@ const CustomerAccounts = (props) => {
           collaborators={collaborators}
           owners={collaborators.map((u) => ({
             ...u,
-            default: u.optionValue === ownerId,
+            default: u.optionValue === ownerId
           }))}
           fromProject={true}
         />
       )}
-      <Paper className={`${classes.root} ${"p-3 pannel_layout"}`} >
-
+      <Paper className={`${classes.root} ${'p-3 pannel_layout'}`}>
         {/*<Accordion*/}
         {/*  square={false}*/}
         {/*  expanded={expandedParent}*/}
         {/*  onChange={() => setExpandedParent(!expandedParent)}*/}
         {/*>*/}
         <div className="customer_account_box">
-          <AccordionSummary aria-controls="panel1d-content" id="panel1d-header" style={{ background: "white" }}>
+          <AccordionSummary aria-controls="panel1d-content" id="panel1d-header" style={{ background: 'white' }}>
             <Box
               display="flex"
               alignItems="center"
               className={clsx(classes.expand, {
-                [classes.expandOpen]: expandedParent,
+                [classes.expandOpen]: expandedParent
               })}
             >
               {/*<ExpandMore />*/}
             </Box>
             <Box component="span" mx={1} />
-            <Typography variant="subtitle1" className={classes.cusName}>Customer Accounts</Typography>
+            <Typography variant="subtitle1" className={classes.cusName}>
+              Customer Accounts
+            </Typography>
             {(permissions?.isUpdate && isTeamMember) || isManager ? (
               <>
                 {/* {customerAccounts.length > 0 &&
@@ -577,31 +558,28 @@ const CustomerAccounts = (props) => {
                 } */}
 
                 <Button
-                  variant={isMobile && !isTablet ? "outlined" : "contained"}
-                  style={isMobile && !isTablet ? { color: "var(--info-dark)", marginLeft: "auto" } : { marginLeft: "auto" }}
+                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                  style={isMobile && !isTablet ? { color: 'var(--info-dark)', marginLeft: 'auto' } : { marginLeft: 'auto' }}
                   color="primary"
                   size="small"
                   onClick={() => {
                     setShowAccountCreateDialog(true);
-
                   }}
                 >
-                  {isMobile && !isTablet ? "New" : "Create New"}
+                  {isMobile && !isTablet ? 'New' : 'Create New'}
                 </Button>
 
                 <Button
-                  variant={isMobile && !isTablet ? "outlined" : "contained"}
-                  style={isMobile && !isTablet ? { color: "var(--info-dark)", marginLeft: "10px" } : { marginLeft: "10px" }}
+                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                  style={isMobile && !isTablet ? { color: 'var(--info-dark)', marginLeft: '10px' } : { marginLeft: '10px' }}
                   color="primary"
                   size="small"
                   onClick={() => {
-                    handleOpenDialog("customer-account");
-
+                    handleOpenDialog('customer-account');
                   }}
                 >
-                  {isMobile && !isTablet ? "Add" : "Add Existing"}
+                  {isMobile && !isTablet ? 'Add' : 'Add Existing'}
                 </Button>
-
 
                 {/*<IconButton*/}
                 {/*    aria-haspopup="true"*/}
@@ -616,50 +594,41 @@ const CustomerAccounts = (props) => {
                 {/*</IconButton>*/}
 
                 {/*<Box component="span" mx={1} />*/}
-
               </>
             ) : null}
           </AccordionSummary>
-
-
 
           <AccordionDetails>
             {loading ? (
               <Typography>Loading...</Typography>
             ) : customerAccounts.length ? (
-              <Box width="100%" className="tab_Box_layout">
+              <Box width="100%">
                 <>
-
                   <Tabs
-
-                    orientation="vertical"
                     variant="scrollable"
                     scrollButtons="auto"
-                    className="oms-tab dynamic-vertical-tab"
+                    className="oms-tab dynamic-vertical-tab tab_custom_style_customer_tab"
                     value={currentTabIndex}
                     onChange={(index, newValue) => {
                       setCurrentTabIndex(newValue);
                     }}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    aria-label="Vertical-tabs-example"
                     TabIndicatorProps={{
-                      style: {
-                        display: 'none'
-                      }
+                      style: { display: 'none' }
                     }}
+                    textColor="primary"
+                    aria-label="scrollable auto tabs example"
                   >
-
                     {customerAccounts.map((c, i) => (
                       <Tab
                         wrapped
                         key={i}
                         tabIndex={i}
                         label={
-                          <Grid container>
+                          <Grid container alignItems="center">
                             <Grid item xs={8}>
-                              <Box component={'h4'} fontWeight={'bold'}>
-                                {c.accountName}
+                              <Box component={'h4'} fontWeight={'bold'} className="title_container">
+                                <AccountCircleIcon />
+                                <span className="tabs_title">{c.accountName}</span>
                               </Box>
                             </Grid>
                             <Grid item xs={4} container justify="flex-end">
@@ -673,7 +642,7 @@ const CustomerAccounts = (props) => {
                                   handleRemoveAccount(c);
                                 }}
                               >
-                                <Delete color="error" fontSize="small" />
+                                <DeleteOutlineIcon color="primary" fontSize="small" />
                               </IconButton>
                             </Grid>
                           </Grid>
@@ -681,76 +650,46 @@ const CustomerAccounts = (props) => {
                         aria-controls={`vertical-tabpanel-${i}`}
                         id={`vertical-tab-${i}`}
                         className={classes.tabProject}
-                        style={{ borderRight: "5px", borderColor: "green", marginRight: "-1px" }}
-                        icon={<AiFillCaretLeft size={18} />}
-                      // icon={<AiFillCaretRight size={18}/>}
 
+                        // icon={<AiFillCaretRight size={18}/>}
                       />
                     ))}
                   </Tabs>
 
-
                   {/* <Box component="span" mx={1} /> */}
 
-
                   {customerAccounts.map((c, i) => (
-
-                    <Box hidden={currentTabIndex !== i} key={c._id} className="tabpanel_layout">
-                      <Grid container >
-                        <Grid item xs={12} style={{ marginTop: "15px" }}>
-
+                    <Box hidden={currentTabIndex !== i} key={c._id} className="tabpanel_layout custom_responsive_style_tabpanel">
+                      <Grid container>
+                        <Grid item xs={12} style={{ marginTop: '15px' }} className="accordion_grid_customer_account">
                           <Accordion
                             expanded={expandCustomerContact}
-
                             className="omsAccordian"
                             onChange={() => setExpandCustomerContact(!expandCustomerContact)}
                           >
-                            <AccordionSummary
-                              style={{ padding: 0 }}
-                              aria-controls="user-panel-content"
-                              id="user-panel-header"
-                            >
+                            <AccordionSummary style={{ padding: 0 }} aria-controls="user-panel-content" id="user-panel-header">
                               <Grid container>
                                 <Grid item xs={8}>
-                                  <Box
-                                    component="div"
-                                    display="flex"
-                                    alignItems="center"
-                                    flexGrow={1}
-                                  >
-                                    <IconButton
-                                      size="small"
-                                      onClick={(e) => e.preventDefault()}
-                                    >
-                                      {expandCustomerContact === true ? (
-                                        <ExpandLessIcon />
-                                      ) : (
-                                        <ExpandMoreIcon />
-                                      )}
+                                  <Box component="div" display="flex" alignItems="center" flexGrow={1}>
+                                    <IconButton size="small" onClick={(e) => e.preventDefault()}>
+                                      {expandCustomerContact === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                                     </IconButton>
                                     <Box>
                                       <Typography variant="subtitle2">
-                                        Customer Contacts (
-                                        {
-                                          customerContacts.filter(
-                                            (ca) => ca.accountName === c._id
-                                          ).length
-                                        }
-                                        )
+                                        Customer Contacts ({customerContacts.filter((ca) => ca.accountName === c._id).length})
                                       </Typography>
                                     </Box>
                                   </Box>
                                 </Grid>
                                 <Grid item xs={4} container justify="flex-end" alignItems="center">
                                   <Typography variant="subtitle2">
-                                    {(permissions?.isUpdate && isTeamMember) ||
-                                      isManager ? (
+                                    {(permissions?.isUpdate && isTeamMember) || isManager ? (
                                       <IconButton
                                         aria-haspopup="true"
                                         color="primary"
                                         size="small"
                                         onClick={(e) => {
-                                          handleClick(e, "customer-contact");
+                                          handleClick(e, 'customer-contact');
                                           setAccId(c._id);
                                         }}
                                       >
@@ -766,33 +705,17 @@ const CustomerAccounts = (props) => {
                               <Box style={{ width: '100%' }}>
                                 {loading ? (
                                   [1, 2].map((i) => (
-                                    <BoxWithBorder
-                                      key={i}
-                                      style={{ marginBottom: "8px" }}
-                                    >
+                                    <BoxWithBorder key={i} style={{ marginBottom: '8px' }}>
                                       <Box padding={1}>
-                                        <Skeleton
-                                          variant="text"
-                                          width="100px"
-                                          height="20px"
-                                        />
+                                        <Skeleton variant="text" width="100px" height="20px" />
                                         <Box marginTop={1} />
-                                        <Skeleton
-                                          variant="text"
-                                          width="100%"
-                                          height="15px"
-
-                                        />
+                                        <Skeleton variant="text" width="100%" height="15px" />
                                       </Box>
                                     </BoxWithBorder>
                                   ))
-                                ) : customerContacts.filter(
-                                  (ca) => ca.accountName === c._id
-                                ).length ? (
+                                ) : customerContacts.filter((ca) => ca.accountName === c._id).length ? (
                                   <CustomerContacts
-                                    contacts={customerContacts.filter(
-                                      (ca) => ca.accountName === c._id
-                                    )}
+                                    contacts={customerContacts.filter((ca) => ca.accountName === c._id)}
                                     accountId={c._id}
                                     accountName={c.accountName}
                                     contactRoute="customer-contact"
@@ -800,36 +723,30 @@ const CustomerAccounts = (props) => {
                                   />
                                 ) : (
                                   <Box pb="6px">
-                                    <Typography variant="subtitle1">
-                                      No Contacts To Show
-                                    </Typography>
+                                    <Typography variant="subtitle1">No Contacts To Show</Typography>
                                   </Box>
                                 )}
                               </Box>
                             </AccordionDetails>
                           </Accordion>
 
-
-
                           {/*TODO: Heirarchy Table */}
                           {permissions?.isRead && (
                             <OpportunityAccordianProjectSales
-                              opportunities={opportunities.filter(
-                                (o) => o.customerAccount === c._id
-                              )}
+                              opportunities={opportunities.filter((o) => o.customerAccount === c._id)}
                               onNewOpportunityAdd={(id) => {
                                 saveOppToProject(id);
                               }}
                               permissions={permissions}
                               accountId={c._id}
                               accountName={c.accountName}
-                              resource={"customerAccount"}
+                              resource={'customerAccount'}
                               isRedirect={false}
                               expanded={true}
                               collaborators={collaborators}
                               users={collaborators.map((u) => ({
                                 ...u,
-                                default: u.optionValue === ownerId,
+                                default: u.optionValue === ownerId
                               }))}
                               projectId={projectId}
                               addExisting={handleOpenDialog}
@@ -838,32 +755,30 @@ const CustomerAccounts = (props) => {
                               isManager={isManager}
                             />
                           )}
-                          {
-                            permissions?.isRead && (
-                              <QuotesAccordionInProjectSale
-                                expanded={true}
-                                quotes={quotes.filter((q) => q.customerAccountName === c._id)}
-                                recordsPerLine={3}
-                                accountId={c._id}
-                                accountResource={"customerAccount"}
-                                permissions={permissions}
-                                projectId={projectId}
-                                addExisting={handleOpenDialog}
-                                fetchProjectData={fetchProjectData}
-                                isTeamMember={isTeamMember}
-                                isManager={isManager}
-                                onNewQuoteAdd={(id) => {
-                                  saveQuoteToProject(id);
-                                }}
-                                currency={currency}
-                                estimatedAmount={estimatedAmount}
-                                marketSegmentId={marketSegmentId}
-                                subMarketSegmentId={subMarketSegmentId}
-                                isFromProjectSales={true}
-                                projectSalesTeam={collaborators}
-                              />
-                            )
-                          }
+                          {permissions?.isRead && (
+                            <QuotesAccordionInProjectSale
+                              expanded={true}
+                              quotes={quotes.filter((q) => q.customerAccountName === c._id)}
+                              recordsPerLine={3}
+                              accountId={c._id}
+                              accountResource={'customerAccount'}
+                              permissions={permissions}
+                              projectId={projectId}
+                              addExisting={handleOpenDialog}
+                              fetchProjectData={fetchProjectData}
+                              isTeamMember={isTeamMember}
+                              isManager={isManager}
+                              onNewQuoteAdd={(id) => {
+                                saveQuoteToProject(id);
+                              }}
+                              currency={currency}
+                              estimatedAmount={estimatedAmount}
+                              marketSegmentId={marketSegmentId}
+                              subMarketSegmentId={subMarketSegmentId}
+                              isFromProjectSales={true}
+                              projectSalesTeam={collaborators}
+                            />
+                          )}
                           {/* <QuotesInAccordion /> */}
                           {/* <ProjectInAccordion
                             recordsPerLine={3}
@@ -873,11 +788,7 @@ const CustomerAccounts = (props) => {
                         </Grid>
                       </Grid>
                     </Box>
-
                   ))}
-
-
-
                 </>
               </Box>
             ) : (
@@ -887,35 +798,32 @@ const CustomerAccounts = (props) => {
         </div>
         {/*</Accordion>*/}
       </Paper>
-      {
-        showConfirmBox && (
-          <ConfirmationDialogRaw
-            open={showConfirmBox}
-            message={
-              accountDeleteRec
-                ? "Are you sure about removing this account from project?"
-                : contactDeleteRec
-                  ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
-                  : null
+      {showConfirmBox && (
+        <ConfirmationDialogRaw
+          open={showConfirmBox}
+          message={
+            accountDeleteRec
+              ? 'Are you sure about removing this account from project?'
+              : contactDeleteRec
+              ? `Are you sure about removing this "${contactDeleteRec.firstName} ${contactDeleteRec.lastName}" contact from project?`
+              : null
+          }
+          onClose={() => {
+            setShowConfirmBox(false);
+            setAccountDeleteRec(null);
+          }}
+          onOk={() => {
+            if (accountDeleteRec) {
+              removeAccount(accountDeleteRec);
             }
-            onClose={() => {
-              setShowConfirmBox(false);
-              setAccountDeleteRec(null);
-            }}
-            onOk={() => {
-              if (accountDeleteRec) {
-                removeAccount(accountDeleteRec)
-              }
 
-              if (contactDeleteRec) {
-                removeContact()
-              }
+            if (contactDeleteRec) {
+              removeContact();
             }
-            }
-            okBtnLoading={isRemoving}
-          />
-        )
-      }
+          }}
+          okBtnLoading={isRemoving}
+        />
+      )}
     </>
   );
 };
