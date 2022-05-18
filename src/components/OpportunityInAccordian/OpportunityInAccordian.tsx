@@ -165,15 +165,13 @@ export default function OpportunityInAccordian({
   };
   return (
     <>
-      <Accordion expanded={expandOpportunity} className={`omsAccordian accordOpportunity `}>
+      <Accordion expanded={expandOpportunity} className={`omsAccordian accordOpportunity `} onChange={() => setExpandOpportunity(!expandOpportunity)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container>
             <Grid item xs={8} alignItems="center">
               <Box display="flex">
                 <Box>
-                  <IconButton size="small" onClick={() => setExpandOpportunity(!expandOpportunity)}>
-                    {expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                  </IconButton>
+                  <IconButton size="small">{expandOpportunity === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                 </Box>
                 <Box padding="5px">
                   <Typography variant="subtitle2">Opportunity ({opportunities?.length || 0})</Typography>

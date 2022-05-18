@@ -28,7 +28,7 @@ const SoftHoldDialog = ({ close, data }) => {
 
   const softHoldDataFetch = () => {
     axiosInstance()
-      .get(`${productInventory.api}/soft-hold/${data.productId}/${data.plantId}`)
+      .get(`${productInventory.api}/soft-hold/${data.productId}?wareHouse=${data.plantId}`)
       .then(({ data: { data } }) => {
         const result = []
         data?.transferInventory?.forEach((e) => {

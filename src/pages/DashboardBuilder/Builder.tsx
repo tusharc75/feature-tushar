@@ -148,6 +148,7 @@ const Builder = (props: Props) => {
             size="small"
             options={kpiList}
             value={formValues.kpi}
+            groupBy={(option) => option.resource}
             onChange={(_, val: KPIListType) => {
               handleChange('kpi', val);
             }}

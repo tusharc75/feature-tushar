@@ -95,7 +95,7 @@ const DashboardItem = ({ id, formData, findCard, moveCard, itemTypes, handleEdit
             col = {formData.column} ({CHART_TYPE})
           </p>
 
-          <Box mt={2}>
+          <Box mt={2} display='flex' justifyContent='center'>
             <RenderIcon type={CHART_TYPE} color="secondary" className={classes.chartIcon} />
             {isEditing && <Typography className={classes.title}>Editing...</Typography>}
           </Box>
