@@ -613,7 +613,9 @@ const CustomerAccounts = (props) => {
                       setCurrentTabIndex(newValue);
                     }}
                     TabIndicatorProps={{
-                      style: { display: 'none' }
+                      style: {
+                        display: 'none'
+                      }
                     }}
                     textColor="primary"
                     aria-label="scrollable auto tabs example"
@@ -742,7 +744,7 @@ const CustomerAccounts = (props) => {
                               accountName={c.accountName}
                               resource={'customerAccount'}
                               isRedirect={false}
-                              expanded={false}
+                              expanded={true}
                               collaborators={collaborators}
                               users={collaborators.map((u) => ({
                                 ...u,
@@ -757,7 +759,7 @@ const CustomerAccounts = (props) => {
                           )}
                           {permissions?.isRead && (
                             <QuotesAccordionInProjectSale
-                              expanded={false}
+                              expanded={true}
                               quotes={quotes.filter((q) => q.customerAccountName === c._id)}
                               recordsPerLine={3}
                               accountId={c._id}

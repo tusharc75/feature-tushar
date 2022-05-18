@@ -62,26 +62,26 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   }, []);
 
   const fetchData = async () => {
-    var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     setAllFields(JSON.parse(JSON.stringify(data)))
     if (isBulkedit) {
       let unitArray: any = []
       let pricingMethodArray: any = []
       selectedProducts?.forEach(element => {
         if (element?.[`${element.type}Detail`]?.unit) {
-          unitArray.push([...element?.[`${element.type}Detail`].unit])
+          unitArray.push([...element?.[`${element?.type}Detail`]?.unit])
         }
-        if (element?.[`${element.type}Detail`].pricingMethod) {
-          pricingMethodArray.push([...element?.[`${element.type}Detail`].pricingMethod])
+        if (element?.[`${element.type}Detail`]?.pricingMethod) {
+          pricingMethodArray.push([...element?.[`${element?.type}Detail`]?.pricingMethod])
         }
       });
       let unit: any = unitArray?.shift()?.filter(function (v) {
-        return unitArray.every(function (a) {
+        return unitArray?.every(function (a) {
           return a.indexOf(v) !== -1;
         });
       });
       let pricingMethod: any = pricingMethodArray?.shift()?.filter(function (v) {
-        return pricingMethodArray.every(function (a) {
+        return pricingMethodArray?.every(function (a) {
           return a.indexOf(v) !== -1;
         });
       });

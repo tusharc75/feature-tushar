@@ -1637,7 +1637,7 @@ svg.MuiSvgIcon-root {
 .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
   padding-right: 190px;
   margin-right: auto;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
   align-items: center;
   position: relative;
 
@@ -1647,6 +1647,26 @@ svg.MuiSvgIcon-root {
   div[role='tablist'] > button {
     min-width: 189px;
     padding: 15px 10px;
+    position: relative;
+    margin-bottom: 20px;
+    overflow: unset;
+    &::after {
+      content: '';
+      position: absolute;
+      display: block;
+      width: 0;
+      z-index: 1;
+      border-style: solid;
+      border-color: transparent;
+      border-width: 15px 8px 0;
+      bottom: -15px;
+      left: 50%;
+      margin-left: -8px;
+      transition: border 0.4s;
+    }
+    &.Mui-selected::after {
+      border-color: #43aeaa transparent;
+    }
   }
   .title_container {
     display: flex;
@@ -1666,6 +1686,7 @@ svg.MuiSvgIcon-root {
     transition: background 0.4s, color 0.4s, opacity 0.4s;
     position: absolute;
     z-index: 1;
+    top: 10px;
   }
   .MuiTabScrollButton-root:hover {
     color: var(--primary);
@@ -1789,7 +1810,10 @@ svg.MuiSvgIcon-root {
 @media all and (max-width: 1300px) {
   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
     padding-right: 105px;
-
+    margin-bottom: 10px;
+    .MuiTabScrollButton-root {
+      top: 5px;
+    }
     .MuiTabScrollButton-root:last-child {
       right: 0;
     }
@@ -1809,9 +1833,16 @@ svg.MuiSvgIcon-root {
   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
     padding-right: 25px;
     padding-left: 25px;
+
+    div[role='tablist'] > button::after {
+      border-width: 15px 8px 0;
+      bottom: -15px;
+    }
     .MuiTabScrollButton-root {
       width: 20px;
       height: 30px;
+      top: 50%;
+      transform: translateY(-15px);
     }
     .MuiTabScrollButton-root:first-child {
       left: 0;
@@ -1822,7 +1853,7 @@ svg.MuiSvgIcon-root {
       pointer-events: none;
     }
     div[role='tablist'] > button {
-      margin: 0 5px;
+      margin: 20px 5px;
     }
   }
 }
@@ -1892,6 +1923,9 @@ svg.MuiSvgIcon-root {
           a {
             color: var(--primary);
             transition: color 0.4s;
+            p {
+              padding-right: 12px;
+            }
             &:hover {
               color: var(--link);
             }
@@ -1928,6 +1962,7 @@ svg.MuiSvgIcon-root {
         border-radius: 5px;
         max-width: max-content;
         padding: 5px 20px;
+        line-height: 1;
         transition: background 0.4s;
         margin: 15px 0 0 0;
         &:hover {

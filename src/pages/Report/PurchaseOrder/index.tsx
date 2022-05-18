@@ -435,7 +435,9 @@ const Report = () => {
             ? '/product-inventory/report/purchase-order-product-wise-report/export'
             : 'product-inventory/report/purchase-order-price/export'
         }${filterQuery}`
-      )
+      ,{
+        responseType: 'arraybuffer'
+      })
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);

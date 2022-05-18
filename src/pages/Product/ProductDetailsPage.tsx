@@ -386,6 +386,8 @@ const ProductDetailsPage = () => {
       });
   };
 
+  console.log(inventoriesData)
+
   return (
     <>
       <Fragment>
@@ -504,7 +506,9 @@ const ProductDetailsPage = () => {
             <Grid item xs={12} sm={12} md={4} lg={4}>
               <Paper style={{ overflow: 'hidden' }}>
                 <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="subtitle2">{routes?.warehouse?.title} ({inventoriesData?.length || 0})</Typography>
+                  <Typography variant="subtitle2">{routes?.warehouse?.title}{" "}
+                    ({productData?.serializedProduct ? (inventoriesData?.length || 0) :
+                      (inventoriesData?.filter(d => d.inventory)?.length || 0)})</Typography>
                   {permissions?.serializedAsset?.isCreate && !loadingWarehouse && (
                     <IconButton
                       title="Manage Plant(s)"
