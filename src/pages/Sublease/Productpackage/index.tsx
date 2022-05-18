@@ -351,6 +351,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
             .then(() => {
                 setDeleting(false)
                 fetchProductInventory()
+                setAnchorEl(null)
                 setDeleteData(null)
             }).catch((error) => {
                 setDeleting(false)
@@ -407,6 +408,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
     const closeActions = () => {
         setAnchorEl(null);
     };
+
     return (<Fragment>
         <Grid container spacing={2} >
             {allowedToEdit &&
@@ -446,8 +448,25 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                             }
                         </Box>
                         <Box display="flex">
+                            {(material?.length && !isIssued && !rowsData?.some(f => !f.isValid)) ?
+                                <Fragment>
+                                    <HtmlTooltip title={"Start Sublease"}>
+                                        <Button
+                                            variant={isMobile && !isTablet ? "text" : "contained"}
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => { issueSublease() }}
+                                            disabled={isIssueing}
+                                            endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
+                                        >
+                                            {isMobile && !isTablet ? <MdDelete size={20} /> : "Start Sublease"}
+                                        </Button>
+                                    </HtmlTooltip>
+                                    <Box mx={1} />
+                                </Fragment>
+                                : null}
                             <Button
-                                // disabled={Boolean(!selectedBrand)}
+                                disabled={selectedProducts?.length ? false : true}
                                 variant={isMobile && !isTablet ? 'text' : 'outlined'}
                                 color="default"
                                 size="small"
@@ -472,7 +491,10 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                                 <MenuItem
                                     color="primary"
                                     disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                                    onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
+                                    onClick={() => {
+                                        setAnchorEl(null)
+                                        setIsProductEdit({ open: true, isBulkedit: true })
+                                    }}
                                 >
                                     {"Bulk Edit"}
                                 </MenuItem>
@@ -493,24 +515,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                                     {"Delete"}
                                 </MenuItem>
                             </Menu>
-                            <Box mx={1} />
-                            {(material?.length && !isIssued && !rowsData?.some(f => !f.isValid)) ?
-                                <Fragment>
-                                    <HtmlTooltip title={"Start Sublease"}>
-                                        <Button
-                                            variant={isMobile && !isTablet ? "text" : "contained"}
-                                            color="primary"
-                                            size="small"
-                                            onClick={() => { issueSublease() }}
-                                            disabled={isIssueing}
-                                            endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
-                                        >
-                                            {isMobile && !isTablet ? <MdDelete size={20} /> : "Start Sublease"}
-                                        </Button>
-                                    </HtmlTooltip>
-                                    <Box mx={1} />
-                                </Fragment>
-                                : null}
                         </Box>
                     </Box>
                 </Grid>}
