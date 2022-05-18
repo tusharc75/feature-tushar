@@ -92,7 +92,7 @@ function DisplayData({ key, label, value, icon }) {
 }
 
 export default function QuotesInAccordion({
-  expanded = true,
+  expanded = false,
   recordsPerLine = 2,
   quotes,
   fetchData,
@@ -294,7 +294,7 @@ export default function QuotesInAccordion({
                       <Grid item xs={12} sm={12} md={recordsPerLineInLargeScreen} key={index}>
                         <Card className="detailCard">
                           <CardContent className="detailListing custom_card_style_for_contact_details">
-                            <div style={{ width: '5px', backgroundColor: 'var(--secondary)', marginBottom: '10px', borderRadius: '5px' }}> </div>
+                            {/* <div style={{ width: '5px', backgroundColor: 'var(--secondary)', marginBottom: '10px', borderRadius: '5px' }}> </div> */}
                             <Grid item xs={12}>
                               <Grid container className="detailCardHeader">
                                 <Grid item xs={7} sm={8}>
@@ -358,7 +358,11 @@ export default function QuotesInAccordion({
                       </Grid>
                     ))}
                   </Grid>
-                ) : null}
+                ) : (
+                  <Typography variant="subtitle1" color="primary">
+                    No Quotes To Show
+                  </Typography>
+                )}
               </>
             )}
           </>
@@ -368,19 +372,20 @@ export default function QuotesInAccordion({
                 <FaEye /> View All &#8599;
             </Box>
             <Box margin={1} /> */}
-
-        <Box
-          margin={1}
-          className="btn-view gap-1"
-          onClick={() => handleViewAll(resourceName)}
-          p={1}
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <span>View All</span>
-          <HiExternalLink size={25} />
-        </Box>
+        {quotes && quotes?.length ? (
+          <Box
+            margin={1}
+            className="btn-view gap-1"
+            onClick={() => handleViewAll(resourceName)}
+            p={1}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <span>View All</span>
+            <HiExternalLink size={20} />
+          </Box>
+        ) : null}
       </Accordion>
 
       {showCreateDialog && (
