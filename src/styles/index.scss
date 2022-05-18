@@ -1662,7 +1662,7 @@ svg.MuiSvgIcon-root {
       bottom: -15px;
       left: 50%;
       margin-left: -8px;
-      transform: border 0.4s;
+      transition: border 0.4s;
     }
     &.Mui-selected::after {
       border-color: #43aeaa transparent;
@@ -1686,6 +1686,7 @@ svg.MuiSvgIcon-root {
     transition: background 0.4s, color 0.4s, opacity 0.4s;
     position: absolute;
     z-index: 1;
+    top: 3px;
   }
   .MuiTabScrollButton-root:hover {
     color: var(--primary);
@@ -1833,6 +1834,8 @@ svg.MuiSvgIcon-root {
     .MuiTabScrollButton-root {
       width: 20px;
       height: 30px;
+      top: 50%;
+      transform: translateY(-21px);
     }
     .MuiTabScrollButton-root:first-child {
       left: 0;

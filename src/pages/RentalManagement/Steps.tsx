@@ -24,14 +24,26 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import CustomMobileStepperOpportunities from '../../components/CustomMobileStepperOpportunities';
 import { FiMaximize2 } from 'react-icons/fi';
+import transitions from '@material-ui/core/styles/transitions';
 
 const useStyles = makeStyles((theme) => ({
   backButton: {
     marginRight: theme.spacing(1)
   },
   BlackSvg: {
+    userSelect: 'none',
     '& svg': {
-      fill: '#000'
+      fill: '#000',
+      transition: 'fill .4s, opacity .4s'
+    },
+    '&:hover svg': {
+      fill: 'var(--primary)'
+    },
+    '&.Mui-disabled': {
+      PointerEvents: 'none',
+      '& svg': {
+        opacity: '0.3'
+      }
     }
   },
   instructions: {
