@@ -31,7 +31,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { getRentalProductAssets, getRentalDeliveryTicket, uniqueProduct, getNestedQty } from './../rentalOfflineHelper';
+import { getRentalProductAssets, getRentalDeliveryTicket, uniqueProduct } from './../rentalOfflineHelper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import ManageRepairJob from '../../RepairJob/ManageRepairJob'
@@ -209,10 +209,11 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       })
 
       products = uniqueProduct(material)
-
       products?.forEach((element) => {
-        var qty = getNestedQty(material, element);
+        var qty = element.qty;
+
         var consumeQty = 0;
+
         consumeProducts?.filter(e => e.product === element.materialId)?.forEach((e) => {
           consumeQty = consumeQty + e.qty;
         })
@@ -241,6 +242,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           productAssets.push(obj)
           qty = qty - ele.qty;
         })
+
         if (qty > 0) {
           const obj: any = {}
           obj._id = element.materialId
