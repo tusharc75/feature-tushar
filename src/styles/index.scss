@@ -1637,7 +1637,7 @@ svg.MuiSvgIcon-root {
 .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
   padding-right: 190px;
   margin-right: auto;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
   align-items: center;
   position: relative;
 
@@ -1647,6 +1647,26 @@ svg.MuiSvgIcon-root {
   div[role='tablist'] > button {
     min-width: 189px;
     padding: 15px 10px;
+    position: relative;
+    overflow: unset;
+    margin-bottom: 15px;
+    &::after {
+      content: '';
+      position: absolute;
+      display: block;
+      width: 0;
+      z-index: 1;
+      border-style: solid;
+      border-color: transparent;
+      border-width: 15px 8px 0;
+      bottom: -15px;
+      left: 50%;
+      margin-left: -8px;
+      transform: border 0.4s;
+    }
+    &.Mui-selected::after {
+      border-color: #43aeaa transparent;
+    }
   }
   .title_container {
     display: flex;
@@ -1809,6 +1829,7 @@ svg.MuiSvgIcon-root {
   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
     padding-right: 25px;
     padding-left: 25px;
+    margin-bottom: 10px;
     .MuiTabScrollButton-root {
       width: 20px;
       height: 30px;
@@ -1822,7 +1843,7 @@ svg.MuiSvgIcon-root {
       pointer-events: none;
     }
     div[role='tablist'] > button {
-      margin: 0 5px;
+      margin: 0 5px 15px;
     }
   }
 }
@@ -1855,7 +1876,7 @@ svg.MuiSvgIcon-root {
     border: 0;
     box-shadow: none;
     & .MuiButtonBase-root.MuiAccordionSummary-root {
-      background: #fff !important;
+      background: #f6f6f6 !important;
       box-shadow: none !important;
       color: #329592 !important;
       border: 1px solid #eaeaea;
