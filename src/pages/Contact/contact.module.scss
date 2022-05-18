@@ -7,11 +7,11 @@
   display: flex;
   gap: 0.25rem;
 }
-.mobile_button_layout{
+.mobile_button_layout {
   padding: 5px !important;
 }
 @media only screen and (max-width: 767px) {
-  .search_box_layout{
+  .search_box_layout {
     margin-left: 0px;
     justify-content: flex-end;
   }
@@ -39,4 +39,3 @@
   background: #f5f5f5;
   padding: 5px;
 }
-

@@ -27,7 +27,7 @@ import { IoMdDownload } from "react-icons/io";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 
-const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, statusOptions, handleViewPdf, handleAttachments, renderedFrom }) => {
+const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statusOptions, handleViewPdf, handleAttachments, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const {
@@ -128,7 +128,9 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                 finalObject["allowedToEdit"] = true
                 let res: any = {
                     ...finalObject,
-                    productDescription: item?.productDetail?.productName,
+                    productName: item?.productDetail?.productName,
+                    productNumber: item?.productDetail?.productNumber,
+                    serializedProduct: item?.productDetail?.serializedProduct,
                     productId: item?.productDetail?._id,
                 };
                 if (item.qty === item.actualReceived) {
@@ -139,7 +141,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
             if (rows.every(d => d.qty === d.actualReceived)) {
                 setDisableCreateAsset(true)
                 if (statusOptions.findIndex(d => d.optionLabel === PURCHASE_ORDER_STATUS.readyToInvoice) > statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status)) {
-                    handleUpdateData({ "status": PURCHASE_ORDER_STATUS.readyToInvoice })
+                    updateStatus(PURCHASE_ORDER_STATUS.readyToInvoice)
                     setCurrentStep(3)
                 }
             }
@@ -366,7 +368,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                 title="Receiving"
                 productList={selectedRecords.filter(d => (d.qty !== d.actualReceived))}
                 purchaseOrderData={purchaseOrderData}
-                handleUpdateData={handleUpdateData}
+                updateStatus={updateStatus}
             />
         }
         {sendEmail && (

@@ -11,7 +11,7 @@ import { Formik, Form, FieldArray, Field } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from "react-device-detect";
 
-const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, productList, handleUpdateData, purchaseOrderData }) => {
+const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, productList, updateStatus, purchaseOrderData }) => {
 
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [constProductList, setConstProductList] = useState(productList);
@@ -54,7 +54,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             })
             axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderID}/update`, { products: tempProductArray })
                 .then(() => {
-                    handleUpdateData({ "status": "Received" })
+                    updateStatus("Received")
                     onSuccess()
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)

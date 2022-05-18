@@ -385,6 +385,9 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           products={selectedRecords?.filter((e) => e.type === 'Product')}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
+            if (transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.new) {
+              updateStatus(TRANSFER_INVENTORY_STATUS.inProgress)
+            }
             fetchProducts();
           }}
         />

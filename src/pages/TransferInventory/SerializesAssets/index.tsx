@@ -251,7 +251,7 @@ const SerialzedAssets = ({
             onClick={() => {
               const product = [];
               selectedRecords?.forEach((e) => {
-                if (e.type === 'product') {
+                if (e.type === 'product' && e?.serializedProduct) {
                   product.push({
                     _id: e._id,
                     id: e.product,
