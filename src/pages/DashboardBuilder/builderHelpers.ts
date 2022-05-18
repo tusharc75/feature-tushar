@@ -24,26 +24,32 @@ export type IFilterType = {
 export type KPIListType = {
   name: string;
   kpi: string;
+  resource: string;
 };
 
 export const kpiList: KPIListType[] = [
   {
+    resource: "Serialized Assets",
     name: "Location Based Asset",
     kpi: "asset/location-base-assets"
   },
   {
+    resource: "Serialized Assets",
     name: "Asset Status Count",
     kpi: 'asset/assets-status-count'
   },
   {
+    resource: "Serialized Assets",
     name: "In Use By Category",
     kpi: "asset/assets-in-use-by-category"
   },
   {
+    resource: "Serialized Assets",
     name: "Asset Total In Use",
     kpi: "asset/assets-total-in-use"
   },
   {
+    resource: "Rental Job",
     name: "Customer in rental",
     kpi: "asset/customer-in-rental"
   },
@@ -97,7 +103,7 @@ export const defaultFormConfigs: IFormDataType = {
   graphType: '',
   chartType: '',
   chartTitle: '',
-  kpi: { name: "", kpi: "" },
+  kpi: { name: "", kpi: "", resource: "" },
   hasFilters: false,
   hasTableView: false,
   hasExport: false,

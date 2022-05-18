@@ -21,7 +21,7 @@ import { Link } from "react-router-dom";
 import { fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
 
 
-const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrentStep, currentStep, handleAttachments, statusOptions, renderedFrom }) => {
+const IssuPO = ({ purchaseOrderData, handleViewPdf, updateStatus, setCurrentStep, currentStep, handleAttachments, statusOptions, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -37,7 +37,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
     ])
-    
+
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
     const NameRenderer = (params) => (
@@ -132,7 +132,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         size="small"
                         onClick={() => {
                             setCurrentStep(currentStep + 1)
-                            handleUpdateData({ "status": "Issued" })
+                            updateStatus("Issued")
                         }}
                     >
                         Issue

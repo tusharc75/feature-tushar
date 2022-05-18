@@ -1,10 +1,11 @@
 import React from 'react';
 import { Grid, Box, Button, TextField, CircularProgress, Typography } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import { MdDashboardCustomize } from 'react-icons/md';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import queryString from 'query-string';
 
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import Builder from './Builder';
@@ -22,6 +23,8 @@ const useClasses = makeStyles(() => ({
 const DashboardBuilder = () => {
   const classes = useClasses();
   const history = useHistory();
+  const { type }: any = queryString.parse(history.location.search);
+
   const { id } = useParams();
   const isNew = id && id === 'new';
   const { setToastConfig } = React.useContext(CustomToastContext);
@@ -42,12 +45,13 @@ const DashboardBuilder = () => {
         axiosInstance()
           .get(`${baseURL}/${id}`)
           .then(({ data: { data } }) => {
+            const dashboardName = (type && type === 'clone') || !data?.name ? '' : data?.name;
             setFormData(data?.charts || []);
-            setName(data?.name || '');
+            setName(dashboardName);
             setLoading(false);
             setCompareData({
-              oldData: JSON.stringify({ name: data?.name, charts: data?.charts }),
-              newData: JSON.stringify({ name: data?.name, charts: data?.charts })
+              oldData: JSON.stringify({ name: dashboardName, charts: data?.charts }),
+              newData: JSON.stringify({ name: dashboardName, charts: data?.charts })
             });
           })
           .catch((err) => {
@@ -92,7 +96,7 @@ const DashboardBuilder = () => {
     axiosInstance()
       .post(baseURL, {
         name: name.trim(),
-        charts: formData.map((form) => ({...form, kpi: form.kpi.kpi}))
+        charts: formData.map((form) => ({ ...form, kpi: type && type === 'clone' ? form.kpi : form.kpi.kpi }))
       })
       .then(() => {
         setToastConfig({
@@ -115,7 +119,7 @@ const DashboardBuilder = () => {
       .put(`${baseURL}`, {
         _id: id,
         name: name.trim(),
-        charts: formData.map((form) => ({...form, kpi: form.kpi.kpi}))
+        charts: formData.map((form) => ({ ...form, kpi: form.kpi.kpi }))
       })
       .then(() => {
         setToastConfig({
@@ -132,7 +136,7 @@ const DashboardBuilder = () => {
   };
 
   const handleClickSave = () => {
-    if (!isNew) {
+    if (!isNew && !type) {
       updateDashboard();
     } else {
       createDashboard();
@@ -145,7 +149,7 @@ const DashboardBuilder = () => {
         <CustomBreadCrumbs
           routes={[
             { title: 'Dashboard Builder', path: '/dashboard-master' },
-            { title: !isNew ? name : 'New', path: '' }
+            { title: type && type === 'clone' ? 'Clone' : !isNew ? name : 'New', path: '' }
           ]}
         />
       </div>
