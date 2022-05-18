@@ -91,6 +91,13 @@ const useStyles = makeStyles((theme) => ({
         fill: '#258C89',
         stroke: '#258C89'
       }
+    },
+    '& svg': {
+      fill: 'rgba(37, 140, 137, 0.26)',
+      fontSize: '20px !important',
+      '& text': {
+        fill: '#000'
+      }
     }
   },
   active: {
