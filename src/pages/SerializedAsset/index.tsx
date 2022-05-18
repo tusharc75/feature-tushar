@@ -43,6 +43,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
+import moment from 'moment';
 
 const SerializedAsset = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -166,12 +167,25 @@ const SerializedAsset = () => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
             e.cellStyle = (params) => {
-              if (
-                [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(
-                  params?.data?.status
-                )
-              ) {
+              if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+              }
+              if (params.data?.recertDate) {
+                var a = moment(params.data?.recertDate);
+                var b = moment();
+                const days = a.diff(b, 'days')
+                if (days < 60 && days > 30) {
+                  return { backgroundColor: "#00FF00" };
+                }
+                else if (days < 30 && days > 15) {
+                  return { backgroundColor: "#FFFF00" };
+                }
+                else if (days < 15 && days > 0) {
+                  return { backgroundColor: "#FF0000" };
+                }
+                else if (days < 0) {
+                  return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+                }
               }
               return null;
             };

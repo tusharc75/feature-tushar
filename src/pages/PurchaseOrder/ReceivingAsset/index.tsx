@@ -128,7 +128,8 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, handleUpdateData, s
                 finalObject["allowedToEdit"] = true
                 let res: any = {
                     ...finalObject,
-                    productDescription: item?.productDetail?.productName,
+                    productName: item?.productDetail?.productName,
+                    productNumber: item?.productDetail?.productNumber,
                     productId: item?.productDetail?._id,
                 };
                 if (item.qty === item.actualReceived) {
