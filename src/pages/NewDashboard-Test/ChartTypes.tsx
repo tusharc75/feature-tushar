@@ -20,7 +20,7 @@ import { startCase } from 'lodash';
 import MapView from './MapView';
 
 export type ChartDataType = {
-  col: any;
+  column: any;
   graphType: string;
   chartType: string;
   filters: { key: string; title: string; multiple: boolean }[];
@@ -140,7 +140,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   const idsWithAdditionStatus = ['openQuotesByCustomer', 'openQuoteByRep'];
 
   return (
-    <Grid item xs={12} md={chart.col}>
+    <Grid item xs={12} md={chart.column}>
       {chart.graphType === 'cards' ? (
         <Grid container spacing={1}>
           {loading
@@ -232,7 +232,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
             )}
           </Box>
 
-          <Box minHeight={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500}>
+          <Box minHeight={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500}>
             {loading ? (
               <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
             ) : !chartData || chartData.length === 0 ? (
@@ -241,18 +241,18 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
               chart.hasTableView && tableView ? (
                 <TableView
                   id={chart.uniqueId}
-                  type={chart.chartType}
+                  type={chart.chartType?.toLowerCase()}
                   chartData={chartData.tableData}
                   isScreenSmall={isScreenSmall}
                   currency={globalFilters.currency || currency}
                   selectedDashboard={globalFilters?.dashboardType}
                 />
               ) : chart.graphType === 'Map' ? (
-                <MapView height={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500} data={chartData} />
+                <MapView height={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
               ) : (
                 <Chart
                   id={chart.uniqueId}
-                  type={chart.chartType}
+                  type={chart.chartType?.toLowerCase()}
                   data={chartData}
                   options={{
                     maintainAspectRatio: false,

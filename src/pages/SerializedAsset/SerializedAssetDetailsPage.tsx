@@ -131,7 +131,11 @@ const SerializedAssetDetailsPage = () => {
                       <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
                         {params.value}
                       </Link>
-                      : params.value
+                      : params.data?.type === "Transfer Inventory" ?
+                        <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
+                          {params.value}
+                        </Link>
+                        : params.value
       ) : (
         <NoDataCell />
       )

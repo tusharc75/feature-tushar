@@ -492,14 +492,25 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                                 >
                                     {"Delete"}
                                 </MenuItem>
-                                <MenuItem
-                                    color="primary"
-                                    onClick={() => { issueSublease() }}
-                                    disabled={isIssueing}
-                                >
-                                    {"Start Sublease"}
-                                </MenuItem>
                             </Menu>
+                            <Box mx={1} />
+                            {(material?.length && !isIssued && !rowsData?.some(f => !f.isValid)) ?
+                                <Fragment>
+                                    <HtmlTooltip title={"Start Sublease"}>
+                                        <Button
+                                            variant={isMobile && !isTablet ? "text" : "contained"}
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => { issueSublease() }}
+                                            disabled={isIssueing}
+                                            endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
+                                        >
+                                            {isMobile && !isTablet ? <MdDelete size={20} /> : "Start Sublease"}
+                                        </Button>
+                                    </HtmlTooltip>
+                                    <Box mx={1} />
+                                </Fragment>
+                                : null}
                         </Box>
                     </Box>
                 </Grid>}
