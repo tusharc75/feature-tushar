@@ -243,10 +243,10 @@ export default function QuotesAccordionInProjectSale({
           Add Exisiting
         </MenuItem>
       </Menu>
-      <Accordion expanded={expandQuote} className="omsAccordian accordQuotes">
+      <Accordion expanded={expandQuote} className="omsAccordian accordQuotes" onChange={() => setExpandQuote(!expandQuote)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container>
-            <Grid item xs={8} alignItems="center" onClick={() => setExpandQuote(!expandQuote)}>
+            <Grid item xs={8} alignItems="center">
               <Box component="div" display="flex" alignItems="center" flexGrow={1}>
                 <IconButton size="small" onClick={() => setExpandQuote(!expandQuote)}>
                   {expandQuote === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}

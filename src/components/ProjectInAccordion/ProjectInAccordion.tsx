@@ -136,10 +136,10 @@ export default function ProjectInAccordion({
   };
   return (
     <>
-      <Accordion expanded={expandProject} className="omsAccordian accordProject">
+      <Accordion expanded={expandProject} className="omsAccordian accordProject" onChange={() => setExpandProject(!expandProject)}>
         <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
           <Grid container>
-            <Grid item xs={8} onClick={() => setExpandProject(!expandProject)}>
+            <Grid item xs={8}>
               <Box display="flex">
                 <Box>
                   <IconButton size="small">{expandProject === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
