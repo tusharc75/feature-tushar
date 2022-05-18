@@ -123,7 +123,7 @@ const ProductDetails = () => {
     }
 
     const fetchCart = () => {
-        axiosInstance().get(`/pos/cart`)
+        axiosInstance().get(`/pos/cart/${warehouseId}`)
             .then(({ data: { data } }) => {
                 setCart(data)
                 fetchProductData()

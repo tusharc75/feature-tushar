@@ -310,29 +310,35 @@ export default function OpportunityInAccordian({
                       </Grid>
                     ))}
                   </Grid>
-                ) : null}
+                ) : (
+                  <Typography variant="subtitle1" color="primary">
+                    No Oppourtunity To Show
+                  </Typography>
+                )}
               </>
             )}
           </>
         </AccordionDetails>
-        <Box
-          margin={1}
-          className="btn-view gap-1"
-          onClick={() =>
-            history.push(`/opportunity`, {
-              accountId: accountId,
-              accountName: accountName,
-              resource: `${resource}`
-            })
-          }
-          p={1}
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <span>View All</span>
-          <HiExternalLink size={25} />
-        </Box>
+        {opportunities && opportunities.length ? (
+          <Box
+            margin={1}
+            className="btn-view gap-1"
+            onClick={() =>
+              history.push(`/opportunity`, {
+                accountId: accountId,
+                accountName: accountName,
+                resource: `${resource}`
+              })
+            }
+            p={1}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <span>View All</span>
+            <HiExternalLink size={20} />
+          </Box>
+        ) : null}
       </Accordion>
 
       {showCreateOpportunityDialog && (
