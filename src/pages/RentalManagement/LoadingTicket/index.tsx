@@ -32,7 +32,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { getRentalProductAssets, getRentalDeliveryTicket, uniqueProduct, getNestedQty } from './../rentalOfflineHelper';
+import { getRentalProductAssets, getRentalDeliveryTicket, uniqueProduct } from './../rentalOfflineHelper';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';

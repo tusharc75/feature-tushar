@@ -102,11 +102,7 @@ const PurchaseOrderDetailsPage = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 3) {
-      axiosInstance().put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: purchaseOrderSteps[currentStep] })
-        .then(({ data }) => {
-        })
-        .catch((error) => {
-        });
+      updateProcessStatus(purchaseOrderSteps[currentStep]);
     }
   }, [currentStep]);
 
@@ -184,30 +180,35 @@ const PurchaseOrderDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    handleUpdateData({ status: o.optionValue });
+    updateStatus(o.optionValue)
   };
 
-  const handleUpdateData = (obj) => {
-    if (obj.status && purchaseOrderData?.status !== obj.status && purchaseOrderFields.length > 0) {
-      const fieldsDataForUpdate = purchaseOrderFields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-      let values = getObjKeysWithValues(purchaseOrderData, fieldsDataForUpdate);
-      values['status'] = obj.status;
-      values['_id'] = id;
-      axiosInstance()
-        .put(`${purchaseOrder.api}`, values)
-        .then(({ data: { data } }) => {
-          getPurchaseOrderFields();
-          fetchPurchaseOrderData();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Status changed to ${obj.status}`
-          });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
+  const updateProcessStatus = async (processStatus) => {
+    axiosInstance()
+      .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => { })
+      .catch((error) => {
+      });
+  };
+
+  const updateStatus = (status) => {
+    axiosInstance()
+      .patch(`${purchaseOrder.api}/status/${id}`, { status: status })
+      .then(({ data: { data } }) => {
+        if (status === 'Invoiced' || status === 'Closed') {
+          updateProcessStatus(purchaseOrderSteps[3]);
+          setCurrentStep(3);
+        }
+        fetchPurchaseOrderData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
         });
-    }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleViewPdf = (download) => {
@@ -414,7 +415,7 @@ const PurchaseOrderDetailsPage = () => {
                             steps={purchaseOrderSteps}
                             currentStep={currentStep}
                             setCurrentStep={setCurrentStep}
-                            isStepEnded={[PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
+                            isStepEnded={[PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
                           />
                           {currentStep === 0 && (
                             <Product
@@ -434,7 +435,7 @@ const PurchaseOrderDetailsPage = () => {
                             <IssuePo
                               purchaseOrderData={purchaseOrderData}
                               handleViewPdf={handleViewPdf}
-                              handleUpdateData={handleUpdateData}
+                              updateStatus={updateStatus}
                               setCurrentStep={setCurrentStep}
                               currentStep={currentStep}
                               handleAttachments={handleAttachments}
@@ -446,7 +447,7 @@ const PurchaseOrderDetailsPage = () => {
                             <ReceivingAsset
                               purchaseOrderData={purchaseOrderData}
                               setCurrentStep={setCurrentStep}
-                              handleUpdateData={handleUpdateData}
+                              updateStatus={updateStatus}
                               statusOptions={statusOptions}
                               handleViewPdf={handleViewPdf}
                               handleAttachments={handleAttachments}

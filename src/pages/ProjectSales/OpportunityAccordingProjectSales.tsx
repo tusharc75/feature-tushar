@@ -15,7 +15,7 @@ import {
   MenuItem,
   Tooltip
 } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { HiExternalLink } from 'react-icons/hi';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -359,7 +359,7 @@ export default function OpportunityAccordianProjectSales({
             justifyContent="center"
             alignItems="center"
           >
-            <FaArrowAltCircleDown size={25} />
+            <HiExternalLink size={20} />
           </Box>
         )}
       </Accordion>

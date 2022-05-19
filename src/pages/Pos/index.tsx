@@ -45,9 +45,11 @@ const Pos = () => {
     useEffect(() => {
         getPlants()
         getProductCategory()
-        fetchCart()
     }, [])
 
+    useEffect(() => {
+        if (plantId) fetchCart()
+    }, [plantId])
     const getPlants = () => {
         var api = `/warehouse?noEntityWise=1`;
         if (user?.user?.customerAccountId || user?.user?.customerContactId) {
@@ -76,7 +78,7 @@ const Pos = () => {
     }
 
     const fetchCart = () => {
-        axiosInstance().get(`/pos/cart`)
+        axiosInstance().get(`/pos/cart/${plantId}`)
             .then(({ data: { data } }) => {
                 setCartProduct(data)
             })
