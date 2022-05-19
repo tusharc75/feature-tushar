@@ -1,4 +1,21 @@
 import { GridSize } from '@material-ui/core';
+import { INVENTORY_STATUS } from 'src/constants/helpers';
+
+const RentalStatus = Object.keys(INVENTORY_STATUS).map((key) => ({
+  optionValue: INVENTORY_STATUS[key],
+  optionLabel: INVENTORY_STATUS[key]
+}));
+
+const openCloseStatus = [
+  {
+    optionValue: "open",
+    optionLabel: "Open",
+  },
+  {
+    optionValue: "close",
+    optionLabel: "Close",
+  },
+]
 
 export const GRAPH_TYPES = ['Chart', 'Table', 'Map'];
 
@@ -6,12 +23,13 @@ export const CHART_TYPES = ['Line', 'Bar', 'Pie', 'Doughnut'];
 
 export const FILTERS_OPTIONS = [
   { title: 'Customer Account', key: 'customerAccount' },
-  { title: 'Product', key: 'product' },
+  { title: 'Product', key: 'productDescription' },
   { title: 'Market Segment', key: 'marketSegment' },
   { title: 'Sub Market Segment', key: 'subMarketSegment' },
   { title: 'Sales Rep', key: 'salesRep' },
   { title: 'Product Category', key: 'productCategory' },
-  { title: 'Country', key: 'country' }
+  { title: 'Country', key: 'country' },
+  { title: 'Status', key: 'status' },
 ];
 
 export const baseURL = '/dashboard-master';
@@ -19,6 +37,7 @@ export const baseURL = '/dashboard-master';
 export type IFilterType = {
   title: string;
   key: string;
+  multiple: boolean;
 };
 
 export type KPIListType = {
@@ -26,6 +45,12 @@ export type KPIListType = {
   kpi: string;
   resource: string;
 };
+
+export const statuses = {
+  "asset/location-base-assets": RentalStatus,
+  "asset/customer-in-rental": openCloseStatus
+
+}
 
 export const kpiList: KPIListType[] = [
   {
@@ -93,7 +118,6 @@ export interface IFormDataType {
   hasTableView?: boolean;
   hasExport?: boolean;
   filters?: IFilterType[];
-  hasStatus?: boolean;
   kpi: KPIListType;
   statusOptions?: { optionValue: string; optionLabel: string }[];
 }
@@ -108,6 +132,5 @@ export const defaultFormConfigs: IFormDataType = {
   hasTableView: false,
   hasExport: false,
   statusOptions: [],
-  hasStatus: false,
   filters: []
 };
