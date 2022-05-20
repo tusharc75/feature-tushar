@@ -6,6 +6,7 @@ import { MdDashboardCustomize } from 'react-icons/md';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import queryString from 'query-string';
+import { read, utils, writeFile } from 'xlsx';
 
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import Builder from './Builder';
@@ -96,7 +97,7 @@ const DashboardBuilder = () => {
     axiosInstance()
       .post(baseURL, {
         name: name.trim(),
-        charts: formData.map((form) => ({ ...form, kpi: type && type === 'clone' ? form.kpi : form.kpi.kpi }))
+        charts: formData
       })
       .then(() => {
         setToastConfig({
@@ -113,13 +114,26 @@ const DashboardBuilder = () => {
       });
   };
 
+  const handleExportField = () => {
+    const header = ['Chart Title', 'Graph Type', 'Chart Type', 'Column'];
+    const json_data = [{ 'Chart Title': '', 'Graph Type': '', 'Chart Type': '', Column: '' }];
+
+    const ws = utils.json_to_sheet(json_data);
+    if (header.length) {
+      utils.sheet_add_aoa(ws, [header]);
+    }
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, 'Sheet1');
+    writeFile(wb, 'DashboardMaster.xlsx');
+  };
+
   const updateDashboard = () => {
     setSubmitting(true);
     axiosInstance()
       .put(`${baseURL}`, {
         _id: id,
         name: name.trim(),
-        charts: formData.map((form) => ({ ...form, kpi: form.kpi.kpi }))
+        charts: formData
       })
       .then(() => {
         setToastConfig({
@@ -148,7 +162,7 @@ const DashboardBuilder = () => {
       <div className="headerbox">
         <CustomBreadCrumbs
           routes={[
-            { title: 'Dashboard Builder', path: '/dashboard-master' },
+            { title: 'Dashboard Master', path: '/dashboard-master' },
             { title: type && type === 'clone' ? 'Clone' : !isNew ? name : 'New', path: '' }
           ]}
         />
@@ -203,6 +217,16 @@ const DashboardBuilder = () => {
                 </Box>
               )}
               <DndProvider backend={HTML5Backend}>
+                <Box display="flex" justifyContent="flex-end">
+                  <Box mr={2}>
+                    <p className="link cursor-pointer setLink" onClick={handleExportField}>
+                      Export
+                    </p>
+                  </Box>
+                  <Box>
+                    <p className="link cursor-pointer setLink">Import</p>
+                  </Box>
+                </Box>
                 <DashboardView
                   selectedData={selectedData}
                   formData={formData}
