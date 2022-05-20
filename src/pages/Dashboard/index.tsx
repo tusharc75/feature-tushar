@@ -17,6 +17,7 @@ import { FaRegistered } from 'react-icons/fa';
 import { AiFillAccountBook } from 'react-icons/ai';
 import { TextField, InputAdornment } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
+import ClearIcon from '@material-ui/icons/Clear';
 import routes from 'src/components/Helpers/Routes';
 import { staticHiddenResource } from '../../constants/helpers';
 
@@ -26,6 +27,7 @@ function Dashboard() {
   const {
     state: { user, selectedEntity }
   } = useData();
+  const [showCloseButton, setShowCloseButton] = useState(false);
   const [sections, setSections] = useState([]);
   const [search, setSearch] = useState('');
   const [filteredData, setFilteredData] = useState([]);
@@ -225,6 +227,10 @@ function Dashboard() {
     });
     setFilteredData(filteredItems);
   };
+  const clearSearch = () => {
+    setSearch('');
+    setShowCloseButton(false);
+  };
 
   return (
     <Fragment>
@@ -244,22 +250,20 @@ function Dashboard() {
                   placeholder="Search"
                   onChange={(e) => {
                     const searchedValue = e.target.value;
+                    searchedValue.length > 0 ? setShowCloseButton(true) : setShowCloseButton(false);
                     setSearch(searchedValue);
                     handleSearch();
                   }}
-                ></input>
-                <InputAdornment position="start">
+                />
+                <div className={styles.searchIcon}>
                   <Search color="disabled" />
-                </InputAdornment>
+                </div>
+                {showCloseButton && (
+                  <div className={styles.clear_icon}>
+                    <ClearIcon onClick={() => clearSearch()} />
+                  </div>
+                )}
               </div>
-              <button
-                className={styles.custom_form_button}
-                onClick={(e) => {
-                  handleSearch();
-                }}
-              >
-                Search
-              </button>
             </div>
             {search.trim() === '' ? (
               <div className="card_grid dashboard_homepage">

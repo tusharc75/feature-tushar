@@ -26,9 +26,9 @@
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         text-align: left;
-        margin: 26px 20px 27px 20px;
       }
       .card_back {
+        margin: 26px;
         position: absolute;
         top: 0;
         left: 0;
@@ -39,8 +39,14 @@
         & a {
           position: relative;
           transition: color 0.3s;
+          font-weight: 600;
+          font-size: 18px;
+          line-height: 22px;
+          color: #41aeaa;
+          display: inline-block;
+          margin-bottom: 16px;
           &:hover {
-            color: var(--link);
+            color: var(--primary);
           }
           &::before {
             content: ' ';
@@ -66,6 +72,7 @@
         }
       }
       .card_front {
+        margin: 26px 20px 27px 20px;
         .card_front_content * {
           margin: 0;
           padding: 0;
