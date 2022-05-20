@@ -2,9 +2,10 @@ import React from 'react';
 import { TextField, Box, Paper, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { Autocomplete } from '@material-ui/lab';
-import { camelCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 
 import { CHART_TYPES, FILTERS_OPTIONS, KPIListType, GRAPH_TYPES, kpiList, IFormDataType, defaultFormConfigs, statuses } from './builderHelpers';
+import axiosInstance from 'src/axios/axiosInstance';
 
 const useClasses = makeStyles(() => ({
   container: {
@@ -29,6 +30,7 @@ const Builder = (props: Props) => {
 
   const [formValues, setFormValues] = React.useState<IFormDataType>(defaultFormConfigs);
   const [errors, setErrors] = React.useState(null);
+  const [kpiLists, setKpiLists] = React.useState([]);
 
   const classes = useClasses();
 
@@ -45,6 +47,17 @@ const Builder = (props: Props) => {
 
     setFormValues((prevState) => ({ ...prevState, statusOptions: statuses[formValues.kpi.kpi] }));
   }, [formValues.kpi, formValues.filters]);
+
+  const fetchKpis = () => {
+    axiosInstance()
+      .get(`dashboard-master/kpi-list`)
+      .then(({ data: { data } }) => {
+        setKpiLists(data);
+      })
+      .catch((err) => {});
+  };
+
+  React.useEffect(fetchKpis, []);
 
   const handleChange = (name: string, val: any) => {
     setFormValues((prevState) => ({ ...prevState, [name]: val }));
@@ -92,6 +105,35 @@ const Builder = (props: Props) => {
     <Box component={Paper} p={1.5} className={classes.container}>
       <div>
         <Box>
+          <Autocomplete
+            size="small"
+            options={kpiLists}
+            value={formValues.kpi}
+            groupBy={(option) => option.resource}
+            onChange={(_, val: KPIListType) => {
+              handleChange('kpi', val);
+
+              setFormValues((prevState) => ({
+                ...prevState,
+                chartType: val && val.hasOwnProperty('chartType') ? startCase(val?.chartType[0]) : '',
+                graphType: val && val.hasOwnProperty('graphType') ? startCase(val?.graphType[0]) : ''
+              }));
+            }}
+            getOptionLabel={(option) => option.name}
+            getOptionSelected={(option, value) => option.kpi === value.kpi}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                required
+                label="KPI"
+                variant="outlined"
+                helperText={errors && !Boolean(formValues.kpi) && errors?.kpi}
+                error={errors && !Boolean(formValues.kpi) && Boolean(errors?.kpi)}
+              />
+            )}
+          />
+        </Box>
+        <Box mt={2}>
           <TextField
             required
             value={formValues.chartTitle}
@@ -109,6 +151,7 @@ const Builder = (props: Props) => {
           <Autocomplete
             size="small"
             options={GRAPH_TYPES}
+            disabled
             value={formValues.graphType}
             onChange={(_, val) => handleChange('graphType', val)}
             getOptionLabel={(option) => option}
@@ -126,48 +169,23 @@ const Builder = (props: Props) => {
           />
         </Box>
 
-        {formValues.graphType === 'Chart' && (
-          <Box mt={2}>
-            <Autocomplete
-              size="small"
-              options={CHART_TYPES}
-              value={formValues.chartType}
-              onChange={(_, val) => handleChange('chartType', val)}
-              getOptionLabel={(option) => option}
-              getOptionSelected={(option, value) => option === value}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  label="Chart Type"
-                  variant="outlined"
-                  helperText={errors && !Boolean(formValues.chartType) && errors?.chartType}
-                  error={errors && !Boolean(formValues.chartType) && Boolean(errors?.chartType)}
-                />
-              )}
-            />
-          </Box>
-        )}
-
         <Box mt={2}>
           <Autocomplete
             size="small"
-            options={kpiList}
-            value={formValues.kpi}
-            groupBy={(option) => option.resource}
-            onChange={(_, val: KPIListType) => {
-              handleChange('kpi', val);
-            }}
-            getOptionLabel={(option) => option.name}
-            getOptionSelected={(option, value) => option.kpi === value.kpi}
+            options={CHART_TYPES}
+            disabled
+            value={formValues.chartType}
+            onChange={(_, val) => handleChange('chartType', val)}
+            getOptionLabel={(option) => option}
+            getOptionSelected={(option, value) => option === value}
             renderInput={(params) => (
               <TextField
                 {...params}
                 required
-                label="KPI"
+                label="Chart Type"
                 variant="outlined"
-                helperText={errors && !Boolean(formValues.kpi) && errors?.kpi}
-                error={errors && !Boolean(formValues.kpi) && Boolean(errors?.kpi)}
+                helperText={errors && !Boolean(formValues.chartType) && errors?.chartType}
+                error={errors && !Boolean(formValues.chartType) && Boolean(errors?.chartType)}
               />
             )}
           />
