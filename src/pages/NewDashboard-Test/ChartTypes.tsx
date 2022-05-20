@@ -193,7 +193,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                     Export to
                   </Button>
                 )}
-                {chart.hasTableView && (
+                {chart.hasTableView && chartData?.tableData && (
                   <Button
                     disabled={loading}
                     color="primary"
@@ -230,7 +230,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                 <TableView
                   id={chart.uniqueId}
                   type={chart.chartType?.toLowerCase()}
-                  chartData={chartData.tableData}
+                  chartData={chartData?.tableData}
                   isScreenSmall={isScreenSmall}
                   currency={globalFilters.currency || currency}
                   selectedDashboard={globalFilters?.dashboardType}
@@ -281,7 +281,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           anchorEl={anchorElExport}
           setAnchorClose={setAnchorElExport}
           currency={globalFilters.currency || currency}
-          tableData={chartData ? (chart.graphType === 'Table' ? chartData : chartData.tableData) : []}
+          tableData={chartData ? (chart.graphType === 'Table' ? chartData : chartData?.tableData) : []}
           chart={chart}
           chartData={chartData}
         />
