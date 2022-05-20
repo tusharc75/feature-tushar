@@ -96,12 +96,8 @@ const RoleDetailsPage = () => {
     purchaseOrder: false,
   })
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false)
-  const [dashBoardOption, setDashBoardOption] = useState([{
-    id: '',
-    name: ''
-  }]);
-  const [selectedDashboardIds, setSelectedDashboardIds] = useState([]);
-  const [dashboardName, setDashboardName] = React.useState<string[]>([]);
+  const [dashBoardOption, setDashBoardOption] = useState([]);
+  const [dashboardName, setDashboardName] = useState([]);
 
 
 
@@ -280,15 +276,14 @@ const RoleDetailsPage = () => {
       const {
         data: { data },
       } = await axiosInstance().get(`/dashboard-master`);
-      let copyOfDashBoardOption = [];
-      data?.map((obj) => {
-        setDashBoardOption((prevState) => [...prevState, { id: obj._id, name: obj.name }])
-        copyOfDashBoardOption.push({ id: obj._id, name: obj.name })
-      })
-      roleData.dashBoards.map((id) => {
-        const dashBoardNames = copyOfDashBoardOption.filter((obj) => obj.id === id).map((obj) => obj.name);
-        setDashboardName(dashBoardNames);
-      })
+      let copyOfDashBoardOption = data?.map((obj) => {
+        return { id: obj._id, name: obj.name }
+      });
+
+      setDashBoardOption([...copyOfDashBoardOption]);
+
+      const dashBoardNames = copyOfDashBoardOption.filter((obj) => roleData.dashBoards.includes(obj.id));
+      setDashboardName(dashBoardNames);
 
 
       setLoading(false);
@@ -297,13 +292,9 @@ const RoleDetailsPage = () => {
     }
   }
 
-  const dashBoardHandleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setDashboardName(event.target.value as string[]);
-  };
-
   const handleUpdateRole = () => {
     setUpdating(true);
-    let dashBoardIds = dashBoardOption.filter((obj) => dashboardName.includes(obj.name)).map((obj) => obj.id);
+    let dashBoardIds = dashboardName.map(obj => obj.id);
     axiosInstance()
       .put(`/role`, {
         _id: id,
@@ -587,8 +578,7 @@ const RoleDetailsPage = () => {
                       {
                         dashBoardOption?.length > 0 &&
                         <DashboardResources
-                          dashboardList={dashBoardOption.map(obj => obj.name)}
-                          handleChange={dashBoardHandleChange}
+                          dashboardList={dashBoardOption}
                           dashboardName={dashboardName}
                           setDashboardName={setDashboardName}
                         />
