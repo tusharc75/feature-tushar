@@ -119,7 +119,7 @@ function Dashboard() {
         case 'CRM+':
           icon = (
             <Icon>
-              <img src={SVG(CRM)} alt="Crm Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+              <img src={SVG(CRM)} alt="ROM Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
             </Icon>
           );
           text = 'Convert leads and close sales deals faster.';
