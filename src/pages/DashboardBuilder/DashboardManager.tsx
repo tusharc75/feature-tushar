@@ -1,12 +1,12 @@
 import React from 'react';
 import { Grid, Box, Button, TextField, CircularProgress, Typography } from '@material-ui/core';
-import { useParams, useHistory, useLocation } from 'react-router-dom';
+import { useParams, useHistory} from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import { MdDashboardCustomize } from 'react-icons/md';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import queryString from 'query-string';
-import { read, utils, writeFile } from 'xlsx';
+import { saveAs } from 'file-saver';
 
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import Builder from './Builder';
@@ -115,16 +115,25 @@ const DashboardBuilder = () => {
   };
 
   const handleExportField = () => {
-    const header = ['Chart Title', 'Graph Type', 'Chart Type', 'Column'];
-    const json_data = [{ 'Chart Title': '', 'Graph Type': '', 'Chart Type': '', Column: '' }];
-
-    const ws = utils.json_to_sheet(json_data);
-    if (header.length) {
-      utils.sheet_add_aoa(ws, [header]);
-    }
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, 'Sheet1');
-    writeFile(wb, 'DashboardMaster.xlsx');
+    const dataToExport = {
+      name: '',
+      charts: [
+        {
+          graphyType: '', // Valid types ["Chart", "Map", "Table"]
+          chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
+          column: 6,
+          chartTitle: '',
+          kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
+          hasFilters: false,
+          hasTableView: false,
+          hasExport: false,
+          statusOptions: [],
+          filters: []
+        }
+      ]
+    };
+    let blob = new Blob([JSON.stringify(dataToExport)], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, 'Dashboard Fields' + '.json');
   };
 
   const updateDashboard = () => {
@@ -160,12 +169,30 @@ const DashboardBuilder = () => {
   return (
     <div>
       <div className="headerbox">
-        <CustomBreadCrumbs
-          routes={[
-            { title: 'Dashboard Master', path: '/dashboard-master' },
-            { title: type && type === 'clone' ? 'Clone' : !isNew ? name : 'New', path: '' }
-          ]}
-        />
+        <Grid container justifyContent="space-between">
+          <Grid item xs={6}>
+            <CustomBreadCrumbs
+              routes={[
+                { title: 'Dashboard Master', path: '/dashboard-master' },
+                { title: type && type === 'clone' ? 'Clone' : !isNew ? name : 'New', path: '' }
+              ]}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <Box display="flex" justifyContent="flex-end">
+              <Box mr={2}>
+                <Typography className="link cursor-pointer" style={{ color: 'var(--tertiary-light)' }} onClick={handleExportField}>
+                  Export
+                </Typography>
+              </Box>
+              <Box mr={1}>
+                <Typography className="link cursor-pointer" style={{ color: 'var(--tertiary-light)' }}>
+                  Import
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
       </div>
       <div className="detail-container">
         <Box bgcolor={'white'} p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>
@@ -217,16 +244,6 @@ const DashboardBuilder = () => {
                 </Box>
               )}
               <DndProvider backend={HTML5Backend}>
-                <Box display="flex" justifyContent="flex-end">
-                  <Box mr={2}>
-                    <p className="link cursor-pointer setLink" onClick={handleExportField}>
-                      Export
-                    </p>
-                  </Box>
-                  <Box>
-                    <p className="link cursor-pointer setLink">Import</p>
-                  </Box>
-                </Box>
                 <DashboardView
                   selectedData={selectedData}
                   formData={formData}
