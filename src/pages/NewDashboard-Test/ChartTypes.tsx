@@ -9,7 +9,6 @@ import styles from '../KpiDashboard/dashboard.module.scss';
 import FiltersDropdown from './FiltersDropdown';
 import axiosInstance from 'src/axios/axiosInstance';
 import ExportDropdown from './ExportDropdown';
-import getMappedData from './getMappedData';
 import TableView from './TableView';
 import { GlobalFiltersType } from './GlobalFilter';
 
@@ -18,23 +17,12 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { startCase } from 'lodash';
 import MapView from './MapView';
+import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 
-export type ChartDataType = {
-  column: any;
-  graphType: string;
-  chartType: string;
-  filters: { key: string; title: string; multiple: boolean }[];
-  chartTitle: string;
-  kpi: string;
-  hasFilters: boolean;
-  hasTableView: boolean;
-  hasExport: boolean;
-  uniqueId: string;
+export interface ChartDataType extends IFormDataType {
   axis?: string;
-  hasStatus?: boolean;
-  statusOptions?: { optionValue: string; optionLabel: string }[];
   numberOfCards?: number;
-};
+}
 interface Props {
   commonSalesData?: any;
   setCommonSalesData?: any;
@@ -126,7 +114,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
     const urlParams = getParams();
     setLoading(true);
     axiosInstance()
-      .get(`kpi/${chart.kpi}?entity=${selectedEntity}&${urlParams}`)
+      .get(`kpi/${chart.kpi.kpi}?entity=${selectedEntity}&${urlParams}`)
       .then(async ({ data: { data } }) => {
         setChartData(data);
         setLoading(false);
@@ -284,7 +272,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           isAssetDashboard={globalFilters.dashboardType?.includes('Asset')}
           filterOptions={{
             ...filterData,
-            [chart.hasStatus && 'status']: chart.statusOptions
+            status: chart.statusOptions
           }}
         />
       )}

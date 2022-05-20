@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 
-import { CHART_TYPES, FILTERS_OPTIONS, KPIListType, GRAPH_TYPES, kpiList, IFormDataType, defaultFormConfigs } from './builderHelpers';
+import { CHART_TYPES, FILTERS_OPTIONS, KPIListType, GRAPH_TYPES, kpiList, IFormDataType, defaultFormConfigs, statuses } from './builderHelpers';
 
 const useClasses = makeStyles(() => ({
   container: {
@@ -39,6 +39,12 @@ const Builder = (props: Props) => {
       setFormValues(defaultFormConfigs);
     }
   }, [selectedData]);
+
+  React.useEffect(() => {
+    if (!formValues.kpi && !formValues.filters.map((k) => k.key).includes('status')) return;
+
+    setFormValues((prevState) => ({ ...prevState, statusOptions: statuses[formValues.kpi.kpi] }));
+  }, [formValues.kpi, formValues.filters]);
 
   const handleChange = (name: string, val: any) => {
     setFormValues((prevState) => ({ ...prevState, [name]: val }));
@@ -176,12 +182,7 @@ const Builder = (props: Props) => {
         <Box mt={2}>
           <FormGroup row>
             <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formValues.hasFilters}
-                  onChange={(e) => handleChange('hasFilters', e.target.checked)}
-                />
-              }
+              control={<Checkbox checked={formValues.hasFilters} onChange={(e) => handleChange('hasFilters', e.target.checked)} />}
               label="Filters"
             />
             <FormControlLabel
@@ -203,15 +204,6 @@ const Builder = (props: Props) => {
                 />
               }
               label="Exports"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formValues.hasStatus}
-                  onChange={(e) => handleChange('hasStatus', e.target.checked)}
-                />
-              }
-              label="Status"
             />
           </FormGroup>
         </Box>
