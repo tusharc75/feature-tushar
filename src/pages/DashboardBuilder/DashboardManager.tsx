@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Box, Button, TextField, CircularProgress, Typography } from '@material-ui/core';
-import { useParams, useHistory} from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import { MdDashboardCustomize } from 'react-icons/md';
 import { DndProvider } from 'react-dnd';
@@ -115,25 +115,46 @@ const DashboardBuilder = () => {
   };
 
   const handleExportField = () => {
-    const dataToExport = {
-      name: '',
-      charts: [
-        {
-          graphyType: '', // Valid types ["Chart", "Map", "Table"]
-          chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
-          column: 6,
-          chartTitle: '',
-          kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
-          hasFilters: false,
-          hasTableView: false,
-          hasExport: false,
-          statusOptions: [],
-          filters: []
-        }
-      ]
-    };
+    const dataToExport =
+      formData?.length > 0
+        ? {
+            name,
+            charts: formData
+          }
+        : {
+            name: '',
+            charts: [
+              {
+                graphyType: '', // Valid types ["Chart", "Map", "Table"]
+                chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
+                column: 6,
+                chartTitle: '',
+                kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
+                hasFilters: false,
+                hasTableView: false,
+                hasExport: false,
+                statusOptions: [],
+                filters: []
+              }
+            ]
+          };
     let blob = new Blob([JSON.stringify(dataToExport)], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, 'Dashboard Fields' + '.json');
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const files = e.target.files,
+      f = files[0];
+    let reader = new FileReader();
+    reader.onload = function (e) {
+      const data: any = e.target.result;
+      const {name, charts} = JSON.parse(data);
+      setName(name);
+      setFormData(charts);
+    };
+    reader.readAsBinaryString(f);
+    e.target.value = null;
   };
 
   const updateDashboard = () => {
@@ -151,6 +172,7 @@ const DashboardBuilder = () => {
           type: 'success'
         });
         setSubmitting(false);
+        history.goBack()
       })
       .catch((error) => {
         setSubmitting(false);
@@ -186,9 +208,12 @@ const DashboardBuilder = () => {
                 </Typography>
               </Box>
               <Box mr={1}>
-                <Typography className="link cursor-pointer" style={{ color: 'var(--tertiary-light)' }}>
-                  Import
-                </Typography>
+                <input accept="json" style={{ display: 'none' }} onChange={handleImport} id="import-file" multiple={false} type="file" />
+                <label htmlFor="import-file">
+                  <Typography className="cursor-pointer" style={{ color: 'var(--tertiary-light)' }}>
+                    Import
+                  </Typography>
+                </label>
               </Box>
             </Box>
           </Grid>

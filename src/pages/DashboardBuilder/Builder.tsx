@@ -116,7 +116,8 @@ const Builder = (props: Props) => {
               setFormValues((prevState) => ({
                 ...prevState,
                 chartType: val && val.hasOwnProperty('chartType') ? startCase(val?.chartType[0]) : '',
-                graphType: val && val.hasOwnProperty('graphType') ? startCase(val?.graphType[0]) : ''
+                graphType: val && val.hasOwnProperty('graphType') ? startCase(val?.graphType[0]) : '',
+                chartTitle: val?.name || ''
               }));
             }}
             getOptionLabel={(option) => option.name}

@@ -212,8 +212,8 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
             {chart.chartTitle && (
               <Typography component="div" align="center" color="textPrimary">
                 <h4>
-                  {chart.chartTitle.includes('currency')
-                    ? startCase(chart.chartTitle.replace(/currency/gi, globalFilters.currency || currency))
+                  {chart.chartTitle.includes('CUR')
+                    ? startCase(chart.chartTitle.replace(/CUR/gi, globalFilters.currency || currency))
                     : startCase(chart.chartTitle.replace(/Type/gi, filterValues?.status?.optionLabel || 'Open'))}
                 </h4>
               </Typography>
