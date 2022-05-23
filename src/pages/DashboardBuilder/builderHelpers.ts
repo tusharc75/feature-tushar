@@ -28,6 +28,8 @@ export const FILTERS_OPTIONS = [
   { title: 'Sub Market Segment', key: 'subMarketSegment' },
   { title: 'Sales Rep', key: 'salesRep' },
   { title: 'Product Category', key: 'productCategory' },
+  { title: 'Country Bill To', key: 'countryBillTo' },
+  { title: 'Country Sell To', key: 'countrySellTo' },
   { title: 'Country', key: 'country' },
   { title: 'Status', key: 'status' },
 ];
