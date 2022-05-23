@@ -7,10 +7,10 @@
 // CARD SECTION
 .card_grid.dashboard_homepage {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   grid-gap: 24px;
   .single_card {
-    perspective: 800px;
+    perspective: 900px;
     .card_content {
       position: relative;
       height: 100%;
@@ -40,6 +40,7 @@
           margin: 0;
           padding: 0;
         }
+
         & p {
           margin: 0;
         }
