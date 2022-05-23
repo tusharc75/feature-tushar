@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import { CssBaseline, Drawer, List, ListItem, ListItemText, Toolbar, Collapse, ListItemIcon, Tooltip } from '@material-ui/core';
@@ -91,6 +91,7 @@ const useStyles = makeStyles((theme) => ({
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
   const [subItemToAddActiveClass, setSubItemToAddActiveClass] = useState(NaN);
+
   const {
     state: { permissions, user, selectedEntity, tour }
   }: any = useData();
@@ -345,11 +346,11 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         <Link
                           className={`sub-list ${itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''}`}
                           key={j}
-                          to={handleRoutes(item)}
                           onClick={() => {
                             setItemToAddActiveClass(i);
                             setSubItemToAddActiveClass(j);
                           }}
+                          to={handleRoutes(item)}
                         >
                           <ListItem button selected={pathnames.includes(lowerCase(item.name))} className={classes.nested}>
                             <ListItemText primary={item.resourceLabel || item.name} />
