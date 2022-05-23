@@ -9,15 +9,18 @@ import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import './Sidebar.scss';
 import { ChevronRight, ExpandMore, ExpandLess } from '@material-ui/icons';
 import { kebabCase, lowerCase, sortBy } from 'lodash';
-import { FaUserTie, FaDatabase, FaHandshake, FaRegistered } from 'react-icons/fa';
-import { BsCalendarFill } from 'react-icons/bs';
-import { MdDashboard, MdDescription, MdLocalActivity } from 'react-icons/md';
-import { RiFolderSettingsFill, RiAccountPinCircleFill } from 'react-icons/ri';
+
+import { FaRegUserCircle, FaRegRegistered } from 'react-icons/fa';
+import { MdOutlineDashboard, MdOutlineLocalActivity } from 'react-icons/md';
+import { RiFolderSettingsLine, RiAccountPinCircleFill, RiShieldUserLine } from 'react-icons/ri';
 import { SiCivicrm } from 'react-icons/si';
-import { AiFillSetting } from 'react-icons/ai';
+import { AiOutlineSetting } from 'react-icons/ai';
 import { BsChatLeftTextFill } from 'react-icons/bs';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { staticHiddenResource } from '../../constants/helpers';
+
+import { AiOutlineDatabase, AiOutlineFileText } from 'react-icons/ai';
+import { HiOutlineUser } from 'react-icons/hi';
 
 import { AccountCircle } from '@material-ui/icons';
 import routes from '../Helpers/Routes';
@@ -105,27 +108,27 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const iconMapping = [
     {
       key: 'Brand Admin',
-      icon: <FaUserTie size={15} className="sidebar-icon" />
+      icon: <FaRegUserCircle size={15} className="sidebar-icon" />
     },
     {
       key: 'Master Data',
-      icon: <FaDatabase size={15} className="sidebar-icon" />
+      icon: <AiOutlineDatabase size={15} className="sidebar-icon" />
     },
     {
       key: 'Product Setup',
-      icon: <RiFolderSettingsFill size={15} className="sidebar-icon" />
+      icon: <RiFolderSettingsLine size={15} className="sidebar-icon" />
     },
     {
       key: 'Admin Portal',
-      icon: <BsCalendarFill size={15} className="sidebar-icon" />
+      icon: <RiShieldUserLine size={15} className="sidebar-icon" />
     },
     {
       key: 'Activities',
-      icon: <MdLocalActivity size={15} className="sidebar-icon" />
+      icon: <MdOutlineLocalActivity size={15} className="sidebar-icon" />
     },
     {
       key: 'Accounts',
-      icon: <RiAccountPinCircleFill size={15} className="sidebar-icon" />
+      icon: <HiOutlineUser size={15} className="sidebar-icon" />
     },
     {
       key: 'CRM +',
@@ -263,7 +266,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             >
               <ListItemIcon>
                 {toggleDrawer ? (
-                  <AccountCircle
+                  <FaRegUserCircle
                     className="sidebar-icon"
                     onClick={() => {
                       history.push('/');
@@ -291,7 +294,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 <Tooltip title={!toggleDrawer ? 'Dashboards' : ''}>
                   <ListItem button selected={location.pathname === '/dashboards'} className="list-item">
                     <ListItemIcon>
-                      <MdDashboard size={15} className="sidebar-icon" />
+                      <MdOutlineDashboard size={15} className="sidebar-icon" />
                     </ListItemIcon>
                     <ListItemText primary="Dashboards" />
                   </ListItem>
@@ -309,7 +312,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 <Tooltip title={!toggleDrawer ? 'Reports' : ''}>
                   <ListItem button selected={location.pathname === '/reports'} className="list-item">
                     <ListItemIcon>
-                      <MdDescription size={16} className="sidebar-icon" />
+                      <AiOutlineFileText size={16} className="sidebar-icon" />
                     </ListItemIcon>
                     <ListItemText primary="Reports" />
                   </ListItem>
@@ -334,7 +337,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                       <ListItemIcon>
                         {iconMapping.find((mapping) => {
                           return mapping.key === listItem.section;
-                        })?.icon || <FaRegistered size={16} className="sidebar-icon" /> || <AiFillSetting size={18} className="sidebar-icon" />}
+                        })?.icon || <FaRegRegistered size={16} className="sidebar-icon" /> || <AiOutlineSetting size={18} className="sidebar-icon" />}
                       </ListItemIcon>
                       <ListItemText primary={listItem.section} />
                       {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
