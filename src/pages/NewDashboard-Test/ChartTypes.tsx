@@ -9,7 +9,6 @@ import styles from '../KpiDashboard/dashboard.module.scss';
 import FiltersDropdown from './FiltersDropdown';
 import axiosInstance from 'src/axios/axiosInstance';
 import ExportDropdown from './ExportDropdown';
-import getMappedData from './getMappedData';
 import TableView from './TableView';
 import { GlobalFiltersType } from './GlobalFilter';
 
@@ -18,23 +17,12 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { startCase } from 'lodash';
 import MapView from './MapView';
+import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 
-export type ChartDataType = {
-  col: any;
-  graphType: string;
-  chartType: string;
-  filters: { key: string; title: string; multiple: boolean }[];
-  chartTitle: string;
-  kpi: string;
-  hasFilters: boolean;
-  hasTableView: boolean;
-  hasExport: boolean;
-  uniqueId: string;
+export interface ChartDataType extends IFormDataType {
   axis?: string;
-  hasStatus?: boolean;
-  statusOptions?: { optionValue: string; optionLabel: string }[];
   numberOfCards?: number;
-};
+}
 interface Props {
   commonSalesData?: any;
   setCommonSalesData?: any;
@@ -126,7 +114,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
     const urlParams = getParams();
     setLoading(true);
     axiosInstance()
-      .get(`kpi/${chart.kpi}?entity=${selectedEntity}&${urlParams}`)
+      .get(`kpi/${chart.kpi.kpi}?entity=${selectedEntity}&${urlParams}`)
       .then(async ({ data: { data } }) => {
         setChartData(data);
         setLoading(false);
@@ -140,7 +128,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   const idsWithAdditionStatus = ['openQuotesByCustomer', 'openQuoteByRep'];
 
   return (
-    <Grid item xs={12} md={chart.col}>
+    <Grid item xs={12} md={chart.column}>
       {chart.graphType === 'cards' ? (
         <Grid container spacing={1}>
           {loading
@@ -205,7 +193,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                     Export to
                   </Button>
                 )}
-                {chart.hasTableView && (
+                {chart.hasTableView && chartData?.tableData && (
                   <Button
                     disabled={loading}
                     color="primary"
@@ -224,15 +212,15 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
             {chart.chartTitle && (
               <Typography component="div" align="center" color="textPrimary">
                 <h4>
-                  {chart.chartTitle.includes('currency')
-                    ? startCase(chart.chartTitle.replace(/currency/gi, globalFilters.currency || currency))
+                  {chart.chartTitle.includes('CUR')
+                    ? startCase(chart.chartTitle.replace(/CUR/gi, globalFilters.currency || currency))
                     : startCase(chart.chartTitle.replace(/Type/gi, filterValues?.status?.optionLabel || 'Open'))}
                 </h4>
               </Typography>
             )}
           </Box>
 
-          <Box minHeight={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500}>
+          <Box minHeight={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500}>
             {loading ? (
               <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
             ) : !chartData || chartData.length === 0 ? (
@@ -241,18 +229,18 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
               chart.hasTableView && tableView ? (
                 <TableView
                   id={chart.uniqueId}
-                  type={chart.chartType}
-                  chartData={chartData.tableData}
+                  type={chart.chartType?.toLowerCase()}
+                  chartData={chartData?.tableData}
                   isScreenSmall={isScreenSmall}
                   currency={globalFilters.currency || currency}
                   selectedDashboard={globalFilters?.dashboardType}
                 />
               ) : chart.graphType === 'Map' ? (
-                <MapView height={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500} data={chartData} />
+                <MapView height={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
               ) : (
                 <Chart
                   id={chart.uniqueId}
-                  type={chart.chartType}
+                  type={chart.chartType?.toLowerCase()}
                   data={chartData}
                   options={{
                     maintainAspectRatio: false,
@@ -284,7 +272,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           isAssetDashboard={globalFilters.dashboardType?.includes('Asset')}
           filterOptions={{
             ...filterData,
-            [chart.hasStatus && 'status']: chart.statusOptions
+            status: chart.statusOptions
           }}
         />
       )}
@@ -293,7 +281,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           anchorEl={anchorElExport}
           setAnchorClose={setAnchorElExport}
           currency={globalFilters.currency || currency}
-          tableData={chartData ? (chart.graphType === 'Table' ? chartData : chartData.tableData) : []}
+          tableData={chartData ? (chart.graphType === 'Table' ? chartData : chartData?.tableData) : []}
           chart={chart}
           chartData={chartData}
         />

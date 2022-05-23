@@ -18,16 +18,12 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
     filters.forEach((filter) => {
       setValues((prevState: any) => ({
         ...prevState,
-        [filter.key]: filter.multiple ? [] : filter.key === 'status' && !isAssetDashboard ? { optionValue: 'open', optionLabel: 'Open' } : {}
+        [filter.key]: filter?.multiple ? [] : {}
       }));
     });
   }, [filters]);
 
   const handleChange = (key: string, val: any) => {
-    if (key === 'status' && !val && !isAssetDashboard) {
-      setValues((prevState: any) => ({ ...prevState, [key]: { optionValue: 'open', optionLabel: 'Open' } }));
-      return;
-    }
     setValues((prevState: any) => ({ ...prevState, [key]: val }));
   };
 
@@ -53,7 +49,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
             {filterOptions[filter.key] ? (
               <Autocomplete
                 size="small"
-                multiple={filter.multiple}
+                multiple={filter?.multiple}
                 fullWidth
                 options={
                   filter.key.includes('subMarket')

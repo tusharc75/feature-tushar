@@ -9,9 +9,6 @@ import CustomAgGrid, { intialState, reducer } from "src/components/AgGridCompone
 import { CommonRenderer, ImageRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import { prepareDataForGrid } from '../../../constants/helpers';
-import { Link } from 'react-router-dom'
-import routes from "../../../components/Helpers/Routes";
-import NoDataCell from "../../../components/Helpers/NoDataCell";
 import AddToPhotosOutlinedIcon from '@material-ui/icons/AddToPhotosOutlined';
 
 const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, searchVal, productCategory, refreshData }) => {
@@ -26,10 +23,9 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
     const columns = [
         { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productImage", headerName: "Product Image", show: false, cellRenderer: "imageRenderer" },
-        { field: "availableInventory", headerName: "Inventory", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "availableInventory", headerName: "Inventory", filter: false, show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: false, cellRenderer: "commonRenderer" },
     ]
-
 
     const ActionsRenderer = (params) => (
         <HtmlTooltip title={params?.data?.inventory ? 'Pickup' : 'No inventory'} >
@@ -117,6 +113,18 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
             dispatch({ type: 'loading', loading: false });
         })
     }
+
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+    if (columnState) {
+        columns.forEach((item) => {
+            columnState.forEach((d) => {
+                if (d.colId === item.field) {
+                    item.show = !d.hide;
+                }
+            });
+        });
+    }
+
 
     return (
         <Fragment>

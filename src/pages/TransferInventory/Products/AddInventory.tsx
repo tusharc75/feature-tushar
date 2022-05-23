@@ -30,7 +30,7 @@ const AddInventory = (props: Props) => {
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
 
   const {
     state: { permissions }
@@ -130,7 +130,7 @@ const AddInventory = (props: Props) => {
   };
 
   const handleClickSave = () => {
-    const _data = selectedRecords.map((d) => ({
+    const _data = getLocalStorageArrayData(localStorageSelectedRecords)?.map((d) => ({
       product: d.productId,
       qty: Number(d.qty)
     }));
@@ -164,7 +164,7 @@ const AddInventory = (props: Props) => {
         open: true
       });
     }
-    const newRecords = selectedRecords.map((d: any) => {
+    const newRecords = getLocalStorageArrayData(localStorageSelectedRecords)?.map((d: any) => {
       if (data?._id === d?._id) {
         return data;
       }
@@ -175,9 +175,9 @@ const AddInventory = (props: Props) => {
   };
 
   let disableSave =
-    selectedRecords.length === 0 ||
-    selectedRecords.filter((d: any) => Number(d.qty) === 0).length > 0 ||
-    selectedRecords.filter((d: any) => Number(d.qty) > Number(d.inventory)).length > 0 ||
+    getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0 ||
+    getLocalStorageArrayData(localStorageSelectedRecords)?.filter((d: any) => Number(d.qty) === 0).length > 0 ||
+    getLocalStorageArrayData(localStorageSelectedRecords)?.filter((d: any) => Number(d.qty) > Number(d.inventory)).length > 0 ||
     isAdding;
 
   return (
@@ -192,12 +192,12 @@ const AddInventory = (props: Props) => {
           alignItems={isMobile ? 'flex-start' : 'center'}
         >
           <div style={{ order: isMobile ? 2 : 1 }}>
-            {selectedRecords.filter((d: any) => d.qty === 0).length > 0 && (
+            {getLocalStorageArrayData(localStorageSelectedRecords)?.filter((d: any) => d.qty === 0).length > 0 && (
               <Typography variant="body2" color="error">
                 Enter quantity before you save
               </Typography>
             )}
-            {selectedRecords.filter((d: any) => Number(d.qty) > Number(d.inventory)).length > 0 && (
+            {getLocalStorageArrayData(localStorageSelectedRecords)?.filter((d: any) => Number(d.qty) > Number(d.inventory)).length > 0 && (
               <Typography variant="body2" color="error">
                 Quantity should be less then inventory
               </Typography>
