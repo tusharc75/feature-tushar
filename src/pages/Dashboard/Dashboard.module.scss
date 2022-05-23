@@ -24,7 +24,7 @@
   font-weight: 500;
   line-height: 135.02%;
   color: rgba(0, 0, 0, 0.5);
-  font-size: clamp(16px, 5vw, 20px);
+  font-size: clamp(16px, 3.5vw, 20px);
 }
 
 .crm_hero_image {
@@ -123,12 +123,15 @@
   .crm_hero_image {
     margin: 29px auto 0;
   }
-}
-@media all and (max-width: 567px) {
   .hero_heading {
-    margin-bottom: 15px;
+    margin-bottom: 5px;
   }
 }
+// @media all and (max-width: 567px) {
+//   .hero_container {
+//     display: none;
+//   }
+// }
 .list_component {
   margin: 0 !important;
   padding: 0;
