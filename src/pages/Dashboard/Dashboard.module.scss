@@ -120,7 +120,8 @@
   }
 }
 .list_component {
-  margin: 0;
+  margin: 0 !important;
+  padding: 0;
 }
 .hover_list_box {
   margin: 0;

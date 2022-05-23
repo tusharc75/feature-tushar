@@ -299,7 +299,7 @@ function Dashboard() {
                               .filter((item) => !item?.isHidden)
                               .map((item) => (
                                 <div key={item.name}>
-                                  <Box marginY={1} component="div" className={styles.list_component}>
+                                  <Box marginY={1} component="div" className={`list_component`}>
                                     <Typography paragraph className={styles.hover_list_box}>
                                       <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
                                     </Typography>
