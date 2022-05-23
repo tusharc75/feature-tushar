@@ -188,6 +188,7 @@ const routes = {
     title: (storedRoutes && storedRoutes.rentalManagement && storedRoutes.rentalManagement) ? storedRoutes.rentalManagement.title : RESOURCE_LABEL.rentalManagement,
     path: "/rental-management/detail",
   },
+  //Same name because handle old code issue
   quoteBuilder: {
     title: (storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder) ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: "/quotes",
@@ -196,6 +197,15 @@ const routes = {
     title: (storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder) ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: "/quotes/detail",
   },
+  quote: {
+    title: (storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder) ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
+    path: "/quotes",
+  },
+  quoteDetail: {
+    title: (storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder) ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
+    path: "/quotes/detail",
+  },
+  //
   budget: {
     title: (storedRoutes && storedRoutes.budget && storedRoutes.budget) ? storedRoutes.budget?.title : RESOURCE_LABEL.budget,
     path: "/budget",
