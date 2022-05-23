@@ -15,16 +15,16 @@
 
 .hero_heading {
   font-weight: 700;
-  font-size: 30px;
   line-height: 153%;
   color: #2a3042;
   margin: 0 0 24px;
+  font-size: clamp(20px, 5vw, 30px);
 }
 .hero_paragraph {
   font-weight: 500;
-  font-size: 20px;
   line-height: 135.02%;
   color: rgba(0, 0, 0, 0.5);
+  font-size: clamp(16px, 5vw, 20px);
 }
 
 .crm_hero_image {
@@ -116,7 +116,17 @@
     grid-template-columns: 1fr;
   }
   .hero_container {
-    display: none;
+    margin: 0 auto;
+    max-width: 600px;
+    text-align: center;
+  }
+  .crm_hero_image {
+    margin: 29px auto 0;
+  }
+}
+@media all and (max-width: 567px) {
+  .hero_heading {
+    margin-bottom: 15px;
   }
 }
 .list_component {
