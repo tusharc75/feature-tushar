@@ -314,27 +314,29 @@ function Dashboard() {
                 })}
               </div>
             ) : (
-              filteredData.map((section) => {
-                return (
-                  <List key={section.head} subheader={<ListSubheader className={`${styles.list_header} mb-2`}>{section.head}</ListSubheader>}>
-                    {section.items.map((item) => {
-                      return (
-                        <>
-                          <ListItem
-                            key={item.name}
-                            button
-                            onClick={() => {
-                              history.push(handleRoutes(item));
-                            }}
-                          >
-                            <ListItemText primary={item.resourceLabel} />
-                          </ListItem>
-                        </>
-                      );
-                    })}
-                  </List>
-                );
-              })
+              <div className={`${styles.filtered_data}`}>
+                {filteredData.map((section) => {
+                  return (
+                    <List key={section.head} subheader={<li className={`${styles.list_header} mb-2`}>{section.head}</li>}>
+                      {section.items.map((item) => {
+                        return (
+                          <>
+                            <ListItem
+                              key={item.name}
+                              button
+                              onClick={() => {
+                                history.push(handleRoutes(item));
+                              }}
+                            >
+                              <ListItemText primary={item.resourceLabel} />
+                            </ListItem>
+                          </>
+                        );
+                      })}
+                    </List>
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>
