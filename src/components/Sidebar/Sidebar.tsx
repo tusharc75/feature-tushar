@@ -370,7 +370,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           <List style={{ bottom: '0px', marginTop: 'auto' }}>
             <ListItem button onClick={() => setChatOpen((prevState) => !prevState)}>
               <ListItemIcon>
-                <BsChatLeftTextFill size={16} className="sidebar-icon" />
+                <BsChatLeftTextFill size={16} className="sidebar-icon chat-icon" />
               </ListItemIcon>
               <ListItemText primary="Chat" />
             </ListItem>
