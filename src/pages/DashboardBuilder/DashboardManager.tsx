@@ -1,11 +1,12 @@
 import React from 'react';
 import { Grid, Box, Button, TextField, CircularProgress, Typography } from '@material-ui/core';
-import { useParams, useHistory, useLocation } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/styles';
 import { MdDashboardCustomize } from 'react-icons/md';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import queryString from 'query-string';
+import { saveAs } from 'file-saver';
 
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import Builder from './Builder';
@@ -96,7 +97,7 @@ const DashboardBuilder = () => {
     axiosInstance()
       .post(baseURL, {
         name: name.trim(),
-        charts: formData.map((form) => ({ ...form, kpi: type && type === 'clone' ? form.kpi : form.kpi.kpi }))
+        charts: formData
       })
       .then(() => {
         setToastConfig({
@@ -113,13 +114,56 @@ const DashboardBuilder = () => {
       });
   };
 
+  const handleExportField = () => {
+    const dataToExport =
+      formData?.length > 0
+        ? {
+            name,
+            charts: formData
+          }
+        : {
+            name: '',
+            charts: [
+              {
+                graphyType: '', // Valid types ["Chart", "Map", "Table"]
+                chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
+                column: 6,
+                chartTitle: '',
+                kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
+                hasFilters: false,
+                hasTableView: false,
+                hasExport: false,
+                statusOptions: [],
+                filters: []
+              }
+            ]
+          };
+    let blob = new Blob([JSON.stringify(dataToExport)], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, 'Dashboard Fields' + '.json');
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const files = e.target.files,
+      f = files[0];
+    let reader = new FileReader();
+    reader.onload = function (e) {
+      const data: any = e.target.result;
+      const {name, charts} = JSON.parse(data);
+      setName(name);
+      setFormData(charts);
+    };
+    reader.readAsBinaryString(f);
+    e.target.value = null;
+  };
+
   const updateDashboard = () => {
     setSubmitting(true);
     axiosInstance()
       .put(`${baseURL}`, {
         _id: id,
         name: name.trim(),
-        charts: formData.map((form) => ({ ...form, kpi: form.kpi.kpi }))
+        charts: formData
       })
       .then(() => {
         setToastConfig({
@@ -128,6 +172,7 @@ const DashboardBuilder = () => {
           type: 'success'
         });
         setSubmitting(false);
+        history.goBack()
       })
       .catch((error) => {
         setSubmitting(false);
@@ -146,12 +191,33 @@ const DashboardBuilder = () => {
   return (
     <div>
       <div className="headerbox">
-        <CustomBreadCrumbs
-          routes={[
-            { title: 'Dashboard Builder', path: '/dashboard-master' },
-            { title: type && type === 'clone' ? 'Clone' : !isNew ? name : 'New', path: '' }
-          ]}
-        />
+        <Grid container justifyContent="space-between">
+          <Grid item xs={6}>
+            <CustomBreadCrumbs
+              routes={[
+                { title: 'Dashboard Master', path: '/dashboard-master' },
+                { title: type && type === 'clone' ? 'Clone' : !isNew ? name : 'New', path: '' }
+              ]}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <Box display="flex" justifyContent="flex-end">
+              <Box mr={2}>
+                <Typography className="link cursor-pointer" style={{ color: 'var(--tertiary-light)' }} onClick={handleExportField}>
+                  Export
+                </Typography>
+              </Box>
+              <Box mr={1}>
+                <input accept="json" style={{ display: 'none' }} onChange={handleImport} id="import-file" multiple={false} type="file" />
+                <label htmlFor="import-file">
+                  <Typography className="cursor-pointer" style={{ color: 'var(--tertiary-light)' }}>
+                    Import
+                  </Typography>
+                </label>
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
       </div>
       <div className="detail-container">
         <Box bgcolor={'white'} p={1.2} display="flex" justifyContent="space-between" alignItems={'center'}>

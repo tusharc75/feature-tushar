@@ -47,6 +47,13 @@ const DashbaordNew = () => {
   }, []);
 
   React.useEffect(() => {
+    const selectedDashboard = dashboardList.find((d) => d.name === globalFilters?.dashboardType);
+    if (selectedDashboard) {
+      setCharts(selectedDashboard?.charts || []);
+    }
+  }, [globalFilters?.dashboardType]);
+
+  React.useEffect(() => {
     (async () => {
       try {
         const {
@@ -65,7 +72,8 @@ const DashbaordNew = () => {
             marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
             subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
             countryBillTo: countriesData,
-            countrySellTo: countriesData
+            countrySellTo: countriesData,
+            country: countriesData,
           });
         });
       } catch (error) {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, Grid, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Tab, Tabs, TextField, Typography } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
@@ -16,11 +16,43 @@ import Paper from '@material-ui/core/Paper';
 import { Link } from 'react-router-dom'
 import routes from "../../../components/Helpers/Routes"
 import { productInventory } from "../../../constants/helpers";
+import { uniq, map } from 'lodash';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: any;
+  value: any;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+  return (
+    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
+      {children}
+    </div>
+  );
+}
+
+function a11yProps(index: any) {
+  return {
+    id: `main-tab-${index}`,
+    'aria-controls': `main-tabpanel-${index}`
+  };
+}
 
 const SoftHoldDialog = ({ close, data }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
   const [softHoldData, setSoftHoldData] = useState([]);
+  const [tabs, setTabs] = useState([]);
+
+
+  const [value, setValue] = useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
 
   useEffect(() => {
     softHoldDataFetch();
@@ -30,14 +62,15 @@ const SoftHoldDialog = ({ close, data }) => {
     axiosInstance()
       .get(`${productInventory.api}/soft-hold/${data.productId}?wareHouse=${data.plantId}`)
       .then(({ data: { data } }) => {
+        var unique = uniq(map(data, 'referenceType'));
+        setTabs(unique)
         const result = []
-        data?.transferInventory?.forEach((e) => {
+        data?.forEach((e) => {
           result.push({
-            _id: e._id,
-            referenceType: routes.transferInventory.title,
-            path: routes.transferInventoryDetail.path,
-            reference: e.transferNumber,
-            qty: e.assetsCount
+            path: e.referenceType === "Sales Order" ? routes.salesOrderDetail.path :
+              e.referenceType === "Transfer Inventory" ? routes.transferInventoryDetail.path :
+                e.referenceType === "Transfer Asset" ? routes.transferAssetDetail.path : "",
+            ...e
           })
         })
         setSoftHoldData(result);
@@ -63,14 +96,34 @@ const SoftHoldDialog = ({ close, data }) => {
       showRequiredLabel={false}
     ></CustomDialogHeader>
     <CustomDialogContent>
-      <Box p={1}>
+      <Tabs
+        textColor="primary"
+        TabIndicatorProps={{
+          style: {
+            display: 'none'
+          }
+        }}
+        value={value}
+        onChange={handleChange} >
+        {tabs?.map((row, index) => (
+          <Tab
+            className={'tabLayout'}
+            style={{
+              background: value === index ? 'white' : '',
+              color: value === index ? '#163340' : '#163340'
+            }}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                {row}
+              </div>
+            } {...a11yProps(index)} />
+        ))}
+      </Tabs>
+      <Box pt={1}>
         <TableContainer component={Paper}>
           <Table aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell>
-                  <span style={{ color: 'black' }}>Reference Type</span>
-                </TableCell>
                 <TableCell>
                   <span style={{ color: 'black' }}>Reference Number</span>
                 </TableCell>
@@ -80,15 +133,17 @@ const SoftHoldDialog = ({ close, data }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {softHoldData?.map((row, index) => (
+              {softHoldData?.filter((e) => e.referenceType === tabs[value])?.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell>{row.referenceType}</TableCell>
                   <TableCell component="th" scope="row">
-                    <Link className="link text-truncate" to={`${row.path}/${row._id}`}>
-                      {row.reference}
-                    </Link>
+                    {row?.path === "" ?
+                      row?.reference?.optionLabel :
+                      <Link className="link text-truncate" to={`${row?.path}/${row?.reference?.optionValue}`}>
+                        {row?.reference?.optionLabel}
+                      </Link>
+                    }
                   </TableCell>
-                  <TableCell align="right">{row.qty}</TableCell>
+                  <TableCell align="right">{row?.qty}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
