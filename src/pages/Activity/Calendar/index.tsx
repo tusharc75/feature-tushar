@@ -248,9 +248,11 @@ const BigCalendar = () => {
             open={true}
             fullWidth
             maxWidth="md"
-            onClose={() => {
-              closeDialog()
-              setFullScreen(false);
+            onClose={(e, reason) => {
+              if (reason !== 'backdropClick') {
+                handleClose()
+                setFullScreen(false);
+              }
             }}
           >
             {createType === "task" && (
