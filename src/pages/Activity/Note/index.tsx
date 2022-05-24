@@ -524,9 +524,11 @@ const Note = () => {
           TransitionComponent={CustomDialogTransition}
           aria-labelledby="customized-dialog-title"
           maxWidth={'md'}
-          onClose={() => {
-            handleDialogClose()
-            setFullScreen(false);
+          onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+              handleDialogClose();
+              setFullScreen(false);
+            }
           }}
           fullWidth
         >

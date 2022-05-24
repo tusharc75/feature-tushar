@@ -196,7 +196,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
     if (new Date(values.startTime).getTime() === new Date(values.endTime).getTime()) {
       errors["endTime"] = "End time should be different";
     }
-    if (new Date(values.startDate).getTime() > new Date(values.endDate).getTime()) {
+    if (new Date(values.startTime).getTime() >= new Date(values.endTime).getTime()) {
+      errors["endTime"] = "End time should be greater then start time";
+    }
+    if (new Date(values.startDate).getTime() < new Date(values.endDate).getTime()) {
       errors["endDate"] = "End date should be greater then start date";
     }
     if (new Date(values.startTime).toString() === "Invalid Date") {
