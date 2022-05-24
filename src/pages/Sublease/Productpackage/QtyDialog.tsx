@@ -67,10 +67,10 @@ const QtyDialog: FC<EditDialogProps> = (
       let unitArray: any = []
       let pricingMethodArray: any = []
       selectedProducts?.forEach(element => {
-        if (element?.[`${element.type}Detail`]?.unit) {
-          unitArray.push([...element?.[`${element.type}Detail`].unit])
+        if (element?.[`${element?.type}Detail`]?.unit) {
+          unitArray.push([...element?.[`${element.type}Detail`]?.unit])
         }
-        if (element?.[`${element.type}Detail`]?.pricingMethod) {
+        if (element?.[`${element?.type}Detail`]?.pricingMethod) {
           pricingMethodArray.push([...element?.[`${element.type}Detail`]?.pricingMethod])
         }
       });

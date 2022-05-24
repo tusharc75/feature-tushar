@@ -42,21 +42,20 @@ const InventoryProduct = () => {
 
   const [softHold, setSoftHold] = useState({ open: false, data: {} });
 
-  const {
-    state: { permissions }
-  }: any = useData();
+  const { state: { user, permissions, selectedEntity } }: any = useData();
+  
   const { getColumnData } = useColumns();
 
   useEffect(() => {
     getPlants();
     fetchProductInventory();
-  }, [plantId, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const getPlants = () => {
     axiosInstance()
       .get(`/warehouse?noEntityWise=1`)
       .then(({ data: { data } }) => {
-        setPlantOptions(data);
+        setPlantOptions([{ "warehouseName": "All", "_id": "All" }, ...data]);
         if (plantId === null && data?.length) {
           setPlantId(data[0]._id);
         }
@@ -65,7 +64,7 @@ const InventoryProduct = () => {
 
   useEffect(() => {
     fetchGridColumns();
-  }, []);
+  }, [plantId]);
 
   const extraColumn = [
     { field: 'softHold', headerName: 'Soft Hold', show: true, cellRenderer: 'softHoldRenderer' },
@@ -86,7 +85,7 @@ const InventoryProduct = () => {
                 columns.push({
                   ...currentColumn?.columnData,
                   cellEditor: 'numericCellEditor',
-                  editable: permissions?.productInventory?.isUpdate
+                  editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
                 });
               } else if (o.fieldData.fieldName === 'product') {
                 columns.push({
@@ -122,13 +121,14 @@ const InventoryProduct = () => {
     }
     const queryString = getQueryString();
     if (plantId) {
+      let tempPlantId = plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId
       axiosInstance()
-        .get(`${productInventory.api}?wareHouse=${plantId}&${queryString}`)
+        .get(`${productInventory.api}?wareHouse=${tempPlantId}&${queryString}`)
         .then(({ data }) => {
           let rows = data.data?.map((u) => {
             let finalObject = prepareDataForGrid(u);
             finalObject['productId'] = u._id;
-            finalObject['plantId'] = plantId;
+            finalObject['plantId'] = tempPlantId;
             finalObject['availableInventory'] = (u?.inventory || 0) - (u?.softHold || 0);
             return {
               ...finalObject
@@ -231,7 +231,7 @@ const InventoryProduct = () => {
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
             additionalParams={`wareHouse=${plantId}`}
-            permissions={permissions?.productInventory}
+            permissions={{ isCreate: permissions?.productInventory?.isCreate && plantId !== "All" }}
             module="product inventory"
             api={productInventory.api}
             afterImportCompleted={() => {

@@ -110,7 +110,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         if (rows?.length) {
           setNextStep(true);
         }
-        dispatch({ type: 'initialize', data: rows, count: data.count });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);

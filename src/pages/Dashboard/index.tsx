@@ -301,7 +301,7 @@ function Dashboard() {
                               .map((item) => (
                                 <div key={item.name}>
                                   <Box marginY={1} component="div" className={`list_component`}>
-                                    <Typography paragraph className={styles.hover_list_box}>
+                                    <Typography variant='subtitle2' className={styles.hover_list_box}>
                                       <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
                                     </Typography>
                                   </Box>
