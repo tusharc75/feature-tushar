@@ -112,9 +112,10 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
 }
 export const getStaticFields = () => {
     return [
-        { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-        { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }]
+        { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' },
+        { field: 'updatedBy', headerName: 'Updated By', show: true, filter: false, sortable: false, cellRenderer: 'updatedByRenderer' }]
 }
+
 export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
     let data = localStorage.getItem("gridMetaData")
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
