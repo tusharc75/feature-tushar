@@ -7,7 +7,8 @@
 // CARD SECTION
 .card_grid.dashboard_homepage {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  // grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   grid-gap: 24px;
 
   .single_card {
@@ -17,7 +18,7 @@
       position: relative;
       height: 100%;
       text-align: center;
-      transition: transform 0.1s;
+      transition: transform 0.6s;
       transform-style: preserve-3d;
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.2);
@@ -99,6 +100,7 @@
         .card_front_content img {
           display: block;
           margin-bottom: 21px;
+          transition: all 0.4s;
         }
 
         .card_front_content .card_head {
@@ -106,6 +108,7 @@
           font-size: 22px;
           line-height: 27px;
           margin-bottom: 13px;
+          transition: all 0.4s;
         }
 
         .card_front_content .card_description {
@@ -113,6 +116,7 @@
           font-size: 16px;
           line-height: 32px;
           padding-bottom: 46px;
+          transition: all 0.4s;
         }
 
         .card_front_content .view_all_button {
@@ -125,6 +129,65 @@
 
     &:hover .card_content {
       transform: rotateY(180deg);
+    }
+  }
+}
+@media all and (max-width: 1400px) {
+  .card_grid.dashboard_homepage {
+    grid-gap: 15px;
+  }
+}
+
+@media all and (min-width: 1155px) and (max-width: 1400px) {
+  .card_grid.dashboard_homepage {
+    .single_card {
+      .card_content {
+        .card_front {
+          .card_front_content {
+            img {
+              margin-bottom: 15px;
+              max-width: 30px;
+              height: auto;
+            }
+            .card_description {
+              line-height: 1.5;
+              padding-bottom: 35px;
+              font-size: 14px;
+            }
+          }
+        }
+        .card_back a {
+          font-size: 16px;
+          margin-bottom: 10px;
+        }
+      }
+    }
+  }
+}
+@media all and (max-width: 998px) {
+  .card_grid.dashboard_homepage {
+    grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+    .single_card {
+      .card_content {
+        .card_front {
+          .card_front_content {
+            img {
+              margin-bottom: 15px;
+              max-width: 30px;
+              height: auto;
+            }
+            .card_description {
+              line-height: 1.5;
+              padding-bottom: 35px;
+              font-size: 14px;
+            }
+          }
+        }
+        .card_back a {
+          font-size: 16px;
+          margin-bottom: 10px;
+        }
+      }
     }
   }
 }
