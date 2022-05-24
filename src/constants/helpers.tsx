@@ -1516,6 +1516,14 @@ export const getLocalStorageArrayData = (key) => {
   }
 };
 
+export const removeLocalStorage = (key) => {
+  try {
+    localStorage.setItem(key, JSON.stringify([]));
+  } catch (err) {
+    return []
+  }
+}
+
 export const translateDataToTree = (data, parentProperty, childProperty, childrenPropertyToStore) => {
   let parents = data.filter((value) => value[parentProperty] == 'undefined' || value[parentProperty] == null);
   let childrens = data.filter((value) => value[parentProperty] !== 'undefined' && value[parentProperty] != null);

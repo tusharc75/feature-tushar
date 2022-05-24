@@ -23,7 +23,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
-import { gridLoadingTimeout, entity, sidebarResource, prepareDataForGrid, getLocalStorageArrayData } from '../../constants/helpers';
+import { gridLoadingTimeout, entity, sidebarResource, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
@@ -824,6 +824,7 @@ export default function Account(props) {
             message: data.message
           });
           setShowDeleteConfirmBox(false);
+          removeLocalStorage(`${localStorageSelectedRecords}`)
           fetchAccounts();
         })
         .catch((error) => {
@@ -842,6 +843,7 @@ export default function Account(props) {
           type: 'success',
           message: data.message
         });
+          removeLocalStorage(`${localStorageSelectedRecords}`)
         fetchAccounts();
       })
       .catch((error) => {
