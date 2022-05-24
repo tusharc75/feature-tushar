@@ -184,16 +184,15 @@ const TransferAssetDetailPage = () => {
         }
 
         const userEntity = user?.entity?.map((e) => e._id) ?? [];
-        const warehouseEntity =
-          data?.transferType === 'Internal'
-            ? data?.transfertoPlant?.entity
-            : data?.transferType === 'External Customer'
-            ? data?.transfertoCustomer?.entity
-            : data?.transfertoSupplier?.entity;
+        const warehouseEntity = data?.transferType === 'Internal' ? data?.transfertoPlant?.entity : data?.transferType === 'External Customer' ? data?.transfertoCustomer?.entity : data?.transfertoSupplier?.entity;
 
-        const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
-
-        setCanReceive(isReceiveable);
+        if (warehouseEntity?.length) {
+          const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
+          setCanReceive(isReceiveable);
+        }
+        else {
+          setCanReceive(true);
+        }
 
         if (permissions?.transferAsset?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
@@ -562,7 +561,7 @@ const TransferAssetDetailPage = () => {
                               type: ACTIVITY_RESOURCE.transferAsset
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>
