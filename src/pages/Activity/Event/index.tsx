@@ -4,7 +4,7 @@ import { Add } from "@material-ui/icons";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import queryString from "query-string";
-import {useData} from "../../../StateProvider/Provider"
+import { useData } from "../../../StateProvider/Provider"
 import MyCalendar from "../Calendar/MyCalendar";
 import { GetBoard, GetReferenceName } from "../../../axios/activity";
 import Layout from "../../../components/Layout";
@@ -19,7 +19,7 @@ const Event = () => {
   const { setToastConfig } = useContext(CustomToastContext);
   const {
     state: {
-      user: { user ,permissions},
+      user: { user, permissions },
     },
   } = useData();
   const [filter, setFilter] = useState([]);
@@ -112,8 +112,14 @@ const Event = () => {
               }}
               type="event"
             />
-
-            <Dialog open={openDialog} onClose={handleClose} maxWidth="md">
+            <Dialog
+              open={openDialog}
+              onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                  handleClose()
+                }
+              }}
+              maxWidth="md">
               <CreateEvent
                 eventId={activityData ? activityData.id : null}
                 handleClose={handleClose}

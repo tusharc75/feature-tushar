@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Box,Button,Dialog } from '@material-ui/core';
+import { Box, Button, Dialog } from '@material-ui/core';
 import { useDrop } from 'react-dnd';
 import update from 'immutability-helper';
 import { BoardBox } from './BoardBox';
@@ -66,10 +66,10 @@ export const BoardList = ({ status, type, activity, selectedResource, resource, 
 
   return (
     <div ref={ref} style={{ height: 'calc(100% - 42px)' }}>
-      <Box 
-      minHeight="100%" 
-      onMouseEnter={() => setCreateButton(true)} 
-      onMouseLeave={() => setCreateButton(false)}
+      <Box
+        minHeight="100%"
+        onMouseEnter={() => setCreateButton(true)}
+        onMouseLeave={() => setCreateButton(false)}
       >
         {!loading ? (
           <>
@@ -87,7 +87,7 @@ export const BoardList = ({ status, type, activity, selectedResource, resource, 
                 handleActivityOpen={handleActivityOpen}
               />
             ))}
-              {
+            {
               permissions && permissions[type?.toLowerCase()]?.isCreate ?
                 <Box
                   p={1}
@@ -114,18 +114,20 @@ export const BoardList = ({ status, type, activity, selectedResource, resource, 
         )}
       </Box>
 
-      {selectedId && 
-      <ActivityModelHandler 
-      setActivityData={setSelectedId} 
-      activityType={type} 
-      fetchBoard={fetchBoard} 
-      activityId={selectedId} />
+      {selectedId &&
+        <ActivityModelHandler
+          setActivityData={setSelectedId}
+          activityType={type}
+          fetchBoard={fetchBoard}
+          activityId={selectedId} />
       }
-       <Dialog
+      <Dialog
         open={openDialog}
-        onClose={() => {
-          handleCloseDialog();
-          setFullScreen(false);
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            handleCloseDialog()
+            setFullScreen(false);
+          }
         }}
         fullWidth
         maxWidth="md"
