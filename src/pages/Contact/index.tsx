@@ -17,7 +17,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, userType } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
@@ -35,11 +35,8 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { MdAccountCircle } from 'react-icons/md';
-import { AiFillPhone } from 'react-icons/ai';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdEmail } from 'react-icons/md';
 import queryString from 'query-string';
 import { MdAdd } from 'react-icons/all';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
@@ -80,10 +77,7 @@ export default function Contact(props) {
     account
   } = props;
   const [selectedType, setSelectedType] = useState(1);
-  const [count, setCount] = useState(0);
   const [open, setOpen] = useState(false);
-  const [checkColName, setCheckColName] = useState('');
-  const [checkColValue, setCheckColValue] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -122,9 +116,6 @@ export default function Contact(props) {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
   const columnState = JSON.parse(localStorage.getItem(contactResource));
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
-  const [disablePortalAccess, setDisablePortalAccess] = useState(false);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
@@ -591,12 +582,10 @@ export default function Contact(props) {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-
           finalObject['owerCollaboratorInitialsOrImages'] = [];
           if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-
           finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
             if (f.initials) {
               f.initials = f.initials
@@ -615,8 +604,6 @@ export default function Contact(props) {
             relatedLeadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity
           };
         });
-        setIsAllChecked(false);
-        setClonedData(data);
         if (appendRows) {
           dispatch({
             type: 'initialize',
@@ -690,10 +677,9 @@ export default function Contact(props) {
   };
 
   const handleDeleteContact = () => {
-    const selectedContacts = selectedRecords.map((m) => {
+    const selectedContacts = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((m) => {
       return m.id;
     });
-
     if (selectedContacts.length > 0) {
       dispatch({ type: 'loading', loading: true });
       axiosInstance()
@@ -769,8 +755,8 @@ export default function Contact(props) {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else getContacts();
@@ -914,8 +900,7 @@ export default function Contact(props) {
 
                   <>
                     <Button
-                      // disabled={Boolean(!selectedBrand)}
-                      disabled={selectedRecords.length === 0}
+                      disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"
@@ -939,9 +924,9 @@ export default function Contact(props) {
                     >
                       {contactPermissions.isDelete && (
                         <MenuItem
-                          disabled={selectedRecords.length === 0}
+                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                           onClick={() => {
-                            if (selectedRecords.some((d) => d.canDelete === false)) {
+                            if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.canDelete === false)) {
                               closeActions();
                               setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
                             } else {
@@ -955,35 +940,35 @@ export default function Contact(props) {
                       )}
                       {user.user?.userType === userType.brandAdmin && (
                         <MenuItem
-                          disabled={selectedRecords.length === 0 || selectedRecords.some((record) => record?.isUserExist)}
+                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 || getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((record) => record?.isUserExist)}
                           onClick={handleAccessToPortal}
                         >
                           Give Access to Portal
                         </MenuItem>
                       )}
-                      {contactPermissions.isUpdate && (
+                      {(contactPermissions.isUpdate && contactResource === 'customerContact' && permissions?.productInventory) && (
                         <MenuItem
-                          disabled={selectedRecords.length === 0 || [...new Set(selectedRecords.map((d) => d.accountNameId))].length > 1}
+                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 || [...new Set(getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d.accountNameId))].length > 1}
                           onClick={() => {
                             setOpenAddPlantsDialog(true)
                             closeActions();
                           }}
                         >
-                          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords.length} />
+                          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
                         </MenuItem>
                       )}
                       {contactPermissions.isUpdate && (
                         <MenuItem
-                          disabled={selectedRecords.length === 0}
+                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                           onClick={() => {
-                            if (selectedRecords.some((d) => d.isUpdate === false)) {
+                            if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.isUpdate === false)) {
                               closeActions();
                               setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
                             } else {
                               closeActions();
-                              if (selectedRecords.length) {
+                              if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length) {
                                 let entities = [];
-                                selectedRecords.map((current) => {
+                                getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((current) => {
                                   if (current?.entityId) {
                                     entities = [...entities, current?.entityId];
                                   }
@@ -998,7 +983,7 @@ export default function Contact(props) {
                             }
                           }}
                         >
-                          Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                          Assign Entity &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
                         </MenuItem>
                       )}
                     </Menu>
@@ -1020,7 +1005,7 @@ export default function Contact(props) {
                 history.push(`${contactApi}/detail/${d._id}`);
               }}
               dataRows={dataRows}
-              selectedRecords={selectedRecords}
+              selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
               dispatch={dispatch}
               onEdit={(d) => {
                 history.push(`${contactApi}/detail/${d._id}?openEdit=true`);
@@ -1131,7 +1116,7 @@ export default function Contact(props) {
                 }}
                 handleCloseDialog={() => setShowAssignEntityDialog(false)}
                 assignedEntity={[]}
-                ids={selectedRecords.map((record) => record._id || record.id)}
+                ids={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((record) => record._id || record.id)}
                 isRenderedFromContact={true}
                 regionalRole={false}
                 type="entity"
@@ -1184,7 +1169,7 @@ export default function Contact(props) {
             <EntitySelectionsDialog
               open={showEntityDialog}
               resource={sidebarResource[contactResource]}
-              resourceIds={selectedRecords.length ? selectedRecords.map((o) => o._id) : [contactId]}
+              resourceIds={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((o) => o._id) : [contactId]}
               onClose={() => {
                 setShowEntityDialog(false);
                 setContactId('');
