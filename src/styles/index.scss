@@ -41,6 +41,7 @@
   --colorContact: #003f57;
   --colorAccount: red;
   --colorProject: yellow;
+  --new_theme_color: #43aeaa;
 }
 
 @import '~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss';
@@ -817,7 +818,7 @@ body::-webkit-scrollbar-thumb {
   align-items: center;
   padding: 10px;
   border-radius: 3px;
-  background-color: #329592;
+  background-color: var(--new_theme_color);
   h3 {
     padding: 0px;
     padding-top: 1px;
@@ -1795,7 +1796,7 @@ svg.MuiSvgIcon-root {
   border: 1px solid #43aeaa3a;
 }
 .accordion_grid_customer_account .MuiPaper-root > .MuiButtonBase-root[aria-expanded='true'] {
-  background-color: #43aeaa;
+  background-color: var(--new_theme_color);
   color: #fff;
 
   * {
@@ -1887,7 +1888,7 @@ svg.MuiSvgIcon-root {
       padding: 4px 0;
       border-radius: 4px;
       &[aria-expanded='true'] {
-        background-color: #41aeaa !important;
+        background-color: var(--new_theme_color) !important;
         & * {
           color: #fff;
           fill: #fff;
