@@ -692,7 +692,7 @@ const ContactDetailsPage = (props) => {
           // contactResource={contactResource}
           accountResource={accountResource}
           contactResource={contactResource}
-          // contactApi={contactApi}
+        // contactApi={contactApi}
         />
       ) : openUpdateDialog ? (
         <ManageContact
@@ -717,7 +717,7 @@ const ContactDetailsPage = (props) => {
           // contactResource={contactResource}
           accountResource={accountResource}
           contactResource={contactResource}
-          // contactApi={contactApi}
+        // contactApi={contactApi}
         />
       ) : null}
 
@@ -776,9 +776,9 @@ const ContactDetailsPage = (props) => {
               ) : null}
 
               {contactPermissions.isDelete &&
-              contactData?.owner?.optionValue &&
-              user?.user?._id &&
-              contactData.owner.optionValue === user.user._id ? (
+                contactData?.owner?.optionValue &&
+                user?.user?._id &&
+                contactData.owner.optionValue === user.user._id ? (
                 <DeleteButton
                   id="detailDeleteButton"
                   text={isMobile ? <MdDelete size={20} /> : 'Delete'}
@@ -819,7 +819,9 @@ const ContactDetailsPage = (props) => {
                   >
                     <Tab label="Details" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
                     <Tab label="Org Chart" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className="tabLayout" />
-                    <Tab label="Plants" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
+                    {(!isOffline && contactResource === 'customerContact' && permissions?.productInventory) && (
+                      <Tab label="Plants" aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
+                    )}
                   </Tabs>
                   <Box hidden={currentTabIndex !== 0}>
                     {showAtLast ? (
@@ -840,11 +842,9 @@ const ContactDetailsPage = (props) => {
                       isInContact={true}
                     />
                   </Box>
-                  {!isOffline && contactResource === 'customerContact' && permissions?.hasOwnProperty('productInventory') && (
-                    <Box hidden={currentTabIndex !== 2}>
-                      <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
-                    </Box>
-                  )}
+                  <Box hidden={currentTabIndex !== 2}>
+                    <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
+                  </Box>
                 </>
               )}
             </Box>
@@ -1038,7 +1038,7 @@ const ContactDetailsPage = (props) => {
                         access: true
                       }
                     ]}
-                    handleActivityRefresh={() => {}}
+                    handleActivityRefresh={() => { }}
                     emails={[contactData?.email ?? '']}
                   />
                 </div>
