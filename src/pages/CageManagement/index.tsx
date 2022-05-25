@@ -98,7 +98,7 @@ const CageManagement = () => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: 'success',
-                        message: "Add to pikup successfully"
+                        message: "Picked Up Successfully"
                     });
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
@@ -117,7 +117,7 @@ const CageManagement = () => {
                 toastConfig.setToastConfig({
                     open: true,
                     type: 'success',
-                    message: data.message
+                    message:  "Drop Successfully"
                 });
                 setLoadingHistory(false)
                 fetchHistory()
