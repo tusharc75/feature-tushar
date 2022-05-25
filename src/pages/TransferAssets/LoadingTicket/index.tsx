@@ -20,10 +20,10 @@ import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSe
 import ReplaceAssetReason from "../../../components/RentalManagment/ReplaceAssetReason";
 import HtmlTooltip from "../../../components/CustomTooltipTitle";
 import InfoIcon from '@material-ui/icons/Info';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 
 interface LoadingGridProps {
-  fetchAssets: any;
   permissions: any;
   transferAssetData?: any;
   transferAssetId: string | any;
@@ -40,13 +40,11 @@ interface LoadingGridProps {
   renderedFrom?: string;
   allowedToEdit: boolean;
   canReceive: boolean;
-  fetchTransferAssetData?: any;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const {
     permissions,
-    fetchAssets,
     transferAssetId,
     transferAssetData,
     setTickets,
@@ -60,7 +58,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     renderedFrom,
     allowedToEdit,
     canReceive,
-    fetchTransferAssetData
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -77,29 +74,124 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
-  const columns = [
-    {
-      field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer',
-      cellStyle: params => {
-        if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
-          return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-        }
-        if (params?.data?.isReplaced) {
-          return { backgroundColor: COLOUR_MASTER.replaceAssetColor.background };
-        }
-        return null;
-      }
-    },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-    { field: 'productDescription', headerName: 'Product Type', show: true, cellRenderer: 'productRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
-  ];
+
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] })
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} })
   const [replaceLoading, setReplaceLoading] = useState(false)
+  const [columns, setColumns] = useState(null)
+
+  useEffect(() => {
+    if (transferAssetId) {
+      fetchAssetsData();
+    }
+  }, [transferAssetId]);
+
+  useEffect(() => {
+    if (selectedRecords.length > 0) {
+      const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('loadingTicket'));
+      setAssetWithNoTicket(inventoryWithNoTicket);
+    }
+    if (dataRows.length) {
+      const inventoryDelivered = dataRows.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
+      const inventoryLost = dataRows.filter((asset: any) => asset?.status === 'Lost');
+      if (inventoryDelivered.length > 0) {
+        setNextStep(true);
+      } else {
+        setNextStep(false);
+      }
+      if (transferAssetData?.transferType === 'Internal') {
+        if (inventoryDelivered.length === dataRows.filter(d => d.status !== "Lost").length || inventoryLost.length === dataRows.length) {
+          setTransferIsEnded(true);
+          updateTransferStatus('Completed');
+        } else {
+          setTransferIsEnded(false);
+        }
+      }
+    }
+  }, [dataRows, selectedRecords]);
+
+  const fetchFields = () => {
+    setColumns(null)
+    const column = [
+      {
+        field: 'assetNumber', headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'assetRenderer',
+        cellStyle: params => {
+          if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
+            return { backgroundColor: COLOUR_MASTER.lostAssets.background };
+          }
+          if (params?.data?.isReplaced) {
+            return { backgroundColor: COLOUR_MASTER.replaceAssetColor.background };
+          }
+          return null;
+        }
+      },
+      { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
+      { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
+      { field: 'productDescription', headerName: 'Product Type', show: true, cellRenderer: 'productRenderer' },
+      { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
+      { field: 'loadingTicketStatus', headerName: 'Loading Ticket Status', show: true, cellRenderer: 'commonRenderer' }
+    ];
+    setColumns(column)
+  }
+
+  const fetchAssetsData = async () => {
+    await fetchFields()
+    dispatch({ type: 'loading', loading: true });
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    try {
+      const result = await axiosInstance().get(`${routes.transferAsset.path}/get-asset/${transferAssetData?._id}`)
+      let assetData = result?.data?.data?.assets?.map((d: any) => ({
+        ...d,
+        productDescription: d?.product?.optionLabel ?? '',
+        productId: d?.product?.optionValue ?? '',
+        isChecked: false
+      }))
+      let replaceAssetLog = result?.data?.data?.replaceAssetLog ? result?.data?.data?.replaceAssetLog : []
+      let ticketData: any = await fetchLoadingTickets();
+      ticketData = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.loading)
+      for (let i = 0; i < ticketData.length; i++) {
+        for (let j = 0; j < assetData.length; j++) {
+          if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
+            assetData[j].loadingTicket = ticketData[i].ticketName;
+            assetData[j].loadingTicketId = ticketData[i]._id;
+            assetData[j].loadingTicketStatus = ticketData[i].status;
+          }
+        }
+      }
+      if (replaceAssetLog?.length) {
+        assetData?.forEach((element) => {
+          const logRes = replaceAssetLog?.filter((e) => e.assetId == element._id);
+          if (logRes.length) {
+            element.isReplaced = true;
+            element.replaceReason = logRes[0]?.replaceReason;
+            element.replaceAsset = logRes[0]?.replaceAsset;;
+          }
+        })
+      }
+      setExistingAssets(assetData);
+      dispatch({ type: 'initialize', data: assetData, count: assetData.length });
+      dispatch({ type: 'loading', loading: false });
+    } catch (error) {
+      dispatch({ type: 'loading', loading: false });
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchLoadingTickets = () =>
+    new Promise((resolve, reject) => {
+      axiosInstance()
+        .get(`${routes.deliveryTicket.path}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.transferAsset}&refrenceId=${transferAssetId}`)
+        .then(({ data: { data } }) => {
+          resolve(data);
+          setTickets(data);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
 
   const AssetRenderer = (params) =>
     params.value ? (
@@ -108,7 +200,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           <p title={params.value}>{params.value}</p>
         </Link>
         {(params?.data?.isReplaced) &&
-          <Box ml={1} mt={1}>
+          <Box ml={1}>
             <HtmlTooltip title={`Replaced Asset with ${params?.data?.replaceAsset} Reason-${params?.data?.replaceReason}`}>
               <InfoIcon fontSize="small" color={"primary"} />
             </HtmlTooltip>
@@ -145,87 +237,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     dateRenderer: DateRenderer
   };
 
-  useEffect(() => {
-    if (transferAssetId) {
-      fetchAssetsData(true);
-    }
-  }, [transferAssetId]);
-
-  const fetchAssetsData = async (forceRefresh) => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    try {
-      let replaceAssetLog = transferAssetData?.replaceAssetLog ? transferAssetData?.replaceAssetLog : []
-      let assetData = await fetchAssets(forceRefresh);
-      let ticketData: any = await fetchLoadingTickets();
-      ticketData = ticketData.filter((ticket: any) => ticket.ticketType === DELIVERY_TICKET_TYPE.loading)
-      for (let i = 0; i < ticketData.length; i++) {
-        for (let j = 0; j < assetData.length; j++) {
-          if (ticketData[i]?.productInventory.some((asset: any) => assetData[j]._id === (typeof asset === 'object' ? asset.optionValue : asset))) {
-            assetData[j].loadingTicket = ticketData[i].ticketName;
-            assetData[j].loadingTicketId = ticketData[i]._id;
-            assetData[j].loadingTicketStatus = ticketData[i].status;
-          }
-        }
-      }
-      if (replaceAssetLog?.length) {
-        assetData?.forEach((element) => {
-          const logRes = replaceAssetLog?.filter((e) => e.assetId == element._id);
-          if (logRes.length) {
-            element.isReplaced = true;
-            element.replaceReason = logRes[0]?.replaceReason;
-            element.replaceAsset = logRes[0]?.replaceAsset;;
-          }
-        })
-      }
-      setExistingAssets(assetData);
-      dispatch({ type: 'initialize', data: assetData, count: assetData.length });
-      dispatch({ type: 'loading', loading: false });
-    } catch (error) {
-      dispatch({ type: 'loading', loading: false });
-      toastConfig.setToastConfig(error);
-    }
-  };
-
-  const fetchLoadingTickets = () =>
-    new Promise((resolve, reject) => {
-      axiosInstance()
-        .get(`${routes.deliveryTicket.path}/typewise?refrenceType=Transfer Asset&refrenceId=${transferAssetId}`)
-        .then(({ data: { data } }) => {
-          resolve(data);
-          setTickets(data);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
-
-  useEffect(() => {
-    if (selectedRecords.length > 0) {
-      const inventoryWithNoTicket = selectedRecords.filter((asset: any) => !asset?.hasOwnProperty('loadingTicket'));
-      setAssetWithNoTicket(inventoryWithNoTicket);
-    }
-    if (dataRows.length) {
-      const inventoryDelivered = dataRows.filter((asset: any) => asset['loadingTicketStatus'] === 'Delivered');
-      const inventoryLost = dataRows.filter((asset: any) => asset?.status === 'Lost');
-      if (inventoryDelivered.length > 0) {
-        setNextStep(true);
-      } else {
-        setNextStep(false);
-      }
-      if (transferAssetData?.transferType === 'Internal') {
-        if (inventoryDelivered.length === dataRows.filter(d => d.status !== "Lost").length || inventoryLost.length === dataRows.length) {
-          setTransferIsEnded(true);
-          updateTransferStatus('Completed');
-        } else {
-          setTransferIsEnded(false);
-        }
-      }
-    }
-  }, [dataRows, selectedRecords]);
-
   const handleRemoveTicket = () => {
     setRemovingTicket(true);
     const groupByCalls = groupBy(selectedRecords, 'loadingTicketId');
@@ -242,7 +253,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           type: 'success',
           message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)`
         });
-        fetchAssetsData(true);
+        fetchAssetsData();
         setRemovingTicket(false);
       })
       .catch((error) => {
@@ -262,7 +273,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       data["status"] = DELIVERY_TICKET_STATUS.delivered
       data["signatures"] = []
       axiosInstance().post(`${deliveryTicket.api}/updatebulk`, data).then(({ data: { data } }) => {
-        fetchAssetsData(true)
+        fetchAssetsData()
         setShowConfirmBoxReceive(false)
         toastConfig.setToastConfig({
           open: true,
@@ -303,16 +314,15 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     setReplaceLoading(true)
     axiosInstance().post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
       .then(({ data }) => {
-        fetchTransferAssetData()
         setShowReplaceReason({ open: false, data: [] })
         setAddSerializedAssetDialog({ open: false, products: [] })
         setReplaceLoading(false)
-        fetchAssetsData(true)
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: `Assets Replaced Successfully`
         });
+        fetchAssetsData()
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -473,64 +483,68 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         </Box>}
       </Box>
       <Box mt={1}>
-        {isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={allowedToEdit}
-            allowSwipe={true}
-            permissions={permissions?.transferAsset}
-            primaryField={columns?.find((d) => d.field)}
-            onClick={(data) => {
-              history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(data) => {
-              // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => { }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            chips={[
-              {
-                label: "Status: ",
-                field: "status",
-              },
-              {
-                label: 'Loading Ticket : ',
-                field: 'loadingTicket',
-                onClick: (data: any) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`),
-              }
-            ]}
-            additionalDetails={[]}
-            owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-            onCreate={false}
-            showClone={false}
-            onClone={(data) => { }}
-            renderedFrom={renderedFrom}
-          />
-        ) : (
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameworkComponents}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={false}
-            actionWidth={100}
-            allowSelection={allowedToEdit}
-            isClientSideGrid={true}
-            loading={loading}
-            renderedFrom={renderedFrom}
-            refreshGrid={() => fetchAssetsData(true)}
-          />
-        )}
+
+        {columns ?
+          isMobile && !isTablet ? (
+            <CustomSwipableList
+              allowSelection={allowedToEdit}
+              allowSwipe={true}
+              permissions={permissions?.transferAsset}
+              primaryField={columns?.find((d) => d.field)}
+              onClick={(data) => {
+                history.push(`${routes.serializedAssetDetail.path}/${data._id}`);
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+                // history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => { }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              chips={[
+                {
+                  label: "Status: ",
+                  field: "status",
+                },
+                {
+                  label: 'Loading Ticket : ',
+                  field: 'loadingTicket',
+                  onClick: (data: any) => history.push(`${routes.deliveryTicketDetail.path}/${data.loadingTicketId}`),
+                }
+              ]}
+              additionalDetails={[]}
+              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+              onCreate={false}
+              showClone={false}
+              onClone={(data) => { }}
+              renderedFrom={renderedFrom}
+            />
+          ) : (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowAction={false}
+              actionWidth={100}
+              allowSelection={allowedToEdit}
+              isClientSideGrid={true}
+              loading={loading}
+              renderedFrom={renderedFrom}
+              refreshGrid={() => fetchAssetsData()}
+            />
+          ) : <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>}
       </Box>
       {
         showTicketDialog.open && (
@@ -542,7 +556,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             onClose={() => setShowTicketDialog({ open: false, data: {} })}
             onSuccess={() => {
               setShowTicketDialog({ open: false, data: {} });
-              fetchAssetsData(true);
+              fetchAssetsData();
             }}
           />
         )

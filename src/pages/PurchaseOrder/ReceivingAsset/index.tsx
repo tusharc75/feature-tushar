@@ -130,6 +130,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                     ...finalObject,
                     productName: item?.productDetail?.productName,
                     productNumber: item?.productDetail?.productNumber,
+                    productDescription: item?.productDetail?.productDescription,
                     serializedProduct: item?.productDetail?.serializedProduct,
                     productId: item?.productDetail?._id,
                 };
@@ -325,7 +326,6 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                         fullHeight={true}
                         renderedFrom={renderedFrom}
                         onClone={() => { }}
-
                     /> : <CustomAgGridEditable
                         columns={columns}
                         dataRows={dataRows}
