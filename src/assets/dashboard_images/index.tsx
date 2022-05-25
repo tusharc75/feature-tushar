@@ -5,6 +5,7 @@ import accounts from './accounts.svg';
 import productSetup from './product_setup.svg';
 import activities from './activities.svg';
 import adminPortal from './admin_portal.svg';
+import { FcViewDetails } from 'react-icons/fc';
 
 import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL } from './constants/imageTypes';
 

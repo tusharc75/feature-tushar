@@ -16,11 +16,13 @@ import { RiFolderSettingsLine, RiAccountPinCircleFill, RiShieldUserLine } from '
 import { SiCivicrm } from 'react-icons/si';
 import { AiOutlineSetting } from 'react-icons/ai';
 import { BsChatLeftTextFill } from 'react-icons/bs';
+import { ProductSetup, AccountsIcon } from '../../assets/sidebar_assets/icons';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { staticHiddenResource } from '../../constants/helpers';
 
 import { AiOutlineDatabase, AiOutlineFileText } from 'react-icons/ai';
-import { HiOutlineUser } from 'react-icons/hi';
+// import { HiOutlineUser } from 'react-icons/hi';
+import { FaRegUser } from 'react-icons/fa';
 
 import { AccountCircle } from '@material-ui/icons';
 import routes from '../Helpers/Routes';
@@ -116,7 +118,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     },
     {
       key: 'Product Setup',
-      icon: <RiFolderSettingsLine size={15} className="sidebar-icon" />
+      icon: <ProductSetup size={15} className="sidebar-icon" />
     },
     {
       key: 'Admin Portal',
@@ -128,7 +130,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     },
     {
       key: 'Accounts',
-      icon: <HiOutlineUser size={15} className="sidebar-icon" />
+      icon: <FaRegUser size={15} className="sidebar-icon" />
     },
     {
       key: 'CRM +',
@@ -370,7 +372,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           <List style={{ bottom: '0px', marginTop: 'auto' }}>
             <ListItem button onClick={() => setChatOpen((prevState) => !prevState)}>
               <ListItemIcon>
-                <BsChatLeftTextFill size={16} className="sidebar-icon" />
+                <BsChatLeftTextFill size={16} className="sidebar-icon chat-icon" />
               </ListItemIcon>
               <ListItemText primary="Chat" />
             </ListItem>

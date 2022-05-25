@@ -68,7 +68,7 @@ function RelatedContacts({ contacts, accountId, accountName, contactRoute, handl
                                   handleRemoveContact(obj);
                                 }}
                               >
-                                <DeleteOutlineIcon color="primary" className={styles.delete_icon_button} />
+                                <DeleteOutlineIcon color="error" className={styles.delete_icon_button} />
                               </IconButton>
                             </Grid>
                           </Grid>

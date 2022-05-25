@@ -306,7 +306,7 @@ export default function OpportunityAccordianProjectSales({
                                           size="small"
                                           onClick={() => handleRemove(obj)}
                                         >
-                                          <DeleteOutlineIcon fontSize="small" color="primary" />
+                                          <DeleteOutlineIcon fontSize="small" color="error" />
                                         </IconButton>
                                       </>
                                     ) : null}

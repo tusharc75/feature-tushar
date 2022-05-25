@@ -130,16 +130,17 @@
   }
 
   .hero_container {
-    margin: 0 auto;
-    max-width: 600px;
-    text-align: center;
+    // margin: 0 auto;
+    // max-width: 600px;
+    // text-align: center;
+    display: none;
   }
-  .crm_hero_image {
-    margin: 29px auto 0;
-  }
-  .hero_heading {
-    margin-bottom: 5px;
-  }
+  // .crm_hero_image {
+  //   margin: 29px auto 0;
+  // }
+  // .hero_heading {
+  //   margin-bottom: 5px;
+  // }
 }
 
 // @media all and (max-width: 567px) {
@@ -182,4 +183,3 @@
   user-select: none;
   text-align: center;
 }
-

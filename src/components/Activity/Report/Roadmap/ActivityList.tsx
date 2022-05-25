@@ -135,9 +135,11 @@ export default function ActivityList(props) {
           TransitionComponent={CustomDialogTransition}
           fullWidth
           maxWidth="md"
-          onClose={() => {
-            closeDialog();
-            setFullScreen(false);
+          onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+              closeDialog()
+              setFullScreen(false);
+            }
           }}
         >
           {type === "task" && (

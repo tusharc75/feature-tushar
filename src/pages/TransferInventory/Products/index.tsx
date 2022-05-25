@@ -17,7 +17,7 @@ import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgG
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 
-const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit }) => {
+const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -128,6 +128,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       })
       .then(() => {
         fetchProducts();
+        fetchTransferInventoryData()
         toastConfig.setToastConfig({
           open: true,
           message: 'Records added successfully',
@@ -153,6 +154,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         setShowConfirmBox(false);
         setRemovingInventory(false);
         fetchProducts();
+        fetchTransferInventoryData()
       } catch (error) {
         setShowConfirmBox(false);
         setRemovingInventory(false);

@@ -16,7 +16,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
@@ -467,8 +467,12 @@ const ProductCategory = () => {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchProductCategory();
