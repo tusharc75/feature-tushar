@@ -17,6 +17,13 @@ const openCloseStatus = [
   },
 ]
 
+const quotesStatus = [
+  { optionLabel: 'Open', optionValue: 'open' },
+  { optionLabel: 'Won', optionValue: 'won' },
+  { optionLabel: 'Lost', optionValue: 'lost' },
+  { optionLabel: 'Offered', optionValue: 'offered' }
+]
+
 export const GRAPH_TYPES = ['Chart', 'Table', 'Map'];
 
 export const CHART_TYPES = ['Line', 'Bar', 'Pie', 'Doughnut'];
@@ -49,12 +56,14 @@ export type KPIListType = {
   name: string;
   kpi: string;
   resource: string;
+  currencyConverter?: boolean
 };
 
 export const statuses = {
   "asset/location-base-assets": RentalStatus,
-  "asset/customer-in-rental": openCloseStatus
-
+  "asset/customer-in-rental": openCloseStatus,
+  "quote/quote-customer-account": quotesStatus,
+  "quote/sales-rep": quotesStatus
 }
 
 export const kpiList: KPIListType[] = [

@@ -139,7 +139,7 @@ const DashboardBuilder = () => {
             ]
           };
     let blob = new Blob([JSON.stringify(dataToExport)], { type: 'text/plain;charset=utf-8' });
-    saveAs(blob, 'Dashboard Fields' + '.json');
+    saveAs(blob, `${name || 'Dashboard Fields'}.json`);
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,7 +149,7 @@ const DashboardBuilder = () => {
     let reader = new FileReader();
     reader.onload = function (e) {
       const data: any = e.target.result;
-      const {name, charts} = JSON.parse(data);
+      const { name, charts } = JSON.parse(data);
       setName(name);
       setFormData(charts);
     };
@@ -172,7 +172,7 @@ const DashboardBuilder = () => {
           type: 'success'
         });
         setSubmitting(false);
-        history.goBack()
+        history.goBack();
       })
       .catch((error) => {
         setSubmitting(false);
