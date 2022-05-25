@@ -41,6 +41,7 @@
   --colorContact: #003f57;
   --colorAccount: red;
   --colorProject: yellow;
+  --new_theme_color: #329592;
 }
 
 @import '~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss';
@@ -817,7 +818,7 @@ body::-webkit-scrollbar-thumb {
   align-items: center;
   padding: 10px;
   border-radius: 3px;
-  background-color: #329592;
+  background-color: var(--new_theme_color);
   h3 {
     padding: 0px;
     padding-top: 1px;
@@ -1665,7 +1666,7 @@ svg.MuiSvgIcon-root {
       transition: border 0.4s;
     }
     &.Mui-selected::after {
-      border-color: #43aeaa transparent;
+      border-color: var(--new_theme_color) transparent;
     }
   }
   .title_container {
@@ -1795,7 +1796,7 @@ svg.MuiSvgIcon-root {
   border: 1px solid #43aeaa3a;
 }
 .accordion_grid_customer_account .MuiPaper-root > .MuiButtonBase-root[aria-expanded='true'] {
-  background-color: #43aeaa;
+  background-color: var(--new_theme_color);
   color: #fff;
 
   * {
@@ -1875,6 +1876,22 @@ svg.MuiSvgIcon-root {
 
 // STYLE FOR CUSTOMER CONTACT DETAILS AND CUSTOMER ACCOUNT ACCRODION
 .modified_style_of_accordion {
+  .pos_rel {
+    position: relative;
+  }
+  .clicker_div {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 32px;
+    z-index: 1;
+    cursor: pointer;
+  }
+  .MuiPaper-root {
+    border: 0 !important;
+    height: 100%;
+  }
   .MuiAccordion-root {
     border: 0;
     box-shadow: none;
@@ -1887,7 +1904,7 @@ svg.MuiSvgIcon-root {
       padding: 4px 0;
       border-radius: 4px;
       &[aria-expanded='true'] {
-        background-color: #41aeaa !important;
+        background-color: var(--new_theme_color) !important;
         & * {
           color: #fff;
           fill: #fff;
@@ -1900,13 +1917,18 @@ svg.MuiSvgIcon-root {
       & .MuiAccordionDetails-root {
         padding: 0;
         margin: 0;
-
+        .MuiCardContent-root,
         .MuiCardContent-root.detailListing.custom_card_style_for_contact_details {
           background-color: #ddf0f0;
           padding: 20px 29px;
           padding-bottom: 11px !important;
+          height: 100%;
+          align-items: flex-start;
+          .cardStyle {
+            display: none;
+          }
           svg {
-            display: block;
+            display: inline-block;
           }
           .detailCardHeader {
             margin-bottom: 15px;
@@ -1971,6 +1993,17 @@ svg.MuiSvgIcon-root {
         }
         &:hover svg {
           fill: #fff;
+        }
+        &.expander {
+          margin-left: auto;
+          margin-right: auto;
+          padding: 5px;
+          svg {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            margin: 0;
+          }
         }
       }
     }

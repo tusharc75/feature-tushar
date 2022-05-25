@@ -4,6 +4,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { camelCase, kebabCase, sortBy } from 'lodash';
 import styles from './Dashboard.module.scss';
+
 import './style.scss';
 // import crmImage from '../../assets/dashboard_images/eQuip-t_dashboard.svg';
 import { SVG, IMAGE_WIDTH, IMAGE_HEIGHT } from '../../assets/dashboard_images';
@@ -18,6 +19,7 @@ import { AiFillAccountBook } from 'react-icons/ai';
 import { TextField, InputAdornment } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import ClearIcon from '@material-ui/icons/Clear';
+import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
 import routes from 'src/components/Helpers/Routes';
 import { staticHiddenResource } from '../../constants/helpers';
 
@@ -300,7 +302,7 @@ function Dashboard() {
                               .map((item) => (
                                 <div key={item.name}>
                                   <Box marginY={1} component="div" className={`list_component`}>
-                                    <Typography paragraph className={styles.hover_list_box}>
+                                    <Typography variant="subtitle2" className={styles.hover_list_box}>
                                       <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
                                     </Typography>
                                   </Box>
@@ -315,27 +317,34 @@ function Dashboard() {
               </div>
             ) : (
               <div className={`${styles.filtered_data}`}>
-                {filteredData.map((section) => {
-                  return (
-                    <List key={section.head} subheader={<li className={`${styles.list_header} mb-2`}>{section.head}</li>}>
-                      {section.items.map((item) => {
-                        return (
-                          <>
-                            <ListItem
-                              key={item.name}
-                              button
-                              onClick={() => {
-                                history.push(handleRoutes(item));
-                              }}
-                            >
-                              <ListItemText primary={item.resourceLabel} />
-                            </ListItem>
-                          </>
-                        );
-                      })}
-                    </List>
-                  );
-                })}
+                {filteredData.length !== 0 ? (
+                  filteredData.map((section) => {
+                    return (
+                      <List key={section.head} subheader={<li className={`${styles.list_header} mb-2`}>{section.head}</li>}>
+                        {section.items.map((item) => {
+                          return (
+                            <>
+                              <ListItem
+                                key={item.name}
+                                button
+                                onClick={() => {
+                                  history.push(handleRoutes(item));
+                                }}
+                              >
+                                <ListItemText primary={item.resourceLabel} />
+                              </ListItem>
+                            </>
+                          );
+                        })}
+                      </List>
+                    );
+                  })
+                ) : (
+                  <div className={styles.no_result_container}>
+                    <SentimentVeryDissatisfiedIcon />
+                    <p className={styles.no_result}>Sorry, we couldn't find any result</p>
+                  </div>
+                )}
               </div>
             )}
           </div>

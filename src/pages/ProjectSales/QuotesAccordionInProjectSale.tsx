@@ -29,7 +29,8 @@ import { IoCalendarOutline } from 'react-icons/io5';
 import { useData } from '../../StateProvider/Provider';
 import { displayDate } from '../../services/util';
 import ManageQuoteDialog from '../../pages/QuoteBuilderCombined/ManageQuote/ManageQuoteDialog';
-import { MoreVert, Delete } from '@material-ui/icons';
+import { MoreVert } from '@material-ui/icons';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -319,7 +320,7 @@ export default function QuotesAccordionInProjectSale({
                                       <>
                                         <Box ml={1} />
                                         <IconButton title={`Remove quote ${obj.quoteName}`} size="small" onClick={() => handleRemove(obj)}>
-                                          <Delete fontSize="small" color="error" />
+                                          <DeleteOutlineIcon fontSize="small" color="error" />
                                         </IconButton>
                                       </>
                                     ) : null}

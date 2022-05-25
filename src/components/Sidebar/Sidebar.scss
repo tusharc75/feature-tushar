@@ -48,6 +48,9 @@
   color: white !important;
 }
 .sidebar-list {
+  .chat-icon {
+    fill: var(--primary);
+  }
   .MuiListItemIcon-root {
     min-width: auto !important;
     padding-right: 17px;
@@ -59,6 +62,9 @@
     color: #6c6f70;
     border-bottom: 1px solid #eaeaea;
     position: relative;
+    svg {
+      fill: var(--primary);
+    }
     &::before {
       content: '';
       position: absolute;
@@ -71,47 +77,80 @@
       border-radius: 8px;
       z-index: -1;
     }
+    &.active_element::before {
+      background-color: #41aeaa;
+      box-shadow: 0px 4px 4px rgba(65, 174, 170, 0.25);
+    }
     &.Mui-selected::before {
       background-color: #41aeaa;
       box-shadow: 0px 4px 4px rgba(65, 174, 170, 0.25);
     }
+
+    &.active_element svg,
     &.Mui-selected svg {
       fill: #fff;
     }
+    &.active_element,
     &.Mui-selected span {
       color: #fff;
     }
+
+    &.active_element,
     &.Mui-selected {
       background-color: unset;
     }
 
+    .active_sub.sub-list::before {
+      background-color: #41aeaa;
+    }
+
     .sub-list {
+      position: relative;
       .MuiListItem-root {
         padding: 2px 0px 0 50px;
         background: #f2f2f2;
+
+        span {
+          white-space: break-spaces;
+          max-width: 180px;
+          overflow-wrap: break-word;
+        }
 
         &:hover {
           background: #d7d7d7;
         }
       }
+      & > div.MuiButtonBase-root {
+        position: relative;
+      }
+      & > div.MuiButtonBase-root::before {
+        content: '';
+        position: absolute;
+        left: 32px;
+        width: 15px;
+        height: 1px;
+        top: 50%;
+        background-color: #41aeaa;
+      }
     }
     .sub-list::before {
-      background-color: white;
+      background-color: #f2f2f2;
       bottom: auto;
       content: '';
-      height: 8.5px;
+      height: 8px;
       left: 24px;
-      margin-top: 14px;
+      top: 50%;
+      transform: translateY(-50%);
       position: absolute;
       right: auto;
       width: 8px;
       z-index: 1;
       border-radius: 50%;
-      border: 2px solid var(--primary);
+      border: 2px solid #41aeaa;
     }
 
     .sub-list::after {
-      border-left: 2px solid var(--primary);
+      border-left: 2px solid #41aeaa;
       bottom: 0;
       content: '';
       left: 27px;
@@ -120,8 +159,8 @@
     }
   }
 }
-.sidebar-icon {
-  color: var(--primary);
+.open_sidebar {
+  margin-left: -3px;
 }
 
 .profileBox {

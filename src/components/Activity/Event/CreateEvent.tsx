@@ -193,26 +193,21 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
 
   function validate(values) {
     const errors = {};
-
-    if (
-      new Date(values.startTime).getTime() >= new Date(values.endTime).getTime()
-    ) {
+    if (new Date(values.startTime).getTime() === new Date(values.endTime).getTime()) {
       errors["endTime"] = "End time should be different";
     }
-
-    if (
-      new Date(values.startDate).getTime() > new Date(values.endDate).getTime()
-    ) {
+    if (new Date(values.startTime).getTime() >= new Date(values.endTime).getTime()) {
+      errors["endTime"] = "End time should be greater then start time";
+    }
+    if (new Date(values.startDate).getTime() < new Date(values.endDate).getTime()) {
       errors["endDate"] = "End date should be greater then start date";
     }
-
     if (new Date(values.startTime).toString() === "Invalid Date") {
       errors["startTime"] = "Invalid Time";
     }
     if (new Date(values.endTime).toString() === "Invalid Date") {
       errors["endTime"] = "Invalid Time";
     }
-
     return errors;
   }
 

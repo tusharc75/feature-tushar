@@ -1,6 +1,5 @@
 import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Badge, Box, Button, capitalize, Chip, ClickAwayListener, Divider, Grid, IconButton, InputBase, List, ListItem, ListItemText, Menu, MenuItem, TextField, Tooltip, Typography } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { useData } from '../../StateProvider/Provider';
@@ -62,8 +61,7 @@ const CageManagement = () => {
     }
 
     const getProductCategory = () => {
-        axiosInstance()
-            .get('/pos/product-category')
+        axiosInstance().get(`${cageManagement.api}/product-category`)
             .then(({ data: { data } }) => {
                 setProductCategoryList(data);
                 if (data?.find((e) => e.name === "Parts")) {
@@ -100,7 +98,7 @@ const CageManagement = () => {
                     toastConfig.setToastConfig({
                         open: true,
                         type: 'success',
-                        message: "Add to pikup successfully"
+                        message: "Picked Up Successfully"
                     });
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
@@ -119,7 +117,7 @@ const CageManagement = () => {
                 toastConfig.setToastConfig({
                     open: true,
                     type: 'success',
-                    message: data.message
+                    message:  "Drop Successfully"
                 });
                 setLoadingHistory(false)
                 fetchHistory()

@@ -5,26 +5,30 @@
   grid-gap: 40px;
   justify-content: space-between;
 }
+
 .hero_container {
   margin-top: 30px;
 }
+
 .filtered_data {
   max-height: 600px;
   overflow-y: scroll;
+  background-color: white;
 }
 
 .hero_heading {
   font-weight: 700;
-  font-size: 30px;
   line-height: 153%;
   color: #2a3042;
   margin: 0 0 24px;
+  font-size: clamp(20px, 5vw, 30px);
 }
+
 .hero_paragraph {
   font-weight: 500;
-  font-size: 20px;
   line-height: 135.02%;
   color: rgba(0, 0, 0, 0.5);
+  font-size: clamp(16px, 3.5vw, 20px);
 }
 
 .crm_hero_image {
@@ -38,6 +42,7 @@
   margin: 20px 0 !important;
   padding: 0 !important;
 }
+
 .hover_list_box {
   margin: 0px;
 }
@@ -46,6 +51,7 @@
   display: flex;
   margin-bottom: 1.875rem;
 }
+
 .custom_form_button {
   padding: 12px 34px;
   background-color: #41aeaa;
@@ -60,21 +66,23 @@
   cursor: pointer;
   outline: none;
   border: 0;
+
   &:hover {
     background-color: var(--primary);
   }
 }
 
 .search_input {
-  background: #f4f4f4;
-  border-radius: 2px;
+  background: white;
+  border-radius: 6px;
   outline: none;
   position: relative;
   border: 0;
   width: 100%;
   overflow: hidden;
+
   input {
-    border-radius: 2px;
+    border-radius: 6px;
     padding: 12px 23px 12px 55px;
     font-weight: 400;
     font-size: 18px;
@@ -85,10 +93,13 @@
     outline: none;
     background-color: transparent;
     transition: border 0.3s;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+
     &:focus {
-      border-color: #41aeaa;
+      border: 1px solid #41aeaa;
     }
   }
+
   .searchIcon svg {
     position: absolute;
     left: 23px;
@@ -96,6 +107,7 @@
     transform: translateY(-50%);
     fill: #7e818c;
   }
+
   .clear_icon svg {
     position: absolute;
     right: 20px;
@@ -111,21 +123,41 @@
     align-items: unset;
   }
 }
+
 @media all and (max-width: 1155px) {
   .dashboard_layout {
     grid-template-columns: 1fr;
   }
+
   .hero_container {
+    // margin: 0 auto;
+    // max-width: 600px;
+    // text-align: center;
     display: none;
   }
+  // .crm_hero_image {
+  //   margin: 29px auto 0;
+  // }
+  // .hero_heading {
+  //   margin-bottom: 5px;
+  // }
 }
+
+// @media all and (max-width: 567px) {
+//   .hero_container {
+//     display: none;
+//   }
+// }
+
 .list_component {
   margin: 0 !important;
   padding: 0;
 }
+
 .hover_list_box {
   margin: 0;
 }
+
 .list_header {
   background-color: #41aeaa;
   color: #fff;
@@ -134,4 +166,20 @@
   position: sticky;
   top: 0;
   z-index: 1;
+}
+
+.no_result_container {
+  padding: 20px 0;
+  user-select: none;
+  svg {
+    fill: var(--grey);
+    margin: 0 auto 10px;
+    width: 50px;
+    height: 50px;
+  }
+}
+.no_result {
+  color: var(--grey);
+  user-select: none;
+  text-align: center;
 }
