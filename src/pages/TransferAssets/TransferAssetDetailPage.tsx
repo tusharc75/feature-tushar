@@ -242,7 +242,7 @@ const TransferAssetDetailPage = () => {
           .get(`${routes.transferAsset.path}/get-asset/${id}`)
           .then(({ data: { data } }) => {
             data = [
-              ...data?.map((d: any) => ({
+              ...data?.assets?.map((d: any) => ({
                 ...d,
                 productDescription: d?.product?.optionLabel ?? '',
                 productId: d?.product?.optionValue ?? '',
@@ -490,7 +490,6 @@ const TransferAssetDetailPage = () => {
                         setPrevStep={setPrevStep}
                         transferAssetId={id}
                         transferAssetData={transferAssetData}
-                        fetchAssets={fetchAssets}
                         permissions={permissions}
                         setNextStep={setNextStep}
                         setExistingAssets={setExistingAssets}
@@ -502,7 +501,6 @@ const TransferAssetDetailPage = () => {
                         renderedFrom={`${renderedFrom}_grid-2`}
                         allowedToEdit={allowedToEdit || isProcessor}
                         canReceive={canReceive}
-                        fetchTransferAssetData={fetchTransferAssetData}
                       />
                     )}
                     {currentStep === 2 && (
