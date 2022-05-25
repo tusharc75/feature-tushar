@@ -67,8 +67,8 @@ import { MdDeleteSweep } from 'react-icons/md';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { AiFillPlusCircle } from 'react-icons/ai';
 import { MdLibraryAdd } from 'react-icons/md';
-import { IoArrowDownCircleSharp } from "react-icons/all";
-import contactClass from "../../Contact/contact.module.scss";
+import { IoArrowDownCircleSharp } from 'react-icons/all';
+import contactClass from '../../Contact/contact.module.scss';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -368,7 +368,6 @@ export default function QuoteDetail() {
         .get(`${qbApi}/${id}?entity=${selectedEntity}`)
         .then(({ data: { data } }) => {
           ReactDOM.unstable_batchedUpdates(() => {
-
             setQuoteData(data);
 
             const dataOfTyoes = [...typeCreateProjectSalesDialog];
@@ -390,9 +389,9 @@ export default function QuoteDetail() {
 
             setAllowedToEdit([...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id));
             let keys = Object.keys(data.versions);
-            let tempCurrentVersion
+            let tempCurrentVersion;
             if (version == 0) {
-              tempCurrentVersion = parseInt(keys[keys.length - 1])
+              tempCurrentVersion = parseInt(keys[keys.length - 1]);
               setCurrentVersion(parseInt(keys[keys.length - 1]));
               setProcessStatus(data.versions[keys[keys.length - 1]].processStatus);
               setProductBuilderId(data.versions[keys[keys.length - 1]].productBuilderId);
@@ -401,7 +400,7 @@ export default function QuoteDetail() {
               setColumnViewExcel(data.versions[keys[keys.length - 1]].excelColumns || []);
               dispatch({ type: 'selection', selectedRecords: data.versions[keys[keys.length - 1]].TNC });
             } else {
-              tempCurrentVersion = version
+              tempCurrentVersion = version;
               setCurrentVersion(version);
               setProcessStatus(data.versions[version].processStatus);
               setProductBuilderId(data.versions[version].productBuilderId);
@@ -410,8 +409,10 @@ export default function QuoteDetail() {
               setColumnViewExcel(data.versions[version].excelColumns || []);
               dispatch({ type: 'selection', selectedRecords: data.versions[version].TNC });
             }
-            setCustomizedRoutes([{ title: routes.quoteBuilder.title, path: routes.quoteBuilder.path },
-            { title: `${data?.quoteName} (V-${tempCurrentVersion})`, hasOnClick: true }]);
+            setCustomizedRoutes([
+              { title: routes.quoteBuilder.title, path: routes.quoteBuilder.path },
+              { title: `${data?.quoteName} (V-${tempCurrentVersion})`, hasOnClick: true }
+            ]);
 
             if (isAllowedToEdit && openEdit === 'true') {
               setOpenUpdateDialog(true);
@@ -676,18 +677,30 @@ export default function QuoteDetail() {
       });
   };
 
-
-  const getHeading = (<span>{quoteData ? `${quoteData.quoteName}  ` : ''}
-    <span className="cursor-pointer underlined"
-      onClick={() => { setShowAllVersionStatus(true) }}>(V-{currentVersion})</span>
-  </span>);
+  const getHeading = (
+    <span>
+      {quoteData ? `${quoteData.quoteName}  ` : ''}
+      <span
+        className="cursor-pointer underlined"
+        onClick={() => {
+          setShowAllVersionStatus(true);
+        }}
+      >
+        (V-{currentVersion})
+      </span>
+    </span>
+  );
 
   return (
     <>
       <Fragment>
         <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={customizedRoutes}
-            onRouteClick={() => { setShowAllVersionStatus(true) }} />
+          <CustomBreadCrumbs
+            routes={customizedRoutes}
+            onRouteClick={() => {
+              setShowAllVersionStatus(true);
+            }}
+          />
         </Grid>
         <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
           <div>
@@ -727,14 +740,14 @@ export default function QuoteDetail() {
                     )}
                     <Tooltip title={`Version : ${currentVersion}`}>
                       <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
                         color="primary"
                         size="small"
-                        className={isMobile && !isTablet ? contactClass.mobile_button_layout : "mx-1"}
+                        className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
                         onClick={() => {
                           setShowAllVersionStatus(true);
                         }}
-                        style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
+                        style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                         startIcon={isMobile && !isTablet ? null : <VscVersions />}
                       >
                         {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
@@ -775,10 +788,10 @@ export default function QuoteDetail() {
                     )}
                     <>
                       <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
                         color="default"
                         size="small"
-                        className={isMobile && !isTablet ? contactClass.mobile_button_layout : "mx-1"}
+                        className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
                         endIcon={isMobile && !isTablet ? null : <ExpandMore />}
                         onClick={openActions}
                         // className={styles.action_submit_btn}
@@ -872,7 +885,9 @@ export default function QuoteDetail() {
                               color="primary"
                               size="small"
                               startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                              onClick={() => { setOpenUpdateDialog(true) }}
+                              onClick={() => {
+                                setOpenUpdateDialog(true);
+                              }}
                             >
                               Edit Information
                             </Button>
@@ -991,15 +1006,17 @@ export default function QuoteDetail() {
                         />
                       )}
                       {permissions?.projectSales?.isRead && (
-                        <ProjectInAccordion
-                          recordsPerLine={3}
-                          projectSales={(relatedTo && relatedTo['Project Sales']?.Quotes) || []}
-                          type={typeCreateProjectSalesDialog}
-                          fetchData={() => fetchRelatedTo()}
-                          permissions={permissions}
-                          isAddProjectSale={true}
-                          isAllowedToEdit={allowedToEdit}
-                        />
+                        <div className="p-3 modified_style_of_accordion">
+                          <ProjectInAccordion
+                            recordsPerLine={3}
+                            projectSales={(relatedTo && relatedTo['Project Sales']?.Quotes) || []}
+                            type={typeCreateProjectSalesDialog}
+                            fetchData={() => fetchRelatedTo()}
+                            permissions={permissions}
+                            isAddProjectSale={true}
+                            isAllowedToEdit={allowedToEdit}
+                          />
+                        </div>
                       )}
                     </>
                   </TabPanel>
@@ -1046,7 +1063,7 @@ export default function QuoteDetail() {
               )}
             </Paper>
           </div>
-          <div className={`${tabValue === 1 && isMobile ? "mb-5" : ""} position-relative`}>
+          <div className={`${tabValue === 1 && isMobile ? 'mb-5' : ''} position-relative`}>
             {/* {showActivity ?
               <Paper>
                 {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
@@ -1113,7 +1130,7 @@ export default function QuoteDetail() {
                           access: true
                         }
                       ]}
-                      handleActivityRefresh={() => { }}
+                      handleActivityRefresh={() => {}}
                       //   emails={contactsEmailsData}
                       emails={null}
                     />
@@ -1123,111 +1140,101 @@ export default function QuoteDetail() {
             </Paper>
           </div>
         </div>
-        {
-          showConfirmBox ? (
-            <ConfirmationDialog
-              open={showConfirmBox}
-              message={`Are you sure you want to delete this Quote?`}
-              onClose={() => setShowConfirmBox(false)}
-              onOk={handleDeleteQuote}
-            />
-          ) : null
-        }
+        {showConfirmBox ? (
+          <ConfirmationDialog
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this Quote?`}
+            onClose={() => setShowConfirmBox(false)}
+            onOk={handleDeleteQuote}
+          />
+        ) : null}
 
-        {
-          openUpdateDialog && (
-            <ManageQuoteDialog
-              open={openUpdateDialog}
-              onSuccess={() => {
-                setIsQuoteClone(false);
-                setOpenUpdateDialog(false);
-                fetchQuoteData(currentVersion);
-                fetchRelatedTo();
+        {openUpdateDialog && (
+          <ManageQuoteDialog
+            open={openUpdateDialog}
+            onSuccess={() => {
+              setIsQuoteClone(false);
+              setOpenUpdateDialog(false);
+              fetchQuoteData(currentVersion);
+              fetchRelatedTo();
+            }}
+            onClose={() => {
+              setOpenUpdateDialog(false);
+              setIsQuoteClone(false);
+            }}
+            isNew={false}
+            isClone={isQuoteClone}
+            dataToUpdate={quoteData}
+            resource={null}
+            isRedirectTodetailPage={false}
+            contactId={null}
+            opportunityId={null}
+            disableOwnerDropDown={true}
+            editCurrency={editCurrency}
+            quoteApproved={isQuoteClone ? false : ifQuoteApproved.approved}
+            cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
+            doaCollaboratorResources={user.user?.doa?.map((obj) => obj.user)}
+          />
+        )}
+        {reopenReasonDialog && (
+          <div className={classes.reasonDialog}>
+            <Dialog
+              maxWidth="xs"
+              open={reopenReasonDialog}
+              aria-labelledby="confirmation-dialog-title"
+              classes={{
+                paper: classes.paper
               }}
-              onClose={() => {
-                setOpenUpdateDialog(false);
-                setIsQuoteClone(false);
-              }}
-              isNew={false}
-              isClone={isQuoteClone}
-              dataToUpdate={quoteData}
-              resource={null}
-              isRedirectTodetailPage={false}
-              contactId={null}
-              opportunityId={null}
-              disableOwnerDropDown={true}
-              editCurrency={editCurrency}
-              quoteApproved={isQuoteClone ? false : ifQuoteApproved.approved}
-              cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
-              doaCollaboratorResources={user.user?.doa?.map((obj) => obj.user)}
-            />
-          )
-        }
-        {
-          reopenReasonDialog && (
-            <div className={classes.reasonDialog}>
-              <Dialog
-                maxWidth="xs"
-                open={reopenReasonDialog}
-                aria-labelledby="confirmation-dialog-title"
-                classes={{
-                  paper: classes.paper
-                }}
-                id="confirmation-dialog"
-                keepMounted
-              >
-                <DialogTitle id="confirmation-dialog-title" className="text-white">
-                  Reason for Re-Open
-                </DialogTitle>
-                <DialogContent dividers>
-                  <TextField
-                    fullWidth
-                    id="outlined-multiline-static"
-                    label="Reason"
-                    multiline
-                    value={reopenReason}
-                    onChange={handleReopenReasonChange}
-                    rows={4}
-                    variant="outlined"
-                  />
-                </DialogContent>
-                <DialogActions>
-                  <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">
-                    Close
-                  </Button>
-                  <Button size="small" disabled={reopenReason === ''} onClick={handleReOpenQuote} color="primary">
-                    Save
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </div>
-          )
-        }
-        {
-          showQuoteStatusChangeDialog && (
-            <DOAReasonDialog
-              reasonDialogOpen={showQuoteStatusChangeDialog}
-              handleCloseDialog={() => setShowQuoteStatusChangeDialog(false)}
-              QuoteStatusChange={QuoteStatusChange}
-              accepted={quoteStatusChangeData}
-            />
-          )
-        }
-        {
-          quoteData && showAllVersionStatus && (
-            <AllVersionStatus
-              open={showAllVersionStatus}
-              onClose={() => setShowAllVersionStatus(false)}
-              quoteId={id}
-              quoteData={quoteData}
-              quotePermissions={permissions[qbResource]}
-              fetchQuoteData={fetchQuoteData}
-              handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
-              handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
-            />
-          )
-        }
-      </Fragment >
+              id="confirmation-dialog"
+              keepMounted
+            >
+              <DialogTitle id="confirmation-dialog-title" className="text-white">
+                Reason for Re-Open
+              </DialogTitle>
+              <DialogContent dividers>
+                <TextField
+                  fullWidth
+                  id="outlined-multiline-static"
+                  label="Reason"
+                  multiline
+                  value={reopenReason}
+                  onChange={handleReopenReasonChange}
+                  rows={4}
+                  variant="outlined"
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button size="small" onClick={() => setReopenReasonDialog(false)} color="primary">
+                  Close
+                </Button>
+                <Button size="small" disabled={reopenReason === ''} onClick={handleReOpenQuote} color="primary">
+                  Save
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </div>
+        )}
+        {showQuoteStatusChangeDialog && (
+          <DOAReasonDialog
+            reasonDialogOpen={showQuoteStatusChangeDialog}
+            handleCloseDialog={() => setShowQuoteStatusChangeDialog(false)}
+            QuoteStatusChange={QuoteStatusChange}
+            accepted={quoteStatusChangeData}
+          />
+        )}
+        {quoteData && showAllVersionStatus && (
+          <AllVersionStatus
+            open={showAllVersionStatus}
+            onClose={() => setShowAllVersionStatus(false)}
+            quoteId={id}
+            quoteData={quoteData}
+            quotePermissions={permissions[qbResource]}
+            fetchQuoteData={fetchQuoteData}
+            handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
+            handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
+          />
+        )}
+      </Fragment>
     </>
   );
 }

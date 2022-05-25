@@ -181,9 +181,11 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               open={open}
               aria-labelledby="customized-dialog-title"
               maxWidth="md"
-              onClose={() => {
-                handleClose()
-                setFullScreen(false);
+              onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                  handleClose()
+                  setFullScreen(false);
+                }
               }}
               fullWidth
               fullScreen={fullScreen || (isMobile || isTablet)}

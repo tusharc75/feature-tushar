@@ -42,15 +42,14 @@ const InventoryProduct = () => {
 
   const [softHold, setSoftHold] = useState({ open: false, data: {} });
 
-  const {
-    state: { permissions }
-  }: any = useData();
+  const { state: { user, permissions, selectedEntity } }: any = useData();
+  
   const { getColumnData } = useColumns();
 
   useEffect(() => {
     getPlants();
     fetchProductInventory();
-  }, [plantId, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const getPlants = () => {
     axiosInstance()

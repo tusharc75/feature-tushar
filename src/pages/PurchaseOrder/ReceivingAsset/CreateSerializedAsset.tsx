@@ -99,7 +99,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             <Formik
                 initialValues={{
                     seriaizedAsset: productList.map(d => ({
-                        "product": d.productDescription,
+                        "product": d.productName,
                         "productId": d.productId,
                         "warehouse": defaultWareHouse || "",
                         "quantity": d.qty - (d.actualReceived || 0),

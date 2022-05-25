@@ -139,7 +139,7 @@ const useStyles = makeStyles((theme) => ({
       animation: 'none !important'
     },
     '&.Mui-selected': {
-      backgroundColor: '#43AEAA !important',
+      backgroundColor: 'var(--new_theme_color) !important',
       color: '#ffff !important',
       border: '1px solid #43AEAA !important',
       '&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child': {

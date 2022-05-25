@@ -4,7 +4,12 @@ import { Link, useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { camelCase, kebabCase, sortBy } from 'lodash';
 import styles from './Dashboard.module.scss';
-import crmImage from '../../assets/eQuip_t-homepage-design-trs-small-size.-in-png.png';
+
+import './style.scss';
+// import crmImage from '../../assets/dashboard_images/eQuip-t_dashboard.svg';
+import { SVG, IMAGE_WIDTH, IMAGE_HEIGHT } from '../../assets/dashboard_images';
+import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL } from '../../assets/dashboard_images/constants/imageTypes';
+import Icon from '@material-ui/core/Icon';
 import { SiCivicrm } from 'react-icons/si';
 import { MdNavigateNext, MdLocalActivity } from 'react-icons/md';
 import { RiAccountPinCircleFill, RiFolderSettingsFill } from 'react-icons/ri';
@@ -13,8 +18,10 @@ import { FaRegistered } from 'react-icons/fa';
 import { AiFillAccountBook } from 'react-icons/ai';
 import { TextField, InputAdornment } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
+import ClearIcon from '@material-ui/icons/Clear';
+import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
 import routes from 'src/components/Helpers/Routes';
-import { staticHiddenResource } from "../../constants/helpers"
+import { staticHiddenResource } from '../../constants/helpers';
 
 function Dashboard() {
   const history = useHistory();
@@ -22,6 +29,7 @@ function Dashboard() {
   const {
     state: { user, selectedEntity }
   } = useData();
+  const [showCloseButton, setShowCloseButton] = useState(false);
   const [sections, setSections] = useState([]);
   const [search, setSearch] = useState('');
   const [filteredData, setFilteredData] = useState([]);
@@ -32,10 +40,7 @@ function Dashboard() {
     // let allData = user && [...user?.role.sideBar];
     let entityData;
     if (user?.entity && user.entity.length) {
-      entityData = user.entity.find(
-        (curEntity) => curEntity._id === selectedEntity
-      );
-
+      entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
     }
     if (entityData?.resource) {
       allData = entityData.resource;
@@ -96,7 +101,7 @@ function Dashboard() {
           return false;
         }
         if (u?.isHidden || staticHiddenResource?.includes(u?.name)) {
-          return false
+          return false;
         }
         return sec === u.sectionName && u.isRead;
       });
@@ -107,39 +112,68 @@ function Dashboard() {
 
       switch (sec) {
         case 'CRM +':
-          icon = <SiCivicrm size={32} />;
+          icon = (
+            <Icon>
+              <img src={SVG(CRM)} alt="Crm Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </Icon>
+          );
           text = 'Convert leads and close sales deals faster.';
           break;
+
         case 'CRM+':
-          icon = <SiCivicrm size={32} />;
+          icon = (
+            <Icon>
+              <img src={SVG(CRM)} alt="ROM Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </Icon>
+          );
           text = 'Convert leads and close sales deals faster.';
           break;
 
         case 'Accounts':
-          icon = <RiAccountPinCircleFill size={32} />;
+          icon = (
+            <Icon>
+              <img src={SVG(ACCOUNTS)} alt="Accounts Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </Icon>
+          );
           text = 'Customer and Supplier Account Management at your fingertips.';
           break;
 
         case 'Activities':
-          icon = <MdLocalActivity size={32} />;
+          icon = (
+            <Icon>
+              <img src={SVG(ACTIVITIES)} alt="Activities Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </Icon>
+          );
           text = 'Assign and Access Activities related to an Order.';
           break;
 
         case 'Product Setup':
-          icon = <RiFolderSettingsFill size={32} />;
+          icon = (
+            <Icon>
+              <img src={SVG(PRODUCT_SETUP)} alt="Product Setup Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </Icon>
+          );
           text = 'Product and Category Setup.';
           break;
 
         case 'Admin Portal':
-          icon = <BsCalendarFill size={32} style={{ padding: '4px' }} />;
-
+          icon = (
+            <Icon>
+              <img src={SVG(ADMIN_PORTAL)} alt="Admin Portal Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </Icon>
+          );
           text = 'Build your own Template, Manage Roles and Entities.';
           break;
 
         case 'ROM':
-          icon = <FaRegistered size={32} />;
+          icon = (
+            <Icon>
+              <img src={SVG(ROM)} alt="ROM Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </Icon>
+          );
           text = 'Fulfill Rental Orders Faster.';
           break;
+
         case 'Dynamic Forms':
           text = 'Setup Dynamic Forms & Templates';
           break;
@@ -152,18 +186,9 @@ function Dashboard() {
         items: list
       };
     });
-    let levalOrderBy = [
-      "CRM+",
-      "CRM +",
-      "ROM",
-      "Accounts",
-      "Product Setup",
-      "Dynamic Forms",
-      "Activities",
-      "Admin Portal",
-    ];
+    let levalOrderBy = ['CRM+', 'CRM +', 'ROM', 'Accounts', 'Product Setup', 'Dynamic Forms', 'Activities', 'Admin Portal'];
     data = sortBy(data, function (item: any) {
-      return levalOrderBy?.indexOf(item?.head)
+      return levalOrderBy?.indexOf(item?.head);
     });
     setSections(data);
     // (async () => {
@@ -183,144 +208,148 @@ function Dashboard() {
 
   const handleRoutes = (item) => {
     switch (item.name) {
-      case "Pos":
+      case 'Pos':
         return routes.pos.path;
       default:
         return `/${kebabCase(item.name)}`;
     }
   };
 
+  // SEARCH FUNCTION
+  const handleSearch = () => {
+    const searchedValueInLowerCase = search?.toLowerCase();
+    const filteredItems = [];
+    sections.forEach((section) => {
+      const items = section.items.filter(
+        (ff) => ff.sectionNameLowerCase.indexOf(searchedValueInLowerCase) > -1 || ff.resourceLabelLowerCase.indexOf(searchedValueInLowerCase) > -1
+      );
+      if (items.length > 0) {
+        filteredItems.push({ ...section, items: items });
+      }
+    });
+    setFilteredData(filteredItems);
+  };
+  const clearSearch = () => {
+    setSearch('');
+    setShowCloseButton(false);
+  };
+
   return (
     <Fragment>
-      <Container>
-        <Grid className={styles.dashboard_layout}>
-          <div className={styles.all_content_box}>
-            <h1 className="mb-2">Raising resiliency in a rapidly transforming business environment</h1>
-            <p>Simplify and accelerate your B2B transactions.</p>
-            <img src={crmImage} alt="Logo" className={styles.set_crm_image} />
+      <div className="content-wrapper">
+        <div className={styles.dashboard_layout}>
+          <div className={styles.hero_container}>
+            <h1 className={styles.hero_heading}>Raising resiliency in a rapidly transforming business environment</h1>
+            <p className={styles.hero_paragraph}>Simplify and accelerate your B2B transactions.</p>
+            <img src={SVG(HERO)} alt="Dashboard Hero Image" className={styles.crm_hero_image} />
           </div>
-          <div>
-            <Box marginY={2} id="resourcesHomeGrid">
-              <TextField
-                placeholder="Search"
-                type="search"
-                value={search}
-                fullWidth
-                className="mb-3"
-                onChange={(e) => {
-                  const searchedValue = e.target.value;
-                  const searchedValueInLowerCase = searchedValue?.toLowerCase();
-                  setSearch(searchedValue);
-
-                  const filteredItems = [];
-
-                  sections.forEach((section) => {
-                    const items = section.items.filter(
-                      (ff) =>
-                        ff.sectionNameLowerCase.indexOf(searchedValueInLowerCase) > -1 ||
-                        ff.resourceLabelLowerCase.indexOf(searchedValueInLowerCase) > -1
-                    );
-                    if (items.length > 0) {
-                      filteredItems.push({ ...section, items: items });
-                    }
-                  });
-
-                  setFilteredData(filteredItems);
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search color="disabled" />
-                    </InputAdornment>
-                  )
-                }}
-              />
-
-              {search.trim() === '' ? (
-                <Grid container spacing={1} className={styles.full_layout}>
-                  {sections.map((section) => {
-                    return section.items.length > 0 ? (
-                      <Grid key={section.head} item xs={12} sm={4} md={4} className={styles.all_box_layout}>
-                        <Grid className={styles.inner_box}>
-                          <Paper className={styles.front_box}>
-                            <Box padding={2}>
-                              <Grid className={styles.box_layout_content}>
-                                {
-                                  <Box textAlign="center">
-                                    <p className={styles.set_icon}>{section.icon}</p>
-                                    <h2 className={styles.headline}>{section.head}</h2>
-                                    <p className={styles.desc}>{section.text}</p>
-                                    {/*<div className={styles.dropdown}>*/}
-                                    <Button className={styles.view_button}>
-                                      View all
-                                      <MdNavigateNext />
-                                      {/*<div className={styles.dropdown_content}>*/}
-                                      {/*  {*/}
-                                      {/*    section.items.map((item) => (*/}
-                                      {/*      <Typography>*/}
-                                      {/*        <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>*/}
-                                      {/*      </Typography>*/}
-                                      {/*    ))*/}
-                                      {/*  }*/}
-                                      {/*</div>*/}
-                                    </Button>
-                                    {/*</div>*/}
+          <div className="card_container">
+            <div className={`${styles.search_section}`}>
+              <div className={`${styles.search_input}`}>
+                <input
+                  type="text"
+                  value={search}
+                  placeholder="Search"
+                  onChange={(e) => {
+                    const searchedValue = e.target.value;
+                    searchedValue.length > 0 ? setShowCloseButton(true) : setShowCloseButton(false);
+                    setSearch(searchedValue);
+                    handleSearch();
+                  }}
+                />
+                <div className={styles.searchIcon}>
+                  <Search color="disabled" />
+                </div>
+                {showCloseButton && (
+                  <div className={styles.clear_icon}>
+                    <ClearIcon onClick={() => clearSearch()} />
+                  </div>
+                )}
+              </div>
+            </div>
+            {search.trim() === '' ? (
+              <div className="card_grid dashboard_homepage">
+                {sections.map((section) => {
+                  return section.items.length > 0 ? (
+                    <div key={section.head} className="single_card">
+                      <div className="card_content">
+                        <div className="card_front">
+                          <div className="card_front_content">
+                            <p className="card_logo">{section.icon}</p>
+                            <h2 className="card_head">{section.head}</h2>
+                            <p className="card_description">{section.text}</p>
+                            {/*<div className={styles.dropdown}>*/}
+                            <Button className="view_all_button">
+                              View all
+                              <MdNavigateNext />
+                              {/*<div className={styles.dropdown_content}>*/}
+                              {/*  {*/}
+                              {/*    section.items.map((item) => (*/}
+                              {/*      <Typography>*/}
+                              {/*        <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>*/}
+                              {/*      </Typography>*/}
+                              {/*    ))*/}
+                              {/*  }*/}
+                              {/*</div>*/}
+                            </Button>
+                            {/*</div>*/}
+                          </div>
+                        </div>
+                        <div className="card_back">
+                          <div className="card_back_content">
+                            {section.items
+                              .filter((item) => !item?.isHidden)
+                              .map((item) => (
+                                <div key={item.name}>
+                                  <Box marginY={1} component="div" className={`list_component`}>
+                                    <Typography variant="subtitle2" className={styles.hover_list_box}>
+                                      <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
+                                    </Typography>
                                   </Box>
-                                }
-                              </Grid>
-                            </Box>
-                          </Paper>
-                          <Paper className={styles.back_box}>
-                            <Box padding={2}>
-                              <Grid>
-                                {<Box height="215px" style={{ overflowY: 'auto' }} className={styles.back_box_content}>
-                                  {section.items.
-                                    filter((item) => !(item?.isHidden)).map((item) => (
-                                      <div key={item.name}>
-                                        <Box marginY={1} component="div" className={styles.list_component}>
-                                          <Typography paragraph className={styles.hover_list_box}>
-                                            <Link to={handleRoutes(item)}>{item.resourceLabel || item.name}</Link>
-                                          </Typography>
-                                        </Box>
-                                      </div>
-                                    ))}
-                                </Box>
-                                }
-                              </Grid>
-                            </Box>
-                          </Paper>
-                        </Grid>
-                      </Grid>
-                    ) : null;
-                  })}
-                </Grid>
-              ) : (
-                filteredData.map((section) => {
-                  return (
-                    <List key={section.head} subheader={<ListSubheader className={`${styles.list_header} mb-2`}>{section.head}</ListSubheader>}>
-                      {section.items.map((item) => {
-                        return (
-                          <>
-                            <ListItem
-                              key={item.name}
-                              button
-                              onClick={() => {
-                                history.push(handleRoutes(item));
-                              }}
-                            >
-                              <ListItemText primary={item.resourceLabel} />
-                            </ListItem>
-                          </>
-                        );
-                      })}
-                    </List>
-                  );
-                })
-              )}
-            </Box>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+            ) : (
+              <div className={`${styles.filtered_data}`}>
+                {filteredData.length !== 0 ? (
+                  filteredData.map((section) => {
+                    return (
+                      <List key={section.head} subheader={<li className={`${styles.list_header} mb-2`}>{section.head}</li>}>
+                        {section.items.map((item) => {
+                          return (
+                            <>
+                              <ListItem
+                                key={item.name}
+                                button
+                                onClick={() => {
+                                  history.push(handleRoutes(item));
+                                }}
+                              >
+                                <ListItemText primary={item.resourceLabel} />
+                              </ListItem>
+                            </>
+                          );
+                        })}
+                      </List>
+                    );
+                  })
+                ) : (
+                  <div className={styles.no_result_container}>
+                    <SentimentVeryDissatisfiedIcon />
+                    <p className={styles.no_result}>Sorry, we couldn't find any result</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </Grid>
-      </Container>
+        </div>
+      </div>
     </Fragment>
   );
 }

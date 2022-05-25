@@ -46,6 +46,7 @@ import React from "react";
 import { startCase, camelCase } from "lodash";
 import { RiNurseFill } from "react-icons/ri";
 import PolicyResources from "./PolicyResources";
+import DashboardResources from "./DashboardResources";
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -95,6 +96,9 @@ const RoleDetailsPage = () => {
     purchaseOrder: false,
   })
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false)
+  const [dashBoardOption, setDashBoardOption] = useState([]);
+  const [dashboardName, setDashboardName] = useState([]);
+
 
 
   const policyResources = [
@@ -141,7 +145,6 @@ const RoleDetailsPage = () => {
     if (id) {
       fetchRoleData();
       fetchLoggedInUserEntities();
-
     }
     // eslint-disable-next-line
   }, [id]);
@@ -149,6 +152,7 @@ const RoleDetailsPage = () => {
   useEffect(() => {
     if (roleData) {
       fetchUser();
+      dashboardList();
     }
     // eslint-disable-next-line
   }, [roleData]);
@@ -239,7 +243,6 @@ const RoleDetailsPage = () => {
         SetPolicyFieldCheckBox((prevState) => ({ ...prevState, ...copyOfResourcePolicy }))
         handlePolicyResourceCheckBox(copyOfResourcePolicy)
       }
-
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -267,8 +270,31 @@ const RoleDetailsPage = () => {
 
   }
 
+  const dashboardList = async () => {
+    setLoading(true)
+    try {
+      const {
+        data: { data },
+      } = await axiosInstance().get(`/dashboard-master`);
+      let copyOfDashBoardOption = data?.map((obj) => {
+        return { id: obj._id, name: obj.name }
+      });
+
+      setDashBoardOption([...copyOfDashBoardOption]);
+
+      const dashBoardNames = copyOfDashBoardOption.filter((obj) => roleData.dashBoards.includes(obj.id));
+      setDashboardName(dashBoardNames);
+
+
+      setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
   const handleUpdateRole = () => {
     setUpdating(true);
+    let dashBoardIds = dashboardName.map(obj => obj.id);
     axiosInstance()
       .put(`/role`, {
         _id: id,
@@ -277,7 +303,8 @@ const RoleDetailsPage = () => {
         resource,
         type: roleData.type,
         policy:
-          policyFieldCheckBox
+          policyFieldCheckBox,
+        dashBoards: dashBoardIds
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -546,6 +573,14 @@ const RoleDetailsPage = () => {
                           open={open}
                           setOpen={setOpen}
                           permissions={permissions}
+                        />
+                      }
+                      {
+                        dashBoardOption?.length > 0 &&
+                        <DashboardResources
+                          dashboardList={dashBoardOption}
+                          dashboardName={dashboardName}
+                          setDashboardName={setDashboardName}
                         />
                       }
                     </>
