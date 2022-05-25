@@ -113,8 +113,13 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   const fetchData = () => {
     const urlParams = getParams();
     setLoading(true);
+    let url = `kpi/${chart.kpi.kpi}?&entity=${selectedEntity}&${urlParams}`;
+    if (chart.kpi?.currencyConverter) {
+      url = `${url}&currency=${currency}`;
+    }
+
     axiosInstance()
-      .get(`kpi/${chart.kpi.kpi}?entity=${selectedEntity}&${urlParams}`)
+      .get(url)
       .then(async ({ data: { data } }) => {
         setChartData(data);
         setLoading(false);
@@ -252,7 +257,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
               <TableView
                 id={chart.uniqueId}
                 type={chart.chartType}
-                chartData={chartData}
+                chartData={chartData?.tableData}
                 isScreenSmall={isScreenSmall}
                 currency={globalFilters.currency || currency}
                 selectedDashboard={globalFilters?.dashboardType}

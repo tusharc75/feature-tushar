@@ -73,7 +73,7 @@ const DashbaordNew = () => {
             subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
             countryBillTo: countriesData,
             countrySellTo: countriesData,
-            country: countriesData,
+            country: countriesData
           });
         });
       } catch (error) {
@@ -88,7 +88,7 @@ const DashbaordNew = () => {
       .then(({ data: { data } }) => {
         if (data?.length) {
           setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
-          setCharts(data[0].charts);
+          setCharts([...data[0].charts]);
           setDashboardList(data);
         }
       })
@@ -122,6 +122,11 @@ const DashbaordNew = () => {
                     setCommonSalesData={setCommonSalesData}
                   />
                 ))}
+                {globalFilters.dashboardType?.includes('Asset') && (
+                  <Grid item xs={12}>
+                    <AssetStats />
+                  </Grid>
+                )}
               </Grid>
             </Box>
           </React.Fragment>
