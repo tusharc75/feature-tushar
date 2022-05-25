@@ -280,7 +280,7 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
         {opportunities?.length > 0 && opportunities.length > maxRecordsToShow && (
           <Box
             margin={1}
-            className="btn-view gap-1"
+            className="btn-view gap-1 expander"
             onClick={() => {
               setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
             }}
@@ -289,6 +289,7 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
             justifyContent="center"
             alignItems="center"
           >
+            <span className="show_more">Show More</span>
             <FaArrowAltCircleDown size={25} />
           </Box>
         )}

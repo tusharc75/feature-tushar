@@ -246,7 +246,7 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
         {accounts?.length > 0 && accounts.length > maxRecordsToShow && (
           <Box
             margin={1}
-            className="btn-view gap-1"
+            className="btn-view gap-1 expander"
             onClick={() => {
               setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
             }}
@@ -255,6 +255,7 @@ export default function AccountAccordionDetail({ accounts, type, expanded = true
             justifyContent="center"
             alignItems="center"
           >
+            <span className="show_more">Show More</span>
             <FaArrowAltCircleDown size={25} />
           </Box>
         )}

@@ -255,7 +255,7 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
         {contacts?.length > 0 && contacts.length > maxRecordsToShow && (
           <Box
             margin={1}
-            className="btn-view gap-1"
+            className="btn-view gap-1 expander"
             onClick={() => {
               // history.push(`/${type === "customer" ? "customer-contact" : "supplier-contact"}`)
               setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
@@ -265,6 +265,7 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
             justifyContent="center"
             alignItems="center"
           >
+            <span className="show_more">Show More</span>
             <FaArrowAltCircleDown size={25} />
           </Box>
         )}
