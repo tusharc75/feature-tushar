@@ -57,10 +57,10 @@ import { ChartDataType } from './ChartTypes';
 // };
 
 export default async (type: string, currency: string, tableData: any[], chart: ChartDataType) => {
-  const { uniqueId, chartType, chartTitle } = chart;
+  const { uniqueId, graphType, chartTitle } = chart;
   const { title, fileName } = { title: chartTitle.replaceAll('currency', currency), fileName: chartTitle.replaceAll('currency', currency) };
 
-  if (chartType !== 'list') {
+  if (graphType !== 'Table') {
     switch (type) {
       case 'ppt': {
         const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
@@ -118,7 +118,7 @@ export default async (type: string, currency: string, tableData: any[], chart: C
     }
   }
 
-  if (chartType === 'list') {
+  if (graphType === 'Table') {
     tableData = tableData.map((d) => {
       for (const key in d) {
         let upper = startCase(key);

@@ -83,6 +83,7 @@ const DashbaordNew = () => {
   }, []);
 
   const fetchDashboards = () => {
+    setDashboardLoading(true);
     axiosInstance()
       .get('/dashboard-master')
       .then(({ data: { data } }) => {
@@ -90,10 +91,12 @@ const DashbaordNew = () => {
           setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
           setCharts([...data[0].charts]);
           setDashboardList(data);
+          setDashboardLoading(false);
         }
       })
       .catch((err) => {
         setToastConfig(err);
+        setDashboardLoading(false);
       });
   };
 
@@ -103,7 +106,7 @@ const DashbaordNew = () => {
         <CustomBreadCrumbs routes={[{ title: 'Dashboards' }]} />
       </div>
       <div className="detail-container">
-        {!userLoading ? (
+        {!userLoading || !dashboardLoading ? (
           <React.Fragment>
             <GlobalFilter
               dashboardList={dashboardList.map((d) => ({ id: d._id, name: d.name }))}
