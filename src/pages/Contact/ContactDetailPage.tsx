@@ -842,9 +842,11 @@ const ContactDetailsPage = (props) => {
                       isInContact={true}
                     />
                   </Box>
-                  <Box hidden={currentTabIndex !== 2}>
-                    <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
-                  </Box>
+                  {(!isOffline && contactResource === 'customerContact' && permissions?.productInventory) && (
+                    <Box hidden={currentTabIndex !== 2}>
+                      <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
+                    </Box>
+                  )}
                 </>
               )}
             </Box>
