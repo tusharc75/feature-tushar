@@ -104,7 +104,8 @@
 .rbc-toolbar button:active:focus,
 .rbc-toolbar button.rbc-active:hover,
 .rbc-toolbar button.rbc-active:focus {
-  background-color: red;
+  background-color: var(--new_theme_color);
+  color: var(--white);
 }
 .rbc-toolbar button {
   cursor: pointer;
