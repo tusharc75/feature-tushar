@@ -127,7 +127,7 @@ const Dashboards = () => {
           <Box display={'flex'} alignItems="center">
             <MdDashboardCustomize size={22} className="headerLogo" />
             <Box ml={1}>
-              <span className="listingHeader">Dashboards Master</span>
+              <span className="listingHeader">Dashboard Master</span>
             </Box>
           </Box>
           <Box py={'6px'}>

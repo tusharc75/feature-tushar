@@ -18,6 +18,8 @@ import { useData } from 'src/StateProvider/Provider';
 import { startCase } from 'lodash';
 import MapView from './MapView';
 import { IFormDataType } from '../DashboardBuilder/builderHelpers';
+import getStaticData from './getStaticData';
+import StaticCards from './StaticCards';
 
 export interface ChartDataType extends IFormDataType {
   axis?: string;
@@ -102,6 +104,10 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
         }
       }
     });
+
+    if (chart.kpi?.currencyConverter) {
+      url = `${url}currency=${globalFilters?.currency || currency}`;
+    }
     return url;
   };
 
@@ -114,14 +120,15 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
     const urlParams = getParams();
     setLoading(true);
     let url = `kpi/${chart.kpi.kpi}?&entity=${selectedEntity}&${urlParams}`;
-    if (chart.kpi?.currencyConverter) {
-      url = `${url}&currency=${currency}`;
-    }
-
     axiosInstance()
       .get(url)
       .then(async ({ data: { data } }) => {
-        setChartData(data);
+        if (chart.kpi?.custom) {
+          const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
+          setChartData(cardData);
+        } else {
+          setChartData(data);
+        }
         setLoading(false);
       })
       .catch((err: any) => {
@@ -134,36 +141,20 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
 
   return (
     <Grid item xs={12} md={chart.column}>
-      {chart.graphType === 'cards' ? (
+      {chart.graphType === 'Custom' ? (
         <Grid container spacing={1}>
-          {loading
-            ? [...Array(chart.numberOfCards).keys()].map((_, index) => (
-                <Grid item xs={12} sm={6} md={3} key={index + 1}>
-                  <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
-                    <Skeleton variant="text" width={150} height={30} />
-                    <Skeleton variant="text" width={100} height={20} />
-                  </Box>
-                </Grid>
-              ))
-            : !chartData || chartData.length === 0
-            ? null
-            : Object.keys(chartData?.cardData).map((key, index) => (
-                <Grid item xs={12} sm={6} md={3} key={index + 1}>
-                  <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
-                    <Box>
-                      <Typography className={styles.price}>{chartData?.cardData[key] ? chartData?.cardData[key] : 0}</Typography>
-                      <Typography variant="h6" className={chartData?.additionalData ? styles.title : styles.title_sub}>
-                        {key}
-                      </Typography>
-                      {chartData?.additionalData && (
-                        <p className={styles.hit_ratio}>
-                          Hit Ratio: {chartData?.additionalData[key] ? (chartData?.additionalData[key]).toFixed(2) : 0} %
-                        </p>
-                      )}
-                    </Box>
-                  </Box>
-                </Grid>
-              ))}
+          {loading ? (
+            [...Array(4).keys()].map((_, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index + 1}>
+                <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
+                  <Skeleton variant="text" width={150} height={30} />
+                  <Skeleton variant="text" width={100} height={20} />
+                </Box>
+              </Grid>
+            ))
+          ) : !chartData ? null : (
+            <StaticCards chartData={chartData} />
+          )}
         </Grid>
       ) : (
         <Box component={Paper} p={'8px'} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
