@@ -240,9 +240,11 @@ const Board = ({ type, filter }) => {
           })}
           <Dialog
             open={openDialog}
-            onClose={() => {
-              handleCloseDialog();
-              setFullScreen(false);
+            onClose={(e, reason) => {
+              if (reason !== 'backdropClick') {
+                handleCloseDialog()
+                setFullScreen(false);
+              }
             }}
             fullWidth
             maxWidth="md"

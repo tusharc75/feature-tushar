@@ -130,6 +130,7 @@ import RepairTypeDetailsPage from './pages/RepairType/RepairTypeDetailsPage';
 import ResourceCalendar from './pages/ResourceCalender';
 import ResourceCalendarData from './pages/ResourceCalender/ResourceCalendar';
 import CageManagement from './pages/CageManagement';
+import SerializedAssetTest from './pages/SerializedAsset-test';
 
 var notificationInterval: any = null;
 
@@ -491,6 +492,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAsset.path}>
               <SerializedAsset />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.serializedAsset.path + '-new'}>
+              <SerializedAssetTest />
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAssetDetail.path + '/:id'}>
               <SerializedAssetDetailsPage />

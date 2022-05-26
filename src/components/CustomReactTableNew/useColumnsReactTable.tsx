@@ -1,28 +1,15 @@
-import { leadDetailPage } from "../routes/Lead"
-import routes from "../components/Helpers/Routes"
 import camelCase from "lodash/camelCase"
-import {
-    CommonRenderer,
-    CreatedByRenderer,
-    UpdatedByRenderer,
-    CommonRendererWithCopy,
-    DateRenderer,
-    LinkRenderer,
-    ImageRenderer,
-    NameRenderer,
-    CheckboxRenderer
-} from '../components/AgGridComponents/CustomAgGridCellRenderers';
-
-import { sidebarResourceObjectFromValues, supplierContact } from './helpers';
-import { useData } from '../StateProvider/Provider';
-
+import { Fragment } from "react";
+import { Link } from 'react-router-dom'
+import NoDataCell from "src/components/Helpers/NoDataCell";
+import moment from "moment";
+import { Avatar } from "@material-ui/core";
+import { dateFormat, sidebarResourceObjectFromValues } from "src/constants/helpers";
+import { leadDetailPage } from "src/routes/Lead";
+import routes from "../Helpers/Routes";
+import { useData } from "src/StateProvider/Provider";
 
 const permissionForLinks = sidebarResourceObjectFromValues();
-
-export const staticFrameworkRender = {
-    "createdByRenderer": CreatedByRenderer,
-    "updatedByRenderer": UpdatedByRenderer
-}
 
 export const headerName = {
     firstName: "Name"
@@ -55,67 +42,44 @@ export const disabledColumns = {
     [routes.deliveryTicketDetail.title]: [],
     [routes.lead.title]: ["firstName"]
 }
-export const getFrameworkComponents = (rendererNameList, showStaticRenderers = false) => {
-    let result = {}
-    rendererNameList.forEach(o => {
-        if (o === "commonRenderer") {
-            result = {
-                ...result,
-                "commonRenderer": CommonRenderer
-            }
-        }
-        else if (o === "linkRenderer") {
-            result = {
-                ...result,
-                "linkRenderer": LinkRenderer
-            }
-        }
-        else if (o === "commonRendererWithCopy") {
-            result = {
-                ...result,
-                "commonRendererWithCopy": CommonRendererWithCopy
-            }
-        }
-        else if (o === "dateRenderer") {
-            result = {
-                ...result,
-                "dateRenderer": DateRenderer
-            }
-        }
-        else if (o === "checkboxRenderer") {
-            result = {
-                ...result,
-                "checkboxRenderer": CheckboxRenderer
-            }
-        }
-        else if (o === "imageRenderer") {
-            result = {
-                ...result,
-                "imageRenderer": ImageRenderer
-            }
-        }
-        else if (o === "nameRenderer") {
-            result = {
-                ...result,
-                "nameRenderer": NameRenderer
-            }
-        }
 
-    })
-    if (showStaticRenderers) {
-        result = {
-            ...result,
-            ...staticFrameworkRender
-        }
-    }
-    return result
-}
 export const getStaticFields = () => {
     return [
-        { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' },
-        { field: 'updatedBy', headerName: 'Updated By', show: true, filter: false, sortable: false, cellRenderer: 'updatedByRenderer' }]
+        {
+            accessor: 'createdBy',
+            Header: 'Created By',
+            show: true,
+            Cell: ({ row }) => (row?.original?.createdBy ? (
+                <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(
+                    row?.original?.createdByDate.slice(0, 10)
+                ).format(dateFormat)}`}>
+                    {row?.original?.createdBy}
+                    <span className="createdAtTime badge-date">
+                        {moment(row?.original?.createdByDate.slice(0, 10)).format(dateFormat)}
+                    </span>
+                </h5>
+            ) : (
+                <NoDataCell />
+            ))
+        },
+        {
+            accessor: 'updatedBy',
+            Header: 'Updated By',
+            show: true,
+            Cell: ({ row }) => (row?.original?.updatedBy ? (
+                <h5 className="updateBy" title={`${row?.original?.updatedBye} • ${moment(
+                    row?.original?.updatedByDate.slice(0, 10)
+                ).format(dateFormat)}`}>
+                    {row?.original?.updatedBy}
+                    <span className="updatedAtTime badge-date">
+                        {moment(row?.original?.updatedByDate.slice(0, 10)).format(dateFormat)}
+                    </span>
+                </h5>
+            ) : (
+                <NoDataCell />
+            ))
+        }]
 }
-
 export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
     let data = localStorage.getItem("gridMetaData")
     let gridMetaData = (data == 'undefined') ? {} : JSON.parse(data)
@@ -174,8 +138,8 @@ export default function useColumns() {
         else {
             let fieldHeaderName = headerName[field?.fieldName] ?? field?.fieldLabel
             let commonFieldData = {
-                field: field?.fieldName,
-                headerName: fieldHeaderName,
+                accessor: field?.fieldName,
+                Header: fieldHeaderName,
                 show: gridMetaData[title]?.hide && gridMetaData[title]?.hide.indexOf(field?.fieldName) >= 0 ? false : true,
                 disabled: gridMetaData[title]?.disabled && gridMetaData[title]?.disabled.indexOf(field?.fieldName) >= 0 ? true : false,
                 primaryField: field?.primaryField ?? false
@@ -187,11 +151,15 @@ export default function useColumns() {
                 return {
                     columnData: {
                         ...commonFieldData,
-                        field: "concatedName",
-                        cellRenderer: "nameRenderer",
-                        cellRendererParams: { pathName: pathName }
-                    },
-                    rendererName: 'nameRenderer',
+                        accessor: "concatedName",
+                        Cell: ({ row }) => (
+                            <Fragment>
+                                <Link className="link text-truncate" title={row?.original?.detail} to={`${pathName}/${row?.original?._id}`}>
+                                    {row?.original?.concatedName}
+                                </Link>
+                            </Fragment>
+                        )
+                    }
                 }
             }
             else if (field?.primaryField === true && detailScreenRoute) {
@@ -201,11 +169,18 @@ export default function useColumns() {
                         lockPosition: true,
                         ...commonFieldData,
                         disabled: true,
-                        field: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,
+                        accessor: field?.fieldName === "firstName" ? "concatedName" : field.fieldName,
                         cellRenderer: permissions[permissionForLinks[field?.resource]]?.isRead ? "linkRenderer" : "commonRenderer",
-                        cellRendererParams: { "pathName": detailScreenRoute, "property": "_id", isForPopup: hasPopup }
+                        cellRendererParams: { "pathName": detailScreenRoute, "property": "_id", isForPopup: hasPopup },
+                        Cell: ({ row }) => (
+                            permissions[permissionForLinks[field?.resource]]?.isRead ? <Fragment>
+                                <Link className="link text-truncate" title={row?.original?.[field?.fieldName]} to={`${detailScreenRoute}/${row?.original?._id}`}>
+                                    {row?.original?.[field?.fieldName]}
+                                </Link>
+                            </Fragment> :
+                                <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>
+                        )
                     },
-                    rendererName: permissions[permissionForLinks[field?.resource]]?.isRead ? "linkRenderer" : "commonRenderer",
                 }
             }
             else if (field?.lookup) {
@@ -236,18 +211,42 @@ export default function useColumns() {
                         cellRendererParams: {
                             "pathName": pathName, "property": joinedFieldName + 'Id',
                             isForPopup: isForPopup, "more": `rest${joinedFieldName}`
-                        }
+                        },
+                        Cell: ({ row }) => (
+                            isForPopup ? (permissions[permissionForLinks[field?.lookupResource]]?.isUpdate ? <Fragment>
+                                <Link className="link text-truncate" title={row?.original?.[field?.fieldName]} to={`${pathName}?id=${row?.original?.[`${field?.fieldName}Id`]}`}>
+                                    {row?.original?.[field?.fieldName]}
+                                </Link>
+                            </Fragment> :
+                                <p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>) : <Fragment>
+                                <Link className="link text-truncate" title={row?.original?.[field?.fieldName]} to={`${pathName}/${row?.original?.[`${field?.fieldName}Id`]}`}>
+                                    {row?.original?.[field?.fieldName]}
+                                </Link>
+                            </Fragment>
+
+
+                        )
                     },
-                    rendererName: isForPopup ? (permissions[permissionForLinks[field?.lookupResource]]?.isUpdate ? "linkRenderer" : "commonRenderer") : "linkRenderer",
                 }
             }
             else if (isRenderWithCopy(field?.type)) {
                 return {
                     columnData: {
                         ...commonFieldData,
-                        cellRenderer: 'commonRendererWithCopy'
+                        cellRenderer: 'commonRendererWithCopy',
+                        Cell: ({ row }) => (row?.original?.[field?.fieldName] ? (
+                            <h5 className="createBy" title={`${row?.original?.[field?.fieldName]} • ${moment(
+                                row?.original?.createdByDate.slice(0, 10)
+                            ).format(dateFormat)}`}>
+                                {row?.original?.[field?.fieldName]}
+                                <span className="createdAtTime badge-date">
+                                    {moment(row?.original?.data.createdByDate.slice(0, 10)).format(dateFormat)}
+                                </span>
+                            </h5>
+                        ) : (
+                            <NoDataCell />
+                        ))
                     },
-                    rendererName: 'commonRendererWithCopy'
                 }
             }
             else if (field?.type === "imageUpload") {
@@ -256,9 +255,9 @@ export default function useColumns() {
                         ...commonFieldData,
                         filter: false, sortable: false,
                         cellRenderer: 'imageRenderer',
+                        Cell: ({ row }) => (<Avatar className="grid-avatar" src={row?.original?.[field?.fieldName]} />),
                         width: 100
                     },
-                    rendererName: 'imageRenderer'
                 }
             }
             else if (field?.type === "date") {
@@ -266,19 +265,20 @@ export default function useColumns() {
                     columnData: {
                         ...commonFieldData,
                         cellRenderer: "dateRenderer",
+                        Cell: ({ row }) => (<p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{moment(row?.original?.[field?.fieldName]?.slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />}</p>),
                         filter: false
                     },
-                    rendererName: 'dateRenderer',
                 }
             }
             else if (field?.type === "checkBox") {
                 return {
                     columnData: {
                         ...commonFieldData,
-                        // filter: false, sortable: false,
+                        Cell: ({ row }) => (<span>
+                            {Boolean(row?.original?.[field?.fieldName]) ? "Yes" : "No"}
+                        </span>),
                         cellRenderer: "checkboxRenderer"
                     },
-                    rendererName: 'checkboxRenderer'
                 }
             }
             else if (field?.type === "colorPicker") {
@@ -287,17 +287,17 @@ export default function useColumns() {
                         ...commonFieldData,
                         cellRenderer: "commonRenderer",
                         filter: false,
+                        Cell: ({ row }) => (<p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>),
                     },
-                    rendererName: 'commonRenderer'
                 }
             }
             else {
                 return {
                     columnData: {
                         ...commonFieldData,
-                        cellRenderer: 'commonRenderer'
+                        cellRenderer: 'commonRenderer',
+                        Cell: ({ row }) => (<p className="text-truncate">{row?.original?.[field?.fieldName] ? <p>{row?.original?.[field?.fieldName]}</p> : <NoDataCell />}</p>),
                     },
-                    rendererName: 'commonRenderer'
                 }
             }
         }

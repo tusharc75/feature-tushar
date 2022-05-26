@@ -73,7 +73,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                             color="primary"
                             onClick={() => history.push(`${routes.serializedAsset.path}`, {
                                 productId: params.data?.productId,
-                                productName: params.data?.productDescription,
+                                productName: params.data?.productName,
                                 pOId: purchaseOrderData?._id,
                                 pOName: purchaseOrderData?.purchaseOrderNumber,
                             })}
@@ -130,6 +130,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                     ...finalObject,
                     productName: item?.productDetail?.productName,
                     productNumber: item?.productDetail?.productNumber,
+                    productDescription: item?.productDetail?.productDescription,
                     serializedProduct: item?.productDetail?.serializedProduct,
                     productId: item?.productDetail?._id,
                 };
@@ -292,7 +293,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                         allowSelection={true}
                         allowSwipe={true}
                         permissions={permissions}
-                        primaryField={columns?.find(d => d.field === "productDescription")}
+                        primaryField={columns?.find(d => d.field === "productNumber")}
                         onClick={(data) => {
                             history.push(`${routes.purchaseOrderDetail.path}/${data.productId}`)
                         }}
@@ -325,7 +326,6 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                         fullHeight={true}
                         renderedFrom={renderedFrom}
                         onClone={() => { }}
-
                     /> : <CustomAgGridEditable
                         columns={columns}
                         dataRows={dataRows}

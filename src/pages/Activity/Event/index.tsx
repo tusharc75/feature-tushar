@@ -101,8 +101,15 @@ const Event = () => {
               }}
               type="event"
             />
-
-            <Dialog open={openDialog} onClose={handleClose} maxWidth="md">
+            <Dialog
+              open={openDialog}
+              onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                  handleClose();
+                }
+              }}
+              maxWidth="md"
+            >
               <CreateEvent
                 eventId={activityData ? activityData.id : null}
                 handleClose={handleClose}

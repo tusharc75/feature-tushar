@@ -142,9 +142,10 @@ const ProjectSales: FC = () => {
   const [entities, setEntities] = useState([])
   const [columns, setColumns] = useState([])
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
-  const [accountDetails, setAccountDetails] = useState({
-    accountId: history.location?.state?.accountId,
-    accountName: history.location?.state?.accountName,
+
+  const [referenceDetails, setReferenceDetails] = useState({
+    referenceId: history.location?.state?.accountId,
+    referenceName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
 
@@ -230,7 +231,7 @@ const ProjectSales: FC = () => {
     if (renderCount > 0) {
       fetchProjects();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, accountDetails]);
+  }, [page, limit, selectedType, filters, sorting, selectedEntity, referenceDetails]);
 
   const ActionsRenderer = (params) => (
     <>
@@ -328,14 +329,20 @@ const ProjectSales: FC = () => {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    if (accountDetails.accountId) {
-      if (accountDetails.resource === customerAccount.accountResource) {
+    if (referenceDetails.referenceId) {
+      if (referenceDetails.resource === sidebarResource.opportunity) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          { field: replaceFieldName('customerAccountName'), term: accountDetails.accountId }
+          { field: "opportunity", term: referenceDetails.referenceId }
         ])}`;
-      } else if (accountDetails.resource === supplierAccount.accountResource) {
+      }
+      else if (referenceDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          { field: replaceFieldName('supplierAccountName'), term: { $in: [accountDetails.accountId] } }
+          { field: replaceFieldName('customerAccountName'), term: referenceDetails.referenceId }
+        ])}`;
+      }
+      else if (referenceDetails.resource === supplierAccount.accountResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          { field: replaceFieldName('supplierAccountName'), term: { $in: [referenceDetails.referenceId] } }
         ])}`;
       }
     }
@@ -558,14 +565,15 @@ const ProjectSales: FC = () => {
               setEntities={setEntities}
               filters={filters}
             >
-              {accountDetails.accountId && (
+              {referenceDetails.referenceId && (
                 <Chip
                   className="ml-3"
                   color="primary"
-                  label={`${accountDetails.resource === customerAccount.accountResource ? 'Customer' : 'Supplier'} Account: ${accountDetails.accountName
-                    }`}
+                  label={`${referenceDetails.resource === customerAccount.accountResource ? routes.customerAccount.title :
+                    referenceDetails.resource === supplierAccount.accountResource ? routes.supplierAccount.title :
+                      routes.opportunity.title} : ${referenceDetails.referenceName}`}
                   onDelete={() => {
-                    setAccountDetails({ accountId: null, accountName: null, resource: null });
+                    setReferenceDetails({ referenceId: null, referenceName: null, resource: null });
                   }}
                 />
               )}

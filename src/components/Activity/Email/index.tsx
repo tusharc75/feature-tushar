@@ -159,9 +159,11 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
-        onClose={() => {
-          handleClose()
-          setFullScreen(false);
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            handleClose()
+            setFullScreen(false);
+          }
         }}
         fullWidth
       >

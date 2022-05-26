@@ -23,7 +23,7 @@ import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import { MdAccountCircle } from 'react-icons/md';
-import { gridLoadingTimeout, entity, sidebarResource, prepareDataForGrid, getLocalStorageArrayData } from '../../constants/helpers';
+import { gridLoadingTimeout, entity, sidebarResource, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from './../../components/Helpers/Routes';
@@ -644,9 +644,9 @@ export default function Account(props) {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${queryType === 'My Accounts' ? 2 : selectedType}`;
-
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}&filterAccounts=${queryType === 'My Accounts' ? 2 : selectedType}` : '?';
+    
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -758,7 +758,7 @@ export default function Account(props) {
         lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
         leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
         leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-        approved: u.staticData?.approved,
+        approved: u.staticData?.approved ? u.staticData?.approved : false,
         isChecked: false,
 
         masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
@@ -811,8 +811,7 @@ export default function Account(props) {
   };
 
   const handleDeleteAccounts = async () => {
-    let selectedAccounts = selectedRecords.map((cr) => cr._id);
-
+    let selectedAccounts = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((cr) => cr._id);
     if (selectedAccounts.length > 0) {
       axiosInstance()
         .put(`/${accountApi}/remove`, {
@@ -825,6 +824,7 @@ export default function Account(props) {
             message: data.message
           });
           setShowDeleteConfirmBox(false);
+          removeLocalStorage(`${localStorageSelectedRecords}`)
           fetchAccounts();
         })
         .catch((error) => {
@@ -843,6 +843,7 @@ export default function Account(props) {
           type: 'success',
           message: data.message
         });
+        removeLocalStorage(`${localStorageSelectedRecords}`)
         fetchAccounts();
       })
       .catch((error) => {
@@ -900,8 +901,7 @@ export default function Account(props) {
   };
 
   const approveDisapproveAccounts = () => {
-    const selectedAccountIds = selectedRecords.filter((d) => d.approved === !multipleApproveDisapproveAccount.approved).map((m) => m._id);
-
+    const selectedAccountIds = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => d.approved === !multipleApproveDisapproveAccount.approved).map((m) => m._id);
     axiosInstance()
       .post(`/${accountApi}/approve`, {
         ids: selectedAccountIds,
@@ -918,6 +918,8 @@ export default function Account(props) {
           approved: false,
           selectedRecords: 0
         });
+        if (gridApi) gridApi.deselectAll()
+        removeLocalStorage(localStorageSelectedRecords)
         fetchAccounts();
       })
       .catch((error) => {
@@ -1011,6 +1013,7 @@ export default function Account(props) {
               if (gridApi) gridApi.deselectAll();
               else fetchAccounts();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
@@ -1200,7 +1203,7 @@ export default function Account(props) {
 
                   {!isOffline && (accountPermissions.isDelete || accountPermissions.approveAccount) && (
                     <Button
-                      disabled={selectedRecords.length === 0}
+                      disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                       variant={isMobile && !isTablet ? 'text' : 'outlined'}
                       color="default"
                       size="small"
@@ -1225,39 +1228,39 @@ export default function Account(props) {
                   >
                     {accountPermissions.isUpdate && accountPermissions.approveAccount && (
                       <MenuItem
-                        disabled={selectedRecords.filter((d) => !d.approved).length === 0}
+                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => !d.approved).length === 0}
                         onClick={() => {
                           closeActions();
                           setMultipleApproveDisapproveAccount({
                             show: true,
                             approved: true,
-                            selectedRecords: selectedRecords.filter((d) => !d.approved).length
+                            selectedRecords: getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => !d.approved).length
                           });
                         }}
                       >
-                        Approve Accounts &nbsp; <Chip size="small" label={selectedRecords.filter((d) => !d.approved).length} />
+                        Approve Accounts &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => !d.approved).length} />
                       </MenuItem>
                     )}
                     {accountPermissions.isUpdate && accountPermissions.approveAccount && (
                       <MenuItem
-                        disabled={selectedRecords.filter((d) => d.approved).length === 0}
+                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => d.approved).length === 0}
                         onClick={() => {
                           closeActions();
                           setMultipleApproveDisapproveAccount({
                             show: true,
                             approved: false,
-                            selectedRecords: selectedRecords.filter((d) => d.approved).length
+                            selectedRecords: getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => d.approved).length
                           });
                         }}
                       >
-                        Disapprove Accounts &nbsp; <Chip size="small" label={selectedRecords.filter((d) => d.approved).length} />
+                        Disapprove Accounts &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.filter((d) => d.approved).length} />
                       </MenuItem>
                     )}
                     {accountPermissions.isDelete && (
                       <MenuItem
-                        disabled={selectedRecords.length === 0}
+                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                         onClick={() => {
-                          if (selectedRecords.some((d) => d.canDelete === false)) {
+                          if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.canDelete === false)) {
                             closeActions();
                             setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
                           } else {
@@ -1269,29 +1272,29 @@ export default function Account(props) {
                         Delete
                       </MenuItem>
                     )}
-                    {accountPermissions.isUpdate && (
+                    {(accountPermissions.isUpdate && accountResource === 'customerAccount' && permissions?.productInventory) && (
                       <MenuItem
-                        disabled={selectedRecords.length === 0}
+                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                         onClick={() => {
                           setOpenAddPlantsDialog(true)
                           closeActions();
                         }}
                       >
-                        Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={selectedRecords.length} />
+                        Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
                       </MenuItem>
                     )}
                     {accountPermissions.isUpdate && (
                       <MenuItem
-                        disabled={selectedRecords.length === 0}
+                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
                         onClick={() => {
-                          if (selectedRecords.some((d) => d?.isAllowedToUpdate === false)) {
+                          if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d?.isAllowedToUpdate === false)) {
                             closeActions();
                             setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
                           } else {
                             closeActions();
-                            if (selectedRecords.length) {
+                            if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length) {
                               let entities = [];
-                              selectedRecords.map((current) => {
+                              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((current) => {
                                 if (current?.entityId) {
                                   entities = [...entities, current?.entityId];
                                 }
@@ -1306,7 +1309,7 @@ export default function Account(props) {
                           }
                         }}
                       >
-                        Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                        Assign Entity &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
                       </MenuItem>
                     )}
                   </Menu>
@@ -1338,7 +1341,7 @@ export default function Account(props) {
                 history.push(`${accountApi}/detail/${d._id}`);
               }}
               dataRows={dataRows}
-              selectedRecords={selectedRecords}
+              selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
               dispatch={dispatch}
               onEdit={(d) => {
                 history.push(`${accountApi}/detail/${d._id}?openEdit=true`);
@@ -1507,7 +1510,7 @@ export default function Account(props) {
             addWarehouse={(selectedPlants: any) => {
               setAddingWarehouse(true)
               axiosInstance().post(`/customer-account/assign-warehouse`, {
-                ids: selectedRecords.map((d: any) => d._id),
+                ids: getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d: any) => d._id),
                 warehouse: selectedPlants.map((d: any) => d._id),
               }).then(() => {
                 fetchAccounts();
@@ -1527,7 +1530,7 @@ export default function Account(props) {
           <EntitySelectionsDialog
             open={showEntityDialog}
             resource={sidebarResource[accountResource]}
-            resourceIds={selectedRecords.length ? selectedRecords.map((o) => o._id) : [accountId]}
+            resourceIds={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((o) => o._id) : [accountId]}
             onClose={() => {
               setShowEntityDialog(false);
               setAccountId('');

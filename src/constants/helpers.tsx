@@ -59,7 +59,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 //export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const salesOrderProcessSteps = ['Add Products', 'Ready To Invoice'];
-export const purchaseOrderSteps = ['Add Product', 'Services and Consumables', 'Issue', 'Receiving'];
+export const purchaseOrderSteps = ['Add Product', 'Services and Consumables', 'Receive Products'];
 export const rentalManagementSteps = ['Add Products', 'Services and Consumables', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
 export const transferInventorySteps = ["Add Products", "Serialized Assets", "Loading Ticket"]
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
@@ -1515,6 +1515,14 @@ export const getLocalStorageArrayData = (key) => {
     return [];
   }
 };
+
+export const removeLocalStorage = (key) => {
+  try {
+    localStorage.setItem(key, JSON.stringify([]));
+  } catch (err) {
+    return []
+  }
+}
 
 export const translateDataToTree = (data, parentProperty, childProperty, childrenPropertyToStore) => {
   let parents = data.filter((value) => value[parentProperty] == 'undefined' || value[parentProperty] == null);

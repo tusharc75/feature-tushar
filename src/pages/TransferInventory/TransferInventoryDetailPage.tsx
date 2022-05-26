@@ -22,7 +22,6 @@ import Activity from 'src/components/Activity';
 import TabPanel from 'src/components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import HideWhenOffline from 'src/components/HideWhenOffline';
 import Products from './Products';
 import SerializesAssets from './SerializesAssets';
 import LoadingTicket from './LoadingTicket';
@@ -60,6 +59,9 @@ const TransferInventoryDetailPage = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+
+  const [transferInvSteps, setTransferInvSteps] = useState([]);
+
 
   useEffect(() => {
     return history.listen((location) => {
@@ -112,19 +114,35 @@ const TransferInventoryDetailPage = () => {
     axiosInstance()
       .get(`${routes.transferInventory.path}/${id}`)
       .then(({ data: { data } }) => {
-        getRessourceFields();
-        setHeadingLabel(data.transferNumber);
-        setCustomizedRoutes([routes.transferInventory, { title: data.transferNumber }]);
-        setCurrentStep(transferInventorySteps.indexOf(data?.processStatus) !== -1 ? transferInventorySteps.indexOf(data?.processStatus) : 0);
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
-        setTransferInventoryData(data);
-        if (permissions?.transferInventory?.isUpdate && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
-        }
+        const transferData = data;
+        axiosInstance()
+          .get(`${routes.transferInventory.path}/${id}/product`)
+          .then(({ data: { data } }) => {
+            var isSerializedAssetsStep = false;
+            data?.products?.forEach((e) => {
+              if (e?.productDetail?.serializedProduct) {
+                isSerializedAssetsStep = true
+              }
+            })
+            var steps = transferInventorySteps;
+            if (!isSerializedAssetsStep) {
+              steps = steps?.filter((e) => e !== "Serialized Assets")
+            }
+            setTransferInvSteps(steps)
+            getRessourceFields();
+            setHeadingLabel(transferData.transferNumber);
+            setCustomizedRoutes([routes.transferInventory, { title: transferData.transferNumber }]);
+            setCurrentStep(steps.indexOf(transferData?.processStatus) !== -1 ? steps.indexOf(transferData?.processStatus) : 0);
+            const isAllowedToEdit = [...(transferData.collaborator ?? []), transferData.owner].some((d) => d?.optionValue === user?.user?._id);
+            setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
+            setTransferInventoryData(transferData);
+            if (permissions?.transferInventory?.isUpdate && openEdit === 'true') {
+              setOpenUpdateDialog(true);
+              const params = new URLSearchParams();
+              params.delete('openEdit');
+              history.push({ search: params.toString() });
+            }
+          })
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -185,7 +203,7 @@ const TransferInventoryDetailPage = () => {
   const updateProcessStatus = (step: number) => {
     axiosInstance()
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
-        processStatus: transferInventorySteps[step]
+        processStatus: transferInvSteps[step]
       })
       .then(() => { })
       .catch((error) => {
@@ -283,7 +301,7 @@ const TransferInventoryDetailPage = () => {
                 {transferInventoryData &&
                   <Paper>
                     <Steps
-                      steps={transferInventorySteps}
+                      steps={transferInvSteps}
                       currentStep={currentStep}
                       setCurrentStep={setCurrentStep}
                       isNextStep={false}
@@ -292,16 +310,17 @@ const TransferInventoryDetailPage = () => {
                       isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
                       setStepFullScreen={() => setStepFullScreen(true)}
                     />
-                    <ContentFullScreen title={transferInventorySteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-                      {currentStep === 0 && (
+                    <ContentFullScreen title={transferInvSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                      {transferInvSteps[currentStep] === "Add Products" && (
                         <Products
                           transferInventoryData={transferInventoryData}
                           setNextStep={setNextStep}
                           renderedFrom={`${renderedFrom}_grid-1`}
                           allowedToEdit={allowedToEdit}
+                          fetchTransferInventoryData={fetchTransferInventoryData}
                         />
                       )}
-                      {currentStep === 1 && (
+                      {transferInvSteps[currentStep] === "Serialized Assets" && (
                         <SerializesAssets
                           transferInventoryData={transferInventoryData}
                           setNextStep={setNextStep}
@@ -313,7 +332,7 @@ const TransferInventoryDetailPage = () => {
                           showActivity={showActivity}
                         />
                       )}
-                      {currentStep === 2 && (
+                      {transferInvSteps[currentStep] === "Loading Ticket" && (
                         <LoadingTicket
                           transferInventoryData={transferInventoryData}
                           updateStatus={updateStatus}

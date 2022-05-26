@@ -43,7 +43,7 @@ const InventoryProduct = () => {
   const [softHold, setSoftHold] = useState({ open: false, data: {} });
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
-  
+
   const { getColumnData } = useColumns();
 
   useEffect(() => {
@@ -119,16 +119,15 @@ const InventoryProduct = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    const queryString = getQueryString();
     if (plantId) {
-      let tempPlantId = plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId
+      const queryString = getQueryString();
       axiosInstance()
-        .get(`${productInventory.api}?wareHouse=${tempPlantId}&${queryString}`)
+        .get(`${productInventory.api}${queryString}`)
         .then(({ data }) => {
           let rows = data.data?.map((u) => {
             let finalObject = prepareDataForGrid(u);
             finalObject['productId'] = u._id;
-            finalObject['plantId'] = tempPlantId;
+            finalObject['plantId'] = plantId;
             finalObject['availableInventory'] = (u?.inventory || 0) - (u?.softHold || 0);
             return {
               ...finalObject
@@ -150,8 +149,18 @@ const InventoryProduct = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const getQueryString = () => {
-    let deepFilter = `page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let tempPlantId = plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId
+
+    let deepFilter = "";
+    if (!isExport) {
+      deepFilter = `?wareHouse=${tempPlantId}`
+      deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
+    }
+    else {
+      deepFilter = `&wareHouse=${tempPlantId}`
+    }
+
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
@@ -230,7 +239,7 @@ const InventoryProduct = () => {
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            additionalParams={`wareHouse=${plantId}`}
+            additionalParams={getQueryString(true)}
             permissions={{ isCreate: permissions?.productInventory?.isCreate && plantId !== "All" }}
             module="product inventory"
             api={productInventory.api}
