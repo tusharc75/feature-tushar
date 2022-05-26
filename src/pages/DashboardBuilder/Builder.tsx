@@ -112,11 +112,10 @@ const Builder = (props: Props) => {
             groupBy={(option) => option.resource}
             onChange={(_, val: KPIListType) => {
               handleChange('kpi', val);
-
               setFormValues((prevState) => ({
                 ...prevState,
                 chartType: val && val.hasOwnProperty('chartType') ? startCase(val?.chartType[0]) : '',
-                graphType: val && val.hasOwnProperty('graphType') ? startCase(val?.graphType[0]) : '',
+                graphType: val?.custom ? 'Custom' : val && val.hasOwnProperty('graphType') ? startCase(val?.graphType[0]) : '',
                 chartTitle: val?.name || ''
               }));
             }}
@@ -201,13 +200,19 @@ const Builder = (props: Props) => {
         <Box mt={2}>
           <FormGroup row>
             <FormControlLabel
-              control={<Checkbox checked={formValues.hasFilters} onChange={(e) => handleChange('hasFilters', e.target.checked)} />}
+              control={
+                <Checkbox
+                  disabled={formValues.graphType === 'Custom'}
+                  checked={formValues.hasFilters}
+                  onChange={(e) => handleChange('hasFilters', e.target.checked)}
+                />
+              }
               label="Filters"
             />
             <FormControlLabel
               control={
                 <Checkbox
-                  disabled={formValues.graphType === 'Table'}
+                  disabled={formValues.graphType === 'Table' || formValues.graphType === 'Custom'}
                   checked={formValues.hasTableView}
                   onChange={(e) => handleChange('hasTableView', e.target.checked)}
                 />
@@ -217,7 +222,7 @@ const Builder = (props: Props) => {
             <FormControlLabel
               control={
                 <Checkbox
-                  disabled={formValues.graphType === 'Map'}
+                  disabled={formValues.graphType === 'Map' || formValues.graphType === 'Custom'}
                   checked={formValues.hasExport}
                   onChange={(e) => handleChange('hasExport', e.target.checked)}
                 />
