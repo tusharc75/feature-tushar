@@ -24,7 +24,7 @@ const quotesStatus = [
   { optionLabel: 'Offered', optionValue: 'offered' }
 ]
 
-export const GRAPH_TYPES = ['Chart', 'Table', 'Map'];
+export const GRAPH_TYPES = ['Chart', 'Table', 'Map', "Custom"];
 
 export const CHART_TYPES = ['Line', 'Bar', 'Pie', 'Doughnut'];
 
@@ -56,6 +56,7 @@ export type KPIListType = {
   name: string;
   kpi: string;
   resource: string;
+  custom?: boolean;
   currencyConverter?: boolean
 };
 
