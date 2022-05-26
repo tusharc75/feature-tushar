@@ -69,7 +69,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'dashboard-master',
         'bulk-asset-creation',
         'erecs',
-        'resource-calendar'
+        'resource-calendar',
+        'serialized-asset-new'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
