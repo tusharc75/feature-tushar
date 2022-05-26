@@ -410,6 +410,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     rowClassRules={{
                         "red-data-row":
                             function (params) {
+                                if (params?.node?.rowPinned) {
+                                    return false
+                                }
                                 return !params?.data?.isValid
                             },
                     }}
