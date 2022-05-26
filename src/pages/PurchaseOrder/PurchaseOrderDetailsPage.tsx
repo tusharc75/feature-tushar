@@ -195,9 +195,9 @@ const PurchaseOrderDetailsPage = () => {
     axiosInstance()
       .patch(`${purchaseOrder.api}/status/${id}`, { status: status })
       .then(({ data: { data } }) => {
-        if (status === 'Invoiced' || status === 'Closed') {
-          updateProcessStatus(purchaseOrderSteps[3]);
-          setCurrentStep(3);
+        if ([PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(status)) {
+          updateProcessStatus(purchaseOrderSteps[2]);
+          setCurrentStep(2);
         }
         fetchPurchaseOrderData();
         toastConfig.setToastConfig({
@@ -430,8 +430,12 @@ const PurchaseOrderDetailsPage = () => {
                             <Service
                               purchaseOrderData={purchaseOrderData}
                               renderedFrom={`${renderedFrom}_grid-2`}
+                              updateStatus={updateStatus}
+                              setCurrentStep={setCurrentStep}
+                              currentStep={currentStep}
+                              setNextStep={setNextStep}
                             />}
-                          {currentStep === 2 && (
+                          {/* {currentStep === 2 && (
                             <IssuePo
                               purchaseOrderData={purchaseOrderData}
                               handleViewPdf={handleViewPdf}
@@ -442,8 +446,8 @@ const PurchaseOrderDetailsPage = () => {
                               statusOptions={statusOptions}
                               renderedFrom={`${renderedFrom}_grid-3`}
                             />
-                          )}
-                          {(currentStep === 3) && (
+                          )} */}
+                          {(currentStep === 2) && (
                             <ReceivingAsset
                               purchaseOrderData={purchaseOrderData}
                               setCurrentStep={setCurrentStep}

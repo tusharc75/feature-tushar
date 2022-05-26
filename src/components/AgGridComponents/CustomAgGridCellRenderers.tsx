@@ -44,9 +44,10 @@ export const DateTimeRenderer = params => params.value ? (
 );
 
 export const CheckboxRenderer = params => (
-    <span>
-        {Boolean(params?.value) ? "Yes" : "No"}
-    </span>
+    params?.node?.rowPinned ? <NoDataCell /> :
+        <span>
+            {Boolean(params?.value) ? "Yes" : "No"}
+        </span>
 )
 
 export const UpdatedByRenderer = params => params.value ? (
@@ -94,7 +95,8 @@ export const NameRenderer = params => params.value ? (
 )
 
 export const ImageRenderer = params => (
-    <Avatar className="grid-avatar" src={params?.value} />
+    params?.node?.rowPinned ? <NoDataCell /> :
+        <Avatar className="grid-avatar" src={params?.value} />
 )
 
 export const CustomLoadingOverlay = (params) => <div

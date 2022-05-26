@@ -880,6 +880,9 @@ const ContactDetailsPage = (props) => {
                     permissions={permissions}
                     isAddProjectSale={true}
                     isAllowedToEdit={contactPermissions.isUpdate && canEdit}
+                    accountId={contactData?.accountName?.optionValue}
+                    accountName={contactData?.accountName?.optionLabel}
+                    resource={accountResource}
                   />
                 </span>
               )}
