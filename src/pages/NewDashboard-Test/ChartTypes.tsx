@@ -286,9 +286,9 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           anchorEl={anchorElExport}
           setAnchorClose={setAnchorElExport}
           currency={globalFilters.currency || currency}
-          tableData={chartData ? (chart.graphType === 'Table' ? chartData : chartData?.tableData) : []}
+          tableData={chartData ? chartData?.tableData : []}
           chart={chart}
-          chartData={chartData}
+          chartData={chartData?.tableData}
         />
       )}
     </Grid>
