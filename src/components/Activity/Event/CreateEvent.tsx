@@ -192,15 +192,19 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   };
 
   function validate(values) {
+    const startDate = new Date(values.startDate)
+    const endDate = new Date(values.endDate)
+    startDate.setHours(0, 0, 0, 0)
+    endDate.setHours(0, 0, 0, 0)
     const errors = {};
-    if (new Date(values.startTime).getTime() === new Date(values.endTime).getTime()) {
-      errors["endTime"] = "End time should be different";
-    }
-    if (new Date(values.startTime).getTime() >= new Date(values.endTime).getTime()) {
-      errors["endTime"] = "End time should be greater then start time";
-    }
-    if (new Date(values.startDate).getTime() < new Date(values.endDate).getTime()) {
+    if (startDate > endDate) {
       errors["endDate"] = "End date should be greater then start date";
+      return errors;
+    }
+    if (startDate.getDate() === endDate.getDate()) {
+      if (new Date(values.startTime).getTime() > new Date(values.endTime).getTime()) {
+        errors["endTime"] = "End time should be greater then start time";
+      }
     }
     if (new Date(values.startTime).toString() === "Invalid Date") {
       errors["startTime"] = "Invalid Time";
@@ -406,11 +410,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                               label="End Date"
                               onChange={(date: any) => {
                                 setFieldValue("endDate", date);
-                                setFieldValue(
-                                  "endTime",
-                                  new Date(
-                                    getTime(date ? date._d : new Date()).getTime() + 30 * 60000
-                                  )
+                                setFieldValue("endTime", new Date(getTime(date ? date._d : new Date()).getTime() + 30 * 60000)
                                 );
                               }}
                               format={dateFormat}
