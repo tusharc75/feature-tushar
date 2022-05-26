@@ -1,51 +1,44 @@
-import React from "react";
-import {
-  Chip,
-  makeStyles,
-  IconButton,
-  Typography,
-  Box,
-  Grid,
-  Menu,
-  MenuItem,
-} from "@material-ui/core";
-import { MoreHoriz, CalendarToday } from "@material-ui/icons";
-import { useDrag, useDrop } from "react-dnd";
-import { ListRelatedTo } from "../../Helpers/ListRelatedTo";
-import {
-  DeleteEvent,
-  DeleteCase,
-  DeleteTask,
-} from "../../../../axios/activity";
+import React from 'react';
+import { Chip, makeStyles, IconButton, Typography, Box, Grid, Menu, MenuItem } from '@material-ui/core';
+import { MoreHoriz, DateRange } from '@material-ui/icons';
+
+import { useDrag, useDrop } from 'react-dnd';
+import { ListRelatedTo } from '../../Helpers/ListRelatedTo';
+import { DeleteEvent, DeleteCase, DeleteTask } from '../../../../axios/activity';
+import { red } from '@material-ui/core/colors';
 
 const useStyles = makeStyles(() => ({
   activitybox: {
-    cursor: "pointer",
-    display: "flex",
-    flexDirection: "column",
-    position: "relative",
-    margin: "5px",
-    borderRadius: "3px",
-    boxShadow:
-      "rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px",
-    backgroundColor: "rgb(255, 255, 255)",
-    color: "rgb(23, 43, 77)",
-    padding: "8px",
-  },
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+    margin: '0px 6px 14px',
+    borderRadius: '4px',
+    // boxShadow: 'rgb(23 43 77 / 20%) 0px 1px 1px, rgb(23 43 77 / 20%) 0px 0px 1px',
+    backgroundColor: 'rgb(255, 255, 255)',
+    color: 'rgb(23, 43, 77)',
+    padding: '14px 15px',
+    transition: 'transform .2s, background .3s',
+    '&:hover': {
+      transform: 'scale(1.02)',
+      zIndex: '1'
+      // backgroundColor: 'var(--hover_bg)'
+    }
+  }
 }));
 
 export const BoardBox = (props) => {
-  const { type, data, id, index, moveCard, fetchBoard, handleActivityOpen, canUpdate, canDelete } =
-    props;
+  const { type, data, id, index, moveCard, fetchBoard, handleActivityOpen, canUpdate, canDelete } = props;
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const ref = React.useRef(null);
 
   const [{ handlerId }, drop] = useDrop({
-    accept: "move",
+    accept: 'move',
     collect(monitor) {
       return {
-        handlerId: monitor.getHandlerId(),
+        handlerId: monitor.getHandlerId()
       };
     },
     hover: (item: any, monitor) => {
@@ -58,8 +51,7 @@ export const BoardBox = (props) => {
         return;
       }
       const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       const clientOffset = monitor.getClientOffset();
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
@@ -70,17 +62,17 @@ export const BoardBox = (props) => {
       }
       moveCard(dragIndex, hoverIndex);
       item.index = hoverIndex;
-    },
+    }
   });
 
   const [{ isDragging }, drag] = useDrag({
-    type: "move",
+    type: 'move',
     item: () => {
       return { id, index };
     },
     collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
+      isDragging: monitor.isDragging()
+    })
   });
 
   const handleOpenMenu = (event) => {
@@ -95,29 +87,29 @@ export const BoardBox = (props) => {
 
   const handleDelete = (event) => {
     event.stopPropagation();
-    if (type === "event") {
+    if (type === 'event') {
       DeleteEvent(data._id)
         .then(({ data }) => {
           setAnchorEl(null);
           fetchBoard();
         })
-        .catch((err) => { });
+        .catch((err) => {});
     }
-    if (type === "case") {
+    if (type === 'case') {
       DeleteCase(data._id)
         .then(({ data }) => {
           setAnchorEl(null);
           fetchBoard();
         })
-        .catch((err) => { });
+        .catch((err) => {});
     }
-    if (type === "task") {
+    if (type === 'task') {
       DeleteTask(data._id)
         .then(({ data }) => {
           setAnchorEl(null);
           fetchBoard();
         })
-        .catch((err) => { });
+        .catch((err) => {});
     }
   };
 
@@ -128,18 +120,15 @@ export const BoardBox = (props) => {
     <div
       ref={ref}
       data-handler-id={handlerId}
-      title={`Due Date - ${new Date(data?.dueDate).getDate() === new Date().getDate()
-        ? "Today"
-        : new Date(data?.dueDate).toDateString()
-        }`}
+      title={`Due Date - ${new Date(data?.dueDate).getDate() === new Date().getDate() ? 'Today' : new Date(data?.dueDate).toDateString()}`}
     >
       <Box
         onClick={() => {
           if (canUpdate) {
-            handleActivityOpen(id)
+            handleActivityOpen(id);
           }
         }}
-        className={classes.activitybox}
+        className={` ${classes.activitybox}`}
         style={{ opacity }}
       >
         <Box>
@@ -148,10 +137,10 @@ export const BoardBox = (props) => {
               <Box display="flex" mr="10px">
                 <Typography
                   style={{
-                    textOverflow: "ellipsis",
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
-                    marginRight: "5px",
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    marginRight: '5px'
                   }}
                   variant="subtitle2"
                 >
@@ -160,64 +149,48 @@ export const BoardBox = (props) => {
                 <Chip
                   size="small"
                   icon={
-                    <CalendarToday
+                    <DateRange
                       style={{
                         color:
-                          new Date(data?.dueDate).getDate() <
-                            new Date().getDate() ||
-                            new Date(data?.dueDate).getMonth() <
-                            new Date().getMonth() ||
-                            new Date(data?.dueDate).getFullYear() <
-                            new Date().getFullYear()
-                            ? "#dc3545"
-                            : new Date(data?.dueDate).getDate() ===
-                              new Date().getDate() &&
-                              new Date(data?.dueDate).getMonth() ===
-                              new Date().getMonth() &&
-                              new Date(data?.dueDate).getFullYear() ===
-                              new Date().getFullYear()
-                              ? "#28a745"
-                              : "#838485",
+                          // new Date(data?.dueDate).getDate() < new Date().getDate() ||
+                          // new Date(data?.dueDate).getMonth() < new Date().getMonth() ||
+                          // new Date(data?.dueDate).getFullYear() < new Date().getFullYear()
+                          //   ? '#dc3545'
+                          //   : new Date(data?.dueDate).getDate() === new Date().getDate() &&
+                          //     new Date(data?.dueDate).getMonth() === new Date().getMonth() &&
+                          //     new Date(data?.dueDate).getFullYear() === new Date().getFullYear()
+                          //   ? '#28a745'
+                          //   : '#838485'
+                          '#969696'
                       }}
                       fontSize="small"
                     />
                   }
                   label={new Date(data?.dueDate).toDateString()}
                   style={{
-                    background: "#eee",
+                    background: 'transparent',
                     color:
-                      new Date(data?.dueDate).getDate() <
-                        new Date().getDate() ||
-                        new Date(data?.dueDate).getMonth() <
-                        new Date().getMonth() ||
-                        new Date(data?.dueDate).getFullYear() <
-                        new Date().getFullYear()
-                        ? "#dc3545"
-                        : new Date(data?.dueDate).getDate() ===
-                          new Date().getDate() &&
-                          new Date(data?.dueDate).getMonth() ===
-                          new Date().getMonth() &&
-                          new Date(data?.dueDate).getFullYear() ===
-                          new Date().getFullYear()
-                          ? "#28a745"
-                          : "#838485",
+                      // new Date(data?.dueDate).getDate() < new Date().getDate() ||
+                      // new Date(data?.dueDate).getMonth() < new Date().getMonth() ||
+                      // new Date(data?.dueDate).getFullYear() < new Date().getFullYear()
+                      //   ? '#dc3545'
+                      //   : new Date(data?.dueDate).getDate() === new Date().getDate() &&
+                      //     new Date(data?.dueDate).getMonth() === new Date().getMonth() &&
+                      //     new Date(data?.dueDate).getFullYear() === new Date().getFullYear()
+                      //   ? '#28a745'
+                      //   : '#838485'
+                      '#969696'
                   }}
                 />
               </Box>
             </Grid>
-            {
-              canDelete ?
-                <Grid item xs={1}>
-                  <IconButton
-                    size="small"
-                    aria-label="delete"
-                    onClick={handleOpenMenu}
-                  >
-                    <MoreHoriz />
-                  </IconButton>
-                </Grid>
-                : null
-            }
+            {canDelete ? (
+              <Grid item xs={1}>
+                <IconButton size="small" aria-label="delete" onClick={handleOpenMenu}>
+                  <MoreHoriz />
+                </IconButton>
+              </Grid>
+            ) : null}
           </Grid>
           <Typography color="textSecondary" variant="body2">
             {data?.description}
@@ -226,19 +199,11 @@ export const BoardBox = (props) => {
         <Box pt={2}>
           <ListRelatedTo relatedTo={data?.relatedTo} originRelatedTo={[]} />
         </Box>
-        {
-          canDelete ?
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleCloseMenu}>
-              <MenuItem onClick={handleDelete}>Delete</MenuItem>
-            </Menu>
-            : null
-        }
-
+        {canDelete ? (
+          <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+            <MenuItem onClick={handleDelete}>Delete</MenuItem>
+          </Menu>
+        ) : null}
       </Box>
     </div>
   );

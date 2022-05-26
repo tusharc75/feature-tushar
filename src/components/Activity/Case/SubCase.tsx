@@ -1,20 +1,10 @@
 import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import {
-  Typography,
-  Button,
-  Grid,
-  Chip,
-  IconButton,
-  TextField,
-  Box,
-  CircularProgress,
-  Avatar
-} from '@material-ui/core';
+import { Typography, Button, Grid, Chip, IconButton, TextField, Box, CircularProgress, Avatar } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { MdDelete } from 'react-icons/md';
-import {BsDot} from "react-icons/bs"
+import { BsDot } from 'react-icons/bs';
 import { SubCaseColors } from '../Helpers/utils';
 
 const useStyles = makeStyles((theme) => ({
@@ -26,16 +16,13 @@ const useStyles = makeStyles((theme) => ({
   },
   childChipLayout: {
     fontSize: '10px',
-    minWidth:"70px !important"
+    minWidth: '70px !important'
   }
 }));
 
 export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, data }) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const [childCases, setChildCases] = useState(data.childCase || null);
-  
-
-
 
   const [isSubmitting, setSubmitting] = useState(false);
   const [caseName, setCaseName] = useState('');
@@ -102,11 +89,10 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
   return (
     <Box mt={3} mb={3}>
       {((childCases && childCases.length > 0) || openAddSub === true) && (
-        <Box mb={1} className='d-flex justify-content-space-between'>
+        <Box mb={1} className="d-flex justify-content-space-between">
           <Typography variant="body2" className={classes.boldFont}>
             Child Case
           </Typography>
-          
         </Box>
       )}
       {childCases &&
@@ -120,14 +106,18 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
             mb={1}
             boxShadow={1}
             borderRadius={4}
-            style={{ cursor: 'pointer', padding: '6px', marginBottom: '0', boxShadow: 'none' }}
+            style={{ cursor: 'pointer', padding: '8px', marginBottom: '10px', boxShadow: 'none' }}
           >
             <Grid container spacing={1}>
-              <Grid item xs={12} className='d-flex justify-content-space-between'>
+              <Grid item xs={12} className="d-flex justify-content-space-between">
                 <Grid style={{ display: 'flex', gap: '15px' }}>
-                  <Typography variant="body1" color="primary" style={{ paddingLeft: '10px', display:"flex", justifyContent:"center" , alignItems:"center" , color:"#a3a0a0" }}>
-                    <BsDot/>
-                  </Typography>
+                  {/* <Typography
+                    variant="body1"
+                    color="primary"
+                    style={{ paddingLeft: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#a3a0a0' }}
+                  >
+                    <BsDot />
+                  </Typography> */}
 
                   <Typography variant="body1" color="primary">
                     {element.name}
@@ -135,17 +125,23 @@ export const SubCase = ({ setId, openAddSub, setOpenAddSub, fetchCaseDetail, dat
                 </Grid>
 
                 <Grid style={{ display: 'flex', gap: '15px' }}>
-                  <Avatar style={{width:"24px",height:"24px"}}>M</Avatar>
+                  <Avatar style={{ width: '24px', height: '24px', fontSize: '12px' }}>M</Avatar>
 
-                 <Chip size="small" label={element.status} color="primary" className={classes.childChipLayout} style={{
-                    backgroundColor: SubCaseColors[element.status],
-                    color: "white",
-                  }} id="check"/>
-                  <IconButton size="small" style={{ color:"var(--error)"}} onClick={(e) => deleteCase(e, element._id)}>
-                    <MdDelete  />
+                  <Chip
+                    size="small"
+                    label={element.status}
+                    color="primary"
+                    className={classes.childChipLayout}
+                    style={{
+                      backgroundColor: SubCaseColors[element.status],
+                      color: 'white'
+                    }}
+                    id="check"
+                  />
+                  <IconButton size="small" style={{ color: 'var(--error)' }} onClick={(e) => deleteCase(e, element._id)}>
+                    <MdDelete />
                   </IconButton>
                 </Grid>
-
               </Grid>
               {/* <Grid container justify="flex-end">
                

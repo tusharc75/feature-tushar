@@ -1997,12 +1997,23 @@ svg.MuiSvgIcon-root {
         &.expander {
           margin-left: auto;
           margin-right: auto;
-          padding: 5px;
+          padding: 0px;
+          border-radius: 50%;
+          border-color: transparent;
+          margin-bottom: -5px;
+
           svg {
             width: 20px;
             height: 20px;
             padding: 0;
             margin: 0;
+          }
+          &:hover {
+            border-color: transparent;
+            background-color: transparent !important;
+            svg {
+              fill: unset;
+            }
           }
         }
       }
