@@ -1,14 +1,11 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import { camelCase } from 'lodash';
+import { Box, Grid } from '@material-ui/core';
 import React from 'react';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
 
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import ChartTypes from './ChartTypes';
-import seed from './seed';
 import countriesData from 'src/constants/Country.json';
 import GlobalFilter from './GlobalFilter';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -41,10 +38,6 @@ const DashbaordNew = () => {
       to: new Date()
     }
   });
-
-  React.useEffect(() => {
-    fetchDashboards();
-  }, []);
 
   React.useEffect(() => {
     const selectedDashboard = dashboardList.find((d) => d.name === globalFilters?.dashboardType);
@@ -80,6 +73,7 @@ const DashbaordNew = () => {
         alert(JSON.stringify(error));
       }
     })();
+    fetchDashboards();
   }, []);
 
   const fetchDashboards = () => {
@@ -106,7 +100,7 @@ const DashbaordNew = () => {
         <CustomBreadCrumbs routes={[{ title: 'Dashboards' }]} />
       </div>
       <div className="detail-container">
-        {!userLoading || !dashboardLoading ? (
+        {!userLoading ? (
           <React.Fragment>
             <GlobalFilter
               dashboardList={dashboardList.map((d) => ({ id: d._id, name: d.name }))}
@@ -114,27 +108,31 @@ const DashbaordNew = () => {
               setGlobalFilters={setGlobalFilters}
             />
             <Box bgcolor="#efefef" p={1} pt={1}>
-              <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
-                {charts.map((chart: ChartDataType, index: number) => (
-                  <ChartTypes
-                    globalFilters={globalFilters}
-                    key={chart.chartType + ' ' + index + 1}
-                    chart={chart}
-                    filterData={{ ...filtersOptions }}
-                    commonSalesData={commonSalesData}
-                    setCommonSalesData={setCommonSalesData}
-                  />
-                ))}
-                {globalFilters.dashboardType?.includes('Asset') && (
-                  <Grid item xs={12}>
-                    <AssetStats />
-                  </Grid>
-                )}
-              </Grid>
+              {dashboardLoading ? (
+                <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboards..." />
+              ) : (
+                <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
+                  {charts.map((chart: ChartDataType, index: number) => (
+                    <ChartTypes
+                      globalFilters={globalFilters}
+                      key={chart.chartType + ' ' + index + 1}
+                      chart={chart}
+                      filterData={{ ...filtersOptions }}
+                      commonSalesData={commonSalesData}
+                      setCommonSalesData={setCommonSalesData}
+                    />
+                  ))}
+                  {globalFilters.dashboardType?.includes('Asset') && (
+                    <Grid item xs={12}>
+                      <AssetStats />
+                    </Grid>
+                  )}
+                </Grid>
+              )}
             </Box>
           </React.Fragment>
         ) : (
-          <Loader minHeight="100%" noLoader={false} text="Loading..." />
+          <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
         )}
       </div>
     </MuiPickersUtilsProvider>
