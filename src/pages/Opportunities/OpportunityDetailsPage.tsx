@@ -689,6 +689,9 @@ function OpportunityDetailsPage() {
                   permissions={permissions}
                   isAddProjectSale={true}
                   isAllowedToEdit={allowedToEdit}
+                  accountId={opportunityData?._id}
+                  accountName={opportunityData?.opportunityName}
+                  resource={sidebarResource.opportunity}
                 />
               )}
               {permissions?.quoteBuilder?.isRead && (
