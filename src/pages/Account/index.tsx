@@ -644,9 +644,9 @@ export default function Account(props) {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterAccounts=${queryType === 'My Accounts' ? 2 : selectedType}`;
-
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}&filterAccounts=${queryType === 'My Accounts' ? 2 : selectedType}` : '?';
+    
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -758,7 +758,7 @@ export default function Account(props) {
         lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
         leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
         leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-        approved: u.staticData?.approved,
+        approved: u.staticData?.approved ? u.staticData?.approved : false,
         isChecked: false,
 
         masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
@@ -843,7 +843,7 @@ export default function Account(props) {
           type: 'success',
           message: data.message
         });
-          removeLocalStorage(`${localStorageSelectedRecords}`)
+        removeLocalStorage(`${localStorageSelectedRecords}`)
         fetchAccounts();
       })
       .catch((error) => {
@@ -918,6 +918,8 @@ export default function Account(props) {
           approved: false,
           selectedRecords: 0
         });
+        if (gridApi) gridApi.deselectAll()
+        removeLocalStorage(localStorageSelectedRecords)
         fetchAccounts();
       })
       .catch((error) => {
@@ -1011,6 +1013,7 @@ export default function Account(props) {
               if (gridApi) gridApi.deselectAll();
               else fetchAccounts();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
