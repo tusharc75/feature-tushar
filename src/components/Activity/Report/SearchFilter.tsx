@@ -10,12 +10,28 @@ import ActivityModelHandler from '../ActivityModelHandler';
 import { isMobile, isTablet } from 'react-device-detect';
 import { get_activity_resource } from '../Helpers/utils';
 import routes from '../../Helpers/Routes';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+  chipStyle: {
+    textAlign: 'center',
+    height: 'unset !important',
+    padding: '2px 12px',
+    '& span.MuiChip-label': {
+      fontWeight: '500'
+    },
+    '& svg': {
+      fill: 'var(--primary)'
+    }
+  }
+}));
 
 export const capitalize = (string) => {
   return string && typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : string;
 };
 
 export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActivity = false, activityName }) => {
+  const classes = useStyles();
   const {
     state: {
       user: { user },
@@ -118,6 +134,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
                   : option.label + ' - ' + option.name
               }
               {...getTagProps({ index })}
+              className={`${classes.chipStyle} `}
             />
           ))
         }
@@ -165,6 +182,7 @@ export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActiv
               <Grid item>
                 <Chip
                   size={chip?.size || 'medium'}
+                  className={`${classes.chipStyle}`}
                   style={{
                     backgroundColor: resActivityColors[option.type],
                     color: resActivityTextColors[option.type]
