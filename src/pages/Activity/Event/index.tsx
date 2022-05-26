@@ -1,26 +1,26 @@
-import React, { useState, useEffect, useCallback, useContext, Fragment } from "react";
-import { Box, Button, Dialog, Grid } from "@material-ui/core";
-import { Add } from "@material-ui/icons";
-import moment from "moment";
-import { useHistory } from "react-router-dom";
-import queryString from "query-string";
-import {useData} from "../../../StateProvider/Provider"
-import MyCalendar from "../Calendar/MyCalendar";
-import { GetBoard, GetReferenceName } from "../../../axios/activity";
-import Layout from "../../../components/Layout";
-import CustomContainer from "../../../components/CustomContainer";
-import CustomBreadCrumbs from "../../../components/CustomBreadCrumbs";
-import { SearchFilter } from "../../../components/Activity/Report/SearchFilter";
-import { CreateEvent } from "../../../components/Activity/Event/CreateEvent";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
+import React, { useState, useEffect, useCallback, useContext, Fragment } from 'react';
+import { Box, Button, Dialog, Grid } from '@material-ui/core';
+import { Add } from '@material-ui/icons';
+import moment from 'moment';
+import { useHistory } from 'react-router-dom';
+import queryString from 'query-string';
+import { useData } from '../../../StateProvider/Provider';
+import MyCalendar from '../Calendar/MyCalendar';
+import { GetBoard, GetReferenceName } from '../../../axios/activity';
+import Layout from '../../../components/Layout';
+import CustomContainer from '../../../components/CustomContainer';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
+import { SearchFilter } from '../../../components/Activity/Report/SearchFilter';
+import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 
 const Event = () => {
   const history = useHistory();
   const { setToastConfig } = useContext(CustomToastContext);
   const {
     state: {
-      user: { user ,permissions},
-    },
+      user: { user, permissions }
+    }
   } = useData();
   const [filter, setFilter] = useState([]);
   const [activityData, setActivityData] = useState(null);
@@ -33,24 +33,20 @@ const Event = () => {
     if (referenceType) {
       GetReferenceName(referenceType, referenceId)
         .then(({ data }) => {
-          setFilter([
-            { _id: referenceId, type: referenceType, name: data.name },
-          ]);
+          setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     }
   }, [referenceId]);
 
   const fetchBoard = useCallback(() => {
-    GetBoard("event", JSON.stringify(filter))
+    GetBoard('event', JSON.stringify(filter))
       .then(({ data }) => {
         const newData = data.map((d) => ({
           ...d,
           title: d.name,
           start: d.startDate ? new Date(d.startDate) : moment().toDate(),
-          end: d.dueDate
-            ? new Date(d.dueDate)
-            : moment().add(20, "days").toDate(),
+          end: d.dueDate ? new Date(d.dueDate) : moment().add(20, 'days').toDate()
         }));
 
         setEvents(newData);
@@ -77,29 +73,22 @@ const Event = () => {
 
   return (
     <Fragment>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs
-          routes={[{ title: "Activity", path: "/activity" }, { title: "Event" }]}
-        />
+      <Grid container className="headerbox ">
+        <CustomBreadCrumbs routes={[{ title: 'Activity', path: '/activity' }, { title: 'Event' }]} />
       </Grid>
       <CustomContainer>
         <div className="detailContainer">
           <Box p={1}>
             <Box mb={2} display="flex" alignItems="center">
               <Box mr={2} minWidth="150px" height="100%">
-                <Button
-                  fullWidth
-                  startIcon={<Add />}
-                  variant="outlined"
-                  size="small"
-                  onClick={() => setOpenDialog(true)}>
+                <Button fullWidth startIcon={<Add />} variant="outlined" size="small" onClick={() => setOpenDialog(true)}>
                   Create Event
                 </Button>
               </Box>
               <SearchFilter
                 handleChangeFilter={handleChangeFilter}
                 filter={filter}
-                chip={{ variant: "default", size: "small", color: "default" }}
+                chip={{ variant: 'default', size: 'small', color: 'default' }}
                 activityName="event"
               />
             </Box>
@@ -118,7 +107,7 @@ const Event = () => {
                 eventId={activityData ? activityData.id : null}
                 handleClose={handleClose}
                 isMinimized={false}
-                onMinimizeMaximize={() => { }}
+                onMinimizeMaximize={() => {}}
                 showManimizeMaximize={false}
               />
             </Dialog>

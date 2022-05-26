@@ -289,7 +289,6 @@ export default function OpportunityAccordionInUserDetail({ opportunities, expand
             justifyContent="center"
             alignItems="center"
           >
-            <span className="show_more">Show More</span>
             <FaArrowAltCircleDown size={25} />
           </Box>
         )}

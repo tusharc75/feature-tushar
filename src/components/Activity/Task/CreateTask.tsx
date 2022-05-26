@@ -64,24 +64,22 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
     if (id) {
       await GetTaskDetail(id)
         .then(({ data }) => {
-          if (data?.assignee && data?.assignee !== "") {
-            if (typeof data?.assignee === "string") {
+          if (data?.assignee && data?.assignee !== '') {
+            if (typeof data?.assignee === 'string') {
               data['assignee'] = [{ userId: data?.assignee }];
-            }
-            else {
+            } else {
               data['assignee'] = data?.assignee?.map((assignee) => ({
                 userId: assignee
               }));
             }
-          }
-          else {
-            data['assignee'] = []
+          } else {
+            data['assignee'] = [];
           }
           setInitialValues(null);
           setInitialValues(data);
           setFormValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       let initialData = {
         name: '',
@@ -166,7 +164,13 @@ export const CreateTask = ({ relatedTo, taskId, handleClose, status, isMinimized
                           {initialValues.parent &&
                             initialValues.parent.map((_p, index) => {
                               return (
-                                <Button size="small" key={index} className="cursor-pointer" onClick={() => setId(_p._id)} color="primary">
+                                <Button
+                                  size="small"
+                                  key={index}
+                                  className="cursor-pointer asdfasfdasdfas"
+                                  onClick={() => setId(_p._id)}
+                                  color="primary"
+                                >
                                   {_p.name}
                                 </Button>
                               );

@@ -11,7 +11,6 @@ import { BsDot } from 'react-icons/bs';
 import { MdDelete } from 'react-icons/md';
 import { SubCaseColors } from '../Helpers/utils';
 
-
 const useStyles = makeStyles(() => ({
   marginLeft: {
     marginLeft: 10
@@ -26,7 +25,7 @@ const useStyles = makeStyles(() => ({
   },
   childChipLayout: {
     fontSize: '10px',
-    minWidth: "70px !important"
+    minWidth: '70px !important'
   }
 }));
 
@@ -115,18 +114,18 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
               mb={1}
               boxShadow={1}
               borderRadius={4}
-              style={{ cursor: 'pointer', padding: '6px', boxShadow: 'none' }}
+              style={{ cursor: 'pointer', padding: '8px', marginBottom: '10px', boxShadow: 'none' }}
             >
               <Grid container spacing={1}>
                 <Grid item xs={12} className="d-flex justify-content-space-between">
                   <Grid style={{ display: 'flex', gap: '15px' }}>
-                    <Typography
+                    {/* <Typography
                       variant="body1"
                       color="primary"
                       style={{ paddingLeft: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#a3a0a0' }}
                     >
                       <BsDot />
-                    </Typography>
+                    </Typography> */}
 
                     <Typography variant="body1" color="primary">
                       {element.name}
@@ -134,11 +133,17 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
                   </Grid>
 
                   <Grid style={{ display: 'flex', gap: '15px' }}>
-                    <Avatar style={{ width: '24px', height: '24px' }}>M</Avatar>
-                    <Chip size="small" label={element.status} color="primary" className={classes.childChipLayout} style={{
-                      backgroundColor: SubCaseColors[element.status],
-                      color: "white",
-                    }} />
+                    <Avatar style={{ width: '24px', height: '24px', fontSize: '12px' }}>M</Avatar>
+                    <Chip
+                      size="small"
+                      label={`${element.status}`}
+                      color="primary"
+                      className={classes.childChipLayout}
+                      style={{
+                        backgroundColor: SubCaseColors[element.status],
+                        color: 'white'
+                      }}
+                    />
 
                     <IconButton
                       size="small"
@@ -155,8 +160,6 @@ export const SubTask = ({ setId, openAddSub, setOpenAddSub, fetchTaskDetail, dat
                     </IconButton>
                   </Grid>
                 </Grid>
-
-
               </Grid>
             </Box>
           ))}

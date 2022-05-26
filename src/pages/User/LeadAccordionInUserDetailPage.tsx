@@ -287,7 +287,6 @@ export default function LeadAccordionInUserDetailPage({ leads, expanded = true, 
             justifyContent="center"
             alignItems="center"
           >
-            <span className="show_more">Show More</span>
             <FaArrowAltCircleDown size={25} />
           </Box>
         )}
