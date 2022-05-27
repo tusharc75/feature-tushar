@@ -14,6 +14,9 @@ import { isMobile } from 'react-device-detect';
 import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import routes from 'src/components/Helpers/Routes';
 
 interface Props {
   plantId: string;
@@ -25,24 +28,40 @@ interface Props {
 }
 
 const AddInventory = (props: Props) => {
+
   const { plantId, close, isAdding, submit, renderedFrom, existingProducts } = props;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
+  const [columns, setColumns] = useState(null)
 
-  const {
-    state: { permissions }
-  }: any = useData();
+
+  useEffect(() => {
+    fetchFields();
+  }, []);
 
   useEffect(() => {
     fetchProductInventory();
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
-  let columns = [
-    { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
-    {
+  const fetchFields = async () => {
+    const column = [];
+    const productResult = await axiosInstance().get('/field?resource=Product&view=true')
+    const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+    productFields?.forEach((e) => {
+      if (e?.fieldData?.fieldName === "productName") {
+        column.push({ field: "productName", primaryField: true, headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
+      }
+      if (e?.fieldData?.fieldName === "productNumber") {
+        column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      }
+      if (e?.fieldData?.fieldName === "serializedProduct") {
+        column.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+      }
+    })
+    column.push({
       field: 'qty',
       headerName: 'Quantity',
       show: true,
@@ -50,8 +69,8 @@ const AddInventory = (props: Props) => {
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
       editable: true
-    },
-    {
+    });
+    column.push({
       field: 'inventory',
       headerName: 'Inventory',
       show: true,
@@ -59,8 +78,9 @@ const AddInventory = (props: Props) => {
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
       editable: false
-    }
-  ];
+    });
+    setColumns([...column])
+  }
 
   const fetchProductInventory = () => {
     dispatch({ type: 'loading', loading: true });
@@ -78,8 +98,8 @@ const AddInventory = (props: Props) => {
           const selectedData = selectedProducts.find((d: any) => d._id === u._id);
           let finalObject = prepareDataForGrid(u);
           finalObject['productId'] = u._id;
-          finalObject['qty'] = selectedData ? selectedData.qty : 0;
           finalObject['inventory'] = u?.inventory ? (u?.inventory - (u?.softHold || 0)) : 0;
+          finalObject['qty'] = selectedData ? selectedData.qty : finalObject['inventory'] ? 1 : 0;
           return {
             ...finalObject
           };
@@ -87,7 +107,6 @@ const AddInventory = (props: Props) => {
         if (selectedProducts.length > 0 && showFilteredRecordsOnly) {
           rows = selectedProducts;
         }
-
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -137,7 +156,15 @@ const AddInventory = (props: Props) => {
     submit(_data);
   };
 
+  const NameRenderer = (params) => (
+    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data.productId}`}>
+      {params.value}
+    </Link>
+  );
+
   const frameworkComponents = {
+    checkboxRenderer: CheckboxRenderer,
+    nameRenderer: NameRenderer,
     commonRenderer: CommonRenderer
   };
 
@@ -227,7 +254,7 @@ const AddInventory = (props: Props) => {
             </Box>
           </Box>
         </Box>
-        {columns.length > 0 && (
+        {columns ? (
           <CustomAgGridEditable
             allowSelection={true}
             allowAction={false}
@@ -247,7 +274,11 @@ const AddInventory = (props: Props) => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchProductInventory}
           />
-        )}
+        )
+          : <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        }
       </CustomDialogContent>
     </Dialog>
   );

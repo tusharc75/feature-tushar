@@ -235,7 +235,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                         disabled={selectedRecords.length === 0 || disableCreateAsset}
                         onClick={() => { setShowCreateAssetDialog(true) }}
                     >
-                        {`Receiving`}
+                        {`Receive`}
                     </Button>
                     <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && !isMobile && (
