@@ -296,7 +296,7 @@ const SerialzedAssets = ({
       >
         {rowsData ? (
           <CustomReactTable
-            height={'calc(100vh - 365px)'}
+            height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
             columns={columns}
             data={rowsData}
             onSelect={setSelectedRecords}
