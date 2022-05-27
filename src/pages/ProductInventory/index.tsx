@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import Grid from '@material-ui/core/Grid';
+import { Grid, IconButton, Tooltip } from "@material-ui/core";
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -20,11 +20,13 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
 import InfoIcon from '@material-ui/icons/Info';
 import SoftHoldDialog from './SoftHold';
+import HistoryDialog from './History/historyDialog';
 import { camelCase } from 'lodash';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-
+import HistoryIcon from '@material-ui/icons/History';
+import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 
 const InventoryProduct = () => {
 
@@ -41,6 +43,7 @@ const InventoryProduct = () => {
   const [columns, setColumns] = useState([]);
 
   const [softHold, setSoftHold] = useState({ open: false, data: {} });
+  const [showHistory, setShowHistory] = useState({ open: false, product: "" });
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
 
@@ -67,6 +70,7 @@ const InventoryProduct = () => {
   }, [plantId]);
 
   const extraColumn = [
+    { field: 'serializedProduct', headerName: 'Serialized Product', show: true, cellRenderer: 'checkboxRenderer' },
     { field: 'softHold', headerName: 'Soft Hold', show: true, cellRenderer: 'softHoldRenderer' },
     { field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' }
   ];
@@ -109,7 +113,13 @@ const InventoryProduct = () => {
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        setFrameworkComponents({ ...tempFrameworkComponent, productNameRenderer: ProductNameRenderer, softHoldRenderer: SoftHoldRenderer });
+        setFrameworkComponents({
+          ...tempFrameworkComponent,
+          productNameRenderer: ProductNameRenderer,
+          softHoldRenderer: SoftHoldRenderer,
+          checkboxRenderer: CheckboxRenderer,
+          actionsRenderer: ActionsRenderer
+        });
         setColumns([...columns, ...extraColumn]);
       });
   };
@@ -217,6 +227,21 @@ const InventoryProduct = () => {
     </>
   );
 
+  const ActionsRenderer = (params) => (
+    <>
+      <Tooltip title="History">
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setShowHistory({ open: true, product: params?.data?.productId })
+          }}
+        >
+          <HistoryIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
+    </>
+  );
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -317,7 +342,7 @@ const InventoryProduct = () => {
           Object.keys(frameworkComponents).length > 0 ? (
             <CustomAgGridEditable
               allowSelection={true}
-              allowAction={false}
+              allowAction={true}
               columns={columns}
               dataRows={dataRows}
               frameworkComponents={frameworkComponents}
@@ -344,6 +369,13 @@ const InventoryProduct = () => {
           <SoftHoldDialog
             close={() => setSoftHold({ open: false, data: {} })}
             data={softHold.data}
+          />}
+
+        {showHistory.open &&
+          <HistoryDialog
+            close={() => setShowHistory({ open: false, product: "" })}
+            product={showHistory.product}
+            warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
           />}
       </div>
     </Fragment>

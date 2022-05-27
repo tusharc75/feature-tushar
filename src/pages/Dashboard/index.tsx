@@ -8,7 +8,7 @@ import styles from './Dashboard.module.scss';
 import './style.scss';
 // import crmImage from '../../assets/dashboard_images/eQuip-t_dashboard.svg';
 import { SVG, IMAGE_WIDTH, IMAGE_HEIGHT } from '../../assets/dashboard_images';
-import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL } from '../../assets/dashboard_images/constants/imageTypes';
+import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL, FORM_ICON } from '../../assets/dashboard_images/constants/imageTypes';
 import Icon from '@material-ui/core/Icon';
 import { SiCivicrm } from 'react-icons/si';
 import { MdNavigateNext, MdLocalActivity } from 'react-icons/md';
@@ -175,6 +175,11 @@ function Dashboard() {
           break;
 
         case 'Dynamic Forms':
+          icon = (
+            <Icon>
+              <img src={SVG(FORM_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </Icon>
+          );
           text = 'Setup Dynamic Forms & Templates';
           break;
       }

@@ -26,7 +26,7 @@ import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
-import { MdAdd } from "react-icons/all";
+import { MdAdd } from 'react-icons/all';
 import { Autocomplete } from '@material-ui/lab';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 
@@ -54,7 +54,7 @@ const Note = () => {
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords, appendRows } = state;
-  const localStorageSelectedRecords = "notesPage";
+  const localStorageSelectedRecords = 'notesPage';
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
@@ -64,7 +64,7 @@ const Note = () => {
   const [resourceOptions, setResourceOptions] = useState([]);
 
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions))
+    setResourceOptions(get_activity_resource(permissions));
   }, []);
 
   const columns = [
@@ -94,9 +94,8 @@ const Note = () => {
         .catch((err) => {
           toastConfig.setToastConfig(err);
         });
-    }
-    else {
-      setFilter([])
+    } else {
+      setFilter([]);
     }
   }, [referenceId]);
 
@@ -148,36 +147,34 @@ const Note = () => {
   };
 
   const NameRenderer = (params) => (
-    <span className={permissions?.note?.isUpdate ? "link cursor-pointer" : ""}
+    <span
+      className={permissions?.note?.isUpdate ? 'link cursor-pointer' : ''}
       onClick={() => {
         if (permissions?.note?.isUpdate) {
-          handleActivityOpen(params.data)
+          handleActivityOpen(params.data);
         }
-      }}>
+      }}
+    >
       {params.value}
     </span>
   );
 
   const ReferenceRenderer = (params) => (
-    <>{params.value && params.value?.length > 0 ? params.value.map(d => {
-      return (
-        <>
-          <Link
-            className="link text-truncate"
-            onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}
-          >
-            {d.name}
-          </Link>
-          <Chip
-            className="ml-3"
-            color="primary"
-            label={`${routes[d?.type]?.title}`}
-          />
-        </>
-      )
-    })
-      : <NoDataCell />
-    }
+    <>
+      {params.value && params.value?.length > 0 ? (
+        params.value.map((d) => {
+          return (
+            <>
+              <Link className="link text-truncate" onClick={() => history.push(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
+                {d.name}
+              </Link>
+              <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
+            </>
+          );
+        })
+      ) : (
+        <NoDataCell />
+      )}
     </>
   );
 
@@ -222,33 +219,37 @@ const Note = () => {
             createdByDate: u.createdBy?.date,
             updatedBy: u.updatedBy?.user?.concatedName,
             updatedByDate: u.updatedBy?.date,
-            isChecked: false,
+            isChecked: false
           };
           return res;
         });
         if (appendRows) {
           dispatch({
-            type: "initialize", data: [...dataRows, ...rows],
-            count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: data.count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
-            type: "initialize", data: rows, count: data.count,
-            selectedRecords: rows.filter(f => f.isChecked === true)
+            type: 'initialize',
+            data: rows,
+            count: data.count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
         if (gridApi) {
           try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
+              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
+              : [];
             if (oldSelectedRecords.length > 0) {
               gridApi.forEachNode(function (node) {
-                node.setSelected(
-                  oldSelectedRecords.some((o) => o === node.data._id)
-                );
+                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
               });
             }
           } catch (ex) {
-            console.error("Error in getting selected records from local storage")
+            console.error('Error in getting selected records from local storage');
           }
         }
 
@@ -321,7 +322,7 @@ const Note = () => {
         </Grid>
       </Grid>
       <CustomContainer>
-        {filter &&
+        {filter && (
           <div className="header-panel">
             <Grid container className={styles.filter_side_container}>
               <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1">
@@ -330,23 +331,20 @@ const Note = () => {
                 <Autocomplete
                   options={resourceOptions}
                   getOptionLabel={(option) => option.optionLabel}
-                  style={{ width: isMobile && !isTablet ? '60%' : "250px" }}
+                  style={{ width: isMobile && !isTablet ? '60%' : '250px' }}
                   value={resource}
                   onChange={(event, newValue) => {
                     setResource(newValue);
                     if (newValue) {
-                      setFilter((prevState) => ([...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]))
-                    }
-                    else {
-                      setFilter([])
+                      setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+                    } else {
+                      setFilter([]);
                     }
                   }}
                   size="small"
                   renderInput={(params) =>
                     isMobile && !isTablet ? (
-                      <TextField {...params} label="Select Resource"
-                        size="small"
-                        variant="outlined" className={isMobile ? 'serchBox' : ''} />
+                      <TextField {...params} label="Select Resource" size="small" variant="outlined" className={isMobile ? 'serchBox' : ''} />
                     ) : (
                       <TextField {...params} label="Select Resource" variant="outlined" />
                     )
@@ -358,23 +356,26 @@ const Note = () => {
                     options={resourceData}
                     getOptionLabel={(option: any) => option.name}
                     getOptionSelected={(option: any, value: any) => option.name === value.name}
-                    style={{ width: isMobile && !isTablet ? '60%' : "250px" }}
+                    style={{ width: isMobile && !isTablet ? '60%' : '250px' }}
                     value={selectedResourceData}
                     onChange={(event, newValue) => {
                       setSelectedResourceData(newValue);
                       if (newValue?.id) {
-                        setFilter((prevState) => ([...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]))
-                      }
-                      else {
-                        setFilter([])
+                        setFilter((prevState) => [...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]);
+                      } else {
+                        setFilter([]);
                       }
                     }}
                     size="small"
                     renderInput={(params) =>
                       isMobile && !isTablet ? (
-                        <TextField {...params} label={`${resource.optionLabel}`}
+                        <TextField
+                          {...params}
+                          label={`${resource.optionLabel}`}
                           size="small"
-                          variant="outlined" className={isMobile ? 'serchBox' : ''} />
+                          variant="outlined"
+                          className={isMobile ? 'serchBox' : ''}
+                        />
                       ) : (
                         <TextField {...params} label={`${resource.optionLabel}`} variant="outlined" />
                       )
@@ -384,40 +385,37 @@ const Note = () => {
               </Grid>
               <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
                 <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
-                  <Grid style={{ width: isMobile && !isTablet ? '75%' : "100%", display: "flex" }}>
-                    <SearchFilter
-                      handleChangeFilter={handleChangeFilter}
-                      filter={filter}
-                      chip={{ size: 'small' }}
-                      activityName="note" />
+                  <Grid style={{ width: isMobile && !isTablet ? '75%' : '100%', display: 'flex' }}>
+                    <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="note" />
                   </Grid>
-                  <Grid style={{ display: "flex", gap: "5px" }}>
-                    {<Button
-                      variant={isMobile && !isTablet ? "text" : "contained"}
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setIsNew(true);
-                        setShowCreateDialog(true);
-                      }}
-                      className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
-                    </Button>
+                  <Grid style={{ display: 'flex', gap: '5px' }}>
+                    {
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setIsNew(true);
+                          setShowCreateDialog(true);
+                        }}
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                      >
+                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                      </Button>
                     }
                     <div className="d-flex gap-2">
                       {/* </Box> */}
                       <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
                         color="default"
                         size="small"
                         onClick={openActions}
                         aria-controls="action-menu"
                         disabled={selectedRecords.length > 0 ? false : true}
-                        className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                       >
-                        {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                       </Button>
                       <Menu
                         anchorEl={anchorEl}
@@ -447,24 +445,22 @@ const Note = () => {
               </Grid>
             </Grid>
           </div>
-        }
-        {isMobile && !isTablet ?
+        )}
+        {isMobile && !isTablet ? (
           <CustomSwipableList
             allowSelection={true}
             allowSwipe={true}
             permissions={permissions.note}
-            primaryField={columns?.find(d => d.primaryField)}
+            primaryField={columns?.find((d) => d.primaryField)}
             onClick={(data) => {
               if (permissions?.note?.isUpdate) {
-                handleActivityOpen(data)
+                handleActivityOpen(data);
               }
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={(data) => {
-
-            }}
+            onEdit={(data) => {}}
             extraParamsToCheckDelete={true}
             onDelete={(data) => {
               showConfirmBox(selectedRecords);
@@ -475,15 +471,16 @@ const Note = () => {
             loading={loading}
             chips={[
               {
-                label: "Status: ",
-                field: "status",
+                label: 'Status: ',
+                field: 'status'
               }
             ]}
             onCreate={false}
             showClone={false}
-            onClone={() => { }}
-            renderedFrom={"notesPage"}
-          /> :
+            onClone={() => {}}
+            renderedFrom={'notesPage'}
+          />
+        ) : (
           <CustomAgGrid
             columns={columns}
             dataRows={dataRows}
@@ -502,7 +499,7 @@ const Note = () => {
             renderedFrom="notesPage"
             refreshGrid={fetchNotes}
           />
-        }
+        )}
         {noteId !== undefined && <ActivityModelHandler activityType="note" activityId={noteId} onClose={() => setNoteId(undefined)} />}
       </CustomContainer>
       {isConfirmDialogVisible ? (
@@ -520,7 +517,7 @@ const Note = () => {
       {showCreateDialog && (
         <Dialog
           open={showCreateDialog}
-          fullScreen={fullScreen || (isMobile || isTablet)}
+          fullScreen={fullScreen || isMobile || isTablet}
           TransitionComponent={CustomDialogTransition}
           aria-labelledby="customized-dialog-title"
           maxWidth={'md'}
@@ -536,25 +533,25 @@ const Note = () => {
             noteId={isNew ? null : noteData?.id}
             relatedTo={[
               {
-                type: resource && selectedResourceData ? resource.optionValue : "user",
+                type: resource && selectedResourceData ? resource.optionValue : 'user',
                 referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
-                access: true,
-              },
+                access: true
+              }
             ]}
             handleClose={() => {
-              handleClose()
+              handleClose();
               setFullScreen(false);
             }}
             handleDialogClose={() => {
-              handleDialogClose()
+              handleDialogClose();
               setFullScreen(false);
             }}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
-              setFullScreen(prevState => !prevState)
+              setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-          // noteData={noteData}
+            // noteData={noteData}
           />
         </Dialog>
       )}

@@ -24,6 +24,9 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
   }, [filters]);
 
   const handleChange = (key: string, val: any) => {
+    if(key === 'marketSegment'){
+      setValues((prevState:any) => ({...prevState, subMarketSegment: {}}))
+    }
     setValues((prevState: any) => ({ ...prevState, [key]: val }));
   };
 
