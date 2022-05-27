@@ -244,8 +244,9 @@ export default function QuotesAccordionInProjectSale({
           Add Exisiting
         </MenuItem>
       </Menu>
-      <Accordion expanded={expandQuote} className="omsAccordian accordQuotes" onChange={() => setExpandQuote(!expandQuote)}>
-        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+      <Accordion expanded={expandQuote} className="omsAccordian accordQuotes ">
+        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header pos_rel">
+          <div className="clicker_div" onClick={() => setExpandQuote(!expandQuote)}></div>
           <Grid container>
             <Grid item xs={8} alignItems="center">
               <Box component="div" display="flex" alignItems="center" flexGrow={1}>
@@ -373,7 +374,7 @@ export default function QuotesAccordionInProjectSale({
         {quotes?.length > 0 && quotes.length > maxRecordsToShow && (
           <Box
             margin={1}
-            className="btn-view gap-1"
+            className="btn-view gap-1 expander"
             onClick={() => {
               setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
             }}
@@ -382,6 +383,7 @@ export default function QuotesAccordionInProjectSale({
             justifyContent="center"
             alignItems="center"
           >
+            <span className="show_more_text">Show More</span>
             <FaArrowAltCircleDown size={25} />
           </Box>
         )}

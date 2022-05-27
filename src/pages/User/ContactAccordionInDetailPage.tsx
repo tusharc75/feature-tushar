@@ -265,6 +265,7 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
             justifyContent="center"
             alignItems="center"
           >
+            <span className="show_more_text">Show More</span>
             <FaArrowAltCircleDown size={25} />
           </Box>
         )}

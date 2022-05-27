@@ -350,7 +350,7 @@ export default function OpportunityAccordianProjectSales({
         {opportunities?.length > 0 && opportunities.length > maxRecordsToShow && (
           <Box
             margin={1}
-            className="btn-view gap-1"
+            className="btn-view gap-1 expander"
             onClick={() => {
               setMaxRecordsToShow((prevState) => prevState + recordsPerLine * 2);
             }}
@@ -359,7 +359,8 @@ export default function OpportunityAccordianProjectSales({
             justifyContent="center"
             alignItems="center"
           >
-            <HiExternalLink size={20} />
+            <span className="show_more_text">Show More</span>
+            <FaArrowAltCircleDown size={25} />
           </Box>
         )}
       </Accordion>

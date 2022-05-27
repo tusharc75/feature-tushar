@@ -1381,8 +1381,8 @@ body::-webkit-scrollbar-thumb {
   margin-left: -0.4px;
 }
 .customer_account_box {
-  border: 2px solid #43adaa;
-  border-radius: 10px;
+  border: 1px solid #43adaa;
+  border-radius: 4px;
 }
 .sort-filter-tablet {
   display: none !important;
@@ -1701,113 +1701,113 @@ svg.MuiSvgIcon-root {
   }
 }
 
-// CUSTOMER ACCOUNT ACCORDION
-.accordion_grid_customer_account .MuiPaper-root {
-  border: 0;
-  box-shadow: none;
-  .MuiCollapse-wrapperInner .MuiAccordionDetails-root {
-    padding: 16px 0 0;
-    .cardStyle {
-      display: none;
-    }
-  }
+// // CUSTOMER ACCOUNT ACCORDION
+// .accordion_grid_customer_account .MuiPaper-root {
+//   border: 0;
+//   box-shadow: none;
+//   .MuiCollapse-wrapperInner .MuiAccordionDetails-root {
+//     padding: 16px 0 0;
+//     .cardStyle {
+//       display: none;
+//     }
+//   }
 
-  .MuiBox-root,
-  .MuiBox-root-341,
-  .MuiBox-root-324 {
-    margin: 0;
-  }
-  .view_all_button {
-    max-width: max-content;
-    background: #fff;
-    border: 2px solid #34918d;
-    color: #4d9e9a;
-    border-radius: 5px;
-    padding: 5px 20px;
-    transition: background 0.4s, color 0.4s, border 0.4s;
-    margin-top: 15px;
+//   .MuiBox-root,
+//   .MuiBox-root-341,
+//   .MuiBox-root-324 {
+//     margin: 0;
+//   }
+//   .view_all_button {
+//     max-width: max-content;
+//     background: #fff;
+//     border: 2px solid #34918d;
+//     color: #4d9e9a;
+//     border-radius: 5px;
+//     padding: 5px 20px;
+//     transition: background 0.4s, color 0.4s, border 0.4s;
+//     margin-top: 15px;
 
-    &:hover {
-      background: var(--primary);
-      border-color: transparent;
-      color: var(--theme-text);
-      svg {
-        fill: var(--theme-text);
-      }
-    }
-    svg {
-      margin-left: 10px;
-      fill: #318f8b;
-      transition: fill 0.4s;
-    }
-  }
-  // COLOR SETTINGS
-  .MuiGrid-root {
-    padding: 0;
-  }
-  .MuiCardContent-root {
-    background-color: #ddf0f0 !important;
-    padding: 11px 30px !important;
-  }
-  .detailListing {
-    background-color: #ddf0f0;
-  }
-  .ProjectSales_opportunity_layout_container__NLREr {
-    padding: 0;
-  }
-  .account_name_link,
-  .link {
-    position: relative;
-    color: var(--primary);
-    text-decoration: none;
-    transition: color 0.4s;
-    max-width: max-content;
-    p {
-      max-width: max-content;
-    }
+//     &:hover {
+//       background: var(--primary);
+//       border-color: transparent;
+//       color: var(--theme-text);
+//       svg {
+//         fill: var(--theme-text);
+//       }
+//     }
+//     svg {
+//       margin-left: 10px;
+//       fill: #318f8b;
+//       transition: fill 0.4s;
+//     }
+//   }
+//   // COLOR SETTINGS
+//   .MuiGrid-root {
+//     padding: 0;
+//   }
+//   .MuiCardContent-root {
+//     background-color: #ddf0f0 !important;
+//     padding: 11px 30px !important;
+//   }
+//   .detailListing {
+//     background-color: #ddf0f0;
+//   }
+//   .ProjectSales_opportunity_layout_container__NLREr {
+//     padding: 0;
+//   }
+//   .account_name_link,
+//   .link {
+//     position: relative;
+//     color: var(--primary);
+//     text-decoration: none;
+//     transition: color 0.4s;
+//     max-width: max-content;
+//     p {
+//       max-width: max-content;
+//     }
 
-    &::before {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 1px;
-      border-radius: 4px;
-      background-color: var(--primary);
-      bottom: 0;
-      left: 0;
-      transform-origin: right;
-      transform: scaleX(0);
-      transition: transform 0.3s ease-in-out;
-    }
+//     &::before {
+//       content: '';
+//       position: absolute;
+//       width: 100%;
+//       height: 1px;
+//       border-radius: 4px;
+//       background-color: var(--primary);
+//       bottom: 0;
+//       left: 0;
+//       transform-origin: right;
+//       transform: scaleX(0);
+//       transition: transform 0.3s ease-in-out;
+//     }
 
-    &:hover {
-      color: var(--link);
-      &::before {
-        transform-origin: left;
-        transform: scaleX(1);
-      }
-    }
-  }
-}
+//     &:hover {
+//       color: var(--link);
+//       &::before {
+//         transform-origin: left;
+//         transform: scaleX(1);
+//       }
+//     }
+//   }
+// }
 
-.accordion_grid_customer_account .MuiPaper-root > .MuiButtonBase-root {
-  border-radius: 3px;
-  box-shadow: none !important;
-  border: 1px solid #43aeaa3a;
-}
-.accordion_grid_customer_account .MuiPaper-root > .MuiButtonBase-root[aria-expanded='true'] {
-  background-color: var(--new_theme_color);
-  color: #fff;
+// .accordion_grid_customer_account .MuiPaper-root > .MuiButtonBase-root {
+//   border-radius: 3px;
+//   box-shadow: none !important;
+//   border: 1px solid #43aeaa3a;
+// }
+// .accordion_grid_customer_account .MuiPaper-root > .MuiButtonBase-root[aria-expanded='true'] {
+//   background-color: var(--new_theme_color);
+//   color: #fff;
 
-  * {
-    transition: color 0.3s, background 0.3s, fill 0.3s;
-    color: #fff;
-  }
+//   * {
+//     transition: color 0.3s, background 0.3s, fill 0.3s;
+//     color: #fff;
+//   }
 
-  svg {
-    fill: #fff;
-  }
-}
+//   svg {
+//     fill: #fff;
+//   }
+// }
 @media all and (max-width: 1300px) {
   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
     padding-right: 105px;
@@ -1876,6 +1876,11 @@ svg.MuiSvgIcon-root {
 
 // STYLE FOR CUSTOMER CONTACT DETAILS AND CUSTOMER ACCOUNT ACCRODION
 .modified_style_of_accordion {
+  .MuiAccordion-root.MuiPaper-root {
+    background-color: transparent;
+    height: unset;
+  }
+
   .pos_rel {
     position: relative;
   }
@@ -1914,6 +1919,7 @@ svg.MuiSvgIcon-root {
 
     & .MuiCollapse-root {
       margin-top: 15px;
+      background-color: var(--white);
       & .MuiAccordionDetails-root {
         padding: 0;
         margin: 0;
@@ -1978,6 +1984,7 @@ svg.MuiSvgIcon-root {
         &:hover {
           background-color: var(--primary) !important;
           border-color: transparent;
+          color: var(--white);
         }
         & span {
           color: #59a4a1;
@@ -2009,8 +2016,12 @@ svg.MuiSvgIcon-root {
             margin: 0;
           }
           &:hover {
+            color: var(--primary);
             border-color: transparent;
             background-color: transparent !important;
+            .show_more_text {
+              color: var(--primary);
+            }
             svg {
               fill: unset;
             }
