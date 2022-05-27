@@ -87,7 +87,7 @@ export default async function (chart: ChartDataType, data: any, currencyTo: stri
             ['Booked Gross Margin']: isNaN(hitRatioMargin) ? 0 : hitRatioMargin * 100
         },
         bookedData: {
-            ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit}`,
+            ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit || "MT"}`,
             ['Total Booked Value']: totalBookedValue
                 ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalBookedValue).fullFormatAmount
                 : 0,
@@ -98,7 +98,7 @@ export default async function (chart: ChartDataType, data: any, currencyTo: stri
                 } (${grossMarginPercent > 0 ? grossMarginPercent.toFixed(2) : 0}%)`
         },
         offeredData: {
-            ['Total Offered Volume']: `${totalOfferedVolume.toFixed(2)} ${volumeUnit}`,
+            ['Total Offered Volume']: `${totalOfferedVolume.toFixed(2)} ${volumeUnit || "MT"}`,
             ['Total Offered Value']: totalOfferedValue
                 ? formatAmountWithCurrency(currencyTo ? currencyTo : currencyFrom, totalOfferedValue).fullFormatAmount
                 : 0,
