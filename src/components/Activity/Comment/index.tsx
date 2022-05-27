@@ -24,11 +24,33 @@ const useStyles = makeStyles((theme) => ({
     color: '#fff',
     backgroundColor: theme.palette.primary.main
   },
+
+  add_comment_wrapper: {
+    marginTop: '15px'
+  },
   avatar_container: {
+    padding: '0 15px 0 0 !important',
     ['@media all and (min-width:600px) and (max-width: 800px)']: {
       flexGrow: '0',
       maxWidth: '100%',
-      flexBasis: '100%'
+      flexBasis: '100%',
+      marginBottom: '8px'
+    },
+    ['@media all and (max-width: 400px)']: {
+      flexGrow: '0',
+      maxWidth: '100%',
+      flexBasis: '100%',
+      width: 'unset',
+      marginBottom: '8px'
+    }
+  },
+  comment_container: {
+    padding: '0 !important',
+    ['@media all and (min-width:600px) and (max-width: 800px)']: {
+      flexGrow: '0',
+      maxWidth: '100%',
+      flexBasis: '100%',
+      width: 'unset'
     },
     ['@media all and (max-width: 400px)']: {
       flexGrow: '0',
@@ -38,19 +60,15 @@ const useStyles = makeStyles((theme) => ({
     }
   },
 
-  comment_container: {
-    ['@media all and (min-width:600px) and (max-width: 800px)']: {
-      flexGrow: '0',
-      maxWidth: '100%',
-      flexBasis: '100%',
-      width: 'unset'
-    },
-    ['@media all and (max-width: 400px)']: {
-      flexGrow: '0',
-      maxWidth: '100%',
-      flexBasis: '100%',
-      width: 'unset'
-    }
+  comment_avatar: {
+    padding: '0 15px 0 0 !important'
+  },
+  comments_container: {
+    padding: '0 !important'
+  },
+  comments_wrapper: {
+    marginTop: '20px',
+    flexWrap: 'nowrap'
   }
 }));
 
@@ -100,11 +118,11 @@ export const Comment = ({ referenceId }) => {
       {comment &&
         comment.map((element, index) => (
           <Box key={index} mt={1}>
-            <Grid container spacing={5}>
-              <Grid item xs={2} sm={2} md={2}>
+            <Grid container className={`${classes.comments_wrapper}`}>
+              <Grid item className={` ${classes.comment_avatar}`}>
                 <Avatar className={`${classes.avatar}`}>{element.firstName[0] + element.lastName[0]}</Avatar>
               </Grid>
-              <Grid item xs={10} sm={10} md={10}>
+              <Grid item className={`${classes.comments_container} `}>
                 <Typography variant="body2" className={classes.boldFont}>
                   {element.firstName + ' ' + element.lastName}
                   <Typography variant="caption" className={classes.marginLeft}>
@@ -118,7 +136,7 @@ export const Comment = ({ referenceId }) => {
           </Box>
         ))}
       <Box pt={3}>
-        <Grid container spacing={3}>
+        <Grid container className={`${classes.add_comment_wrapper} `}>
           <Grid item className={`${classes.avatar_container} `}>
             <Avatar className={`${classes.avatar} `}>{currentUser && currentUser.firstName[0] + currentUser.lastName[0]} </Avatar>
           </Grid>
