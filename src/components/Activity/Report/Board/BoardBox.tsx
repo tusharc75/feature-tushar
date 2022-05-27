@@ -192,9 +192,10 @@ export const BoardBox = (props) => {
               </Grid>
             ) : null}
           </Grid>
-          <Typography color="textSecondary" variant="body2">
+          {/* COMMENTED DESCTIPTION BOARD */}
+          {/* <Typography color="textSecondary" variant="body2">
             {data?.description}
-          </Typography>
+          </Typography> */}
         </Box>
         <Box pt={2}>
           <ListRelatedTo relatedTo={data?.relatedTo} originRelatedTo={[]} />
