@@ -26,7 +26,7 @@ import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helpe
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom'
 
-const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, seIsShowIssue }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -129,10 +129,17 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 }
                 return res;
             });
-            if (rows.filter(_rows => _rows.isValid === false).length > 0) {
+            if (rows.length === 0) {
                 setNextStep(false)
-            } else {
+                seIsShowIssue(false)
+            }
+            else if (rows.filter(_rows => _rows.isValid === false).length > 0) {
+                setNextStep(false)
+                seIsShowIssue(false)
+            }
+            else {
                 setNextStep(true)
+                seIsShowIssue(true)
             }
             dispatch({ type: "initialize", data: rows, count: rows.length });
             dispatch({ type: "loading", loading: false });
