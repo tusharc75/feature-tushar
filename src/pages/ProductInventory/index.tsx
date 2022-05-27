@@ -26,6 +26,7 @@ import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constan
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import HistoryIcon from '@material-ui/icons/History';
+import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 
 const InventoryProduct = () => {
 
@@ -69,6 +70,7 @@ const InventoryProduct = () => {
   }, [plantId]);
 
   const extraColumn = [
+    { field: 'serializedProduct', headerName: 'Serialized Product', show: true, cellRenderer: 'checkboxRenderer' },
     { field: 'softHold', headerName: 'Soft Hold', show: true, cellRenderer: 'softHoldRenderer' },
     { field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' }
   ];
@@ -115,6 +117,7 @@ const InventoryProduct = () => {
           ...tempFrameworkComponent,
           productNameRenderer: ProductNameRenderer,
           softHoldRenderer: SoftHoldRenderer,
+          checkboxRenderer: CheckboxRenderer,
           actionsRenderer: ActionsRenderer
         });
         setColumns([...columns, ...extraColumn]);
