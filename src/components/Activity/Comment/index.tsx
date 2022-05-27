@@ -37,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
       width: 'unset'
     }
   },
+
   comment_container: {
     ['@media all and (min-width:600px) and (max-width: 800px)']: {
       flexGrow: '0',
