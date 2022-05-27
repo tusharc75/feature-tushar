@@ -5,3 +5,4 @@ export const ACCOUNTS = 'Accounts';
 export const PRODUCT_SETUP = 'PorductSetup';
 export const ACTIVITIES = 'Activities';
 export const ADMIN_PORTAL = 'adminPortal';
+export const FORM_ICON = 'FormIcon';

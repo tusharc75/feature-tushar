@@ -25,15 +25,31 @@ const useStyles = makeStyles((theme) => ({
     background: '#f0f0f0',
     borderRadius: '4px',
     minHeight: 'calc(100vh - 33.5vh)',
-    height: '100%',
-
+    height: '100%'
   },
   activityMainBlock: {
     height: 'calc(100vh - 32vh)',
-    overflow: 'auto',
+    overflow: 'auto'
   },
   '.MuiGrid-spacing-xs-1': {
     width: 'calc(100vw + 14px)'
+  },
+  mediumDevice: {
+    ['@media (min-width:600px)']: {
+      flexGrow: '0',
+      maxWidth: '50%',
+      flexBasis: '50%'
+    },
+    ['@media (min-width:768px)']: {
+      flexGrow: '0',
+      maxWidth: '33.333333%',
+      flexBasis: '33.333333%'
+    },
+    ['@media (min-width:1100px)']: {
+      flexGrow: '0',
+      maxWidth: '25%',
+      flexBasis: '25%'
+    }
   }
 }));
 
@@ -130,7 +146,7 @@ const Board = ({ type, filter }) => {
   const updateStatus = (id: string, updatedData: any) => {
     axiosInstance()
       .put(`${type}/${id}`, { status: updatedData.status })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((err) => {
         fetchBoard();
       });
@@ -138,7 +154,7 @@ const Board = ({ type, filter }) => {
 
   return (
     <>
-      <Box display="flex" style={{ paddingBottom: "18px" }} pb={1}>
+      <Box display="flex" style={{ paddingBottom: '18px' }} pb={1}>
         <Autocomplete
           options={resourceOptions}
           getOptionLabel={(option) => option.optionLabel}
@@ -150,9 +166,7 @@ const Board = ({ type, filter }) => {
           size="small"
           renderInput={(params) =>
             isMobile && !isTablet ? (
-              <TextField {...params} label="Select Resource"
-                size="small"
-                variant="outlined" className={isMobile ? 'serchBox' : ''} />
+              <TextField {...params} label="Select Resource" size="small" variant="outlined" className={isMobile ? 'serchBox' : ''} />
             ) : (
               <TextField {...params} label="Select Resource" variant="outlined" />
             )
@@ -176,10 +190,10 @@ const Board = ({ type, filter }) => {
         )}
       </Box>
       <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-        <Grid container spacing={2} className={classes.activityMainBlock}>
+        <Grid container spacing={2} className={` ${classes.activityMainBlock}`}>
           {statusList.map((data, index) => {
             return (
-              <Grid item md={3} xs={12} sm={4} style={{ paddingTop: "0px" }} key={index}>
+              <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={index} className={classes.mediumDevice}>
                 <div className={classes.block}>
                   {!loading && (
                     <Box p={1} className="fixedBoardHeader">
@@ -192,9 +206,7 @@ const Board = ({ type, filter }) => {
                           ')'}
                       </Typography>
                       {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
-                        <Tooltip
-                          title={`Create ${type}`}
-                        >
+                        <Tooltip title={`Create ${type}`}>
                           <IconButton
                             size="small"
                             style={{ float: 'right', marginTop: '-25px' }}

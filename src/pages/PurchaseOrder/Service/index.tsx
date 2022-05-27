@@ -20,7 +20,7 @@ import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import { fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
 
-const Product = ({ purchaseOrderData, updateStatus, setNextStep, setCurrentStep, currentStep, renderedFrom }) => {
+const Product = ({ purchaseOrderData, setNextStep, renderedFrom, seIsShowIssue }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -41,6 +41,7 @@ const Product = ({ purchaseOrderData, updateStatus, setNextStep, setCurrentStep,
         if ([PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status)) {
             setNextStep(false)
         }
+        seIsShowIssue(true)
         fetchPurchaseOrderService();
     }, [purchaseOrderData]);
 
@@ -211,18 +212,6 @@ const Product = ({ purchaseOrderData, updateStatus, setNextStep, setCurrentStep,
                             setDeletePurchaseOrderService(selectedRecords.map(d => d._id))
                         }}>Delete</MenuItem>}
                     </Menu>
-                    {[PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status) &&
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={() => {
-                                setCurrentStep(currentStep + 1)
-                                updateStatus(PURCHASE_ORDER_STATUS.issued)
-                            }}
-                        >
-                            Issue
-                        </Button>}
                 </div>
             </Box>
             {columns && frameWorkComponent ? isMobile && !isTablet ?

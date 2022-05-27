@@ -26,7 +26,7 @@
   gap: 5px;
   padding: 12px !important;
   padding-bottom: 0 !important;
-  background-color: #c8e9ce;
+  // background-color: #c8e9ce;
 }
 .delete_contact {
   display: flex !important;
@@ -54,11 +54,11 @@
   grid-template-columns: minmax(250px, 1fr) minmax(250px, 1fr);
   grid-gap: 8px;
   //padding: 4px !important;
-  &_container {
-    padding: 4px;
-    background-color: #e6e6e6;
-    border-radius: 5px;
-  }
+  // &_container {
+  //   padding: 4px;
+  //   background-color: #e6e6e6;
+  //   border-radius: 5px;
+  // }
 }
 .opportunity_closed_date {
   ul {

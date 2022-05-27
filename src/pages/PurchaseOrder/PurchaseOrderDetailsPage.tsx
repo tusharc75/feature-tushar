@@ -47,6 +47,7 @@ import accountClass from '../Account/account.module.scss';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
+import ContentFullScreen from '../../components/ContentFullScreen';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title)
@@ -74,6 +75,9 @@ const PurchaseOrderDetailsPage = () => {
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [nextStep, setNextStep] = useState(true);
+  const [isShowIssue, seIsShowIssue] = useState(false);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
+
 
   function a11yProps(index: any) {
     return {
@@ -199,6 +203,10 @@ const PurchaseOrderDetailsPage = () => {
           updateProcessStatus(purchaseOrderSteps[2]);
           setCurrentStep(2);
         }
+        if ([PURCHASE_ORDER_STATUS.issued].includes(status)) {
+          updateProcessStatus(purchaseOrderSteps[2]);
+          setCurrentStep(2);
+        }
         fetchPurchaseOrderData();
         toastConfig.setToastConfig({
           open: true,
@@ -305,7 +313,9 @@ const PurchaseOrderDetailsPage = () => {
                         {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                       </Button>
                     )}
-                  {permissions?.purchaseOrder?.isUpdate && [PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(purchaseOrderData?.status)
+                  {permissions?.purchaseOrder?.isUpdate &&
+                    (isShowIssue && [PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status)
+                      || [PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(purchaseOrderData?.status))
                     && (
                       <>
                         <Button
@@ -333,7 +343,9 @@ const PurchaseOrderDetailsPage = () => {
                           {statusOptions.map((o, index) => {
                             return (
                               <MenuItem
-                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
+                                disabled={[PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status) ?
+                                  o?.optionLabel === PURCHASE_ORDER_STATUS.issued ? false : true :
+                                  index <= statusOptions.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
                                 onClick={() => {
                                   closeActions();
                                   handleStatusChange(o);
@@ -416,26 +428,27 @@ const PurchaseOrderDetailsPage = () => {
                             currentStep={currentStep}
                             setCurrentStep={setCurrentStep}
                             isStepEnded={[PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
+                            setStepFullScreen={() => setStepFullScreen(true)}
                           />
-                          {currentStep === 0 && (
-                            <Product
-                              purchaseOrderData={purchaseOrderData}
-                              setNextStep={setNextStep}
-                              setPurchaseOrderProduct={setPurchaseOrderProduct}
-                              renderedFrom={`${renderedFrom}_grid-1`}
-                              allowedToEdit={allowedToEdit}
-                            />
-                          )}
-                          {currentStep === 1 &&
-                            <Service
-                              purchaseOrderData={purchaseOrderData}
-                              renderedFrom={`${renderedFrom}_grid-2`}
-                              updateStatus={updateStatus}
-                              setCurrentStep={setCurrentStep}
-                              currentStep={currentStep}
-                              setNextStep={setNextStep}
-                            />}
-                          {/* {currentStep === 2 && (
+                          <ContentFullScreen title={purchaseOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                            {currentStep === 0 && (
+                              <Product
+                                purchaseOrderData={purchaseOrderData}
+                                setNextStep={setNextStep}
+                                setPurchaseOrderProduct={setPurchaseOrderProduct}
+                                renderedFrom={`${renderedFrom}_grid-1`}
+                                allowedToEdit={allowedToEdit}
+                                seIsShowIssue={seIsShowIssue}
+                              />
+                            )}
+                            {currentStep === 1 &&
+                              <Service
+                                purchaseOrderData={purchaseOrderData}
+                                renderedFrom={`${renderedFrom}_grid-2`}
+                                setNextStep={setNextStep}
+                                seIsShowIssue={seIsShowIssue}
+                              />}
+                            {/* {currentStep === 2 && (
                             <IssuePo
                               purchaseOrderData={purchaseOrderData}
                               handleViewPdf={handleViewPdf}
@@ -447,17 +460,21 @@ const PurchaseOrderDetailsPage = () => {
                               renderedFrom={`${renderedFrom}_grid-3`}
                             />
                           )} */}
-                          {(currentStep === 2) && (
-                            <ReceivingAsset
-                              purchaseOrderData={purchaseOrderData}
-                              setCurrentStep={setCurrentStep}
-                              updateStatus={updateStatus}
-                              statusOptions={statusOptions}
-                              handleViewPdf={handleViewPdf}
-                              handleAttachments={handleAttachments}
-                              renderedFrom={`${renderedFrom}_grid-4`}
-                            />
-                          )}
+                            {(currentStep === 2) && (
+                              <ReceivingAsset
+                                purchaseOrderData={purchaseOrderData}
+                                setCurrentStep={setCurrentStep}
+                                updateStatus={updateStatus}
+                                statusOptions={statusOptions}
+                                handleViewPdf={handleViewPdf}
+                                handleAttachments={handleAttachments}
+                                renderedFrom={`${renderedFrom}_grid-4`}
+                                isSmallScreen={isSmallScreen}
+                                isTabletScreen={isTabletScreen}
+                                stepFullScreen={stepFullScreen}
+                                showActivity={showActivity}
+                              />
+                            )}</ContentFullScreen>
                         </Paper>
                       </Grid>
                     )}

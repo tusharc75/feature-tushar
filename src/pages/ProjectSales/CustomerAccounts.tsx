@@ -142,6 +142,9 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: 'var(--new_theme_color) !important',
       color: '#ffff !important',
       border: '1px solid #43AEAA !important',
+      '& svg': {
+        fill: 'var(--white)'
+      },
       '&.MuiTab-labelIcon .MuiTab-wrapper > *:first-child': {
         display: 'flex',
         marginBottom: '0px',
@@ -521,7 +524,7 @@ const CustomerAccounts = (props) => {
             >
               {/*<ExpandMore />*/}
             </Box>
-            <Box component="span" mx={1} />
+
             <Typography variant="subtitle1" className={classes.cusName}>
               Customer Accounts
             </Typography>
@@ -659,15 +662,12 @@ const CustomerAccounts = (props) => {
                   {/* <Box component="span" mx={1} /> */}
 
                   {customerAccounts.map((c, i) => (
-                    <Box hidden={currentTabIndex !== i} key={c._id} className="tabpanel_layout custom_responsive_style_tabpanel">
-                      <Grid container>
-                        <Grid item xs={12} style={{ marginTop: '15px' }} className="accordion_grid_customer_account">
-                          <Accordion
-                            expanded={expandCustomerContact}
-                            className="omsAccordian"
-                            onChange={() => setExpandCustomerContact(!expandCustomerContact)}
-                          >
-                            <AccordionSummary style={{ padding: 0 }} aria-controls="user-panel-content" id="user-panel-header">
+                    <Box hidden={currentTabIndex !== i} key={c._id}>
+                      <Grid container className="modified_style_of_accordion sales_accordions">
+                        <Grid item xs={12}>
+                          <Accordion expanded={expandCustomerContact} className="omsAccordian accordAccount">
+                            <AccordionSummary aria-controls="user-panel-content" id="user-panel-header" className="pos_rel">
+                              <div className="clicker_div" onClick={() => setExpandCustomerContact(!expandCustomerContact)}></div>
                               <Grid container>
                                 <Grid item xs={8}>
                                   <Box component="div" display="flex" alignItems="center" flexGrow={1}>
@@ -708,7 +708,7 @@ const CustomerAccounts = (props) => {
                                     <BoxWithBorder key={i} style={{ marginBottom: '8px' }}>
                                       <Box padding={1}>
                                         <Skeleton variant="text" width="100px" height="20px" />
-                                        <Box marginTop={1} />
+
                                         <Skeleton variant="text" width="100%" height="15px" />
                                       </Box>
                                     </BoxWithBorder>

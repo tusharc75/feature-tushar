@@ -59,11 +59,11 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 //export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const salesOrderProcessSteps = ['Add Products', 'Ready To Invoice'];
-export const purchaseOrderSteps = ['Add Product', 'Services and Consumables', 'Receive Products'];
+export const purchaseOrderSteps = ['Add Products', 'Services and Consumables', 'Receive Products'];
 export const rentalManagementSteps = ['Add Products', 'Services and Consumables', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
 export const transferInventorySteps = ["Add Products", "Serialized Assets", "Loading Ticket"]
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
-export const bulkAssetCreationSteps = ['Add Product', 'Serialized Asset'];
+export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';

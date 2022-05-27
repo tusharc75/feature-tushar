@@ -125,6 +125,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
       .then(async ({ data: { data } }) => {
         if (chart.kpi?.custom) {
           const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
+          console.log(cardData)
           setChartData(cardData);
         } else {
           setChartData(data);
@@ -210,7 +211,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                 <h4>
                   {chart.chartTitle.includes('CUR')
                     ? startCase(chart.chartTitle.replace(/CUR/gi, globalFilters.currency || currency))
-                    : startCase(chart.chartTitle.replace(/Type/gi, filterValues?.status?.optionLabel || 'Open'))}
+                    : startCase(chart.chartTitle.replace(/statusType/gi, filterValues?.status?.optionLabel || 'Open'))}
                 </h4>
               </Typography>
             )}
