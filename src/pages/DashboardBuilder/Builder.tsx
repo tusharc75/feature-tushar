@@ -43,9 +43,9 @@ const Builder = (props: Props) => {
   }, [selectedData]);
 
   React.useEffect(() => {
-    if (!formValues.kpi && !formValues.filters.map((k) => k.key).includes('status')) return;
+    if (!formValues.kpi?.kpi && !formValues.filters.map((k) => k.key).includes('status')) return;
 
-    setFormValues((prevState) => ({ ...prevState, statusOptions: statuses[formValues.kpi.kpi] }));
+    setFormValues((prevState) => ({ ...prevState, statusOptions: statuses[formValues.kpi?.kpi] }));
   }, [formValues.kpi, formValues.filters]);
 
   const fetchKpis = () => {
