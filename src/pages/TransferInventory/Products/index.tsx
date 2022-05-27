@@ -242,7 +242,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               setAddInventoryDialog(true);
             }}
           >
-            {`Add Product`}
+            {`Add Products`}
           </Button>
           <Box display="flex">
             <Button

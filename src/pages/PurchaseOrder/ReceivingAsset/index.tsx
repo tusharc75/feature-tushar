@@ -73,7 +73,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                             color="primary"
                             onClick={() => history.push(`${routes.serializedAsset.path}`, {
                                 productId: params.data?.productId,
-                                productName: params.data?.productDescription,
+                                productName: params.data?.productName,
                                 pOId: purchaseOrderData?._id,
                                 pOName: purchaseOrderData?.purchaseOrderNumber,
                             })}
@@ -235,7 +235,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                         disabled={selectedRecords.length === 0 || disableCreateAsset}
                         onClick={() => { setShowCreateAssetDialog(true) }}
                     >
-                        {`Receiving`}
+                        {`Receive`}
                     </Button>
                     <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && !isMobile && (
@@ -293,7 +293,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                         allowSelection={true}
                         allowSwipe={true}
                         permissions={permissions}
-                        primaryField={columns?.find(d => d.field === "productDescription")}
+                        primaryField={columns?.find(d => d.field === "productNumber")}
                         onClick={(data) => {
                             history.push(`${routes.purchaseOrderDetail.path}/${data.productId}`)
                         }}
