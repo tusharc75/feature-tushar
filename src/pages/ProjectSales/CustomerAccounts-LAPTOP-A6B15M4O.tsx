@@ -521,7 +521,7 @@ const CustomerAccounts = (props) => {
             >
               {/*<ExpandMore />*/}
             </Box>
-            <Box component="span" mx={1} />
+
             <Typography variant="subtitle1" className={classes.cusName}>
               Customer Accounts
             </Typography>
@@ -661,12 +661,12 @@ const CustomerAccounts = (props) => {
                   {/* <Box component="span" mx={1} /> */}
 
                   {customerAccounts.map((c, i) => (
-                    <Box hidden={currentTabIndex !== i} key={c._id} className="tabpanel_layout custom_responsive_style_tabpanel">
-                      <Grid container>
-                        <Grid item xs={12} style={{ marginTop: '15px' }} className="accordion_grid_customer_account">
+                    <Box hidden={currentTabIndex !== i} key={c._id}>
+                      <Grid container className="modified_style_of_accordion sales_accordions">
+                        <Grid item xs={12}>
                           <Accordion
                             expanded={expandCustomerContact}
-                            className="omsAccordian"
+                            className="omsAccordian accordAccount"
                             onChange={() => setExpandCustomerContact(!expandCustomerContact)}
                           >
                             <AccordionSummary style={{ padding: 0 }} aria-controls="user-panel-content" id="user-panel-header">
