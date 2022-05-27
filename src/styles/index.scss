@@ -1808,71 +1808,71 @@ svg.MuiSvgIcon-root {
 //     fill: #fff;
 //   }
 // }
-// @media all and (max-width: 1300px) {
-//   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
-//     padding-right: 105px;
+@media all and (max-width: 1300px) {
+  .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
+    padding-right: 105px;
 
-//     .MuiTabScrollButton-root:last-child {
-//       right: 0;
-//     }
-//     .MuiTabScrollButton-root:first-child {
-//       right: 50px;
-//     }
-//     div[role='tablist'] > button {
-//       min-width: 169px;
-//       padding: 9px 6px;
-//     }
-//   }
-// }
-// @media all and (max-width: 1024px) {
-//   .MuiTab-root {
-//     min-width: unset !important;
-//   }
-//   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
-//     padding-right: 25px;
-//     padding-left: 25px;
-//     margin-bottom: 10px;
-//     .MuiTabScrollButton-root {
-//       width: 20px;
-//       height: 30px;
-//       top: 50%;
-//       transform: translateY(-21px);
-//     }
-//     .MuiTabScrollButton-root:first-child {
-//       left: 0;
-//       right: unset;
-//     }
-//     .MuiTabScrollButton-root.Mui-disabled {
-//       opacity: 0.2;
-//       pointer-events: none;
-//     }
-//     div[role='tablist'] > button {
-//       margin: 0 5px 15px;
-//     }
-//   }
-// }
-// @media all and (max-width: 768px) {
-//   .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
-//     padding-right: 0;
-//     padding-left: 0;
-//   }
-//   .MuiTabScrollButton-root:last-child,
-//   .MuiTabScrollButton-root:first-child {
-//     display: none;
-//   }
-// }
-// @media all and (max-width: 599px) {
-//   .tabpanel_layout.custom_responsive_style_tabpanel {
-//     padding: 0;
-//     border-radius: 0;
-//     border-left: 0;
-//     border-right: 0;
-//     border-bottom: 0;
-//     & > div {
-//       padding: 10px 0 0px;
-//     }
-//   }
-// }
+    .MuiTabScrollButton-root:last-child {
+      right: 0;
+    }
+    .MuiTabScrollButton-root:first-child {
+      right: 50px;
+    }
+    div[role='tablist'] > button {
+      min-width: 169px;
+      padding: 9px 6px;
+    }
+  }
+}
+@media all and (max-width: 1024px) {
+  .MuiTab-root {
+    min-width: unset !important;
+  }
+  .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
+    padding-right: 25px;
+    padding-left: 25px;
+    margin-bottom: 10px;
+    .MuiTabScrollButton-root {
+      width: 20px;
+      height: 30px;
+      top: 50%;
+      transform: translateY(-21px);
+    }
+    .MuiTabScrollButton-root:first-child {
+      left: 0;
+      right: unset;
+    }
+    .MuiTabScrollButton-root.Mui-disabled {
+      opacity: 0.2;
+      pointer-events: none;
+    }
+    div[role='tablist'] > button {
+      margin: 0 5px 15px;
+    }
+  }
+}
+@media all and (max-width: 768px) {
+  .tab_custom_style_customer_tab.oms-tab.dynamic-vertical-tab {
+    padding-right: 0;
+    padding-left: 0;
+  }
+  .MuiTabScrollButton-root:last-child,
+  .MuiTabScrollButton-root:first-child {
+    display: none;
+  }
+}
+@media all and (max-width: 599px) {
+  .tabpanel_layout.custom_responsive_style_tabpanel {
+    padding: 0;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    & > div {
+      padding: 10px 0 0px;
+    }
+  }
+}
 
 // STYLE FOR CUSTOMER CONTACT DETAILS AND CUSTOMER ACCOUNT ACCRODION
 .modified_style_of_accordion {
