@@ -11,6 +11,7 @@ const useStyles = makeStyles((theme) => ({
     '& span.MuiChip-label': {
       fontSize: '12px',
       lineHeight: '15px',
+      fontWeight: '500',
       padding: '8px 21px',
       display: 'inline-block'
     }
