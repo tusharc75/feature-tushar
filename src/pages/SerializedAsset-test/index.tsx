@@ -770,7 +770,6 @@ const SerializedAssetTest = () => {
             //     page={page}
             //     actionWidth={150}
             //     loading={loading}
-            //     renderedFrom={renderedFrom}
             //     refreshGrid={fetchProductInventory}
             //     showOnlyShowFilteredRecordSwitch={true}
             //   />
@@ -781,18 +780,19 @@ const SerializedAssetTest = () => {
               data={dataRows}
               currentPage={page}
               onSelect={(newSelectedRecords) => {
-                dispatch({ type: "selection", selectedRecords: newSelectedRecords })
+                // dispatch({ type: "selection", selectedRecords: newSelectedRecords })
               }}
               dispatch={dispatch}
               childrenProperty="subRows"
               uniqueKey="_id"
               setWholeRowsCellColor={() => { }}
-              renderedFrom="rental_management_receiving_ticket"
+              renderedFrom={renderedFrom}
               isClientSideGrid={false}
               rowCount={rowCount}
               limit={limit}
               customFilters={filters}
               sorting={sorting}
+              loading={loading}
             />
         ) : (
           <Box p={2} height={500} bgcolor="white">
