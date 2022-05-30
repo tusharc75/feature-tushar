@@ -235,7 +235,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
 
   return (
     <React.Fragment>
-      {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) && (
+      {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress]?.includes(transferInventoryData?.status) && (
         <Box display="flex" justifyContent="space-between" p={1}>
           <Button
             variant={'contained'}
