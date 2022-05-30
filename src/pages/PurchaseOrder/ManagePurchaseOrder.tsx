@@ -55,6 +55,11 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Purchase Order").then(({ data: { data } }) => {
+            data?.forEach((e) => {
+                if (e?.fieldData?.lookupResource === "Warehouse") {
+                    e.fieldData.option = e?.fieldData?.option?.filter((a) => !a?.entity || a?.entity?.length === 0 || a?.entity?.includes(selectedEntity));
+                }
+            })
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             fieldsDataForCreate = fieldsDataForCreate.filter(f => f.fieldName !== "rentalJob");

@@ -27,6 +27,10 @@ import HtmlTooltip from "../../components/CustomTooltipTitle";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import HistoryIcon from '@material-ui/icons/History';
 import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import AddRemoveDialog from './AddRemove';
+
 
 const InventoryProduct = () => {
 
@@ -44,10 +48,16 @@ const InventoryProduct = () => {
 
   const [softHold, setSoftHold] = useState({ open: false, data: {} });
   const [showHistory, setShowHistory] = useState({ open: false, product: "" });
+  const [inventory, setInventory] = useState({ open: false, product: [], type: "" });
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
 
   const { getColumnData } = useColumns();
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, [plantId]);
+
 
   useEffect(() => {
     getPlants();
@@ -56,7 +66,7 @@ const InventoryProduct = () => {
 
   const getPlants = () => {
     axiosInstance()
-      .get(`/warehouse?noEntityWise=1`)
+      .get(`/warehouse`)
       .then(({ data: { data } }) => {
         setPlantOptions([{ "warehouseName": "All", "_id": "All" }, ...data]);
         if (plantId === null && data?.length) {
@@ -65,10 +75,6 @@ const InventoryProduct = () => {
       });
   };
 
-  useEffect(() => {
-    fetchGridColumns();
-  }, [plantId]);
-
   const extraColumn = [
     { field: 'serializedProduct', headerName: 'Serialized Product', show: true, cellRenderer: 'checkboxRenderer' },
     { field: 'softHold', headerName: 'Soft Hold', show: true, cellRenderer: 'softHoldRenderer' },
@@ -76,6 +82,7 @@ const InventoryProduct = () => {
   ];
 
   const fetchGridColumns = () => {
+    setColumns(null)
     axiosInstance()
       .get('/field?resource=Product Inventory')
       .then(({ data: { data } }) => {
@@ -85,7 +92,7 @@ const InventoryProduct = () => {
           let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
           if (currentColumn !== null) {
             if (currentColumn?.columnData.field !== 'plant') {
-              if (o.fieldData.type === 'number' && ['inventory', 'minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
+              if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
                 columns.push({
                   ...currentColumn?.columnData,
                   cellEditor: 'numericCellEditor',
@@ -229,17 +236,50 @@ const InventoryProduct = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip title="History">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setShowHistory({ open: true, product: params?.data?.productId })
-          }}
-        >
-          <HistoryIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
+      {(permissions?.productInventory?.isUpdate && plantId !== "All") &&
+        <Fragment>
+          <Box>
+            <Tooltip title="Add">
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                  setInventory({ open: true, product: [params?.data], type: 'add' })
+                }}
+              >
+                <AddCircleOutlineIcon fontSize="small" color="secondary" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Box pl={1}>
+            <Tooltip title="Remove">
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                disabled={params?.data?.availableInventory ? false : true}
+                onClick={() => {
+                  setInventory({ open: true, product: [params?.data], type: 'remove' })
+                }}
+              >
+                <RemoveCircleOutlineIcon fontSize="small" color={params?.data?.availableInventory ? "error" : "disabled"} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Fragment>
+      }
+      <Box pl={1}>
+        <Tooltip title="History">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowHistory({ open: true, product: params?.data?.productId })
+            }}
+          >
+            <HistoryIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      </Box>
     </>
   );
 
@@ -369,6 +409,7 @@ const InventoryProduct = () => {
           <SoftHoldDialog
             close={() => setSoftHold({ open: false, data: {} })}
             data={softHold.data}
+            warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
           />}
 
         {showHistory.open &&
@@ -376,6 +417,19 @@ const InventoryProduct = () => {
             close={() => setShowHistory({ open: false, product: "" })}
             product={showHistory.product}
             warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
+          />}
+        {inventory.open &&
+          <AddRemoveDialog
+            handleClose={() =>
+              setInventory({ open: false, product: [], type: "" })
+            }
+            handleSuccess={() => {
+              fetchProductInventory()
+              setInventory({ open: false, product: [], type: "" })
+            }}
+            product={inventory.product}
+            type={inventory.type}
+            warehouse={plantId}
           />}
       </div>
     </Fragment>
