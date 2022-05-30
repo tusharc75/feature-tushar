@@ -317,6 +317,7 @@ const TransferInventoryDetailPage = () => {
                           setNextStep={setNextStep}
                           renderedFrom={`${renderedFrom}_grid-1`}
                           allowedToEdit={allowedToEdit}
+                          updateStatus={updateStatus}
                           fetchTransferInventoryData={fetchTransferInventoryData}
                         />
                       )}

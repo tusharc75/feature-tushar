@@ -319,8 +319,8 @@ const PurchaseOrderDetailsPage = () => {
                     && (
                       <>
                         <Button
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          color="default"
+                          variant={'outlined'}
+                          color="primary"
                           size="small"
                           onClick={openActions}
                           aria-controls="action-menu"
@@ -439,6 +439,7 @@ const PurchaseOrderDetailsPage = () => {
                                 renderedFrom={`${renderedFrom}_grid-1`}
                                 allowedToEdit={allowedToEdit}
                                 seIsShowIssue={seIsShowIssue}
+                                updateStatus={updateStatus}
                               />
                             )}
                             {currentStep === 1 &&
