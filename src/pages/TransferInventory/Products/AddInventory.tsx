@@ -101,6 +101,7 @@ const AddInventory = (props: Props) => {
           finalObject['productId'] = u._id;
           finalObject['inventory'] = u?.inventory ? (u?.inventory - (u?.softHold || 0)) : 0;
           finalObject['qty'] = selectedData ? selectedData.qty : finalObject['inventory'] ? 1 : 0;
+          finalObject['hideSelection'] = finalObject['inventory'] ? false : true;
           return {
             ...finalObject
           };

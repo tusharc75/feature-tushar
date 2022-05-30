@@ -27,7 +27,7 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import { uniq, map, groupBy } from 'lodash';
 import { AiFillFilePdf } from 'react-icons/ai';
 
-const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus }) => {
+const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -273,37 +273,41 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           {downloadingFile ? 'Please wait...' : 'Preview'}
         </Button>
         <Box ml={1}>
-          <Button
-            variant={'outlined'}
-            color="primary"
-            disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
-            onClick={handleLoadingTicketDialog}
-            size="small"
-          >
-            {`Create Loading Ticket`}
-          </Button>
+          {(allowedToEdit && canLoad) &&
+            <Button
+              variant={'outlined'}
+              color="primary"
+              disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
+              onClick={handleLoadingTicketDialog}
+              size="small"
+            >
+              {`Create Loading Ticket`}
+            </Button>
+          }
           <Box component="span" ml={1} />
-          <Button
-            variant={'outlined'}
-            color="primary"
-            onClick={() => {
-              setShowConfirmBoxReceive(true);
-            }}
-            disabled={
-              selectedRecords.length === 0 ||
-              selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
-            }
-            size="small"
-          >
-            {`Receive`}
-          </Button>
+          {canReceive &&
+            <Button
+              variant={'outlined'}
+              color="primary"
+              onClick={() => {
+                setShowConfirmBoxReceive(true);
+              }}
+              disabled={
+                selectedRecords.length === 0 ||
+                selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+              }
+              size="small"
+            >
+              {`Receive`}
+            </Button>
+          }
         </Box>
       </Box>
       <Box>
         {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
-              allowSelection={allowedToEdit}
+              allowSelection={allowedToEdit || canReceive}
               allowSwipe={true}
               permissions={true}
               primaryField={columns?.find((d: any) => d.primaryField)}
@@ -364,7 +368,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
               allowAction={false}
               loading={loading}
               isClientSideGrid={true}
-              allowSelection={allowedToEdit}
+              allowSelection={allowedToEdit || canReceive}
               renderedFrom={renderedFrom}
               refreshGrid={fetchProducts}
             />
@@ -393,7 +397,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         <ConfirmationDialog
           okBtnLoading={isLoading}
           open={showConfirmBoxReceive}
-          message={`Are you sure you want to received?`}
+          message={`Are you sure have been received ?`}
           onClose={() => {
             setShowConfirmBoxReceive(false);
           }}
