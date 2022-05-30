@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react'
 import MaUTable from '@material-ui/core/Table'
-import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField, TablePagination } from '@material-ui/core'
+import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField, TablePagination, Box, CircularProgress } from '@material-ui/core'
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers'
 import { generateUniqueId, gridPageSizes, treeToFlatArray } from '../../constants/helpers'
@@ -85,7 +85,8 @@ export default function CustomReactTable({
     limit = gridPageSizes[0],
     customFilters = [],
     dispatch,
-    sorting
+    sorting,
+    loading
     // customPageSize = 20,
 }) {
     const defaultColumn = React.useMemo(
@@ -140,8 +141,8 @@ export default function CustomReactTable({
                 minWidth: 50,
                 width: 50,
                 maxWidth: 50,
-                Header: ({ getToggleAllPageRowsSelectedProps }) => (
-                    <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
+                Header: ({ getToggleAllRowsSelectedProps }) => (
+                    <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
                 ),
                 Cell: ({ row }) => (
                     <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
@@ -154,8 +155,8 @@ export default function CustomReactTable({
                 minWidth: 50,
                 width: 50,
                 maxWidth: 50,
-                Header: ({ getToggleAllPageRowsSelectedProps }) => (
-                    <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
+                Header: ({ getToggleAllRowsSelectedProps }) => (
+                    <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
                 ),
                 Cell: ({ row }) => (
                     <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
@@ -219,7 +220,8 @@ export default function CustomReactTable({
                 sortBy: sorting.map((d) => { return { id: d.colId, desc: d.sort === 'asc' ? false : true } }),
                 pageIndex: currentPage,
                 autoResetExpanded: false,
-                hiddenColumns: hideSelection ? ["selection", "action"] : []
+                hiddenColumns: hideSelection ? ["selection", "action"] : [],
+                selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`) ? Object.assign({}, data.map(d => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some(obj => obj._id === d._id))) : {}
             },
             getSubRows: (row: any) => row.subRows,
             sortTypes: {
@@ -274,7 +276,6 @@ export default function CustomReactTable({
         } catch (ex) {
             console.error(`Error while getting stored data from local storage - ${renderedFrom}`)
         }
-
     }, [])
 
     useEffect(() => {
@@ -312,10 +313,10 @@ export default function CustomReactTable({
         let flatSelectedData = [];
         Object.keys(selectedRowIds).forEach((key) => {
             const splittedArray = key.split(".");
-            if (splittedArray.length === 0) {
+            if (splittedArray.length <= 1 && selectedRowIds[key]) {
                 const { subRows, ...rest } = data[key];
                 flatSelectedData.push({ ...rest })
-            } else {
+            } else if (selectedRowIds[key]) {
                 let dataToStore = null;
                 splittedArray.forEach((f, index) => {
                     if (index === 0) {
@@ -329,6 +330,11 @@ export default function CustomReactTable({
             }
         })
         onSelect([...flatSelectedData]);
+        localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([...flatSelectedData]));
+        dispatch({
+            type: 'selection',
+            selectedRecords: [...flatSelectedData]
+        });
     }, [selectedRowIds]);
 
     // Render the UI for your table
@@ -361,6 +367,12 @@ export default function CustomReactTable({
                 // overflowY: "hidden",
                 // borderBottom: "1px solid black"
             }} className="border custom-react-table">
+               { loading && <Box bgcolor={'rgba(255,255,255,0.2)'} width="100%" height='100%' zIndex={100} position='absolute' top={0} left={0} display='flex' justifyContent="center" alignItems='center'> 
+                            <Box textAlign='center'>
+                            <CircularProgress color='inherit' />
+                            <p>Loading...</p>
+                            </Box>
+                        </Box> }
                 <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
                     <TableHead style={{ overflowY: "auto", overflowX: "hidden" }} className="header">
                         {headerGroups.map((headerGroup, index) => (
@@ -433,7 +445,7 @@ export default function CustomReactTable({
                     }
                 </MaUTable>
             </div>
-            {allowPagination && (<TablePagination
+            {allowPagination && !loading && (<TablePagination
                 component="div"
                 count={rowCount}
                 page={pageIndex}

@@ -24,6 +24,7 @@ const SerialzedAssets = ({
   isTabletScreen,
   isSmallScreen,
   showActivity,
+  canLoad
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -205,42 +206,7 @@ const SerialzedAssets = ({
 
   return (
     <Fragment>
-      {/* {currentStep === 1 && statusOptions?.length >= 0 && (
-        <Box mt={1}>
-          <Grid container spacing={2}>
-            <Grid item xs={8} sm={10} md={10}>
-              <Stepper activeStep={statusOptions?.findIndex((f) => f.optionLabel === transferInventoryData?.status)} alternativeLabel>
-                {statusOptions?.map(({ optionLabel }) => (
-                  <Step key={optionLabel}>
-                    <StepLabel>{optionLabel}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-            </Grid>
-            <Grid item xs={4} sm={2} md={2}>
-              {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
-                <Button
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                  onClick={() => {
-                    var index = 0;
-                    if (statusOptions?.findIndex((f) => f.optionLabel === transferInventoryData?.status) >= 0) {
-                      index = statusOptions?.findIndex((f) => f.optionLabel === transferInventoryData?.status) + 1;
-                    }
-                    updateTransferInventoryStatus(statusOptions[index]?.optionLabel);
-                  }}
-                >
-                  {statusOptions?.findIndex((f) => f.optionLabel === transferInventoryData?.status) >= 0
-                    ? statusOptions[statusOptions?.findIndex((f) => f.optionLabel === transferInventoryData?.status) + 1]?.optionLabel
-                    : statusOptions[0]?.optionLabel}
-                </Button>
-              )}
-            </Grid>
-          </Grid>
-        </Box>
-      )} */}
-      {allowedToEdit &&
+      {(allowedToEdit && canLoad) &&
         <Box display="flex" justifyContent="flex-end" p={1}>
           <Button
             variant="contained"

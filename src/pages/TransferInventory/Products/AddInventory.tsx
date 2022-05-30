@@ -7,7 +7,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from 'src/pages/Leads/Header.module.scss';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, productInventory } from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage, productInventory } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { isMobile } from 'react-device-detect';
@@ -39,6 +39,7 @@ const AddInventory = (props: Props) => {
 
 
   useEffect(() => {
+    removeLocalStorage(localStorageSelectedRecords)
     fetchFields();
   }, []);
 
@@ -100,6 +101,7 @@ const AddInventory = (props: Props) => {
           finalObject['productId'] = u._id;
           finalObject['inventory'] = u?.inventory ? (u?.inventory - (u?.softHold || 0)) : 0;
           finalObject['qty'] = selectedData ? selectedData.qty : finalObject['inventory'] ? 1 : 0;
+          finalObject['hideSelection'] = finalObject['inventory'] ? false : true;
           return {
             ...finalObject
           };

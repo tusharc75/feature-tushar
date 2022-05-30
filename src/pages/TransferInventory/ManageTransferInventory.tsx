@@ -108,19 +108,21 @@ const ManageTransferInventory: FC<Props> = (props) => {
         let toOptions = data.find((obj: any) => obj?.fieldData.fieldName === 'transfertoPlant')?.fieldData?.option ?? [];
         let filteredFromOptions = [];
         let filteredToOptions = [];
+
         fromOptions.forEach((plant: any) => {
           if (plant?.entity && (plant?.entity.length === 0 || plant?.entity.includes(selectedEntity))) {
             filteredFromOptions.push(plant);
           }
         });
-        toOptions.forEach((plant: any) => {
-          if (plant?.entity && (plant?.entity.length === 0 || plant?.entity.includes(selectedEntity))) {
-            filteredToOptions.push(plant);
-          }
-        });
+
+        // toOptions.forEach((plant: any) => {
+        //   if (plant?.entity && (plant?.entity.length === 0 || plant?.entity.includes(selectedEntity))) {
+        //     filteredToOptions.push(plant);
+        //   }
+        // });
 
         setPlantsFromOptions(filteredFromOptions);
-        setPlantToOptions(filteredToOptions);
+        setPlantToOptions(toOptions);
 
         if (transferInventoryId) {
           axiosInstance()

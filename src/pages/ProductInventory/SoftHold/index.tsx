@@ -40,7 +40,7 @@ function a11yProps(index: any) {
   };
 }
 
-const SoftHoldDialog = ({ close, data }) => {
+const SoftHoldDialog = ({ close, data, warehouse }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -60,7 +60,7 @@ const SoftHoldDialog = ({ close, data }) => {
 
   const softHoldDataFetch = () => {
     axiosInstance()
-      .get(`${productInventory.api}/soft-hold/${data.productId}?wareHouse=${data.plantId}`)
+      .get(`${productInventory.api}/soft-hold/${data.productId}?wareHouse=${warehouse}`)
       .then(({ data: { data } }) => {
         var unique = uniq(map(data, 'referenceType'));
         setTabs(unique)
