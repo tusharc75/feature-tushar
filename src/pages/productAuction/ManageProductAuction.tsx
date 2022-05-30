@@ -199,7 +199,11 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
                                   isNew={Boolean(productAuctionId)}
                                   {...field}
                                   fieldData={field}
-                                  disabled={Boolean(productAuctionId) && field.disableOnEdit && !isClone}
+                                  disabled={
+                                    (Boolean(productAuctionId) && field.disableOnEdit && !isClone) || field.fieldName == 'auctionNumber'
+                                      ? true
+                                      : false
+                                  }
                                   values={values}
                                   errors={errors}
                                   touched={touched}
