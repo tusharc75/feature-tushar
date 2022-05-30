@@ -5,7 +5,7 @@ import routes from "src/components/Helpers/Routes";
 import { useData } from "src/StateProvider/Provider";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder } from "src/constants/helpers";
+import { purchaseOrder, PURCHASE_ORDER_STATUS } from "src/constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
@@ -26,7 +26,7 @@ import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helpe
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom'
 
-const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, seIsShowIssue }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, seIsShowIssue, updateStatus }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -210,6 +210,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         }))
         axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { "orderDetails": tempProductArray })
             .then(() => {
+                if (purchaseOrderData?.status === PURCHASE_ORDER_STATUS.new) {
+                    updateStatus(PURCHASE_ORDER_STATUS.inProgress)
+                }
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
                 setAddingProducts(false)
