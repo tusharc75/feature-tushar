@@ -514,7 +514,7 @@ const ProductDetailsPage = () => {
                   <Typography variant="subtitle2">{routes?.warehouse?.title}{" "}
                     ({productData?.serializedProduct ? (inventoriesData?.length || 0) :
                       (inventoriesData?.filter(d => d.inventory)?.length || 0)})</Typography>
-                  {permissions?.serializedAsset?.isCreate && !loadingWarehouse && (
+                  {(permissions?.serializedAsset?.isCreate && productData?.serializedProduct && !loadingWarehouse) && (
                     <IconButton
                       title="Manage Plant(s)"
                       color="primary"
@@ -547,7 +547,7 @@ const ProductDetailsPage = () => {
                     ) : inventoriesData?.length ? (
                       productData?.serializedProduct ? (
                         inventoriesData.map(({ products, warehouse, plant, count }, i) => (
-                          <Box key={i}>
+                          <Box key={i} p={1}>
                             <Box display="flex" bgcolor="#f7f5f5" borderRadius="3px" borderBottom="1px solid #efe7e7">
                               <Grid>
                                 <Grid item xs={8}>
@@ -615,9 +615,10 @@ const ProductDetailsPage = () => {
                                         index === 5 ? (
                                           <Button
                                             fullWidth
-                                            className="mt-2"
+                                            className="mt-3"
                                             variant="outlined"
                                             color="primary"
+                                            size='small'
                                             onClick={() => {
                                               history.push(`${routes.serializedAsset.path}`, {
                                                 warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse).warehouse,
@@ -630,7 +631,6 @@ const ProductDetailsPage = () => {
                                         ) : (
                                           <Chip
                                             label={i?.assetNumber}
-                                            // color="secondary"
                                             style={{
                                               marginRight: '2px',
                                               background: ['New', 'Available'].indexOf(i?.status) >= 0 ? '#b9ffce' : '#ffb4b4'
@@ -649,15 +649,15 @@ const ProductDetailsPage = () => {
                       ) : (
                         <Box width="100%">
                           <Box mx={2} mt={1} display="flex" justifyContent="space-between">
-                            <Typography variant="h6">{routes.warehouse.title}</Typography>
-                            <Typography variant="h6">Qty.</Typography>
+                            <Typography variant="subtitle2">{routes.warehouse.title}</Typography>
+                            <Typography variant="subtitle2">Qty.</Typography>
                           </Box>
                           {inventoriesData?.filter(d => d.inventory).map(({ inventory, warehouse }) => (
                             <List disablePadding key={warehouse?._id}>
                               <ListItem dense>
                                 <ListItemText primary={warehouse?.name} />
                                 <ListItemSecondaryAction>
-                                  <Typography variant="h6">{inventory}</Typography>
+                                  <Typography variant="subtitle2">{inventory}</Typography>
                                 </ListItemSecondaryAction>
                               </ListItem>
                             </List>
@@ -666,7 +666,7 @@ const ProductDetailsPage = () => {
                       )
                     ) : (
                       <Box textAlign="center" padding={2} minHeight={150}>
-                        <Typography>No Plants Found</Typography>
+                        <Typography>No {routes.warehouse.title} Found</Typography>
                       </Box>
                     )}
                   </Box>
@@ -718,7 +718,7 @@ const ProductDetailsPage = () => {
         />
       )}
       {openProductInventoryDialog ? (
-        productData.serializedProduct ? (
+        productData?.serializedProduct ? (
           <ManageSerializedAsset
             productId={productData?._id}
             productCategory={productData?.productCategory}
