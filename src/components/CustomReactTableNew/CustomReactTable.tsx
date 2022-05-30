@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react'
 import MaUTable from '@material-ui/core/Table'
-import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField, TablePagination } from '@material-ui/core'
+import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField, TablePagination, Box, CircularProgress } from '@material-ui/core'
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers'
 import { generateUniqueId, gridPageSizes, treeToFlatArray } from '../../constants/helpers'
@@ -367,6 +367,12 @@ export default function CustomReactTable({
                 // overflowY: "hidden",
                 // borderBottom: "1px solid black"
             }} className="border custom-react-table">
+               { loading && <Box bgcolor={'rgba(255,255,255,0.2)'} width="100%" height='100%' zIndex={100} position='absolute' top={0} left={0} display='flex' justifyContent="center" alignItems='center'> 
+                            <Box textAlign='center'>
+                            <CircularProgress color='inherit' />
+                            <p>Loading...</p>
+                            </Box>
+                        </Box> }
                 <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
                     <TableHead style={{ overflowY: "auto", overflowX: "hidden" }} className="header">
                         {headerGroups.map((headerGroup, index) => (
