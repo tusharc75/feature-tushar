@@ -35,6 +35,7 @@ import { MdDelete } from 'react-icons/md';
 import accountClass from '../Account/account.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
+import InventoryHistory from './InventoryHistory';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -386,8 +387,6 @@ const ProductDetailsPage = () => {
       });
   };
 
-  console.log(inventoriesData)
-
   return (
     <>
       <Fragment>
@@ -448,6 +447,9 @@ const ProductDetailsPage = () => {
                 {permissions?.repairType &&
                   <Tab label="Repair Types" value={5} aria-controls="a11y-tabpanel-5" id="a11y-tab-5" />
                 }
+                {permissions?.productInventory?.isRead &&
+                  <Tab label="History" value={6} aria-controls="a11y-tabpanel-5" id="a11y-tab-5" />
+                }
               </Tabs>
               {tabValue === 0 &&
                 <Box>
@@ -499,6 +501,9 @@ const ProductDetailsPage = () => {
               />}
               {tabValue === 5 && (
                 <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-4`} />
+              )}
+              {tabValue === 6 && (
+                <InventoryHistory id={id} />
               )}
             </Paper>
           </Grid>
