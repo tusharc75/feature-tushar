@@ -35,7 +35,7 @@ import { kebabCase, orderBy, uniqBy, camelCase } from 'lodash';
 //   }
 // };
 
-export const staticHiddenResource = ["Dashboard", "Report"]
+export const staticHiddenResource = ['Dashboard', 'Report'];
 
 export const defaultActivityShow = false;
 
@@ -60,8 +60,15 @@ export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 //export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const salesOrderProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const purchaseOrderSteps = ['Add Products', 'Services and Consumables', 'Receive Products'];
-export const rentalManagementSteps = ['Add Products', 'Services and Consumables', 'Serialized Asset', 'Loading Ticket', 'Receiving Ticket', 'Packing Slip'];
-export const transferInventorySteps = ["Add Products", "Serialized Assets", "Loading Ticket"]
+export const rentalManagementSteps = [
+  'Add Products',
+  'Services and Consumables',
+  'Serialized Asset',
+  'Loading Ticket',
+  'Receiving Ticket',
+  'Packing Slip'
+];
+export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 
@@ -186,9 +193,10 @@ export const sidebarResource = {
   bulkAssetCreation: 'Bulk Asset Creation',
   pos: 'Pos',
   repairType: 'Repair Type',
-  report: "Report",
+  report: 'Report',
   resourceCalendar: 'Resource Calendar',
-  cageManagement: "Cage Management",
+  cageManagement: 'Cage Management',
+  productAuction: 'Product Auction'
 };
 
 export const resourceNames = {
@@ -249,10 +257,10 @@ export const resourceNames = {
   wellMaster: 'Well Master',
   bulkAssetCreation: 'Bulk Asset Creation',
   pos: 'Pos',
-  report: "Report",
+  report: 'Report',
   resourceCalendar: 'Resource Calendar',
-  cageManagement: "Cage Management",
-
+  cageManagement: 'Cage Management',
+  productAuction: 'Product Auction'
 };
 
 export const primaryFields = {
@@ -317,14 +325,15 @@ export const RESOURCE_LABEL = {
   address: 'Addresses',
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
-  zone: "Zone",
-  wellMaster: "Well Master",
-  bulkAssetCreation: "Bulk Asset Creation",
-  pos: "eRECS",
-  repairType: "Repair Types",
-  report: "Report",
+  zone: 'Zone',
+  wellMaster: 'Well Master',
+  bulkAssetCreation: 'Bulk Asset Creation',
+  pos: 'eRECS',
+  repairType: 'Repair Types',
+  report: 'Report',
   resourceCalendar: 'Resource Calendar',
-  cageManagement: "Cage Management",
+  cageManagement: 'Cage Management',
+  productAuction: 'Product Auction'
 };
 
 export const CHILD_RESOURCE = {
@@ -569,6 +578,12 @@ export const cageManagement = {
   permission: 'Cage Management',
   resource: 'Cage Management'
 };
+export const productAuction = {
+  api: '/product-auction',
+  route: '/product-auction',
+  permission: 'Product Auction',
+  resource: 'Product Auction'
+};
 
 export const profileMenuItems = {
   profile: 1,
@@ -724,21 +739,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1218,7 +1233,10 @@ export const determineLightOrDark = (color: any) => {
  * Convert Miliseconds to Hour
  */
 
-export const msToHour = (ms: number) => { let hour = ms / (1000 * 60 * 60); return hour.toFixed(1) }
+export const msToHour = (ms: number) => {
+  let hour = ms / (1000 * 60 * 60);
+  return hour.toFixed(1);
+};
 
 //  Currencies Short Form Symbols
 // const SI_SYMBOL = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
@@ -1520,9 +1538,9 @@ export const removeLocalStorage = (key) => {
   try {
     localStorage.setItem(key, JSON.stringify([]));
   } catch (err) {
-    return []
+    return [];
   }
-}
+};
 
 export const translateDataToTree = (data, parentProperty, childProperty, childrenPropertyToStore) => {
   let parents = data.filter((value) => value[parentProperty] == 'undefined' || value[parentProperty] == null);
@@ -1678,17 +1696,17 @@ export const INVENTORY_OWNER_TYPE = {
 } as const;
 
 export const TRANSFER_INVENTORY_STATUS = {
-  new: "New",
-  inProgress: "In Progress",
-  readyToShip: "Ready to ship",
-  inTransit: "In-Transit",
-  delivered: "Delivered"
-}
+  new: 'New',
+  inProgress: 'In Progress',
+  readyToShip: 'Ready to ship',
+  inTransit: 'In-Transit',
+  delivered: 'Delivered'
+};
 
 export const REPAIR_PROCESS_STATUS = {
   start: 'Start',
   complete: 'Complete',
-  failed: 'Failed',
+  failed: 'Failed'
 } as const;
 
 export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
@@ -1725,13 +1743,13 @@ export const REPORT_LIST = [
   { title: sidebarResource.opportunity, permission: 'opportunity', key: 'opportunity', type: 'dynamic' },
   { title: sidebarResource.quoteBuilder, permission: 'quoteBuilder', key: 'quoteBuilder', type: 'dynamic' },
   { title: sidebarResource.projectSales, permission: 'projectSales', key: 'projectSales', type: 'dynamic' },
-  { title: "Purchase Order Product", permission: 'purchaseOrder', key: 'purchaseOrderProduct', type: 'purchaseOrderProduct' },
-  { title: "Product Average Costing", permission: 'purchaseOrder', key: 'productAverageCost', type: 'productAverageCost' },
+  { title: 'Purchase Order Product', permission: 'purchaseOrder', key: 'purchaseOrderProduct', type: 'purchaseOrderProduct' },
+  { title: 'Product Average Costing', permission: 'purchaseOrder', key: 'productAverageCost', type: 'productAverageCost' }
 ];
 
 export const RESOURCE_CALENDAR = [
   { title: sidebarResource.rentalManagement, key: 'rentalManagement' },
-  { title: sidebarResource.quoteBuilder, key: 'quoteBuilder' },
+  { title: sidebarResource.quoteBuilder, key: 'quoteBuilder' }
 ];
 
 export const getApi = (resource: string) => {
@@ -1752,8 +1770,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'supplier-account':
@@ -1763,8 +1782,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'lead':
