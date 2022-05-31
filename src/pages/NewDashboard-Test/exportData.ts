@@ -7,60 +7,11 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import { ChartDataType } from './ChartTypes';
 
-// const getTitle = (uniqueId: string, currency: string): { fileName: string; title: string } => {
-//   switch (uniqueId) {
-//     case 'bookedVSBudget':
-//       return {
-//         fileName: 'Entity Sales Chart',
-//         title: `Total offered Value In ${currency}`
-//       };
-
-//     case 'offeredVsEntities':
-//       return {
-//         fileName: 'Sales Chart',
-//         title: `Total offered value in ${currency} vs Entities`
-//       };
-
-//     case 'offeredVsBudget':
-//       return {
-//         fileName: 'Sales Chart',
-//         title: `Total offered value in ${currency} vs Total booked value in ${currency}`
-//       };
-
-//     case 'regionalSale':
-//       return {
-//         fileName: 'Regional Sales',
-//         title: `Regional Sales Data`
-//       };
-
-//     case 'topCategory':
-//       return {
-//         fileName: 'Top Category',
-//         title: 'Top Selling Product Category'
-//       };
-
-//     case 'volumeVsBudget':
-//       return {
-//         fileName: 'Total Booked Volume',
-//         title: 'Total Booked Volume in MT vs Budget'
-//       };
-
-//     case 'volume2VsBudget':
-//       return {
-//         fileName: 'Total Booked Margin',
-//         title: `Total Booked GM in ${currency} vs Budget`
-//       };
-
-//     default:
-//       return;
-//   }
-// };
-
-export default async (type: string, currency: string, tableData: any[], chart: ChartDataType) => {
+export default async (type: string, currency: string, tableData: any[], chart: ChartDataType, isTableView: boolean) => {
   const { uniqueId, graphType, chartTitle } = chart;
   const { title, fileName } = { title: chartTitle.replaceAll('currency', currency), fileName: chartTitle.replaceAll('currency', currency) };
 
-  if (graphType !== 'Table') {
+  if (graphType !== 'Table' && !isTableView) {
     switch (type) {
       case 'ppt': {
         const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
@@ -118,8 +69,9 @@ export default async (type: string, currency: string, tableData: any[], chart: C
     }
   }
 
-  if (graphType === 'Table') {
-    tableData = tableData.map((d) => {
+  if (graphType === 'Table' ||graphType === "Chart" && isTableView) {
+    let newData = [...tableData];
+    newData = newData.map((d) => {
       for (const key in d) {
         let upper = startCase(key);
         if (upper !== key) {
@@ -129,6 +81,7 @@ export default async (type: string, currency: string, tableData: any[], chart: C
       }
       return d;
     });
+
     switch (type) {
       case 'ppt': {
         const pptx = new PptxGenJs();
@@ -136,19 +89,18 @@ export default async (type: string, currency: string, tableData: any[], chart: C
         pptx.writeFile({ fileName: fileName + '.pptx' });
         break;
       }
-
       case 'pdf': {
         const doc = new jsPDF('portrait');
         doc.setFontSize(14);
         doc.text(title, 70, 10);
-        let col = Object.keys(tableData[0]).map((_c: string) => _c);
+        let col = Object.keys(tableData[0])
         let row = [];
         if (tableData && tableData.length) {
           row = tableData.map((data) =>
             Object.keys(data).map((key) =>
               isNaN(Number(data[key]))
-                ? data[key]
-                : formatAmountWithCurrency(currency, Number(data[key]) ? data[key].toFixed(2) : '00').fullFormatAmount
+                ? data[key] : key.includes("MT") || key.includes("GM") ? Number(data[key]) ? data[key].toFixed(2) : '00'
+                  : formatAmountWithCurrency(currency, Number(data[key]) ? data[key].toFixed(2) : '00').fullFormatAmount
             )
           );
           //@ts-ignore
