@@ -171,7 +171,7 @@ const ReportFilters = (props: FiltersProps) => {
       return prevState;
     });
     setIsStatusPeriod(
-      resource.includes('Serialized Asset') &&
+      resource?.includes('Serialized Asset') &&
       Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
       formValues?.hasOwnProperty('status') &&
       formValues.status.length > 0
@@ -520,7 +520,7 @@ const ReportFilters = (props: FiltersProps) => {
           </Grid>
         </Box>
         <Box mt={2}>
-          {!resource.includes('Purchase Order') && (
+          {!resource?.includes('Purchase Order') && (
             <Box height={'100%'} mb={2}>
               <Autocomplete
                 options={reportList}
