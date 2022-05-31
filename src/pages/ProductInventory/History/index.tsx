@@ -44,7 +44,7 @@ const History = ({ product, warehouse }) => {
 
     const columns = [
         { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer" },
-        { field: "referenceType", headerName: "ReferenceType Type", show: true, cellRenderer: "commonRenderer" },
+        { field: "referenceType", headerName: "Reference Type", show: true, cellRenderer: "commonRenderer" },
         { field: "reference", headerName: "Reference", show: true, cellRenderer: "referenceRenderer" },
         { field: "type", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
         {
