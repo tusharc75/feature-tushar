@@ -206,8 +206,11 @@ const Report = () => {
   };
 
   // Create and return query for filters
-  const getFilter = () => {
-    let filterQuery = `page=${page}&limit=${limit}&`;
+  const getFilter = (isExport = false) => {
+    let filterQuery = `page=${page}&`;
+    if(!isExport) {
+      filterQuery = `limit=${limit}&`;
+    }
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
@@ -293,7 +296,7 @@ const Report = () => {
       type: 'info'
     });
     setExporting(true);
-    let filterQuery = getFilter();
+    let filterQuery = getFilter(true);
     axiosInstance()
       .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`, {
         responseType: 'arraybuffer'
@@ -422,7 +425,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => { }}
+                      onEdit={() => {}}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -437,8 +440,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => { }}
-                      onClone={(data) => { }}
+                      onDelete={(data) => {}}
+                      onClone={(data) => {}}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
