@@ -38,6 +38,17 @@ const History = ({ product, warehouse }) => {
             finalObject.type = capitalize(u.type)
             return finalObject;
         });
+
+        var qty = 0;
+        rows?.slice().reverse().forEach(function (item) {
+            if (item.type === "Credit") {
+                qty = qty + item?.qty
+            }
+            else {
+                qty = qty - item?.qty
+            }
+            item.finalInventory = qty;
+        });
         dispatch({ type: "initialize", data: rows, count: rows.length });
         setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     };
@@ -61,6 +72,7 @@ const History = ({ product, warehouse }) => {
                 };
             }
         },
+        { field: "finalInventory", headerName: "Final Inventory", show: true, cellRenderer: "commonRenderer" },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
         { field: "user", headerName: "Transacted By", show: true, cellRenderer: "commonRenderer" },
     ];

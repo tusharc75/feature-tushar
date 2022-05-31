@@ -139,7 +139,7 @@ export default async (type: string, currency: string, tableData: any[], chart: C
 
       case 'pdf': {
         const doc = new jsPDF('portrait');
-        doc.setFontSize(16);
+        doc.setFontSize(14);
         doc.text(title, 70, 10);
         let col = Object.keys(tableData[0]).map((_c: string) => _c);
         let row = [];

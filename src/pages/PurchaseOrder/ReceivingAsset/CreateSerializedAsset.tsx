@@ -190,7 +190,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                                 ["warehouse"]: newValue,
                                                                                             });
                                                                                         }}
-                                                                                        disabled
+                                                                                        //disabled
                                                                                         renderInput={(params) => <TextField
                                                                                             {...params}
                                                                                             variant="outlined"
