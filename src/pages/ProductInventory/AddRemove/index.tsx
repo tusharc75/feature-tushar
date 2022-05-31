@@ -27,7 +27,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
 
     const handleSubmit = (values) => {
         const data = {
-            products: [product[0]._id],
+            products: product?.map((e) => e._id),
             qty: parseInt(values.qty),
             warehouse: warehouse
         }
@@ -71,7 +71,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
             errors["qty"] = "Please enter valid qty"
         }
         if (type === "remove") {
-            if (parseInt(values.qty) > (product[0]?.availableInventory)) {
+            var validateQty = product[0]?.availableInventory;
+            if (product?.length > 1) {
+                validateQty = product?.reduce(function (min, obj) { return obj.availableInventory < min ? obj.availableInventory : min; }, Infinity);
+            }
+            if (parseInt(values.qty) > validateQty) {
                 errors["qty"] = "qty not more than inventory"
             }
         }
@@ -106,10 +110,15 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                     <CustomDialogContent>
                         <List style={{ padding: 0 }}>
                             <ListItem divider key={product[0]?._id}>
-                                <ListItemText
-                                    primary={product[0]?.productName}
-                                    secondary={`Inventory - ${product[0]?.availableInventory}`}
-                                />
+                                {product?.length === 1 ?
+                                    <ListItemText
+                                        primary={product[0]?.productName}
+                                        secondary={`Inventory - ${product[0]?.availableInventory}`}
+                                    /> :
+                                    <ListItemText
+                                        primary={`${product?.length} Products`}
+                                    />
+                                }
                                 <Field
                                     component={TextFieldFormik}
                                     margin="dense"
