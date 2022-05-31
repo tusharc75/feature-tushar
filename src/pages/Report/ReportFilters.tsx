@@ -118,7 +118,7 @@ const ReportFilters = (props: FiltersProps) => {
 
   const handleSelectFilter = (name, value) => {
     let fieldProps: any = {};
-    if (!name.includes('Date')) {
+    if (!name?.includes('Date')) {
       fieldProps.type = resourceOptions[name].type;
       fieldProps.lookup = resourceOptions[name].lookup;
     } else {
@@ -162,8 +162,8 @@ const ReportFilters = (props: FiltersProps) => {
     setBetweenDate((prevState) => {
       let keys = prevState ? Object.keys(prevState) : [];
       keys.forEach((key) => {
-        if (key.includes('to') || key.includes('from')) {
-          if (!selectedResources.map((d) => d.fieldName).includes(key.split('_')[1])) {
+        if (key?.includes('to') || key?.includes('from')) {
+          if (!selectedResources?.map((d) => d.fieldName)?.includes(key.split('_')[1])) {
             delete prevState[key];
           }
         }
@@ -182,8 +182,8 @@ const ReportFilters = (props: FiltersProps) => {
     setStatusPeriodDate((prevState) => {
       let keys = prevState ? Object.keys(prevState) : [];
       keys.forEach((key) => {
-        if (key.includes('to') || key.includes('from')) {
-          if (!selectedResources.map((d) => d.fieldName).includes(key.split('_')[1])) {
+        if (key?.includes('to') || key?.includes('from')) {
+          if (!selectedResources?.map((d) => d.fieldName)?.includes(key.split('_')[1])) {
             delete prevState[key];
           }
         }
@@ -314,7 +314,7 @@ const ReportFilters = (props: FiltersProps) => {
                 const dataKeys = Object?.keys(prev);
                 if (dataKeys && dataKeys.length) {
                   dataKeys.forEach((key) => {
-                    if (!selectedKeys.includes(key)) {
+                    if (!selectedKeys?.includes(key)) {
                       delete prev[key];
                     }
                   });
@@ -326,7 +326,7 @@ const ReportFilters = (props: FiltersProps) => {
                 const dataKeys = Object?.keys(prev);
                 if (dataKeys && dataKeys.length) {
                   dataKeys.forEach((key) => {
-                    if (!selectedKeys.includes(key)) {
+                    if (!selectedKeys?.includes(key)) {
                       delete prev[key];
                     }
                   });
