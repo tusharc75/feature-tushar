@@ -30,7 +30,7 @@ const Report = () => {
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   } = useData();
   let { resource } = useParams();
   let history = useHistory();
@@ -128,7 +128,7 @@ const Report = () => {
     if (showGrid) {
       fetchResourceData();
     }
-  }, [page, sorting, search, limit, filters, pageSizes]);
+  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   React.useEffect(() => {
     // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
@@ -339,7 +339,7 @@ const Report = () => {
                         className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
                         style={{ color: theme.palette.info.light }}
                       >
-                        Export All ({dataRows?.length || 0})
+                        Export All
                       </span>
                     </div>
                   )}
