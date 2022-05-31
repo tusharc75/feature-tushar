@@ -279,6 +279,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           currency={globalFilters.currency || currency}
           tableData={chartData ? chartData?.tableData : []}
           chart={chart}
+          isTableView={chartData?.graphType !== 'Table' && tableView}
           chartData={chartData?.tableData}
         />
       )}

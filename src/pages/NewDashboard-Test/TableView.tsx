@@ -39,7 +39,7 @@ const TableView = ({ id, chartData, isScreenSmall, currency, selectedDashboard }
                 <TableCell key={key} align={i < 1 ? 'left' : 'right'}>
                   {isNaN(data[key])
                     ? data[key]
-                    : id === 'volumeVsBudget' || key.includes('MT')
+                    : id === 'volumeVsBudget' || key.includes('MT')  || key.includes("GM")
                     ? data[key].toFixed(2)
                     : selectedDashboard && selectedDashboard.includes('Asset')
                     ? data[key]
