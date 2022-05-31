@@ -10,8 +10,6 @@ import History from './index';
 
 const HistoryDialog = ({ close, product, warehouse }) => {
 
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
     return (<Dialog
         fullScreen
         TransitionComponent={CustomDialogTransition}
@@ -22,11 +20,6 @@ const HistoryDialog = ({ close, product, warehouse }) => {
         <CustomDialogHeader
             title={'History'}
             onClose={close}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
             showRequiredLabel={false}
         ></CustomDialogHeader>
         <CustomDialogContent>

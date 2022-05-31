@@ -30,7 +30,7 @@ const Report = () => {
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   } = useData();
   let { resource } = useParams();
   let history = useHistory();
@@ -89,7 +89,7 @@ const Report = () => {
       if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase]) {
         o.fieldData.primaryField = true;
       }
-      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`].path);
+      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`]?.path);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -128,7 +128,7 @@ const Report = () => {
     if (showGrid) {
       fetchResourceData();
     }
-  }, [page, sorting, search, limit, filters, pageSizes]);
+  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   React.useEffect(() => {
     // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
@@ -206,8 +206,11 @@ const Report = () => {
   };
 
   // Create and return query for filters
-  const getFilter = () => {
-    let filterQuery = `page=${page}&limit=${limit}&`;
+  const getFilter = (isExport = false) => {
+    let filterQuery = `page=${page}&`;
+    if(!isExport) {
+      filterQuery = `limit=${limit}&`;
+    }
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
@@ -293,7 +296,7 @@ const Report = () => {
       type: 'info'
     });
     setExporting(true);
-    let filterQuery = getFilter();
+    let filterQuery = getFilter(true);
     axiosInstance()
       .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`, {
         responseType: 'arraybuffer'
@@ -339,7 +342,7 @@ const Report = () => {
                         className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
                         style={{ color: theme.palette.info.light }}
                       >
-                        Export All ({dataRows?.length || 0})
+                        Export All
                       </span>
                     </div>
                   )}
@@ -422,7 +425,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => { }}
+                      onEdit={() => {}}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -437,8 +440,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => { }}
-                      onClone={(data) => { }}
+                      onDelete={(data) => {}}
+                      onClone={(data) => {}}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (

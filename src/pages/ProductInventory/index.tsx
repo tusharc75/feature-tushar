@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, IconButton, Tooltip } from "@material-ui/core";
+import { Grid, IconButton, Tooltip, Button, Menu, MenuItem } from "@material-ui/core";
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,7 +11,7 @@ import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { isObjectEmpty, gridLoadingTimeout, productInventory } from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, productInventory, getLocalStorageArrayData, removeLocalStorage } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -30,6 +30,7 @@ import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGrid
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import AddRemoveDialog from './AddRemove';
+import { ExpandMore } from '@material-ui/icons';
 
 
 const InventoryProduct = () => {
@@ -53,6 +54,17 @@ const InventoryProduct = () => {
   const { state: { user, permissions, selectedEntity } }: any = useData();
 
   const { getColumnData } = useColumns();
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
 
   useEffect(() => {
     fetchGridColumns();
@@ -314,8 +326,8 @@ const InventoryProduct = () => {
             isDownloadExcel={false}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchProductInventory();
@@ -375,6 +387,50 @@ const InventoryProduct = () => {
                   />
                 </Grid>
               </Box>
+              {permissions?.productInventory?.isUpdate ?
+                <Box ml={1}>
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="default"
+                    size="small"
+                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                  >
+                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        closeActions()
+                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: "add" })
+                      }}
+                    >
+                      Add
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        closeActions()
+                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: "remove" })
+                      }}
+                    >
+                      Remove
+                    </MenuItem>
+                  </Menu>
+                </Box>
+                : null}
             </Grid>
           </Grid>
         </div>
@@ -424,6 +480,7 @@ const InventoryProduct = () => {
               setInventory({ open: false, product: [], type: "" })
             }
             handleSuccess={() => {
+              removeLocalStorage(localStorageSelectedRecords)
               fetchProductInventory()
               setInventory({ open: false, product: [], type: "" })
             }}
