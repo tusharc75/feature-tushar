@@ -66,7 +66,7 @@ const InventoryProduct = () => {
 
   const getPlants = () => {
     axiosInstance()
-      .get(`/warehouse?noEntityWise=1`)
+      .get(`/warehouse`)
       .then(({ data: { data } }) => {
         setPlantOptions([{ "warehouseName": "All", "_id": "All" }, ...data]);
         if (plantId === null && data?.length) {
@@ -409,6 +409,7 @@ const InventoryProduct = () => {
           <SoftHoldDialog
             close={() => setSoftHold({ open: false, data: {} })}
             data={softHold.data}
+            warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
           />}
 
         {showHistory.open &&

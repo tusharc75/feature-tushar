@@ -17,7 +17,7 @@ import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgG
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 
-const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData }) => {
+const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -136,6 +136,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         });
         setIsAdding(false);
         closeDialog();
+        if (transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.new) {
+          updateStatus(TRANSFER_INVENTORY_STATUS.inProgress)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -232,7 +235,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
 
   return (
     <React.Fragment>
-      {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) && (
+      {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress]?.includes(transferInventoryData?.status) && (
         <Box display="flex" justifyContent="space-between" p={1}>
           <Button
             variant={'contained'}
