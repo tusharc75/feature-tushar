@@ -125,7 +125,6 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
       .then(async ({ data: { data } }) => {
         if (chart.kpi?.custom) {
           const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
-          console.log(cardData)
           setChartData(cardData);
         } else {
           setChartData(data);
