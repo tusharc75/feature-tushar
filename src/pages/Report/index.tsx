@@ -89,7 +89,7 @@ const Report = () => {
       if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase]) {
         o.fieldData.primaryField = true;
       }
-      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`].path);
+      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`]?.path);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
