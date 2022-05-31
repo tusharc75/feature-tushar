@@ -30,7 +30,7 @@ const Report = () => {
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   } = useData();
   const { type } = useParams();
   const history = useHistory();
@@ -225,7 +225,7 @@ const Report = () => {
     if (showGrid) {
       fetchResourceData();
     }
-  }, [page, sorting, search, limit, filters, pageSizes]);
+  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   React.useEffect(() => {
     // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
@@ -296,10 +296,9 @@ const Report = () => {
 
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? '/product-inventory/report/purchase-order-product-wise-report'
-            : 'product-inventory/report/purchase-order-price'
+        `${resourceCamelCase === 'purchaseOrderProduct'
+          ? '/product-inventory/report/purchase-order-product-wise-report'
+          : 'product-inventory/report/purchase-order-price'
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -430,14 +429,13 @@ const Report = () => {
     let filterQuery = getFilter();
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? '/product-inventory/report/purchase-order-product-wise-report/export'
-            : 'product-inventory/report/purchase-order-price/export'
+        `${resourceCamelCase === 'purchaseOrderProduct'
+          ? '/product-inventory/report/purchase-order-product-wise-report/export'
+          : 'product-inventory/report/purchase-order-price/export'
         }${filterQuery}`
-      ,{
-        responseType: 'arraybuffer'
-      })
+        , {
+          responseType: 'arraybuffer'
+        })
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);
@@ -479,7 +477,7 @@ const Report = () => {
                         className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
                         style={{ color: theme.palette.info.light }}
                       >
-                        Export All ({dataRows?.length || 0})
+                        Export All
                       </span>
                     </div>
                   )}
@@ -562,7 +560,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => {}}
+                      onEdit={() => { }}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -577,8 +575,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (

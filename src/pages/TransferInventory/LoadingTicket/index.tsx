@@ -52,7 +52,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
     { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   const TicketRenderer = (params) =>

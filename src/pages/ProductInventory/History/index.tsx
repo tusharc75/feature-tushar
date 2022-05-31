@@ -38,13 +38,24 @@ const History = ({ product, warehouse }) => {
             finalObject.type = capitalize(u.type)
             return finalObject;
         });
+
+        var qty = 0;
+        rows?.slice().reverse().forEach(function (item) {
+            if (item.type === "Credit") {
+                qty = qty + item?.qty
+            }
+            else {
+                qty = qty - item?.qty
+            }
+            item.finalInventory = qty;
+        });
         dispatch({ type: "initialize", data: rows, count: rows.length });
         setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     };
 
     const columns = [
         { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer" },
-        { field: "referenceType", headerName: "ReferenceType Type", show: true, cellRenderer: "commonRenderer" },
+        { field: "referenceType", headerName: "Reference Type", show: true, cellRenderer: "commonRenderer" },
         { field: "reference", headerName: "Reference", show: true, cellRenderer: "referenceRenderer" },
         { field: "type", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
         {
@@ -61,6 +72,7 @@ const History = ({ product, warehouse }) => {
                 };
             }
         },
+        { field: "finalInventory", headerName: "Final Inventory", show: true, cellRenderer: "commonRenderer" },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
         { field: "user", headerName: "Transacted By", show: true, cellRenderer: "commonRenderer" },
     ];
