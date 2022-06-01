@@ -12,7 +12,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { transferInventory } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import Steps from 'src/pages/RentalManagement/Steps';
@@ -126,7 +126,7 @@ const TransferInventoryDetailPage = () => {
         else {
           setCanLoad(true);
         }
-        
+
         if (data?.transfertoPlant?.entity?.length) {
           setCanReceive(data?.transfertoPlant?.entity?.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0);
         }
@@ -387,7 +387,7 @@ const TransferInventoryDetailPage = () => {
                     <div>
                       <Activity
                         resourceId={transferInventoryData?._id}
-                        resource={transferInventory.resource}
+                        resource={ACTIVITY_RESOURCE.transferInventory}
                         // restrictedAddActivities={
                         //   permissions && permissions['transferInventory'] && permissions['rentalManagement'].isUpdate
                         //   ? []
@@ -397,7 +397,7 @@ const TransferInventoryDetailPage = () => {
                           {
                             access: true,
                             referenceId: transferInventoryData?._id,
-                            type: 'transferInventory'
+                            type: ACTIVITY_RESOURCE.transferInventory
                           }
                         ]}
                         handleActivityRefresh={() => { }}

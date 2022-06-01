@@ -26,17 +26,16 @@ import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constan
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import NoDataCell from "../../components/Helpers/NoDataCell";
 import HistoryIcon from '@material-ui/icons/History';
-import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import AddRemoveDialog from './AddRemove';
 import { ExpandMore } from '@material-ui/icons';
 
-
 const InventoryProduct = () => {
 
   const renderedFrom = camelCase(routes?.productInventory.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -65,14 +64,15 @@ const InventoryProduct = () => {
     setAnchorEl(null);
   };
 
-
   useEffect(() => {
     fetchGridColumns();
   }, [plantId]);
 
-
   useEffect(() => {
     getPlants();
+  }, [selectedEntity]);
+
+  useEffect(() => {
     fetchProductInventory();
   }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
@@ -87,61 +87,59 @@ const InventoryProduct = () => {
       });
   };
 
-  const extraColumn = [
-    { field: 'serializedProduct', headerName: 'Serialized Product', show: true, cellRenderer: 'checkboxRenderer' },
-    { field: 'softHold', headerName: 'Soft Hold', show: true, cellRenderer: 'softHoldRenderer' },
-    { field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' }
-  ];
-
-  const fetchGridColumns = () => {
+  const fetchGridColumns = async () => {
     setColumns(null)
-    axiosInstance()
-      .get('/field?resource=Product Inventory')
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
-          if (currentColumn !== null) {
-            if (currentColumn?.columnData.field !== 'plant') {
-              if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
-                columns.push({
-                  ...currentColumn?.columnData,
-                  cellEditor: 'numericCellEditor',
-                  editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
-                });
-              } else if (o.fieldData.fieldName === 'product') {
-                columns.push({
-                  ...currentColumn?.columnData,
-                  field: 'productName',
-                  headerName: o.fieldData.fieldLabel,
-                  cellRenderer: 'productNameRenderer',
-                  primaryField: true
-                });
-              } else {
-                columns.push(currentColumn?.columnData);
-              }
-            }
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              if (currentColumn?.columnData.field === 'product') {
-                rendererNames.push('productNameRenderer');
-              } else {
-                rendererNames.push(currentColumn?.rendererName);
-              }
-            }
+
+    const productFields = await axiosInstance().get("/field?resource=Product&view=true");
+    const productInventoryFields = await axiosInstance().get("/field?resource=Product Inventory&view=true");
+
+    let columns = []
+    let rendererNames = []
+
+    productFields?.data?.data?.forEach(o => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+    })
+
+    columns?.forEach((e) => {
+      if (!["productName", "serializedProduct"].includes(e.field)) {
+        e.show = false
+      }
+    })
+
+    productInventoryFields?.data?.data?.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
+      if (currentColumn !== null) {
+        if (!['plant', 'product'].includes(currentColumn?.columnData.field)) {
+          if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
+            columns.push({
+              ...currentColumn?.columnData,
+              cellEditor: 'numericCellEditor',
+              editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
+            });
           }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        setFrameworkComponents({
-          ...tempFrameworkComponent,
-          productNameRenderer: ProductNameRenderer,
-          softHoldRenderer: SoftHoldRenderer,
-          checkboxRenderer: CheckboxRenderer,
-          actionsRenderer: ActionsRenderer
-        });
-        setColumns([...columns, ...extraColumn]);
-      });
-  };
+          else {
+            columns.push(currentColumn?.columnData);
+          }
+        }
+      }
+    });
+
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    setFrameworkComponents({ ...tempFrameworkComponent, softHoldRenderer: SoftHoldRenderer, actionsRenderer: ActionsRenderer })
+
+    const defaultColumns = [
+      { field: 'softHold', headerName: 'Soft Hold', show: true, cellRenderer: 'softHoldRenderer' },
+      { field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' }
+    ];
+
+    setColumns([...columns, ...defaultColumns])
+  }
 
   const fetchProductInventory = () => {
     dispatch({ type: 'loading', loading: true });
@@ -223,12 +221,6 @@ const InventoryProduct = () => {
     };
     axiosInstance().put(`${productInventory.api}`, inputData);
   };
-
-  const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
 
   const infoHandler = (params) => {
     setSoftHold({ open: true, data: params.data });

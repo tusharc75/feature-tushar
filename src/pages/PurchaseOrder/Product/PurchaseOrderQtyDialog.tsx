@@ -63,6 +63,10 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
       poFields.forEach((element) => {
         if (element.fieldName === "unit") {
           element.option = unitOptions;
+          if (unitOptions?.length) {
+            element.isDefaultValue = true;
+            element.defaultValue = unitOptions[0]?.optionValue;
+          }
         }
         element.required = false;
         element.isFormula = false;
