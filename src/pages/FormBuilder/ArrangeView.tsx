@@ -80,7 +80,6 @@ const ArrangeView = (props) => {
       // });
       let dragCard = resourceData[dragIndex];
 
-      console.log(dragIndex, hoverIndex, section);
       const updatedIndexColumns = update(resourceData, {
         $splice: [
           [dragIndex, 1],
@@ -115,7 +114,6 @@ const ArrangeView = (props) => {
       order: indx,
       sectionName: d.section
     }));
-    console.log(fileData);
     axiosInstance()
       .put(`/sa-formbuilder/resource/form-builder/update-order`, fileData)
       .then(() => {

@@ -37,7 +37,6 @@ export default function MobileFilterDialog({ isOpen, handleClose, contentPart, c
           fieldValue: filters[field].filter,
         });
       });
-      console.log(data)
       setInputFields(data)
     }
     else {

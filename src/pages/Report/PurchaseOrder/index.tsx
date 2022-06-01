@@ -163,7 +163,6 @@ const Report = () => {
 
         productFields.forEach((o: any) => {
           if (o?.fieldData.fieldName === 'productCategory') {
-            console.log(o);
             resourceFieldData.push(o);
           }
           let currentColumn = getColumnData('Product', o?.fieldData, routes['productDetail'].path);
