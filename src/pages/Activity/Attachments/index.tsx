@@ -264,44 +264,52 @@ export default function Attachment() {
     }
     </>
   );
+  
   const downloadFile = (data1) => {
-    const file = data1.file
-    const fileUrl = file.map(f => f.url)
+    const file = data1?.file
     setIsDownloading(true);
-    axiosInstance()
-      .put(`user/download`, {
+    if (file?.length === 1) {
+      axiosInstance().get(`user/download?fileName=${file[0].url}`, {
+        responseType: 'blob',
+      })
+        .then(({ data }) => {
+          const url = window.URL.createObjectURL(new Blob([data]));
+          const link = document.createElement('a');
+          link.href = url;
+          var fileExt = file[0].url?.split('.').pop();
+          link.setAttribute('download', file[0].name + "." + fileExt);
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => setIsDownloading(false), 2000);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setIsDownloading(false);
+        });
+    }
+    else {
+      const fileUrl = file.map(f => f.url)
+      axiosInstance().put(`user/download`, {
         files: fileUrl
       }, {
         responseType: 'blob',
-        // onDownloadProgress: (progressEvent) => {
-        //   let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-
-        //   if (percentCompleted === 100) {
-        //     toastConfig.setToastConfig({
-        //       message: 'File Downloaded Successfully',
-        //       open: true,
-        //       type: 'success'
-        //     });
-        //     setTimeout(() => {
-        //       setIsDownloading(false);
-        //     }, 2000);
-        //   }
-        // }
       })
-      .then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', data1.name ? `${data1.name}.zip` : "download.zip");
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => setIsDownloading(false), 2000);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setIsDownloading(false);
-      });
+        .then(({ data }) => {
+          const url = window.URL.createObjectURL(new Blob([data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', attachmentData?.name ? `${attachmentData?.name}.zip` : "download.zip");
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => setIsDownloading(false), 2000);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setIsDownloading(false);
+        });
+    }
   };
+
   const ActionsRenderer = (params) => (
     <>
       <Tooltip title="Download">

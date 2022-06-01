@@ -25,6 +25,7 @@ import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom'
+import SendEmail from './../SendEmail';
 
 const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, seIsShowIssue, updateStatus }) => {
 
@@ -127,6 +128,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 else {
                     res.isValid = true
                 }
+                res.hideSelection = item.actualReceived ? true : false
                 return res;
             });
             if (rows.length === 0) {
@@ -206,7 +208,8 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         let tempProductArray = rows?.map(d => ({
             "productId": d.productId || d._id,
             "qty": d.qty ? parseInt(d.qty) : 1,
-            "expectedDelivery": purchaseOrderData?.deliveryDate
+            "expectedDelivery": purchaseOrderData?.deliveryDate,
+            "unit": d?.unitMain?.length ? d?.unitMain[0] : "",
         }))
         axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { "orderDetails": tempProductArray })
             .then(() => {
@@ -279,7 +282,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
-
+                    <SendEmail
+                        purchaseOrderData={purchaseOrderData}
+                    />
                     <Box display={isMobile ? "none" : "flex"} justifyContent="flex-end">
                         <Button
                             variant={isMobile && !isTablet ? "text" : "contained"}
