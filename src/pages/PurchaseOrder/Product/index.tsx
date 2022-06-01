@@ -213,7 +213,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         }))
         axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { "orderDetails": tempProductArray })
             .then(() => {
-                if (purchaseOrderData?.status === PURCHASE_ORDER_STATUS.new) {
+                if (purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
                     updateStatus(PURCHASE_ORDER_STATUS.inProgress)
                 }
                 setAddProductDialog(false)
