@@ -90,7 +90,9 @@ const CreateFormBuilder = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [resourceLabel, setResourceLabel] = useState('');
   const [sectionName, setsectionName] = useState('');
-  const sectionNameList = ['Accounts', 'Admin Portal', 'CRM+', 'Product Setup'];
+
+  const sectionNameList = ['CRM +', 'ROM', 'Accounts', 'Product Setup', 'Activities', 'Admin Portal'];
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -127,7 +129,6 @@ const CreateFormBuilder = () => {
     axiosInstance()
       .get(`/sa-formbuilder/resourcedata/` + resource)
       .then(({ data: { data } }) => {
-        console.log(data);
         setSection(data.section);
         setsectionName(data.sectionName || '');
         setResourceLabel(data.resourceLabel);
@@ -168,7 +169,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -196,7 +197,6 @@ const CreateFormBuilder = () => {
     sendData.sectionName = sectionName;
     sendData.deleteField = deleteField;
     sendData.resourceLabel = resourceLabel;
-    console.log(sendData);
     setIsUpdating(true);
     axiosInstance()
       .put(`/sa-formbuilder/resourcedata`, sendData)

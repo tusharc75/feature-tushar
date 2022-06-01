@@ -423,6 +423,12 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     currency={purchaseOrderData?.currency?.toLowerCase()}
                     fromPurchaseOrderGrid={true}
                     rowClassRules={{
+                        "scrap-data-row": function (params) {
+                            if (params?.node?.rowPinned) {
+                                return true
+                            }
+                            return false
+                        },
                         "red-data-row":
                             function (params) {
                                 if (params?.node?.rowPinned) {

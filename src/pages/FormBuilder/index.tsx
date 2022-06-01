@@ -66,7 +66,7 @@ const FormBuilder = () => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`/sa-formbuilder/resource`)
+      .get(`/sa-formbuilder/resource?allResource=true'`)
       .then(({ data: { data } }) => {
         data.forEach((d) => {
           d['_id'] = d.id;
@@ -144,18 +144,18 @@ const FormBuilder = () => {
             dataRows={dataRows}
             selectedRecords={[]}
             dispatch={dispatch}
-            onEdit={(d) => {}}
+            onEdit={(d) => { }}
             extraParamsToCheckDelete={true}
-            onDelete={(d) => {}}
+            onDelete={(d) => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
             additionalDetails={[]}
             chips={[]}
             owerCollaboratorInitialsOrImages=""
-            onCreate={() => {}}
+            onCreate={() => { }}
             showClone={false}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={'form-builder'}
           />
         ) : (

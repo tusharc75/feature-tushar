@@ -6,10 +6,11 @@ import productSetup from './product_setup.svg';
 import activities from './activities.svg';
 import adminPortal from './admin_portal.svg';
 import formIcon from './form_icon.svg';
+import genIcon from './gen_icon.svg';
 
 import { FcViewDetails } from 'react-icons/fc';
 
-import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL, FORM_ICON } from './constants/imageTypes';
+import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL, FORM_ICON, GEN_ICON } from './constants/imageTypes';
 
 export const IMAGE_HEIGHT = 56;
 export const IMAGE_WIDTH = 56;
@@ -32,6 +33,8 @@ export const SVG = (name) => {
       return adminPortal;
     case FORM_ICON:
       return formIcon;
+    case GEN_ICON:
+      return genIcon;
     default:
       return;
   }
