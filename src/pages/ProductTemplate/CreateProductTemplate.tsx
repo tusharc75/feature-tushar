@@ -190,6 +190,8 @@ const ProductTemplate = () => {
           if (!data.owner) {
             data.owner = user.user._id;
           }
+          data.entity = data?.entity || [];
+          data.collaborator = data?.collaborator || [];
           setGeneralRemarkData(data?.generalRemark || '');
           setInitialValues(data);
           setSection(JSON.parse(JSON.stringify(data.section)));
