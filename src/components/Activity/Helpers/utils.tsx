@@ -49,6 +49,7 @@ export const resActivityColors = {
   rentalManagement: 'rgba(223, 231, 246, 1)',
   repairJob: 'rgba(223, 231, 246, 1)',
   transferAsset: 'rgba(222, 249, 255, 1)',
+  transferInventory: 'rgba(222, 249, 255, 1)',
   purchaseOrder: 'rgba(236, 241, 255, 1)',
   deliveryTicket: 'rgba(214, 250, 233, 1)',
   sublease: 'rgba(254, 237, 251, 1)',
@@ -77,6 +78,7 @@ export const resActivityTextColors = {
   rentalManagement: 'rgba(7, 43, 97, 1)',
   repairJob: 'rgba(169, 43, 3, 1)',
   transferAsset: 'rgba(0, 122, 149, 1)',
+  transferInventory: 'rgba(0, 122, 149, 1)',
   purchaseOrder: 'rgba(0, 40, 101, 1)',
   deliveryTicket: 'rgba(0, 129, 67, 1)',
   sublease: 'rgba(176, 1, 85, 1)',
@@ -89,7 +91,7 @@ export const resActivityTextColors = {
   case: 'rgba(132, 0, 47, 1)',
   note: 'rgba(255, 97, 9, 1)',
   email: 'rgba(255, 97, 9, 1)',
-  attachment: 'rgba(0, 40, 101, 1)'
+  attachment: 'rgba(0, 40, 101, 1)',
 };
 
 export const SubCaseColors = {

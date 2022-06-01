@@ -219,63 +219,8 @@ const PurchaseOrderDetailsPage = () => {
       });
   };
 
-  const handleViewPdf = (download) => {
-    axiosInstance()
-      .get(`${purchaseOrder.api}/${id}/pdf`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            if (download) {
-              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', `PurchaseOrder-${purchaseOrderData.purchaseOrderNumber}.pdf`);
-              document.body.appendChild(link);
-              link.click();
-            } else {
-              const file = new Blob([data], { type: 'application/pdf' });
-              const fileURL = URL.createObjectURL(file);
-              const pdfWindow = window.open();
-              pdfWindow.location.href = fileURL;
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            }
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
-  };
-
-  const handleAttachments = () => {
-    let request;
-    request = {
-      name: 'Purchase Order',
-      fileUrl: '',
-      relatedTo: [
-        {
-          type: purchaseOrder.resource,
-          referenceId: purchaseOrderData?._id,
-          access: true
-        },
-        {
-          type: purchaseOrderData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
-          referenceId: purchaseOrderData?.customerAccountName
-            ? purchaseOrderData?.customerAccountName?.optionValue
-            : purchaseOrderData?.supplierAccountName?.optionValue,
-          access: false
-        }
-      ]
-    };
   };
 
   return (
@@ -456,7 +401,6 @@ const PurchaseOrderDetailsPage = () => {
                               updateStatus={updateStatus}
                               setCurrentStep={setCurrentStep}
                               currentStep={currentStep}
-                              handleAttachments={handleAttachments}
                               statusOptions={statusOptions}
                               renderedFrom={`${renderedFrom}_grid-3`}
                             />
@@ -467,8 +411,6 @@ const PurchaseOrderDetailsPage = () => {
                                 setCurrentStep={setCurrentStep}
                                 updateStatus={updateStatus}
                                 statusOptions={statusOptions}
-                                handleViewPdf={handleViewPdf}
-                                handleAttachments={handleAttachments}
                                 renderedFrom={`${renderedFrom}_grid-4`}
                                 isSmallScreen={isSmallScreen}
                                 isTabletScreen={isTabletScreen}

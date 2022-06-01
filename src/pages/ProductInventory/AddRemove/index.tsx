@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect, useContext } from "react";
 import {
-    Avatar, Button, Dialog, List,
+    Box, Button, Dialog, List,
     ListItem,
     ListItemAvatar,
     ListItemText,
@@ -29,7 +29,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
         const data = {
             products: product?.map((e) => e._id),
             qty: parseInt(values.qty),
-            warehouse: warehouse
+            warehouse: warehouse,
+            comment: values.comment
         }
         setLoading(true)
         if (type === "add") {
@@ -94,7 +95,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
         }}
         aria-labelledby="assign-roles-dialog"
     >
-        <Formik initialValues={{ qty: 1 }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+        <Formik initialValues={{ qty: 1, comment: "" }} onSubmit={handleSubmit} validateOnMount validate={validate}>
             {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                     <CustomDialogHeader
@@ -109,7 +110,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                     />
                     <CustomDialogContent>
                         <List style={{ padding: 0 }}>
-                            <ListItem divider key={product[0]?._id}>
+                            <ListItem key={product[0]?._id}>
                                 {product?.length === 1 ?
                                     <ListItemText
                                         primary={product[0]?.productName}
@@ -135,6 +136,25 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                                 />
                             </ListItem>
                         </List>
+                        <Box m={1}>
+                            <Field
+                                component={TextFieldFormik}
+                                margin="dense"
+                                type="text"
+                                label="Comment"
+                                name="comment"
+                                fullWidth
+                                multiline
+                                rows={3}
+                                variant="outlined"
+                                value={values['comment']}
+                                error={touched['comment'] && Boolean(errors['comment'])}
+                                helperText={touched['comment'] && errors['comment']}
+                                onChange={(e) => {
+                                    setFieldValue('comment', e.target.value);
+                                }}
+                            />
+                        </Box>
                     </CustomDialogContent>
                     <CustomDialogFooter>
                         <CustomButton
