@@ -6,39 +6,29 @@ import { Button, Chip, Dialog, Grid } from "@material-ui/core";
 import axiosInstance from "src/axios/axiosInstance";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import {
-    CustomDialogTransition, dateFormat, defaultActivityShow, gridLoadingTimeout, serializedAsset,
-    purchaseOrder, PURCHASE_ORDER_STATUS, prepareDataForGrid, formatAmountWithCurrency
+    dateFormat, purchaseOrder, PURCHASE_ORDER_STATUS, prepareDataForGrid, formatAmountWithCurrency
 } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
 import CreateSerializedAsset from "./CreateSerializedAsset";
 import { isMobile, isTablet } from "react-device-detect";
 import routes from "src/components/Helpers/Routes";
 import { Link } from "react-router-dom";
-import { CreateEmail } from "src/components/Activity/Email/CreateEmail";
-import { AiFillFilePdf } from "react-icons/ai";
-import { MdAdd, MdEmail } from "react-icons/md";
-import { useHistory } from "react-router-dom";
-import { IoMdDownload } from "react-icons/io";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
+import SendEmail from './../SendEmail';
 
-const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statusOptions, handleViewPdf, handleAttachments,
+
+const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statusOptions,
     stepFullScreen, isSmallScreen, isTabletScreen, showActivity, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
 
     const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
-    const [sendEmail, setSendEmail] = useState(false);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
-    const [generatingPdfFile, setGeneratingFile] = useState(false);
     const [disableCreateAsset, setDisableCreateAsset] = useState(false);
-    const [emailButtonLoading, setEmailButtonLoading] = useState(false)
-    const [downlodingFile, setDownlodingFile] = useState(false)
-    const [pdfFileBase64, setPdfFileBase64] = useState(null);
 
     const [rowsData, setRowsData] = useState(null);
     const [columns, setColumns] = useState(null)
@@ -47,7 +37,6 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
     useEffect(() => {
         fetchColumns()
         fetchProduct()
-        fetchEmailsData()
     }, []);
 
     const fetchColumns = async () => {
@@ -252,134 +241,25 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
         }
     }
 
-    const fetchEmailsData = () => {
-        let ownerCollaboratorEmails = [];
-        if (purchaseOrderData?.collaborator && purchaseOrderData.collaborator.length) {
-            ownerCollaboratorEmails = purchaseOrderData.collaborator.filter((o) => o?.email).map((o) => o?.email);
-        }
-        if (purchaseOrderData?.owner?.email) {
-            ownerCollaboratorEmails.push(purchaseOrderData.owner.email);
-        }
-        let toEmails = [];
-        if (purchaseOrderData?.supplier?.email) {
-            toEmails.push(purchaseOrderData.supplier.email);
-        }
-        setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
-    }
-
-    let attachments = [];
-    if (pdfFileBase64) {
-        attachments.push({
-            base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
-            contentType: pdfFileBase64.split(';')[0].split(':')[1],
-            name: `Purchase Order-${purchaseOrderData.purchaseOrderNumber}`
-        });
-    }
-
-    const fetchEmailAttachment = () => {
-        axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/pdf`)
-            .then(({ data }) => {
-                axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                        responseType: "blob",
-                    })
-                    .then(({ data }) => {
-                        const file = new Blob([data], { type: 'application/pdf' });
-                        generateBase64forFile(file, 'pdf');
-                    })
-                    .catch((err) => {
-                        toastConfig.setToastConfig({
-                            open: true,
-                            type: 'error',
-                            message: 'PDF generating error'
-                        });
-                    });
-            }).catch((err) => {
-                toastConfig.setToastConfig(err);
-                setDownlodingFile(false);
-            })
-    }
-
-    const generateBase64forFile = (blobData, type) => {
-        let reader = new FileReader();
-        reader.readAsDataURL(blobData);
-        reader.onloadend = function () {
-            let base64data = reader.result;
-            if (type === 'pdf') {
-                setPdfFileBase64(base64data);
-                setSendEmail(true)
-                setEmailButtonLoading(false)
-            }
-        };
-    };
-
-    const onSendEmailSuccess = () => {
-        setSendEmail(false);
-        handleAttachments();
-    };
-
     return (<>
         <Box display="flex" justifyContent="space-between" m={1}>
-            <Box display="flex" alignItems="center">
-                <Box display="flex">
-                    <Button
-                        variant={"contained"}
-                        color="primary"
-                        size="small"
-                        style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
-                        disabled={selectedRecords.length === 0 || disableCreateAsset}
-                        onClick={() => { setShowCreateAssetDialog(true) }}
-                    >
-                        {`Receive`}
-                    </Button>
-                    <Box mx={1} />
-                    {permissions?.purchaseOrder?.isRead && !isMobile && (
-                        <Button
-                            variant={isMobile && !isTablet ? "text" : "outlined"}
-                            color="primary"
-                            type="button"
-                            size="small"
-                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
-                            disabled={downlodingFile}
-                            onClick={() => { handleViewPdf(false) }}
-                        >
-                            {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile ? "Please wait..." : "Preview"}
-                        </Button>
-                    )}
-                    <Box mx={1} />
-                    {permissions?.purchaseOrder?.isRead && (
-                        <Button
-                            variant={isMobile && !isTablet ? "text" : "outlined"}
-                            color="primary"
-                            type="button"
-                            size="small"
-                            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
-                            startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
-                            disabled={downlodingFile}
-                            onClick={() => { handleViewPdf(true) }}
-                        >
-                            {isMobile && !isTablet ? <IoMdDownload size={20} /> : downlodingFile ? "Please wait..." : "Download"}
-                        </Button>
-                    )}
-                    <Box mx={1} />
-                    {permissions?.purchaseOrder?.isRead && <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
-                        color="primary"
-                        size="small"
-                        style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
-                        disabled={emailButtonLoading}
-                        startIcon={isMobile ? '' : <MdEmail />}
-                        onClick={() => {
-                            setEmailButtonLoading(true)
-                            fetchEmailAttachment()
-                        }}
-                    >
-                        {isMobile && !isTablet ? <MdEmail size={20} /> : `Send Email`}
-                    </Button>}
-                </Box>
-                <Box mx={1} />
+            <Box display="flex">
+                <Button
+                    variant={"contained"}
+                    color="primary"
+                    size="small"
+                    style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
+                    disabled={selectedRecords.length === 0 || disableCreateAsset}
+                    onClick={() => { setShowCreateAssetDialog(true) }}
+                >
+                    {`Receive`}
+                </Button>
             </Box>
+            <div className="d-flex gap-2">
+                <SendEmail
+                    purchaseOrderData={purchaseOrderData}
+                />
+            </div>
         </Box>
         <Grid item xs={12} md={12} sm={12}>
             {columns && rowsData ? (
@@ -419,43 +299,6 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                 updateStatus={updateStatus}
             />
         }
-        {sendEmail && (
-            <Dialog
-                open={sendEmail}
-                fullScreen={fullScreen || isMobile || isTablet}
-                TransitionComponent={CustomDialogTransition}
-                aria-labelledby="customized-dialog-title"
-                maxWidth="md"
-                onClose={() => {
-                    setSendEmail(false);
-                    setFullScreen(false);
-                }}
-                fullWidth
-            >
-                <CreateEmail
-                    generatingFile={generatingPdfFile}
-                    handleClose={() => {
-                        setSendEmail(false);
-                        setFullScreen(false);
-                    }}
-                    fetchData={onSendEmailSuccess}
-                    id={purchaseOrderData._id}
-                    isQuoteBuilder={true}
-                    options={userEmails?.to}
-                    cc={userEmails?.cc ?? []}
-                    emailId={null}
-                    qouteBuilderAttachments={attachments}
-                    subject={`${user?.user?.brandName ?? 'Brand'} Offer - ${purchaseOrderData?.purchaseOrderId ?? ''}`}
-                    fromQuote={true}
-                    isMinimized={!fullScreen}
-                    onMinimizeMaximize={() => {
-                        setFullScreen((prevState) => !prevState);
-                    }}
-                    showManimizeMaximize={true}
-                    refrenceType="purchaseOrder"
-                />
-            </Dialog>
-        )}
     </>
     );
 }
