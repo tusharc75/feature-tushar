@@ -11,7 +11,6 @@ import TinyMce from '../../../components/TinyMCE/index';
 const GeneralRemarkManagement = (props) => {
   const { classes, generalRemarkOpen, setGeneralRemarkOpen, generalRemarkData, setGeneralRemarkData, initialValues } = props;
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  //   console.log(initialValues);
   return (
     <>
       <Dialog

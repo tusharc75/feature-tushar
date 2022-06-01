@@ -8,7 +8,7 @@ import styles from './Dashboard.module.scss';
 import './style.scss';
 // import crmImage from '../../assets/dashboard_images/eQuip-t_dashboard.svg';
 import { SVG, IMAGE_WIDTH, IMAGE_HEIGHT } from '../../assets/dashboard_images';
-import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL, FORM_ICON } from '../../assets/dashboard_images/constants/imageTypes';
+import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL, FORM_ICON, GEN_ICON } from '../../assets/dashboard_images/constants/imageTypes';
 import Icon from '@material-ui/core/Icon';
 import { SiCivicrm } from 'react-icons/si';
 import { MdNavigateNext, MdLocalActivity } from 'react-icons/md';
@@ -45,57 +45,15 @@ function Dashboard() {
     if (entityData?.resource) {
       allData = entityData.resource;
     }
-    // if (['local', 'development'].includes(process.env.REACT_APP_ENV) && allData) {
-    //   const indexOfProduct = allData.findIndex((d) => d.name === 'Product');
-    //   const product = allData[indexOfProduct];
-    //
-    //   allData = [
-    //     ...allData.splice(0, indexOfProduct + 1),
-    //     {
-    //       isCreate: true,
-    //       isDelete: true,
-    //       isRead: true,
-    //       isUpdate: true,
-    //       name: 'Product List',
-    //       resourceId: '',
-    //       resourceLabel: 'Product List',
-    //       roleType: 1,
-    //       sectionName: product.sectionName
-    //     },
-    //     ...allData
-    //   ];
-    // }
 
     allData?.forEach((u) => {
       u['resourceLabel'] = u.resourceLabel ?? u.name;
       u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
       u['resourceLabelLowerCase'] = u.resourceLabel?.toLowerCase() ?? u.name?.toLowerCase();
-
       !arr.includes(u.sectionName) && arr.push(u.sectionName);
     });
 
-    //  In offline mode ROM section will be visible even if the user does not have permission.
-    //  No scenarios are discussed for this.
-    // if (!navigator.onLine) {
-    //   const rom = "ROM";
-    //   arr = [rom];
-
-    //   allData = [{
-    //     "name": "Rental Management",
-    //     "resourceLabel": routes.rentalManagement.title,
-    //     "sectionName": rom,
-    //     "isRead": true,
-    //     "isCreate": true,
-    //     "isUpdate": true,
-    //     "isDelete": true,
-    //     "resourceId": "6215f88cbf69343f7d4fee97",
-    //     "sectionNameLowerCase": rom.toLowerCase(),
-    //     "resourceLabelLowerCase": routes.rentalManagement.title.toLowerCase()
-    //   }]
-    // }
-
     var data = arr.map((sec) => {
-      // const list = allData?.filter((u) => sec === u.sectionName && u.isRead);
       const list = allData?.filter((u) => {
         if (u?.name === 'Product Builder' && process.env.REACT_APP_ENV === 'staging') {
           return false;
@@ -119,16 +77,6 @@ function Dashboard() {
           );
           text = 'Convert leads and close sales deals faster.';
           break;
-
-        case 'CRM+':
-          icon = (
-            <Icon>
-              <img src={SVG(CRM)} alt="ROM Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            </Icon>
-          );
-          text = 'Convert leads and close sales deals faster.';
-          break;
-
         case 'Accounts':
           icon = (
             <Icon>
@@ -137,7 +85,6 @@ function Dashboard() {
           );
           text = 'Customer and Supplier Account Management at your fingertips.';
           break;
-
         case 'Activities':
           icon = (
             <Icon>
@@ -146,7 +93,6 @@ function Dashboard() {
           );
           text = 'Assign and Access Activities related to an Order.';
           break;
-
         case 'Product Setup':
           icon = (
             <Icon>
@@ -155,7 +101,6 @@ function Dashboard() {
           );
           text = 'Product and Category Setup.';
           break;
-
         case 'Admin Portal':
           icon = (
             <Icon>
@@ -164,7 +109,6 @@ function Dashboard() {
           );
           text = 'Build your own Template, Manage Roles and Entities.';
           break;
-
         case 'ROM':
           icon = (
             <Icon>
@@ -173,7 +117,6 @@ function Dashboard() {
           );
           text = 'Fulfill Rental Orders Faster.';
           break;
-
         case 'Dynamic Forms':
           icon = (
             <Icon>
@@ -182,6 +125,13 @@ function Dashboard() {
           );
           text = 'Setup Dynamic Forms & Templates';
           break;
+        default:
+          icon = (
+            <Icon>
+              <img src={SVG(GEN_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </Icon>
+          );
+          text = ""
       }
 
       return {
@@ -191,10 +141,7 @@ function Dashboard() {
         items: list
       };
     });
-    let levalOrderBy = ['CRM+', 'CRM +', 'ROM', 'Accounts', 'Product Setup', 'Dynamic Forms', 'Activities', 'Admin Portal'];
-    data = sortBy(data, function (item: any) {
-      return levalOrderBy?.indexOf(item?.head);
-    });
+
     setSections(data);
     // (async () => {
     //   try {

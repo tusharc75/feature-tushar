@@ -72,7 +72,6 @@ const Report = () => {
       const {
         data: { data: lookupResource }
       } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
-      console.log(lookupResource);
       if (lookupResource) {
         data?.forEach((e) => {
           if (e?.fieldData?.fieldName === 'currentOwner') {

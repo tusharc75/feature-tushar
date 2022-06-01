@@ -107,6 +107,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
+  
   const iconMapping = [
     {
       key: 'Brand Admin',
@@ -134,10 +135,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     },
     {
       key: 'CRM +',
-      icon: <SiCivicrm size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'CRM+',
       icon: <SiCivicrm size={15} className="sidebar-icon" />
     }
   ];
@@ -188,10 +185,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           }
         });
       }
-      let levalOrderBy = ['CRM+', 'CRM +', 'ROM', 'Accounts', 'Product Setup', 'Dynamic Forms', 'Activities', 'Admin Portal'];
-      sections = sortBy(sections, function (item: any) {
-        return levalOrderBy?.indexOf(item);
-      });
+
 
       return sections.map((section) => {
         const lists = user.role.sideBar.filter((list) => list.sectionName === section);
