@@ -304,7 +304,6 @@ const ReportFilters = (props: FiltersProps) => {
             if (val.filter((f) => f.fieldName === 'all').length > 0) {
               setSelectedResources(filterOptions);
             } else {
-              console.log(val, reason);
               setSelectedResources(val);
             }
 
