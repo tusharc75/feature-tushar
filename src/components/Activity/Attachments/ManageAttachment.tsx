@@ -180,6 +180,8 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
         }
     };
 
+    
+
     const downloadFile = (event, file) => {
         if (event) {
             toastConfig.setToastConfig({
