@@ -228,10 +228,6 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
             });
             if (rows.every(d => d.qty === d.actualReceived)) {
                 setDisableCreateAsset(true)
-                if (statusOptions.findIndex(d => d.optionLabel === PURCHASE_ORDER_STATUS.readyToInvoice) > statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status)) {
-                    updateStatus(PURCHASE_ORDER_STATUS.readyToInvoice)
-                    setCurrentStep(3)
-                }
             }
             setRowsData(rows);
             setSelectedRecords([]);

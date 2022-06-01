@@ -481,22 +481,26 @@ const ProductDetailsPage = () => {
                     <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
                       <Typography variant="subtitle2">{routes?.productInventory?.title}</Typography>
                     </Box>
-                    <Box width="100%">
-                      <Box mx={2} mt={1} display="flex" justifyContent="space-between">
-                        <Typography variant="subtitle2">{routes.warehouse.title}</Typography>
-                        <Typography variant="subtitle2">Qty</Typography>
+                    {productInventoryData?.filter(d => d.inventory)?.length ?
+                      <Box width="100%">
+                        <Box mx={2} mt={1} display="flex" justifyContent="space-between">
+                          <Typography variant="subtitle2">{routes.warehouse.title}</Typography>
+                          <Typography variant="subtitle2">Qty</Typography>
+                        </Box>
+                        {productInventoryData?.filter(d => d.inventory).map(({ inventory, warehouse }) => (
+                          <List disablePadding key={warehouse?._id}>
+                            <ListItem dense>
+                              <ListItemText primary={warehouse?.name} />
+                              <ListItemSecondaryAction>
+                                <Typography variant="subtitle2">{inventory}</Typography>
+                              </ListItemSecondaryAction>
+                            </ListItem>
+                          </List>
+                        ))}
                       </Box>
-                      {productInventoryData?.filter(d => d.inventory).map(({ inventory, warehouse }) => (
-                        <List disablePadding key={warehouse?._id}>
-                          <ListItem dense>
-                            <ListItemText primary={warehouse?.name} />
-                            <ListItemSecondaryAction>
-                              <Typography variant="subtitle2">{inventory}</Typography>
-                            </ListItemSecondaryAction>
-                          </ListItem>
-                        </List>
-                      ))}
-                    </Box>
+                      : <Box textAlign="center" padding={2} minHeight={100}>
+                        <Typography>No {routes.productInventory.title} Found</Typography>
+                      </Box>}
                     {(permissions?.product?.isUpdate && permissions?.serializedAsset?.isCreate && productData?.serializedProduct === false) &&
                       <Box p={2} borderTop={1} borderColor="grey.300">
                         <Button
@@ -656,7 +660,7 @@ const ProductDetailsPage = () => {
                           </Box>
                         ))
                       ) : (
-                        <Box textAlign="center" padding={2} minHeight={150}>
+                        <Box textAlign="center" padding={2} minHeight={100}>
                           <Typography>No {routes.serializedAsset.title} Found</Typography>
                         </Box>
                       )}

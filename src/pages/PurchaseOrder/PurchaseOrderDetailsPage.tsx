@@ -260,7 +260,7 @@ const PurchaseOrderDetailsPage = () => {
                     )}
                   {permissions?.purchaseOrder?.isUpdate &&
                     (isShowIssue && [PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status)
-                      || [PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(purchaseOrderData?.status))
+                      || [PURCHASE_ORDER_STATUS.received, PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(purchaseOrderData?.status))
                     && (
                       <>
                         <Button
