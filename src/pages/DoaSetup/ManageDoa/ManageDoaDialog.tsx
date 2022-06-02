@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Box, Button, TextField, Grid, Container, DialogContent, IconButton, ButtonGroup, makeStyles, InputAdornment, Chip, Tooltip, FormControlLabel, Switch } from '@material-ui/core';
-import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Box, Button, TextField, Grid, Container, DialogContent, IconButton, ButtonGroup, makeStyles, InputAdornment, Chip, Tooltip, FormControlLabel, Switch, Tab, Tabs, Dialog } from '@material-ui/core';
+import { Autocomplete, TabPanel, ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { Formik, Form, Field, FieldArray, FormikProps } from 'formik';
 import { Add, Delete, SyncDisabled } from '@material-ui/icons';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -10,6 +10,17 @@ import { getUniqueCurrencies, removeEmptyKeys } from '../../../constants/helpers
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import React from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+
+const DoaApproveType = [
+  {
+    key: 'User',
+    value: 0
+  },
+  {
+    key: 'Role',
+    value: 1
+  }
+];
 
 const DOAType = [
   {
@@ -54,6 +65,14 @@ const useStyles = makeStyles((theme) => ({
     padding: '4px !important'
   }
 }));
+
+function a11yProps(index: any) {
+  return {
+    id: `main-tab-${index}`,
+    'aria-controls': `main-tabpanel-${index}`
+  };
+}
+
 const DoaDialog = ({
   selectedEntity,
   onSuccess,
@@ -65,12 +84,17 @@ const DoaDialog = ({
   open,
   onClose,
   from = 'EntityDetailPage',
-  isRenderedFromUserSetUp = false
+  isRenderedFromUserSetUp = false,
+  doaApproveType = 'User'
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
+  const [roleList, setRoleList] = useState<any[]>([]);
+  const [tabValue, setTabValue] = useState(doaApproveType ? DoaApproveType.find(d => d.key === doaApproveType)?.value : 0);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
   const [check, setCheck] = useState(false);
   const [doaLowerLimit, setDoaLowerLimit] = useState(doaMinLimit);
   const [currencyData, setCurrencyData] = useState<any[]>([]);
@@ -84,7 +108,7 @@ const DoaDialog = ({
   const tempUserList = from === 'EntityDetailPage' ? userList?.filter((v) => v?.id !== selectedEntity[0]) : userList?.filter((v) => v?.id !== 'self');
   const fetchDoa = useCallback(() => {
     doa?.length > 0
-      ? setUsers(doa.map((d) => ({ ...d, user: d?.user?.map((e) => e?._id)?.toString() })))
+      ? setUsers(doa.map((d) => ({ ...d, user: doaApproveType === 'User' ? d?.user?.map((e) => e?._id)?.toString() : d?.role?.map((e) => e?._id)?.toString() })))
       : setUsers([{ user: tempUserList ? tempUserList[0]?.name : '', amount: 0, disable: false }]);
   }, []);
 
@@ -92,34 +116,84 @@ const DoaDialog = ({
     fetchDoa();
   }, [fetchDoa]);
 
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  const fetchRoles = async () => {
+    axiosInstance()
+      .get(`/role`)
+      .then(({ data: { data, count } }) => {
+
+        const rows = data.length
+          ? data.map((role: any) => ({
+            id: role._id,
+            name: role.name,
+          }))
+          : [];
+
+        setRoleList(rows);
+      })
+
+  }
 
   const handleSubmit = async (values) => {
     let doaArray;
-    if (selectedType === 2) {
-      doaArray = values
-        .sort((a, b) => a.amount - b.amount)
-        .filter((item) => item.user !== '' && item.user !== undefined)
-        .map((item) => {
-          return {
-            user: item.user.split(','),
-            amount: item.amount ? Number(item.amount) : 0,
-            disable: item.disable
-          };
-        });
-      let self_index = doaArray.findIndex((x) => x.user === selectedEntity[0] || x.user === 'self');
-      if (self_index > 0) {
-        var element = doaArray[self_index];
-        doaArray.splice(self_index, 1);
-        doaArray.splice(0, 0, element);
+    if (tabValue === 0) {
+      if (selectedType === 2) {
+        doaArray = values
+          .sort((a, b) => a.amount - b.amount)
+          .filter((item) => item.user !== '' && item.user !== undefined)
+          .map((item) => {
+            return {
+              user: item.user.split(','),
+              amount: item.amount ? Number(item.amount) : 0,
+              disable: item.disable
+            };
+          });
+        let self_index = doaArray.findIndex((x) => x.user === selectedEntity[0] || x.user === 'self');
+        if (self_index > 0) {
+          var element = doaArray[self_index];
+          doaArray.splice(self_index, 1);
+          doaArray.splice(0, 0, element);
+        }
+      } else {
+        doaArray = values
+          .filter((item) => item.user !== '' && item.user !== undefined)
+          .map((item) => {
+            return {
+              user: item.user.split(',')
+            };
+          });
       }
-    } else {
-      doaArray = values
-        .filter((item) => item.user !== '' && item.user !== undefined)
-        .map((item) => {
-          return {
-            user: item.user.split(',')
-          };
-        });
+    }
+    else {
+      if (selectedType === 2) {
+        doaArray = values
+          .sort((a, b) => a.amount - b.amount)
+          .filter((item) => item.user !== '' && item.user !== undefined)
+          .map((item) => {
+            return {
+              role: item.user.split(','),
+              amount: item.amount ? Number(item.amount) : 0,
+              disable: item.disable
+            };
+          });
+        let self_index = doaArray.findIndex((x) => x.user === selectedEntity[0] || x.user === 'self');
+        if (self_index > 0) {
+          var element = doaArray[self_index];
+          doaArray.splice(self_index, 1);
+          doaArray.splice(0, 0, element);
+        }
+      } else {
+        doaArray = values
+          .filter((item) => item.user !== '' && item.user !== undefined)
+          .map((item) => {
+            return {
+              role: item.user.split(',')
+            };
+          });
+      }
     }
 
     const userDoa = {
@@ -127,7 +201,8 @@ const DoaDialog = ({
       doaCurrency: selectedType === 2 ? currency : '',
       doa: doaArray,
       doaType: selectedType,
-      doaMinLimit: selectedType === 2 ? doaLowerLimit : 0
+      doaMinLimit: selectedType === 2 ? doaLowerLimit : 0,
+      doaApproveType: DoaApproveType.find(d => d.value === tabValue)?.key
     };
     setLoading(true);
     axiosInstance()
@@ -152,11 +227,11 @@ const DoaDialog = ({
       setSelectedType(DOAType.find((d) => d.key === newFilter).value);
       if (newFilter === 'Sequence') {
         doa.length > 0
-          ? setUsers(doa.map((d) => ({ ...d, user: d.user.map((e) => e._id).toString() })))
+          ? setUsers(doa.map((d) => ({ ...d, user: doaApproveType === 'User' ? d?.user.map((e) => e?._id).toString() : d?.role.map((e) => e?._id).toString() })))
           : setUsers([{ user: tempUserList ? tempUserList[0]?.id : '', amount: 0, disable: false }]);
       } else {
         doa.length > 0
-          ? setUsers(doa.map((d) => ({ ...d, user: d.user.map((e) => e._id).toString() })))
+          ? setUsers(doa.map((d) => ({ ...d, user: doaApproveType === 'User' ? d?.user.map((e) => e?._id).toString() : d?.role.map((e) => e?._id).toString() })))
           : setUsers([{ user: tempUserList ? tempUserList[0]?.id : '', amount: 0, disable: false }]);
       }
       formikRef.current?.resetForm();
@@ -189,294 +264,372 @@ const DoaDialog = ({
     return errors;
   };
 
-  return (
-    // <Dialog
-    //     open={open}
-    //     onClose={onClose}
-    //     scroll="body"
-    //     maxWidth="md"
-    //     fullWidth
-    // >
-    <>
-      {!loading && (
-        <>
-          {!isRenderedFromUserSetUp && <CustomDialogHeader title={doa?.length > 0 ? 'Edit DOA' : 'Add DOA'} />}
-          <Grid container className={classes.doaBox}>
-            <Grid item xs={4} md={6} sm={6}>
-              <ToggleButtonGroup size="small" value={filter} exclusive onChange={handleFilter}>
-                {DOAType.map((k, index) => {
-                  return (
-                    <ToggleButton value={k.key} key={index}>
-                      {k.key}
-                    </ToggleButton>
-                  );
-                })}
-              </ToggleButtonGroup>
-            </Grid>
-            <Grid item xs={8} md={6} sm={6} className="d-flex justify-content-end">
-              {selectedType === 2 && (
-                <>
-                  <TextField
-                    fullWidth
-                    InputProps={{
-                      startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                    }}
-                    variant="outlined"
-                    type="text"
-                    size="small"
-                    name="amount"
-                    placeholder="Enter minimum DOA amount"
-                    label={isMobile && !isTablet ? "DOA amount" : "Enter minimum DOA amount"}
-                    value={doaLowerLimit}
-                    onChange={(e) => {
-                      setDoaLowerLimit(Number(e.target.value.replace(/[^0-9]/g, '')));
-                    }}
-                    required
-                    error={formikRef?.current?.values ? validate(formikRef?.current?.values) : false}
-                    helperText={formikRef?.current?.values ? (validate(formikRef?.current?.values) ? 'should have minimum amount' : '') : ''}
-                  />
-                  <Autocomplete
-                    className={classes.currencyStyle}
-                    fullWidth
-                    size="small"
-                    value={
-                      currencyData.filter((data) => data?.currencyCode === currency).length
-                        ? currencyData.filter((data) => data?.currencyCode === currency)[0]
-                        : ''
-                    }
-                    options={currencyData}
-                    getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
-                    getOptionSelected={(option: any, val) => option?.currencyCode === val}
-                    onChange={(e, val) => {
-                      setCurrency(val?.currencyCode ? val?.currencyCode : '');
-                      setCurrencySymbol(val?.symbolNative);
-                    }}
-                    renderInput={(params) => <TextField {...params} variant="outlined" name={'currency'} label={'Currency'} />}
-                    renderOption={(option) => {
-                      const { currencyCode, currencyName, symbolNative } = option;
-                      return `${currencyCode} - ${currencyName} - (${symbolNative})`;
-                    }}
-                  />
-                </>
-              )}
-            </Grid>
-          </Grid>
-          <div className={classes.doaUsersStyle}>
-            <Formik initialValues={{ users: users }} enableReinitialize={true} innerRef={formikRef} onSubmit={() => { }}>
-              {({ values }) => (
-                <>
-                  <DialogContent className={classes.contentBox}>
-                    <Form>
-                      <Container className="p-0">
-                        <Grid container direction="row" justify="space-evenly" alignItems="center">
-                          <Grid item md={12}>
-                            {values.users && values.users.length > 0 && (
-                              <Box className={classes.doaHeader}>
-                                <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
-                                  <Grid item md={1}>
-                                    {' '}
-                                    #{' '}
-                                  </Grid>
-                                  <Grid item md={5}>
-                                    {' '}
-                                    Users{' '}
-                                  </Grid>
-                                  {selectedType === 2 && (
-                                    <Grid item md={4}>
-                                      {' '}
-                                      Amount{' '}
-                                    </Grid>
-                                  )}
-                                  <Grid item md={2}></Grid>
-                                </Grid>
-                              </Box>
-                            )}
-                            <Box className="p-1">
-                              <FieldArray
-                                name="users"
-                                render={(arrayHelpers) => (
-                                  <div>
-                                    {values.users && values.users.length > 0 ? (
-                                      values.users.map((userVal, index) => (
-                                        <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center" key={index}>
-                                          <Grid item xs={1} md={1}>
-                                            {index + 1}
-                                          </Grid>
-                                          <Grid item xs={11} sm={5} md={5}>
-                                            <Autocomplete
-                                              id="combo-box-demo"
-                                              size="small"
-                                              style={{ minWidth: 200 }}
-                                              // options={userList}
-                                              options={
-                                                selectedType === 2
-                                                  ? userList?.filter(
-                                                    (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                  )
-                                                  : tempUserList?.filter(
-                                                    (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                  )
-                                              }
-                                              getOptionLabel={(option: any) => (option?.name ? option?.name : '')}
-                                              onChange={(event, newValue) => {
-                                                arrayHelpers.replace(index, {
-                                                  ...values.users[index],
-                                                  ['user']: newValue?.map((d) => d.id).toString()
-                                                });
-                                              }}
-                                              multiple
-                                              value={userList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))}
-                                              renderOption={(option) => <React.Fragment>{option?.name}</React.Fragment>}
-                                              renderInput={(params) => (
-                                                <TextField
-                                                  {...params}
-                                                  variant="outlined"
-                                                  name="userField"
-                                                  error={userVal?.user?.length <= 0}
-                                                  helperText={userVal?.user?.length <= 0 ? ' User is Required' : ''}
-                                                  required
-                                                />
-                                              )}
-                                            />
-                                          </Grid>
-                                          {selectedType === 2 && (
-                                            <Grid item xs={6} sm={3} md={3}>
-                                              <Field
-                                                fullWidth
-                                                InputProps={{
-                                                  startAdornment: (
-                                                    <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                                                  )
-                                                }}
-                                                startAdornment={
-                                                  currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''
-                                                }
-                                                variant="outlined"
-                                                type="text"
-                                                size="small"
-                                                component={TextField}
-                                                name="amount"
-                                                placeholder="Enter Amount"
-                                                label="Enter Amount"
-                                                value={userVal.amount}
-                                                onChange={(e) => {
-                                                  arrayHelpers.replace(index, {
-                                                    ...values.users[index],
-                                                    ['amount']: e.target.value.replace(/[^0-9]/g, '')
-                                                  });
-                                                }}
-                                                // error={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined}
-                                                // helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
-                                                required
-                                              />
-                                              {validate(values) && check && (userVal.id === selectedEntity[0] || userVal.id === 'self') && (
-                                                <span style={{ color: 'red' }}>{`${userVal.name} should have minimum amount`}</span>
-                                              )}
-                                            </Grid>
-                                          )}
-                                          <Grid item xs={6} sm={3} md={3}>
-                                            <ButtonGroup size="medium" aria-label="small outlined button group">
-                                              <IconButton
-                                                size="small"
-                                                aria-label="add"
-                                                disabled={values.users.length === userList.length}
-                                                onClick={() => {
-                                                  arrayHelpers.insert(index + 1, { user: '', amount: 0, disable: false });
-                                                }}
-                                              >
-                                                <Add />
-                                              </IconButton>
-                                              <IconButton
-                                                size="small"
-                                                aria-label="delete"
-                                                style={{ color: '#f44336' }}
-                                                onClick={() => arrayHelpers.remove(index)}
-                                              >
-                                                <Delete />
-                                              </IconButton>
-                                              <Tooltip
-                                                title={userVal.disable ? "User Disabled" : "User Enabled"}
-                                              >
-                                                <FormControlLabel
-                                                  key={1}
-                                                  control={
-                                                    <Switch
-                                                      color={userVal.disable ? 'primary' : 'secondary'}
-                                                      checked={userVal.disable}
-                                                      name="disable"
-                                                      onChange={(e) => {
-                                                        arrayHelpers.replace(index, {
-                                                          ...values.users[index],
-                                                          ['disable']: !userVal.disable
-                                                        });
-                                                      }}
-                                                    />
-                                                  }
-                                                  label=""
-                                                />
-                                              </Tooltip>
-                                            </ButtonGroup>
-                                          </Grid>
-                                        </Grid>
-                                      ))
-                                    ) : (
-                                      <Grid item md={12} className="d-flex  align-items-center justify-content-center">
-                                        <Button
-                                          variant="contained"
-                                          color="primary"
-                                          size="large"
-                                          onClick={() => {
-                                            arrayHelpers.push({ user: '', amount: 0, disable: false });
-                                          }}
-                                        >
-                                          Add Users
-                                        </Button>
-                                      </Grid>
-                                    )}
-                                  </div>
-                                )}
-                              />
-                            </Box>
-                          </Grid>
-                        </Grid>
-                      </Container>
-                    </Form>
-                  </DialogContent>
 
-                  <CustomDialogFooter>
-                    {!isRenderedFromUserSetUp && (
-                      <Button size="small" onClick={onClose} variant="contained">
-                        Cancel
-                      </Button>
-                    )}
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      size="small"
-                      disabled={
-                        currency === '' && selectedType === 2
-                        // ||values.users.filter(item => item.name === "" || item.name === undefined || item.id === "" || item.id === undefined).length > 0
-                      }
-                      onClick={() => {
-                        if (values.users.length === 0) {
-                          handleSubmit(values.users);
-                        } else {
-                          validate(values) ? setCheck(true) : handleSubmit(values.users);
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+    formikRef.current?.resetForm();
+  };
+
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      scroll="body"
+      maxWidth="md"
+      fullWidth
+      fullScreen={fullScreen || (isMobile || isTablet)}
+    >
+      <>
+        {!loading && (
+          <>
+            {!isRenderedFromUserSetUp && <CustomDialogHeader
+              title={doa?.length > 0 ? 'Edit DOA' : 'Add DOA'}
+              onClose={onClose}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen(prevState => !prevState)
+              }}
+              showManimizeMaximize={true}
+            />}
+
+            <>
+              <Box p={1}>
+                <Tabs
+                  className="quote-tab"
+                  value={tabValue}
+                  onChange={handleMainTabChange}
+                  textColor="primary"
+                  TabIndicatorProps={{
+                    style: {
+                      display: 'none'
+                    }
+                  }}
+                >
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 1 ? 'white' : '',
+                      color: tabValue === 1 ? '#163340' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        User
+                      </div>
+                    }
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 2 ? 'white' : '',
+                      color: tabValue === 2 ? 'blue' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        Role
+                      </div>
+                    }
+                    {...a11yProps(1)}
+                  />
+                  <div className={'uio'}> </div>
+                </Tabs>
+              </Box>
+              {/* <TabPanel value={tabValue} index={1}> */}
+              <Grid container className={classes.doaBox}>
+                <Grid item xs={4} md={6} sm={6}>
+                  <ToggleButtonGroup size="small" value={filter} exclusive onChange={handleFilter}>
+                    {DOAType.map((k, index) => {
+                      return (
+                        <ToggleButton value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                </Grid>
+                <Grid item xs={8} md={6} sm={6} className="d-flex justify-content-end">
+                  {selectedType === 2 && (
+                    <>
+                      <TextField
+                        fullWidth
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                        }}
+                        variant="outlined"
+                        type="text"
+                        size="small"
+                        name="amount"
+                        placeholder="Enter minimum DOA amount"
+                        label={isMobile && !isTablet ? "DOA amount" : "Enter minimum DOA amount"}
+                        value={doaLowerLimit}
+                        onChange={(e) => {
+                          setDoaLowerLimit(Number(e.target.value.replace(/[^0-9]/g, '')));
+                        }}
+                        required
+                        error={formikRef?.current?.values ? validate(formikRef?.current?.values) : false}
+                        helperText={formikRef?.current?.values ? (validate(formikRef?.current?.values) ? 'should have minimum amount' : '') : ''}
+                      />
+                      <Autocomplete
+                        className={classes.currencyStyle}
+                        fullWidth
+                        size="small"
+                        value={
+                          currencyData.filter((data) => data?.currencyCode === currency).length
+                            ? currencyData.filter((data) => data?.currencyCode === currency)[0]
+                            : ''
                         }
-                      }}
-                    >
-                      {isRenderedFromUserSetUp ? 'Save & Continue' : 'Save'}
-                    </Button>
-                  </CustomDialogFooter>
-                </>
-              )}
-            </Formik>
-          </div>
-        </>
-      )}
-      {/* </Dialog> */}
-    </>
+                        options={currencyData}
+                        getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
+                        getOptionSelected={(option: any, val) => option?.currencyCode === val}
+                        onChange={(e, val) => {
+                          setCurrency(val?.currencyCode ? val?.currencyCode : '');
+                          setCurrencySymbol(val?.symbolNative);
+                        }}
+                        renderInput={(params) => <TextField {...params} variant="outlined" name={'currency'} label={'Currency'} />}
+                        renderOption={(option) => {
+                          const { currencyCode, currencyName, symbolNative } = option;
+                          return `${currencyCode} - ${currencyName} - (${symbolNative})`;
+                        }}
+                      />
+                    </>
+                  )}
+                </Grid>
+              </Grid>
+              <div className={classes.doaUsersStyle}>
+                <Formik initialValues={{ users: users }} enableReinitialize={true} innerRef={formikRef} onSubmit={() => { }}>
+                  {({ values }) => (
+                    <>
+                      <DialogContent className={classes.contentBox}>
+                        <Form>
+                          <Container className="p-0">
+                            <Grid container direction="row" justify="space-evenly" alignItems="center">
+                              <Grid item md={12}>
+                                {values.users && values.users.length > 0 && (
+                                  <Box className={classes.doaHeader}>
+                                    <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
+                                      <Grid item md={1}>
+                                        {' '}
+                                        #{' '}
+                                      </Grid>
+                                      <Grid item md={5}>
+                                        {' '}
+                                        {tabValue == 0 ? "User" : "Role"}{' '}
+                                      </Grid>
+                                      {selectedType === 2 && (
+                                        <Grid item md={4}>
+                                          {' '}
+                                          Amount{' '}
+                                        </Grid>
+                                      )}
+                                      <Grid item md={2}></Grid>
+                                    </Grid>
+                                  </Box>
+                                )}
+                                <Box className="p-1">
+                                  <FieldArray
+                                    name="users"
+                                    render={(arrayHelpers) => (
+                                      <div>
+                                        {values.users && values.users.length > 0 ? (
+                                          values.users.map((userVal, index) => (
+                                            <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center" key={index}>
+                                              <Grid item xs={1} md={1}>
+                                                {index + 1}
+                                              </Grid>
+                                              <Grid item xs={11} sm={5} md={5}>
+                                                <Autocomplete
+                                                  id="combo-box-demo"
+                                                  size="small"
+                                                  style={{ minWidth: 200 }}
+                                                  // options={userList}
+                                                  options={
+                                                    tabValue == 0 ?
+                                                      selectedType === 2
+                                                        ? userList?.filter(
+                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                        )
+                                                        : tempUserList?.filter(
+                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                        )
+                                                      : selectedType === 2
+                                                        ? roleList?.filter(
+                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                        )
+                                                        : roleList?.filter(
+                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                        )
+                                                  }
+                                                  getOptionLabel={(option: any) => (option?.name ? option?.name : '')}
+                                                  onChange={(event, newValue) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.users[index],
+                                                      ['user']: newValue?.map((d) => d.id).toString()
+                                                    });
+                                                  }}
+                                                  multiple
+                                                  value={tabValue == 0 ?
+                                                    userList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
+                                                    : roleList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))}
+                                                  renderOption={(option) => <React.Fragment>{option?.name}</React.Fragment>}
+                                                  renderInput={(params) => (
+                                                    <TextField
+                                                      {...params}
+                                                      variant="outlined"
+                                                      name="userField"
+                                                      error={userVal?.user?.length <= 0}
+                                                      helperText={userVal?.user?.length <= 0 ? `${tabValue == 0 ? "User" : "Role"}  is Required` : ''}
+                                                      required
+                                                    />
+                                                  )}
+                                                />
+                                              </Grid>
+                                              {selectedType === 2 && (
+                                                <Grid item xs={6} sm={3} md={3}>
+                                                  <Field
+                                                    fullWidth
+                                                    InputProps={{
+                                                      startAdornment: (
+                                                        <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                                                      )
+                                                    }}
+                                                    startAdornment={
+                                                      currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''
+                                                    }
+                                                    variant="outlined"
+                                                    type="text"
+                                                    size="small"
+                                                    component={TextField}
+                                                    name="amount"
+                                                    placeholder="Enter Amount"
+                                                    label="Enter Amount"
+                                                    value={userVal.amount}
+                                                    onChange={(e) => {
+                                                      arrayHelpers.replace(index, {
+                                                        ...values.users[index],
+                                                        ['amount']: e.target.value.replace(/[^0-9]/g, '')
+                                                      });
+                                                    }}
+                                                    // error={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined}
+                                                    // helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
+                                                    required
+                                                  />
+                                                  {validate(values) && check && (userVal.id === selectedEntity[0] || userVal.id === 'self') && (
+                                                    <span style={{ color: 'red' }}>{`${userVal.name} should have minimum amount`}</span>
+                                                  )}
+                                                </Grid>
+                                              )}
+                                              <Grid item xs={6} sm={3} md={3}>
+                                                <ButtonGroup size="medium" aria-label="small outlined button group">
+                                                  <IconButton
+                                                    size="small"
+                                                    aria-label="add"
+                                                    disabled={values.users.length === userList.length}
+                                                    onClick={() => {
+                                                      arrayHelpers.insert(index + 1, { user: '', amount: 0, disable: false });
+                                                    }}
+                                                  >
+                                                    <Add />
+                                                  </IconButton>
+                                                  <IconButton
+                                                    size="small"
+                                                    aria-label="delete"
+                                                    style={{ color: '#f44336' }}
+                                                    onClick={() => arrayHelpers.remove(index)}
+                                                  >
+                                                    <Delete />
+                                                  </IconButton>
+                                                  <Tooltip
+                                                    title={userVal.disable ? "User Disabled" : "User Enabled"}
+                                                  >
+                                                    <FormControlLabel
+                                                      key={1}
+                                                      control={
+                                                        <Switch
+                                                          color={userVal.disable ? 'primary' : 'secondary'}
+                                                          checked={userVal.disable}
+                                                          name="disable"
+                                                          onChange={(e) => {
+                                                            arrayHelpers.replace(index, {
+                                                              ...values.users[index],
+                                                              ['disable']: !userVal.disable
+                                                            });
+                                                          }}
+                                                        />
+                                                      }
+                                                      label=""
+                                                    />
+                                                  </Tooltip>
+                                                </ButtonGroup>
+                                              </Grid>
+                                            </Grid>
+                                          ))
+                                        ) : (
+                                          <Grid item md={12} className="d-flex  align-items-center justify-content-center">
+                                            <Button
+                                              variant="contained"
+                                              color="primary"
+                                              size="large"
+                                              onClick={() => {
+                                                arrayHelpers.push({ user: '', amount: 0, disable: false });
+                                              }}
+                                            >
+                                              Add Users
+                                            </Button>
+                                          </Grid>
+                                        )}
+                                      </div>
+                                    )}
+                                  />
+                                </Box>
+                              </Grid>
+                            </Grid>
+                          </Container>
+                        </Form>
+                      </DialogContent>
+
+                      <CustomDialogFooter>
+                        {!isRenderedFromUserSetUp && (
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            onClick={onClose}>
+                            Cancel
+                          </Button>
+                        )}
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          type="submit"
+                          size="small"
+                          disabled={
+                            currency === '' && selectedType === 2
+                            // ||values.users.filter(item => item.name === "" || item.name === undefined || item.id === "" || item.id === undefined).length > 0
+                          }
+                          onClick={() => {
+                            if (values.users.length === 0) {
+                              handleSubmit(values.users);
+                            } else {
+                              validate(values) ? setCheck(true) : handleSubmit(values.users);
+                            }
+                          }}
+                        >
+                          {isRenderedFromUserSetUp ? 'Save & Continue' : 'Save'}
+                        </Button>
+                      </CustomDialogFooter>
+                    </>
+                  )}
+                </Formik>
+              </div>
+              {/* </TabPanel> */}
+            </>
+
+          </>
+        )}
+        {/* </Dialog> */}
+      </>
+    </Dialog>
   );
 };
 

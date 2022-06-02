@@ -61,6 +61,7 @@ const EntityDetailsPage = () => {
   const [doa, setDoa] = useState<any[]>([]);
   const [doaCurrency, setDoaCurrency] = useState("");
   const [doaType, setDoaType] = useState(null);
+  const [doaApproveType, setDoaApproveType] = useState(null);
   const [doaMinLimit, setDoaMinLimit] = useState(null);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
@@ -281,10 +282,11 @@ const EntityDetailsPage = () => {
         //   }
         // });
 
-        setDoa(data.doa);
-        setDoaCurrency(data.doaCurrency)
-        setDoaType(data.doaType)
-        setDoaMinLimit(data.doaMinLimit)
+        setDoa(data?.doa);
+        setDoaCurrency(data?.doaCurrency)
+        setDoaType(data?.doaType)
+        setDoaMinLimit(data?.doaMinLimit)
+        setDoaApproveType(data?.doaApproveType ? data?.doaApproveType : "User")
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -464,6 +466,7 @@ const EntityDetailsPage = () => {
                             heading={" "}
                             steps={doa}
                             doaCurrency={doaCurrency}
+                            doaApproveType={doaApproveType}
                           />
                         ) : (
                           <Box textAlign="center" marginTop={2}>
@@ -591,15 +594,7 @@ const EntityDetailsPage = () => {
           : null
       }
       {doaDialogOpen && (
-        <Dialog
-          open={doaDialogOpen}
-          onClose={() => {
-            setDoaDialogOpen(false);
-          }}
-          scroll="body"
-          maxWidth="md"
-          fullWidth
-        >
+
           <DoaDialog
             userList={userList}
             doa={doa}
@@ -615,8 +610,9 @@ const EntityDetailsPage = () => {
             }}
             doaType={doaType}
             doaMinLimit={doaMinLimit}
+            doaApproveType={doaApproveType}
           />
-        </Dialog>
+
 
       )}
     </>
