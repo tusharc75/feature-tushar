@@ -92,7 +92,6 @@ const DoaDialog = ({
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [roleList, setRoleList] = useState<any[]>([]);
-  const [tabValue, setTabValue] = useState(doaApproveType ? DoaApproveType.find(d => d.key === doaApproveType)?.value : 0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [check, setCheck] = useState(false);
@@ -139,7 +138,7 @@ const DoaDialog = ({
 
   const handleSubmit = async (values) => {
     let doaArray;
-    if (tabValue === 0) {
+    if (doaApprove === 0) {
       if (selectedType === 2) {
         doaArray = values
           .sort((a, b) => a.amount - b.amount)
@@ -202,7 +201,7 @@ const DoaDialog = ({
       doa: doaArray,
       doaType: selectedType,
       doaMinLimit: selectedType === 2 ? doaLowerLimit : 0,
-      doaApproveType: DoaApproveType.find(d => d.value === tabValue)?.key
+      doaApproveType: DoaApproveType.find(d => d.value === doaApprove)?.key
     };
     setLoading(true);
     axiosInstance()
@@ -238,6 +237,16 @@ const DoaDialog = ({
     }
   };
 
+  const [doaApprove, setDoaApprove] = useState(doaApproveType ? DoaApproveType.find(d => d.key === doaApproveType)?.value : 0);
+  const [selectedDoaApprove, setSelectedDoaApprove] = useState(doaApproveType ? doaApproveType : "User");
+  const handleDOAAproveTypeFilter = (event, newFilter) => {
+    if (newFilter !== null) {
+      setSelectedDoaApprove(newFilter);
+      setDoaApprove(DoaApproveType.find((d) => d.key === newFilter).value);
+    }
+    formikRef.current?.resetForm();
+  };
+
   useEffect(() => {
     const sortedArr = getUniqueCurrencies().sort((a, b) =>
       a.name.toUpperCase() < b.name.toUpperCase() ? -1 : a.name.toUpperCase() > b.name.toUpperCase() ? 1 : 0
@@ -265,10 +274,7 @@ const DoaDialog = ({
   };
 
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
-    formikRef.current?.resetForm();
-  };
+
 
 
   return (
@@ -294,108 +300,84 @@ const DoaDialog = ({
             />}
 
             <>
-              <Box p={1}>
-                <Tabs
-                  className="quote-tab"
-                  value={tabValue}
-                  onChange={handleMainTabChange}
-                  textColor="primary"
-                  TabIndicatorProps={{
-                    style: {
-                      display: 'none'
-                    }
-                  }}
-                >
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 1 ? 'white' : '',
-                      color: tabValue === 1 ? '#163340' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        User
-                      </div>
-                    }
-                    {...a11yProps(0)}
-                  />
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 2 ? 'white' : '',
-                      color: tabValue === 2 ? 'blue' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        Role
-                      </div>
-                    }
-                    {...a11yProps(1)}
-                  />
-                  <div className={'uio'}> </div>
-                </Tabs>
+              <Box padding={2} className={classes.contentBox}>
+                <Box padding={1} >
+                  <Grid container spacing={2}  >
+                    <Grid item xs={6} md={3} sm={6}>
+                      <ToggleButtonGroup size="small" value={filter} exclusive onChange={handleFilter}>
+                        {DOAType.map((k, index) => {
+                          return (
+                            <ToggleButton style={{width:80}} value={k.key} key={index}>
+                              {k.key}
+                            </ToggleButton>
+                          );
+                        })}
+                      </ToggleButtonGroup>
+                    </Grid>
+                    <Grid item xs={6} md={3} sm={6}>
+                      <ToggleButtonGroup size="small" value={selectedDoaApprove} exclusive onChange={handleDOAAproveTypeFilter}>
+                        {DoaApproveType.map((k, index) => {
+                          return (
+                            <ToggleButton style={{width:80}} value={k.key} key={index}>
+                              {k.key} 
+                            </ToggleButton>
+                          );
+                        })}
+                      </ToggleButtonGroup>
+                    </Grid>
+                    <Grid item  xs={6} md={3} sm={6} >
+                      {selectedType === 2 && (
+                        <>
+                          <TextField
+                            InputProps={{
+                              startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                            }}
+                            variant="outlined"
+                            type="text"
+                            size="small"
+                            name="amount"
+                            placeholder="Enter minimum DOA amount"
+                            label={isMobile && !isTablet ? "DOA amount" : "Enter minimum DOA amount"}
+                            value={doaLowerLimit}
+                            onChange={(e) => {
+                              setDoaLowerLimit(Number(e.target.value.replace(/[^0-9]/g, '')));
+                            }}
+                            required
+                            error={formikRef?.current?.values ? validate(formikRef?.current?.values) : false}
+                            helperText={formikRef?.current?.values ? (validate(formikRef?.current?.values) ? 'should have minimum amount' : '') : ''}
+                          />
+                        </>
+                      )}
+                    </Grid>
+                    <Grid item xs={6} md={3} sm={6} >
+                      {selectedType === 2 && (
+                        <Autocomplete
+                          className={classes.currencyStyle}
+                          size="small"
+                          value={
+                            currencyData.filter((data) => data?.currencyCode === currency).length
+                              ? currencyData.filter((data) => data?.currencyCode === currency)[0]
+                              : ''
+                          }
+                          style={{ width: 200 }}
+                          options={currencyData}
+                          getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
+                          getOptionSelected={(option: any, val) => option?.currencyCode === val}
+                          onChange={(e, val) => {
+                            setCurrency(val?.currencyCode ? val?.currencyCode : '');
+                            setCurrencySymbol(val?.symbolNative);
+                          }}
+                          renderInput={(params) => <TextField {...params} variant="outlined" name={'currency'} label={'Currency'} />}
+                          renderOption={(option) => {
+                            const { currencyCode, currencyName, symbolNative } = option;
+                            return `${currencyCode} - ${currencyName} - (${symbolNative})`;
+                          }}
+                        />
+                      )}
+                    </Grid>
+                  </Grid>
+                </Box>
               </Box>
-              {/* <TabPanel value={tabValue} index={1}> */}
-              <Grid container className={classes.doaBox}>
-                <Grid item xs={4} md={6} sm={6}>
-                  <ToggleButtonGroup size="small" value={filter} exclusive onChange={handleFilter}>
-                    {DOAType.map((k, index) => {
-                      return (
-                        <ToggleButton value={k.key} key={index}>
-                          {k.key}
-                        </ToggleButton>
-                      );
-                    })}
-                  </ToggleButtonGroup>
-                </Grid>
-                <Grid item xs={8} md={6} sm={6} className="d-flex justify-content-end">
-                  {selectedType === 2 && (
-                    <>
-                      <TextField
-                        fullWidth
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                        }}
-                        variant="outlined"
-                        type="text"
-                        size="small"
-                        name="amount"
-                        placeholder="Enter minimum DOA amount"
-                        label={isMobile && !isTablet ? "DOA amount" : "Enter minimum DOA amount"}
-                        value={doaLowerLimit}
-                        onChange={(e) => {
-                          setDoaLowerLimit(Number(e.target.value.replace(/[^0-9]/g, '')));
-                        }}
-                        required
-                        error={formikRef?.current?.values ? validate(formikRef?.current?.values) : false}
-                        helperText={formikRef?.current?.values ? (validate(formikRef?.current?.values) ? 'should have minimum amount' : '') : ''}
-                      />
-                      <Autocomplete
-                        className={classes.currencyStyle}
-                        fullWidth
-                        size="small"
-                        value={
-                          currencyData.filter((data) => data?.currencyCode === currency).length
-                            ? currencyData.filter((data) => data?.currencyCode === currency)[0]
-                            : ''
-                        }
-                        options={currencyData}
-                        getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
-                        getOptionSelected={(option: any, val) => option?.currencyCode === val}
-                        onChange={(e, val) => {
-                          setCurrency(val?.currencyCode ? val?.currencyCode : '');
-                          setCurrencySymbol(val?.symbolNative);
-                        }}
-                        renderInput={(params) => <TextField {...params} variant="outlined" name={'currency'} label={'Currency'} />}
-                        renderOption={(option) => {
-                          const { currencyCode, currencyName, symbolNative } = option;
-                          return `${currencyCode} - ${currencyName} - (${symbolNative})`;
-                        }}
-                      />
-                    </>
-                  )}
-                </Grid>
-              </Grid>
               <div className={classes.doaUsersStyle}>
                 <Formik initialValues={{ users: users }} enableReinitialize={true} innerRef={formikRef} onSubmit={() => { }}>
                   {({ values }) => (
@@ -414,7 +396,7 @@ const DoaDialog = ({
                                       </Grid>
                                       <Grid item md={5}>
                                         {' '}
-                                        {tabValue == 0 ? "User" : "Role"}{' '}
+                                        {doaApprove == 0 ? "User" : "Role"}{' '}
                                       </Grid>
                                       {selectedType === 2 && (
                                         <Grid item md={4}>
@@ -444,7 +426,7 @@ const DoaDialog = ({
                                                   style={{ minWidth: 200 }}
                                                   // options={userList}
                                                   options={
-                                                    tabValue == 0 ?
+                                                    doaApprove == 0 ?
                                                       selectedType === 2
                                                         ? userList?.filter(
                                                           (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
@@ -468,7 +450,7 @@ const DoaDialog = ({
                                                     });
                                                   }}
                                                   multiple
-                                                  value={tabValue == 0 ?
+                                                  value={doaApprove == 0 ?
                                                     userList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
                                                     : roleList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))}
                                                   renderOption={(option) => <React.Fragment>{option?.name}</React.Fragment>}
@@ -478,7 +460,7 @@ const DoaDialog = ({
                                                       variant="outlined"
                                                       name="userField"
                                                       error={userVal?.user?.length <= 0}
-                                                      helperText={userVal?.user?.length <= 0 ? `${tabValue == 0 ? "User" : "Role"}  is Required` : ''}
+                                                      helperText={userVal?.user?.length <= 0 ? `${doaApprove == 0 ? "User" : "Role"}  is Required` : ''}
                                                       required
                                                     />
                                                   )}
