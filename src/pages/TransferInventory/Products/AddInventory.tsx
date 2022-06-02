@@ -69,7 +69,8 @@ const AddInventory = (props: Props) => {
       disabled: false,
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
-      editable: true
+      editable: true,
+      filter: false
     });
     column.push({
       field: 'inventory',
@@ -78,7 +79,8 @@ const AddInventory = (props: Props) => {
       disabled: false,
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
-      editable: false
+      editable: false,
+      filter: false
     });
     setColumns([...column])
   }

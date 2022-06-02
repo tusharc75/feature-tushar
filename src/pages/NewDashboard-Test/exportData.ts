@@ -69,7 +69,7 @@ export default async (type: string, currency: string, tableData: any[], chart: C
     }
   }
 
-  if (graphType === 'Table' ||graphType === "Chart" && isTableView) {
+  if (graphType === 'Table' || graphType === "Chart" && isTableView) {
     let newData = [...tableData];
     newData = newData.map((d) => {
       for (const key in d) {
@@ -97,12 +97,13 @@ export default async (type: string, currency: string, tableData: any[], chart: C
         let row = [];
         if (tableData && tableData.length) {
           row = tableData.map((data) =>
-            Object.keys(data).map((key) =>
+            col.map((key) =>
               isNaN(Number(data[key]))
                 ? data[key] : key.includes("MT") || key.includes("GM") ? Number(data[key]) ? data[key].toFixed(2) : '00'
                   : formatAmountWithCurrency(currency, Number(data[key]) ? data[key].toFixed(2) : '00').fullFormatAmount
             )
           );
+          console.log(col, row)
           //@ts-ignore
           doc.autoTable(col, row, { startY: 20 });
         } else {

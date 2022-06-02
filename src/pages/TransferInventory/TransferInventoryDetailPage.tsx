@@ -145,10 +145,10 @@ const TransferInventoryDetailPage = () => {
               }
             })
             var steps = transferInventorySteps;
-            if (!isSerializedAssetsStep) {
-              steps = steps?.filter((e) => e !== "Serialized Assets")
-            }
-
+            // if (!isSerializedAssetsStep) {
+            //   steps = steps?.filter((e) => e !== "Serialized Assets")
+            // }
+            steps = steps?.filter((e) => e !== "Serialized Assets")
             setTransferInvSteps(steps)
             getRessourceFields();
             setHeadingLabel(transferData.transferNumber);
@@ -212,7 +212,7 @@ const TransferInventoryDetailPage = () => {
           message: `Status updated ${status} Successfully`
         });
         if (status === TRANSFER_INVENTORY_STATUS.delivered) {
-          updateProcessStatus(2);
+          updateProcessStatus(1);
         }
         fetchTransferInventoryData();
       })

@@ -190,7 +190,7 @@ function QontoStepIconForReject(status) {
     </div>
   );
 }
-const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null }) => {
+const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null, doaApproveType = "User" }) => {
   const classes = useStyles();
 
   return (
@@ -250,27 +250,51 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
                 : (steps.filter((item) => !item?.disable).map((label) => (
                   <Step key={label}>
                     <StepLabel StepIconComponent={QontoStepIcon}>
-                      <>
-                        {label?.user?.slice(0, 3).filter(user => user?.firstName && user?.lastName).map((obj) => (
-                          <div style={{ color: "#09445A" }}>
-                            <Link
-                              title={obj?.firstName}
-                              className="link"
-                              to={`${routes.userDetail.path}/${obj?._id}`}
-                            >
-                              {`${obj?.firstName} ${obj?.lastName}`}
-                            </Link>
-                          </div>
-                        ))}
-                        {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
-                        {doaCurrency && <div style={{ color: "#09445A" }}>{
-                          getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
-                            ? getUniqueCurrencies().filter(
-                              (data) => data?.currencyCode === doaCurrency
-                            )[0].symbolNative
-                            : null}{label?.amount}
-                        </div>}
-                      </>
+                      {doaApproveType === "User" ?
+                        <>
+                          {label?.user?.slice(0, 3).filter(user => (user?.firstName && user?.lastName)).map((obj) => (
+                            <div style={{ color: "#09445A" }}>
+                              <Link
+                                title={obj?.firstName}
+                                className="link"
+                                to={`${routes.userDetail.path}/${obj?._id}`}
+                              >
+                                {`${obj?.firstName} ${obj?.lastName}`}
+                              </Link>
+                            </div>
+                          ))}
+                          {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
+                          {doaCurrency && <div style={{ color: "#09445A" }}>{
+                            getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
+                              ? getUniqueCurrencies().filter(
+                                (data) => data?.currencyCode === doaCurrency
+                              )[0].symbolNative
+                              : null}{label?.amount}
+                          </div>}
+                        </>
+                        : <>
+                          {label?.role?.slice(0, 3).filter(role => role?.name).map((obj) => (
+                            <div style={{ color: "#09445A" }}>
+                              <Link
+                                title={obj?.name}
+                                className="link"
+                                to={`${routes.roleDetail.path}/${obj?._id}`}
+                              >
+                                {`${obj?.name}`}
+                              </Link>
+                            </div>
+                          ))}
+                          {label?.role?.length > 4 && `+ ${label?.role.length - 4} more`}
+                          {doaCurrency && <div style={{ color: "#09445A" }}>{
+                            getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
+                              ? getUniqueCurrencies().filter(
+                                (data) => data?.currencyCode === doaCurrency
+                              )[0].symbolNative
+                              : null}{label?.amount}
+                          </div>}
+                        </>
+                      }
+
                     </StepLabel>
                   </Step>
                 )))}
