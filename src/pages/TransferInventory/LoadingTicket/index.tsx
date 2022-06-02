@@ -26,6 +26,7 @@ import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwip
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map, groupBy } from 'lodash';
 import { AiFillFilePdf } from 'react-icons/ai';
+import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
 
@@ -40,20 +41,38 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
   const [downloadingFile, setDownlodingFile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [columns, setColumns] = useState(null)
+
+  useEffect(() => {
+    fetchFields();
+  }, []);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  const columns = [
-    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'assetNumber', primaryField: true, headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'inventoryRenderer' },
-    { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
-    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
-  ];
+  const fetchFields = async () => {
+    const column = [];
+    const productResult = await axiosInstance().get('/field?resource=Product&view=true')
+    const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+    productFields?.forEach((e) => {
+      if (e?.fieldData?.fieldName === "productName") {
+        column.push({ field: "productName", primaryField: true, headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "productNameRenderer" })
+      }
+      if (e?.fieldData?.fieldName === "productNumber") {
+        column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      }
+      if (e?.fieldData?.fieldName === "serializedProduct") {
+        column.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+      }
+    })
+    const extracolumns = [
+      { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+      { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
+      { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
+    ];
+    setColumns([...column, ...extracolumns])
+  }
 
   const TicketRenderer = (params) =>
     params?.value ? (
@@ -123,19 +142,19 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         obj['isChecked'] = false;
         rows.push(obj);
       });
-      products
-        ?.filter((p) => p.productDetail.serializedProduct === false)
-        ?.forEach((product) => {
-          let obj = { ...product };
-          obj['assetNumber'] = product.productDetail.productName;
-          obj['_id'] = product.product;
-          obj['qty'] = product.qty;
-          obj['type'] = 'Product';
-          obj['productName'] = product?.productDetail?.productName;
-          obj['productId'] = product?.product;
-          obj['isChecked'] = false;
-          rows.push(obj);
-        });
+
+      products?.forEach((product) => {
+        let obj = { ...product };
+        obj['productId'] = product?.product;
+        obj['_id'] = product.product;
+        obj['productName'] = product.productDetail.productName;
+        obj['productNumber'] = product.productDetail.productNumber;
+        obj['serializedProduct'] = product.productDetail.serializedProduct;
+        obj['qty'] = product.qty;
+        obj['type'] = 'Product';
+        obj['isChecked'] = false;
+        rows.push(obj);
+      });
 
       deliveryTicketList?.map((obj) => {
         rows.map((d, index) => {
@@ -175,6 +194,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     productNameRenderer: ProductNameRenderer,
     inventoryRenderer: InventoryRenderer,
     warehouseRenderer: WarehouseRenderer,
+    checkboxRenderer: CheckboxRenderer,
     commonRenderer: CommonRenderer
   };
 
