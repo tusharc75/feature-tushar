@@ -83,15 +83,16 @@ const ProductDetailsPage = () => {
   const [tabValue, setTabValue] = useState(0);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [openProductInventoryDialog, setOpenProductInventoryDialog] = useState(false);
-  const [productColoums, setProductColoums] = useState([]);
   const [columns, setColumns] = useState([]);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const [currentTab, setCurrentTab] = useState(null);
   const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
   const ignoreField = ['priceTemplate', 'brand'];
 
   const [showConfirmBoxConvert, setShowConfirmBoxConvert] = useState(false);
+
+
+  const [productInventoryData, setProductInventoryData] = useState([]);
 
 
   useEffect(() => {
@@ -230,40 +231,6 @@ const ProductDetailsPage = () => {
 
   };
 
-  // const getFrequentlyBoughtProduct = () => {
-  //   axiosInstance()
-  //     .get(`${product.api}/frequent/` + id)
-  //     .then(({ data }) => {
-  //       setFrequentlyBoughtProduct(data.data);
-  //     })
-  //     .catch((err) => {
-  //       toastConfig.setToastConfig(err);
-  //     });
-  // };
-
-  const unassignProduct = async (obj) => {
-    if (obj) {
-      const dataObj = {
-        _id: id,
-        frequentlyBoughtTogether: frequentlyBoughtProduct.filter((r) => r._id !== obj._id).map((obj) => obj._id)
-      };
-
-      await axiosInstance()
-        .put(`/product/frequent`, dataObj)
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            message: data.message,
-            type: 'success',
-            open: true
-          });
-          //getFrequentlyBoughtProduct();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
-
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -283,23 +250,21 @@ const ProductDetailsPage = () => {
 
   const getWarehouses = () => {
     setLoadingWarehouse(true);
+    axiosInstance()
+      .get(`${productInventory.api}/product/${id}`)
+      .then(async ({ data: { data } }) => {
+        setProductInventoryData(data);
+        setLoadingWarehouse(false);
+      })
+      .catch((err) => {
+        setLoadingWarehouse(false);
+        toastConfig.setToastConfig(err);
+      });
     if (productData?.serializedProduct) {
       axiosInstance()
         .get(`product/${id}/warehouse`)
         .then(async ({ data: { data } }) => {
           data = data?.filter((e) => e.warehouse)
-          setProductWarehouseData(data);
-          setInventoriesData(data);
-          setLoadingWarehouse(false);
-        })
-        .catch((err) => {
-          setLoadingWarehouse(false);
-          toastConfig.setToastConfig(err);
-        });
-    } else {
-      axiosInstance()
-        .get(`${productInventory.api}/product/${id}`)
-        .then(async ({ data: { data } }) => {
           setProductWarehouseData(data);
           setInventoriesData(data);
           setLoadingWarehouse(false);
@@ -507,46 +472,94 @@ const ProductDetailsPage = () => {
               )}
             </Paper>
           </Grid>
-          {(permissions?.serializedAsset && permissions?.serializedAsset?.isRead) ? (
+          {((permissions?.serializedAsset && permissions?.serializedAsset?.isRead)
+            || (permissions?.productInventory && permissions?.productInventory?.isRead)) ? (
             <Grid item xs={12} sm={12} md={4} lg={4}>
-              <Paper style={{ overflow: 'hidden' }}>
-                <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="subtitle2">{routes?.warehouse?.title}{" "}
-                    ({productData?.serializedProduct ? (inventoriesData?.length || 0) :
-                      (inventoriesData?.filter(d => d.inventory)?.length || 0)})</Typography>
-                  {(permissions?.serializedAsset?.isCreate && productData?.serializedProduct && !loadingWarehouse) && (
-                    <IconButton
-                      title="Manage Plant(s)"
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setOpenProductInventoryDialog(true);
-                      }}
-                    >
-                      <ControlPoint />
-                    </IconButton>
-                  )}
+              {permissions?.productInventory?.isRead &&
+                <Box mb={2}>
+                  <Paper style={{ overflow: 'hidden' }}>
+                    <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
+                      <Typography variant="subtitle2">{routes?.productInventory?.title}</Typography>
+                    </Box>
+                    {productInventoryData?.filter(d => d.inventory)?.length ?
+                      <Box width="100%">
+                        <Box mx={2} mt={1} display="flex" justifyContent="space-between">
+                          <Typography variant="subtitle2">{routes.warehouse.title}</Typography>
+                          <Typography variant="subtitle2">Qty</Typography>
+                        </Box>
+                        {productInventoryData?.filter(d => d.inventory).map(({ inventory, warehouse }) => (
+                          <List disablePadding key={warehouse?._id}>
+                            <ListItem dense>
+                              <ListItemText primary={warehouse?.name} />
+                              <ListItemSecondaryAction>
+                                <Typography variant="subtitle2">{inventory}</Typography>
+                              </ListItemSecondaryAction>
+                            </ListItem>
+                          </List>
+                        ))}
+                      </Box>
+                      : <Box textAlign="center" padding={2} minHeight={100}>
+                        <Typography>No {routes.productInventory.title} Found</Typography>
+                      </Box>}
+                    {(permissions?.product?.isUpdate && permissions?.serializedAsset?.isCreate && productData?.serializedProduct === false) &&
+                      <Box p={2} borderTop={1} borderColor="grey.300">
+                        <Button
+                          variant={'outlined'}
+                          color="primary"
+                          onClick={() => { setShowConfirmBoxConvert(true) }}
+                          size="small">
+                          Convert Serialized Product
+                        </Button>
+                        {showConfirmBoxConvert && (
+                          <ConfirmationDialog
+                            open={showConfirmBoxConvert}
+                            message={`Are you sure you want to convert serialized product ?`}
+                            onClose={() => {
+                              setShowConfirmBoxConvert(false);
+                            }}
+                            onOk={handleConvertSerialized}
+                          />
+                        )}
+                      </Box>}
+                  </Paper>
                 </Box>
-                {
-                  <Box style={{ paddingBottom: '8px' }}>
-                    {loading || loadingWarehouse ? (
-                      [1, 2].map((i) => (
-                        <BoxWithBorder
-                          key={i}
-                          style={{
-                            margin: '8px'
+              }
+              {permissions?.serializedAsset?.isRead && productData?.serializedProduct ?
+                <Box mb={2}>
+                  <Paper style={{ overflow: 'hidden' }}>
+                    <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
+                      <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
+                      {(permissions?.serializedAsset?.isCreate) && (
+                        <IconButton
+                          title="Manage Plant(s)"
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            setOpenProductInventoryDialog(true);
                           }}
                         >
-                          <Box padding={1}>
-                            <Skeleton variant="text" width="100px" height="20px" />
-                            <Box marginTop={1} />
-                            <Skeleton variant="text" width="100%" height="15px" />
-                          </Box>
-                        </BoxWithBorder>
-                      ))
-                    ) : inventoriesData?.length ? (
-                      productData?.serializedProduct ? (
-                        inventoriesData.map(({ products, warehouse, plant, count }, i) => (
+                          <ControlPoint fontSize='small' />
+                        </IconButton>
+                      )}
+                    </Box>
+                    {<Box style={{ paddingBottom: '8px' }}>
+                      {loading || loadingWarehouse ? (
+                        [1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{
+                              margin: '8px'
+                            }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton variant="text" width="100px" height="20px" />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
+                            </Box>
+                          </BoxWithBorder>
+                        ))
+                      ) : inventoriesData?.length ? (
+                        inventoriesData?.map(({ products, warehouse, plant, count }, i) => (
                           <Box key={i} p={1}>
                             <Box display="flex" bgcolor="#f7f5f5" borderRadius="3px" borderBottom="1px solid #efe7e7">
                               <Grid>
@@ -647,51 +660,14 @@ const ProductDetailsPage = () => {
                           </Box>
                         ))
                       ) : (
-                        <Box width="100%">
-                          <Box mx={2} mt={1} display="flex" justifyContent="space-between">
-                            <Typography variant="subtitle2">{routes.warehouse.title}</Typography>
-                            <Typography variant="subtitle2">Qty.</Typography>
-                          </Box>
-                          {inventoriesData?.filter(d => d.inventory).map(({ inventory, warehouse }) => (
-                            <List disablePadding key={warehouse?._id}>
-                              <ListItem dense>
-                                <ListItemText primary={warehouse?.name} />
-                                <ListItemSecondaryAction>
-                                  <Typography variant="subtitle2">{inventory}</Typography>
-                                </ListItemSecondaryAction>
-                              </ListItem>
-                            </List>
-                          ))}
+                        <Box textAlign="center" padding={2} minHeight={100}>
+                          <Typography>No {routes.serializedAsset.title} Found</Typography>
                         </Box>
-                      )
-                    ) : (
-                      <Box textAlign="center" padding={2} minHeight={150}>
-                        <Typography>No {routes.warehouse.title} Found</Typography>
-                      </Box>
-                    )}
-                  </Box>
-                }
-                {(permissions?.product?.isUpdate && permissions?.serializedAsset?.isCreate && productData?.serializedProduct === false) &&
-                  <Box p={2} borderTop={1} borderColor="grey.300">
-                    <Button
-                      variant={'outlined'}
-                      color="primary"
-                      onClick={() => { setShowConfirmBoxConvert(true) }}
-                      size="small">
-                      Convert Serialized Product
-                    </Button>
-                    {showConfirmBoxConvert && (
-                      <ConfirmationDialog
-                        open={showConfirmBoxConvert}
-                        message={`Are you sure you want to convert serialized product ?`}
-                        onClose={() => {
-                          setShowConfirmBoxConvert(false);
-                        }}
-                        onOk={handleConvertSerialized}
-                      />
-                    )}
-                  </Box>}
-              </Paper>
+                      )}
+                    </Box>}
+                  </Paper>
+                </Box>
+                : null}
             </Grid>
           ) : null}
         </Grid>
