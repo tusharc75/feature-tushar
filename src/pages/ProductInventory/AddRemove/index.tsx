@@ -1,11 +1,12 @@
 import { Fragment, useState, useEffect, useContext } from "react";
 import {
-    Box, Button, Dialog, List,
+    Box, Button, CircularProgress, Dialog, Divider, List,
     ListItem,
     ListItemAvatar,
     ListItemText,
     TextField,
 } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
@@ -23,17 +24,40 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
 
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [loading, setLoading] = useState(false);
+    const [loadingData, setLoadingData] = useState(false);
+    const [serialNumbers, setSerialNumbers] = useState([])
     const toastConfig = useContext(CustomToastContext);
 
-    const handleSubmit = (values) => {
-        const data = {
-            products: product?.map((e) => e._id),
-            qty: parseInt(values.qty),
-            warehouse: warehouse,
-            comment: values.comment
+    useEffect(() => {
+        if (product.length === 1 && type === "remove") {
+            fetchData()
         }
+    }, [type, product])
+
+    const fetchData = () => {
+        setLoadingData(true)
+        axiosInstance().get(`${productInventory.api}/serial-number/${product[0]._id}/${warehouse}`)
+            .then(({ data: { data } }) => {
+                if (!data || data.lenght === 0) return
+                setSerialNumbers(data)
+                setLoadingData(false)
+            }).catch((err) => {
+                setLoadingData(false)
+                toastConfig.setToastConfig(err);
+            })
+    }
+
+    const handleSubmit = (values) => {
+        let data: any;
         setLoading(true)
         if (type === "add") {
+            data = {
+                products: product.lenght > 1
+                    ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumber: [] }))
+                    : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumber: values['serialNumbers'] })),
+                warehouse: warehouse,
+                comment: values.comment
+            }
             axiosInstance().post(`${productInventory.api}/add-inventory`, data)
                 .then(({ data: { data } }) => {
                     setLoading(false)
@@ -50,6 +74,14 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                 });
         }
         else {
+            const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
+            data = {
+                products: product.lenght > 1
+                    ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: [] }))
+                    : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: serialNumberIds.map((item) => item?._id) })),
+                warehouse: warehouse,
+                comment: values.comment
+            }
             axiosInstance().post(`${productInventory.api}/remove-inventory`, data)
                 .then(({ data: { data } }) => {
                     setLoading(false)
@@ -80,6 +112,17 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                 errors["qty"] = "qty not more than inventory"
             }
         }
+
+        // find duplicates serial numbers
+        const serialNumbersList = values['serialNumbers']
+        const duplicates = serialNumbersList.filter((item, index) => serialNumbersList.indexOf(item) != index)
+
+        if (serialNumbersList.length > Number(values['qty'])) {
+            errors['serialNumbers'] = `Please ${type === 'add' ? "enter" : "select"} serial numbers same as quantity`;
+        }
+        else if (duplicates.length > 0) {
+            errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
+        }
         return errors;
     }
 
@@ -95,7 +138,9 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
         }}
         aria-labelledby="assign-roles-dialog"
     >
-        <Formik initialValues={{ qty: 1, comment: "" }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+        {loadingData ? <Box p={5} display='flex' justifyContent='center' alignItems='center'>
+            <CircularProgress color='inherit' />
+        </Box> : <Formik initialValues={{ qty: 1, comment: "", serialNumbers: [] }} onSubmit={handleSubmit} validateOnMount validate={validate}>
             {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                     <CustomDialogHeader
@@ -145,7 +190,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                                 name="comment"
                                 fullWidth
                                 multiline
-                                rows={3}
+                                rows={2}
                                 variant="outlined"
                                 value={values['comment']}
                                 error={touched['comment'] && Boolean(errors['comment'])}
@@ -155,6 +200,42 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                                 }}
                             />
                         </Box>
+                        {(product?.length === 1 && product[0]?.serializedProduct) &&
+                            <Fragment>
+                                <Box my={2} mx={1}>
+                                    <Divider />
+                                </Box>
+                                <Box m={1}>
+                                    <Autocomplete
+                                        size="small"
+                                        options={type === 'add' ? [] : serialNumbers.map((item: any) => item?.serialNumber)}
+                                        freeSolo={type === 'add'}
+                                        multiple={true}
+                                        disableCloseOnSelect
+                                        value={values['serialNumbers']}
+                                        onChange={(_, val) => {
+                                            if (type === 'remove') {
+                                                setFieldValue('serialNumbers', val)
+                                            } else {
+                                                setFieldValue('serialNumbers', val.map((item: string) => item.toUpperCase()));
+                                            }
+                                        }}
+                                        getOptionSelected={(item, current) => item === current}
+                                        getOptionLabel={(option) => option}
+                                        renderInput={props => (
+                                            <TextField
+                                                {...props}
+                                                placeholder={type === 'add' ? "Enter serial number and press enter" : ""}
+                                                variant="outlined"
+                                                name="serialNumbers"
+                                                label="Serial Numbers"
+                                                error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
+                                                helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                                            />
+                                        )}
+                                    />
+                                </Box>
+                            </Fragment>}
                     </CustomDialogContent>
                     <CustomDialogFooter>
                         <CustomButton
@@ -169,7 +250,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                     </CustomDialogFooter>
                 </Form>
             )}
-        </Formik>
+        </Formik>}
     </Dialog>
     );
 };
