@@ -133,6 +133,7 @@ import CageManagement from './pages/CageManagement';
 import SerializedAssetTest from './pages/SerializedAsset-test';
 import ProductAuction from './pages/productAuction';
 import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDetailsPage';
+import ConvertInventory from './pages/ConvertInventory';
 
 var notificationInterval: any = null;
 
@@ -726,6 +727,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.productAuctionDetail.path}/:id`}>
               <ProductAuctionDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.inventoryToAsset.path}>
+              <ConvertInventory />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
