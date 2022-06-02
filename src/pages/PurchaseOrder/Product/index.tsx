@@ -273,7 +273,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                         variant={"contained"}
                         color="primary"
                         size="small"
-                        // style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                         onClick={() => {
                             setAddProductDialog(true);
                         }}
@@ -285,22 +284,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     <SendEmail
                         purchaseOrderData={purchaseOrderData}
                     />
-                    <Box display={isMobile ? "none" : "flex"} justifyContent="flex-end">
-                        <Button
-                            variant={isMobile && !isTablet ? "text" : "contained"}
-                            color="primary"
-                            size="small"
-                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                            disabled={selectedRecords.length === 0}
-                            onClick={() => {
-                                setIsBulkEdit(true)
-                                setShowProductDialog(true)
-                            }}
-
-                        >
-                            {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : `Bulk Edit`}
-                        </Button>
-                    </Box>
                     <HtmlTooltip title="Please select some product">
                         <Button
                             variant={"outlined"}
@@ -314,7 +297,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                             <ExpandMore fontSize="small" />
                         </Button>
                     </HtmlTooltip>
-                    {isMobile ? <Menu
+                    <Menu
                         anchorEl={anchorEl}
                         keepMounted
                         getContentAnchorEl={null}
@@ -326,9 +309,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
                     >
-
                         <MenuItem disabled={selectedRecords.length === 0}
                             onClick={() => {
+                                closeActions()
                                 setIsBulkEdit(true)
                                 setShowProductDialog(true)
                             }}>
@@ -339,26 +322,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                             setShowDeleteConfirmBox(true)
                             setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
                         }}>Delete</MenuItem>}
-                    </Menu> :
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "left",
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}
-                        >
-                            {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
-                                closeActions()
-                                setShowDeleteConfirmBox(true)
-                                setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
-                            }}>Delete</MenuItem>}
-                        </Menu>
-                    }
+                    </Menu>
                 </div>
             </Box>}
             {columns && frameWorkComponent ? isMobile && !isTablet ?
