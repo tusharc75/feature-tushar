@@ -13,7 +13,6 @@ import { useData } from 'src/StateProvider/Provider';
 import AddInventory from './AddInventory';
 import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE } from 'src/constants/helpers';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 
@@ -53,7 +52,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
       if (e?.fieldData?.fieldName === "serializedProduct") {
-        column.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+        column.push({ field: "serializedProductShow", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
     })
     column.push({
@@ -97,6 +96,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           finalObject['productName'] = u?.productDetail?.productName;
           finalObject['productNumber'] = u?.productDetail?.productNumber;
           finalObject['serializedProduct'] = u?.productDetail?.serializedProduct;
+          finalObject['serializedProductShow'] = u?.productDetail?.serializedProduct ? "Yes" : "No";
           finalObject['qty'] = u.qty;
           finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
           finalObject['isChecked'] = false;
@@ -190,7 +190,6 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const frameworkComponents = {
     commonRenderer: CommonRenderer,
     nameRenderer: NameRenderer,
-    checkboxRenderer: CheckboxRenderer,
     actionsRenderer: ActionRenderer
   };
 
@@ -319,7 +318,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               loading={loading}
               onCellValueChanged={onCellValueChanged}
               renderedFrom={renderedFrom}
-              refreshGrid={() => { }}
+              refreshGrid={fetchProducts}
             />
           )
           : <Box p={2} height={500} bgcolor="white">
