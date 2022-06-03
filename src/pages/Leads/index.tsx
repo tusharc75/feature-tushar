@@ -265,8 +265,12 @@ const Leads = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
+
+    if (isExport) {
+      deepFilter = `filterLeads=${selectedType}`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -581,6 +585,7 @@ const Leads = () => {
               if (gridApi) gridApi.deselectAll()
               else fetchLeads()
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
