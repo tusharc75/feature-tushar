@@ -167,8 +167,11 @@ const PurchaseOrder = () => {
         });
     };
 
-    const getQueryString = () => {
+    const getQueryString = (isExport = false) => {
         let deepFilter = `?page=${page}&limit=${limit}&filterPurchaseOrders=${selectedType}`;
+        if (isExport) {
+            deepFilter = `filterPurchaseOrders=${selectedType}`;
+        }
         let filterById = [];
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
@@ -327,6 +330,7 @@ const PurchaseOrder = () => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchPurchaseOrder()
                     }}
+                    additionalParams={getQueryString(true)}
                 />
             </Grid>
         </Grid>

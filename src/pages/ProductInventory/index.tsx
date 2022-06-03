@@ -21,6 +21,7 @@ import { Autocomplete } from '@material-ui/lab';
 import InfoIcon from '@material-ui/icons/Info';
 import SoftHoldDialog from './SoftHold';
 import HistoryDialog from './History/historyDialog';
+import SerialNumberDialog from './SerialNumber/SerialNumberDialog';
 import { camelCase } from 'lodash';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import HtmlTooltip from "../../components/CustomTooltipTitle";
@@ -30,6 +31,7 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import AddRemoveDialog from './AddRemove';
 import { ExpandMore } from '@material-ui/icons';
+import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
 
 const InventoryProduct = () => {
 
@@ -44,10 +46,12 @@ const InventoryProduct = () => {
   const [plantId, setPlantId] = useState(null);
   const [plantOptions, setPlantOptions] = useState([]);
   const [frameworkComponents, setFrameworkComponents] = useState({});
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
 
   const [softHold, setSoftHold] = useState({ open: false, data: {} });
   const [showHistory, setShowHistory] = useState({ open: false, product: "" });
+  const [showSerialNumber, setShowSerialNumber] = useState({ open: false, product: "" });
+
   const [inventory, setInventory] = useState({ open: false, product: [], type: "" });
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
@@ -139,6 +143,7 @@ const InventoryProduct = () => {
     ];
 
     setColumns([...columns, ...defaultColumns])
+    fetchProductInventory();
   }
 
   const fetchProductInventory = () => {
@@ -284,6 +289,21 @@ const InventoryProduct = () => {
           </IconButton>
         </Tooltip>
       </Box>
+      {params?.data?.serializedProduct &&
+        <Box pl={1}>
+          <Tooltip title="View Serial Number">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowSerialNumber({ open: true, product: params?.data?.productId })
+              }}
+            >
+              <VisibilityOutlinedIcon fontSize="small" color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      }
     </>
   );
 
@@ -441,8 +461,8 @@ const InventoryProduct = () => {
               pageSizes={pageSizes}
               page={page}
               onCellValueChanged={onCellValueChanged}
-              actionWidth={150}
               loading={loading}
+              actionWidth={180}
               renderedFrom={renderedFrom}
               refreshGrid={fetchProductInventory}
               showOnlyShowFilteredRecordSwitch={true}
@@ -464,6 +484,13 @@ const InventoryProduct = () => {
           <HistoryDialog
             close={() => setShowHistory({ open: false, product: "" })}
             product={showHistory.product}
+            warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
+          />}
+
+        {showSerialNumber.open &&
+          <SerialNumberDialog
+            close={() => setShowSerialNumber({ open: false, product: "" })}
+            product={showSerialNumber.product}
             warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
           />}
         {inventory.open &&
