@@ -196,7 +196,8 @@ export const sidebarResource = {
   report: 'Report',
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
-  productAuction: 'Product Auction'
+  productAuction: 'Product Auction',
+  inventoryToAsset: 'Inventory to Asset'
 };
 
 export const resourceNames = {
@@ -333,7 +334,8 @@ export const RESOURCE_LABEL = {
   report: 'Report',
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
-  productAuction: 'Product Auction'
+  productAuction: 'Product Auction',
+  inventoryToAsset: 'Inventory to Asset'
 };
 
 export const CHILD_RESOURCE = {
@@ -495,13 +497,19 @@ export const serializedAsset = {
   resource: 'Serialized Asset'
 };
 
+export const convertInventory = {
+  api: '/convert-inventory-to-asset',
+  route: '/inventory-to-asset',
+  permission: 'inventoryToAsset',
+  resource: 'Inventory to Asset'
+};
+
 export const productInventory = {
   api: '/product-inventory',
   route: '/product-inventory',
   permission: 'productInventory',
   resource: 'product-inventory'
 };
-
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
@@ -739,21 +747,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1771,8 +1779,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'supplier-account':
@@ -1782,8 +1791,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'lead':

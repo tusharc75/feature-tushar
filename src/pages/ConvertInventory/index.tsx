@@ -1,0 +1,412 @@
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import { Link } from 'react-router-dom';
+import { Grid, IconButton, Tooltip, Button, Menu, MenuItem } from '@material-ui/core';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import { Box, TextField } from '@material-ui/core';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import styles from '../Leads/Header.module.scss';
+import routes from 'src/components/Helpers/Routes';
+import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
+import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
+import {
+  isObjectEmpty,
+  gridLoadingTimeout,
+  productInventory,
+  getLocalStorageArrayData,
+  removeLocalStorage,
+  convertInventory
+} from 'src/constants/helpers';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from 'src/StateProvider/Provider';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import { prepareDataForGrid } from 'src/constants/helpers';
+import { isMobile, isTablet } from 'react-device-detect';
+import { Autocomplete } from '@material-ui/lab';
+import InfoIcon from '@material-ui/icons/Info';
+import SoftHoldDialog from './SoftHold';
+import HistoryDialog from './History/historyDialog';
+import { camelCase } from 'lodash';
+import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+import NoDataCell from '../../components/Helpers/NoDataCell';
+import HistoryIcon from '@material-ui/icons/History';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import ConvertInventoryToAsset from './Convert';
+import { ExpandMore } from '@material-ui/icons';
+import { SiConvertio } from 'react-icons/si';
+
+const ConvertInventory = () => {
+  const renderedFrom = camelCase(routes?.inventoryToAsset.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
+  const toastConfig = useContext(CustomToastContext);
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
+  const [plantId, setPlantId] = useState(null);
+  const [plantOptions, setPlantOptions] = useState([]);
+  const [frameworkComponents, setFrameworkComponents] = useState({});
+  const [columns, setColumns] = useState([]);
+
+  const [softHold, setSoftHold] = useState({ open: false, data: {} });
+  const [showHistory, setShowHistory] = useState({ open: false, product: '' });
+  const [inventory, setInventory] = useState({ open: false, product: [], type: '' });
+
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
+
+  const { getColumnData } = useColumns();
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, [plantId]);
+
+  useEffect(() => {
+    getPlants();
+  }, [selectedEntity]);
+
+  useEffect(() => {
+    fetchProductInventory();
+  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+
+  const getPlants = () => {
+    axiosInstance()
+      .get(`/warehouse`)
+      .then(({ data: { data } }) => {
+        setPlantOptions([
+          // { warehouseName: 'All', _id: 'All' },
+          ...data
+        ]);
+        if (plantId === null && data?.length) {
+          setPlantId(data[0]._id);
+        }
+      });
+  };
+
+  const fetchGridColumns = async () => {
+    setColumns(null);
+
+    const productFields = await axiosInstance().get('/field?resource=Product&view=true');
+    const productInventoryFields = await axiosInstance().get('/field?resource=Product Inventory&view=true');
+
+    let columns = [];
+    let rendererNames = [];
+
+    productFields?.data?.data?.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName);
+        }
+      }
+    });
+
+    columns?.forEach((e) => {
+      if (!['productName', 'serializedProduct'].includes(e.field)) {
+        e.show = false;
+      }
+    });
+    productInventoryFields?.data?.data?.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
+      if (currentColumn !== null) {
+        if (!['plant', 'product', 'minInventory', 'maxInventory'].includes(currentColumn?.columnData.field)) {
+          if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
+            columns.push({
+              ...currentColumn?.columnData,
+              cellEditor: 'numericCellEditor',
+              editable: permissions?.inventoryToAsset?.isUpdate
+            });
+          } else {
+            columns.push(currentColumn?.columnData);
+          }
+        }
+      }
+    });
+
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    setFrameworkComponents({
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    });
+
+    setColumns(columns);
+  };
+
+  const fetchProductInventory = () => {
+    dispatch({ type: 'loading', loading: true });
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    if (plantId) {
+      const queryString = getQueryString();
+      axiosInstance()
+        .get(`${convertInventory.api}${queryString}`)
+        .then(({ data }) => {
+          let rows = data.data?.map((u) => {
+            let finalObject = prepareDataForGrid(u);
+            finalObject['productId'] = u._id;
+            finalObject['plantId'] = plantId;
+            finalObject['availableInventory'] = (u?.inventory || 0) - (u?.softHold || 0);
+            return {
+              ...finalObject
+            };
+          });
+          dispatch({ type: 'initialize', data: rows, count: data.count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          dispatch({ type: 'loading', loading: false });
+        });
+    }
+  };
+
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
+
+  const getQueryString = (isExport = false) => {
+    let tempPlantId = plantId;
+
+    let deepFilter = '';
+    if (!isExport) {
+      deepFilter = `?wareHouse=${tempPlantId}`;
+      deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
+    } else {
+      deepFilter = `&wareHouse=${tempPlantId}`;
+    }
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+      Object.keys(filters).forEach((field) => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    }
+    return `${deepFilter}&filterType=and`;
+  };
+
+  const onCellValueChanged = (row) => {
+    let inputData = {
+      plant: plantId,
+      product: row?.data?.productId
+    };
+    axiosInstance().put(`${convertInventory.api}`, inputData);
+  };
+
+  const infoHandler = (params) => {
+    setSoftHold({ open: true, data: params.data });
+  };
+
+  const ActionsRenderer = (params) => (
+    <>
+      {permissions?.inventoryToAsset?.isUpdate && (
+        <Fragment>
+          <Box pl={1}>
+            <Tooltip title="Convert Inventory">
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                disabled={params?.data?.availableInventory ? false : true}
+                onClick={() => {
+                  setInventory({ open: true, product: [params?.data], type: 'convert' });
+                }}
+              >
+                <SiConvertio fontSize="small" color={params?.data?.availableInventory ? 'error' : 'disabled'} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Fragment>
+      )}
+    </>
+  );
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case 'productName':
+        return 'productName';
+      case 'createdBy':
+        return 'createdBy.user.concatedName';
+      case 'updatedBy':
+        return 'updatedBy.user.concatedName';
+      default:
+        return field;
+    }
+  };
+
+  return (
+    <Fragment>
+      <Grid container className="headerbox">
+        <Grid item md={4} sm={11} xs={10}>
+          <CustomBreadCrumbs routes={[routes.inventoryToAsset]} />
+        </Grid>
+      </Grid>
+      <div className="main-container">
+        <div className="header-panel">
+          <Grid container className={styles.filter_side_container}>
+            <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
+              <div className="d-flex align-items-center">
+                <SiConvertio size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
+                <span className="listingHeader">{routes.inventoryToAsset?.title} </span>
+              </div>
+              <>
+                <Autocomplete
+                  style={{ width: '250px' }}
+                  options={plantOptions}
+                  getOptionLabel={(option: any) => option.warehouseName}
+                  disableClearable
+                  getOptionSelected={(option: any, val) => option._id === val}
+                  value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
+                  onChange={(e, val) => {
+                    if (val !== null) {
+                      setPlantId(val && val._id ? val._id : '');
+                    }
+                  }}
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        name="plant"
+                        placeholder="Plant"
+                        variant="standard"
+                        fullWidth
+                        className={isMobile ? 'serchBox' : ''}
+                      />
+                    ) : (
+                      <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
+                    )
+                  }
+                />
+              </>
+            </Grid>
+            <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
+              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                <Grid style={{ display: 'flex', flex: 1 }}>
+                  <SearchBox
+                    onSearch={handleSearch}
+                    searchbox={styles.search_box_input}
+                    width={isMobile ? '200px' : '242px'}
+                    style={isMobile ? { flex: 1 } : {}}
+                    size="small"
+                    value={search}
+                  />
+                </Grid>
+              </Box>
+              {permissions?.inventoryToAsset?.isUpdate ? (
+                <Box ml={1}>
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="default"
+                    size="small"
+                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                  >
+                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        closeActions();
+                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'convert' });
+                      }}
+                    >
+                      Convert Inventory to Asset
+                    </MenuItem>
+                  </Menu>
+                </Box>
+              ) : null}
+            </Grid>
+          </Grid>
+        </div>
+        {columns && plantId ? (
+          Object.keys(frameworkComponents).length > 0 ? (
+            <CustomAgGridEditable
+              allowSelection={true}
+              allowAction={true}
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              onCellValueChanged={onCellValueChanged}
+              actionWidth={150}
+              loading={loading}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchProductInventory}
+              showOnlyShowFilteredRecordSwitch={true}
+            />
+          ) : null
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+
+        {inventory.open && (
+          <ConvertInventoryToAsset
+            handleClose={() => setInventory({ open: false, product: [], type: '' })}
+            handleSuccess={() => {
+              removeLocalStorage(localStorageSelectedRecords);
+              fetchProductInventory();
+              setInventory({ open: false, product: [], type: '' });
+            }}
+            product={inventory.product}
+            type={inventory.type}
+            warehouse={plantId}
+          />
+        )}
+      </div>
+    </Fragment>
+  );
+};
+
+export default ConvertInventory;

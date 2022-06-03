@@ -530,6 +530,13 @@ const routes = {
         ? storedRoutes.productAuction?.title
         : RESOURCE_LABEL.productAuction,
     path: '/product-auction/detail'
+  },
+  inventoryToAsset: {
+    title:
+      storedRoutes && storedRoutes.InventoryToAsset && storedRoutes.InventoryToAsset.title
+        ? storedRoutes.InventoryToAsset?.title
+        : RESOURCE_LABEL.inventoryToAsset,
+    path: '/inventory-to-asset'
   }
 };
 
