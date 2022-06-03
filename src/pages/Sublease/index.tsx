@@ -164,10 +164,12 @@ const Sublease = () => {
         });
     };
 
-    const getQueryString = () => {
+    const getQueryString = (isExport = false) => {
         let deepFilter = `?page=${page}&limit=${limit}&filterSublease=${selectedType}`;
         let filterById = [];
-
+        if (isExport) {
+            deepFilter = `filterSublease=${selectedType}`;
+          }
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }
@@ -324,6 +326,7 @@ const Sublease = () => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchData()
                     }}
+                    additionalParams={getQueryString(true)}
                 />
             </Grid>
         </Grid>

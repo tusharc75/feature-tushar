@@ -141,9 +141,11 @@ const TransferAsset = () => {
       });
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterTransferAssets=${selectedType}`;
-
+    if (isExport) {
+      deepFilter = `filterRepairJobs=${selectedType}`;
+    }
     if (fromRental) {
       let filterById = [];
       filterById.push({ field: "rentalJob", term: fromRental?._id });
@@ -339,6 +341,7 @@ const TransferAsset = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchTransferAsset();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
