@@ -70,16 +70,23 @@ export default async (type: string, currency: string, tableData: any[], chart: C
   }
 
   if (graphType === 'Table' || graphType === "Chart" && isTableView) {
-    let newData = [...tableData];
-    newData = newData.map((d) => {
-      for (const key in d) {
-        let upper = startCase(key);
-        if (upper !== key) {
-          d[upper] = d[key];
-          delete d[key];
-        }
-      }
-      return d;
+    const columns = Object.keys(tableData[0])
+      .map((k) => {
+        let b = tableData[0];
+        return {
+          colName: k,
+          order: b[k].order
+        };
+      })
+      .sort((a, b) => a.order - b.order)
+      .map((d) => d.colName);
+    let newData = tableData.map((data) => {
+      let obj: any = {};
+      columns.forEach((key) => {
+        obj[key] = data[key].value;
+      });
+
+      return obj;
     });
 
     switch (type) {
@@ -93,17 +100,16 @@ export default async (type: string, currency: string, tableData: any[], chart: C
         const doc = new jsPDF('portrait');
         doc.setFontSize(14);
         doc.text(title, 70, 10);
-        let col = Object.keys(tableData[0])
+        let col = columns.map((s:string) => startCase(s))
         let row = [];
-        if (tableData && tableData.length) {
-          row = tableData.map((data) =>
-            col.map((key) =>
+        if (newData && newData.length) {
+          row = newData.map((data) =>
+            columns.map((key) =>
               isNaN(Number(data[key]))
                 ? data[key] : key.includes("MT") || key.includes("GM") ? Number(data[key]) ? data[key].toFixed(2) : '00'
                   : formatAmountWithCurrency(currency, Number(data[key]) ? data[key].toFixed(2) : '00').fullFormatAmount
             )
           );
-          console.log(col, row)
           //@ts-ignore
           doc.autoTable(col, row, { startY: 20 });
         } else {
@@ -117,7 +123,7 @@ export default async (type: string, currency: string, tableData: any[], chart: C
       case 'excel': {
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const ws = utils.json_to_sheet(tableData);
+        const ws = utils.json_to_sheet(newData);
         const wb = {
           Sheets: {
             data: ws
@@ -131,7 +137,7 @@ export default async (type: string, currency: string, tableData: any[], chart: C
       }
 
       case 'json': {
-        let blob = new Blob([JSON.stringify(tableData)], { type: 'text/plain;charset=utf-8' });
+        let blob = new Blob([JSON.stringify(newData)], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, fileName + '.json');
         break;
       }
