@@ -9,55 +9,40 @@ import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
-import { productInventory } from '../../../constants/helpers';
+import { convertInventory, productInventory } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 
-const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => {
+const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, warehouse }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
 
   const handleSubmit = (values) => {
+    console.log(product);
     const data = {
-      products: product?.map((e) => e._id),
+      products: product?.map((e) => {
+        return { id: e.id, productCategory: e.productCategoryId };
+      }),
       qty: parseInt(values.qty),
-      warehouse: warehouse,
-      comment: values.comment
+      warehouse: warehouse
     };
     setLoading(true);
-    if (type === 'add') {
-      axiosInstance()
-        .post(`${productInventory.api}/add-inventory`, data)
-        .then(({ data: { data } }) => {
-          setLoading(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `${capitalize(type)} Inventory Successfully`
-          });
-          handleSuccess();
-        })
-        .catch((error) => {
-          setLoading(false);
-          toastConfig.setToastConfig(error);
+
+    axiosInstance()
+      .post(`${convertInventory.api}/convert-inventory`, data)
+      .then(({ data: { data } }) => {
+        setLoading(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `${capitalize(type)} Inventory Successfully`
         });
-    } else {
-      axiosInstance()
-        .post(`${productInventory.api}/remove-inventory`, data)
-        .then(({ data: { data } }) => {
-          setLoading(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `${capitalize(type)} Inventory Successfully`
-          });
-          handleSuccess();
-        })
-        .catch((error) => {
-          setLoading(false);
-          toastConfig.setToastConfig(error);
-        });
-    }
+        handleSuccess();
+      })
+      .catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   function validate(values) {
@@ -65,7 +50,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
-    if (type === 'remove') {
+    if (type === 'convert') {
       var validateQty = product[0]?.availableInventory;
       if (product?.length > 1) {
         validateQty = product?.reduce(function (min, obj) {
@@ -129,25 +114,6 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                   />
                 </ListItem>
               </List>
-              {/* <Box m={1}>
-                            <Field
-                                component={TextFieldFormik}
-                                margin="dense"
-                                type="text"
-                                label="Comment"
-                                name="comment"
-                                fullWidth
-                                multiline
-                                rows={3}
-                                variant="outlined"
-                                value={values['comment']}
-                                error={touched['comment'] && Boolean(errors['comment'])}
-                                helperText={touched['comment'] && errors['comment']}
-                                onChange={(e) => {
-                                    setFieldValue('comment', e.target.value);
-                                }}
-                            />
-                        </Box> */}
             </CustomDialogContent>
             <CustomDialogFooter>
               <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
@@ -161,4 +127,4 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
   );
 };
 
-export default AddRemove;
+export default ConvertInventoryToAsset;

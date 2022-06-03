@@ -34,7 +34,7 @@ import NoDataCell from '../../components/Helpers/NoDataCell';
 import HistoryIcon from '@material-ui/icons/History';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import AddRemoveDialog from './AddRemove';
+import ConvertInventoryToAsset from './Convert';
 import { ExpandMore } from '@material-ui/icons';
 import { SiConvertio } from 'react-icons/si';
 
@@ -59,7 +59,6 @@ const ConvertInventory = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  console.log(permissions);
 
   const { getColumnData } = useColumns();
 
@@ -123,16 +122,15 @@ const ConvertInventory = () => {
         e.show = false;
       }
     });
-
     productInventoryFields?.data?.data?.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
       if (currentColumn !== null) {
-        if (!['plant', 'product'].includes(currentColumn?.columnData.field)) {
+        if (!['plant', 'product', 'minInventory', 'maxInventory'].includes(currentColumn?.columnData.field)) {
           if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
             columns.push({
               ...currentColumn?.columnData,
               cellEditor: 'numericCellEditor',
-              editable: plantId === 'All' ? false : permissions?.productInventory?.isUpdate
+              editable: permissions?.inventoryToAsset?.isUpdate
             });
           } else {
             columns.push(currentColumn?.columnData);
@@ -144,16 +142,10 @@ const ConvertInventory = () => {
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     setFrameworkComponents({
       ...tempFrameworkComponent,
-      // softHoldRenderer: SoftHoldRenderer,
       actionsRenderer: ActionsRenderer
     });
 
-    const defaultColumns = [
-      // { field: 'softHold', headerName: 'Soft Hold', show: true, cellRenderer: 'softHoldRenderer' },
-      { field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' }
-    ];
-
-    setColumns([...columns, ...defaultColumns]);
+    setColumns(columns);
   };
 
   const fetchProductInventory = () => {
@@ -192,13 +184,7 @@ const ConvertInventory = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let tempPlantId =
-      plantId === 'All'
-        ? plantOptions
-            .filter((d) => d._id !== 'All')
-            .map((d) => d._id)
-            .toString()
-        : plantId;
+    let tempPlantId = plantId;
 
     let deepFilter = '';
     if (!isExport) {
@@ -234,10 +220,7 @@ const ConvertInventory = () => {
   const onCellValueChanged = (row) => {
     let inputData = {
       plant: plantId,
-      product: row?.data?.productId,
-      inventory: row?.data?.inventory,
-      minInventory: row?.data?.minInventory,
-      maxInventory: row?.data?.maxInventory
+      product: row?.data?.productId
     };
     axiosInstance().put(`${convertInventory.api}`, inputData);
   };
@@ -246,71 +229,26 @@ const ConvertInventory = () => {
     setSoftHold({ open: true, data: params.data });
   };
 
-  // const SoftHoldRenderer = (params) => (
-  //   <>
-  //     {' '}
-  //     {params.value ? (
-  //       <Fragment>
-  //         {params.value}
-  //         <HtmlTooltip title={`Soft Hold History`}>
-  //           <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(params)} />
-  //         </HtmlTooltip>
-  //       </Fragment>
-  //     ) : (
-  //       <NoDataCell />
-  //     )}
-  //   </>
-  // );
-
   const ActionsRenderer = (params) => (
     <>
-      {
-        // permissions?.convertInventory?.isUpdate &&
-        plantId !== 'All' && (
-          <Fragment>
-            <Box>
-              <Tooltip title="Add">
-                <IconButton
-                  size="small"
-                  aria-label="Clone"
-                  onClick={() => {
-                    setInventory({ open: true, product: [params?.data], type: 'add' });
-                  }}
-                >
-                  <AddCircleOutlineIcon fontSize="small" color="secondary" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            <Box pl={1}>
-              <Tooltip title="Remove">
-                <IconButton
-                  size="small"
-                  aria-label="Clone"
-                  disabled={params?.data?.availableInventory ? false : true}
-                  onClick={() => {
-                    setInventory({ open: true, product: [params?.data], type: 'remove' });
-                  }}
-                >
-                  <RemoveCircleOutlineIcon fontSize="small" color={params?.data?.availableInventory ? 'error' : 'disabled'} />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Fragment>
-        )
-      }
-      <Box pl={1}>
-        <Tooltip title="History">
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setShowHistory({ open: true, product: params?.data?.productId });
-            }}
-          >
-            <HistoryIcon fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      </Box>
+      {permissions?.inventoryToAsset?.isUpdate && (
+        <Fragment>
+          <Box pl={1}>
+            <Tooltip title="Convert Inventory">
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                disabled={params?.data?.availableInventory ? false : true}
+                onClick={() => {
+                  setInventory({ open: true, product: [params?.data], type: 'convert' });
+                }}
+              >
+                <SiConvertio fontSize="small" color={params?.data?.availableInventory ? 'error' : 'disabled'} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Fragment>
+      )}
     </>
   );
 
@@ -386,7 +324,7 @@ const ConvertInventory = () => {
                   />
                 </Grid>
               </Box>
-              {permissions?.convertInventory?.isUpdate ? (
+              {permissions?.inventoryToAsset?.isUpdate ? (
                 <Box ml={1}>
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -414,18 +352,10 @@ const ConvertInventory = () => {
                     <MenuItem
                       onClick={() => {
                         closeActions();
-                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'add' });
+                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'convert' });
                       }}
                     >
-                      Add
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'remove' });
-                      }}
-                    >
-                      Remove
+                      Convert Inventory to Asset
                     </MenuItem>
                   </Menu>
                 </Box>
@@ -460,37 +390,9 @@ const ConvertInventory = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {/* {softHold.open && (
-          <SoftHoldDialog
-            close={() => setSoftHold({ open: false, data: {} })}
-            data={softHold.data}
-            warehouse={
-              plantId === 'All'
-                ? plantOptions
-                    .filter((d) => d._id !== 'All')
-                    .map((d) => d._id)
-                    .toString()
-                : plantId
-            }
-          />
-        )} */}
 
-        {showHistory.open && (
-          <HistoryDialog
-            close={() => setShowHistory({ open: false, product: '' })}
-            product={showHistory.product}
-            warehouse={
-              plantId === 'All'
-                ? plantOptions
-                    .filter((d) => d._id !== 'All')
-                    .map((d) => d._id)
-                    .toString()
-                : plantId
-            }
-          />
-        )}
         {inventory.open && (
-          <AddRemoveDialog
+          <ConvertInventoryToAsset
             handleClose={() => setInventory({ open: false, product: [], type: '' })}
             handleSuccess={() => {
               removeLocalStorage(localStorageSelectedRecords);
