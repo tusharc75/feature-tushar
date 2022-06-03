@@ -9,68 +9,10 @@ import { ChartDataType } from './ChartTypes';
 
 export default async (type: string, currency: string, tableData: any[], chart: ChartDataType, isTableView: boolean) => {
   const { uniqueId, graphType, chartTitle } = chart;
-  const { title, fileName } = { title: chartTitle.replaceAll('currency', currency), fileName: chartTitle.replaceAll('currency', currency) };
+  const { title, fileName } = { title: chartTitle.replaceAll('CUR', currency), fileName: chartTitle.replaceAll('CUR', currency) };
 
-  if (graphType !== 'Table' && !isTableView) {
-    switch (type) {
-      case 'ppt': {
-        const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
-        const dataUrl = canvas.toDataURL('image/png');
-        const pptx = new PptxGenJs();
-        const slide = pptx.addSlide();
-        slide.addText(title, {
-          fontSize: 20,
-          color: '363636',
-          x: '12%',
-          y: '4%',
-          fill: { color: 'F1F1F1' },
-          align: pptx.AlignH.center
-        });
-        slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '15%' });
-        pptx.writeFile({ fileName: fileName + '.pptx' });
-        break;
-      }
 
-      case 'pdf': {
-        const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
-        const dataUrl = canvas.toDataURL('image/png', 1.0);
-        const doc = new jsPDF('portrait');
-        doc.setFontSize(10);
-        doc.text(title, 60, 15);
-        doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
-        doc.save(fileName + '.pdf');
-        break;
-      }
-
-      case 'excel': {
-        // const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
-        // const dataUrl = canvas.toDataURL('image/png', 1.0);
-        const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-        const ws = utils.json_to_sheet(tableData);
-        const wb = {
-          Sheets: {
-            data: ws
-          },
-          SheetNames: ['data']
-        };
-        const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
-        const data = new Blob([excelBuffer], { type: fileType });
-        saveAs(data, fileName + '.xlsx');
-        break;
-      }
-
-      case 'json': {
-        let blob = new Blob([JSON.stringify(tableData)], { type: 'text/plain;charset=utf-8' });
-        saveAs(blob, fileName + '.json');
-        break;
-      }
-      default:
-        break;
-    }
-  }
-
-  if (graphType === 'Table' || graphType === "Chart" && isTableView) {
-    const columns = Object.keys(tableData[0])
+  const columns = Object.keys(tableData[0])
       .map((k) => {
         let b = tableData[0];
         return {
@@ -89,18 +31,89 @@ export default async (type: string, currency: string, tableData: any[], chart: C
       return obj;
     });
 
+  if (graphType !== 'Table' && !isTableView) {
+    switch (type) {
+      case 'ppt': {
+        const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
+        const dataUrl = canvas.toDataURL('image/png');
+        const pptx = new PptxGenJs();
+        const slide = pptx.addSlide();
+        slide.addText(title, {
+          fontSize: 15,
+          color: '363636',
+          x: '12%',
+          y: '4%',
+          fill: { color: 'F1F1F1' },
+          align: pptx.AlignH.center
+        });
+        slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '10%' });
+        pptx.writeFile({ fileName: fileName + '.pptx' });
+        break;
+      }
+
+      case 'pdf': {
+        const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        const doc = new jsPDF('portrait');
+        doc.setFontSize(12);
+        doc.text(title, 105, 10, { align: 'center' });
+        doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 140);
+        doc.save(fileName + '.pdf');
+        break;
+      }
+
+      case 'excel': {
+        // const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
+        // const dataUrl = canvas.toDataURL('image/png', 1.0);
+        const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+        const ws = utils.json_to_sheet(newData);
+        const wb = {
+          Sheets: {
+            data: ws
+          },
+          SheetNames: ['data']
+        };
+        const excelBuffer = write(wb, { bookType: 'xlsx', type: 'array' });
+        const data = new Blob([excelBuffer], { type: fileType });
+        saveAs(data, fileName + '.xlsx');
+        break;
+      }
+
+      case 'json': {
+        let blob = new Blob([JSON.stringify(newData)], { type: 'text/plain;charset=utf-8' });
+        saveAs(blob, fileName + '.json');
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  if (graphType === 'Table' || graphType === "Chart" && isTableView) {
+
     switch (type) {
       case 'ppt': {
         const pptx = new PptxGenJs();
-        pptx.tableToSlides('table_' + uniqueId, { x: 0.5, y: 0.2, w: 10 });
+        pptx.tableToSlides('table_' + uniqueId, {
+          x: 0.5, y: 0.5, w: 10, addText: {
+            text: title as any, options: {
+              fontSize: 15,
+              color: '363636',
+              x: '12%',
+              y: '4%',
+              fill: { color: 'F1F1F1' },
+              align: pptx.AlignH.center
+            }
+          }
+        });
         pptx.writeFile({ fileName: fileName + '.pptx' });
         break;
       }
       case 'pdf': {
         const doc = new jsPDF('portrait');
-        doc.setFontSize(14);
-        doc.text(title, 70, 10);
-        let col = columns.map((s:string) => startCase(s))
+        doc.setFontSize(12);
+        doc.text(title, 105, 10, { align: 'center' });
+        let col = columns.map((s: string) => startCase(s))
         let row = [];
         if (newData && newData.length) {
           row = newData.map((data) =>
