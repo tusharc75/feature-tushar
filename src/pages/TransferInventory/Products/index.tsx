@@ -202,7 +202,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   };
 
   const onCellValueChanged = ({ data }) => {
-    if (!Number(data?.qty)) {
+    if (!Number(data?.qty) || Number(data?.qty) <= 0) {
       toastConfig.setToastConfig({
         type: 'error',
         message: "Please enter valid Qty.",
