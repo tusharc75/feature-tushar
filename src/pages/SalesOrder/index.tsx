@@ -229,8 +229,11 @@ const SalesOrder = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterSalesOrder=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterSalesOrder=${selectedType}`;
+    }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
@@ -395,6 +398,7 @@ const SalesOrder = () => {
                     if (gridApi) gridApi.deselectAll();
                     else fetchSalesOrder();
                   }}
+                  additionalParams={getQueryString(true)}
                 />
               </Grid>
             </Grid>
