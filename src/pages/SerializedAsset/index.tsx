@@ -461,48 +461,49 @@ const SerializedAsset = () => {
             <Grid item xs={12} sm={12} md={8} className="d-flex align-items-center gap-1">
               <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
               <span className="listingHeader">{routes.serializedAsset?.title} </span>
-              {warehouse && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Plants : ${warehouse.optionLabel}`}
-                  onDelete={() => {
-                    setWarehouse(null);
-                  }}
-                />
-              )}
-              {redirectProduct && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Product : ${redirectProduct.name}`}
-                  onDelete={() => {
-                    setRedirectProduct(null);
-                  }}
-                />
-              )}
-              {fromPurchaseOrder?.pOId ? (
-                <>
-                  {fromPurchaseOrder?.productId && (
+              {(warehouse || warehouse || fromPurchaseOrder?.pOId) ?
+                <Fragment>
+                  {warehouse && (
                     <Chip
                       className="ml-3"
                       color="primary"
-                      label={`Product : ${fromPurchaseOrder.productName}`}
+                      label={`Plants : ${warehouse.optionLabel}`}
                       onDelete={() => {
-                        setFromPurchaseOrder(null);
+                        setWarehouse(null);
                       }}
                     />
                   )}
-                  <Chip
-                    className="ml-3"
-                    color="primary"
-                    label={`Purchase Order : ${fromPurchaseOrder.pOName}`}
-                    onDelete={() => {
-                      setFromPurchaseOrder(null);
-                    }}
-                  />
-                </>
-              ) : (
+                  {redirectProduct && (
+                    <Chip
+                      className="ml-3"
+                      color="primary"
+                      label={`Product : ${redirectProduct.name}`}
+                      onDelete={() => {
+                        setRedirectProduct(null);
+                      }}
+                    />
+                  )}
+                  {fromPurchaseOrder?.productId && (
+                    <Fragment>
+                      <Chip
+                        className="ml-3"
+                        color="primary"
+                        label={`Product : ${fromPurchaseOrder.productName}`}
+                        onDelete={() => {
+                          setFromPurchaseOrder(null);
+                        }}
+                      />
+                      <Chip
+                        className="ml-3"
+                        color="primary"
+                        label={`Purchase Order : ${fromPurchaseOrder.pOName}`}
+                        onDelete={() => {
+                          setFromPurchaseOrder(null);
+                        }}
+                      />
+                    </Fragment>
+                  )}
+                </Fragment> :
                 <Fragment>
                   <Autocomplete
                     style={{ width: '250px' }}
@@ -594,21 +595,7 @@ const SerializedAsset = () => {
                       label="Sublease Assets"
                     />
                   )}
-                  {/* <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="isNonSerializedAsset"
-                        checked={isNonSerializedAsset}
-                        onChange={(e) => {
-                          setNonSerializedAsset(e.target.checked);
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Non Serialized Assets"
-                  /> */}
-                </Fragment>
-              )}
+                </Fragment>}
             </Grid>
             <Grid md={4} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -700,8 +687,7 @@ const SerializedAsset = () => {
                         >
                           {`Status Change - ${INVENTORY_STATUS.lost}`}
                         </MenuItem>
-                      </>
-                    }
+                      </>}
                   </Menu>
                 </Grid>
               </Box>

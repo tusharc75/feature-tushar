@@ -322,8 +322,11 @@ const ProjectSales: FC = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterProjects=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterProjects=${selectedType}`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -542,6 +545,7 @@ const ProjectSales: FC = () => {
                 if (gridApi) gridApi.deselectAll()
                 else fetchProjects()
               }}
+              additionalParams={getQueryString(true)}
             />
           </Grid>
         </Grid>

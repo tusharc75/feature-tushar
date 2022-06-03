@@ -85,10 +85,10 @@ const Report = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase==="quotes" ? "quoteBuilder": resourceCamelCase]) {
+      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === "quotes" ? "quoteBuilder" : resourceCamelCase]) {
         o.fieldData.primaryField = true;
       }
-      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase==="quotes" ? "quoteBuilder": resourceCamelCase}Detail`].path);
+      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase === "quotes" ? "quoteBuilder" : resourceCamelCase}Detail`].path);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -207,7 +207,7 @@ const Report = () => {
   // Create and return query for filters
   const getFilter = (isExport = false) => {
     let filterQuery = `page=${page}&`;
-    if(!isExport) {
+    if (!isExport) {
       filterQuery = `limit=${limit}&`;
     }
     if (sorting.length > 0) {
@@ -297,7 +297,7 @@ const Report = () => {
     setExporting(true);
     let filterQuery = getFilter(true);
     axiosInstance()
-      .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`, {
+      .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report/export?export=1&${filterQuery}`, {
         responseType: 'arraybuffer'
       })
       .then((res) => {
@@ -424,7 +424,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => {}}
+                      onEdit={() => { }}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -439,8 +439,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
