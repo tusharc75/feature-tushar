@@ -196,7 +196,8 @@ export const sidebarResource = {
   report: 'Report',
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
-  productAuction: 'Product Auction'
+  productAuction: 'Product Auction',
+  inventoryToAsset: 'Inventory to Asset'
 };
 
 export const resourceNames = {
@@ -497,7 +498,7 @@ export const serializedAsset = {
 };
 
 export const convertInventory = {
-  api: '/inventory-to-asset',
+  api: '/convert-inventory-to-asset',
   route: '/inventory-to-asset',
   permission: 'inventoryToAsset',
   resource: 'Inventory to Asset'
