@@ -222,8 +222,11 @@ const DeliveryTicket = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterDeliveryTickets=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterDeliveryTickets=${selectedType}`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -346,6 +349,7 @@ const DeliveryTicket = () => {
                         fetchDeliveryTicket();
                       }
                     }}
+                    additionalParams={getQueryString(true)}
                   />
                 </Grid>
               </Grid>

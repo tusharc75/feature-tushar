@@ -66,7 +66,7 @@ const FormBuilder = () => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`/sa-formbuilder/resource?allResource=true'`)
+      .get(`/sa-formbuilder/resource?allResource=true`)
       .then(({ data: { data } }) => {
         data.forEach((d) => {
           d['_id'] = d.id;
