@@ -124,8 +124,12 @@ const InventoryProduct = () => {
             columns.push({
               ...currentColumn?.columnData,
               cellEditor: 'numericCellEditor',
+              filter: false, sortable: false,
               editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
             });
+          }
+          else if (['inventory'].includes(currentColumn?.columnData.field)) {
+            columns.push({ ...currentColumn?.columnData, filter: false, sortable: false });
           }
           else {
             columns.push(currentColumn?.columnData);
@@ -138,8 +142,8 @@ const InventoryProduct = () => {
     setFrameworkComponents({ ...tempFrameworkComponent, softHoldRenderer: SoftHoldRenderer, actionsRenderer: ActionsRenderer })
 
     const defaultColumns = [
-      { field: 'softHold', headerName: 'Soft Hold', show: true, cellRenderer: 'softHoldRenderer' },
-      { field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' }
+      { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
+      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'commonRenderer' }
     ];
 
     setColumns([...columns, ...defaultColumns])

@@ -371,6 +371,10 @@ export const genrateColoum = (fields, column, rendererNames, editable, renderedF
                         currentColumn.columnData.editable = true;
                     }
                 }
+                if (ele.type === "date") {
+                    currentColumn.columnData.filter = false;
+                    currentColumn.columnData.sortable = false;
+                }
                 column.push({ ...currentColumn.columnData, leval: ele.leval });
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
                     rendererNames.push(currentColumn?.rendererName)
