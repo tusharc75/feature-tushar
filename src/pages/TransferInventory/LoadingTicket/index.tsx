@@ -26,7 +26,6 @@ import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwip
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import { uniq, map, groupBy } from 'lodash';
 import { AiFillFilePdf } from 'react-icons/ai';
-import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 
 const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
 
@@ -63,7 +62,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
       if (e?.fieldData?.fieldName === "serializedProduct") {
-        column.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+        column.push({ field: "serializedProductShow", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
     })
     const extracolumns = [
@@ -150,6 +149,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         obj['productName'] = product.productDetail.productName;
         obj['productNumber'] = product.productDetail.productNumber;
         obj['serializedProduct'] = product.productDetail.serializedProduct;
+        obj['serializedProductShow'] = product.productDetail.serializedProduct ? "Yes" : "No";
         obj['qty'] = product.qty;
         obj['type'] = 'Product';
         obj['isChecked'] = false;
@@ -194,7 +194,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     productNameRenderer: ProductNameRenderer,
     inventoryRenderer: InventoryRenderer,
     warehouseRenderer: WarehouseRenderer,
-    checkboxRenderer: CheckboxRenderer,
     commonRenderer: CommonRenderer
   };
 
