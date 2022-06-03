@@ -11,17 +11,39 @@ import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import { convertInventory, productInventory } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { Autocomplete } from '@material-ui/lab';
 
 const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, warehouse }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+  const [serialNumbers, setSerialNumbers] = useState([]);
   const toastConfig = useContext(CustomToastContext);
 
+  useEffect(() => {
+    if (product.length === 1 && type === 'convert') {
+      fetchData();
+    }
+  }, [type, product]);
+  const fetchData = () => {
+    setLoading(true);
+    axiosInstance()
+      .get(`${convertInventory.api}/serial-number/${product[0]._id}`)
+      .then(({ data: { data } }) => {
+        if (!data || data.lenght === 0) return;
+        setSerialNumbers(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setLoading(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   const handleSubmit = (values) => {
-    console.log(product);
+    const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
     const data = {
       products: product?.map((e) => {
-        return { id: e.id, productCategory: e.productCategoryId };
+        return { id: e.id, productCategory: e.productCategoryId, serialNumberIds: product > 1 ? [] : serialNumberIds.map((item) => item?._id) };
       }),
       qty: parseInt(values.qty),
       warehouse: warehouse
@@ -29,7 +51,7 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
     setLoading(true);
 
     axiosInstance()
-      .post(`${convertInventory.api}/convert-inventory`, data)
+      .post(`${convertInventory.api}/convert-inventory-to-asset`, data)
       .then(({ data: { data } }) => {
         setLoading(false);
         toastConfig.setToastConfig({
@@ -114,6 +136,37 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
                   />
                 </ListItem>
               </List>
+              <Autocomplete
+                size="small"
+                options={serialNumbers.map((item: any) => item?.serialNumber)}
+                freeSolo={false}
+                multiple={true}
+                disableCloseOnSelect
+                value={values['serialNumbers']}
+                onChange={(_, val) => {
+                  if (type === 'convert') {
+                    setFieldValue('serialNumbers', val);
+                  } else {
+                    setFieldValue(
+                      'serialNumbers',
+                      val.map((item: string) => item.toUpperCase())
+                    );
+                  }
+                }}
+                getOptionSelected={(item, current) => item === current}
+                getOptionLabel={(option) => option}
+                renderInput={(props) => (
+                  <TextField
+                    {...props}
+                    placeholder={''}
+                    variant="outlined"
+                    name="serialNumbers"
+                    label={'Select Serial Numbers'}
+                    error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
+                    helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                  />
+                )}
+              />
             </CustomDialogContent>
             <CustomDialogFooter>
               <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
