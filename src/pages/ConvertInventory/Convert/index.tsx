@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect, useContext } from 'react';
-import { Box, Button, Dialog, List, ListItem, ListItemAvatar, ListItemText, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, Divider, List, ListItem, ListItemAvatar, ListItemText, TextField } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -136,6 +136,9 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
                   />
                 </ListItem>
               </List>
+              <Box my={2} mx={1}>
+                <Divider />
+              </Box>
               <Autocomplete
                 size="small"
                 options={serialNumbers.map((item: any) => item?.serialNumber)}
