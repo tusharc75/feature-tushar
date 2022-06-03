@@ -13,12 +13,12 @@ export const CommonRenderer = params => <CustomRenderCell value={params.value} /
 export const CommonRendererWithCopy = params => <CustomRenderCell value={params.value} isCopyToClipboard={true} />;
 
 export const CreatedByRenderer = params => params.value ? (
-    <h5 className="createBy" title={`${params.value} • ${moment(
-        params.data.createdByDate.slice(0, 10)
+    <h5 className="createBy" title={`${params?.value} • ${moment(
+        params?.data?.createdByDate?.slice(0, 10)
     ).format(dateFormat)}`}>
         {params.value}
         <span className="createdAtTime badge-date">
-            {moment(params.data.createdByDate.slice(0, 10)).format(dateFormat)}
+            {moment(params?.data?.createdByDate?.slice(0, 10))?.format(dateFormat)}
         </span>
     </h5>
 ) : (
@@ -29,15 +29,15 @@ export const DateRenderer = params => params.value ? (
     <h5 className="createBy" title={`${moment(
         params.value.slice(0, 10)
     ).format(dateFormat)}`}>
-        {moment(params.value.slice(0, 10)).format(dateFormat)}
+        {moment(params?.value?.slice(0, 10))?.format(dateFormat)}
     </h5>
 ) : (
     <NoDataCell />
 );
 
 export const DateTimeRenderer = params => params.value ? (
-    <h5 className="createBy" title={`${moment(params.value).format(dateTimeFormat)}`}>
-        {moment(params.value).format(dateTimeFormat)}
+    <h5 className="createBy" title={`${moment(params.value)?.format(dateTimeFormat)}`}>
+        {moment(params.value)?.format(dateTimeFormat)}
     </h5>
 ) : (
     <NoDataCell />
@@ -52,11 +52,11 @@ export const CheckboxRenderer = params => (
 
 export const UpdatedByRenderer = params => params.value ? (
     <h5 className="updateBy" title={`${params.value} • ${moment(
-        params.data.updatedByDate.slice(0, 10)
+        params?.data?.updatedByDate?.slice(0, 10)
     ).format(dateFormat)}`}>
         {params.value}
         <span className="updatedAtTime badge-date">
-            {moment(params.data.updatedByDate.slice(0, 10)).format(dateFormat)}
+            {moment(params?.data?.updatedByDate?.slice(0, 10))?.format(dateFormat)}
         </span>
     </h5>
 ) : (
