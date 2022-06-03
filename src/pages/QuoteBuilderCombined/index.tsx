@@ -435,8 +435,12 @@ const QuoteBuilders = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterQuotes=${selectedType}`;
+
+    if (isExport) {
+      deepFilter = `filterQuotes=${selectedType}`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -748,6 +752,7 @@ const QuoteBuilders = () => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchQuoteBuilder()
                     }}
+                    additionalParams={getQueryString(true)}
                   />
                 </Grid>
               </Grid>

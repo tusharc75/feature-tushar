@@ -62,7 +62,15 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       disabled: false,
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
+      filter: false, sortable: false,
       editable: permissions?.transferInventory?.isUpdate
+    });
+    column.push({
+      field: 'inventory',
+      headerName: 'Inventory',
+      show: true,
+      filter: false, sortable: false,
+      cellRenderer: 'commonRenderer',
     });
     setColumns([...column])
   }
@@ -194,20 +202,31 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   };
 
   const onCellValueChanged = ({ data }) => {
+    if (!Number(data?.qty) || Number(data?.qty) <= 0) {
+      toastConfig.setToastConfig({
+        type: 'error',
+        message: "Please enter valid Qty.",
+        open: true
+      });
+      fetchProducts();
+      return;
+    }
     if (data.canDelete === false) {
       toastConfig.setToastConfig({
-        type: 'warning',
+        type: 'error',
         message: "Qty can't be updated",
         open: true
       });
+      fetchProducts();
       return;
     }
     if (Number(data.qty) > Number(data.inventory)) {
       toastConfig.setToastConfig({
-        type: 'warning',
+        type: 'error',
         message: "Qty can't be greater then inventory",
         open: true
       });
+      fetchProducts();
       return;
     }
     updateQty(data?._id, data.qty);

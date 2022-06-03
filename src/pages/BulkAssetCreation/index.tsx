@@ -185,10 +185,12 @@ const BulkAssetCreation = () => {
         });
     };
 
-    const getQueryString = () => {
+    const getQueryString = (isExport = false) => {
         let deepFilter = `?page=${page}&limit=${limit}&filterBulkAssetCreation=${selectedType}`;
         let filterById = [];
-
+        if (isExport) {
+            deepFilter = `filterBulkAssetCreation=${selectedType}`;
+          }
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }
@@ -354,6 +356,7 @@ const BulkAssetCreation = () => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchBulkAssetCreation()
                     }}
+                    additionalParams={getQueryString(true)}
                 />
             </Grid>
         </Grid>
