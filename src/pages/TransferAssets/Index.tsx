@@ -144,7 +144,7 @@ const TransferAsset = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterTransferAssets=${selectedType}`;
     if (isExport) {
-      deepFilter = `filterRepairJobs=${selectedType}`;
+      deepFilter = `filterTransferAssets=${selectedType}`;
     }
     if (fromRental) {
       let filterById = [];
