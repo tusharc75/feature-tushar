@@ -30,7 +30,7 @@ const Report = () => {
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   } = useData();
   let { resource } = useParams();
   let history = useHistory();
@@ -72,7 +72,6 @@ const Report = () => {
       const {
         data: { data: lookupResource }
       } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
-      console.log(lookupResource);
       if (lookupResource) {
         data?.forEach((e) => {
           if (e?.fieldData?.fieldName === 'currentOwner') {
@@ -86,10 +85,10 @@ const Report = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase]) {
+      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === "quotes" ? "quoteBuilder" : resourceCamelCase]) {
         o.fieldData.primaryField = true;
       }
-      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`].path);
+      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase === "quotes" ? "quoteBuilder" : resourceCamelCase}Detail`].path);
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -128,7 +127,7 @@ const Report = () => {
     if (showGrid) {
       fetchResourceData();
     }
-  }, [page, sorting, search, limit, filters, pageSizes]);
+  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   React.useEffect(() => {
     // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
@@ -206,8 +205,11 @@ const Report = () => {
   };
 
   // Create and return query for filters
-  const getFilter = () => {
-    let filterQuery = `page=${page}&limit=${limit}&`;
+  const getFilter = (isExport = false) => {
+    let filterQuery = `page=${page}&`;
+    if (!isExport) {
+      filterQuery = `limit=${limit}&`;
+    }
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
@@ -293,9 +295,9 @@ const Report = () => {
       type: 'info'
     });
     setExporting(true);
-    let filterQuery = getFilter();
+    let filterQuery = getFilter(true);
     axiosInstance()
-      .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`, {
+      .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report/export?export=1&${filterQuery}`, {
         responseType: 'arraybuffer'
       })
       .then((res) => {
@@ -339,7 +341,7 @@ const Report = () => {
                         className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
                         style={{ color: theme.palette.info.light }}
                       >
-                        Export All ({dataRows?.length || 0})
+                        Export All
                       </span>
                     </div>
                   )}

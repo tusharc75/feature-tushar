@@ -47,6 +47,7 @@ import accountClass from '../Account/account.module.scss';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
+import ContentFullScreen from '../../components/ContentFullScreen';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title)
@@ -75,6 +76,7 @@ const PurchaseOrderDetailsPage = () => {
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [nextStep, setNextStep] = useState(true);
   const [isShowIssue, seIsShowIssue] = useState(false);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
 
   function a11yProps(index: any) {
@@ -217,63 +219,8 @@ const PurchaseOrderDetailsPage = () => {
       });
   };
 
-  const handleViewPdf = (download) => {
-    axiosInstance()
-      .get(`${purchaseOrder.api}/${id}/pdf`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            if (download) {
-              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', `PurchaseOrder-${purchaseOrderData.purchaseOrderNumber}.pdf`);
-              document.body.appendChild(link);
-              link.click();
-            } else {
-              const file = new Blob([data], { type: 'application/pdf' });
-              const fileURL = URL.createObjectURL(file);
-              const pdfWindow = window.open();
-              pdfWindow.location.href = fileURL;
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            }
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
-  };
-
-  const handleAttachments = () => {
-    let request;
-    request = {
-      name: 'Purchase Order',
-      fileUrl: '',
-      relatedTo: [
-        {
-          type: purchaseOrder.resource,
-          referenceId: purchaseOrderData?._id,
-          access: true
-        },
-        {
-          type: purchaseOrderData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
-          referenceId: purchaseOrderData?.customerAccountName
-            ? purchaseOrderData?.customerAccountName?.optionValue
-            : purchaseOrderData?.supplierAccountName?.optionValue,
-          access: false
-        }
-      ]
-    };
   };
 
   return (
@@ -313,12 +260,12 @@ const PurchaseOrderDetailsPage = () => {
                     )}
                   {permissions?.purchaseOrder?.isUpdate &&
                     (isShowIssue && [PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status)
-                      || [PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(purchaseOrderData?.status))
+                      || [PURCHASE_ORDER_STATUS.received, PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(purchaseOrderData?.status))
                     && (
                       <>
                         <Button
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          color="default"
+                          variant={'outlined'}
+                          color="primary"
                           size="small"
                           onClick={openActions}
                           aria-controls="action-menu"
@@ -426,47 +373,51 @@ const PurchaseOrderDetailsPage = () => {
                             currentStep={currentStep}
                             setCurrentStep={setCurrentStep}
                             isStepEnded={[PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
+                            setStepFullScreen={() => setStepFullScreen(true)}
                           />
-                          {currentStep === 0 && (
-                            <Product
-                              purchaseOrderData={purchaseOrderData}
-                              setNextStep={setNextStep}
-                              setPurchaseOrderProduct={setPurchaseOrderProduct}
-                              renderedFrom={`${renderedFrom}_grid-1`}
-                              allowedToEdit={allowedToEdit}
-                              seIsShowIssue={seIsShowIssue}
-                            />
-                          )}
-                          {currentStep === 1 &&
-                            <Service
-                              purchaseOrderData={purchaseOrderData}
-                              renderedFrom={`${renderedFrom}_grid-2`}
-                              setNextStep={setNextStep}
-                              seIsShowIssue={seIsShowIssue}
-                            />}
-                          {/* {currentStep === 2 && (
+                          <ContentFullScreen title={purchaseOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                            {currentStep === 0 && (
+                              <Product
+                                purchaseOrderData={purchaseOrderData}
+                                setNextStep={setNextStep}
+                                setPurchaseOrderProduct={setPurchaseOrderProduct}
+                                renderedFrom={`${renderedFrom}_grid-1`}
+                                allowedToEdit={allowedToEdit}
+                                seIsShowIssue={seIsShowIssue}
+                                updateStatus={updateStatus}
+                              />
+                            )}
+                            {currentStep === 1 &&
+                              <Service
+                                purchaseOrderData={purchaseOrderData}
+                                renderedFrom={`${renderedFrom}_grid-2`}
+                                setNextStep={setNextStep}
+                                seIsShowIssue={seIsShowIssue}
+                              />}
+                            {/* {currentStep === 2 && (
                             <IssuePo
                               purchaseOrderData={purchaseOrderData}
                               handleViewPdf={handleViewPdf}
                               updateStatus={updateStatus}
                               setCurrentStep={setCurrentStep}
                               currentStep={currentStep}
-                              handleAttachments={handleAttachments}
                               statusOptions={statusOptions}
                               renderedFrom={`${renderedFrom}_grid-3`}
                             />
                           )} */}
-                          {(currentStep === 2) && (
-                            <ReceivingAsset
-                              purchaseOrderData={purchaseOrderData}
-                              setCurrentStep={setCurrentStep}
-                              updateStatus={updateStatus}
-                              statusOptions={statusOptions}
-                              handleViewPdf={handleViewPdf}
-                              handleAttachments={handleAttachments}
-                              renderedFrom={`${renderedFrom}_grid-4`}
-                            />
-                          )}
+                            {(currentStep === 2) && (
+                              <ReceivingAsset
+                                purchaseOrderData={purchaseOrderData}
+                                setCurrentStep={setCurrentStep}
+                                updateStatus={updateStatus}
+                                statusOptions={statusOptions}
+                                renderedFrom={`${renderedFrom}_grid-4`}
+                                isSmallScreen={isSmallScreen}
+                                isTabletScreen={isTabletScreen}
+                                stepFullScreen={stepFullScreen}
+                                showActivity={showActivity}
+                              />
+                            )}</ContentFullScreen>
                         </Paper>
                       </Grid>
                     )}

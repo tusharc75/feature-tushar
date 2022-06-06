@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import Grid from '@material-ui/core/Grid';
+import { Grid, IconButton, Tooltip, Button, Menu, MenuItem } from "@material-ui/core";
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,7 +11,7 @@ import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { isObjectEmpty, gridLoadingTimeout, productInventory } from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, productInventory, getLocalStorageArrayData, removeLocalStorage } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -20,16 +20,24 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
 import InfoIcon from '@material-ui/icons/Info';
 import SoftHoldDialog from './SoftHold';
+import HistoryDialog from './History/historyDialog';
+import SerialNumberDialog from './SerialNumber/SerialNumberDialog';
 import { camelCase } from 'lodash';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
 import HtmlTooltip from "../../components/CustomTooltipTitle";
 import NoDataCell from "../../components/Helpers/NoDataCell";
-
+import HistoryIcon from '@material-ui/icons/History';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import AddRemoveDialog from './AddRemove';
+import { ExpandMore } from '@material-ui/icons';
+import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
 
 const InventoryProduct = () => {
 
   const renderedFrom = camelCase(routes?.productInventory.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -38,22 +46,43 @@ const InventoryProduct = () => {
   const [plantId, setPlantId] = useState(null);
   const [plantOptions, setPlantOptions] = useState([]);
   const [frameworkComponents, setFrameworkComponents] = useState({});
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
 
   const [softHold, setSoftHold] = useState({ open: false, data: {} });
+  const [showHistory, setShowHistory] = useState({ open: false, product: "" });
+  const [showSerialNumber, setShowSerialNumber] = useState({ open: false, product: "" });
+
+  const [inventory, setInventory] = useState({ open: false, product: [], type: "" });
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
 
   const { getColumnData } = useColumns();
 
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, [plantId]);
+
   useEffect(() => {
     getPlants();
+  }, [selectedEntity]);
+
+  useEffect(() => {
     fetchProductInventory();
   }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const getPlants = () => {
     axiosInstance()
-      .get(`/warehouse?noEntityWise=1`)
+      .get(`/warehouse`)
       .then(({ data: { data } }) => {
         setPlantOptions([{ "warehouseName": "All", "_id": "All" }, ...data]);
         if (plantId === null && data?.length) {
@@ -62,57 +91,64 @@ const InventoryProduct = () => {
       });
   };
 
-  useEffect(() => {
-    fetchGridColumns();
-  }, [plantId]);
+  const fetchGridColumns = async () => {
+    setColumns(null)
 
-  const extraColumn = [
-    { field: 'softHold', headerName: 'Soft Hold', show: true, cellRenderer: 'softHoldRenderer' },
-    { field: 'availableInventory', headerName: 'Available Inventory', show: true, cellRenderer: 'commonRenderer' }
-  ];
+    const productFields = await axiosInstance().get("/field?resource=Product&view=true");
+    const productInventoryFields = await axiosInstance().get("/field?resource=Product Inventory&view=true");
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Product Inventory')
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
-          if (currentColumn !== null) {
-            if (currentColumn?.columnData.field !== 'plant') {
-              if (o.fieldData.type === 'number' && ['inventory', 'minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
-                columns.push({
-                  ...currentColumn?.columnData,
-                  cellEditor: 'numericCellEditor',
-                  editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
-                });
-              } else if (o.fieldData.fieldName === 'product') {
-                columns.push({
-                  ...currentColumn?.columnData,
-                  field: 'productName',
-                  headerName: o.fieldData.fieldLabel,
-                  cellRenderer: 'productNameRenderer',
-                  primaryField: true
-                });
-              } else {
-                columns.push(currentColumn?.columnData);
-              }
-            }
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              if (currentColumn?.columnData.field === 'product') {
-                rendererNames.push('productNameRenderer');
-              } else {
-                rendererNames.push(currentColumn?.rendererName);
-              }
-            }
+    let columns = []
+    let rendererNames = []
+
+    productFields?.data?.data?.forEach(o => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path)
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+    })
+
+    columns?.forEach((e) => {
+      if (!["productName", "serializedProduct"].includes(e.field)) {
+        e.show = false
+      }
+    })
+
+    productInventoryFields?.data?.data?.forEach((o) => {
+      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
+      if (currentColumn !== null) {
+        if (!['plant', 'product'].includes(currentColumn?.columnData.field)) {
+          if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
+            columns.push({
+              ...currentColumn?.columnData,
+              cellEditor: 'numericCellEditor',
+              filter: false, sortable: false,
+              editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
+            });
           }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        setFrameworkComponents({ ...tempFrameworkComponent, productNameRenderer: ProductNameRenderer, softHoldRenderer: SoftHoldRenderer });
-        setColumns([...columns, ...extraColumn]);
-      });
-  };
+          else if (['inventory'].includes(currentColumn?.columnData.field)) {
+            columns.push({ ...currentColumn?.columnData, filter: false, sortable: false });
+          }
+          else {
+            columns.push(currentColumn?.columnData);
+          }
+        }
+      }
+    });
+
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    setFrameworkComponents({ ...tempFrameworkComponent, softHoldRenderer: SoftHoldRenderer, actionsRenderer: ActionsRenderer })
+
+    const defaultColumns = [
+      { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
+      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'commonRenderer' }
+    ];
+
+    setColumns([...columns, ...defaultColumns])
+    fetchProductInventory();
+  }
 
   const fetchProductInventory = () => {
     dispatch({ type: 'loading', loading: true });
@@ -195,12 +231,6 @@ const InventoryProduct = () => {
     axiosInstance().put(`${productInventory.api}`, inputData);
   };
 
-  const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`/product/detail/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
   const infoHandler = (params) => {
     setSoftHold({ open: true, data: params.data });
   };
@@ -217,6 +247,69 @@ const InventoryProduct = () => {
     </>
   );
 
+  const ActionsRenderer = (params) => (
+    <>
+      {(permissions?.productInventory?.isUpdate && plantId !== "All") &&
+        <Fragment>
+          <Box>
+            <Tooltip title="Add">
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                onClick={() => {
+                  setInventory({ open: true, product: [params?.data], type: 'add' })
+                }}
+              >
+                <AddCircleOutlineIcon fontSize="small" color="secondary" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Box pl={1}>
+            <Tooltip title="Remove">
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                disabled={params?.data?.availableInventory ? false : true}
+                onClick={() => {
+                  setInventory({ open: true, product: [params?.data], type: 'remove' })
+                }}
+              >
+                <RemoveCircleOutlineIcon fontSize="small" color={params?.data?.availableInventory ? "error" : "disabled"} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Fragment>
+      }
+      <Box pl={1}>
+        <Tooltip title="History">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowHistory({ open: true, product: params?.data?.productId })
+            }}
+          >
+            <HistoryIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      {params?.data?.serializedProduct &&
+        <Box pl={1}>
+          <Tooltip title="View Serial Number">
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setShowSerialNumber({ open: true, product: params?.data?.productId })
+              }}
+            >
+              <VisibilityOutlinedIcon fontSize="small" color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      }
+    </>
+  );
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -249,8 +342,8 @@ const InventoryProduct = () => {
             isDownloadExcel={false}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchProductInventory();
@@ -310,6 +403,50 @@ const InventoryProduct = () => {
                   />
                 </Grid>
               </Box>
+              {permissions?.productInventory?.isUpdate ?
+                <Box ml={1}>
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                    color="default"
+                    size="small"
+                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                  >
+                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        closeActions()
+                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: "add" })
+                      }}
+                    >
+                      Add
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        closeActions()
+                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: "remove" })
+                      }}
+                    >
+                      Remove
+                    </MenuItem>
+                  </Menu>
+                </Box>
+                : null}
             </Grid>
           </Grid>
         </div>
@@ -317,7 +454,7 @@ const InventoryProduct = () => {
           Object.keys(frameworkComponents).length > 0 ? (
             <CustomAgGridEditable
               allowSelection={true}
-              allowAction={false}
+              allowAction={true}
               columns={columns}
               dataRows={dataRows}
               frameworkComponents={frameworkComponents}
@@ -328,8 +465,8 @@ const InventoryProduct = () => {
               pageSizes={pageSizes}
               page={page}
               onCellValueChanged={onCellValueChanged}
-              actionWidth={150}
               loading={loading}
+              actionWidth={180}
               renderedFrom={renderedFrom}
               refreshGrid={fetchProductInventory}
               showOnlyShowFilteredRecordSwitch={true}
@@ -344,6 +481,35 @@ const InventoryProduct = () => {
           <SoftHoldDialog
             close={() => setSoftHold({ open: false, data: {} })}
             data={softHold.data}
+            warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
+          />}
+
+        {showHistory.open &&
+          <HistoryDialog
+            close={() => setShowHistory({ open: false, product: "" })}
+            product={showHistory.product}
+            warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
+          />}
+
+        {showSerialNumber.open &&
+          <SerialNumberDialog
+            close={() => setShowSerialNumber({ open: false, product: "" })}
+            product={showSerialNumber.product}
+            warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
+          />}
+        {inventory.open &&
+          <AddRemoveDialog
+            handleClose={() =>
+              setInventory({ open: false, product: [], type: "" })
+            }
+            handleSuccess={() => {
+              removeLocalStorage(localStorageSelectedRecords)
+              fetchProductInventory()
+              setInventory({ open: false, product: [], type: "" })
+            }}
+            product={inventory.product}
+            type={inventory.type}
+            warehouse={plantId}
           />}
       </div>
     </Fragment>

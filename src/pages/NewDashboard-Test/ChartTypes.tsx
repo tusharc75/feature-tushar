@@ -210,7 +210,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                 <h4>
                   {chart.chartTitle.includes('CUR')
                     ? startCase(chart.chartTitle.replace(/CUR/gi, globalFilters.currency || currency))
-                    : startCase(chart.chartTitle.replace(/Type/gi, filterValues?.status?.optionLabel || 'Open'))}
+                    : startCase(chart.chartTitle.replace(/statusType/gi, filterValues?.status?.optionLabel || 'Open'))}
                 </h4>
               </Typography>
             )}
@@ -226,7 +226,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                 <TableView
                   id={chart.uniqueId}
                   type={chart.chartType?.toLowerCase()}
-                  chartData={chartData?.tableData}
+                  chartData={[...chartData?.tableData]}
                   isScreenSmall={isScreenSmall}
                   currency={globalFilters.currency || currency}
                   selectedDashboard={globalFilters?.dashboardType}
@@ -240,7 +240,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   data={chartData}
                   options={{
                     maintainAspectRatio: false,
-                    indexAxis: chart.axis
+                    indexAxis: chart?.axis
                   }}
                 />
               )
@@ -248,7 +248,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
               <TableView
                 id={chart.uniqueId}
                 type={chart.chartType}
-                chartData={chartData?.tableData}
+                chartData={[...chartData?.tableData]}
                 isScreenSmall={isScreenSmall}
                 currency={globalFilters.currency || currency}
                 selectedDashboard={globalFilters?.dashboardType}
@@ -279,6 +279,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           currency={globalFilters.currency || currency}
           tableData={chartData ? chartData?.tableData : []}
           chart={chart}
+          isTableView={chartData?.graphType !== 'Table' && tableView}
           chartData={chartData?.tableData}
         />
       )}

@@ -7,60 +7,31 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import { ChartDataType } from './ChartTypes';
 
-// const getTitle = (uniqueId: string, currency: string): { fileName: string; title: string } => {
-//   switch (uniqueId) {
-//     case 'bookedVSBudget':
-//       return {
-//         fileName: 'Entity Sales Chart',
-//         title: `Total offered Value In ${currency}`
-//       };
-
-//     case 'offeredVsEntities':
-//       return {
-//         fileName: 'Sales Chart',
-//         title: `Total offered value in ${currency} vs Entities`
-//       };
-
-//     case 'offeredVsBudget':
-//       return {
-//         fileName: 'Sales Chart',
-//         title: `Total offered value in ${currency} vs Total booked value in ${currency}`
-//       };
-
-//     case 'regionalSale':
-//       return {
-//         fileName: 'Regional Sales',
-//         title: `Regional Sales Data`
-//       };
-
-//     case 'topCategory':
-//       return {
-//         fileName: 'Top Category',
-//         title: 'Top Selling Product Category'
-//       };
-
-//     case 'volumeVsBudget':
-//       return {
-//         fileName: 'Total Booked Volume',
-//         title: 'Total Booked Volume in MT vs Budget'
-//       };
-
-//     case 'volume2VsBudget':
-//       return {
-//         fileName: 'Total Booked Margin',
-//         title: `Total Booked GM in ${currency} vs Budget`
-//       };
-
-//     default:
-//       return;
-//   }
-// };
-
-export default async (type: string, currency: string, tableData: any[], chart: ChartDataType) => {
+export default async (type: string, currency: string, tableData: any[], chart: ChartDataType, isTableView: boolean) => {
   const { uniqueId, graphType, chartTitle } = chart;
-  const { title, fileName } = { title: chartTitle.replaceAll('currency', currency), fileName: chartTitle.replaceAll('currency', currency) };
+  const { title, fileName } = { title: chartTitle.replaceAll('CUR', currency), fileName: chartTitle.replaceAll('CUR', currency) };
 
-  if (graphType !== 'Table') {
+
+  const columns = Object.keys(tableData[0])
+      .map((k) => {
+        let b = tableData[0];
+        return {
+          colName: k,
+          order: b[k].order
+        };
+      })
+      .sort((a, b) => a.order - b.order)
+      .map((d) => d.colName);
+    let newData = tableData.map((data) => {
+      let obj: any = {};
+      columns.forEach((key) => {
+        obj[key] = data[key].value;
+      });
+
+      return obj;
+    });
+
+  if (graphType !== 'Table' && !isTableView) {
     switch (type) {
       case 'ppt': {
         const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
@@ -68,14 +39,14 @@ export default async (type: string, currency: string, tableData: any[], chart: C
         const pptx = new PptxGenJs();
         const slide = pptx.addSlide();
         slide.addText(title, {
-          fontSize: 20,
+          fontSize: 15,
           color: '363636',
           x: '12%',
           y: '4%',
           fill: { color: 'F1F1F1' },
           align: pptx.AlignH.center
         });
-        slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '15%' });
+        slide.addImage({ data: dataUrl, w: '80%', h: '80%', x: '10%', y: '10%' });
         pptx.writeFile({ fileName: fileName + '.pptx' });
         break;
       }
@@ -84,9 +55,9 @@ export default async (type: string, currency: string, tableData: any[], chart: C
         const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
         const dataUrl = canvas.toDataURL('image/png', 1.0);
         const doc = new jsPDF('portrait');
-        doc.setFontSize(10);
-        doc.text(title, 60, 15);
-        doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 100);
+        doc.setFontSize(12);
+        doc.text(title, 105, 10, { align: 'center' });
+        doc.addImage(dataUrl, 'JPEG', 10, 20, 190, 140);
         doc.save(fileName + '.pdf');
         break;
       }
@@ -95,7 +66,7 @@ export default async (type: string, currency: string, tableData: any[], chart: C
         // const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
         // const dataUrl = canvas.toDataURL('image/png', 1.0);
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-        const ws = utils.json_to_sheet(tableData);
+        const ws = utils.json_to_sheet(newData);
         const wb = {
           Sheets: {
             data: ws
@@ -109,7 +80,7 @@ export default async (type: string, currency: string, tableData: any[], chart: C
       }
 
       case 'json': {
-        let blob = new Blob([JSON.stringify(tableData)], { type: 'text/plain;charset=utf-8' });
+        let blob = new Blob([JSON.stringify(newData)], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, fileName + '.json');
         break;
       }
@@ -118,37 +89,38 @@ export default async (type: string, currency: string, tableData: any[], chart: C
     }
   }
 
-  if (graphType === 'Table') {
-    tableData = tableData.map((d) => {
-      for (const key in d) {
-        let upper = startCase(key);
-        if (upper !== key) {
-          d[upper] = d[key];
-          delete d[key];
-        }
-      }
-      return d;
-    });
+  if (graphType === 'Table' || graphType === "Chart" && isTableView) {
+
     switch (type) {
       case 'ppt': {
         const pptx = new PptxGenJs();
-        pptx.tableToSlides('table_' + uniqueId, { x: 0.5, y: 0.2, w: 10 });
+        pptx.tableToSlides('table_' + uniqueId, {
+          x: 0.5, y: 0.5, w: 10, addText: {
+            text: title as any, options: {
+              fontSize: 15,
+              color: '363636',
+              x: '12%',
+              y: '4%',
+              fill: { color: 'F1F1F1' },
+              align: pptx.AlignH.center
+            }
+          }
+        });
         pptx.writeFile({ fileName: fileName + '.pptx' });
         break;
       }
-
       case 'pdf': {
         const doc = new jsPDF('portrait');
-        doc.setFontSize(16);
-        doc.text(title, 70, 10);
-        let col = Object.keys(tableData[0]).map((_c: string) => _c);
+        doc.setFontSize(12);
+        doc.text(title, 105, 10, { align: 'center' });
+        let col = columns.map((s: string) => startCase(s))
         let row = [];
-        if (tableData && tableData.length) {
-          row = tableData.map((data) =>
-            Object.keys(data).map((key) =>
+        if (newData && newData.length) {
+          row = newData.map((data) =>
+            columns.map((key) =>
               isNaN(Number(data[key]))
-                ? data[key]
-                : formatAmountWithCurrency(currency, Number(data[key]) ? data[key].toFixed(2) : '00').fullFormatAmount
+                ? data[key] : key.includes("MT") || key.includes("GM") ? Number(data[key]) ? data[key].toFixed(2) : '00'
+                  : formatAmountWithCurrency(currency, Number(data[key]) ? data[key].toFixed(2) : '00').fullFormatAmount
             )
           );
           //@ts-ignore
@@ -164,7 +136,7 @@ export default async (type: string, currency: string, tableData: any[], chart: C
       case 'excel': {
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const ws = utils.json_to_sheet(tableData);
+        const ws = utils.json_to_sheet(newData);
         const wb = {
           Sheets: {
             data: ws
@@ -178,7 +150,7 @@ export default async (type: string, currency: string, tableData: any[], chart: C
       }
 
       case 'json': {
-        let blob = new Blob([JSON.stringify(tableData)], { type: 'text/plain;charset=utf-8' });
+        let blob = new Blob([JSON.stringify(newData)], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, fileName + '.json');
         break;
       }

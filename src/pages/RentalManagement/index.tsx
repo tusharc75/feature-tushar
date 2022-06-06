@@ -275,8 +275,11 @@ const RentalManagement = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterRentalManagements=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterRentalManagements=${selectedType}`;
+    }
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
@@ -466,6 +469,7 @@ const RentalManagement = () => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchRentalManagement()
                     }}
+                    additionalParams={getQueryString(true)}
                   />
                 </Grid>
               </Grid>

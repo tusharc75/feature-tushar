@@ -140,13 +140,14 @@ const TransferInventory = () => {
       });
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterTransferInventory=${selectedType}`;
+  const getQueryString = (isExport = false) => {
 
-    if (fromRental) {
-      let filterById = [];
-      filterById.push({ field: 'rentalJob', term: fromRental?._id });
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterTransferInventory=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterTransferInventory=${selectedType}`;
+    }
+    else {
+      deepFilter = `?page=${page}&limit=${limit}&filterTransferInventory=${selectedType}`;
     }
 
     if (!isObjectEmpty(filters)) {
@@ -303,7 +304,7 @@ const TransferInventory = () => {
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
             permissions={permissions?.transferInventory}
-            module="purchase order"
+            module="transfer inventory"
             api={transferInventory.api}
             afterImportCompleted={() => {
               fetchTransferInventory();
@@ -316,6 +317,7 @@ const TransferInventory = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchTransferInventory();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
@@ -390,16 +392,6 @@ const TransferInventory = () => {
                   </div>
                 </HideWhenOffline>
               }
-              {/* {fromRental && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Rental Job : ${fromRental?.rentalJobName}`}
-                  onDelete={() => {
-                    setFromRental(null);
-                  }}
-                />
-              )} */}
             </Grid>
             <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -428,45 +420,6 @@ const TransferInventory = () => {
                       </Button>
                     )}
                   </Grid>
-
-                  {/* <HtmlTooltip title={selectedRecords.length > 0 ? '' : 'Please select some records'}>
-                    <span>
-                      <Button
-                        className={isMobile ? 'mobile_button' : styles.action_submit_btn}
-                        variant={isMobile ? 'text' : 'contained'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        disabled={selectedRecords.length === 0 || selectedRecords.filter((t: any) => t.status !== 'New').length > 0}
-                        aria-controls="action-menu"
-                      >
-                        {isMobile ? '' : 'Actions'} <ExpandMore />
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    {permissions?.transferInventory?.isDelete && (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    )}
-                  </Menu> */}
                 </Grid>
               </Box>
             </Grid>

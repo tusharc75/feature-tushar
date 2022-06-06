@@ -27,7 +27,7 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import { uniq, map, groupBy } from 'lodash';
 import { AiFillFilePdf } from 'react-icons/ai';
 
-const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus }) => {
+const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, updateStatus, canLoad, canReceive }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -40,20 +40,38 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
   const [downloadingFile, setDownlodingFile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [columns, setColumns] = useState(null)
+
+  useEffect(() => {
+    fetchFields();
+  }, []);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  const columns = [
-    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'assetNumber', primaryField: true, headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'inventoryRenderer' },
-    { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
-    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
-  ];
+  const fetchFields = async () => {
+    const column = [];
+    const productResult = await axiosInstance().get('/field?resource=Product&view=true')
+    const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+    productFields?.forEach((e) => {
+      if (e?.fieldData?.fieldName === "productName") {
+        column.push({ field: "productName", primaryField: true, headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "productNameRenderer" })
+      }
+      if (e?.fieldData?.fieldName === "productNumber") {
+        column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      }
+      if (e?.fieldData?.fieldName === "serializedProduct") {
+        column.push({ field: "serializedProductShow", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      }
+    })
+    const extracolumns = [
+      { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+      { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
+      { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
+    ];
+    setColumns([...column, ...extracolumns])
+  }
 
   const TicketRenderer = (params) =>
     params?.value ? (
@@ -123,19 +141,20 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         obj['isChecked'] = false;
         rows.push(obj);
       });
-      products
-        ?.filter((p) => p.productDetail.serializedProduct === false)
-        ?.forEach((product) => {
-          let obj = { ...product };
-          obj['assetNumber'] = product.productDetail.productName;
-          obj['_id'] = product.product;
-          obj['qty'] = product.qty;
-          obj['type'] = 'Product';
-          obj['productName'] = product?.productDetail?.productName;
-          obj['productId'] = product?.product;
-          obj['isChecked'] = false;
-          rows.push(obj);
-        });
+
+      products?.forEach((product) => {
+        let obj = { ...product };
+        obj['productId'] = product?.product;
+        obj['_id'] = product.product;
+        obj['productName'] = product.productDetail.productName;
+        obj['productNumber'] = product.productDetail.productNumber;
+        obj['serializedProduct'] = product.productDetail.serializedProduct;
+        obj['serializedProductShow'] = product.productDetail.serializedProduct ? "Yes" : "No";
+        obj['qty'] = product.qty;
+        obj['type'] = 'Product';
+        obj['isChecked'] = false;
+        rows.push(obj);
+      });
 
       deliveryTicketList?.map((obj) => {
         rows.map((d, index) => {
@@ -273,37 +292,41 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           {downloadingFile ? 'Please wait...' : 'Preview'}
         </Button>
         <Box ml={1}>
-          <Button
-            variant={'outlined'}
-            color="primary"
-            disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
-            onClick={handleLoadingTicketDialog}
-            size="small"
-          >
-            {`Create Loading Ticket`}
-          </Button>
+          {(allowedToEdit && canLoad) &&
+            <Button
+              variant={'outlined'}
+              color="primary"
+              disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
+              onClick={handleLoadingTicketDialog}
+              size="small"
+            >
+              {`Create Loading Ticket`}
+            </Button>
+          }
           <Box component="span" ml={1} />
-          <Button
-            variant={'outlined'}
-            color="primary"
-            onClick={() => {
-              setShowConfirmBoxReceive(true);
-            }}
-            disabled={
-              selectedRecords.length === 0 ||
-              selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
-            }
-            size="small"
-          >
-            {`Receive`}
-          </Button>
+          {canReceive &&
+            <Button
+              variant={'outlined'}
+              color="primary"
+              onClick={() => {
+                setShowConfirmBoxReceive(true);
+              }}
+              disabled={
+                selectedRecords.length === 0 ||
+                selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+              }
+              size="small"
+            >
+              {`Receive`}
+            </Button>
+          }
         </Box>
       </Box>
       <Box>
         {columns ? (
           isMobile && !isTablet ? (
             <CustomSwipableList
-              allowSelection={allowedToEdit}
+              allowSelection={allowedToEdit || canReceive}
               allowSwipe={true}
               permissions={true}
               primaryField={columns?.find((d: any) => d.primaryField)}
@@ -364,7 +387,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
               allowAction={false}
               loading={loading}
               isClientSideGrid={true}
-              allowSelection={allowedToEdit}
+              allowSelection={allowedToEdit || canReceive}
               renderedFrom={renderedFrom}
               refreshGrid={fetchProducts}
             />
@@ -385,9 +408,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           products={selectedRecords?.filter((e) => e.type === 'Product')}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
-            if (transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.new) {
-              updateStatus(TRANSFER_INVENTORY_STATUS.inProgress)
-            }
             fetchProducts();
           }}
         />
@@ -396,7 +416,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         <ConfirmationDialog
           okBtnLoading={isLoading}
           open={showConfirmBoxReceive}
-          message={`Are you sure you want to received?`}
+          message={`Are you sure have been received ?`}
           onClose={() => {
             setShowConfirmBoxReceive(false);
           }}

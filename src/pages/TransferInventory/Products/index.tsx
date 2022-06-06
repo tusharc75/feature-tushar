@@ -13,11 +13,10 @@ import { useData } from 'src/StateProvider/Provider';
 import AddInventory from './AddInventory';
 import { gridLoadingTimeout, prepareDataForGrid, TRANSFER_INVENTORY_STATUS, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE } from 'src/constants/helpers';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 
-const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData }) => {
+const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -53,7 +52,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
       if (e?.fieldData?.fieldName === "serializedProduct") {
-        column.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+        column.push({ field: "serializedProductShow", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
       }
     })
     column.push({
@@ -63,7 +62,15 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       disabled: false,
       cellRenderer: 'commonRenderer',
       cellEditor: 'numericCellEditor',
+      filter: false, sortable: false,
       editable: permissions?.transferInventory?.isUpdate
+    });
+    column.push({
+      field: 'inventory',
+      headerName: 'Inventory',
+      show: true,
+      filter: false, sortable: false,
+      cellRenderer: 'commonRenderer',
     });
     setColumns([...column])
   }
@@ -97,6 +104,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
           finalObject['productName'] = u?.productDetail?.productName;
           finalObject['productNumber'] = u?.productDetail?.productNumber;
           finalObject['serializedProduct'] = u?.productDetail?.serializedProduct;
+          finalObject['serializedProductShow'] = u?.productDetail?.serializedProduct ? "Yes" : "No";
           finalObject['qty'] = u.qty;
           finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
           finalObject['isChecked'] = false;
@@ -136,6 +144,9 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
         });
         setIsAdding(false);
         closeDialog();
+        if (transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.new) {
+          updateStatus(TRANSFER_INVENTORY_STATUS.inProgress)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -187,25 +198,35 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
   const frameworkComponents = {
     commonRenderer: CommonRenderer,
     nameRenderer: NameRenderer,
-    checkboxRenderer: CheckboxRenderer,
     actionsRenderer: ActionRenderer
   };
 
   const onCellValueChanged = ({ data }) => {
+    if (!Number(data?.qty) || Number(data?.qty) <= 0) {
+      toastConfig.setToastConfig({
+        type: 'error',
+        message: "Please enter valid Qty.",
+        open: true
+      });
+      fetchProducts();
+      return;
+    }
     if (data.canDelete === false) {
       toastConfig.setToastConfig({
-        type: 'warning',
+        type: 'error',
         message: "Qty can't be updated",
         open: true
       });
+      fetchProducts();
       return;
     }
     if (Number(data.qty) > Number(data.inventory)) {
       toastConfig.setToastConfig({
-        type: 'warning',
+        type: 'error',
         message: "Qty can't be greater then inventory",
         open: true
       });
+      fetchProducts();
       return;
     }
     updateQty(data?._id, data.qty);
@@ -232,7 +253,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
 
   return (
     <React.Fragment>
-      {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inTransit]?.includes(transferInventoryData?.status) && (
+      {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress]?.includes(transferInventoryData?.status) && (
         <Box display="flex" justifyContent="space-between" p={1}>
           <Button
             variant={'contained'}
@@ -316,7 +337,7 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
               loading={loading}
               onCellValueChanged={onCellValueChanged}
               renderedFrom={renderedFrom}
-              refreshGrid={() => { }}
+              refreshGrid={fetchProducts}
             />
           )
           : <Box p={2} height={500} bgcolor="white">

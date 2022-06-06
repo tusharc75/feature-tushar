@@ -131,6 +131,9 @@ import ResourceCalendar from './pages/ResourceCalender';
 import ResourceCalendarData from './pages/ResourceCalender/ResourceCalendar';
 import CageManagement from './pages/CageManagement';
 import SerializedAssetTest from './pages/SerializedAsset-test';
+import ProductAuction from './pages/productAuction';
+import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDetailsPage';
+import ConvertInventory from './pages/ConvertInventory';
 
 var notificationInterval: any = null;
 
@@ -236,7 +239,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -301,7 +304,7 @@ function App() {
       }
     }
     if (user?.user?.customerContactId) {
-      redirectToAnotherScreen = routes?.pos?.path
+      redirectToAnotherScreen = routes?.pos?.path;
     }
 
     return !user ? (
@@ -704,10 +707,10 @@ function App() {
             <PrivateRoute exact path={`${routes.posProductDetail.path}/:id/:warehouseId`}>
               <PosProductDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={"/dashboard-master/:id"}>
+            <PrivateRoute exact path={'/dashboard-master/:id'}>
               <DashboardBuilder />
             </PrivateRoute>
-            <PrivateRoute exact path={"/dashboard-master"}>
+            <PrivateRoute exact path={'/dashboard-master'}>
               <DashboardsList />
             </PrivateRoute>
             <Route exact path={'/customer-sign/:id'}>
@@ -718,6 +721,15 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.cageManagement.path}`}>
               <CageManagement />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productAuction.path}`}>
+              <ProductAuction />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productAuctionDetail.path}/:id`}>
+              <ProductAuctionDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.inventoryToAsset.path}>
+              <ConvertInventory />
             </PrivateRoute>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}

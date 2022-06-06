@@ -531,9 +531,11 @@ export default function Contact(props) {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${queryType === 'My Accounts' ? 2 : selectedType}`;
-
+    if (isExport) {
+      deepFilter = `filterContacts=${queryType === 'My Accounts' ? 2 : selectedType}`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -761,6 +763,7 @@ export default function Contact(props) {
               if (gridApi) gridApi.deselectAll();
               else getContacts();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

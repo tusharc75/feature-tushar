@@ -12,7 +12,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { transferInventory } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import Steps from 'src/pages/RentalManagement/Steps';
@@ -61,6 +61,9 @@ const TransferInventoryDetailPage = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [transferInvSteps, setTransferInvSteps] = useState([]);
+
+  const [canReceive, setCanReceive] = useState(false);
+  const [canLoad, setCanLoad] = useState(false);
 
 
   useEffect(() => {
@@ -115,9 +118,26 @@ const TransferInventoryDetailPage = () => {
       .get(`${routes.transferInventory.path}/${id}`)
       .then(({ data: { data } }) => {
         const transferData = data;
+
+        const userEntity = user?.entity?.map((e) => e._id) ?? [];
+        if (data?.transferFromPlant?.entity?.length) {
+          setCanLoad(data?.transferFromPlant?.entity?.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0);
+        }
+        else {
+          setCanLoad(true);
+        }
+
+        if (data?.transfertoPlant?.entity?.length) {
+          setCanReceive(data?.transfertoPlant?.entity?.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0);
+        }
+        else {
+          setCanReceive(true);
+        }
+
         axiosInstance()
           .get(`${routes.transferInventory.path}/${id}/product`)
           .then(({ data: { data } }) => {
+
             var isSerializedAssetsStep = false;
             data?.products?.forEach((e) => {
               if (e?.productDetail?.serializedProduct) {
@@ -125,9 +145,10 @@ const TransferInventoryDetailPage = () => {
               }
             })
             var steps = transferInventorySteps;
-            if (!isSerializedAssetsStep) {
-              steps = steps?.filter((e) => e !== "Serialized Assets")
-            }
+            // if (!isSerializedAssetsStep) {
+            //   steps = steps?.filter((e) => e !== "Serialized Assets")
+            // }
+            steps = steps?.filter((e) => e !== "Serialized Assets")
             setTransferInvSteps(steps)
             getRessourceFields();
             setHeadingLabel(transferData.transferNumber);
@@ -191,7 +212,7 @@ const TransferInventoryDetailPage = () => {
           message: `Status updated ${status} Successfully`
         });
         if (status === TRANSFER_INVENTORY_STATUS.delivered) {
-          updateProcessStatus(2);
+          updateProcessStatus(1);
         }
         fetchTransferInventoryData();
       })
@@ -317,6 +338,7 @@ const TransferInventoryDetailPage = () => {
                           setNextStep={setNextStep}
                           renderedFrom={`${renderedFrom}_grid-1`}
                           allowedToEdit={allowedToEdit}
+                          updateStatus={updateStatus}
                           fetchTransferInventoryData={fetchTransferInventoryData}
                         />
                       )}
@@ -330,6 +352,7 @@ const TransferInventoryDetailPage = () => {
                           isTabletScreen={isTabletScreen}
                           isSmallScreen={isSmallScreen}
                           showActivity={showActivity}
+                          canLoad={canLoad}
                         />
                       )}
                       {transferInvSteps[currentStep] === "Loading Ticket" && (
@@ -338,6 +361,8 @@ const TransferInventoryDetailPage = () => {
                           updateStatus={updateStatus}
                           renderedFrom={`${renderedFrom}_grid-3`}
                           allowedToEdit={allowedToEdit}
+                          canLoad={canLoad}
+                          canReceive={canReceive}
                         />
                       )}
                     </ContentFullScreen>
@@ -362,7 +387,7 @@ const TransferInventoryDetailPage = () => {
                     <div>
                       <Activity
                         resourceId={transferInventoryData?._id}
-                        resource={transferInventory.resource}
+                        resource={ACTIVITY_RESOURCE.transferInventory}
                         // restrictedAddActivities={
                         //   permissions && permissions['transferInventory'] && permissions['rentalManagement'].isUpdate
                         //   ? []
@@ -372,7 +397,7 @@ const TransferInventoryDetailPage = () => {
                           {
                             access: true,
                             referenceId: transferInventoryData?._id,
-                            type: 'transferInventory'
+                            type: ACTIVITY_RESOURCE.transferInventory
                           }
                         ]}
                         handleActivityRefresh={() => { }}

@@ -259,8 +259,11 @@ const RepairJob = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterRepairJobs=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterRepairJobs=${selectedType}`;
+    }
     let filterById = [];
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
@@ -439,6 +442,7 @@ const RepairJob = () => {
                     if (gridApi) gridApi.deselectAll()
                     else fetchRepairJobs()
                   }}
+                  additionalParams={getQueryString(true)}
                 />
               </Grid>
             </Grid>

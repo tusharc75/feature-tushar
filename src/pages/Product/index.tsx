@@ -18,7 +18,7 @@ import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { product, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from '../../constants/helpers';
+import { product, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -386,6 +386,7 @@ const Product = () => {
     axiosInstance()
       .put(`/product/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords)
         fetchProduct();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
