@@ -6,12 +6,14 @@
 
 // CARD SECTION
 .card_grid.dashboard_homepage {
+  display: -ms-grid;
   display: grid;
-  // grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  -ms-grid-columns: 1fr 24px 1fr 24px 1fr;
   grid-template-columns: repeat(3, 1fr);
   grid-gap: 24px;
 
   .single_card {
+    -webkit-perspective: 900px;
     perspective: 900px;
 
     .card_content {
@@ -38,6 +40,7 @@
         left: 0;
         bottom: 0;
         right: 0;
+        -webkit-transform: rotateY(180deg);
         transform: rotateY(180deg);
         overflow-y: auto;
 
@@ -52,6 +55,8 @@
 
         & a {
           position: relative;
+          -webkit-transition: color 0.3s;
+          -o-transition: color 0.3s;
           transition: color 0.3s;
           font-weight: 600;
           font-size: 16px;
@@ -68,22 +73,33 @@
             content: ' ';
             display: block;
             position: absolute;
-
             bottom: 0;
             left: 0;
             right: 0;
             height: 1px;
             background: var(--link);
+            -webkit-transition: -webkit-transform 0.3s ease;
+            transition: -webkit-transform 0.3s ease;
+            -o-transition: transform 0.3s ease;
             transition: transform 0.3s ease;
+            transition: transform 0.3s ease, -webkit-transform 0.3s ease;
           }
 
           &::before {
+            -webkit-transform: scaleX(0);
+            -ms-transform: scaleX(0);
             transform: scaleX(0);
+            -webkit-transform-origin: bottom right;
+            -ms-transform-origin: bottom right;
             transform-origin: bottom right;
           }
 
           &:hover::before {
+            -webkit-transform: scaleX(1);
+            -ms-transform: scaleX(1);
             transform: scaleX(1);
+            -webkit-transform-origin: bottom left;
+            -ms-transform-origin: bottom left;
             transform-origin: bottom left;
           }
         }
@@ -100,6 +116,8 @@
         .card_front_content img {
           display: block;
           margin-bottom: 21px;
+          -webkit-transition: all 0.4s;
+          -o-transition: all 0.4s;
           transition: all 0.4s;
         }
 
@@ -108,6 +126,8 @@
           font-size: 22px;
           line-height: 27px;
           margin-bottom: 13px;
+          -webkit-transition: all 0.4s;
+          -o-transition: all 0.4s;
           transition: all 0.4s;
         }
 
@@ -116,6 +136,8 @@
           font-size: 16px;
           line-height: 32px;
           padding-bottom: 46px;
+          -webkit-transition: all 0.4s;
+          -o-transition: all 0.4s;
           transition: all 0.4s;
         }
 
@@ -127,8 +149,14 @@
       }
     }
 
-    &:hover .card_content {
-      transform: rotateY(180deg);
+    &:hover {
+      .card_content {
+        -webkit-transform: rotateY(180deg);
+        transform: rotateY(180deg);
+      }
+      .card_front {
+        opacity: 0;
+      }
     }
   }
 }
