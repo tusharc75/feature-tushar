@@ -146,6 +146,7 @@ export interface IFormDataType {
   hasFilters?: boolean;
   hasTableView?: boolean;
   hasExport?: boolean;
+  axis?:string;
   filters?: IFilterType[];
   kpi: KPIListType;
   statusOptions?: { optionValue: string; optionLabel: string }[];
@@ -158,6 +159,7 @@ export const defaultFormConfigs: IFormDataType = {
   chartTitle: '',
   kpi: { name: "", kpi: "", resource: "", id: 0, graphType: [], chartType: [] },
   hasFilters: false,
+  axis:'y',
   hasTableView: false,
   hasExport: false,
   statusOptions: [],

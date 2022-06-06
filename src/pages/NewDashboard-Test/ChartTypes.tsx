@@ -240,7 +240,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   data={chartData}
                   options={{
                     maintainAspectRatio: false,
-                    indexAxis: chart.axis
+                    indexAxis: chart?.axis
                   }}
                 />
               )
