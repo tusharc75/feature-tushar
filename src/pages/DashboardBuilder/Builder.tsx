@@ -191,6 +191,25 @@ const Builder = (props: Props) => {
           />
         </Box>
 
+        {formValues.chartType === "Bar" && <Box mt={2}>
+          <Autocomplete
+            size="small"
+            options={['x','y']}
+            value={formValues.axis}
+            onChange={(_, val) => handleChange('axis', val)}
+            getOptionLabel={(option) => option}
+            getOptionSelected={(option, value) => option === value}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                required
+                label="Flow Axis"
+                variant="outlined"
+              />
+            )}
+          />
+        </Box>
+}
         {/* {isNaN(formValues.column) && (
           <Box mt={2}>
             <TextField required size="small" fullWidth variant="outlined" label={`Custom Column`} />
