@@ -182,8 +182,8 @@ const PricingConditions = () => {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     const updatedFilters = [];
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
@@ -261,6 +261,7 @@ const PricingConditions = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchPriceConditionList();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

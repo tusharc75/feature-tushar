@@ -139,8 +139,8 @@ const ProductAuction = () => {
       });
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     let filterById = [];
     if (filterById.length > 0) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
@@ -285,6 +285,7 @@ const ProductAuction = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchData();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
