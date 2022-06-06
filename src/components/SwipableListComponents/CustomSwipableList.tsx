@@ -72,7 +72,7 @@ export default function CustomSwipableList({
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={isAllChecked && dataRows?.every((d) => d?.isChecked === true)}
+                  checked={isAllChecked && dataRows?.every((d) => d?.isChecked === true || d?.hideSelection === true)}
                   onChange={(e) => {
                     setIsAllChecked(e.target.checked);
                     const updatedMetadata = dataRows.map((d) => {
@@ -129,13 +129,11 @@ export default function CustomSwipableList({
                         checked={d.isChecked}
                         onChange={(e) => {
                           dataRows[index].isChecked = e.target.checked;
-                          setIsAllChecked(dataRows.every((d) => d.isChecked === true));
-
+                          setIsAllChecked(dataRows.every((d) => d.isChecked === true || d?.hideSelection === true));
                           dispatch({
                             type: 'selection',
                             selectedRecords: dataRows.filter((d) => d.isChecked)
                           });
-
                           dispatch({ type: 'update', data: dataRows });
                           localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify(dataRows.filter((d) => d.isChecked)));
                         }}

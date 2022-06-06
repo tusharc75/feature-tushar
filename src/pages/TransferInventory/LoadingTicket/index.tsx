@@ -67,9 +67,17 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     })
     const extracolumns = [
       { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+      { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'serialNumberRenderer' },
       { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-      { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
+      { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     ];
+
+    column.push({
+      field: 'serialNumber',
+      headerName: 'Serial Number',
+      show: true,
+      cellRenderer: 'serialNumberRenderer',
+    });
     setColumns([...column, ...extracolumns])
   }
 
@@ -124,7 +132,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.transferInventory}&refrenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
       );
 
-      const { assets, products } = productsData;
+      const { assets, products, serialNumber } = productsData;
       let rows = [];
 
       assets?.forEach((asset) => {
@@ -153,6 +161,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         obj['qty'] = product.qty;
         obj['type'] = 'Product';
         obj['isChecked'] = false;
+        obj['serialNumber'] = serialNumber?.filter((e) => e.product === product?.product);
         rows.push(obj);
       });
 
@@ -189,7 +198,14 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     }
   };
 
+  const SerialNumberRenderer = (params) => (
+    params?.data?.serialNumber?.length ?
+      params?.data?.serialNumber?.map((e) => e.serialNumber)?.toString() :
+      <NoDataCell />
+  );
+
   const frameworkComponents = {
+    serialNumberRenderer: SerialNumberRenderer,
     ticketRenderer: TicketRenderer,
     productNameRenderer: ProductNameRenderer,
     inventoryRenderer: InventoryRenderer,
@@ -406,6 +422,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={selectedRecords?.filter((e) => e.type === 'Product')}
+          serialNumber={selectedRecords?.filter((e) => e.type === 'Product')?.map((e) => e?.serialNumber?.map((e) => e._id))?.flat()}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchProducts();

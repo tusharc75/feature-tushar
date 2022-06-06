@@ -32,7 +32,8 @@ import ManageAddressDialog from "../../components/Address/ManageAddressDialog";
 import { isArray } from "lodash";
 import routes from './../../components/Helpers/Routes';
 
-const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, ticketType = null, refrenceType = null, refrenceData = null, productInventory = null, products = null }) => {
+const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, ticketType = null, refrenceType = null, refrenceData = null,
+    productInventory = null, products = null, serialNumber = null }) => {
 
     const { state: { user } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
@@ -211,6 +212,10 @@ const ManageDeliveryTicket = ({ onClose, onSuccess, deliveryTicketId = null, tic
                     products?.forEach((ele) => {
                         tempInitialData["products"].push({ product: ele._id, qty: ele.qty })
                     })
+                    tempInitialData["serialNumber"] = []
+                    if (serialNumber) {
+                        tempInitialData["serialNumber"] = serialNumber
+                    }
                     tempInitialData["wellName"] = refrenceData?.wellName;
                     tempInitialData["afeNumber"] = refrenceData?.afeNumber;
                     if (refrenceData?.processor) {

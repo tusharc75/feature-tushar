@@ -303,8 +303,8 @@ const AddressResource = () => {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -410,6 +410,7 @@ const AddressResource = () => {
               if (gridApi) gridApi.deselectAll()
               else fetchWarehouses()
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
