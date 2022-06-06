@@ -137,8 +137,8 @@ const WellMaster = () => {
         });
     };
 
-    const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
+    const getQueryString = (isExport = false) => {
+        let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
         let filterById = [];
 
@@ -283,6 +283,7 @@ const WellMaster = () => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchData()
                     }}
+                    additionalParams={getQueryString(true)}
                 />
             </Grid>
         </Grid>
