@@ -175,7 +175,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
         let tableContent = parsedData.slice(1, parsedData.length);
         let serialNumbers = [];
         tableContent.forEach((item) => {
-          serialNumbers.push(item[1]);
+          serialNumbers.push(item[1]?.toString());
         });
         setFieldValue('serialNumbers', serialNumbers);
       }
