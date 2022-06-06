@@ -74,7 +74,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
         let errors = { quantity: null, warehouse: null };
         if (values.length > 0) {
             values.map(d => {
-                let tempProduct = productList.find(u => u.productId === d.productId)
+                let tempProduct = productList.find(u => u._id === d._id)
                 if (tempProduct && d.quantity > (tempProduct.qty - (tempProduct.actualReceived || 0))) {
                     errors.quantity = "should be greater"
                 }
@@ -85,6 +85,8 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
         }
         return errors;
     };
+
+    console.log(productList)
 
     return (
         <Dialog
@@ -110,6 +112,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             <Formik
                 initialValues={{
                     seriaizedAsset: productList.map(d => ({
+                        "_id": d._id,
                         "product": d.productName,
                         "productId": d.productId,
                         "warehouse": defaultWareHouse || "",

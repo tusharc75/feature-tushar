@@ -189,8 +189,8 @@ const Zone = () => {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -355,6 +355,7 @@ const Zone = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchZone();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

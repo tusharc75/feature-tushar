@@ -256,8 +256,8 @@ const ProductCategory = () => {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -477,6 +477,7 @@ const ProductCategory = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchProductCategory();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
