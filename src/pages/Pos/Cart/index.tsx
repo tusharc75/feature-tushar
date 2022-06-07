@@ -104,7 +104,7 @@ const AssignCartDialog = ({ handleCloseDialog, fetchCart, products, handleDelete
                                     color="secondary"
                                     size="small"
                                     style={{ border: "1px solid" }}
-                                    disabled={product?.qty >= product?.inventory?.availableInventory}
+                                    disabled={product?.inventory?.availableInventory > 0 ? false : true}
                                     onClick={() => { handleUpdateCart(product, "add") }}>
                                     <AddIcon fontSize="small" />
                                 </IconButton >

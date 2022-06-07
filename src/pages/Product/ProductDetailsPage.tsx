@@ -479,7 +479,19 @@ const ProductDetailsPage = () => {
                 <Box mb={2}>
                   <Paper style={{ overflow: 'hidden' }}>
                     <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                      <Typography variant="subtitle2">{routes?.productInventory?.title}</Typography>
+                      <Box display={'flex'}>
+                        <Box>
+                          <Typography variant="subtitle2">{routes?.productInventory?.title}</Typography>
+                        </Box>
+                        <Box pl={1}>
+                          <IconButton size="small" onClick={() => {
+                            history.push(`${routes.productInventory.path}`,
+                              { product: id, productName: productData?.productName })
+                          }}>
+                            <InfoOutlined fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      </Box>
                     </Box>
                     {productInventoryData?.filter(d => d.inventory)?.length ?
                       <Box width="100%">
@@ -602,7 +614,7 @@ const ProductDetailsPage = () => {
                                         }
                                       >
                                         <IconButton size="small">
-                                          <InfoOutlined />
+                                          <InfoOutlined fontSize="small" />
                                         </IconButton>
                                       </HtmlTooltip>
                                     </Box>
@@ -671,7 +683,7 @@ const ProductDetailsPage = () => {
             </Grid>
           ) : null}
         </Grid>
-      </Fragment>
+      </Fragment >
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -682,45 +694,49 @@ const ProductDetailsPage = () => {
           onOk={handleDelete}
         />
       )}
-      {openUpdateDialog && (
-        <CreateProduct
-          isClone={false}
-          productId={id}
-          handleClose={() => {
-            setOpenUpdateDialog(false);
-            getProductFieldsAndData();
-          }}
-          openFrom="productMaster"
-        />
-      )}
-      {openProductInventoryDialog ? (
-        productData?.serializedProduct ? (
-          <ManageSerializedAsset
-            productId={productData?._id}
-            productCategory={productData?.productCategory}
-            productInventoryId={null}
-            onClose={() => setOpenProductInventoryDialog(false)}
-            onSuccess={() => {
-              setOpenProductInventoryDialog(false);
-              if (permissions?.serializedAsset) {
-                getWarehouses();
-              }
-            }}
-          />
-        ) : (
-          <NonSerializedAssetProductInventory
+      {
+        openUpdateDialog && (
+          <CreateProduct
+            isClone={false}
             productId={id}
-            productInventoryData={inventoriesData}
-            onSuccess={() => {
-              setOpenProductInventoryDialog(false);
-              if (permissions?.serializedAsset) {
-                getWarehouses();
-              }
+            handleClose={() => {
+              setOpenUpdateDialog(false);
+              getProductFieldsAndData();
             }}
-            onClose={() => setOpenProductInventoryDialog(false)}
+            openFrom="productMaster"
           />
         )
-      ) : null}
+      }
+      {
+        openProductInventoryDialog ? (
+          productData?.serializedProduct ? (
+            <ManageSerializedAsset
+              productId={productData?._id}
+              productCategory={productData?.productCategory}
+              productInventoryId={null}
+              onClose={() => setOpenProductInventoryDialog(false)}
+              onSuccess={() => {
+                setOpenProductInventoryDialog(false);
+                if (permissions?.serializedAsset) {
+                  getWarehouses();
+                }
+              }}
+            />
+          ) : (
+            <NonSerializedAssetProductInventory
+              productId={id}
+              productInventoryData={inventoriesData}
+              onSuccess={() => {
+                setOpenProductInventoryDialog(false);
+                if (permissions?.serializedAsset) {
+                  getWarehouses();
+                }
+              }}
+              onClose={() => setOpenProductInventoryDialog(false)}
+            />
+          )
+        ) : null
+      }
     </>
   );
 };
