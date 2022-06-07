@@ -10,33 +10,18 @@ import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import {
-  isObjectEmpty,
-  gridLoadingTimeout,
-  productInventory,
-  getLocalStorageArrayData,
-  removeLocalStorage,
-  convertInventory
-} from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage, convertInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
-import InfoIcon from '@material-ui/icons/Info';
-import SoftHoldDialog from './SoftHold';
-import HistoryDialog from './History/historyDialog';
 import { camelCase } from 'lodash';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import HistoryIcon from '@material-ui/icons/History';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import ConvertInventoryToAsset from './Convert';
 import { ExpandMore } from '@material-ui/icons';
 import { SiConvertio } from 'react-icons/si';
+import CachedIcon from '@material-ui/icons/Cached';
 
 const ConvertInventory = () => {
   const renderedFrom = camelCase(routes?.inventoryToAsset.title);
@@ -54,7 +39,7 @@ const ConvertInventory = () => {
 
   const [softHold, setSoftHold] = useState({ open: false, data: {} });
   const [showHistory, setShowHistory] = useState({ open: false, product: '' });
-  const [inventory, setInventory] = useState({ open: false, product: [], type: '' });
+  const [inventory, setInventory] = useState({ open: false, product: [], type: '', multi: false });
 
   const {
     state: { user, permissions, selectedEntity }
@@ -240,10 +225,10 @@ const ConvertInventory = () => {
                 aria-label="Clone"
                 disabled={params?.data?.availableInventory ? false : true}
                 onClick={() => {
-                  setInventory({ open: true, product: [params?.data], type: 'convert' });
+                  setInventory({ open: true, product: [params?.data], type: 'convert', multi: false });
                 }}
               >
-                <SiConvertio fontSize="small" color={params?.data?.availableInventory ? 'error' : 'disabled'} />
+                <CachedIcon fontSize="small" color="secondary" />
               </IconButton>
             </Tooltip>
           </Box>
@@ -352,7 +337,12 @@ const ConvertInventory = () => {
                     <MenuItem
                       onClick={() => {
                         closeActions();
-                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'convert' });
+                        setInventory({
+                          open: true,
+                          product: getLocalStorageArrayData(`${localStorageSelectedRecords}`),
+                          type: 'convert',
+                          multi: true
+                        });
                       }}
                     >
                       Convert Inventory to Asset
@@ -393,15 +383,16 @@ const ConvertInventory = () => {
 
         {inventory.open && (
           <ConvertInventoryToAsset
-            handleClose={() => setInventory({ open: false, product: [], type: '' })}
+            handleClose={() => setInventory({ open: false, product: [], type: '', multi: false })}
             handleSuccess={() => {
               removeLocalStorage(localStorageSelectedRecords);
               fetchProductInventory();
-              setInventory({ open: false, product: [], type: '' });
+              setInventory({ open: false, product: [], type: '', multi: true });
             }}
             product={inventory.product}
             type={inventory.type}
             warehouse={plantId}
+            multi={inventory.multi}
           />
         )}
       </div>
