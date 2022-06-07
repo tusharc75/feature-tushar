@@ -25,9 +25,9 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
 
     const columns = [
         { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "productNameRenderer" },
-        { field: "productImage", headerName: "Product Image", show: false, cellRenderer: "imageRenderer" },
-        { field: "availableInventory", headerName: "Inventory", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "availableInventory", headerName: "Inventory", show: true, filter: false, sortable: false, disabled: true, cellRenderer: "commonRenderer" },
         { field: "productCategory", headerName: "Product Category", show: false, cellRenderer: "commonRenderer" },
+        { field: "productImage", headerName: "Product Image", show: false, cellRenderer: "imageRenderer" },
     ]
 
     const ProductNameRenderer = (params) => (
@@ -126,6 +126,17 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
             toastConfig.setToastConfig(error);
             dispatch({ type: 'loading', loading: false });
         })
+    }
+
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+    if (columnState) {
+        columns.forEach((item) => {
+            columnState.forEach((d) => {
+                if (d.colId === item.field) {
+                    item.show = !d.hide;
+                }
+            });
+        });
     }
 
     return (
