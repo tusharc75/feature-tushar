@@ -63,6 +63,9 @@ export const UpdatedByRenderer = params => params.value ? (
     <NoDataCell />
 )
 
+export const NumberRenderer = params => params.value ? params.value : 0;
+
+
 const getTitle = data => {
     if (data.length) {
         let restParams = data.map(o => o?.optionLabel ? o?.optionLabel : typeof o !== "object" ? o : "").join(", ")

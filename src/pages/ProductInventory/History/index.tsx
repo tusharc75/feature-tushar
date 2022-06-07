@@ -36,6 +36,7 @@ const History = ({ product, warehouse }) => {
         let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
             finalObject.type = capitalize(u.type)
+            finalObject.serialNumber = u?.serialNumber?.map((e) => e.serialNumber)?.toString()
             return finalObject;
         });
 
@@ -75,6 +76,7 @@ const History = ({ product, warehouse }) => {
         { field: "finalInventory", headerName: "Final Inventory", show: true, cellRenderer: "commonRenderer" },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
         { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "user", headerName: "Transacted By", show: true, cellRenderer: "commonRenderer" },
     ];
 
