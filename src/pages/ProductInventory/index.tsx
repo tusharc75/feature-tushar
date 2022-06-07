@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, IconButton, Tooltip, Button, Menu, MenuItem } from "@material-ui/core";
+import { Grid, IconButton, Tooltip, Button, Menu, MenuItem, Chip } from "@material-ui/core";
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -32,6 +32,7 @@ import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import AddRemoveDialog from './AddRemove';
 import { ExpandMore } from '@material-ui/icons';
 import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
+import { useHistory } from 'react-router-dom';
 
 const InventoryProduct = () => {
 
@@ -56,6 +57,14 @@ const InventoryProduct = () => {
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
 
+
+  const history = useHistory();
+
+  const [fromProductMaster, setFromProductMaster] = useState({
+    product: history.location?.state?.product,
+    productName: history.location?.state?.productName,
+  });
+
   const { getColumnData } = useColumns();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -78,7 +87,7 @@ const InventoryProduct = () => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, fromProductMaster]);
 
   const getPlants = () => {
     axiosInstance()
@@ -195,6 +204,14 @@ const InventoryProduct = () => {
     }
     else {
       deepFilter = `&wareHouse=${tempPlantId}`
+    }
+
+    let filterById = [];
+    if (fromProductMaster?.product) {
+      filterById.push({ field: '_id', term: fromProductMaster.product });
+    }
+    if (filterById.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
 
     if (!isObjectEmpty(filters)) {
@@ -359,36 +376,44 @@ const InventoryProduct = () => {
                 <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
                 <span className="listingHeader">{routes.productInventory?.title} </span>
               </div>
-              <>
-                <Autocomplete
-                  style={{ width: '250px' }}
-                  options={plantOptions}
-                  getOptionLabel={(option: any) => option.warehouseName}
-                  disableClearable
-                  getOptionSelected={(option: any, val) => option._id === val}
-                  value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
-                  onChange={(e, val) => {
-                    if (val !== null) {
-                      setPlantId(val && val._id ? val._id : '');
-                    }
-                  }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="plant"
-                        placeholder="Plant"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
-                    )
+              <Autocomplete
+                style={{ width: '250px' }}
+                options={plantOptions}
+                getOptionLabel={(option: any) => option.warehouseName}
+                disableClearable
+                getOptionSelected={(option: any, val) => option._id === val}
+                value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
+                onChange={(e, val) => {
+                  if (val !== null) {
+                    setPlantId(val && val._id ? val._id : '');
                   }
+                }}
+                renderInput={(params) =>
+                  isMobile && !isTablet ? (
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      name="plant"
+                      placeholder="Plant"
+                      variant="standard"
+                      fullWidth
+                      className={isMobile ? 'serchBox' : ''}
+                    />
+                  ) : (
+                    <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
+                  )
+                }
+              />
+              {fromProductMaster?.product && (
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={`Product : ${fromProductMaster?.productName}`}
+                  onDelete={() => {
+                    setFromProductMaster(null);
+                  }}
                 />
-              </>
+              )}
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">

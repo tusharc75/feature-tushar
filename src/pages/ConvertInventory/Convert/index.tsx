@@ -13,7 +13,7 @@ import { convertInventory, productInventory } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 
-const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, warehouse }) => {
+const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, warehouse, multi = false }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
@@ -21,13 +21,13 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
 
   useEffect(() => {
     if (product.length === 1 && type === 'convert') {
-      fetchData();
+      !multi && fetchData();
     }
   }, [type, product]);
   const fetchData = () => {
     setLoading(true);
     axiosInstance()
-      .get(`${convertInventory.api}/serial-number/${product[0]._id}`)
+      .get(`${productInventory.api}/serial-number/${product[0]._id}?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         if (!data || data.lenght === 0) return;
         setSerialNumbers(data);
@@ -136,40 +136,44 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
                   />
                 </ListItem>
               </List>
-              <Box my={2} mx={1}>
-                <Divider />
-              </Box>
-              <Autocomplete
-                size="small"
-                options={serialNumbers.map((item: any) => item?.serialNumber)}
-                freeSolo={false}
-                multiple={true}
-                disableCloseOnSelect
-                value={values['serialNumbers']}
-                onChange={(_, val) => {
-                  if (type === 'convert') {
-                    setFieldValue('serialNumbers', val);
-                  } else {
-                    setFieldValue(
-                      'serialNumbers',
-                      val.map((item: string) => item.toUpperCase())
-                    );
-                  }
-                }}
-                getOptionSelected={(item, current) => item === current}
-                getOptionLabel={(option) => option}
-                renderInput={(props) => (
-                  <TextField
-                    {...props}
-                    placeholder={''}
-                    variant="outlined"
-                    name="serialNumbers"
-                    label={'Select Serial Numbers'}
-                    error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
-                    helperText={touched['serialNumbers'] && errors['serialNumbers']}
-                  />
-                )}
-              />
+              {!multi && (
+                <Box my={2} mx={1}>
+                  <Divider />
+                </Box>
+              )}
+              {!multi && (
+                <Autocomplete
+                  size="small"
+                  options={serialNumbers.map((item: any) => item?.serialNumber)}
+                  freeSolo={false}
+                  multiple={true}
+                  disableCloseOnSelect
+                  value={values['serialNumbers']}
+                  onChange={(_, val) => {
+                    if (type === 'convert') {
+                      setFieldValue('serialNumbers', val);
+                    } else {
+                      setFieldValue(
+                        'serialNumbers',
+                        val.map((item: string) => item.toUpperCase())
+                      );
+                    }
+                  }}
+                  getOptionSelected={(item, current) => item === current}
+                  getOptionLabel={(option) => option}
+                  renderInput={(props) => (
+                    <TextField
+                      {...props}
+                      placeholder={''}
+                      variant="outlined"
+                      name="serialNumbers"
+                      label={'Select Serial Numbers'}
+                      error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
+                      helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                    />
+                  )}
+                />
+              )}
             </CustomDialogContent>
             <CustomDialogFooter>
               <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>

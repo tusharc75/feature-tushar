@@ -46,7 +46,8 @@ const useStyles = makeStyles(() => ({
         width: 500,
         height: 500,
         boxShadow: "10px 10px 20px 10px rgba(0,0,0,0.2)",
-        zIndex: 9999999
+        zIndex: 9999999,
+        backgroundColor: 'white'
     },
     zoomContainer: {
         width: '200%',
