@@ -11,7 +11,6 @@ import { Formik, Form, FieldArray, Field } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from "react-device-detect";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import Checkbox from '@material-ui/core/Checkbox';
 
 
 const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, productList, updateStatus, purchaseOrderData }) => {
@@ -36,15 +35,17 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
 
     const handleCreateSerializedAsset = (values) => {
         setIsSubmitting(true)
+        
         let data = values.map(u => ({
-            purchaseOrderId: purchaseOrderID,
             product: u.productId,
             serializedProduct: u.serializedProduct,
-            createAsset: u.createAsset,
             warehouse: u.warehouse?._id,
-            qty: parseInt(u?.quantity)
+            inventoryQuantity: parseInt(u?.inventoryQuantity),
+            assetQuantity: parseInt(u?.assetQuantity),
+            serialNumber: u?.serialNumber,
         }))
-        axiosInstance().post(`${purchaseOrder.api}/asset-po`, data).then(({ data }) => {
+
+        axiosInstance().post(`${purchaseOrder.api}/asset-po/${purchaseOrderID}`, data).then(({ data }) => {
             setIsSubmitting(false);
             toastConfig.setToastConfig({
                 open: true,
@@ -54,7 +55,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             let tempProductArray = values.map(d => {
                 let res;
                 res = d.row
-                res["actualReceived"] = parseInt(d.quantity || 0) + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.actualReceived || 0)
+                res["actualReceived"] = parseInt(d.inventoryQuantity || 0) + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.actualReceived || 0)
                 return res
             })
             axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderID}/update`, { products: tempProductArray })
@@ -71,12 +72,12 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
     }
 
     const validate = (values) => {
-        let errors = { quantity: null, warehouse: null };
+        let errors = { inventoryQuantity: null, warehouse: null };
         if (values.length > 0) {
             values.map(d => {
                 let tempProduct = productList.find(u => u._id === d._id)
-                if (tempProduct && d.quantity > (tempProduct.qty - (tempProduct.actualReceived || 0))) {
-                    errors.quantity = "should be greater"
+                if (tempProduct && d.inventoryQuantity > (tempProduct.qty - (tempProduct.actualReceived || 0))) {
+                    errors.inventoryQuantity = "should be greater"
                 }
                 if (tempProduct && !d.warehouse) {
                     errors.warehouse = "Plant is required"
@@ -85,8 +86,6 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
         }
         return errors;
     };
-
-    console.log(productList)
 
     return (
         <Dialog
@@ -116,9 +115,10 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                         "product": d.productName,
                         "productId": d.productId,
                         "warehouse": defaultWareHouse || "",
-                        "quantity": d.qty - (d.actualReceived || 0),
+                        "inventoryQuantity": d.qty - (d.actualReceived || 0),
+                        "assetQuantity": 0,
                         "serializedProduct": d.serializedProduct || false,
-                        "createAsset": false,
+                        "serialNumber": [],
                         "row": d
                     }))
                 }}
@@ -147,8 +147,8 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                         <Grid item md={1}> # </Grid>
                                                         <Grid item md={4}> Product </Grid>
                                                         <Grid item md={3}> Plants </Grid>
-                                                        <Grid item md={2}> Quantity </Grid>
-                                                        <Grid item md={2}> Create Asset </Grid>
+                                                        <Grid item md={2}> Inventory Quantity </Grid>
+                                                        <Grid item md={2}> Asset Quantity </Grid>
                                                     </Grid>
                                                 </Box>
                                                 <Box className="p-1">
@@ -217,31 +217,65 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                 type="number"
                                                                                 size="small"
                                                                                 component={TextField}
-                                                                                name="quantity"
+                                                                                name="inventoryQuantity"
                                                                                 placeholder="Enter Quantity"
-                                                                                value={data.quantity}
+                                                                                value={data.inventoryQuantity}
                                                                                 onChange={(e) => {
                                                                                     arrayHelpers.replace(index, {
                                                                                         ...values.seriaizedAsset[index],
-                                                                                        ["quantity"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                                        ["inventoryQuantity"]: e.target.value.replace(/[^0-9]/g, '')
                                                                                     })
                                                                                 }}
-                                                                                error={validate([data])?.quantity}
-                                                                                helperText={validate([data]).quantity ? "Receiving qunatity is more than actual quantity" : ""}
+                                                                                error={validate([data])?.inventoryQuantity}
+                                                                                helperText={validate([data]).inventoryQuantity ? "Receiving qunatity is more than actual quantity" : ""}
                                                                             />
                                                                         </Grid>
                                                                         <Grid item md={2} >
                                                                             {data?.serializedProduct &&
-                                                                                <Checkbox
-                                                                                    checked={data.createAsset}
-                                                                                    name="createAsset"
-                                                                                    onChange={(event) => {
-                                                                                        arrayHelpers.replace(index, {
-                                                                                            ...values.seriaizedAsset[index],
-                                                                                            ["createAsset"]: event.target.checked
-                                                                                        })
-                                                                                    }}
-                                                                                />}
+                                                                                <>
+                                                                                    <Field
+                                                                                        fullWidth
+                                                                                        variant="outlined"
+                                                                                        type="number"
+                                                                                        size="small"
+                                                                                        component={TextField}
+                                                                                        name="assetQuantity"
+                                                                                        placeholder="Enter Quantity"
+                                                                                        value={data.assetQuantity}
+                                                                                        onChange={(e) => {
+                                                                                            arrayHelpers.replace(index, {
+                                                                                                ...values.seriaizedAsset[index],
+                                                                                                ["assetQuantity"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                                            })
+                                                                                        }}
+                                                                                    />
+                                                                                    <Autocomplete
+                                                                                        options={[]}
+                                                                                        size="small"
+                                                                                        freeSolo={true}
+                                                                                        multiple={true}
+                                                                                        disableCloseOnSelect
+                                                                                        value={data.serialNumber}
+                                                                                        onChange={(_, val) => {
+                                                                                            arrayHelpers.replace(index, {
+                                                                                                ...values.seriaizedAsset[index],
+                                                                                                ["serialNumber"]: val
+                                                                                            })
+                                                                                        }}
+                                                                                        getOptionSelected={(item, current) => item === current}
+                                                                                        getOptionLabel={(option) => option}
+                                                                                        renderInput={(props) => (
+                                                                                            <TextField
+                                                                                                {...props}
+                                                                                                placeholder={`Enter serial number`}
+                                                                                                variant="outlined"
+                                                                                                name="serialNumbers"
+                                                                                                label={'Serial Number'}
+                                                                                            />
+                                                                                        )}
+                                                                                    />
+                                                                                </>
+                                                                            }
                                                                         </Grid>
                                                                     </Grid>
                                                                 )))}
@@ -266,7 +300,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                 Cancel
                             </Button>
                             <Button
-                                onClick={() => { if (!validate(values.seriaizedAsset).quantity && !validate(values.seriaizedAsset).warehouse) handleCreateSerializedAsset(values.seriaizedAsset) }}
+                                onClick={() => { if (!validate(values.seriaizedAsset).inventoryQuantity && !validate(values.seriaizedAsset).warehouse) handleCreateSerializedAsset(values.seriaizedAsset) }}
                                 variant="contained"
                                 disabled={isSubmitting}
                                 color="primary"
