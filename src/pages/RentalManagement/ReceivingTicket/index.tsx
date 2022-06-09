@@ -72,6 +72,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
 
   const [showConformationConsume, setShowConformationConsume] = useState(false);
+  const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
+
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 
@@ -604,14 +606,22 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
   const handleConsumProduct = (data) => {
     const products = []
-    selectedRecords?.forEach((e) => {
-      products.push({ product: e.materialId, qty: parseInt(data.qty) })
-    })
+    if (data) {
+      selectedRecords?.forEach((e) => {
+        products.push({ product: e.materialId, qty: parseInt(data.qty) })
+      })
+    }
+    else {
+      selectedRecords?.forEach((e) => {
+        products.push({ product: e.materialId, qty: parseInt(e.qty) })
+      })
+    }
     setOkBtnLoading(true);
     axiosInstance().post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { "products": products })
       .then(({ data }) => {
         setOkBtnLoading(false);
         setShowConformationConsume(false);
+        setShowConformationConsumeMultiple(false);
         fetchRecords();
       })
       .catch((error) => {
@@ -741,11 +751,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               }}>{INVENTORY_STATUS.needRecert}</MenuItem>
             </Fragment>
           }
-          {(selectedRecords?.length === 1 && selectedRecords?.filter((f) => f.type === "Product"
-            && f.hasOwnProperty("loadingTicketId") && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length) &&
+          {(selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")
+            && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length) &&
             <MenuItem onClick={() => {
               setAnchorEl(null)
-              setShowConformationConsume(true)
+              if (selectedRecords?.length === 1) {
+                setShowConformationConsume(true)
+              }
+              else {
+                setShowConformationConsumeMultiple(true)
+              }
             }}>{RENTAL_INTERNAL_ASSET_STATUS.consumed}</MenuItem>
           }
         </Menu>
@@ -1166,6 +1181,19 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         onClose={() => setShowNonSerializeAsset({ open: false, data: {} })}
       />
     }
+    {showConformationConsumeMultiple && (
+      <ConfirmationDialog
+        open={showConformationConsumeMultiple}
+        message={`Are you sure you want to consumed selected products?`}
+        onClose={() => {
+          setShowConformationConsumeMultiple(false);
+        }}
+        onOk={() => {
+          handleConsumProduct(null)
+        }}
+        okBtnLoading={okBtnLoading}
+      />
+    )}
   </>
   );
 };
