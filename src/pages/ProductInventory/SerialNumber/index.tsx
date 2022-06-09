@@ -27,14 +27,15 @@ const SerialNumber = ({ product, warehouse }) => {
         }
         let data;
 
-        const query = warehouse ? `?warehouse=${warehouse}` : ``;
-        
+        const query = warehouse ? `?warehouse=${warehouse}&isAll=true` : `?isAll=true`;
+
         const response = await axiosInstance().get(`${productInventory.api}/serial-number/${product}${query}`)
         data = response?.data?.data
         let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
             return finalObject;
         });
+        console.log(rows)
         dispatch({ type: "initialize", data: rows, count: rows.length });
         setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     };
@@ -42,10 +43,15 @@ const SerialNumber = ({ product, warehouse }) => {
     const columns = [
         { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
+        { field: "active", headerName: "Status", show: true, cellRenderer: "statusRenderer" },
         { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' }
     ];
 
+    const StatusRenderer = (params) =>
+        params?.value ? "Available" : "Unavailable";
+
     const frameworkComponents = {
+        statusRenderer: StatusRenderer,
         createdByRenderer: CreatedByRenderer,
         commonRenderer: CommonRenderer,
     };

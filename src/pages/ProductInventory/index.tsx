@@ -33,6 +33,7 @@ import AddRemoveDialog from './AddRemove';
 import { ExpandMore } from '@material-ui/icons';
 import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
 import { useHistory } from 'react-router-dom';
+import { NumberRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 
 const InventoryProduct = () => {
 
@@ -133,12 +134,13 @@ const InventoryProduct = () => {
             columns.push({
               ...currentColumn?.columnData,
               cellEditor: 'numericCellEditor',
+              cellRenderer: 'numberRenderer',
               filter: false, sortable: false,
               editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
             });
           }
           else if (['inventory'].includes(currentColumn?.columnData.field)) {
-            columns.push({ ...currentColumn?.columnData, filter: false, sortable: false });
+            columns.push({ ...currentColumn?.columnData, cellRenderer: 'numberRenderer', filter: false, sortable: false });
           }
           else {
             columns.push(currentColumn?.columnData);
@@ -148,11 +150,11 @@ const InventoryProduct = () => {
     });
 
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-    setFrameworkComponents({ ...tempFrameworkComponent, softHoldRenderer: SoftHoldRenderer, actionsRenderer: ActionsRenderer })
+    setFrameworkComponents({ ...tempFrameworkComponent, softHoldRenderer: SoftHoldRenderer, numberRenderer: NumberRenderer, actionsRenderer: ActionsRenderer })
 
     const defaultColumns = [
       { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
-      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'commonRenderer' }
+      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }
     ];
 
     setColumns([...columns, ...defaultColumns])
@@ -260,7 +262,7 @@ const InventoryProduct = () => {
           <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(params)} />
         </HtmlTooltip>
       </Fragment>
-    ) : <NoDataCell />}
+    ) : 0}
     </>
   );
 
