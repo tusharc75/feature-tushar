@@ -52,6 +52,8 @@ const MapView = (props: MapViewProps) => {
 
   if (!window.google || typeof window.google !== 'object') return <div>Loading...</div>;
 
+  if(!data || !Array.isArray(data) || data.length === 0) return <div>No data</div>;
+
   return (
     <Box height={height} borderRadius={4} overflow="hidden" className="">
       <GoogleMap
@@ -86,7 +88,7 @@ const MapView = (props: MapViewProps) => {
       >
         <MarkerClusterer>
           {(clusterer) =>
-            data.map(
+            data.length > 0 ? data.map(
               (asset: locationType) =>
                 asset?._id && (
                   <Marker
@@ -105,7 +107,7 @@ const MapView = (props: MapViewProps) => {
                     clusterer={clusterer}
                   />
                 )
-            )
+            ) : null
           }
         </MarkerClusterer>
 

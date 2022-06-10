@@ -33,7 +33,7 @@ export const FILTERS_OPTIONS = [
   { title: 'Product', key: 'productDescription' },
   { title: 'Market Segment', key: 'marketSegment' },
   { title: 'Sub Market Segment', key: 'subMarketSegment' },
-  { title: 'Sales Rep', key: 'salesRep' },
+  { title: 'Sales Reps', key: 'salesReps' },
   { title: 'Product Category', key: 'productCategory' },
   { title: 'Country Bill To', key: 'countryBillTo' },
   { title: 'Country Sell To', key: 'countrySellTo' },
@@ -46,7 +46,7 @@ export const baseURL = '/dashboard-master';
 export type IFilterType = {
   title: string;
   key: string;
-  multiple: boolean;
+  multiple?: boolean;
 };
 
 export type KPIListType = {
@@ -57,7 +57,8 @@ export type KPIListType = {
   kpi: string;
   resource: string;
   custom?: boolean;
-  currencyConverter?: boolean
+  currencyConverter?: boolean;
+  filters: IFilterType[]
 };
 
 export const statuses = {
@@ -67,46 +68,46 @@ export const statuses = {
   "quote/sales-rep": quotesStatus
 }
 
-export const kpiList: KPIListType[] = [
-  {
-    id: 1,
-    graphType: ["Map"],
-    resource: "Serialized Assets",
-    name: "Location Based Asset",
-    kpi: "asset/location-base-assets"
-  },
-  {
-    id: 2,
-    graphType: ["Chart"],
-    chartType: ["Pie"],
-    resource: "Serialized Assets",
-    name: "Asset Status Count",
-    kpi: 'asset/assets-status-count'
-  },
-  {
-    id: 3,
-    graphType: ["Chart"],
-    chartType: ["Bar"],
-    resource: "Serialized Assets",
-    name: "In Use By Category",
-    kpi: "asset/assets-in-use-by-category"
-  },
-  {
-    id: 2,
-    graphType: ["Chart"],
-    chartType: ["Pie"],
-    resource: "Serialized Assets",
-    name: "Asset Total In Use",
-    kpi: "asset/assets-total-in-use"
-  },
-  {
-    id: 2,
-    graphType: ["Chart"],
-    chartType: ["Pie"],
-    resource: "Rental Job",
-    name: "Customer in rental",
-    kpi: "asset/customer-in-rental"
-  },
+// export const kpiList: KPIListType[] = [
+//   {
+//     id: 1,
+//     graphType: ["Map"],
+//     resource: "Serialized Assets",
+//     name: "Location Based Asset",
+//     kpi: "asset/location-base-assets"
+//   },
+//   {
+//     id: 2,
+//     graphType: ["Chart"],
+//     chartType: ["Pie"],
+//     resource: "Serialized Assets",
+//     name: "Asset Status Count",
+//     kpi: 'asset/assets-status-count'
+//   },
+//   {
+//     id: 3,
+//     graphType: ["Chart"],
+//     chartType: ["Bar"],
+//     resource: "Serialized Assets",
+//     name: "In Use By Category",
+//     kpi: "asset/assets-in-use-by-category"
+//   },
+//   {
+//     id: 2,
+//     graphType: ["Chart"],
+//     chartType: ["Pie"],
+//     resource: "Serialized Assets",
+//     name: "Asset Total In Use",
+//     kpi: "asset/assets-total-in-use"
+//   },
+//   {
+//     id: 2,
+//     graphType: ["Chart"],
+//     chartType: ["Pie"],
+//     resource: "Rental Job",
+//     name: "Customer in rental",
+//     kpi: "asset/customer-in-rental"
+//   },
   // {
   //   name: "Total Booked GM vs Total Offered GM vs Budget",
   //   kpi: "sales"
@@ -135,7 +136,7 @@ export const kpiList: KPIListType[] = [
   //   name: 'Created Leads',
   //   kpi: 'created/leads'
   // }
-]
+// ]
 
 export interface IFormDataType {
   uniqueId?: string;
@@ -146,7 +147,7 @@ export interface IFormDataType {
   hasFilters?: boolean;
   hasTableView?: boolean;
   hasExport?: boolean;
-  axis?:string;
+  axis?: string;
   filters?: IFilterType[];
   kpi: KPIListType;
   statusOptions?: { optionValue: string; optionLabel: string }[];
@@ -157,9 +158,9 @@ export const defaultFormConfigs: IFormDataType = {
   graphType: '',
   chartType: '',
   chartTitle: '',
-  kpi: { name: "", kpi: "", resource: "", id: 0, graphType: [], chartType: [] },
+  kpi: { name: "", kpi: "", resource: "", id: 0, graphType: [], chartType: [], filters: [] },
   hasFilters: false,
-  axis:'y',
+  axis: 'y',
   hasTableView: false,
   hasExport: false,
   statusOptions: [],

@@ -26,16 +26,13 @@ const SerialNumber = ({ product, warehouse }) => {
             gridApi.setRowData([]);
         }
         let data;
-
         const query = warehouse ? `?warehouse=${warehouse}&isAll=true` : `?isAll=true`;
-
         const response = await axiosInstance().get(`${productInventory.api}/serial-number/${product}${query}`)
         data = response?.data?.data
         let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
             return finalObject;
         });
-        console.log(rows)
         dispatch({ type: "initialize", data: rows, count: rows.length });
         setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     };

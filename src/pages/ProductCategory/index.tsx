@@ -332,7 +332,6 @@ const ProductCategory = () => {
       }
     }
     catch (e) {
-      console.log(e)
     }
   }
 
