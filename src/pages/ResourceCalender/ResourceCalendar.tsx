@@ -58,10 +58,6 @@ const MyCalendar = (props: Props) => {
       .catch((err) => {});
   }, [resource, dateRange]);
 
-  // useEffect(() => {
-  //   console.log(view);
-  // }, [view]);
-
   const onRangeChange = useCallback(
     (range) => {
       setRange(range);
