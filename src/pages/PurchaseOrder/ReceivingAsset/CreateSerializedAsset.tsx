@@ -55,7 +55,8 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             let tempProductArray = values.map(d => {
                 let res;
                 res = d.row
-                res["actualReceived"] = parseInt(d.inventoryQuantity || 0) + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.actualReceived || 0)
+                res["actualReceived"] = parseInt(d.inventoryQuantity || 0) + parseInt(d.assetQuantity || 0)
+                    + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.actualReceived || 0)
                 return res
             })
             axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderID}/update`, { products: tempProductArray })

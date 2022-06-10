@@ -5,8 +5,6 @@ import moment from 'moment';
 
 import FormTypes from '../../components/Helpers/FormTypes';
 import { dateFormatForInputControl } from '../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
-import seed from './seed';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -41,12 +39,7 @@ interface Props {
 
 const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList }: Props) => {
   const classes = useStyles();
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
-  // const dashboards = seed.map((s) => s.name);
+
   const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
 
   React.useEffect(() => {
@@ -96,6 +89,12 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList }: Props)
     }
   }, [timeFrame]);
 
+  const handleSelectDashboard = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedDashboard = e.target.value.toString();
+    localStorage.setItem('selectedDashboard', selectedDashboard);
+    setGlobalFilters((prevState: GlobalFiltersType) => ({ ...prevState, dashboardType: selectedDashboard }));
+  };
+
   return (
     <AppBar className={classes.appBar} position="sticky" elevation={0} color="default">
       <Box p={1} pt={2}>
@@ -105,12 +104,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList }: Props)
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small" variant="outlined">
                   <InputLabel id="dashboard-type">Dashboard</InputLabel>
-                  <Select
-                    labelId="dashboard-type"
-                    id="type"
-                    value={globalFilters.dashboardType}
-                    onChange={(e) => setGlobalFilters((prevState: GlobalFiltersType) => ({ ...prevState, dashboardType: e.target.value.toString() }))}
-                  >
+                  <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard}>
                     {dashboardList.map((d: { name: string; id: string }) => (
                       <MenuItem key={d.id} value={d.name}>
                         {d.name}

@@ -104,7 +104,7 @@ const RepairType = () => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = permissions?.repairType?.isUpdate;
-                finalObject["canDelete"] = permissions?.repairType?.isUpdate;;
+                finalObject["canDelete"] = permissions?.repairType?.isDelete;
                 let res = {
                     ...finalObject,
                 };
