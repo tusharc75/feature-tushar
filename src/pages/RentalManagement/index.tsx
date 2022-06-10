@@ -36,6 +36,8 @@ import { isMobile, isTablet } from 'react-device-detect'
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { setUpindexDB, objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
 import { CheckboxRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import DeleteIcon from '@material-ui/icons/Delete';
+import HideWhenOffline from '../../components/HideWhenOffline';
 
 
 let rentalManagementTimeout;
@@ -208,41 +210,43 @@ const RentalManagement = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {
-        permissions?.rentalManagement?.isCreate ? (
-          <Tooltip title="Clone">
+      {permissions?.rentalManagement?.isCreate ? (
+        <Tooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: params.data._id })
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton aria-label="Clone" size="small">
+            <FileCopyIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+      {params.data.canDelete ?
+        <HideWhenOffline>
+          <Tooltip title="Delete">
             <IconButton
               size="small"
-              aria-label="Clone"
+              aria-label="Delete"
               onClick={() => {
-                setShowManageRentalManagementDialog({ open: true, isClone: true, idToClone: params.data._id })
+                setSingleRentalManagementDelete({
+                  show: true,
+                  id: params.data._id,
+                  rentalJobName: `${params.data.rentalJobName}`,
+                })
               }}
             >
-              <FileCopyIcon fontSize="small" color="primary" />
+              <DeleteIcon fontSize="small" color="error" />
             </IconButton>
           </Tooltip>
-        ) : (
-          <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        )}
-      {/* <HideWhenOffline>
-        <GridDeleteIcon
-          hasDeletePermission={permissions.rentalManagement.isDelete}
-          ownerId={params.data.ownerId}
-          userId={user?.user?._id}
-          onDelete={() =>
-            setSingleRentalManagementDelete({
-              show: true,
-              id: params.data._id,
-              rentalJobName: `${params.data.rentalJobName}`,
-            })
-          }
-          entity="rentalManagement"
-        />
-      </HideWhenOffline> */}
+        </HideWhenOffline> : null}
     </>
   );
 
@@ -347,10 +351,10 @@ const RentalManagement = () => {
         count = data?.length || 0;
       }
       let rows = data.map((u) => {
-        let finalObject = prepareDataForGrid(u, user);
-        finalObject["canDelete"] = false;
+        let finalObject: any = prepareDataForGrid(u, user);
+        finalObject["canDelete"] = permissions?.rentalManagement?.isDelete && finalObject?.ownerId === user?.user?._id && u?.material?.length === 0;
         finalObject["isChecked"] = false;
-        finalObject["allowedToEdit"] = true;
+        finalObject["allowedToEdit"] = permissions?.rentalManagement?.isUpdate;
         finalObject["owerCollaboratorInitialsOrImages"] = [];
         if (finalObject["owner"])
           finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] }); finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
@@ -394,7 +398,7 @@ const RentalManagement = () => {
         setDeleteRecord(row);
       }
     } else {
-      if (selectedRecords.find((d) => d.canDelete === false)) {
+      if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.find((d) => d.canDelete === false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -412,7 +416,7 @@ const RentalManagement = () => {
     if (deleteRecord?._id) {
       recordsToDelete.push(deleteRecord?._id);
     } else {
-      recordsToDelete = selectedRecords.map((o) => o._id);
+      recordsToDelete = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((o) => o._id);
     }
     if (recordsToDelete.length > 0) {
       axiosInstance()
@@ -481,7 +485,7 @@ const RentalManagement = () => {
           <div className="header-panel">
             <RentalManagementHeader
               selectedType={selectedType}
-              selectedRecords={selectedRecords}
+              selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
               onTypeChange={handleRentalManagementTypeSel}
               options={RentalManagementType}
               onSearch={handleSearch}
@@ -529,7 +533,7 @@ const RentalManagement = () => {
                     history.push(`${routes.rentalManagementDetail.path}/${data._id}`)
                   }}
                   dataRows={dataRows}
-                  selectedRecords={selectedRecords}
+                  selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                   dispatch={dispatch}
                   onEdit={(data) => {
                     history.push(`${routes.rentalManagementDetail.path}/${data._id}?openEdit=true`)
