@@ -539,7 +539,6 @@ export default function CustomReactTable({
 //             if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
 //                 return;
 //             }
-//             console.log(dragIndex + "  " + hoverIndex)
 //             moveItem(dragIndex, hoverIndex);
 //             item.index = hoverIndex;
 //         }
