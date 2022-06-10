@@ -253,15 +253,12 @@ const Builder = (props: Props) => {
               multiple
               size="small"
               disableCloseOnSelect
-              options={FILTERS_OPTIONS}
+              options={formValues?.kpi?.filters || []}
               disabled={!formValues.kpi?.name}
               value={formValues.filters}
               onChange={(_, val) => handleChange('filters', val)}
               getOptionLabel={(option) => option.title}
               getOptionSelected={(option, value) => option.title === value.title}
-              getOptionDisabled={(option) =>
-                formValues?.kpi?.filters && formValues?.kpi?.filters.length > 0 ? formValues?.kpi?.filters.every((d) => d.key !== option.key) : false
-              }
               renderInput={(params) => (
                 <TextField
                   {...params}
