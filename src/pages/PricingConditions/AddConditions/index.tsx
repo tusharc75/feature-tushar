@@ -196,7 +196,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         hideDuration: null,
         open: true,
         type: 'info',
-        message: `Uploading ${module}, Please wait...`
+        message: `Uploading file, Please wait...`
       });
       const file = event.target.files[0];
 
@@ -224,7 +224,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             toastConfig.setToastConfig({
               open: true,
               type: 'error',
-              message: `Found some issue(s) while importing ${module}`
+              message: `Found some issue(s) while importing file. Please check the file and try again.`
             });
             fetchCondition();
           }
