@@ -30,13 +30,17 @@ const DashbaordNew = () => {
   const [dashboardLoading, setDashboardLoading] = React.useState(false);
   const [dashboardList, setDashboardList] = React.useState([]);
   const [charts, setCharts] = React.useState([]);
-  const [globalFilters, setGlobalFilters] = React.useState({
-    dashboardType: '',
-    currency: '',
-    between: {
-      from: new Date(moment().subtract(1, 'year').calendar()),
-      to: new Date()
-    }
+  const [globalFilters, setGlobalFilters] = React.useState(() => {
+    const selectedDashboard = localStorage.getItem('selectedDashboard') ? localStorage.getItem('selectedDashboard') : '';
+
+    return {
+      dashboardType: selectedDashboard,
+      currency: '',
+      between: {
+        from: new Date(moment().subtract(1, 'year').calendar()),
+        to: new Date()
+      }
+    };
   });
 
   React.useEffect(() => {
@@ -82,8 +86,15 @@ const DashbaordNew = () => {
       .get('/dashboard-master')
       .then(({ data: { data } }) => {
         if (data?.length) {
-          setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
-          setCharts([...data[0].charts]);
+          const savedSelected = localStorage.getItem('selectedDashboard');
+          if (!savedSelected) {
+            setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
+          } else {
+            const selectedDashboard = data.find((d) => d.name === savedSelected);
+            if (selectedDashboard) {
+              setCharts(selectedDashboard?.charts || []);
+            }
+          }
           setDashboardList(data);
           setDashboardLoading(false);
         }
