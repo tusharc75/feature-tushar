@@ -3,7 +3,7 @@ import { Popover, TextField, Box } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 
 interface Props {
-  filters: { key: string; title: string; multiple: boolean }[];
+  filters: { key: string; title: string; multiple?: boolean }[];
   anchorEl: any;
   closeAnchor: () => any;
   values: any;
