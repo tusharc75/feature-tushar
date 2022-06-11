@@ -15,6 +15,8 @@ interface Props {
 const TableView = ({ id, chartData, isScreenSmall, currency, selectedDashboard }: Props) => {
   const [tableData, setTableData] = useState([])
   useEffect(() => {
+    if(!chartData || chartData.length === 0) return;
+
     const col = Object.keys(chartData[0])
       .map((k) => {
         let b = chartData[0];
@@ -34,7 +36,7 @@ const TableView = ({ id, chartData, isScreenSmall, currency, selectedDashboard }
       return obj;
     });
     setTableData(tableData);
-  }, []);
+  }, [chartData]);
 
   if (!chartData || chartData.length === 0 || tableData.length === 0) {
     return (

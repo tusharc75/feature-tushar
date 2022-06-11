@@ -13,7 +13,7 @@ import ReportArrangeView from './ReportArrangeView';
 let timeout
 export default function CustomGridHeaderOptions({ columns, setColumns, columnApi,
   refreshGrid = null, renderedFrom = null, isClientSideGrid = false, dispatch: gridDispatch = null, showOnlyShowFilteredRecordSwitch = false,
-  saveColumnOptions = false, selectedRecords = [], selectedReportView = null, setSelectedReportView = null
+  saveColumnOptions = false, selectedRecords = [], selectedReportView = null, setSelectedReportView = null, reportSave=false
 }) {
 
   const [disableSelectionSwitch, setDisableSelectionSwitch] = useState(true);
@@ -276,7 +276,7 @@ export default function CustomGridHeaderOptions({ columns, setColumns, columnApi
       </Box>
 
       {openColumnSelection && 
-      <>{ renderedFrom.includes("report") ? 
+      <>{ renderedFrom.includes("report") && reportSave ? 
         <ReportArrangeView
           columns={columns} 
           onClose={() => setOpenColumnSelection(false)}

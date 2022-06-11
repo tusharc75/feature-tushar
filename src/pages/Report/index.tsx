@@ -447,6 +447,7 @@ const Report = () => {
                     <CustomAgGrid
                       setSelectedReportView={setSelectedReportView}
                       selectedReportView={selectedReportView}
+                      reportSave={true}
                       columns={columns}
                       dataRows={dataRows}
                       frameworkComponents={frameWorkComponent}
