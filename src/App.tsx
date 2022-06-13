@@ -134,6 +134,7 @@ import SerializedAssetTest from './pages/SerializedAsset-test';
 import ProductAuction from './pages/productAuction';
 import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDetailsPage';
 import ConvertInventory from './pages/ConvertInventory';
+import PublicRoutePage from './pages/PublicRoutePage';
 
 var notificationInterval: any = null;
 
@@ -239,7 +240,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -731,6 +732,9 @@ function App() {
             <PrivateRoute exact path={routes.inventoryToAsset.path}>
               <ConvertInventory />
             </PrivateRoute>
+            <Route exact path={'/public/:id'}>
+              <PublicRoutePage />
+            </Route>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>
