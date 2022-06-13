@@ -7,7 +7,7 @@ import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
-import { getLocalStorageArrayData, prepareDataForGrid } from "../../constants/helpers"
+import { getLocalStorageArrayData, prepareDataForGrid, removeLocalStorage } from "../../constants/helpers"
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { FaRegistered, FaSuitcase, FaAddressBook, FaAddressCard } from "react-icons/fa";
 import { SiStatuspage } from "react-icons/all";
@@ -424,6 +424,7 @@ const RentalManagement = () => {
           ids: recordsToDelete,
         })
         .then(({ data }) => {
+          removeLocalStorage(localStorageSelectedRecords)
           toastConfig.setToastConfig({
             open: true,
             type: "success",
