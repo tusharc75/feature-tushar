@@ -301,7 +301,7 @@ const ProductDetails = () => {
                                                         color="secondary"
                                                         size="small"
                                                         style={{ border: "1px solid" }}
-                                                        disabled={cartProduct?.qty >= productData?.availableInventory}
+                                                        disabled={productData?.availableInventory > 0 ? false : true}
                                                         onClick={() => { handleUpdateCart(cartProduct, "add") }}>
                                                         <AddIcon fontSize="small" />
                                                     </IconButton >
