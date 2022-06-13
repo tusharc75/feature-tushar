@@ -41,16 +41,16 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
     );
 
     const ActionsRenderer = (params) => (
-        <HtmlTooltip title={params?.data?.inventory ? 'Add to cart' : 'No inventory'} >
+        <HtmlTooltip title={params?.data?.availableInventory ? 'Add to cart' : 'No inventory'} >
             <span>
                 <IconButton
                     size="small"
-                    disabled={!params.data?.inventory || params.data?.inventory === 0}
+                    disabled={!params.data?.availableInventory || params.data?.availableInventory === 0}
                     aria-label="Add to cart"
                     onClick={() => {
                         setAssignCartProductQty(params.data)
                     }}
-                    color={params?.data?.inventory ? "secondary" : "inherit"}
+                    color={params?.data?.availableInventory ? "secondary" : "inherit"}
                 >
                     <MdAddShoppingCart />
                 </IconButton>
