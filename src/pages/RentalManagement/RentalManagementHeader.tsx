@@ -269,7 +269,7 @@ function RentalManagementHeader({
                       open={Boolean(anchorEl)}
                       onClose={closeActions}
                     >
-                      {((selectedRecords?.filter((e) => e.canDelete === true)?.length) === selectedRecords?.length) ?
+                      {((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e.canDelete === true)?.length) === selectedRecords?.length) ?
                         <MenuItem
                           onClick={() => {
                             closeActions();
