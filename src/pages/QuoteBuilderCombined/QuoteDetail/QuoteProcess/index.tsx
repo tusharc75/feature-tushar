@@ -446,8 +446,6 @@ export default function QuoteProcess(props) {
     tempBuilderData.forEach((quoteRows: { [x: string]: any }, i) => {
       const quoteRowKeys = Object?.keys(quoteRows);
       let inventorydata: { fieldName: string; fieldValue: any }[] = [];
-      // if (i === 0) console.log(quoteRows)
-      // Making table columns and data for table
 
       const labelsWithVal = {};
       const requiredValues = {};
@@ -455,7 +453,6 @@ export default function QuoteProcess(props) {
       quoteRowKeys.forEach((key) => {
         if (fieldArray) {
           fieldArray.forEach((data, i) => {
-            // console.log(data)
             if (!filterKeys.includes(data.fieldName)) {
               const fieldLabel = data.fieldLabel;
               const fieldName = data.fieldName;
@@ -596,9 +593,6 @@ export default function QuoteProcess(props) {
         if (hasPrice) {
           withZeroAmt = tempBuilderData.filter((d) => d[`totalSalesPrice_${quoteData?.currency.toLowerCase()}`] === 0);
         }
-
-        // console.log(BuilderData)
-        // console.log(`totalSalesPrice_${quoteData?.currency.toLowerCase()}`)
 
         if ((!ungivenValues && ungivenValues.length === 0) || (!withZeroAmt.length && hasPrice && !withZeroQty.length)) {
           setNextStep(true);

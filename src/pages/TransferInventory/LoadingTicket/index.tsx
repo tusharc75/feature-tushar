@@ -71,13 +71,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
       { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
       { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     ];
-
-    column.push({
-      field: 'serialNumber',
-      headerName: 'Serial Number',
-      show: true,
-      cellRenderer: 'serialNumberRenderer',
-    });
     setColumns([...column, ...extracolumns])
   }
 
