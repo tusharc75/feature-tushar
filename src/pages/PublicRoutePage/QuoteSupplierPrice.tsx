@@ -180,24 +180,23 @@ const QuoteSupplierPrice = ({ quoteData }) => {
     const onCellValueChanged = (row) => {
 
         let tempData = {
-
             "products": [{
-
-                "uniqueId": "629f14a5c6ed5202cdc75d1d",
-
-                "costPrice": 10
-
+                "uniqueId": row.data._id,
+                "costPrice": parseInt(row?.data?.totalCost)
             }],
-
-            "requestId": "62a068d9a49ae06188867761"
+            "requestId": quoteData?.data?.requestId
         }
 
-        // axios.post(backendApi + `/quote-builder/supplier-price-response`, tempData).then(({ data: { data } }) => {
-
-        // })
-        //     .catch((error) => {
-        //         toastConfig.setToastConfig(error);
-        //     });
+        axios.post(backendApi + `/quote-builder/supplier-price-response`, tempData).then(({ data }) => {
+            toastConfig.setToastConfig({
+                message: data.message,
+                type: "success",
+                open: true,
+            });
+        })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
     }
 
     return (
