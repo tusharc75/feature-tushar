@@ -80,7 +80,7 @@ const InventoryProduct = () => {
 
   useEffect(() => {
     fetchGridColumns();
-  }, [plantId]);
+  }, []);
 
   useEffect(() => {
     getPlants();
@@ -158,7 +158,6 @@ const InventoryProduct = () => {
     ];
 
     setColumns([...columns, ...defaultColumns])
-    fetchProductInventory();
   }
 
   const fetchProductInventory = () => {
@@ -268,7 +267,7 @@ const InventoryProduct = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {(permissions?.productInventory?.isUpdate && plantId !== "All") &&
+      {(permissions?.productInventory?.isUpdate && params?.data?.plantId !== "All") &&
         <Fragment>
           <Box>
             <Tooltip title="Add">
