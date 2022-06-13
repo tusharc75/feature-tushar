@@ -60,7 +60,8 @@ const ProductBuilder = (props) => {
     permissions,
     fromQuote,
     setColumnForPDFExcel,
-    fullScreen = false
+    fullScreen = false,
+    quoteData = null
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -534,6 +535,29 @@ const ProductBuilder = (props) => {
     }
   };
 
+  const handelAskPriceToSupplier = () => {
+
+    let data: any = {
+      "products": selectedRecords?.map(d => {
+        return {
+          "productId": d?.productId,
+          "uniqueId": d?._id
+        }
+      }),
+      "quote": quoteData?._id
+    }
+    axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
+      toastConfig.setToastConfig({
+        message: `Email has been sent to suppliers`,
+        type: "success",
+        open: true,
+      });
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Box p={1} pt={0}>
       {Editable && (
@@ -558,6 +582,18 @@ const ProductBuilder = (props) => {
                 else fetchProduct(productBuilderId)
               }}
             />
+          )}
+          {isPriceBuilder && fromQuote && permissions.isUpdate && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              className="float-right ml-1 mr-2"
+              onClick={handelAskPriceToSupplier}
+              disabled={checkUniqTemplate()}
+              aria-controls="action-menu">
+              {isMobile && !isTablet ? "Supplier" : "Ask Price to Supplier"}
+            </Button>
           )}
           {stage === "cost" && permissions.isUpdate && (
             <Button
