@@ -42,6 +42,7 @@ const QuoteSupplierPrice = ({ quoteData }) => {
             let rows = data.products.map((item, index) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
+                    totalCost: item.totalCost || item.costPrice
                 };
                 res.srno = index + 1;
                 res.isChecked = false;
@@ -181,7 +182,7 @@ const QuoteSupplierPrice = ({ quoteData }) => {
 
         let tempData = {
             "products": [{
-                "uniqueId": row.data._id,
+                "uniqueId": row.data?.uniqueId,
                 "costPrice": parseInt(row?.data?.totalCost)
             }],
             "requestId": quoteData?.data?.requestId
