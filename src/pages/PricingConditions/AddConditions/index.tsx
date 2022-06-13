@@ -243,7 +243,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       type: 'info',
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
-    let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}`;
+    let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}${
+      selectedRecords.length ? `?ids=${JSON.stringify(selectedRecords?.map((e) => e?.materialId) || [])}` : ''
+    }`;
 
     axiosInstance()
       .get(exportApi, {
@@ -344,7 +346,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             </Button>
           </HtmlTooltip> */}
           <Button
-            variant={isMobile && !isTablet ? 'text' : 'contained'}
+            variant={isMobile && !isTablet ? 'text' : 'outlined'}
             color="default"
             size="small"
             className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
@@ -392,7 +394,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 exportToExcel();
               }}
             >
-              Export to Excel
+              Export to Excel {selectedRecords && selectedRecords.length ? `(${selectedRecords.length})` : '(All)'}
             </MenuItem>
             <MenuItem onClick={() => {}}>
               <label htmlFor="importFromExcel">{ImportInput}Import from Excel</label>

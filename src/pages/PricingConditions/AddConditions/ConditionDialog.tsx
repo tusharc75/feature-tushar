@@ -26,8 +26,8 @@ import { useData } from '../../../StateProvider/Provider';
 import { object, array, string } from 'yup';
 
 const pricingConditionSchema = object().shape({
-  conditionType: array().of(string()).min(1, 'Condition type is required'),
-  unit: array().of(string()).min(1, 'Condition type is required')
+  conditionType: array().of(string()).required().min(1, 'Condition type is required'),
+  unit: array().of(string()).required().min(1, 'Condition type is required')
 });
 
 const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit }) => {
@@ -163,17 +163,21 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
     setTax(_tax);
   };
 
+  const valueTouch = {};
   const validate = (values) => {
     const errors: any = {};
     currency.forEach((_currency) => {
       values['unit']?.map((_unit) => {
         if (values.conditionType?.includes('Price')) {
           const data = values['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())];
-          console.log(data);
           if (isNaN(data)) {
+            valueTouch['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = true;
             errors['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = 'Price is required';
           }
-          if (parseFloat(data) < 0) {
+          if (data === undefined) {
+            errors['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = 'Enter valid price';
+          }
+          if (parseFloat(data) <= 0) {
             errors['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = 'Enter valid price';
           }
         }
@@ -185,7 +189,11 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
               errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] =
                 'Price is required';
             }
-            if (parseFloat(data) < 0) {
+            if (data === undefined) {
+              errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] =
+                'Enter valid price';
+            }
+            if (parseFloat(data) <= 0) {
               errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] =
                 'Enter valid price';
             }
@@ -249,7 +257,9 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                             renderTags={(value: string[], getTagProps) =>
                               value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
                             }
-                            onChange={(e, value) => setFieldValue('conditionType', value)}
+                            onChange={(e, value) => {
+                              setFieldValue('conditionType', value);
+                            }}
                             renderInput={(params) => (
                               <TextField
                                 {...params}
@@ -273,7 +283,9 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                             renderTags={(value: string[], getTagProps) =>
                               value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
                             }
-                            onChange={(e, value) => setFieldValue('unit', value)}
+                            onChange={(e, value) => {
+                              setFieldValue('unit', value);
+                            }}
                             renderInput={(params) => (
                               <TextField
                                 {...params}
@@ -334,11 +346,13 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                         inputProps: { min: 0, max: 9999999999 }
                                       }}
                                       error={
-                                        touched['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] &&
+                                        (valueTouch['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] ??
+                                          touched['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())]) &&
                                         Boolean(errors['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())])
                                       }
                                       helperText={
-                                        touched['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] &&
+                                        (valueTouch['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] ??
+                                          touched['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())]) &&
                                         errors['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())]
                                       }
                                     />
@@ -443,15 +457,28 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                     parseFloat(e.target.value)
                                                   );
                                                 }}
+                                                InputProps={{
+                                                  startAdornment: (
+                                                    <InputAdornment position="start">
+                                                      {result(
+                                                        find(getUniqueCurrencies(), function (obj) {
+                                                          return obj.currencyCode === _currency;
+                                                        }),
+                                                        'symbolNative'
+                                                      )}
+                                                    </InputAdornment>
+                                                  ),
+                                                  inputProps: { min: 0, max: 9999999999 }
+                                                }}
                                                 error={
-                                                  touched[
-                                                    'rent_' +
-                                                      camelCase(_pricingMethod.toLowerCase()) +
-                                                      '_' +
-                                                      _currency.toLowerCase() +
-                                                      '_' +
-                                                      camelCase(_unit.toLowerCase())
-                                                  ] &&
+                                                  // touched[
+                                                  //   'rent_' +
+                                                  //     camelCase(_pricingMethod.toLowerCase()) +
+                                                  //     '_' +
+                                                  //     _currency.toLowerCase() +
+                                                  //     '_' +
+                                                  //     camelCase(_unit.toLowerCase())
+                                                  // ] &&
                                                   Boolean(
                                                     errors[
                                                       'rent_' +
@@ -464,14 +491,14 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                   )
                                                 }
                                                 helperText={
-                                                  touched[
-                                                    'rent_' +
-                                                      camelCase(_pricingMethod.toLowerCase()) +
-                                                      '_' +
-                                                      _currency.toLowerCase() +
-                                                      '_' +
-                                                      camelCase(_unit.toLowerCase())
-                                                  ] &&
+                                                  // touched[
+                                                  //   'rent_' +
+                                                  //     camelCase(_pricingMethod.toLowerCase()) +
+                                                  //     '_' +
+                                                  //     _currency.toLowerCase() +
+                                                  //     '_' +
+                                                  //     camelCase(_unit.toLowerCase())
+                                                  // ] &&
                                                   errors[
                                                     'rent_' +
                                                       camelCase(_pricingMethod.toLowerCase()) +
