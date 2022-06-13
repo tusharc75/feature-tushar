@@ -198,7 +198,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                             <div>
                                                                 {(values.seriaizedAsset.map((data, index) => (
                                                                     <Box key={index} border={'1px solid #dddddd'} borderRadius={4} mb={2} p={2}  pt={0}>
-                                                                       
+                                                                       {data?.serializedProduct &&
                                                                         <Box my={1} display="flex" justifyContent="flex-end">
                                                                             <Box mr={2}>
                                                                                 <Typography className="link cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExportField(data)}>
@@ -213,7 +213,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                 </Typography>
                                                                                 </label>
                                                                             </Box>
-                                                                        </Box>
+                                                                        </Box>}
                                                                         
                                                                         <Grid
                                                                             container
