@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState, FC, Fragment } from 'react';
-import { Dialog, Button, Box, TextField, Grid, Chip, ButtonGroup, Container, InputAdornment, Paper } from '@material-ui/core';
+import React, { useContext, useEffect, useState, FC, Fragment } from 'react';
+import { Dialog, Button, Box, TextField, Grid, Chip, ButtonGroup, Container, InputAdornment, Paper, Typography, TableBody } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -11,7 +11,7 @@ import { Formik, Form, FieldArray, Field } from 'formik';
 import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from "react-device-detect";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-
+import { read, utils, writeFile } from 'xlsx';
 
 const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, productList, updateStatus, purchaseOrderData }) => {
 
@@ -99,6 +99,49 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
         return errors;
     };
 
+    const handleExportField = (data:any) => {
+        const qty = data?.row?.qty - (data?.row?.actualReceived || 0)
+        let json_data = [...Array(qty).keys()].map((item) => ({
+            'Product': data?.product || "",
+            "Serial Number": ""
+        }));
+        const header = ['Product','Serial Number'];    
+        const ws = utils.json_to_sheet(json_data);
+        if (header.length) {
+        utils.sheet_add_aoa(ws, [header]);
+        }
+        const wb = utils.book_new();
+        utils.book_append_sheet(wb, ws, 'Sheet1');
+        writeFile(wb, 'PO Serial Number.xlsx');
+    }
+
+    const handleImport = (arrayHelpers:any, index:number, values:any) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault();
+    const files = e.target.files,
+      f = files[0];
+    let reader = new FileReader();
+    reader.onload = function (e) {
+      const data = e.target.result;
+      let readedData = read(data, { type: 'binary' });
+      const wsname = readedData.SheetNames[0];
+      const ws = readedData.Sheets[wsname];
+      const parsedData = utils.sheet_to_json(ws, { header: 1 });
+
+      if (parsedData.length > 1) {
+        let tableContent = parsedData.slice(1, parsedData.length);
+        const serialNumber = tableContent.map((item:any[]) => item[1]);
+
+        arrayHelpers.replace(index, {
+            ...values.seriaizedAsset[index],
+            serialNumber
+        })
+
+      }
+    };
+    reader.readAsBinaryString(f);
+    e.target.value = null;
+    }
+
     return (
         <Dialog
             open
@@ -154,7 +197,24 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                         render={arrayHelpers => (
                                                             <div>
                                                                 {(values.seriaizedAsset.map((data, index) => (
-                                                                    <Box key={index} border={'1px solid #dddddd'} borderRadius={4} mb={2} p={2}>
+                                                                    <Box key={index} border={'1px solid #dddddd'} borderRadius={4} mb={2} p={2}  pt={0}>
+                                                                       
+                                                                        <Box my={1} display="flex" justifyContent="flex-end">
+                                                                            <Box mr={2}>
+                                                                                <Typography className="link cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExportField(data)}>
+                                                                                Export
+                                                                                </Typography>
+                                                                            </Box>
+                                                                            <Box mr={1}>
+                                                                                <input accept="json" style={{ display: 'none' }} onChange={handleImport(arrayHelpers, index, values)} id="import-file" multiple={false} type="file" />
+                                                                                <label htmlFor="import-file">
+                                                                                <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
+                                                                                    Import
+                                                                                </Typography>
+                                                                                </label>
+                                                                            </Box>
+                                                                        </Box>
+                                                                        
                                                                         <Grid
                                                                             container
                                                                             spacing={2}
@@ -224,9 +284,14 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                             placeholder="Enter Quantity"
                                                                                             value={data.inventoryQuantity}
                                                                                             onChange={(e) => {
+                                                                                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                                                                                const qty = data?.row?.qty - (data?.row?.actualReceived || 0)
+
+                                                                                                if(value > qty) return
                                                                                                 arrayHelpers.replace(index, {
                                                                                                     ...values.seriaizedAsset[index],
-                                                                                                    ["inventoryQuantity"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                                                    ["inventoryQuantity"]: value,
+                                                                                                    ['assetQuantity']: qty - value,
                                                                                                 })
                                                                                             }}
                                                                                             error={validate([data])?.inventoryQuantity}
@@ -247,9 +312,13 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                                     placeholder="Enter Quantity"
                                                                                                     value={data.assetQuantity}
                                                                                                     onChange={(e) => {
+                                                                                                        const value = e.target.value.replace(/[^0-9]/g, '');
+                                                                                                        const qty = data?.row?.qty - (data?.row?.actualReceived || 0)
+                                                                                                        if(value > qty) return
                                                                                                         arrayHelpers.replace(index, {
                                                                                                             ...values.seriaizedAsset[index],
-                                                                                                            ["assetQuantity"]: e.target.value.replace(/[^0-9]/g, '')
+                                                                                                            ["assetQuantity"]: value,
+                                                                                                            ['inventoryQuantity']: qty - value,
                                                                                                         })
                                                                                                     }}
                                                                                                     error={validate([data])?.assetQuantity}
