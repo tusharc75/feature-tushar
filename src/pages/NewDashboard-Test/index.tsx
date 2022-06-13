@@ -89,7 +89,9 @@ const DashbaordNew = () => {
           const savedSelected = localStorage.getItem('selectedDashboard');
           if (!savedSelected) {
             setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
+            setCharts(data[0]?.charts);
           } else {
+            setGlobalFilters((prevState) => ({ ...prevState, dashboardType: savedSelected }));
             const selectedDashboard = data.find((d) => d.name === savedSelected);
             if (selectedDashboard) {
               setCharts(selectedDashboard?.charts || []);

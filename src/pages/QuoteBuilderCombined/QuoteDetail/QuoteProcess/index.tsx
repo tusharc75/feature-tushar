@@ -1592,6 +1592,7 @@ export default function QuoteProcess(props) {
 
                   <ProductBuilder
                     fromQuote={true}
+                    quoteData={quoteData}
                     permissions={permissions[qbResource]}
                     hasPermission={allowedToEdit}
                     currency={quoteData?.currency.toLowerCase()}
