@@ -154,7 +154,8 @@ const InventoryProduct = () => {
 
     const defaultColumns = [
       { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
-      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }
+      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' },
+      { field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }
     ];
 
     setColumns([...columns, ...defaultColumns])
