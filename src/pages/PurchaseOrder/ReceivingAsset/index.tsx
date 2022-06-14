@@ -2,7 +2,7 @@
 import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useContext } from "react";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import { Button, Chip, Dialog, Grid } from "@material-ui/core";
+import { Button, Chip, Dialog, Grid, useMediaQuery, useTheme } from "@material-ui/core";
 import axiosInstance from "src/axios/axiosInstance";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import {
@@ -25,6 +25,8 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
+    const theme = useTheme()
+    const isMobileScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
     const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -261,7 +263,11 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
             {columns && rowsData ? (
                 <Box
                     zIndex={5}
-                    width={stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
+                    width={isMobileScreen 
+                        ? '100vw' 
+                        : stepFullScreen || showActivity || isTabletScreen 
+                        ? '100%' 
+                        : 'calc(100vw - 103px)'}
                 >
                     <CustomReactTable
                         height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
