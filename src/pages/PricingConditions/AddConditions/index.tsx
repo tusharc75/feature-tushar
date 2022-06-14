@@ -30,13 +30,14 @@ import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AddExistingMaterialDialog from '../AddExistingMaterialDialog';
 import ConditionDialog from './ConditionDialog';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
 import { ExpandMore } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
+  const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -105,8 +106,10 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(() => {
         fetchCondition();
         setAnchorEl(null);
+        localStorage.removeItem(renderFrom);
       })
       .catch((error) => {
+        localStorage.removeItem(renderFrom);
         toastConfig.setToastConfig(error);
       });
   };
@@ -243,7 +246,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       type: 'info',
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
-    let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}`;
+    let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}${
+      selectedRecords.length ? `?ids=${JSON.stringify(selectedRecords?.map((e) => e?.materialId) || [])}` : ''
+    }`;
 
     axiosInstance()
       .get(exportApi, {
@@ -252,7 +257,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
         downloadExcel(response.data, fileName);
-
+        localStorage.removeItem(renderFrom);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -260,6 +265,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         });
       })
       .catch((error) => {
+        localStorage.removeItem(renderFrom);
         toastConfig.setToastConfig(error);
       });
     setAnchorEl(null);
@@ -344,7 +350,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             </Button>
           </HtmlTooltip> */}
           <Button
-            variant={isMobile && !isTablet ? 'text' : 'contained'}
+            variant={isMobile && !isTablet ? 'text' : 'outlined'}
             color="default"
             size="small"
             className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
@@ -392,7 +398,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 exportToExcel();
               }}
             >
-              Export to Excel
+              Export to Excel {selectedRecords && selectedRecords.length ? `(${selectedRecords.length})` : '(All)'}
             </MenuItem>
             <MenuItem onClick={() => {}}>
               <label htmlFor="importFromExcel">{ImportInput}Import from Excel</label>
@@ -414,7 +420,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             page={page}
             allowAction={true}
             loading={loading}
-            renderedFrom={'pricingConditionsList'}
+            selectedRecords={selectedRecords}
+            renderedFrom={renderFrom}
             refreshGrid={fetchCondition}
           />
         ) : (
