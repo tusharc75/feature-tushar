@@ -187,6 +187,19 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                 }
             }
         });
+
+        column.push({
+            accessor: "assetQty",
+            Header: "Asset Received",
+            width: 300,
+            Cell: ({ row }) => (row.original["assetQty"] ? <p>{row.original["assetQty"]}</p> : <NoDataCell />),
+        });
+        column.push({
+            accessor: "inventoryQty",
+            Header: "Inventory Received",
+            width: 300,
+            Cell: ({ row }) => (row.original["inventoryQty"] ? <p>{row.original["inventoryQty"]}</p> : <NoDataCell />),
+        });
         setColumns([...column])
     }
 
@@ -224,6 +237,8 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                         }
                     })
                 }
+                res["assetQty"] = subRows?.length
+                res["inventoryQty"] = item?.actualReceived ? ((item?.actualReceived || 0) - subRows?.length) : 0
                 return res;
             });
             if (rows.every(d => d.qty === d.actualReceived)) {
