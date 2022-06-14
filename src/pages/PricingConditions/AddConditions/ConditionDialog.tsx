@@ -97,11 +97,10 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
       setHeaderLabel(
         startCase(conditionData?.materialType) + ' - ' + (conditionData?.materialType === 'product' ? details?.productName : details?.packageName)
       );
-      console.log(conditionData);
       currency.forEach((_currency) => {
         details?.unit?.map((_unit) => {
           if (conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] === undefined)
-            conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = '';
+            conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = 0;
           details?.pricingMethod?.map((_pricingMethod) => {
             if (
               conditionData[
@@ -110,12 +109,10 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
             )
               conditionData[
                 'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
-              ] = '';
+              ] = 0;
           });
         });
       });
-      console.log(conditionData);
-
       setInitialData(conditionData);
     }
   }, [conditionData]);
