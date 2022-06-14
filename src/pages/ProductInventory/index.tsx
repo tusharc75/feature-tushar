@@ -80,7 +80,7 @@ const InventoryProduct = () => {
 
   useEffect(() => {
     fetchGridColumns();
-  }, [plantId]);
+  }, []);
 
   useEffect(() => {
     getPlants();
@@ -154,11 +154,11 @@ const InventoryProduct = () => {
 
     const defaultColumns = [
       { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
-      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }
+      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' },
+      { field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }
     ];
 
     setColumns([...columns, ...defaultColumns])
-    fetchProductInventory();
   }
 
   const fetchProductInventory = () => {
@@ -268,7 +268,7 @@ const InventoryProduct = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {(permissions?.productInventory?.isUpdate && plantId !== "All") &&
+      {(permissions?.productInventory?.isUpdate && params?.data?.plantId !== "All") &&
         <Fragment>
           <Box>
             <Tooltip title="Add">
