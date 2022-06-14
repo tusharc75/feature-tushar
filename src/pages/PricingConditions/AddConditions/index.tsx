@@ -35,6 +35,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import { ExpandMore } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
   const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
@@ -52,6 +53,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [showDialog, setShowDialog] = useState({ open: false, isBulkedit: false });
   const [conditionData, setConditionData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
 
   useEffect(() => {
     fetchCondition();
@@ -100,15 +103,25 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       });
   };
 
-  const handleDelete = (ids) => {
+  const handleDelete = () => {
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords.map((d) => d._id);
+    }
     axiosInstance()
-      .post(`${pricingCondition.api}/condition/remove/${pricingConditionId}`, { ids })
+      .post(`${pricingCondition.api}/condition/remove/${pricingConditionId}`, { ids: ids })
       .then(() => {
         fetchCondition();
         setAnchorEl(null);
+        setDeleteRecord(null);
+        setShowDeleteConfirmBox(false);
         localStorage.removeItem(renderFrom);
       })
       .catch((error) => {
+        setDeleteRecord(null);
+        setShowDeleteConfirmBox(false);
         localStorage.removeItem(renderFrom);
         toastConfig.setToastConfig(error);
       });
@@ -173,7 +186,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         ownerId={user?.user?._id}
         userId={user?.user?._id}
         onDelete={() => {
-          handleDelete([params.data._id]);
+          // handleDelete([params.data._id]);
+          setDeleteRecord(params.data);
+          setShowDeleteConfirmBox(true);
         }}
         entity="pricingCondition"
       />
@@ -372,7 +387,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             onClose={closeActions}
           >
             <MenuItem
-              disabled={!Boolean(selectedRecords && selectedRecords.length > 1)}
+              disabled={!Boolean(selectedRecords && selectedRecords?.length > 1 && dataRows?.length > 1)}
               onClick={() => {
                 setShowDialog({ open: true, isBulkedit: true });
                 setConditionData(condition.filter((data) => selectedRecords.some((rec) => rec._id === data._id)));
@@ -381,19 +396,15 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               Bulk Edit
             </MenuItem>
             <MenuItem
-              disabled={!Boolean(selectedRecords && selectedRecords.length)}
+              disabled={!Boolean(selectedRecords && selectedRecords.length && dataRows?.length)}
               onClick={() => {
-                const dataToDelete =
-                  selectedRecords &&
-                  selectedRecords.map((rec: any) => {
-                    return rec._id;
-                  });
-                handleDelete(dataToDelete);
+                setShowDeleteConfirmBox(true);
               }}
             >
               Delete
             </MenuItem>
             <MenuItem
+              disabled={!Boolean(dataRows?.length)}
               onClick={() => {
                 exportToExcel();
               }}
@@ -453,6 +464,19 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             setShowDialog({ open: false, isBulkedit: false });
             fetchCondition();
           }}
+        />
+      )}
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete pricing setup condition  ${
+            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+          } ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          onOk={handleDelete}
         />
       )}
     </Fragment>
