@@ -30,13 +30,14 @@ import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AddExistingMaterialDialog from '../AddExistingMaterialDialog';
 import ConditionDialog from './ConditionDialog';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
 import { ExpandMore } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
+  const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -105,8 +106,10 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(() => {
         fetchCondition();
         setAnchorEl(null);
+        localStorage.removeItem(renderFrom);
       })
       .catch((error) => {
+        localStorage.removeItem(renderFrom);
         toastConfig.setToastConfig(error);
       });
   };
@@ -254,7 +257,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
         downloadExcel(response.data, fileName);
-
+        localStorage.removeItem(renderFrom);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -262,6 +265,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         });
       })
       .catch((error) => {
+        localStorage.removeItem(renderFrom);
         toastConfig.setToastConfig(error);
       });
     setAnchorEl(null);
@@ -416,7 +420,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             page={page}
             allowAction={true}
             loading={loading}
-            renderedFrom={'pricingConditionsList'}
+            selectedRecords={selectedRecords}
+            renderedFrom={renderFrom}
             refreshGrid={fetchCondition}
           />
         ) : (

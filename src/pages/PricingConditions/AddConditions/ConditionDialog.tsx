@@ -81,7 +81,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
       if (!conditionData?.conditionType) {
         conditionData['conditionType'] = ['Rent'];
       }
-      setInitialData(conditionData);
+
       let details: any = {};
       if (conditionData?.materialType === 'product') {
         details = conditionData?.productDetail;
@@ -97,6 +97,26 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
       setHeaderLabel(
         startCase(conditionData?.materialType) + ' - ' + (conditionData?.materialType === 'product' ? details?.productName : details?.packageName)
       );
+      console.log(conditionData);
+      currency.forEach((_currency) => {
+        details?.unit?.map((_unit) => {
+          if (conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] === undefined)
+            conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = '';
+          details?.pricingMethod?.map((_pricingMethod) => {
+            if (
+              conditionData[
+                'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
+              ] == undefined
+            )
+              conditionData[
+                'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
+              ] = '';
+          });
+        });
+      });
+      console.log(conditionData);
+
+      setInitialData(conditionData);
     }
   }, [conditionData]);
 
@@ -346,13 +366,11 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                         inputProps: { min: 0, max: 9999999999 }
                                       }}
                                       error={
-                                        (valueTouch['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] ??
-                                          touched['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())]) &&
+                                        touched['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] &&
                                         Boolean(errors['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())])
                                       }
                                       helperText={
-                                        (valueTouch['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] ??
-                                          touched['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())]) &&
+                                        touched['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] &&
                                         errors['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())]
                                       }
                                     />
@@ -471,14 +489,14 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                   inputProps: { min: 0, max: 9999999999 }
                                                 }}
                                                 error={
-                                                  // touched[
-                                                  //   'rent_' +
-                                                  //     camelCase(_pricingMethod.toLowerCase()) +
-                                                  //     '_' +
-                                                  //     _currency.toLowerCase() +
-                                                  //     '_' +
-                                                  //     camelCase(_unit.toLowerCase())
-                                                  // ] &&
+                                                  touched[
+                                                    'rent_' +
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase() +
+                                                      '_' +
+                                                      camelCase(_unit.toLowerCase())
+                                                  ] &&
                                                   Boolean(
                                                     errors[
                                                       'rent_' +
@@ -491,14 +509,14 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                   )
                                                 }
                                                 helperText={
-                                                  // touched[
-                                                  //   'rent_' +
-                                                  //     camelCase(_pricingMethod.toLowerCase()) +
-                                                  //     '_' +
-                                                  //     _currency.toLowerCase() +
-                                                  //     '_' +
-                                                  //     camelCase(_unit.toLowerCase())
-                                                  // ] &&
+                                                  touched[
+                                                    'rent_' +
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase() +
+                                                      '_' +
+                                                      camelCase(_unit.toLowerCase())
+                                                  ] &&
                                                   errors[
                                                     'rent_' +
                                                       camelCase(_pricingMethod.toLowerCase()) +
