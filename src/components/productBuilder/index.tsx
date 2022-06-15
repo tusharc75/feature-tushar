@@ -5,6 +5,7 @@ import AddExistingProduct from "./AddExistingProduct";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import ProductDialog from "./ProductDialog";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -34,6 +35,7 @@ import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomButton from "../Helpers/CustomButton";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
+import SupplierAskPrice from "./SupplierAskPrice";
 
 let levalOrderBy = [
   "product",
@@ -78,6 +80,9 @@ const ProductBuilder = (props) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isClone, setIsClone] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
+  const [openSupplierPriceDialog, setOpenSupplierPriceDialog] = useState(false);
+  const [supplierData, setSupplierData] = useState(null)
+
   // const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
   //   useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
 
@@ -171,6 +176,12 @@ const ProductBuilder = (props) => {
       });
   };
 
+  const supplierPriceDialogData = (product) => {
+    setOpenSupplierPriceDialog(true)
+    setSupplierData(product)
+
+  }
+
   const ActionsRenderer = (params) => {
     const permission = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
     return (
@@ -202,6 +213,21 @@ const ProductBuilder = (props) => {
             color={permission ? "primary" : "disabled"}
           />
         </IconButton>
+        {isPriceBuilder && fromQuote && permissions.isUpdate && (
+          <IconButton
+            disabled={isPriceBuilder && fromQuote && permissions.isUpdate ? false : true}
+            size="small"
+            aria-label="Supplier"
+            onClick={() => {
+              supplierPriceDialogData(params.data)
+            }}
+          >
+            <VisibilityIcon
+              fontSize="small"
+              color={isPriceBuilder && fromQuote && permissions.isUpdate ? "primary" : "disabled"}
+            />
+          </IconButton>
+        )}
         <IconButton
           disabled={permission ? false : true}
           size="small"
@@ -544,7 +570,8 @@ const ProductBuilder = (props) => {
           "uniqueId": d?._id
         }
       }),
-      "quote": quoteData?._id
+      "quote": quoteData?._id,
+      "productBuilder": productBuilderId ,
     }
     axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
       toastConfig.setToastConfig({
@@ -583,7 +610,7 @@ const ProductBuilder = (props) => {
               }}
             />
           )}
-          {isPriceBuilder && fromQuote && permissions.isUpdate && (
+          {isPriceBuilder && fromQuote && permissions.isUpdate && columns && columns.some(d => d.field.includes("supplier")) && (
             <Button
               variant="contained"
               color="primary"
@@ -776,6 +803,12 @@ const ProductBuilder = (props) => {
           loading={loading}
           productBuilderId={productBuilderId}
           stage={stage}
+        />
+      )}
+      {openSupplierPriceDialog && (
+        <SupplierAskPrice
+          supplierData={supplierData}
+          handleClose={() => setOpenSupplierPriceDialog(false)}
         />
       )}
       {showDeleteConfirmBox && (
