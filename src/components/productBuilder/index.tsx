@@ -106,17 +106,6 @@ const ProductBuilder = (props) => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/productbuilder/getproduct/${id}`).then(({ data: { data } }) => {
-      setProductData(data);
-      let rows = data.product.map((item, index) => {
-        let res: any = {
-          ...prepareDataForGrid(item),
-        };
-        res.srno = index + 1;
-        res.isChecked = false;
-        res.canDelete = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
-        res.allowedToEdit = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
-        return res;
-      });
       let columns = []
       columns = [
         {
@@ -167,6 +156,18 @@ const ProductBuilder = (props) => {
       if (setColumnForPDFExcel) {
         setColumnForPDFExcel([...columns].filter(d => d.field !== "srno").map(d => d.headerName))
       }
+      setProductData(data);
+      let rows = data.product.map((item, index) => {
+        let res: any = {
+          ...prepareDataForGrid(item),
+        };
+        res.srno = index + 1;
+        res.isChecked = false;
+        res.canDelete = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
+        res.allowedToEdit = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
+        res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && columns.some(d => d.field.includes("supplier"))
+        return res;
+      });
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
       refreshProducts(data);
@@ -213,9 +214,9 @@ const ProductBuilder = (props) => {
             color={permission ? "primary" : "disabled"}
           />
         </IconButton>
-        {isPriceBuilder && fromQuote && permissions.isUpdate && (
+        {params.data?.isSupplierExist && (
           <IconButton
-            disabled={isPriceBuilder && fromQuote && permissions.isUpdate ? false : true}
+            disabled={params.data?.isSupplierExist ? false : true}
             size="small"
             aria-label="Supplier"
             onClick={() => {
@@ -224,7 +225,7 @@ const ProductBuilder = (props) => {
           >
             <VisibilityIcon
               fontSize="small"
-              color={isPriceBuilder && fromQuote && permissions.isUpdate ? "primary" : "disabled"}
+              color={params.data?.isSupplierExist ? "primary" : "disabled"}
             />
           </IconButton>
         )}
@@ -571,7 +572,7 @@ const ProductBuilder = (props) => {
         }
       }),
       "quote": quoteData?._id,
-      "productBuilder": productBuilderId ,
+      "productBuilder": productBuilderId,
     }
     axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
       toastConfig.setToastConfig({
@@ -809,6 +810,7 @@ const ProductBuilder = (props) => {
         <SupplierAskPrice
           supplierData={supplierData}
           handleClose={() => setOpenSupplierPriceDialog(false)}
+          productBuilderId={productBuilderId}
         />
       )}
       {showDeleteConfirmBox && (

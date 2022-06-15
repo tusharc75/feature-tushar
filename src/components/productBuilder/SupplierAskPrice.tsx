@@ -27,7 +27,7 @@ const localStorageSelectedRecords = `${renderedFrom}_selected`;
 const SupplierAskPrice = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose, supplierData } = props;
+    const { handleClose, supplierData, productBuilderId } = props;
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search,
@@ -181,6 +181,23 @@ const SupplierAskPrice = (props) => {
     }
 
     const handleAdd = () => {
+
+        let tempData = {
+            "uniqueId": supplierData?._id,
+            "requestId": getLocalStorageArrayData(localStorageSelectedRecords)[0]?._id,
+            "productBuilder": productBuilderId
+        }
+
+        axiosInstance().put(`/quote-builder/apply-supplier-price`, tempData).then(({ data }) => {
+            toastConfig.setToastConfig({
+                message: data?.message,
+                type: "success",
+                open: true,
+            });
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+            dispatch({ type: "loading", loading: false });
+        });
 
     }
 
