@@ -811,6 +811,10 @@ const ProductBuilder = (props) => {
           supplierData={supplierData}
           handleClose={() => setOpenSupplierPriceDialog(false)}
           productBuilderId={productBuilderId}
+          onSuccess={() => {
+            setOpenSupplierPriceDialog(false);
+            fetchProduct(productBuilderId)
+          }}
         />
       )}
       {showDeleteConfirmBox && (
