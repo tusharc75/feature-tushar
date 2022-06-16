@@ -89,13 +89,13 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
             }
             if (e?.fieldData?.fieldName === "serializedProduct") {
                 column.push({
-                    accessor: 'serializedProduct',
+                    accessor: 'serializedProductView',
                     Header: e?.fieldData?.fieldLabel,
                     width: 150,
                     Cell: ({ row }) => (
                         row.original.type === "Product" ?
                             <p className="text-truncate"  >
-                                {row.original.serializedProduct ? "Yes" : "No"}
+                                {row.original.serializedProductView}
                             </p> : <NoDataCell />),
                 })
             }
@@ -235,6 +235,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                     productNumber: item?.productDetail?.productNumber,
                     productDescription: item?.productDetail?.productDescription,
                     serializedProduct: item?.productDetail?.serializedProduct,
+                    serializedProductView: item.productDetail?.serializedProduct ? "Yes" : "No",
                     productId: item?.productDetail?._id,
                 };
                 if (item.qty === item.actualReceived) {

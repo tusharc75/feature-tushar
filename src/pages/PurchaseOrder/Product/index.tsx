@@ -72,7 +72,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 columns.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
             }
             if (e?.fieldData?.fieldName === "serializedProduct") {
-                columns.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+                columns.push({ field: "serializedProductView", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
             }
         })
         const fields = await fetch_po_product_fields(purchaseOrderData?.currency);
@@ -113,6 +113,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 res.productName = item.productDetail?.productName
                 res.productNumber = item.productDetail?.productNumber
                 res.serializedProduct = item.productDetail?.serializedProduct
+                res.serializedProductView = item.productDetail?.serializedProduct ? "Yes" : "No"
                 res.productDetail = item.productDetail
                 if (item?.qty === 0) {
                     res.isValid = false;
@@ -229,6 +230,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     const handleUpdateQty = (rows) => {
         axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
             .then(() => {
+                if (purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
+                    updateStatus(PURCHASE_ORDER_STATUS.inProgress)
+                }
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
                 setSelectedProductData(null)
