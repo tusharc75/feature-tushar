@@ -37,6 +37,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
         setIsSubmitting(true)
 
         let data = values.map(u => ({
+            _id: u._id,
             product: u.productId,
             serializedProduct: u.serializedProduct,
             warehouse: u.warehouse?._id,
@@ -44,7 +45,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             assetQuantity: parseInt(u?.assetQuantity),
             serialNumber: u?.serialNumber,
         }))
-
+     
         axiosInstance().post(`${purchaseOrder.api}/asset-po/${purchaseOrderID}`, data).then(({ data }) => {
             setIsSubmitting(false);
             toastConfig.setToastConfig({
