@@ -117,6 +117,8 @@ const RentalManagementViews = (props) => {
       const subLease = viewsData?.data?.data?.sublease;
       const transferAsset = viewsData?.data?.data?.transferAsset;
       const allAssets = viewsData?.data?.data?.transferAssetData;
+      const consumeProducts = product?.consumeProducts;
+      const consumeID = `consume-product`;
 
       const loadingTicket = ticketData?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.loading);
       const receivingTicket = ticketData?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.receiving);
@@ -161,6 +163,11 @@ const RentalManagementViews = (props) => {
           assetsInReturn[i?.product] = item._id;
         });
       });
+      const assetsInConsume = {};
+      consumeProducts?.map((item) => {
+        assetsInConsume[item?.product] = consumeID;
+      });
+      console.log(assetsInConsume);
 
       if (allPackages.length) xPosition += 300;
       var pakcageIdx = 0;
@@ -497,8 +504,11 @@ const RentalManagementViews = (props) => {
       const loadingAssetsXPosition = xPosition + 300;
       var receivingProductData = [];
       product?.material
-        ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInReceiving[i?.materialId] && i.type !== 'package')
+        ?.filter(
+          (i) => !i?.productDetail?.serializedProduct && (assetsInReceiving[i?.materialId] || assetsInConsume[i?.materialId]) && i.type !== 'package'
+        )
         .map((item) => {
+          console.log('material');
           if (!receivingProductData.includes(`${item.materialId}`)) {
             receivingProductData.push(`${item.materialId}`);
 
@@ -535,9 +545,16 @@ const RentalManagementViews = (props) => {
             arrowHeadType: 'arrow',
             target: `${assetsInReceiving[item?.materialId]}`
           });
+          flowEdge.push({
+            id: `edge-assets-product-${item?.materialId}-${assetsInConsume[item?.materialId]}-${_.random(0, 1000)}`,
+            source: `${item.materialId}`,
+            arrowHeadType: 'arrow',
+            target: `${assetsInConsume[item?.materialId]}`
+          });
         });
 
       xPosition += 600;
+      var lastYPosition = 0;
       var receivingAndReturnIdx = 0;
       receivingTicket?.map((item: any) => {
         flow.push({
@@ -574,6 +591,7 @@ const RentalManagementViews = (props) => {
           position: { x: xPosition, y: receivingAndReturnIdx * 80 },
           style: item.status === 'Delivered' ? customDeliveredNodeStyle.receivingTicket : customNodeStyles.receivingTicket
         });
+        lastYPosition = receivingAndReturnIdx * 80;
         receivingAndReturnIdx += 1;
         item.productInventory?.map((product: any) => {
           flowEdge.push({
@@ -661,6 +679,7 @@ const RentalManagementViews = (props) => {
           position: { x: xPosition, y: receivingAndReturnIdx * 80 },
           style: item.status === 'Delivered' ? customDeliveredNodeStyle.returnTicket : customNodeStyles.returnTicket
         });
+        lastYPosition = receivingAndReturnIdx * 80;
         receivingAndReturnIdx += 1;
         item.productInventory?.map((product: any) => {
           flowEdge.push({
@@ -672,7 +691,35 @@ const RentalManagementViews = (props) => {
         });
       });
 
-      if ((status === RENTAL_STATUS.cancelled || status === RENTAL_STATUS.closed) && (receivingTicket.length || returnTicket.length)) {
+      if (consumeProducts.length > 0) {
+        flow.push({
+          id: consumeID,
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          type: 'default',
+          data: {
+            ref_type: 'consume product',
+            ref_id: '',
+            label: (
+              <HtmlTooltip arrow placement="top" title={<>Consume Products</>}>
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  Consume Products
+                  {/* {item.ticketName}
+                  <br />
+                  {item.ticketType} Ticket */}
+                </div>
+              </HtmlTooltip>
+            )
+          },
+          position: { x: xPosition, y: lastYPosition + 80 },
+          style: customNodeStyles.loadingTicket
+        });
+      }
+
+      if (
+        (status === RENTAL_STATUS.cancelled || status === RENTAL_STATUS.closed) &&
+        (receivingTicket.length || returnTicket.length || consumeProducts.length)
+      ) {
         xPosition += 300;
         const endRentalTicketId = '12345678900987654123456';
         flow.push({
@@ -704,6 +751,13 @@ const RentalManagementViews = (props) => {
             target: `${endRentalTicketId}`
           });
         });
+        consumeProducts.length &&
+          flowEdge.push({
+            id: `edge-consume-last-rental`,
+            source: consumeID,
+            arrowHeadType: 'arrow',
+            target: `${endRentalTicketId}`
+          });
       }
 
       setFlowData([...flow, ...flowEdge]);
