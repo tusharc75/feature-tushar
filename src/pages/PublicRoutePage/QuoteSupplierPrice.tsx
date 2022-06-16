@@ -12,9 +12,17 @@ import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEd
 import { sortBy } from "lodash";
 import DetailsPage from "src/components/Shared/DetailsPage";
 import { FaDiceOne } from "react-icons/fa";
-import DetailsPageHeader from "src/components/DetailsPageHeader";
 
-const QuoteSupplierPrice = ({ quoteData }) => {
+const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit"]
+let levalOrderBy = [
+    "product",
+    "product-custom",
+    "product-template",
+    "price-template",
+    "product-builder-custom",
+    "price-builder-custom",
+];
+const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     let renderedFrom = "QuoteSupplierPrice"
     const toastConfig = useContext(CustomToastContext)
     const [gridApi, setGridApi] = useState(null);
@@ -24,6 +32,7 @@ const QuoteSupplierPrice = ({ quoteData }) => {
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [productData, setProductData] = useState([]);
     const [quoteDetailsData, setQuoteDetailsData] = useState(null);
+    const [isSubmited, setIsSubmited] = useState(false);
 
     const quoteFields = [
         {
@@ -62,28 +71,6 @@ const QuoteSupplierPrice = ({ quoteData }) => {
         },
         {
             "fieldData": {
-                "_id": "628e0cb1dc9001aec1d293da",
-                "fieldLabel": "Est. Revenue (USD)",
-                "type": "number",
-                "option": [],
-                "required": false,
-                "isTooltip": false,
-                "tooltipMessage": "",
-                "editAble": true,
-                "deletAble": true,
-                "order": 2,
-                "sectionName": "Quote Information",
-                "fieldName": "estRevenueUSD",
-                "resource": "Quotes",
-                "brand": "62666e58de44fa0e29624707",
-                "roleType": 0
-            },
-            "isCreate": true,
-            "isRead": true,
-            "isUpdate": true
-        },
-        {
-            "fieldData": {
                 "_id": "628e0cb1dc9001aec1d293db",
                 "fieldLabel": "Quote Date",
                 "type": "date",
@@ -104,207 +91,7 @@ const QuoteSupplierPrice = ({ quoteData }) => {
             "isRead": true,
             "isUpdate": true
         },
-        {
-            "fieldData": {
-                "_id": "628e0cb1dc9001aec1d293de",
-                "fieldLabel": "Project Name",
-                "type": "multiLine",
-                "option": [],
-                "required": false,
-                "isTooltip": false,
-                "tooltipMessage": "",
-                "editAble": true,
-                "deletAble": true,
-                "order": 6,
-                "sectionName": "Quote Information",
-                "fieldName": "projectName",
-                "resource": "Quotes",
-                "brand": "62666e58de44fa0e29624707",
-                "roleType": 0
-            },
-            "isCreate": true,
-            "isRead": true,
-            "isUpdate": true
-        },
-        {
-            "fieldData": {
-                "_id": "628e0cb1dc9001aec1d293df",
-                "fieldLabel": "End-user",
-                "type": "multiLine",
-                "option": [],
-                "required": false,
-                "isTooltip": false,
-                "tooltipMessage": "",
-                "editAble": true,
-                "deletAble": true,
-                "order": 7,
-                "sectionName": "Quote Information",
-                "fieldName": "enduser",
-                "resource": "Quotes",
-                "brand": "62666e58de44fa0e29624707",
-                "roleType": 0
-            },
-            "isCreate": true,
-            "isRead": true,
-            "isUpdate": true
-        },
-        {
-            "fieldData": {
-                "_id": "628e0cb1dc9001aec1d293e0",
-                "fieldLabel": "Customer Reference Number",
-                "type": "singleLine",
-                "option": [],
-                "required": false,
-                "isTooltip": false,
-                "tooltipMessage": "",
-                "editAble": true,
-                "order": 8,
-                "sectionName": "Quote Information",
-                "fieldName": "customerReferenceNumber",
-                "resource": "Quotes",
-                "brand": "62666e58de44fa0e29624707",
-                "roleType": 0
-            },
-            "isCreate": true,
-            "isRead": true,
-            "isUpdate": true
-        },
-        {
-            "fieldData": {
-                "_id": "628e0cb1dc9001aec1d293e1",
-                "fieldLabel": "Est. Volume (MT)",
-                "type": "number",
-                "option": [],
-                "required": false,
-                "isTooltip": false,
-                "tooltipMessage": "",
-                "editAble": true,
-                "order": 9,
-                "sectionName": "Quote Information",
-                "fieldName": "estVolumeMT",
-                "resource": "Quotes",
-                "brand": "62666e58de44fa0e29624707",
-                "roleType": 0
-            },
-            "isCreate": true,
-            "isRead": true,
-            "isUpdate": true
-        },
-        {
-            "fieldData": {
-                "_id": "628e0cb1dc9001aec1d293e2",
-                "fieldLabel": "Est. GM (USD)",
-                "type": "number",
-                "option": [],
-                "required": false,
-                "isTooltip": false,
-                "tooltipMessage": "",
-                "editAble": true,
-                "order": 10,
-                "sectionName": "Quote Information",
-                "fieldName": "estGMUSD",
-                "resource": "Quotes",
-                "brand": "62666e58de44fa0e29624707",
-                "roleType": 0
-            },
-            "isCreate": true,
-            "isRead": true,
-            "isUpdate": true
-        },
-        {
-            "fieldData": {
-                "_id": "628e0cb1dc9001aec1d293e5",
-                "fieldName": "currency",
-                "fieldLabel": "Currency",
-                "required": true,
-                "type": "currency",
-                "sectionName": "Quote Information",
-                "order": 13,
-                "editAble": true,
-                "resource": "Quotes",
-                "brand": "62666e58de44fa0e29624707",
-                "roleType": 0
-            },
-            "isCreate": true,
-            "isRead": true,
-            "isUpdate": true
-        },
-        {
-            "fieldData": {
-                "_id": "628e0cb1dc9001aec1d293e7",
-                "fieldLabel": "Quote Status",
-                "type": "dropDown",
-                "option": [
-                    {
-                        "optionLabel": "Received, not yet quoted",
-                        "optionValue": "Received, not yet quoted",
-                        "order": 1,
-                        "default": false
-                    },
-                    {
-                        "optionLabel": "Quoted",
-                        "optionValue": "Quoted",
-                        "order": 2,
-                        "default": false
-                    },
-                    {
-                        "optionLabel": "Won",
-                        "optionValue": "Won",
-                        "order": 3,
-                        "default": false
-                    },
-                    {
-                        "optionLabel": "Lost / Cancelled",
-                        "optionValue": "Lost / Cancelled",
-                        "order": 4,
-                        "default": false
-                    }
-                ],
-                "required": false,
-                "isTooltip": false,
-                "tooltipMessage": "",
-                "editAble": true,
-                "deletAble": true,
-                "order": 15,
-                "hiddenField": false,
-                "isDefaultValue": false,
-                "disableOnEdit": false,
-                "addManualOptionInExcel": false,
-                "addAdditionalOption": false,
-                "lookup": false,
-                "lookupResource": "",
-                "isDropdown": false,
-                "isWarningTooltip": false,
-                "warningTooltipMessage": "",
-                "defaultValue": "",
-                "sectionName": "Quote Information",
-                "fieldName": "quoteStatus",
-                "resource": "Quotes",
-                "brand": "62666e58de44fa0e29624707",
-                "roleType": 0
-            },
-            "isCreate": true,
-            "isRead": true,
-            "isUpdate": true
-        },
-        {
-            "fieldData": {
-                "_id": "628e0cb1dc9001aec1d293ed",
-                "fieldName": "probability",
-                "fieldLabel": "Probability (%)",
-                "required": false,
-                "type": "percent",
-                "sectionName": "Quote Information",
-                "order": 21,
-                "editAble": true,
-                "resource": "Quotes",
-                "brand": "62666e58de44fa0e29624707",
-                "roleType": 0
-            },
-            "isCreate": true,
-            "isRead": true,
-            "isUpdate": true
-        },
+
     ]
 
     useEffect(() => {
@@ -354,7 +141,9 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                 ...tempFrameworkComponent,
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
-            columns = sortBy(columns, ['order']);
+            columns = sortBy(columns, function (item: any) {
+                return levalOrderBy.indexOf(item.leval)
+            });
             setColumns([...columns])
 
             dispatch({ type: "initialize", data: rows, count: rows.length });
@@ -380,9 +169,9 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = true
+                            col.show = displayColumns.includes(ele.fieldName) ? true : false
                             col.disabled = false
-                            col.order = ele.order
+                            col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
                             column.push(col)
                         }
@@ -398,9 +187,9 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                                 col.field = fieldName
                                 col.headerName = fieldLabel
                                 col.width = 180
-                                col.show = true
+                                col.show = displayColumns.includes(ele.fieldName) ? true : false
                                 col.disabled = false
-                                col.order = ele.order
+                                col.leval = ele.leval
                                 col.cellRenderer = "commonRenderer";
                                 column.push(col)
                             }
@@ -416,9 +205,9 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = true
+                            col.show = displayColumns.includes(ele.fieldName) ? true : false
                             col.disabled = false
-                            col.order = ele.order
+                            col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
                             if (ele.fieldName === "totalCostPerUnit") {
                                 col.cellEditor = "numericCellEditor";
@@ -436,9 +225,9 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                         col.field = ele.fieldName
                         col.headerName = ele.fieldLabel
                         col.width = 180
-                        col.show = true
+                        col.show = displayColumns.includes(ele.fieldName) ? true : false
                         col.disabled = false
-                        col.order = ele.order
+                        col.leval = ele.leval
                         col.cellRenderer = "commonRenderer";
                         column.push(col)
                     }
@@ -468,10 +257,12 @@ const QuoteSupplierPrice = ({ quoteData }) => {
 
         let tempData = {
             "products": productData,
-            "requestId": quoteData?.data?.requestId
+            "requestId": quoteData?.data?.requestId,
+            "openAuthId": openAuthId
         }
 
         axios.post(backendApi + `/quote-builder/supplier-price-response`, tempData).then(({ data }) => {
+            setIsSubmited(true)
             toastConfig.setToastConfig({
                 message: data.message,
                 type: "success",
@@ -491,58 +282,55 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                     fields={quoteFields}
                 />
             ) : null}
-            <Box mt={2} p={2}>
-                <>
-                    <DetailsPageHeader
-                        heading={"Product List"}
-                        mainPoints={null}
-                        showHeading={true}
-                    >
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={handleSubmit}
-                        >
-                            Submit
-                        </Button>
-                        {/* <div className={"detail-box-content"}>
+            {isSubmited ?
+                <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
+                    Thanks for your submission
+                </h1>
+
+                : <Box mt={2} p={2}>
+                    <>
+                        <div className={"detail-box-content"}>
                             <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                             <h3 className="form-label-style" title={" Product List"}>
                                 Product List
                             </h3>
-                        </div> */}
-                        {/* <Button
-                            variant="text"
-                            size="small"
-                            onClick={handleSubmit}
-                        >
-                            Submit
-                        </Button> */}
-                    </DetailsPageHeader>
-                    {
-                        columns ?
-                            <CustomAgGridEditable
-                                columns={columns}
-                                dataRows={dataRows}
-                                frameworkComponents={frameWorkComponent}
-                                setGridApi={setGridApi}
-                                dispatch={dispatch}
-                                rowCount={rowCount}
-                                limit={limit}
-                                pageSizes={pageSizes}
-                                page={page}
-                                allowAction={false}
-                                loading={loading}
-                                allowSelection={false}
-                                showOnlyShowFilteredRecordSwitch={true}
-                                refreshGrid={fetchProduct}
-                                renderedFrom={renderedFrom}
-                                isClientSideGrid={true}
-                                onCellValueChanged={onCellValueChanged} />
-                            : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-                </>
-            </Box>
+                        </div>
+                        {
+                            columns ?
+                                <CustomAgGridEditable
+                                    columns={columns}
+                                    dataRows={dataRows}
+                                    frameworkComponents={frameWorkComponent}
+                                    setGridApi={setGridApi}
+                                    dispatch={dispatch}
+                                    rowCount={rowCount}
+                                    limit={limit}
+                                    pageSizes={pageSizes}
+                                    page={page}
+                                    allowAction={false}
+                                    loading={loading}
+                                    allowSelection={false}
+                                    showOnlyShowFilteredRecordSwitch={true}
+                                    refreshGrid={fetchProduct}
+                                    renderedFrom={renderedFrom}
+                                    isClientSideGrid={true}
+                                    onCellValueChanged={onCellValueChanged} />
+                                : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+                        <Box display="flex" pt={1} justifyContent="flex-end">
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                disabled={productData.length === 0}
+                                onClick={handleSubmit}
+                            >
+                                Submit
+                            </Button>
+                            <Box mx={1} />
+                        </Box>
+                    </>
+                </Box>}
+
         </>
     );
 }

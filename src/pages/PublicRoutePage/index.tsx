@@ -132,7 +132,7 @@ const PublicRoutePage = () => {
             </Grid>
             {
                 loading || resourceData ?
-                    resourceData?.referenceIdType === "Quotes" ? <QuoteSupplierPrice quoteData={resourceData} />
+                    resourceData?.referenceIdType === "Quotes" ? <QuoteSupplierPrice quoteData={resourceData} openAuthId={id}/>
                         : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                     : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }

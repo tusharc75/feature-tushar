@@ -23,11 +23,19 @@ import { CommonRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
 
 const renderedFrom = "quoteSupplierPrice";
 const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
+const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit"]
+let levalOrderBy = [
+    "product",
+    "product-custom",
+    "product-template",
+    "price-template",
+    "product-builder-custom",
+    "price-builder-custom",
+];
 const SupplierAskPrice = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose, supplierData, productBuilderId } = props;
+    const { handleClose, supplierData, productBuilderId,onSuccess } = props;
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search,
@@ -78,7 +86,9 @@ const SupplierAskPrice = (props) => {
                 ...tempFrameworkComponent,
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
-            columns = sortBy(columns, ['order']);
+            columns = sortBy(columns, function (item: any) {
+                return levalOrderBy.indexOf(item.leval)
+            });
             setColumns([...columns])
 
             dispatch({ type: "initialize", data: rows, count: rows.length });
@@ -93,20 +103,7 @@ const SupplierAskPrice = (props) => {
         let _fields = fields;
 
         _fields.forEach((ele) => {
-            if (ele.fieldName === "totalCost") {
-                let col: any = {}
-                col.field = ele.fieldName
-                col.headerName = ele.fieldLabel
-                col.width = 180
-                col.show = true
-                col.disabled = false
-                col.order = ele.order
-                col.cellRenderer = "commonRenderer";
-                col.cellEditor = "numericCellEditor";
-                col.editable = true;
-                column.push(col)
-            }
-            else if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+            if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
                 if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
                     ele.displayUnits.forEach((_unit) => {
                         let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
@@ -116,9 +113,9 @@ const SupplierAskPrice = (props) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = true
+                            col.show = displayColumns.includes(ele.fieldName) ? true : false
                             col.disabled = false
-                            col.order = ele.order
+                            col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
                             column.push(col)
                         }
@@ -134,9 +131,9 @@ const SupplierAskPrice = (props) => {
                                 col.field = fieldName
                                 col.headerName = fieldLabel
                                 col.width = 180
-                                col.show = true
+                                col.show = displayColumns.includes(ele.fieldName) ? true : false
                                 col.disabled = false
-                                col.order = ele.order
+                                col.leval = ele.leval
                                 col.cellRenderer = "commonRenderer";
                                 column.push(col)
                             }
@@ -152,9 +149,9 @@ const SupplierAskPrice = (props) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = true
+                            col.show = displayColumns.includes(ele.fieldName) ? true : false
                             col.disabled = false
-                            col.order = ele.order
+                            col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
                             column.push(col)
                         }
@@ -168,9 +165,9 @@ const SupplierAskPrice = (props) => {
                         col.field = ele.fieldName
                         col.headerName = ele.fieldLabel
                         col.width = 180
-                        col.show = true
+                        col.show = displayColumns.includes(ele.fieldName) ? true : false
                         col.disabled = false
-                        col.order = ele.order
+                        col.leval = ele.leval
                         col.cellRenderer = "commonRenderer";
                         column.push(col)
                     }
@@ -189,6 +186,7 @@ const SupplierAskPrice = (props) => {
         }
 
         axiosInstance().put(`/quote-builder/apply-supplier-price`, tempData).then(({ data }) => {
+            onSuccess()
             toastConfig.setToastConfig({
                 message: data?.message,
                 type: "success",
@@ -214,7 +212,7 @@ const SupplierAskPrice = (props) => {
                     <Grid item xs={12} sm={12} md={12} container justify="flex-end">
                         <Box ml={1} mt={1} >
                             <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={getLocalStorageArrayData(localStorageSelectedRecords).length === 1 ? false : true}>
-                                Add</Button>
+                                Apply</Button>
                         </Box>
                     </Grid>
                 </Grid>
