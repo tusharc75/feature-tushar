@@ -335,7 +335,7 @@ const ProjectSales: FC = () => {
     if (referenceDetails.referenceId) {
       if (referenceDetails.resource === sidebarResource.opportunity) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          { field: "opportunity", term: referenceDetails.referenceId }
+          { field: "staticData.opportunity", term: referenceDetails.referenceId }
         ])}`;
       }
       else if (referenceDetails.resource === customerAccount.accountResource) {
