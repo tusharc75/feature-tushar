@@ -72,15 +72,21 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
+
     var validateQty = product[0]?.availableInventory;
     if (product?.length > 1) {
-      validateQty = product?.reduce(function (min, obj) {
-        return obj.availableInventory < min ? obj.availableInventory : min;
-      }, Infinity);
+      validateQty = product?.reduce(function (min, obj) { return obj.availableInventory < min ? obj.availableInventory : min; }, Infinity);
     }
-    if (parseInt(values.qty) > validateQty) {
+
+    if (parseInt(values?.qty) > validateQty) {
       errors['qty'] = 'qty not more than inventory';
     }
+
+    const serialNumbersList = values['serialNumbers'];
+    if (serialNumbersList?.length > parseInt(values?.qty)) {
+      errors['serialNumbers'] = `Please select serial numbers same as quantity`;
+    }
+
     return errors;
   }
 
