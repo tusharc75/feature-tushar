@@ -2,20 +2,27 @@ import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import axios from "axios";
 import { backendApi } from "../../config";
-import { Box, IconButton } from "@material-ui/core";
-import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { gridLoadingTimeout, CustomDialogTransition, packages, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, deliveryTicket } from '../../constants/helpers';
+import { Box, Button } from "@material-ui/core";
+import { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
+import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
-import routes from "../../components/Helpers/Routes";
-import { isMobile, isTablet } from "react-device-detect";
-import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
+import { getFrameworkComponents } from "../../constants/useColumns"
 import { CommonRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
-import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import { sortBy } from "lodash";
+import DetailsPage from "src/components/Shared/DetailsPage";
+import { FaDiceOne } from "react-icons/fa";
 
-const QuoteSupplierPrice = ({ quoteData }) => {
+const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit"]
+let levalOrderBy = [
+    "product",
+    "product-custom",
+    "product-template",
+    "price-template",
+    "product-builder-custom",
+    "price-builder-custom",
+];
+const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     let renderedFrom = "QuoteSupplierPrice"
     const toastConfig = useContext(CustomToastContext)
     const [gridApi, setGridApi] = useState(null);
@@ -23,9 +30,69 @@ const QuoteSupplierPrice = ({ quoteData }) => {
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
-    const [productData, setProductData] = useState(null);
+    const [productData, setProductData] = useState([]);
+    const [quoteDetailsData, setQuoteDetailsData] = useState(null);
+    const [isSubmited, setIsSubmited] = useState(false);
 
+    const quoteFields = [
+        {
+            "fieldData": {
+                "_id": "628e0cb1dc9001aec1d293d9",
+                "fieldLabel": "Quote Name",
+                "type": "singleLine",
+                "option": [],
+                "required": true,
+                "isTooltip": false,
+                "tooltipMessage": "",
+                "editAble": true,
+                "deletAble": true,
+                "order": 1,
+                "isUneditable": true,
+                "hiddenField": false,
+                "isDefaultValue": true,
+                "disableOnEdit": true,
+                "unique": true,
+                "primaryField": true,
+                "lookup": false,
+                "lookupResource": "",
+                "isDropdown": false,
+                "isWarningTooltip": false,
+                "warningTooltipMessage": "",
+                "defaultValue": "Auto Generated",
+                "fieldName": "quoteName",
+                "sectionName": "Quote Information",
+                "resource": "Quotes",
+                "brand": "62666e58de44fa0e29624707",
+                "roleType": 0
+            },
+            "isCreate": true,
+            "isRead": true,
+            "isUpdate": true
+        },
+        {
+            "fieldData": {
+                "_id": "628e0cb1dc9001aec1d293db",
+                "fieldLabel": "Quote Date",
+                "type": "date",
+                "option": [],
+                "required": false,
+                "isTooltip": false,
+                "tooltipMessage": "",
+                "editAble": true,
+                "deletAble": true,
+                "order": 3,
+                "sectionName": "Quote Information",
+                "fieldName": "quoteDate",
+                "resource": "Quotes",
+                "brand": "62666e58de44fa0e29624707",
+                "roleType": 0
+            },
+            "isCreate": true,
+            "isRead": true,
+            "isUpdate": true
+        },
 
+    ]
 
     useEffect(() => {
         fetchProduct()
@@ -38,11 +105,10 @@ const QuoteSupplierPrice = ({ quoteData }) => {
             gridApi.setRowData([]);
         }
         axios.get(backendApi + `/quote-builder/supplier-price-response/${quoteData?.data?.requestId}`).then(({ data: { data } }) => {
-            setProductData(data.products);
+            setQuoteDetailsData(data?.quote);
             let rows = data.products.map((item, index) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
-                    totalCost: item.totalCost || item.costPrice
                 };
                 res.srno = index + 1;
                 res.isChecked = false;
@@ -75,7 +141,9 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                 ...tempFrameworkComponent,
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
-            columns = sortBy(columns, ['order']);
+            columns = sortBy(columns, function (item: any) {
+                return levalOrderBy.indexOf(item.leval)
+            });
             setColumns([...columns])
 
             dispatch({ type: "initialize", data: rows, count: rows.length });
@@ -91,20 +159,7 @@ const QuoteSupplierPrice = ({ quoteData }) => {
         let _fields = fields;
 
         _fields.forEach((ele) => {
-            if (ele.fieldName === "totalCost") {
-                let col: any = {}
-                col.field = ele.fieldName
-                col.headerName = ele.fieldLabel
-                col.width = 180
-                col.show = true
-                col.disabled = false
-                col.order = ele.order
-                col.cellRenderer = "commonRenderer";
-                col.cellEditor = "numericCellEditor";
-                col.editable = true;
-                column.push(col)
-            }
-            else if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+            if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
                 if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
                     ele.displayUnits.forEach((_unit) => {
                         let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
@@ -114,9 +169,9 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = true
+                            col.show = displayColumns.includes(ele.fieldName) ? true : false
                             col.disabled = false
-                            col.order = ele.order
+                            col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
                             column.push(col)
                         }
@@ -132,9 +187,9 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                                 col.field = fieldName
                                 col.headerName = fieldLabel
                                 col.width = 180
-                                col.show = true
+                                col.show = displayColumns.includes(ele.fieldName) ? true : false
                                 col.disabled = false
-                                col.order = ele.order
+                                col.leval = ele.leval
                                 col.cellRenderer = "commonRenderer";
                                 column.push(col)
                             }
@@ -150,10 +205,14 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = true
+                            col.show = displayColumns.includes(ele.fieldName) ? true : false
                             col.disabled = false
-                            col.order = ele.order
+                            col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
+                            if (ele.fieldName === "totalCostPerUnit") {
+                                col.cellEditor = "numericCellEditor";
+                                col.editable = true;
+                            }
                             column.push(col)
                         }
                     })
@@ -166,9 +225,9 @@ const QuoteSupplierPrice = ({ quoteData }) => {
                         col.field = ele.fieldName
                         col.headerName = ele.fieldLabel
                         col.width = 180
-                        col.show = true
+                        col.show = displayColumns.includes(ele.fieldName) ? true : false
                         col.disabled = false
-                        col.order = ele.order
+                        col.leval = ele.leval
                         col.cellRenderer = "commonRenderer";
                         column.push(col)
                     }
@@ -179,16 +238,31 @@ const QuoteSupplierPrice = ({ quoteData }) => {
     }
 
     const onCellValueChanged = (row) => {
+        let tempData = {
+            "uniqueId": row.data?.uniqueId,
+            "costPrice": parseInt(row?.newValue)
+        }
+        let productIndex = productData.findIndex(d => d.uniqueId === tempData.uniqueId)
+        if (productIndex === -1) {
+            setProductData((prevState) => ([...prevState, tempData]))
+        }
+        else {
+            let tempProductData = productData
+            tempProductData[productIndex].costPrice = tempData.costPrice
+        }
+
+    }
+
+    const handleSubmit = () => {
 
         let tempData = {
-            "products": [{
-                "uniqueId": row.data?.uniqueId,
-                "costPrice": parseInt(row?.data?.totalCost)
-            }],
-            "requestId": quoteData?.data?.requestId
+            "products": productData,
+            "requestId": quoteData?.data?.requestId,
+            "openAuthId": openAuthId
         }
 
         axios.post(backendApi + `/quote-builder/supplier-price-response`, tempData).then(({ data }) => {
+            setIsSubmited(true)
             toastConfig.setToastConfig({
                 message: data.message,
                 type: "success",
@@ -201,54 +275,63 @@ const QuoteSupplierPrice = ({ quoteData }) => {
     }
 
     return (
-        <Box mt={2} p={2}>
-            {isMobile && !isTablet ? <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={{ isCreate: false, isRead: true, isUpdate: true, isDelete: false }}
-                primaryField={columns?.find(d => d.field === "productName")}
-                onClick={(data) => { }}
-                selectedRecords={[]}
-                dataRows={dataRows}
-                dispatch={dispatch}
-                onEdit={() => {
+        <>
+            {quoteDetailsData ? (
+                <DetailsPage
+                    data={quoteDetailsData}
+                    fields={quoteFields}
+                />
+            ) : null}
+            {isSubmited ?
+                <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
+                    Thanks for your submission
+                </h1>
 
-                }}
-                extraParamsToCheckDelete={true}
-                onDelete={() => {
-                }}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                chips={[]}
-                onCreate={null}
-                showClone={false}
-                fullHeight={true}
-                renderedFrom={renderedFrom}
-                onClone={() => {
-                }}
-            /> :
-                columns ?
-                    <CustomAgGridEditable
-                        columns={columns}
-                        dataRows={dataRows}
-                        frameworkComponents={frameWorkComponent}
-                        setGridApi={setGridApi}
-                        dispatch={dispatch}
-                        rowCount={rowCount}
-                        limit={limit}
-                        pageSizes={pageSizes}
-                        page={page}
-                        allowAction={false}
-                        loading={loading}
-                        allowSelection={false}
-                        showOnlyShowFilteredRecordSwitch={true}
-                        refreshGrid={fetchProduct}
-                        renderedFrom={renderedFrom}
-                        isClientSideGrid={true}
-                        onCellValueChanged={onCellValueChanged} />
-                    : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-        </Box>
+                : <Box mt={2} p={2}>
+                    <>
+                        <div className={"detail-box-content"}>
+                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                            <h3 className="form-label-style" title={" Product List"}>
+                                Product List
+                            </h3>
+                        </div>
+                        {
+                            columns ?
+                                <CustomAgGridEditable
+                                    columns={columns}
+                                    dataRows={dataRows}
+                                    frameworkComponents={frameWorkComponent}
+                                    setGridApi={setGridApi}
+                                    dispatch={dispatch}
+                                    rowCount={rowCount}
+                                    limit={limit}
+                                    pageSizes={pageSizes}
+                                    page={page}
+                                    allowAction={false}
+                                    loading={loading}
+                                    allowSelection={false}
+                                    showOnlyShowFilteredRecordSwitch={true}
+                                    refreshGrid={fetchProduct}
+                                    renderedFrom={renderedFrom}
+                                    isClientSideGrid={true}
+                                    onCellValueChanged={onCellValueChanged} />
+                                : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+                        <Box display="flex" pt={1} justifyContent="flex-end">
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                disabled={productData.length === 0}
+                                onClick={handleSubmit}
+                            >
+                                Submit
+                            </Button>
+                            <Box mx={1} />
+                        </Box>
+                    </>
+                </Box>}
+
+        </>
     );
 }
 

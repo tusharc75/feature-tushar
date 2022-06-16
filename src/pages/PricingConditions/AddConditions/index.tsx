@@ -22,7 +22,7 @@ import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { pricingCondition, gridLoadingTimeout, downloadExcel } from '../../../constants/helpers';
+import { pricingCondition, gridLoadingTimeout, downloadExcel, removeLocalStorage, getLocalStorageArrayData } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
 import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
@@ -55,6 +55,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const localStorageSelectedRecords = `${renderFrom}_selected`;
 
   useEffect(() => {
     fetchCondition();
@@ -117,12 +118,12 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         setAnchorEl(null);
         setDeleteRecord(null);
         setShowDeleteConfirmBox(false);
-        localStorage.removeItem(renderFrom);
+        localStorage.removeItem(localStorageSelectedRecords);
       })
       .catch((error) => {
         setDeleteRecord(null);
         setShowDeleteConfirmBox(false);
-        localStorage.removeItem(renderFrom);
+        localStorage.removeItem(localStorageSelectedRecords);
         toastConfig.setToastConfig(error);
       });
   };
@@ -262,7 +263,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
     let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}${
-      selectedRecords.length ? `?ids=${JSON.stringify(selectedRecords?.map((e) => e?.materialId) || [])}` : ''
+      getLocalStorageArrayData(localStorageSelectedRecords).length
+        ? `?ids=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((e) => e?.materialId) || [])}`
+        : ''
     }`;
 
     axiosInstance()
@@ -272,7 +275,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
         downloadExcel(response.data, fileName);
-        localStorage.removeItem(renderFrom);
+        removeLocalStorage(renderFrom);
+        // localStorage.removeItem(renderFrom);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -409,7 +413,10 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 exportToExcel();
               }}
             >
-              Export to Excel {selectedRecords && selectedRecords.length ? `(${selectedRecords.length})` : '(All)'}
+              Export to Excel{' '}
+              {getLocalStorageArrayData(localStorageSelectedRecords).length
+                ? `(${getLocalStorageArrayData(localStorageSelectedRecords).length})`
+                : '(All)'}
             </MenuItem>
             <MenuItem onClick={() => {}}>
               <label htmlFor="importFromExcel">{ImportInput}Import from Excel</label>

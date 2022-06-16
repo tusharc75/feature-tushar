@@ -99,6 +99,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
                 coloum.push({
                     accessor: element.fieldName,
                     Header: element.fieldLabel,
+                    disableFilters: true,
                     Cell: ({ row }) => (
                         row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
                     )

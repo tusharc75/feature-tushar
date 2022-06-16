@@ -70,6 +70,9 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                                     {row.original.productName}
                                 </Link>}
                         </p>),
+                    Footer: () => {
+                        return <>Total</>;
+                    }
                 })
             }
             if (e?.fieldData?.fieldName === "productNumber") {
@@ -86,13 +89,13 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
             }
             if (e?.fieldData?.fieldName === "serializedProduct") {
                 column.push({
-                    accessor: 'serializedProduct',
+                    accessor: 'serializedProductView',
                     Header: e?.fieldData?.fieldLabel,
                     width: 150,
                     Cell: ({ row }) => (
                         row.original.type === "Product" ?
                             <p className="text-truncate"  >
-                                {row.original.serializedProduct ? "Yes" : "No"}
+                                {row.original.serializedProductView}
                             </p> : <NoDataCell />),
                 })
             }
@@ -195,12 +198,22 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
             Header: "Asset Received",
             width: 300,
             Cell: ({ row }) => (row.original["assetQty"] ? <p>{row.original["assetQty"]}</p> : <NoDataCell />),
+            Footer: (info) => {
+                return (info?.rows?.filter((f) => f.values.hasOwnProperty("assetQty") && !isNaN(f.values["assetQty"]))
+                    .reduce((sum, row) => row.values["assetQty"] + sum, 0)
+                );
+            }
         });
         column.push({
             accessor: "inventoryQty",
             Header: "Inventory Received",
             width: 300,
             Cell: ({ row }) => (row.original["inventoryQty"] ? <p>{row.original["inventoryQty"]}</p> : <NoDataCell />),
+            Footer: (info) => {
+                return (info?.rows?.filter((f) => f.values.hasOwnProperty("inventoryQty") && !isNaN(f.values["inventoryQty"]))
+                    .reduce((sum, row) => row.values["inventoryQty"] + sum, 0)
+                );
+            }
         });
         setColumns([...column])
     }
@@ -222,6 +235,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                     productNumber: item?.productDetail?.productNumber,
                     productDescription: item?.productDetail?.productDescription,
                     serializedProduct: item?.productDetail?.serializedProduct,
+                    serializedProductView: item.productDetail?.serializedProduct ? "Yes" : "No",
                     productId: item?.productDetail?._id,
                 };
                 if (item.qty === item.actualReceived) {
@@ -278,11 +292,11 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
             {columns && rowsData ? (
                 <Box
                     zIndex={5}
-                    width={isMobileScreen 
-                        ? '100vw' 
-                        : stepFullScreen || showActivity || isTabletScreen 
-                        ? '100%' 
-                        : 'calc(100vw - 103px)'}
+                    width={isMobileScreen
+                        ? '100vw'
+                        : stepFullScreen || showActivity || isTabletScreen
+                            ? '100%'
+                            : 'calc(100vw - 103px)'}
                 >
                     <CustomReactTable
                         height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
