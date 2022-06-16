@@ -128,9 +128,11 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             if (parsedData.length > 1) {
                 let tableContent = parsedData.slice(1, parsedData.length);
                 const serialNumber = tableContent.map((item: any[]) => item[1]);
+                var strSerialNumber = serialNumber?.map(String);
+                console.log(strSerialNumber)
                 arrayHelpers.replace(index, {
                     ...values.seriaizedAsset[index],
-                    serialNumber
+                    serialNumber: strSerialNumber
                 })
             }
         };

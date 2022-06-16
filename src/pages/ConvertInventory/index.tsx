@@ -56,7 +56,7 @@ const ConvertInventory = () => {
 
   useEffect(() => {
     fetchGridColumns();
-  }, [plantId]);
+  }, []);
 
   useEffect(() => {
     getPlants();
