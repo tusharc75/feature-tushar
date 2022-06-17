@@ -16,12 +16,15 @@ const useStyles = makeStyles(() => ({
     header: {
         background: "#163340",
         textAlign: "center",
-        padding: "10px",
+        paddingLeft: "22px",
+        paddingTop: "5px",
+        paddingBottom: "5px",
         color: "white",
         boxShadow: "1px 4px 5px #7c7979",
     },
     logo: {
-        width: "140px",
+        paddingTop: "8px",
+        width: '120px'
     },
     brandLogo: {
         height: "45px",
@@ -130,9 +133,12 @@ const PublicRoutePage = () => {
                 <Grid item xs={6} md={2} sm={2} className="pull-right">
                 </Grid>
             </Grid>
-            {
-                loading || resourceData ?
-                    resourceData?.referenceIdType === "Quotes" ? <QuoteSupplierPrice quoteData={resourceData} openAuthId={id}/>
+            {!valid ?
+                <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
+                    Link is not valid
+                </h1>
+                : loading || resourceData ?
+                    resourceData?.referenceIdType === "Quotes" ? <QuoteSupplierPrice quoteData={resourceData} openAuthId={id} />
                         : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                     : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }
@@ -144,28 +150,7 @@ const PublicRoutePage = () => {
                     handleSave={fetchResourceData}
                 />
             }
-            {!valid &&
-                <Dialog
-                    maxWidth="md"
-                    fullWidth
-                    TransitionComponent={CustomDialogTransition}
-                    aria-labelledby="customized-dialog-title"
-                    onClose={() => { }}
-                    open={true}
-                    disableBackdropClick={true}
-                >
-                    <CustomDialogHeader
-                        title={"Invalid Link"}
-                        showManimizeMaximize={false}
-                        showRequiredLabel={false}
-                    />
-                    <CustomDialogContent>
-                        <Typography variant="h5" component="h5" className="m-2 text-center" >
-                            Not a valid link
-                        </Typography>
-                    </CustomDialogContent>
-                </Dialog>
-            }
+
         </>
     );
 }

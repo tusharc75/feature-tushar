@@ -240,7 +240,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     const onCellValueChanged = (row) => {
         let tempData = {
             "uniqueId": row.data?.uniqueId,
-            "costPrice": parseInt(row?.newValue)
+            "costPrice": parseInt(row?.newValue === "" ? 0 : row?.newValue)
         }
         let productIndex = productData.findIndex(d => d.uniqueId === tempData.uniqueId)
         if (productIndex === -1) {
@@ -249,6 +249,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
         else {
             let tempProductData = productData
             tempProductData[productIndex].costPrice = tempData.costPrice
+            setProductData(tempProductData.filter(d => d.costPrice !== 0))
         }
 
     }
@@ -276,6 +277,19 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
 
     return (
         <>
+            <Box display="flex" pt={1} justifyContent="flex-end">
+                <Box mx={1} />
+                <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    disabled={productData.length === 0 || productData.some(d => d?.costPrice === 0)}
+                    onClick={handleSubmit}
+                >
+                    Submit
+                </Button>
+                <Box mx={1} />
+            </Box>
             {quoteDetailsData ? (
                 <DetailsPage
                     data={quoteDetailsData}
@@ -316,18 +330,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                                     isClientSideGrid={true}
                                     onCellValueChanged={onCellValueChanged} />
                                 : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-                        <Box display="flex" pt={1} justifyContent="flex-end">
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                size="small"
-                                disabled={productData.length === 0}
-                                onClick={handleSubmit}
-                            >
-                                Submit
-                            </Button>
-                            <Box mx={1} />
-                        </Box>
+
                     </>
                 </Box>}
 
