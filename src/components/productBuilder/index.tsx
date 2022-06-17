@@ -573,9 +573,11 @@ const ProductBuilder = (props) => {
       }),
       "quote": quoteData?._id,
       "productBuilder": productBuilderId,
+      "protected": true
     }
     axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
       dispatch({ type: "selection", selectedRecords: [] })
+      fetchProduct(productBuilderId);
       toastConfig.setToastConfig({
         message: `Email has been sent to suppliers`,
         type: "success",
