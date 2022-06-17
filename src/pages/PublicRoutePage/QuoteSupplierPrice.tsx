@@ -279,7 +279,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
         <>
             <Box display="flex" pt={1} justifyContent="flex-end">
                 <Box mx={1} />
-                <Button
+                {!isSubmited && <Button
                     variant="contained"
                     color="primary"
                     size="small"
@@ -287,7 +287,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                     onClick={handleSubmit}
                 >
                     Submit
-                </Button>
+                </Button>}
                 <Box mx={1} />
             </Box>
             {quoteDetailsData ? (
