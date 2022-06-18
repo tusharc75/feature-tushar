@@ -35,7 +35,7 @@ let levalOrderBy = [
 const SupplierAskPrice = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose, supplierData, productBuilderId,onSuccess } = props;
+    const { handleClose, supplierData, productBuilderId, onSuccess } = props;
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search,
@@ -64,7 +64,7 @@ const SupplierAskPrice = (props) => {
 
         axiosInstance().get(`/quote-builder/supplier-response/${supplierData?._id}`).then(({ data: { data } }) => {
 
-            let rows = data.map((item, index) => {
+            let rows = data.products.map((item, index) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
                     totalCost: item.totalCost || item.costPrice
@@ -73,12 +73,8 @@ const SupplierAskPrice = (props) => {
             });
             let columns = []
             let rendererNames = [];
-            let fields = []
-            data?.forEach((ele) => {
-                fields = [...fields, ...ele.fields]
-            })
 
-            GenrateColoum([...new Map(fields.map(item => [item["_id"], item])).values()], columns, rendererNames);
+            GenrateColoum(data.fields, columns, rendererNames);
 
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
@@ -159,20 +155,16 @@ const SupplierAskPrice = (props) => {
                 }
             }
             else {
-                if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                    let col: any = {}
-                    if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-                        col.field = ele.fieldName
-                        col.headerName = ele.fieldLabel
-                        col.width = 180
-                        col.show = displayColumns.includes(ele.fieldName) ? true : false
-                        col.disabled = false
-                        col.leval = ele.leval
-                        col.cellRenderer = "commonRenderer";
-                        column.push(col)
-                    }
+                let col: any = {}
+                col.field = ele.fieldName
+                col.headerName = ele.fieldLabel
+                col.width = 180
+                col.show = displayColumns.includes(ele.fieldName) ? true : false
+                col.disabled = false
+                col.leval = ele.leval
+                col.cellRenderer = "commonRenderer";
+                column.push(col)
 
-                }
             }
         })
     }

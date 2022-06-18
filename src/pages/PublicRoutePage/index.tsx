@@ -1,27 +1,27 @@
 import { useParams, useLocation } from "react-router-dom";
 import axios from 'axios'
 import { backendApi } from './../../config';
-import { Grid, Box, Button, Typography, Paper, makeStyles, Dialog } from "@material-ui/core";
+import { Grid, Box, Button, Typography, Paper, makeStyles, Dialog, TextField, AppBar, Toolbar } from "@material-ui/core";
 import { Fragment, useContext, useEffect, useState } from "react";
 import { SVG } from '../../assets';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import QuoteSupplierPrice from "./QuoteSupplierPrice";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
-import { CustomDialogTransition } from "src/constants/helpers";
-import PasswordVerification from "./PasswordVerification";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
+
     header: {
         background: "#163340",
         textAlign: "center",
-        padding: "10px",
+        paddingLeft: "22px",
+        paddingTop: "5px",
+        paddingBottom: "5px",
         color: "white",
         boxShadow: "1px 4px 5px #7c7979",
     },
     logo: {
-        width: "140px",
+        paddingTop: "8px",
+        width: '120px'
     },
     brandLogo: {
         height: "45px",
@@ -55,7 +55,7 @@ const PublicRoutePage = () => {
     const [valid, setValid] = useState(true);
     const [resourceData, setResourceData] = useState(null);
     const [passwordVerification, setPasswordVerification] = useState(false);
-    const [passwordVerificationDialog, setPasswordVerificationDialog] = useState(false);
+    const [password, setPassword] = useState(null);
 
     useEffect(() => {
         if (id) {
@@ -69,7 +69,7 @@ const PublicRoutePage = () => {
             .then(async ({ data }) => {
                 if (data?.data?.valid) {
                     if (data?.data?.protected) {
-                        setPasswordVerificationDialog(true)
+                        setPasswordVerification(true)
                     }
                     else {
                         fetchResourceData()
@@ -94,7 +94,7 @@ const PublicRoutePage = () => {
             });
     };
 
-    const fetchResourceData = (password = null) => {
+    const fetchResourceData = () => {
         let tempData = {
             "id": id
         }
@@ -102,11 +102,11 @@ const PublicRoutePage = () => {
         axios.post(backendApi + `/public/get-data`, tempData)
             .then(async ({ data }) => {
                 setResourceData(data.data)
-                setPasswordVerificationDialog(false)
+                setPasswordVerification(false)
                 setLoading(false)
             })
             .catch((error) => {
-                setPasswordVerificationDialog(false)
+                setPasswordVerification(false)
                 toastConfig.setToastConfig({
                     message: `Password is wrong`,
                     type: "error",
@@ -118,6 +118,14 @@ const PublicRoutePage = () => {
 
     return (
         <>
+
+            {/* <AppBar position="fixed" className={classes.appBar} color="primary">
+                <Toolbar className={classes.toolbar}>
+                    <Box component="div" display="flex" alignItems="center" flexGrow={1}>
+                        <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
+                    </Box>
+                </Toolbar>
+            </AppBar> */}
             <Grid container className={classes.header}>
                 <Grid item xs={12} md={1} sm={2}>
                     <img
@@ -130,42 +138,56 @@ const PublicRoutePage = () => {
                 <Grid item xs={6} md={2} sm={2} className="pull-right">
                 </Grid>
             </Grid>
-            {
-                loading || resourceData ?
-                    resourceData?.referenceIdType === "Quotes" ? <QuoteSupplierPrice quoteData={resourceData} openAuthId={id}/>
+            {passwordVerification &&
+                <>
+                    <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
+                        Please enter your password
+                    </h1>
+
+                    <Grid spacing={3}  container>
+                        <Grid item xs={12} sm={3} md={3} >
+                            <TextField
+                                id="outlined-full-width"
+                                margin="normal"
+                                variant="outlined"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                label="Password"
+                                name="Password"
+                                type="password"
+                                placeholder="Please enter password"
+                                onChange={(e) => setPassword(e.target.value)}
+                                fullWidth
+                                size="small"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={3} md={3}>
+                            <Button
+                                style={{ marginTop: "20px" }}
+                                variant="contained"
+                                color="primary"
+                                size="medium"
+                                onClick={fetchResourceData}
+                            >
+                                Submit
+                            </Button>
+                        </Grid>
+                    </Grid>
+
+                </>
+            }
+            {!valid ?
+                <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
+                    Link is expired or already used
+                </h1>
+                : loading || resourceData ?
+                    resourceData?.referenceIdType === "Quotes" ? <QuoteSupplierPrice quoteData={resourceData} openAuthId={id} />
                         : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                     : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }
-            {passwordVerificationDialog &&
-                <PasswordVerification
-                    open={passwordVerificationDialog}
-                    title="Password Verification"
-                    close={() => setPasswordVerificationDialog(false)}
-                    handleSave={fetchResourceData}
-                />
-            }
-            {!valid &&
-                <Dialog
-                    maxWidth="md"
-                    fullWidth
-                    TransitionComponent={CustomDialogTransition}
-                    aria-labelledby="customized-dialog-title"
-                    onClose={() => { }}
-                    open={true}
-                    disableBackdropClick={true}
-                >
-                    <CustomDialogHeader
-                        title={"Invalid Link"}
-                        showManimizeMaximize={false}
-                        showRequiredLabel={false}
-                    />
-                    <CustomDialogContent>
-                        <Typography variant="h5" component="h5" className="m-2 text-center" >
-                            Not a valid link
-                        </Typography>
-                    </CustomDialogContent>
-                </Dialog>
-            }
+
+
         </>
     );
 }
