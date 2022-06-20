@@ -107,6 +107,12 @@ function CustomReactTable({
     []
   );
 
+  const [baseColumns, setBaseColumns] = React.useState([]);
+
+  useEffect(() => {
+    setBaseColumns(columns);
+  }, [columns]);
+
   const newColumns = React.useMemo(
     () =>
       expander
@@ -165,7 +171,7 @@ function CustomReactTable({
               Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />,
               Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
             },
-            ...columns.map((m) => {
+            ...baseColumns.map((m) => {
               return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
             })
           ]
@@ -178,11 +184,11 @@ function CustomReactTable({
               Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />,
               Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
             },
-            ...columns.map((m) => {
+            ...baseColumns.map((m) => {
               return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
             })
           ],
-    []
+    [baseColumns]
   );
 
   const filterTypes = React.useMemo(
@@ -216,7 +222,6 @@ function CustomReactTable({
     selectedFlatRows,
     toggleRowExpanded,
     toggleAllRowsExpanded,
-
     setColumnOrder,
     state: {
       pageIndex,
@@ -368,34 +373,65 @@ function CustomReactTable({
     });
   }, [selectedRowIds]);
 
-  // console.log("***COLUMNS***", newColumns)
-
   const reorder = (item: any, newIndex: number) => {
     const { index: currentIndex } = item;
     const dragColumn = columnOrder[currentIndex];
     const hoverColumn = columnOrder[newIndex];
+    const firstElement = columnOrder[0];
 
     const dragItem = allColumns.find((col) => col?.id === dragColumn || col?.accessor === dragColumn);
     const hoverItem = allColumns.find((col) => col?.id === hoverColumn || col?.accessor === hoverColumn);
 
-    if (dragItem?.id === 'action' || dragItem?.id === 'selection' || dragItem?.lockPosition) return
-    if (hoverItem?.id === 'action' || hoverItem?.id === 'selection' || hoverItem?.lockPosition) return
-    setColumnOrder(
-      update(columnOrder, {
-        $splice: [
-          [currentIndex, 1],
-          [newIndex, 0, dragColumn]
-        ]
-      })
-    );
-    // console.log(newState);
+    if (dragItem?.id === 'action' || dragItem?.id === 'selection' || dragItem?.lockPosition) return;
+    if (hoverItem?.id === 'action' || hoverItem?.id === 'selection' || hoverItem?.lockPosition) return;
+
+    const newOrderedColumns: string[] = update(columnOrder, {
+      $splice: [
+        [currentIndex, 1],
+        [newIndex, 0, dragColumn]
+      ]
+    });
+
+    let newBaseColumns = new Array();
+    baseColumns.forEach((item) => {
+      let filteredOrder = newOrderedColumns.filter((el) => el !== firstElement);
+      const index = filteredOrder.indexOf(item.accessor);
+      newBaseColumns[index] = item;
+    });
+
+    // console.log(baseColumns ,newOrderedColumns.filter((item) => ![firstElement].includes(item)));
+    setColumnOrder(newOrderedColumns);
+    setBaseColumns(newBaseColumns);
   };
+
+  useEffect(() => {
+    if (!allColumns || !Array.isArray(allColumns)) return;
+    let timeout = setTimeout(() => {
+      let newColumnState = [];
+      allColumns.forEach((f) => {
+        let object = {};
+
+        Object.keys(f).forEach((ff) => {
+          if (typeof f[ff] !== 'function' && typeof f[ff] !== 'object') {
+            object[ff] = f[ff];
+          }
+        });
+
+        newColumnState.push(object);
+      });
+
+      localStorage.setItem(renderedFrom, JSON.stringify(newColumnState));
+    }, 500);
+
+    return () => clearTimeout(timeout);
+    // localStorage.setItem(renderedFrom, newColumns);
+  }, [allColumns]);
 
   // Render the UI for your table
   return (
     <>
       <CustomReactTableHeaderOptions
-        columns={allColumns}
+        columns={baseColumns}
         // setSelectedReportView={setSelectedReportView}
         // selectedReportView={selectedReportView}
         // columns={columns}

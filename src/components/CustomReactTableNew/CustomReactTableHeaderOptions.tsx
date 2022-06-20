@@ -11,7 +11,7 @@ import ArrangeViewDialog from './ArrangeViewDialog';
 import ReportArrangeView from './ReportArrangeView';
 
 let timeout
-export default function CustomReactTableHeaderOptions({
+function CustomReactTableHeaderOptions({
     columns,
     // setColumns,
     // columnApi,
@@ -218,3 +218,5 @@ export default function CustomReactTableHeaderOptions({
         </>
     );
 }
+
+export default CustomReactTableHeaderOptions
