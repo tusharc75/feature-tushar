@@ -138,53 +138,59 @@ const PublicRoutePage = () => {
                 <Grid item xs={6} md={2} sm={2} className="pull-right">
                 </Grid>
             </Grid>
-            {passwordVerification &&
+            {passwordVerification ?
                 <>
-                    <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
-                        Please enter your password
-                    </h1>
+                    <Box style={{ padding: "10px", display: "flex", justifyContent: "center" }}>
+                        <Box style={{ marginTop:"50px",width: "400px" }} boxShadow={3}>
 
-                    <Grid spacing={3}  container>
-                        <Grid item xs={12} sm={3} md={3} >
-                            <TextField
-                                id="outlined-full-width"
-                                margin="normal"
-                                variant="outlined"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                label="Password"
-                                name="Password"
-                                type="password"
-                                placeholder="Please enter password"
-                                onChange={(e) => setPassword(e.target.value)}
-                                fullWidth
-                                size="small"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={3} md={3}>
-                            <Button
-                                style={{ marginTop: "20px" }}
-                                variant="contained"
-                                color="primary"
-                                size="medium"
-                                onClick={fetchResourceData}
-                            >
-                                Submit
-                            </Button>
-                        </Grid>
-                    </Grid>
+                            <Grid spacing={1} style={{ padding: "10px", display: "flex", justifyContent: "center" }} container>
+                                <Grid item xs={12} sm={12} md={12} >
+                                    <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={"Authentication Required"}>
+                                        Authentication Required
+                                    </h1>
+                                </Grid>
 
+                                <Grid item xs={10} sm={10} md={10} >
+                                    <TextField
+                                        id="outlined-full-width"
+                                        margin="normal"
+                                        variant="outlined"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        label="Password"
+                                        name="Password"
+                                        type="password"
+                                        placeholder="Please enter password"
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        fullWidth
+                                        size="small"
+                                    />
+                                </Grid>
+                                <Grid item xs={10} sm={10} md={10} >
+                                    <Button
+                                        style={{ marginBottom: "20px"}}
+                                        variant="contained"
+                                        color="primary"
+                                        size="medium"
+                                        fullWidth
+                                        onClick={fetchResourceData}
+                                    >
+                                        Submit
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Box>
+                    </Box>
                 </>
-            }
-            {!valid ?
-                <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
-                    Link is expired or already used
-                </h1>
-                : loading || resourceData ?
-                    resourceData?.referenceIdType === "Quotes" ? <QuoteSupplierPrice quoteData={resourceData} openAuthId={id} />
+                : !valid ?
+                    <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
+                        Link is expired or already used
+                    </h1>
+                    : loading || resourceData ?
+                        resourceData?.referenceIdType === "Quotes" ? <QuoteSupplierPrice quoteData={resourceData} openAuthId={id} />
+                            : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                         : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-                    : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }
 
 
