@@ -18,7 +18,7 @@ const SerialNumberDialog = ({ close, product, warehouse }) => {
     const [refresh, setRefresh] = useState(true);
 
     useEffect(() => {
-        if (warehouse) {
+        if (warehouse && warehouse?.split(",")?.length === 1) {
             fetchRecords()
         }
     }, []);

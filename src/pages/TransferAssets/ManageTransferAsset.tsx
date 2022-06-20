@@ -556,7 +556,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                         name={field.fieldName}
                                         fieldData={field}
                                         type={field.type}
-                                        options={plantsCategoryOptions?.filter((o: any) => !o?.entity || o?.entity?.length === 0 || o?.entity?.includes(selectedEntity)) ?? []}
+                                        options={plantsCategoryOptions}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={field?.isTooltip || false}

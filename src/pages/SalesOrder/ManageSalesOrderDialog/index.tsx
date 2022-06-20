@@ -189,11 +189,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             let fieldData;
             const response: any = await axiosInstance().get("/field?resource=Sales Order");
             fieldData = response?.data?.data;
-            fieldData?.forEach((e: any) => {
-                if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
-                    e.fieldData.option = e?.fieldData?.option?.filter((a) => !a?.entity || a?.entity?.length === 0 || a?.entity?.includes(selectedEntity));
-                }
-            })
+     
             const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 

@@ -234,6 +234,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.addAdditionalOption = values.addAdditionalOption;
             ele.lookup = values.lookup || false;
             ele.lookupResource = values.lookup ? values.lookupResource : '';
+            ele.entityWiseLookup = values.entityWiseLookup || false;
+
             ele.isDropdown = values.isDropdown || false;
 
             if (values.hasOwnProperty('isWarningTooltip')) {
@@ -1099,6 +1101,18 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Add Additional Option"
                       />
                     )}
+                    {values["lookup"] &&
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="entityWiseLookup"
+                            checked={values["entityWiseLookup"]}
+                            onChange={(e) => setFieldValue("entityWiseLookup", e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label="Entity Wise Lookup"
+                      />}
                     {fieldData.type === 'dropDown' && (
                       <FormControlLabel
                         control={
