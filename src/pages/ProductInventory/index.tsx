@@ -96,7 +96,7 @@ const InventoryProduct = () => {
       .then(({ data: { data } }) => {
         setPlantOptions([{ "warehouseName": "All", "_id": "All" }, ...data]);
         if (plantId === null && data?.length) {
-          setPlantId(data[0]._id);
+          setPlantId("All");
         }
       });
   };

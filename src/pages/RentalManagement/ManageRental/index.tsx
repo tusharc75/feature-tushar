@@ -202,8 +202,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
             var statusOptions = []
             fieldData?.forEach((e: any) => {
                 if (e?.fieldData?.fieldName === "warehouse" && e?.fieldData?.option) {
-                    setOptionsPlantsEntity(e?.fieldData?.option?.filter((a) => !a?.entity || a?.entity?.length === 0 || a?.entity?.includes(selectedEntity)));
-                    e.fieldData.option = e?.fieldData?.option?.filter((a) => !a?.entity || a?.entity?.length === 0 || a?.entity?.includes(selectedEntity));
+                    setOptionsPlantsEntity(e?.fieldData?.option);
                 }
                 if (e?.fieldData?.fieldName === 'status') {
                     statusOptions = e.fieldData.option;
