@@ -18,7 +18,7 @@ import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers";
-import { CommonRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, DateTimeRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
 
 
 const renderedFrom = "quoteSupplierPrice";
@@ -79,10 +79,19 @@ const SupplierAskPrice = (props) => {
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
                 commonRenderer: CommonRenderer,
+                dateTimeRenderer: DateTimeRenderer,
                 ...tempFrameworkComponent,
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
-            columns = sortBy(columns, function (item: any) {
+            columns = sortBy([...columns, {
+                "field": "responseDate",
+                "headerName": "Rate Submit Date",
+                "width": 180,
+                "show": true,
+                "disabled": false,
+                "cellRenderer": "dateTimeRenderer",
+                "leval": "product"
+            }], function (item: any) {
                 return levalOrderBy.indexOf(item.leval)
             });
             setColumns([...columns])
@@ -157,7 +166,7 @@ const SupplierAskPrice = (props) => {
             else {
                 if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
                     let col: any = {}
-                    if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine" || ele.type === "multiSelect"|| ele.type === "dropDown") {
+                    if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine" || ele.type === "multiSelect" || ele.type === "dropDown") {
                         col.field = ele.fieldName
                         col.headerName = ele.fieldLabel
                         col.width = 180
