@@ -45,7 +45,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             assetQuantity: parseInt(u?.assetQuantity),
             serialNumber: u?.serialNumber,
         }))
-     
+
         axiosInstance().post(`${purchaseOrder.api}/asset-po/${purchaseOrderID}`, data).then(({ data }) => {
             setIsSubmitting(false);
             toastConfig.setToastConfig({
@@ -130,7 +130,9 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                 let tableContent = parsedData.slice(1, parsedData.length);
                 const serialNumber = tableContent.map((item: any[]) => item[1]);
                 var strSerialNumber = serialNumber?.map(String);
-                console.log(strSerialNumber)
+                console.log(arrayHelpers)
+                console.log(index)
+                console.log(values)
                 arrayHelpers.replace(index, {
                     ...values.seriaizedAsset[index],
                     serialNumber: strSerialNumber
@@ -205,8 +207,14 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                     </Typography>
                                                                                 </Box>
                                                                                 <Box mr={1}>
-                                                                                    <input accept="json" style={{ display: 'none' }} onChange={handleImport(arrayHelpers, index, values)} id="import-file" multiple={false} type="file" />
-                                                                                    <label htmlFor="import-file">
+                                                                                    <input
+                                                                                        accept="json"
+                                                                                        style={{ display: 'none' }}
+                                                                                        onChange={handleImport(arrayHelpers, index, values)}
+                                                                                        id={`import-file-${index}`}
+                                                                                        multiple={false}
+                                                                                        type="file" />
+                                                                                    <label htmlFor={`import-file-${index}`}>
                                                                                         <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
                                                                                             Import
                                                                                         </Typography>
