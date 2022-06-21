@@ -236,6 +236,15 @@ const TransferInventoryDetailPage = () => {
     setActivityShow(!showActivity);
   };
 
+  useEffect(() => {
+    if (isSmallScreen && tabValue === 0) {
+      setActivityShow(true);
+    } else {
+      setActivityShow(false);
+    }
+  }, [isSmallScreen, tabValue]);
+
+
   return (
     <>
       <Grid container className="headerbox">
