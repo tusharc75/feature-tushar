@@ -119,9 +119,9 @@ const Report = () => {
           .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
             if (field?.fieldData.fieldName === 'productName') {
-              let tempField = field
-              tempField.fieldData.type ='dropDown'
-              resourceFieldData.push(tempField);
+              // let tempField = field
+              // tempField.fieldData.type ='dropDown'
+              // resourceFieldData.push(tempField);
               columns.push({
                 field: 'productName',
                 headerName: field?.fieldData?.fieldLabel,
