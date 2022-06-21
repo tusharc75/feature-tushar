@@ -386,6 +386,12 @@ const SerializedAssetDetailsPage = () => {
     setActivityShow(!showActivity);
   };
 
+  useEffect(() => {
+    if (isSmallScreen) {
+      setActivityShow(true);
+    }
+  }, [isSmallScreen]);
+  
   return (
     <>
       <Fragment>
