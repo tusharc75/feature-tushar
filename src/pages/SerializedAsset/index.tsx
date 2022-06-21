@@ -170,23 +170,23 @@ const SerializedAsset = () => {
               if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
               }
-              if (params.data?.recertDate) {
-                var a = moment(params.data?.recertDate);
-                var b = moment();
-                const days = a.diff(b, 'days')
-                if (days < 60 && days > 30) {
-                  return { backgroundColor: "#00FF00" };
-                }
-                else if (days < 30 && days > 15) {
-                  return { backgroundColor: "#FFFF00" };
-                }
-                else if (days < 15 && days > 0) {
-                  return { backgroundColor: "#FF0000" };
-                }
-                else if (days < 0) {
-                  return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-                }
-              }
+              // if (params.data?.recertDate) {
+              //   var a = moment(params.data?.recertDate);
+              //   var b = moment();
+              //   const days = a.diff(b, 'days')
+              //   if (days <= 60 && days >= 30) {
+              //     return { backgroundColor: "#ACF1C8" };
+              //   }
+              //   else if (days < 30 && days >= 15) {
+              //     return { backgroundColor: "#FAE498" };
+              //   }
+              //   else if (days < 15 && days >= 0) {
+              //     return { backgroundColor: "#FEB1B1" };
+              //   }
+              //   else if (days < 0) {
+              //     return { backgroundColor: "#FEB1B1" };
+              //   }
+              // }
               return null;
             };
           }
@@ -749,6 +749,47 @@ const SerializedAsset = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchProductInventory}
               showOnlyShowFilteredRecordSwitch={true}
+              rowClassRules={{
+                "light-red-data-row":
+                  function (params) {
+                    if (params.data?.recertDate) {
+                      var a = moment(params.data?.recertDate);
+                      var b = moment();
+                      const days = a.diff(b, 'days')
+                      if (days < 15 && days >= 0) {
+                        return true;
+                      }
+                      else if (days < 0) {
+                        return true;
+                      }
+                    }
+                    return false
+                  },
+                "light-yellow-data-row":
+                  function (params) {
+                    if (params.data?.recertDate) {
+                      var a = moment(params.data?.recertDate);
+                      var b = moment();
+                      const days = a.diff(b, 'days')
+                      if (days < 30 && days >= 15) {
+                        return true;
+                      }
+                    }
+                    return false
+                  },
+                "light-green-data-row":
+                  function (params) {
+                    if (params.data?.recertDate) {
+                      var a = moment(params.data?.recertDate);
+                      var b = moment();
+                      const days = a.diff(b, 'days')
+                      if (days <= 60 && days >= 30) {
+                        return true;
+                      }
+                    }
+                    return false
+                  },
+              }}
             />
           ) : null
         ) : (
