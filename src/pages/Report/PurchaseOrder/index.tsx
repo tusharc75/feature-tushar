@@ -119,6 +119,9 @@ const Report = () => {
           .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
             if (field?.fieldData.fieldName === 'productName') {
+              let tempField = field
+              tempField.fieldData.type ='dropDown'
+              resourceFieldData.push(tempField);
               columns.push({
                 field: 'productName',
                 headerName: field?.fieldData?.fieldLabel,
@@ -153,7 +156,13 @@ const Report = () => {
           ...tempFrameworkComponent
         };
         setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
-        columns = [...columns];
+        columns = [...columns,{
+          field: 'soldQty',
+          headerName: 'Sold Qty',
+          show: true,
+          disabled: false,
+          cellRenderer: 'commonRenderer'
+        }];
       }
 
       if (resourceCamelCase === 'productAverageCost') {

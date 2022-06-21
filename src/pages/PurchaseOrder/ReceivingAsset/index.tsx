@@ -62,13 +62,15 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                                     {row.original.productName}
                                 </Link>
                                 :
-                                <Link
-                                    className="link"
-                                    title={row.original.productId}
-                                    to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}
-                                >
-                                    {row.original.productName}
-                                </Link>}
+                                row.original.type === "Asset" ?
+                                    <Link
+                                        className="link"
+                                        title={row.original.productId}
+                                        to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}
+                                    >
+                                        {row.original.productName}
+                                    </Link>
+                                    : row.original.productName}
                         </p>),
                     Footer: () => {
                         return <>Total</>;
@@ -221,8 +223,9 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
     const fetchProduct = async () => {
         try {
             const result = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`)
-            var assets: any = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/assets`)
-            assets = assets?.data?.data;
+            const assets: any = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/assets`)
+            const serializedAsset = assets?.data?.data?.serializedAsset;
+            const productSerialNumber = assets?.data?.data?.productSerialNumber;
 
             let rows = result?.data?.data?.map((item) => {
                 let finalObject = prepareDataForGrid(item);
@@ -242,12 +245,23 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                     res["hideSelection"] = true
                 }
                 res.subRows = []
-                const subRows = assets?.filter((e) => e?.product?.optionValue === res?.productId)
+                const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.productId)
                 if (subRows?.length) {
                     let actualReceived = item.actualReceived;
                     subRows?.forEach((e: any) => {
                         if (actualReceived && !e.isUsed) {
                             res.subRows.push({ productName: e.assetNumber, type: "Asset", assetId: e?._id, hideSelection: true })
+                            actualReceived = actualReceived - 1;
+                            e.isUsed = true;
+                        }
+                    })
+                }
+                const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.productId)
+                if (subRowsproductSerialNumber?.length) {
+                    let actualReceived = item.actualReceived;
+                    subRowsproductSerialNumber?.forEach((e: any) => {
+                        if (actualReceived && !e.isUsed) {
+                            res.subRows.push({ productName: e.serialNumber, type: "Serial Number", assetId: e?._id, hideSelection: true })
                             actualReceived = actualReceived - 1;
                             e.isUsed = true;
                         }
