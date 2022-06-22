@@ -156,7 +156,7 @@ const Report = () => {
           ...tempFrameworkComponent
         };
         setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
-        columns = [...columns,{
+        columns = [...columns, {
           field: 'soldQty',
           headerName: 'Sold Qty',
           show: true,
@@ -302,6 +302,9 @@ const Report = () => {
       gridApi.setRowData([]);
     }
 
+    console.log(filterQuery)
+    console.log(encodeURI(filterQuery))
+
     axiosInstance()
       .get(
         `${resourceCamelCase === 'purchaseOrderProduct'
@@ -349,14 +352,14 @@ const Report = () => {
   // Create and return query for filters
   const getFilter = (isExport = false) => {
     let filterQuery = `page=${page}&`;
-    if(!isExport) {
+    if (!isExport) {
       filterQuery = `limit=${limit}&`
     }
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${search}&`;
+      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
     }
     if (selectedResources.length > 0) {
       let deepFilter = [];
@@ -380,7 +383,7 @@ const Report = () => {
           options.forEach((o: any) => {
             deepFilter.push({
               field: key,
-              term: o.optionValue
+              term: encodeURIComponent(o.optionValue)
             });
           });
         });
@@ -411,7 +414,7 @@ const Report = () => {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: filters[field].filter
+          term: encodeURIComponent(filters[field].filter)
         });
       });
       filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
