@@ -167,7 +167,6 @@ const RentalManagementViews = (props) => {
       consumeProducts?.map((item) => {
         assetsInConsume[item?.product] = consumeID;
       });
-      console.log(assetsInConsume);
 
       if (allPackages.length) xPosition += 300;
       var pakcageIdx = 0;
@@ -508,7 +507,6 @@ const RentalManagementViews = (props) => {
           (i) => !i?.productDetail?.serializedProduct && (assetsInReceiving[i?.materialId] || assetsInConsume[i?.materialId]) && i.type !== 'package'
         )
         .map((item) => {
-          console.log('material');
           if (!receivingProductData.includes(`${item.materialId}`)) {
             receivingProductData.push(`${item.materialId}`);
 
