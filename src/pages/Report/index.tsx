@@ -214,7 +214,7 @@ const Report = () => {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${search}&`;
+      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
     }
     if (selectedResources.length > 0) {
       let deepFilter = [];
@@ -238,7 +238,7 @@ const Report = () => {
           options.forEach((o: any) => {
             deepFilter.push({
               field: key,
-              term: o.optionValue
+              term: encodeURIComponent(o.optionValue)
             });
           });
         });
@@ -269,7 +269,7 @@ const Report = () => {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: filters[field].filter
+          term: encodeURIComponent(filters[field].filter)
         });
       });
       filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;

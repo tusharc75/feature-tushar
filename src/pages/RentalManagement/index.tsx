@@ -312,7 +312,7 @@ const RentalManagement = () => {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: filters[field].filter,
+          term: encodeURIComponent(filters[field].filter),
         });
       });
       deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(
@@ -327,7 +327,7 @@ const RentalManagement = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
