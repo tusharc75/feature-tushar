@@ -203,6 +203,7 @@ const Report = () => {
             headerName: 'Quantity',
             show: true,
             disabled: false,
+            filter: false, sortable: false,
             cellRenderer: 'commonRenderer'
           },
           {
@@ -210,6 +211,7 @@ const Report = () => {
             headerName: 'Unit Price',
             show: true,
             disabled: false,
+            filter: false, sortable: false,
             cellRenderer: 'commonRenderer'
           },
           {
@@ -217,6 +219,7 @@ const Report = () => {
             headerName: 'Total',
             show: true,
             disabled: false,
+            filter: false, sortable: false,
             cellRenderer: 'commonRenderer'
           }
         ];
