@@ -80,6 +80,9 @@ const Report = () => {
         let {
           data: { data: POProductFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order Product`);
+        let {
+          data: { data: productOption }
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
         POFields.filter((field) => ['purchaseOrderNumber', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach(
           (field: any) => {
@@ -115,13 +118,13 @@ const Report = () => {
             }
           }
         );
+
+        console.log(productOption?.Product);
         productFields
           .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
             if (field?.fieldData.fieldName === 'productName') {
-              // let tempField = field
-              // tempField.fieldData.type ='dropDown'
-              // resourceFieldData.push(tempField);
+              resourceFieldData.push({ ...field, fieldData: { ...field.fieldData, type: 'dropDown', option: productOption?.Product || [] } });
               columns.push({
                 field: 'productName',
                 headerName: field?.fieldData?.fieldLabel,
@@ -307,9 +310,10 @@ const Report = () => {
 
     axiosInstance()
       .get(
-        `${resourceCamelCase === 'purchaseOrderProduct'
-          ? '/product-inventory/report/purchase-order-product-wise-report'
-          : 'product-inventory/report/purchase-order-price'
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? '/product-inventory/report/purchase-order-product-wise-report'
+            : 'product-inventory/report/purchase-order-price'
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -353,7 +357,11 @@ const Report = () => {
   const getFilter = (isExport = false) => {
     let filterQuery = `page=${page}&`;
     if (!isExport) {
+<<<<<<< HEAD
+      filterQuery = `limit=${limit}&`;
+=======
       filterQuery = `limit=${limit}&`
+>>>>>>> b533bd01a55b2199da789660a698a5625890804e
     }
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
@@ -443,13 +451,15 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${resourceCamelCase === 'purchaseOrderProduct'
-          ? '/product-inventory/report/purchase-order-product-wise-report/export'
-          : 'product-inventory/report/purchase-order-price/export'
-        }${filterQuery}`
-        , {
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? '/product-inventory/report/purchase-order-product-wise-report/export'
+            : 'product-inventory/report/purchase-order-price/export'
+        }${filterQuery}`,
+        {
           responseType: 'arraybuffer'
-        })
+        }
+      )
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);
@@ -574,7 +584,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => { }}
+                      onEdit={() => {}}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -589,8 +599,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => { }}
-                      onClone={(data) => { }}
+                      onDelete={(data) => {}}
+                      onClone={(data) => {}}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
