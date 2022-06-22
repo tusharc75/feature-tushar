@@ -113,7 +113,6 @@ export default function AssignSupplierContactsDialog({
   );
   const handleSupplierAccountChange = (e, option) => {
     let selectedAccounts = [];
-    console.log({ option });
     option.forEach((currentOption) => {
       if (currentOption.optionValue) {
         selectedAccounts.push(currentOption.optionValue);
@@ -123,7 +122,6 @@ export default function AssignSupplierContactsDialog({
     onGetSupplierAccountsContacts(false, true, option);
   };
 
-  console.log({ selectedSupplierAccounts });
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title={title} />

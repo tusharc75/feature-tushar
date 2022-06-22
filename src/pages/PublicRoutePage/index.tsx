@@ -56,6 +56,7 @@ const PublicRoutePage = () => {
     const [resourceData, setResourceData] = useState(null);
     const [passwordVerification, setPasswordVerification] = useState(false);
     const [password, setPassword] = useState(null);
+    const [validPassword, setValidPassword] = useState(true);
 
     useEffect(() => {
         if (id) {
@@ -77,19 +78,9 @@ const PublicRoutePage = () => {
                 }
                 else {
                     setValid(false)
-                    toastConfig.setToastConfig({
-                        message: `Link is not valid`,
-                        type: "error",
-                        open: true,
-                    });
                 }
             })
             .catch((error) => {
-                toastConfig.setToastConfig({
-                    message: `Link is not valid`,
-                    type: "error",
-                    open: true,
-                });
                 setValid(false)
             });
     };
@@ -106,7 +97,7 @@ const PublicRoutePage = () => {
                 setLoading(false)
             })
             .catch((error) => {
-                setPasswordVerification(false)
+                setValidPassword(false)
                 toastConfig.setToastConfig({
                     message: `Password is wrong`,
                     type: "error",
@@ -139,9 +130,9 @@ const PublicRoutePage = () => {
                 </Grid>
             </Grid>
             {passwordVerification ?
-                <>
+                <>{validPassword ?
                     <Box style={{ padding: "10px", display: "flex", justifyContent: "center" }}>
-                        <Box style={{ marginTop:"50px",width: "400px" }} boxShadow={3}>
+                        <Box style={{ marginTop: "50px", width: "400px" }} boxShadow={3}>
 
                             <Grid spacing={1} style={{ padding: "10px", display: "flex", justifyContent: "center" }} container>
                                 <Grid item xs={12} sm={12} md={12} >
@@ -169,7 +160,7 @@ const PublicRoutePage = () => {
                                 </Grid>
                                 <Grid item xs={10} sm={10} md={10} >
                                     <Button
-                                        style={{ marginBottom: "20px"}}
+                                        style={{ marginBottom: "20px" }}
                                         variant="contained"
                                         color="primary"
                                         size="medium"
@@ -181,7 +172,8 @@ const PublicRoutePage = () => {
                                 </Grid>
                             </Grid>
                         </Box>
-                    </Box>
+                    </Box> : null}
+
                 </>
                 : !valid ?
                     <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
