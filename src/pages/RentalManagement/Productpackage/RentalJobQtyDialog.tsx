@@ -120,6 +120,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         if (element.fieldName === "pricingMethod") {
           element.option = pricingMethodOptions;
         }
+        if (element.fieldName === "qty" && rowData?.serializedProduct === false && rowData?.hideSelection) {
+          element.isUneditable = true;
+        }
       });
       if (rowData.actualStartDate === "" || rowData.actualStartDate === "") {
         data = data.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))

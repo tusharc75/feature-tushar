@@ -10,51 +10,33 @@ import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import {
-  isObjectEmpty,
-  gridLoadingTimeout,
-  productInventory,
-  getLocalStorageArrayData,
-  removeLocalStorage,
-  convertInventory
-} from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage, convertInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Autocomplete } from '@material-ui/lab';
-import InfoIcon from '@material-ui/icons/Info';
-import SoftHoldDialog from './SoftHold';
-import HistoryDialog from './History/historyDialog';
 import { camelCase } from 'lodash';
 import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
-import HtmlTooltip from '../../components/CustomTooltipTitle';
-import NoDataCell from '../../components/Helpers/NoDataCell';
-import HistoryIcon from '@material-ui/icons/History';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
-import ConvertInventoryToAsset from './Convert';
+import InventoryToAsset from './InventoryToAsset';
 import { ExpandMore } from '@material-ui/icons';
 import { SiConvertio } from 'react-icons/si';
+import CachedIcon from '@material-ui/icons/Cached';
 
 const ConvertInventory = () => {
+
   const renderedFrom = camelCase(routes?.inventoryToAsset.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
   const [plantId, setPlantId] = useState(null);
   const [plantOptions, setPlantOptions] = useState([]);
   const [frameworkComponents, setFrameworkComponents] = useState({});
   const [columns, setColumns] = useState([]);
-
-  const [softHold, setSoftHold] = useState({ open: false, data: {} });
-  const [showHistory, setShowHistory] = useState({ open: false, product: '' });
-  const [inventory, setInventory] = useState({ open: false, product: [], type: '' });
+  const [inventory, setInventory] = useState({ open: false, product: [] });
 
   const {
     state: { user, permissions, selectedEntity }
@@ -74,7 +56,7 @@ const ConvertInventory = () => {
 
   useEffect(() => {
     fetchGridColumns();
-  }, [plantId]);
+  }, []);
 
   useEffect(() => {
     getPlants();
@@ -89,7 +71,6 @@ const ConvertInventory = () => {
       .get(`/warehouse`)
       .then(({ data: { data } }) => {
         setPlantOptions([
-          // { warehouseName: 'All', _id: 'All' },
           ...data
         ]);
         if (plantId === null && data?.length) {
@@ -100,13 +81,9 @@ const ConvertInventory = () => {
 
   const fetchGridColumns = async () => {
     setColumns(null);
-
     const productFields = await axiosInstance().get('/field?resource=Product&view=true');
-    const productInventoryFields = await axiosInstance().get('/field?resource=Product Inventory&view=true');
-
     let columns = [];
     let rendererNames = [];
-
     productFields?.data?.data?.forEach((o) => {
       let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
       if (currentColumn !== null) {
@@ -116,35 +93,17 @@ const ConvertInventory = () => {
         }
       }
     });
-
     columns?.forEach((e) => {
       if (!['productName', 'serializedProduct'].includes(e.field)) {
         e.show = false;
       }
     });
-    productInventoryFields?.data?.data?.forEach((o) => {
-      let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productInventory.path);
-      if (currentColumn !== null) {
-        if (!['plant', 'product', 'minInventory', 'maxInventory'].includes(currentColumn?.columnData.field)) {
-          if (o.fieldData.type === 'number' && ['minInventory', 'maxInventory'].includes(o.fieldData.fieldName)) {
-            columns.push({
-              ...currentColumn?.columnData,
-              cellEditor: 'numericCellEditor',
-              editable: permissions?.inventoryToAsset?.isUpdate
-            });
-          } else {
-            columns.push(currentColumn?.columnData);
-          }
-        }
-      }
-    });
-
+    columns.push({ field: "availableInventory", headerName: "Available Inventory", show: true, cellRenderer: "commonRenderer" })
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     setFrameworkComponents({
       ...tempFrameworkComponent,
       actionsRenderer: ActionsRenderer
     });
-
     setColumns(columns);
   };
 
@@ -208,7 +167,7 @@ const ConvertInventory = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -225,10 +184,6 @@ const ConvertInventory = () => {
     axiosInstance().put(`${convertInventory.api}`, inputData);
   };
 
-  const infoHandler = (params) => {
-    setSoftHold({ open: true, data: params.data });
-  };
-
   const ActionsRenderer = (params) => (
     <>
       {permissions?.inventoryToAsset?.isUpdate && (
@@ -240,10 +195,10 @@ const ConvertInventory = () => {
                 aria-label="Clone"
                 disabled={params?.data?.availableInventory ? false : true}
                 onClick={() => {
-                  setInventory({ open: true, product: [params?.data], type: 'convert' });
+                  setInventory({ open: true, product: [params?.data] });
                 }}
               >
-                <SiConvertio fontSize="small" color={params?.data?.availableInventory ? 'error' : 'disabled'} />
+                <CachedIcon fontSize="small" color="secondary" />
               </IconButton>
             </Tooltip>
           </Box>
@@ -280,36 +235,34 @@ const ConvertInventory = () => {
                 <SiConvertio size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
                 <span className="listingHeader">{routes.inventoryToAsset?.title} </span>
               </div>
-              <>
-                <Autocomplete
-                  style={{ width: '250px' }}
-                  options={plantOptions}
-                  getOptionLabel={(option: any) => option.warehouseName}
-                  disableClearable
-                  getOptionSelected={(option: any, val) => option._id === val}
-                  value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
-                  onChange={(e, val) => {
-                    if (val !== null) {
-                      setPlantId(val && val._id ? val._id : '');
-                    }
-                  }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="plant"
-                        placeholder="Plant"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
-                    )
+              <Autocomplete
+                style={{ width: '250px' }}
+                options={plantOptions}
+                getOptionLabel={(option: any) => option.warehouseName}
+                disableClearable
+                getOptionSelected={(option: any, val) => option._id === val}
+                value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
+                onChange={(e, val) => {
+                  if (val !== null) {
+                    setPlantId(val && val._id ? val._id : '');
                   }
-                />
-              </>
+                }}
+                renderInput={(params) =>
+                  isMobile && !isTablet ? (
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      name="plant"
+                      placeholder="Plant"
+                      variant="standard"
+                      fullWidth
+                      className={isMobile ? 'serchBox' : ''}
+                    />
+                  ) : (
+                    <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
+                  )
+                }
+              />
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -352,10 +305,13 @@ const ConvertInventory = () => {
                     <MenuItem
                       onClick={() => {
                         closeActions();
-                        setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: 'convert' });
+                        setInventory({
+                          open: true,
+                          product: getLocalStorageArrayData(`${localStorageSelectedRecords}`),
+                        });
                       }}
                     >
-                      Convert Inventory to Asset
+                      Convert
                     </MenuItem>
                   </Menu>
                 </Box>
@@ -392,15 +348,14 @@ const ConvertInventory = () => {
         )}
 
         {inventory.open && (
-          <ConvertInventoryToAsset
-            handleClose={() => setInventory({ open: false, product: [], type: '' })}
+          <InventoryToAsset
+            handleClose={() => setInventory({ open: false, product: [] })}
             handleSuccess={() => {
               removeLocalStorage(localStorageSelectedRecords);
               fetchProductInventory();
-              setInventory({ open: false, product: [], type: '' });
+              setInventory({ open: false, product: [] });
             }}
             product={inventory.product}
-            type={inventory.type}
             warehouse={plantId}
           />
         )}

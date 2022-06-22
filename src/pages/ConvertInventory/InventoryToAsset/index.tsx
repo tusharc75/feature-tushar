@@ -7,27 +7,28 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form, Field } from 'formik';
 import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import { convertInventory, productInventory } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 
-const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, warehouse }) => {
+const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    if (product.length === 1 && type === 'convert') {
+    if (product.length === 1) {
       fetchData();
     }
-  }, [type, product]);
+  }, []);
+
   const fetchData = () => {
     setLoading(true);
     axiosInstance()
-      .get(`${convertInventory.api}/serial-number/${product[0]._id}`)
+      .get(`${productInventory.api}/serial-number/${product[0]._id}?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         if (!data || data.lenght === 0) return;
         setSerialNumbers(data);
@@ -49,7 +50,6 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
       warehouse: warehouse
     };
     setLoading(true);
-
     axiosInstance()
       .post(`${convertInventory.api}/convert-inventory-to-asset`, data)
       .then(({ data: { data } }) => {
@@ -57,7 +57,7 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `${capitalize(type)} Inventory Successfully`
+          message: `Convert Inventory to Asset Successfully`
         });
         handleSuccess();
       })
@@ -72,17 +72,21 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
-    if (type === 'convert') {
-      var validateQty = product[0]?.availableInventory;
-      if (product?.length > 1) {
-        validateQty = product?.reduce(function (min, obj) {
-          return obj.availableInventory < min ? obj.availableInventory : min;
-        }, Infinity);
-      }
-      if (parseInt(values.qty) > validateQty) {
-        errors['qty'] = 'qty not more than inventory';
-      }
+
+    var validateQty = product[0]?.availableInventory;
+    if (product?.length > 1) {
+      validateQty = product?.reduce(function (min, obj) { return obj.availableInventory < min ? obj.availableInventory : min; }, Infinity);
     }
+
+    if (parseInt(values?.qty) > validateQty) {
+      errors['qty'] = 'qty not more than inventory';
+    }
+
+    const serialNumbersList = values['serialNumbers'];
+    if (serialNumbersList?.length > parseInt(values?.qty)) {
+      errors['serialNumbers'] = `Please select serial numbers same as quantity`;
+    }
+
     return errors;
   }
 
@@ -103,7 +107,7 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogHeader
-              title={`${capitalize(type)} Inventory`}
+              title={`Convert Inventory`}
               showRequiredLabel={true}
               onClose={handleClose}
               isMinimized={!fullScreen}
@@ -136,44 +140,44 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
                   />
                 </ListItem>
               </List>
-              <Box my={2} mx={1}>
-                <Divider />
-              </Box>
-              <Autocomplete
-                size="small"
-                options={serialNumbers.map((item: any) => item?.serialNumber)}
-                freeSolo={false}
-                multiple={true}
-                disableCloseOnSelect
-                value={values['serialNumbers']}
-                onChange={(_, val) => {
-                  if (type === 'convert') {
-                    setFieldValue('serialNumbers', val);
-                  } else {
-                    setFieldValue(
-                      'serialNumbers',
-                      val.map((item: string) => item.toUpperCase())
-                    );
-                  }
-                }}
-                getOptionSelected={(item, current) => item === current}
-                getOptionLabel={(option) => option}
-                renderInput={(props) => (
-                  <TextField
-                    {...props}
-                    placeholder={''}
-                    variant="outlined"
-                    name="serialNumbers"
-                    label={'Select Serial Numbers'}
-                    error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
-                    helperText={touched['serialNumbers'] && errors['serialNumbers']}
-                  />
-                )}
-              />
+              {product?.length === 1 ?
+                <Fragment>
+                  <Box my={2} mx={1}>
+                    <Divider />
+                  </Box>
+                  <Box m={1}>
+                    <Autocomplete
+                      size="small"
+                      options={serialNumbers.map((item: any) => item?.serialNumber)}
+                      freeSolo={false}
+                      multiple={true}
+                      disableCloseOnSelect
+                      value={values['serialNumbers']}
+                      onChange={(_, val) => {
+                        setFieldValue('serialNumbers', val);
+                      }}
+                      getOptionSelected={(item, current) => item === current}
+                      getOptionLabel={(option) => option}
+                      renderInput={(props) => (
+                        <TextField
+                          {...props}
+                          placeholder={''}
+                          variant="outlined"
+                          name="serialNumbers"
+                          label={'Select Serial Numbers'}
+                          error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
+                          helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                        />
+                      )}
+                    />
+                  </Box>
+                </Fragment>
+                : null
+              }
             </CustomDialogContent>
             <CustomDialogFooter>
               <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
-                {capitalize(type)}
+                Convert
               </CustomButton>
             </CustomDialogFooter>
           </Form>
@@ -183,4 +187,4 @@ const ConvertInventoryToAsset = ({ handleClose, handleSuccess, product, type, wa
   );
 };
 
-export default ConvertInventoryToAsset;
+export default InventoryToAsset;

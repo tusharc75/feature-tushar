@@ -5,6 +5,7 @@ import AddExistingProduct from "./AddExistingProduct";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import ProductDialog from "./ProductDialog";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -34,6 +35,7 @@ import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomButton from "../Helpers/CustomButton";
 import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
+import SupplierAskPrice from "./SupplierAskPrice";
 
 let levalOrderBy = [
   "product",
@@ -60,7 +62,8 @@ const ProductBuilder = (props) => {
     permissions,
     fromQuote,
     setColumnForPDFExcel,
-    fullScreen = false
+    fullScreen = false,
+    quoteData = null
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -77,6 +80,9 @@ const ProductBuilder = (props) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isClone, setIsClone] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
+  const [openSupplierPriceDialog, setOpenSupplierPriceDialog] = useState(false);
+  const [supplierData, setSupplierData] = useState(null)
+
   // const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
   //   useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
 
@@ -100,17 +106,6 @@ const ProductBuilder = (props) => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/productbuilder/getproduct/${id}`).then(({ data: { data } }) => {
-      setProductData(data);
-      let rows = data.product.map((item, index) => {
-        let res: any = {
-          ...prepareDataForGrid(item),
-        };
-        res.srno = index + 1;
-        res.isChecked = false;
-        res.canDelete = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
-        res.allowedToEdit = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
-        return res;
-      });
       let columns = []
       columns = [
         {
@@ -161,6 +156,18 @@ const ProductBuilder = (props) => {
       if (setColumnForPDFExcel) {
         setColumnForPDFExcel([...columns].filter(d => d.field !== "srno").map(d => d.headerName))
       }
+      setProductData(data);
+      let rows = data.product.map((item, index) => {
+        let res: any = {
+          ...prepareDataForGrid(item),
+        };
+        res.srno = index + 1;
+        res.isChecked = false;
+        res.canDelete = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
+        res.allowedToEdit = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
+        res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && columns.some(d => d.field.includes("supplier"))
+        return res;
+      });
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
       refreshProducts(data);
@@ -169,6 +176,12 @@ const ProductBuilder = (props) => {
         toastConfig.setToastConfig(error);
       });
   };
+
+  const supplierPriceDialogData = (product) => {
+    setOpenSupplierPriceDialog(true)
+    setSupplierData(product)
+
+  }
 
   const ActionsRenderer = (params) => {
     const permission = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
@@ -201,6 +214,21 @@ const ProductBuilder = (props) => {
             color={permission ? "primary" : "disabled"}
           />
         </IconButton>
+        {params.data?.isSupplierExist && (
+          <IconButton
+            disabled={params.data?.isSupplierExist ? false : true}
+            size="small"
+            aria-label="Supplier"
+            onClick={() => {
+              supplierPriceDialogData(params.data)
+            }}
+          >
+            <VisibilityIcon
+              fontSize="small"
+              color={params.data?.isSupplierExist ? "primary" : "disabled"}
+            />
+          </IconButton>
+        )}
         <IconButton
           disabled={permission ? false : true}
           size="small"
@@ -534,6 +562,33 @@ const ProductBuilder = (props) => {
     }
   };
 
+  const handelAskPriceToSupplier = () => {
+
+    let data: any = {
+      "products": selectedRecords?.map(d => {
+        return {
+          "productId": d?.productId,
+          "uniqueId": d?._id
+        }
+      }),
+      "quote": quoteData?._id,
+      "productBuilder": productBuilderId,
+      "protected": true
+    }
+    axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
+      dispatch({ type: "selection", selectedRecords: [] })
+      fetchProduct(productBuilderId);
+      toastConfig.setToastConfig({
+        message: `Email has been sent to suppliers`,
+        type: "success",
+        open: true,
+      });
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Box p={1} pt={0}>
       {Editable && (
@@ -558,6 +613,18 @@ const ProductBuilder = (props) => {
                 else fetchProduct(productBuilderId)
               }}
             />
+          )}
+          {isPriceBuilder && fromQuote && permissions.isUpdate && columns && columns.some(d => d.field.includes("supplier")) && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              className="float-right ml-1 mr-2"
+              onClick={handelAskPriceToSupplier}
+              disabled={checkUniqTemplate()}
+              aria-controls="action-menu">
+              {isMobile && !isTablet ? "Supplier" : "Ask Price to Supplier"}
+            </Button>
           )}
           {stage === "cost" && permissions.isUpdate && (
             <Button
@@ -740,6 +807,17 @@ const ProductBuilder = (props) => {
           loading={loading}
           productBuilderId={productBuilderId}
           stage={stage}
+        />
+      )}
+      {openSupplierPriceDialog && (
+        <SupplierAskPrice
+          supplierData={supplierData}
+          handleClose={() => setOpenSupplierPriceDialog(false)}
+          productBuilderId={productBuilderId}
+          onSuccess={() => {
+            setOpenSupplierPriceDialog(false);
+            fetchProduct(productBuilderId)
+          }}
         />
       )}
       {showDeleteConfirmBox && (

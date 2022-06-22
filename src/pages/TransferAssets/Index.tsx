@@ -144,7 +144,7 @@ const TransferAsset = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterTransferAssets=${selectedType}`;
     if (isExport) {
-      deepFilter = `filterRepairJobs=${selectedType}`;
+      deepFilter = `filterTransferAssets=${selectedType}`;
     }
     if (fromRental) {
       let filterById = [];
@@ -165,7 +165,7 @@ const TransferAsset = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -173,7 +173,7 @@ const TransferAsset = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;

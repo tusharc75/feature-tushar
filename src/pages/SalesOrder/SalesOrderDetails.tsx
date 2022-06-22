@@ -85,6 +85,15 @@ const SalesOrderDetails = () => {
     setActivityShow(!showActivity);
   };
 
+  useEffect(() => {
+    if (isSmallScreen && tabValue === 0) {
+      setActivityShow(true);
+    } else {
+      setActivityShow(false);
+    }
+  }, [isSmallScreen, tabValue]);
+
+
   const handleStatusChange = o => {
     if (o.optionValue && salesOrderData?.status !== o.optionValue) {
       updateJobStatus(o.optionValue)

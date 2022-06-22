@@ -20,6 +20,16 @@ export function reducer(state, action) {
         loading: action.loading,
         appendRows: action.loading === false ? false : state.appendRows
       };
+    case 'onlyLoading':
+      return {
+        ...state,
+        loading: action.loading,
+      };
+    case 'onlyFilter':
+      return {
+        ...state,
+        filters: action.filters,
+      };
 
     case 'initialize':
       return {
@@ -156,7 +166,8 @@ export default function CustomAgGrid({
   rowClassRules = null,
   selectedReportView = null,
   setSelectedReportView = null,
-  isMultipleSelection = true
+  isMultipleSelection = true,
+  reportSave = false,
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
@@ -377,6 +388,7 @@ export default function CustomAgGrid({
           <CustomGridHeaderOptions
             setSelectedReportView={setSelectedReportView}
             selectedReportView={selectedReportView}
+            reportSave={reportSave}
             columns={columns}
             setColumns={setColumns}
             columnApi={columnApi}

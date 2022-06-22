@@ -2,7 +2,7 @@
 import Box from "@material-ui/core/Box/Box";
 import { useState, useEffect, useContext } from "react";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import { Button, Chip, Dialog, Grid } from "@material-ui/core";
+import { Button, Chip, Dialog, Grid, useMediaQuery, useTheme } from "@material-ui/core";
 import axiosInstance from "src/axios/axiosInstance";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import {
@@ -25,6 +25,8 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
+    const theme = useTheme()
+    const isMobileScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
     const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -60,14 +62,19 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                                     {row.original.productName}
                                 </Link>
                                 :
-                                <Link
-                                    className="link"
-                                    title={row.original.productId}
-                                    to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}
-                                >
-                                    {row.original.productName}
-                                </Link>}
+                                row.original.type === "Asset" ?
+                                    <Link
+                                        className="link"
+                                        title={row.original.productId}
+                                        to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}
+                                    >
+                                        {row.original.productName}
+                                    </Link>
+                                    : row.original.productName}
                         </p>),
+                    Footer: () => {
+                        return <>Total</>;
+                    }
                 })
             }
             if (e?.fieldData?.fieldName === "productNumber") {
@@ -84,13 +91,13 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
             }
             if (e?.fieldData?.fieldName === "serializedProduct") {
                 column.push({
-                    accessor: 'serializedProduct',
+                    accessor: 'serializedProductView',
                     Header: e?.fieldData?.fieldLabel,
                     width: 150,
                     Cell: ({ row }) => (
                         row.original.type === "Product" ?
                             <p className="text-truncate"  >
-                                {row.original.serializedProduct ? "Yes" : "No"}
+                                {row.original.serializedProductView}
                             </p> : <NoDataCell />),
                 })
             }
@@ -187,14 +194,38 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                 }
             }
         });
+
+        column.push({
+            accessor: "assetQty",
+            Header: "Asset Received",
+            width: 300,
+            Cell: ({ row }) => (row.original["assetQty"] ? <p>{row.original["assetQty"]}</p> : <NoDataCell />),
+            Footer: (info) => {
+                return (info?.rows?.filter((f) => f.values.hasOwnProperty("assetQty") && !isNaN(f.values["assetQty"]))
+                    .reduce((sum, row) => row.values["assetQty"] + sum, 0)
+                );
+            }
+        });
+        column.push({
+            accessor: "inventoryQty",
+            Header: "Inventory Received",
+            width: 300,
+            Cell: ({ row }) => (row.original["inventoryQty"] ? <p>{row.original["inventoryQty"]}</p> : <NoDataCell />),
+            Footer: (info) => {
+                return (info?.rows?.filter((f) => f.values.hasOwnProperty("inventoryQty") && !isNaN(f.values["inventoryQty"]))
+                    .reduce((sum, row) => row.values["inventoryQty"] + sum, 0)
+                );
+            }
+        });
         setColumns([...column])
     }
 
     const fetchProduct = async () => {
         try {
             const result = await axiosInstance().get(`${purchaseOrder.api}/product/${purchaseOrderData._id}`)
-            var assets: any = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/assets`)
-            assets = assets?.data?.data;
+            const assets: any = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/assets`)
+            const serializedAsset = assets?.data?.data?.serializedAsset;
+            const productSerialNumber = assets?.data?.data?.productSerialNumber;
 
             let rows = result?.data?.data?.map((item) => {
                 let finalObject = prepareDataForGrid(item);
@@ -207,13 +238,14 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                     productNumber: item?.productDetail?.productNumber,
                     productDescription: item?.productDetail?.productDescription,
                     serializedProduct: item?.productDetail?.serializedProduct,
+                    serializedProductView: item.productDetail?.serializedProduct ? "Yes" : "No",
                     productId: item?.productDetail?._id,
                 };
                 if (item.qty === item.actualReceived) {
                     res["hideSelection"] = true
                 }
                 res.subRows = []
-                const subRows = assets?.filter((e) => e?.product?.optionValue === res?.productId)
+                const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.productId)
                 if (subRows?.length) {
                     let actualReceived = item.actualReceived;
                     subRows?.forEach((e: any) => {
@@ -224,6 +256,19 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                         }
                     })
                 }
+                const subRowsproductSerialNumber = productSerialNumber?.filter((e) => e?.product === res?.productId)
+                if (subRowsproductSerialNumber?.length) {
+                    let actualReceived = item.actualReceived;
+                    subRowsproductSerialNumber?.forEach((e: any) => {
+                        if (actualReceived && !e.isUsed) {
+                            res.subRows.push({ productName: e.serialNumber, type: "Serial Number", assetId: e?._id, hideSelection: true })
+                            actualReceived = actualReceived - 1;
+                            e.isUsed = true;
+                        }
+                    })
+                }
+                res["assetQty"] = subRows?.length
+                res["inventoryQty"] = item?.actualReceived ? ((item?.actualReceived || 0) - subRows?.length) : 0
                 return res;
             });
             if (rows.every(d => d.qty === d.actualReceived)) {
@@ -261,7 +306,11 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
             {columns && rowsData ? (
                 <Box
                     zIndex={5}
-                    width={stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
+                    width={isMobileScreen
+                        ? '100vw'
+                        : stepFullScreen || showActivity || isTabletScreen
+                            ? '100%'
+                            : 'calc(100vw - 103px)'}
                 >
                     <CustomReactTable
                         height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}

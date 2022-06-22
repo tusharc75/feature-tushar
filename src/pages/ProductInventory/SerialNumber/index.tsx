@@ -26,9 +26,7 @@ const SerialNumber = ({ product, warehouse }) => {
             gridApi.setRowData([]);
         }
         let data;
-
-        const query = warehouse ? `?warehouse=${warehouse}` : ``;
-        
+        const query = warehouse ? `?warehouse=${warehouse}&isAll=true` : `?isAll=true`;
         const response = await axiosInstance().get(`${productInventory.api}/serial-number/${product}${query}`)
         data = response?.data?.data
         let rows = data.map((u) => {
@@ -42,10 +40,15 @@ const SerialNumber = ({ product, warehouse }) => {
     const columns = [
         { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
+        { field: "active", headerName: "Status", show: true, cellRenderer: "statusRenderer" },
         { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' }
     ];
 
+    const StatusRenderer = (params) =>
+        params?.value ? "Available" : "Unavailable";
+
     const frameworkComponents = {
+        statusRenderer: StatusRenderer,
         createdByRenderer: CreatedByRenderer,
         commonRenderer: CommonRenderer,
     };

@@ -80,6 +80,9 @@ const Report = () => {
         let {
           data: { data: POProductFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order Product`);
+        let {
+          data: { data: productOption }
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
         POFields.filter((field) => ['purchaseOrderNumber', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach(
           (field: any) => {
@@ -115,10 +118,15 @@ const Report = () => {
             }
           }
         );
+
         productFields
           .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
             if (field?.fieldData.fieldName === 'productName') {
+              resourceFieldData.push({
+                ...field,
+                fieldData: { ...field.fieldData, type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+              });
               columns.push({
                 field: 'productName',
                 headerName: field?.fieldData?.fieldLabel,
@@ -153,7 +161,16 @@ const Report = () => {
           ...tempFrameworkComponent
         };
         setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
-        columns = [...columns];
+        columns = [
+          ...columns,
+          {
+            field: 'soldQty',
+            headerName: 'Sold Qty',
+            show: true,
+            disabled: false,
+            cellRenderer: 'commonRenderer'
+          }
+        ];
       }
 
       if (resourceCamelCase === 'productAverageCost') {
@@ -186,6 +203,7 @@ const Report = () => {
             headerName: 'Quantity',
             show: true,
             disabled: false,
+            filter: false, sortable: false,
             cellRenderer: 'commonRenderer'
           },
           {
@@ -193,6 +211,7 @@ const Report = () => {
             headerName: 'Unit Price',
             show: true,
             disabled: false,
+            filter: false, sortable: false,
             cellRenderer: 'commonRenderer'
           },
           {
@@ -200,6 +219,7 @@ const Report = () => {
             headerName: 'Total',
             show: true,
             disabled: false,
+            filter: false, sortable: false,
             cellRenderer: 'commonRenderer'
           }
         ];
@@ -219,6 +239,11 @@ const Report = () => {
       initialRender.current = false;
     }
   }, []);
+  // React.useEffect(() => {
+  //   if (!showGrid) {
+  //     dispatch({ type: 'filter', filters: {} });
+  //   }
+  // }, [showGrid]);
 
   React.useEffect(() => {
     if (showGrid) {
@@ -281,9 +306,7 @@ const Report = () => {
    */
   const fetchResourceData = () => {
     setShowGrid(true);
-
     let filterQuery = getFilter();
-
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -295,9 +318,10 @@ const Report = () => {
 
     axiosInstance()
       .get(
-        `${resourceCamelCase === 'purchaseOrderProduct'
-          ? '/product-inventory/report/purchase-order-product-wise-report'
-          : 'product-inventory/report/purchase-order-price'
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? '/product-inventory/report/purchase-order-product-wise-report'
+            : 'product-inventory/report/purchase-order-price'
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -340,14 +364,14 @@ const Report = () => {
   // Create and return query for filters
   const getFilter = (isExport = false) => {
     let filterQuery = `page=${page}&`;
-    if(!isExport) {
-      filterQuery = `limit=${limit}&`
+    if (!isExport) {
+      filterQuery = `limit=${limit}&`;
     }
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${search}&`;
+      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
     }
     if (selectedResources.length > 0) {
       let deepFilter = [];
@@ -371,7 +395,7 @@ const Report = () => {
           options.forEach((o: any) => {
             deepFilter.push({
               field: key,
-              term: o.optionValue
+              term: encodeURIComponent(o.optionValue)
             });
           });
         });
@@ -398,11 +422,12 @@ const Report = () => {
       }
     }
     if (!isObjectEmpty(filters)) {
+      console.log(filters);
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: filters[field].filter
+          term: encodeURIComponent(filters[field].filter)
         });
       });
       filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
@@ -431,13 +456,15 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${resourceCamelCase === 'purchaseOrderProduct'
-          ? '/product-inventory/report/purchase-order-product-wise-report/export'
-          : 'product-inventory/report/purchase-order-price/export'
-        }${filterQuery}`
-        , {
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? '/product-inventory/report/purchase-order-product-wise-report/export'
+            : 'product-inventory/report/purchase-order-price/export'
+        }${filterQuery}`,
+        {
           responseType: 'arraybuffer'
-        })
+        }
+      )
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);
@@ -503,6 +530,8 @@ const Report = () => {
                           disableElevation
                           onClick={() => {
                             setShowGrid(false);
+                            dispatch({type: 'onlyLoading', loading: false})
+                            dispatch({type: 'onlyFilter', filters: {}})
                           }}
                           startIcon={<MdChevronLeft />}
                         >
@@ -562,7 +591,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => { }}
+                      onEdit={() => {}}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -577,8 +606,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => { }}
-                      onClone={(data) => { }}
+                      onDelete={(data) => {}}
+                      onClone={(data) => {}}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (

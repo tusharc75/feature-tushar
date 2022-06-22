@@ -76,7 +76,7 @@ const ChatsPopover = (props) => {
         horizontal: 'center'
       }}
     >
-      <Box width={isSmallScreen ? 'calc(96vw - 4px)' : 350} height={isSmallScreen ? '95vh' : 450} overflow="hidden">
+      <Box width={isSmallScreen ? '92vw' : 350} height={isSmallScreen ? '94vh' : 450} overflow="hidden">
         <Box mx={1} height={50} display="flex" justifyContent="space-between" alignItems="center">
           {selectedChat || newChat ? (
             <HtmlTooltip title="Go Back">

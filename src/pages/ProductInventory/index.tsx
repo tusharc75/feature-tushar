@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, IconButton, Tooltip, Button, Menu, MenuItem } from "@material-ui/core";
+import { Grid, IconButton, Tooltip, Button, Menu, MenuItem, Chip } from "@material-ui/core";
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -32,6 +32,8 @@ import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import AddRemoveDialog from './AddRemove';
 import { ExpandMore } from '@material-ui/icons';
 import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
+import { useHistory } from 'react-router-dom';
+import { NumberRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 
 const InventoryProduct = () => {
 
@@ -56,6 +58,14 @@ const InventoryProduct = () => {
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
 
+
+  const history = useHistory();
+
+  const [fromProductMaster, setFromProductMaster] = useState({
+    product: history.location?.state?.product,
+    productName: history.location?.state?.productName,
+  });
+
   const { getColumnData } = useColumns();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -70,7 +80,7 @@ const InventoryProduct = () => {
 
   useEffect(() => {
     fetchGridColumns();
-  }, [plantId]);
+  }, []);
 
   useEffect(() => {
     getPlants();
@@ -78,7 +88,7 @@ const InventoryProduct = () => {
 
   useEffect(() => {
     fetchProductInventory();
-  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
+  }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, fromProductMaster]);
 
   const getPlants = () => {
     axiosInstance()
@@ -86,7 +96,7 @@ const InventoryProduct = () => {
       .then(({ data: { data } }) => {
         setPlantOptions([{ "warehouseName": "All", "_id": "All" }, ...data]);
         if (plantId === null && data?.length) {
-          setPlantId(data[0]._id);
+          setPlantId("All");
         }
       });
   };
@@ -124,12 +134,13 @@ const InventoryProduct = () => {
             columns.push({
               ...currentColumn?.columnData,
               cellEditor: 'numericCellEditor',
+              cellRenderer: 'numberRenderer',
               filter: false, sortable: false,
               editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
             });
           }
           else if (['inventory'].includes(currentColumn?.columnData.field)) {
-            columns.push({ ...currentColumn?.columnData, filter: false, sortable: false });
+            columns.push({ ...currentColumn?.columnData, cellRenderer: 'numberRenderer', filter: false, sortable: false });
           }
           else {
             columns.push(currentColumn?.columnData);
@@ -139,15 +150,15 @@ const InventoryProduct = () => {
     });
 
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-    setFrameworkComponents({ ...tempFrameworkComponent, softHoldRenderer: SoftHoldRenderer, actionsRenderer: ActionsRenderer })
+    setFrameworkComponents({ ...tempFrameworkComponent, softHoldRenderer: SoftHoldRenderer, numberRenderer: NumberRenderer, actionsRenderer: ActionsRenderer })
 
     const defaultColumns = [
       { field: 'softHold', headerName: 'Soft Hold', filter: false, sortable: false, show: true, cellRenderer: 'softHoldRenderer' },
-      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'commonRenderer' }
+      { field: 'availableInventory', headerName: 'Available Inventory', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' },
+      { field: 'purchaseOrderQty', headerName: 'On PO', filter: false, sortable: false, show: true, cellRenderer: 'numberRenderer' }
     ];
 
     setColumns([...columns, ...defaultColumns])
-    fetchProductInventory();
   }
 
   const fetchProductInventory = () => {
@@ -197,6 +208,14 @@ const InventoryProduct = () => {
       deepFilter = `&wareHouse=${tempPlantId}`
     }
 
+    let filterById = [];
+    if (fromProductMaster?.product) {
+      filterById.push({ field: '_id', term: fromProductMaster.product });
+    }
+    if (filterById.length > 0) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    }
+
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
@@ -211,7 +230,7 @@ const InventoryProduct = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -243,13 +262,13 @@ const InventoryProduct = () => {
           <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(params)} />
         </HtmlTooltip>
       </Fragment>
-    ) : <NoDataCell />}
+    ) : 0}
     </>
   );
 
   const ActionsRenderer = (params) => (
     <>
-      {(permissions?.productInventory?.isUpdate && plantId !== "All") &&
+      {(permissions?.productInventory?.isUpdate && params?.data?.plantId !== "All") &&
         <Fragment>
           <Box>
             <Tooltip title="Add">
@@ -359,36 +378,44 @@ const InventoryProduct = () => {
                 <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
                 <span className="listingHeader">{routes.productInventory?.title} </span>
               </div>
-              <>
-                <Autocomplete
-                  style={{ width: '250px' }}
-                  options={plantOptions}
-                  getOptionLabel={(option: any) => option.warehouseName}
-                  disableClearable
-                  getOptionSelected={(option: any, val) => option._id === val}
-                  value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
-                  onChange={(e, val) => {
-                    if (val !== null) {
-                      setPlantId(val && val._id ? val._id : '');
-                    }
-                  }}
-                  renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name="plant"
-                        placeholder="Plant"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
-                    )
+              <Autocomplete
+                style={{ width: '250px' }}
+                options={plantOptions}
+                getOptionLabel={(option: any) => option.warehouseName}
+                disableClearable
+                getOptionSelected={(option: any, val) => option._id === val}
+                value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
+                onChange={(e, val) => {
+                  if (val !== null) {
+                    setPlantId(val && val._id ? val._id : '');
                   }
+                }}
+                renderInput={(params) =>
+                  isMobile && !isTablet ? (
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      name="plant"
+                      placeholder="Plant"
+                      variant="standard"
+                      fullWidth
+                      className={isMobile ? 'serchBox' : ''}
+                    />
+                  ) : (
+                    <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
+                  )
+                }
+              />
+              {fromProductMaster?.product && (
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={`Product : ${fromProductMaster?.productName}`}
+                  onDelete={() => {
+                    setFromProductMaster(null);
+                  }}
                 />
-              </>
+              )}
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -409,7 +436,7 @@ const InventoryProduct = () => {
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="default"
                     size="small"
-                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
+                    disabled={(getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length && plantId !== "All") ? false : true}
                     className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                     onClick={openActions}
                     aria-controls="action-menu"
