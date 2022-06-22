@@ -357,11 +357,7 @@ const Report = () => {
   const getFilter = (isExport = false) => {
     let filterQuery = `page=${page}&`;
     if (!isExport) {
-<<<<<<< HEAD
       filterQuery = `limit=${limit}&`;
-=======
-      filterQuery = `limit=${limit}&`
->>>>>>> b533bd01a55b2199da789660a698a5625890804e
     }
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
