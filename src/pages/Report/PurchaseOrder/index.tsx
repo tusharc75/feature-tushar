@@ -119,7 +119,6 @@ const Report = () => {
           }
         );
 
-        console.log(productOption?.Product);
         productFields
           .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
@@ -164,6 +163,7 @@ const Report = () => {
           headerName: 'Sold Qty',
           show: true,
           disabled: false,
+          filter: false, sortable: false,
           cellRenderer: 'commonRenderer'
         }];
       }
@@ -198,6 +198,7 @@ const Report = () => {
             headerName: 'Quantity',
             show: true,
             disabled: false,
+            filter: false, sortable: false,
             cellRenderer: 'commonRenderer'
           },
           {
@@ -205,6 +206,7 @@ const Report = () => {
             headerName: 'Unit Price',
             show: true,
             disabled: false,
+            filter: false, sortable: false,
             cellRenderer: 'commonRenderer'
           },
           {
@@ -212,6 +214,7 @@ const Report = () => {
             headerName: 'Total',
             show: true,
             disabled: false,
+            filter: false, sortable: false,
             cellRenderer: 'commonRenderer'
           }
         ];
@@ -304,9 +307,6 @@ const Report = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
-    console.log(filterQuery)
-    console.log(encodeURI(filterQuery))
 
     axiosInstance()
       .get(
