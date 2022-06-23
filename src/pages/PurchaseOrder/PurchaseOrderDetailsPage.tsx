@@ -219,6 +219,23 @@ const PurchaseOrderDetailsPage = () => {
     setActivityShow(!showActivity);
   };
 
+
+  const checkReceivedProduct = (products) => {
+    var isReceived = false;
+    if (products?.filter((e) => (e?.qty - ((e?.actualReceived || 0) + (e?.scrapQuantity || 0)) > 0)).length > 0) {
+      isReceived = false
+    }
+    else {
+      isReceived = true;
+    }
+    if (isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.received) {
+      updateStatus(PURCHASE_ORDER_STATUS.received)
+    }
+    if (!isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
+      updateStatus(PURCHASE_ORDER_STATUS.inProgress)
+    }
+  }
+
   return (
     <>
       <Grid container className="headerbox">
@@ -377,6 +394,7 @@ const PurchaseOrderDetailsPage = () => {
                                 allowedToEdit={allowedToEdit}
                                 seIsShowIssue={seIsShowIssue}
                                 updateStatus={updateStatus}
+                                checkReceivedProduct={checkReceivedProduct}
                               />
                             )}
                             {/* {currentStep === 1 &&
@@ -408,6 +426,7 @@ const PurchaseOrderDetailsPage = () => {
                                 isTabletScreen={isTabletScreen}
                                 stepFullScreen={stepFullScreen}
                                 showActivity={showActivity}
+                                checkReceivedProduct={checkReceivedProduct}
                               />
                             )}</ContentFullScreen>
                         </Paper>
