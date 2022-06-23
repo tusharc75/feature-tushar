@@ -35,7 +35,6 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
 
     const handleCreateSerializedAsset = (values) => {
         setIsSubmitting(true)
-
         let data = values.map(u => ({
             _id: u._id,
             product: u.productId,
@@ -43,6 +42,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             warehouse: u.warehouse?._id,
             inventoryQuantity: parseInt(u?.inventoryQuantity),
             assetQuantity: parseInt(u?.assetQuantity),
+            scrapQuantity: parseInt(u?.scrapQuantity),
             serialNumber: u?.serialNumber,
         }))
 
@@ -54,15 +54,14 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                 message: data.message
             });
             let tempProductArray = values.map(d => {
-                let res;
-                res = d.row
-                res["actualReceived"] = parseInt(d.inventoryQuantity || 0) + parseInt(d.assetQuantity || 0)
-                    + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.actualReceived || 0)
+                let res = {};
+                res["_id"] = d?._id
+                res["actualReceived"] = parseInt(d.inventoryQuantity || 0) + parseInt(d.assetQuantity || 0) + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.actualReceived || 0)
+                res["scrapQuantity"] = parseInt(d.scrapQuantity || 0) + + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.scrapQuantity || 0)
                 return res
             })
             axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderID}/update`, { products: tempProductArray })
                 .then(() => {
-                    updateStatus("Received")
                     onSuccess()
                 }).catch((error) => {
                     toastConfig.setToastConfig(error)
@@ -78,16 +77,20 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
         if (values.length > 0) {
             values.map(d => {
                 let tempProduct = productList.find(u => u._id === d._id)
-                let qty = tempProduct.qty - (tempProduct.actualReceived || 0);
+                let qty = tempProduct.qty - (tempProduct.actualReceived || 0) - (tempProduct.scrapQuantity || 0);
                 if (tempProduct && d.inventoryQuantity > qty) {
                     errors.inventoryQuantity = "should be greater"
                 }
                 if (tempProduct && d.assetQuantity > qty) {
                     errors.assetQuantity = "should be greater"
                 }
-                if (tempProduct && (parseInt(d.inventoryQuantity) + parseInt(d.assetQuantity)) > qty) {
+                if (tempProduct && d.scrapQuantity > qty) {
+                    errors.scrapQuantity = "should be greater"
+                }
+                if (tempProduct && (parseInt(d.inventoryQuantity) + parseInt(d.assetQuantity) + parseInt(d.scrapQuantity)) > qty) {
                     errors.inventoryQuantity = "should be greater"
                     errors.assetQuantity = "should be greater"
+                    errors.scrapQuantity = "should be greater"
                 }
                 if (tempProduct && (parseInt(d.inventoryQuantity) < d.serialNumber?.length)) {
                     errors.serialNumber = "should be greater"
@@ -168,8 +171,9 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                         "product": d.productName,
                         "productId": d.productId,
                         "warehouse": defaultWareHouse || "",
-                        "inventoryQuantity": d.qty - (d.actualReceived || 0),
+                        "inventoryQuantity": d.qty - (d.actualReceived || 0) - (d.scrapQuantity || 0),
                         "assetQuantity": 0,
+                        "scrapQuantity": 0,
                         "serializedProduct": d.serializedProduct || false,
                         "serialNumber": [],
                         "row": d
@@ -195,40 +199,16 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                         render={arrayHelpers => (
                                                             <div>
                                                                 {(values.seriaizedAsset.map((data, index) => (
-                                                                    <Box key={index} border={'1px solid #dddddd'} borderRadius={4} mb={2} p={2} pt={data?.serializedProduct ? 0 : 2}>
-                                                                        {data?.serializedProduct &&
-                                                                            <Box my={1} display="flex" justifyContent="flex-end">
-                                                                                <Box mr={2}>
-                                                                                    <Typography className="link cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExportField(data)}>
-                                                                                        Export
-                                                                                    </Typography>
-                                                                                </Box>
-                                                                                <Box mr={1}>
-                                                                                    <input
-                                                                                        accept="json"
-                                                                                        style={{ display: 'none' }}
-                                                                                        onChange={handleImport(arrayHelpers, index, values)}
-                                                                                        id={`import-file-${index}`}
-                                                                                        multiple={false}
-                                                                                        type="file" />
-                                                                                    <label htmlFor={`import-file-${index}`}>
-                                                                                        <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
-                                                                                            Import
-                                                                                        </Typography>
-                                                                                    </label>
-                                                                                </Box>
-                                                                            </Box>}
-                                                                        <Grid
-                                                                            container
-                                                                            spacing={2}
-                                                                            alignItems='center'
-                                                                        >
-                                                                            <Grid item xs={1} >
+                                                                    <Box key={index}
+                                                                        border={'1px solid #dddddd'}
+                                                                        borderRadius={4} mb={2} p={2} pt={2}>
+                                                                        <Grid container spacing={2} alignItems='center'   >
+                                                                            <Grid item xs={12} md={1} >
                                                                                 <Chip color="primary" label={index + 1} />
                                                                             </Grid>
-                                                                            <Grid item xs={11}>
+                                                                            <Grid item xs={12} md={11}>
                                                                                 <Grid container spacing={2} alignItems='center'>
-                                                                                    <Grid item xs={4}>
+                                                                                    <Grid item xs={12} md={4}>
                                                                                         <Autocomplete
                                                                                             size="small"
                                                                                             value={data.product}
@@ -249,7 +229,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                             />}
                                                                                         />
                                                                                     </Grid>
-                                                                                    <Grid item xs={4}>
+                                                                                    <Grid item xs={12} md={4}>
                                                                                         <Autocomplete
                                                                                             size="small"
                                                                                             value={data.warehouse}
@@ -272,37 +252,38 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                             />}
                                                                                         />
                                                                                     </Grid>
-                                                                                    <Grid item xs={4}>
-                                                                                        <span><b>Quantity: </b>{data?.row?.qty - (data?.row?.actualReceived || 0)}</span>
+                                                                                    <Grid item xs={12} md={4}>
+                                                                                        <span><b>Quantity: </b>{data?.row?.qty
+                                                                                            - (data?.row?.actualReceived || 0)
+                                                                                            - (data?.row?.scrapQuantity || 0)}</span>
                                                                                     </Grid>
-                                                                                    <Grid item xs={4}>
-                                                                                        <Field
-                                                                                            fullWidth
-                                                                                            label="Inventory Quantity"
-                                                                                            variant="outlined"
-                                                                                            type="number"
-                                                                                            size="small"
-                                                                                            component={TextField}
-                                                                                            name="inventoryQuantity"
-                                                                                            placeholder="Enter Quantity"
-                                                                                            value={data.inventoryQuantity}
-                                                                                            onChange={(e) => {
-                                                                                                const value = e.target.value.replace(/[^0-9]/g, '');
-                                                                                                const qty = data?.row?.qty - (data?.row?.actualReceived || 0)
-                                                                                                // if (value > qty) return
-                                                                                                arrayHelpers.replace(index, {
-                                                                                                    ...values.seriaizedAsset[index],
-                                                                                                    ["inventoryQuantity"]: value,
-                                                                                                    //['assetQuantity']: qty - value,
-                                                                                                })
-                                                                                            }}
-                                                                                            error={validate([data])?.inventoryQuantity}
-                                                                                            helperText={validate([data]).inventoryQuantity ? "Receiving quantity is more than actual quantity" : ""}
-                                                                                        />
-                                                                                    </Grid>
-                                                                                    {data?.serializedProduct &&
-                                                                                        <>
-                                                                                            <Grid item xs={4}>
+                                                                                </Grid>
+                                                                                <Box mt={1}>
+                                                                                    <Grid container spacing={2} alignItems='center'>
+                                                                                        <Grid item xs={12} md={4}>
+                                                                                            <Field
+                                                                                                fullWidth
+                                                                                                label="Inventory Quantity"
+                                                                                                variant="outlined"
+                                                                                                type="number"
+                                                                                                size="small"
+                                                                                                component={TextField}
+                                                                                                name="inventoryQuantity"
+                                                                                                placeholder="Inventory Quantity"
+                                                                                                value={data.inventoryQuantity}
+                                                                                                onChange={(e) => {
+                                                                                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                                                                                    arrayHelpers.replace(index, {
+                                                                                                        ...values.seriaizedAsset[index],
+                                                                                                        ["inventoryQuantity"]: value,
+                                                                                                    })
+                                                                                                }}
+                                                                                                error={validate([data])?.inventoryQuantity}
+                                                                                                helperText={validate([data]).inventoryQuantity ? "Receiving quantity is more than actual quantity" : ""}
+                                                                                            />
+                                                                                        </Grid>
+                                                                                        {data?.serializedProduct &&
+                                                                                            <Grid item xs={12} md={4}>
                                                                                                 <Field
                                                                                                     fullWidth
                                                                                                     label='Asset Quantity'
@@ -311,23 +292,48 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                                     size="small"
                                                                                                     component={TextField}
                                                                                                     name="assetQuantity"
-                                                                                                    placeholder="Enter Quantity"
+                                                                                                    placeholder="Asset Quantity"
                                                                                                     value={data.assetQuantity}
                                                                                                     onChange={(e) => {
                                                                                                         const value = e.target.value.replace(/[^0-9]/g, '');
-                                                                                                        const qty = data?.row?.qty - (data?.row?.actualReceived || 0)
-                                                                                                        // if (value > qty) return
                                                                                                         arrayHelpers.replace(index, {
                                                                                                             ...values.seriaizedAsset[index],
                                                                                                             ["assetQuantity"]: value,
-                                                                                                            //['inventoryQuantity']: qty - value,
                                                                                                         })
                                                                                                     }}
                                                                                                     error={validate([data])?.assetQuantity}
                                                                                                     helperText={validate([data]).assetQuantity ? "Receiving quantity is more than actual quantity" : ""}
                                                                                                 />
                                                                                             </Grid>
-                                                                                            <Grid item xs={4}>
+                                                                                        }
+                                                                                        <Grid item xs={12} md={4}>
+                                                                                            <Field
+                                                                                                fullWidth
+                                                                                                label='Scrap Quantity'
+                                                                                                variant="outlined"
+                                                                                                type="number"
+                                                                                                size="small"
+                                                                                                component={TextField}
+                                                                                                name="scrapQuantity"
+                                                                                                placeholder="Scrap Quantity"
+                                                                                                value={data.scrapQuantity}
+                                                                                                onChange={(e) => {
+                                                                                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                                                                                    arrayHelpers.replace(index, {
+                                                                                                        ...values.seriaizedAsset[index],
+                                                                                                        ["scrapQuantity"]: value,
+                                                                                                    })
+                                                                                                }}
+                                                                                                error={validate([data])?.scrapQuantity}
+                                                                                                helperText={validate([data]).scrapQuantity ? "Quantity is more than actual quantity" : ""}
+                                                                                            />
+                                                                                        </Grid>
+                                                                                    </Grid>
+                                                                                </Box>
+                                                                                {data?.serializedProduct &&
+                                                                                    <Box mt={1}>
+                                                                                        <Grid container spacing={2} alignItems='center'>
+                                                                                            <Grid item xs={12} md={8}>
                                                                                                 <Autocomplete
                                                                                                     options={[]}
                                                                                                     size="small"
@@ -346,7 +352,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                                     renderInput={(props) => (
                                                                                                         <TextField
                                                                                                             {...props}
-                                                                                                            placeholder={`Enter serial number`}
+                                                                                                            placeholder={`Serial Number`}
                                                                                                             variant="outlined"
                                                                                                             name="serialNumber"
                                                                                                             label={'Serial Number'}
@@ -356,9 +362,32 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                                     )}
                                                                                                 />
                                                                                             </Grid>
-                                                                                        </>
-                                                                                    }
-                                                                                </Grid>
+                                                                                            <Grid item xs={12} md={4}>
+                                                                                                <Box my={1} display="flex" justifyContent="flex-end">
+                                                                                                    <Box mr={2}>
+                                                                                                        <Typography className="link cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExportField(data)}>
+                                                                                                            Export
+                                                                                                        </Typography>
+                                                                                                    </Box>
+                                                                                                    <Box mr={1}>
+                                                                                                        <input
+                                                                                                            accept="json"
+                                                                                                            style={{ display: 'none' }}
+                                                                                                            onChange={handleImport(arrayHelpers, index, values)}
+                                                                                                            id={`import-file-${index}`}
+                                                                                                            multiple={false}
+                                                                                                            type="file" />
+                                                                                                        <label htmlFor={`import-file-${index}`}>
+                                                                                                            <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
+                                                                                                                Import
+                                                                                                            </Typography>
+                                                                                                        </label>
+                                                                                                    </Box>
+                                                                                                </Box>
+                                                                                            </Grid>
+                                                                                        </Grid>
+                                                                                    </Box>
+                                                                                }
                                                                             </Grid>
                                                                         </Grid>
                                                                     </Box>
@@ -387,8 +416,9 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                     if (!validate(values.seriaizedAsset).inventoryQuantity
                                         && !validate(values.seriaizedAsset).warehouse
                                         && !validate(values.seriaizedAsset).assetQuantity
-                                        && !validate(values.seriaizedAsset).warehouse
-                                        && !validate(values.seriaizedAsset).serialNumber) handleCreateSerializedAsset(values.seriaizedAsset)
+                                        && !validate(values.seriaizedAsset).scrapQuantity
+                                        && !validate(values.seriaizedAsset).serialNumber)
+                                        handleCreateSerializedAsset(values.seriaizedAsset)
                                 }}
                                 variant="contained"
                                 disabled={isSubmitting}

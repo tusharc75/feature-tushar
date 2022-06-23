@@ -199,13 +199,9 @@ const PurchaseOrderDetailsPage = () => {
     axiosInstance()
       .patch(`${purchaseOrder.api}/status/${id}`, { status: status })
       .then(({ data: { data } }) => {
-        if ([PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(status)) {
-          updateProcessStatus(purchaseOrderSteps[2]);
-          setCurrentStep(2);
-        }
-        if ([PURCHASE_ORDER_STATUS.issued].includes(status)) {
-          updateProcessStatus(purchaseOrderSteps[2]);
-          setCurrentStep(2);
+        if ([PURCHASE_ORDER_STATUS.closed].includes(status)) {
+          updateProcessStatus(purchaseOrderSteps[1]);
+          setCurrentStep(1);
         }
         fetchPurchaseOrderData();
         toastConfig.setToastConfig({
@@ -222,6 +218,24 @@ const PurchaseOrderDetailsPage = () => {
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
   };
+
+  const checkReceivedProduct = (products) => {
+    if (products?.length) {
+      var isReceived = false;
+      if (products?.filter((e) => (e?.qty - ((e?.actualReceived || 0) + (e?.scrapQuantity || 0)) > 0)).length > 0) {
+        isReceived = false
+      }
+      else {
+        isReceived = true;
+      }
+      if (isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.received) {
+        updateStatus(PURCHASE_ORDER_STATUS.received)
+      }
+      if (!isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
+        updateStatus(PURCHASE_ORDER_STATUS.inProgress)
+      }
+    }
+  }
 
   return (
     <>
@@ -245,7 +259,7 @@ const PurchaseOrderDetailsPage = () => {
               ) : (
                 <DetailsPageHeader heading={purchaseOrderData?.purchaseOrderNumber} mainPoints={null} showHeading={true}>
                   {permissions?.purchaseOrder?.isUpdate &&
-                    ![PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)
+                    ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)
                     && (
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -258,9 +272,7 @@ const PurchaseOrderDetailsPage = () => {
                         {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                       </Button>
                     )}
-                  {permissions?.purchaseOrder?.isUpdate &&
-                    (isShowIssue && [PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status)
-                      || [PURCHASE_ORDER_STATUS.received, PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(purchaseOrderData?.status))
+                  {permissions?.purchaseOrder?.isUpdate && [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status)
                     && (
                       <>
                         <Button
@@ -288,9 +300,7 @@ const PurchaseOrderDetailsPage = () => {
                           {statusOptions.map((o, index) => {
                             return (
                               <MenuItem
-                                disabled={[PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status) ?
-                                  o?.optionLabel === PURCHASE_ORDER_STATUS.issued ? false : true :
-                                  index <= statusOptions.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
+                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
                                 onClick={() => {
                                   closeActions();
                                   handleStatusChange(o);
@@ -372,7 +382,7 @@ const PurchaseOrderDetailsPage = () => {
                             steps={purchaseOrderSteps}
                             currentStep={currentStep}
                             setCurrentStep={setCurrentStep}
-                            isStepEnded={[PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
+                            isStepEnded={[PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
                             setStepFullScreen={() => setStepFullScreen(true)}
                           />
                           <ContentFullScreen title={purchaseOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
@@ -385,15 +395,16 @@ const PurchaseOrderDetailsPage = () => {
                                 allowedToEdit={allowedToEdit}
                                 seIsShowIssue={seIsShowIssue}
                                 updateStatus={updateStatus}
+                                checkReceivedProduct={checkReceivedProduct}
                               />
                             )}
-                            {currentStep === 1 &&
+                            {/* {currentStep === 1 &&
                               <Service
                                 purchaseOrderData={purchaseOrderData}
                                 renderedFrom={`${renderedFrom}_grid-2`}
                                 setNextStep={setNextStep}
                                 seIsShowIssue={seIsShowIssue}
-                              />}
+                              />} */}
                             {/* {currentStep === 2 && (
                             <IssuePo
                               purchaseOrderData={purchaseOrderData}
@@ -405,7 +416,7 @@ const PurchaseOrderDetailsPage = () => {
                               renderedFrom={`${renderedFrom}_grid-3`}
                             />
                           )} */}
-                            {(currentStep === 2) && (
+                            {(currentStep === 1) && (
                               <ReceivingAsset
                                 purchaseOrderData={purchaseOrderData}
                                 setCurrentStep={setCurrentStep}
@@ -416,6 +427,7 @@ const PurchaseOrderDetailsPage = () => {
                                 isTabletScreen={isTabletScreen}
                                 stepFullScreen={stepFullScreen}
                                 showActivity={showActivity}
+                                checkReceivedProduct={checkReceivedProduct}
                               />
                             )}</ContentFullScreen>
                         </Paper>

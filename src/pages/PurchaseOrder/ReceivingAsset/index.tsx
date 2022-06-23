@@ -21,7 +21,7 @@ import SendEmail from './../SendEmail';
 
 
 const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statusOptions,
-    stepFullScreen, isSmallScreen, isTabletScreen, showActivity, renderedFrom }) => {
+    stepFullScreen, isSmallScreen, isTabletScreen, showActivity, renderedFrom, checkReceivedProduct }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -29,7 +29,6 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
     const isMobileScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
     const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [disableCreateAsset, setDisableCreateAsset] = useState(false);
 
     const [rowsData, setRowsData] = useState(null);
@@ -217,6 +216,17 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                 );
             }
         });
+        column.push({
+            accessor: "scrapQuantity",
+            Header: "Scrap Quantity",
+            width: 300,
+            Cell: ({ row }) => (row.original["scrapQuantity"] ? <p>{row.original["scrapQuantity"]}</p> : <NoDataCell />),
+            Footer: (info) => {
+                return (info?.rows?.filter((f) => f.values.hasOwnProperty("scrapQuantity") && !isNaN(f.values["scrapQuantity"]))
+                    .reduce((sum, row) => row.values["scrapQuantity"] + sum, 0)
+                );
+            }
+        });
         setColumns([...column])
     }
 
@@ -241,7 +251,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                     serializedProductView: item.productDetail?.serializedProduct ? "Yes" : "No",
                     productId: item?.productDetail?._id,
                 };
-                if (item.qty === item.actualReceived) {
+                if (item.qty === (item.actualReceived + (item?.scrapQuantity || 0))) {
                     res["hideSelection"] = true
                 }
                 res.subRows = []
@@ -274,6 +284,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
             if (rows.every(d => d.qty === d.actualReceived)) {
                 setDisableCreateAsset(true)
             }
+            checkReceivedProduct(result?.data?.data)
             setRowsData(rows);
             setSelectedRecords([]);
         }
@@ -319,7 +330,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
                         onSelect={setSelectedRecords}
                         childrenProperty="subRows"
                         uniqueKey="_id"
-                        hideSelection={[PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? true : false}
+                        hideSelection={[PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? true : false}
                         renderedFrom={renderedFrom}
                         isClientSideGrid={true}
                     />

@@ -93,6 +93,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
       if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
         tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
       }
+      tempObjKeysWithValues["scrapQuantity"] = productData["scrapQuantity"]
       setInitialData({
         fields: poFields,
         values: tempObjKeysWithValues,
@@ -132,8 +133,8 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
 
   function validate(values) {
     const errors = {};
-    if (values?.qty < values?.actualReceived) {
-      errors['qty'] = 'Quantity should be greater than Actual Received';
+    if (values?.qty < (values?.actualReceived + (values?.scrapQuantity || 0))) {
+      errors['qty'] = 'Quantity should be greater than Actual Received and Scrap Quantity';
     }
     return errors;
   }
