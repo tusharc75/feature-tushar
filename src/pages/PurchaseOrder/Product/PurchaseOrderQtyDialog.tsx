@@ -122,7 +122,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
       }
       productData.forEach(element => {
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-        returnData.push({ ...element, ...calValues })
+        returnData.push({ _id: element._id, productId: element.productId, ...calValues })
       })
     }
     else {
