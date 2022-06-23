@@ -23,7 +23,15 @@ export default makeStyles((theme) => ({
         transition: theme.transitions.create('width', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen
-        })
+        }),
+        '& .wordWrap': {
+            '& span': {
+                /* word-break: break-all, */
+                display: 'block',
+                wordWrap: 'break-word',
+                whiteSpace: 'normal',
+            }
+        }
     },
     drawerClose: {
         transition: theme.transitions.create('width', {
