@@ -219,6 +219,24 @@ const PurchaseOrderDetailsPage = () => {
     setActivityShow(!showActivity);
   };
 
+  const checkReceivedProduct = (products) => {
+    if (products?.length) {
+      var isReceived = false;
+      if (products?.filter((e) => (e?.qty - ((e?.actualReceived || 0) + (e?.scrapQuantity || 0)) > 0)).length > 0) {
+        isReceived = false
+      }
+      else {
+        isReceived = true;
+      }
+      if (isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.received) {
+        updateStatus(PURCHASE_ORDER_STATUS.received)
+      }
+      if (!isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
+        updateStatus(PURCHASE_ORDER_STATUS.inProgress)
+      }
+    }
+  }
+
   return (
     <>
       <Grid container className="headerbox">
@@ -263,9 +281,9 @@ const PurchaseOrderDetailsPage = () => {
                           size="small"
                           onClick={openActions}
                           aria-controls="action-menu"
-                          endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                          endIcon={<ExpandMore />}
                         >
-                          {isMobile && !isTablet ? <GrStatusGood size={18} style={{ color: 'var(--warning-darken)' }} /> : 'Change Status'}
+                          {'Change Status'}
                         </Button>
                         <Menu
                           anchorEl={anchorEl}
@@ -377,6 +395,7 @@ const PurchaseOrderDetailsPage = () => {
                                 allowedToEdit={allowedToEdit}
                                 seIsShowIssue={seIsShowIssue}
                                 updateStatus={updateStatus}
+                                checkReceivedProduct={checkReceivedProduct}
                               />
                             )}
                             {/* {currentStep === 1 &&
@@ -408,6 +427,7 @@ const PurchaseOrderDetailsPage = () => {
                                 isTabletScreen={isTabletScreen}
                                 stepFullScreen={stepFullScreen}
                                 showActivity={showActivity}
+                                checkReceivedProduct={checkReceivedProduct}
                               />
                             )}</ContentFullScreen>
                         </Paper>
