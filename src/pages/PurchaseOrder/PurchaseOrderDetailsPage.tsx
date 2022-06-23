@@ -219,20 +219,21 @@ const PurchaseOrderDetailsPage = () => {
     setActivityShow(!showActivity);
   };
 
-
   const checkReceivedProduct = (products) => {
-    var isReceived = false;
-    if (products?.filter((e) => (e?.qty - ((e?.actualReceived || 0) + (e?.scrapQuantity || 0)) > 0)).length > 0) {
-      isReceived = false
-    }
-    else {
-      isReceived = true;
-    }
-    if (isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.received) {
-      updateStatus(PURCHASE_ORDER_STATUS.received)
-    }
-    if (!isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
-      updateStatus(PURCHASE_ORDER_STATUS.inProgress)
+    if (products?.length) {
+      var isReceived = false;
+      if (products?.filter((e) => (e?.qty - ((e?.actualReceived || 0) + (e?.scrapQuantity || 0)) > 0)).length > 0) {
+        isReceived = false
+      }
+      else {
+        isReceived = true;
+      }
+      if (isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.received) {
+        updateStatus(PURCHASE_ORDER_STATUS.received)
+      }
+      if (!isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
+        updateStatus(PURCHASE_ORDER_STATUS.inProgress)
+      }
     }
   }
 

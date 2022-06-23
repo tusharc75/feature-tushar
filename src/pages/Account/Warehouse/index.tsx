@@ -153,33 +153,35 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
     }
 
     return (<>
-        <Box display="flex" justifyContent="space-between" m={1}>
-            <Box display="flex" pt={1} alignItems="center">
-                <Button
-                    variant={'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                        setOpenAssignWarehouse(true);
-                    }}
-                >
-                    {`Assign ${routes.warehouse.title}`}
-                </Button>
-            </Box>
-            <Box display="flex" pt={1} justifyContent="flex-end">
-                <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    disabled={selectedRecords.length === 0 || isDeleting}
-                    onClick={() => {
-                        setShowConfirmBox({ open: true, data: selectedRecords })
-                    }}>
-                    Delete
-                </Button>
-                <Box mx={1} />
-            </Box>
-        </Box>
+        {permissions[reference]?.isUpdate ?
+            <Box display="flex" justifyContent="space-between" m={1}>
+                <Box display="flex" pt={1} alignItems="center">
+                    <Button
+                        variant={'contained'}
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                            setOpenAssignWarehouse(true);
+                        }}
+                    >
+                        {`Assign ${routes.warehouse.title}`}
+                    </Button>
+                </Box>
+                <Box display="flex" pt={1} justifyContent="flex-end">
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        disabled={selectedRecords.length === 0 || isDeleting}
+                        onClick={() => {
+                            setShowConfirmBox({ open: true, data: selectedRecords })
+                        }}>
+                        Delete
+                    </Button>
+                    <Box mx={1} />
+                </Box>
+            </Box> : null
+        }
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ?
                 isMobile && !isTablet ? <CustomSwipableList

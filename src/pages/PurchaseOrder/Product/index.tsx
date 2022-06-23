@@ -262,18 +262,21 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         <Fragment>
             {allowedToEdit && <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
-                    <Button
-                        variant={"contained"}
-                        color="primary"
-                        size="small"
-                        // style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
-                        onClick={() => {
-                            setIsAddNewProduct(true);
-                        }}
-                    >
-                        {isMobile && !isTablet ? "Add" : `Add New ${routes.product.title}`}
-                    </Button>
-                    <Box mx={isMobile ? 0.5 : 1} />
+                    {permissions?.product?.isCreate ?
+                        <>
+                            <Button
+                                variant={"contained"}
+                                color="primary"
+                                size="small"
+                                // style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
+                                onClick={() => {
+                                    setIsAddNewProduct(true);
+                                }}
+                            >
+                                {isMobile && !isTablet ? "Add" : `Add New ${routes.product.title}`}
+                            </Button>
+                            <Box mx={isMobile ? 0.5 : 1} />
+                        </> : null}
                     <Button
                         variant={"contained"}
                         color="primary"
