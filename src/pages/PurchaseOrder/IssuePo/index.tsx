@@ -121,7 +121,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, updateStatus, setCurrentStep
     }, []);
 
     return (<>
-        <Box display="flex" justifyContent="flex-end" m={1}>
+        {/* <Box display="flex" justifyContent="flex-end" m={1}>
             {statusOptions?.findIndex(d => d.optionLabel === PURCHASE_ORDER_STATUS.issued) >
                 statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status) &&
                 <Box display="flex" justifyContent="flex-end" p="4px">
@@ -139,7 +139,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, updateStatus, setCurrentStep
                     </Button>
                 </Box>
             }
-        </Box>
+        </Box> */}
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns && frameWorkComponent ?
                 isMobile && !isTablet && !isTablet ? <CustomSwipableList
