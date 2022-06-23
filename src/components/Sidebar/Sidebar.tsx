@@ -42,7 +42,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
-  
+
   const iconMapping = [
     {
       key: 'Brand Admin',
@@ -120,7 +120,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           }
         });
       }
-
 
       return sections.map((section) => {
         const lists = user.role.sideBar.filter((list) => list.sectionName === section);
@@ -270,7 +269,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                           return mapping.key === listItem.section;
                         })?.icon || <FaRegRegistered size={16} className="sidebar-icon" /> || <AiOutlineSetting size={18} className="sidebar-icon" />}
                       </ListItemIcon>
-                      <ListItemText primary={listItem.section} />
+                      <ListItemText primary={listItem.section} className={`wordWrap`} />
                       {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
                   </Tooltip>
