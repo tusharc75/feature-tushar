@@ -211,7 +211,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   history.push('/');
                 }}
                 primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
-                className={`wordWrap`}
+                // className={`wordWrap`}
               />
             </ListItem>
             {permissions?.dashboard?.isRead && !isOffline && (
