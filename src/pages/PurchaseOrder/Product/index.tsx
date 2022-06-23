@@ -27,7 +27,7 @@ import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgG
 import { Link } from 'react-router-dom'
 import SendEmail from './../SendEmail';
 
-const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, seIsShowIssue, updateStatus }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, seIsShowIssue, updateStatus, checkReceivedProduct }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -144,6 +144,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 setNextStep(true)
                 seIsShowIssue(true)
             }
+            checkReceivedProduct(data)
             dispatch({ type: "initialize", data: rows, count: rows.length });
             dispatch({ type: "loading", loading: false });
         }).catch((error) => {
@@ -261,18 +262,21 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         <Fragment>
             {allowedToEdit && <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
-                    <Button
-                        variant={"contained"}
-                        color="primary"
-                        size="small"
-                        // style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
-                        onClick={() => {
-                            setIsAddNewProduct(true);
-                        }}
-                    >
-                        {isMobile && !isTablet ? "Add" : `Add New ${routes.product.title}`}
-                    </Button>
-                    <Box mx={isMobile ? 0.5 : 1} />
+                    {permissions?.product?.isCreate ?
+                        <>
+                            <Button
+                                variant={"contained"}
+                                color="primary"
+                                size="small"
+                                // style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
+                                onClick={() => {
+                                    setIsAddNewProduct(true);
+                                }}
+                            >
+                                {isMobile && !isTablet ? "Add" : `Add New ${routes.product.title}`}
+                            </Button>
+                            <Box mx={isMobile ? 0.5 : 1} />
+                        </> : null}
                     <Button
                         variant={"contained"}
                         color="primary"

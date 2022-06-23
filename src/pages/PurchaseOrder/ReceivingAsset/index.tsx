@@ -21,7 +21,7 @@ import SendEmail from './../SendEmail';
 
 
 const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statusOptions,
-    stepFullScreen, isSmallScreen, isTabletScreen, showActivity, renderedFrom }) => {
+    stepFullScreen, isSmallScreen, isTabletScreen, showActivity, renderedFrom, checkReceivedProduct }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -284,6 +284,7 @@ const ReceivingAsset = ({ purchaseOrderData, setCurrentStep, updateStatus, statu
             if (rows.every(d => d.qty === d.actualReceived)) {
                 setDisableCreateAsset(true)
             }
+            checkReceivedProduct(result?.data?.data)
             setRowsData(rows);
             setSelectedRecords([]);
         }

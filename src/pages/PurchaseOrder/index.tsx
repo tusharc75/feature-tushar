@@ -24,7 +24,7 @@ import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
 import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
 import { prepareDataForGrid } from "src/constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
-import { AiFillCrown, MdAdd, MdSort, MdFilterList } from "react-icons/all";
+import { AiFillCrown, MdAdd, MdSort, MdFilterList, MdAccountCircle } from "react-icons/all";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
@@ -516,11 +516,20 @@ const PurchaseOrder = () => {
                             loading={loading}
                             additionalDetails={[
                                 {
-                                    icon: <FaSuitcase size={18} />,
+                                    icon: <MdAccountCircle size={18} />,
                                     field: 'supplierAccount'
                                 }
                             ]}
                             chips={[
+                                {
+                                    label: "Purchase Order Date:  ",
+                                    fieldType: "date",
+                                    field: "purchaseOrderDate",
+                                },
+                                {
+                                    label: "Plant:  ",
+                                    field: "warehouse",
+                                },
                                 {
                                     label: "Delivery Date: ",
                                     field: "deliveryDate",
@@ -531,10 +540,7 @@ const PurchaseOrder = () => {
                                     label: "Status: ",
                                     field: "status",
                                 },
-                                {
-                                    label: "SupplierContact:  ",
-                                    field: "supplierContact",
-                                },
+
                             ]}
                             onCreate={false}
                             showClone={true}
