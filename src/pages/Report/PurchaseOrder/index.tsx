@@ -21,6 +21,7 @@ import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwip
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from '../ReportFilters';
+import { DateRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 
 let cancelTokenSource = null;
 
@@ -84,7 +85,7 @@ const Report = () => {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        POFields.filter((field) => ['purchaseOrderNumber', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach(
+        POFields.filter((field) => ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach(
           (field: any) => {
             if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
               resourceFieldData.push(field);
@@ -116,6 +117,16 @@ const Report = () => {
                 cellRenderer: 'plantRenderer'
               });
             }
+            if (field?.fieldData.fieldName === 'purchaseOrderDate') {
+              resourceFieldData.push(field);
+              columns.push({
+                field: 'purchaseOrderDate',
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: 'dateRenderer'
+              });
+            }
           }
         );
 
@@ -125,7 +136,7 @@ const Report = () => {
             if (field?.fieldData.fieldName === 'productName') {
               resourceFieldData.push({
                 ...field,
-                fieldData: { ...field.fieldData, type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+                fieldData: { ...field.fieldData, fieldName: "productId", type: 'dropDown', lookup: true, option: productOption?.Product || [] }
               });
               columns.push({
                 field: 'productName',
@@ -297,7 +308,8 @@ const Report = () => {
     purchaseOrderRenderer: PurchaseOrderRenderer,
     productRenderer: ProductRenderer,
     plantRenderer: PlantRenderer,
-    supplierRenderer: SupplierRenderer
+    supplierRenderer: SupplierRenderer,
+    dateRenderer: DateRenderer,
   };
 
   /**
