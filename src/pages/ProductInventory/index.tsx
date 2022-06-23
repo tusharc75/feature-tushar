@@ -35,6 +35,8 @@ import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
 import { useHistory } from 'react-router-dom';
 import { NumberRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 
+let searchTimeout;
+
 const InventoryProduct = () => {
 
   const renderedFrom = camelCase(routes?.productInventory.title);
@@ -43,7 +45,7 @@ const InventoryProduct = () => {
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } =
     state;
   const [plantId, setPlantId] = useState(null);
   const [plantOptions, setPlantOptions] = useState([]);
@@ -57,7 +59,6 @@ const InventoryProduct = () => {
   const [inventory, setInventory] = useState({ open: false, product: [], type: "" });
 
   const { state: { user, permissions, selectedEntity } }: any = useData();
-
 
   const history = useHistory();
 
@@ -87,7 +88,13 @@ const InventoryProduct = () => {
   }, [selectedEntity]);
 
   useEffect(() => {
-    fetchProductInventory();
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchProductInventory();
+    }, millisec);
   }, [plantId, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, fromProductMaster]);
 
   const getPlants = () => {
@@ -342,6 +349,17 @@ const InventoryProduct = () => {
         return field;
     }
   };
+
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  if (columnState && columns) {
+      columns?.forEach((item) => {
+          columnState.forEach((d) => {
+              if (d.colId === item.field) {
+                  item.show = !d.hide;
+              }
+          });
+      });
+  }
 
   return (
     <Fragment>

@@ -20,6 +20,16 @@ export function reducer(state, action) {
         loading: action.loading,
         appendRows: action.loading === false ? false : state.appendRows
       };
+    case 'onlyLoading':
+      return {
+        ...state,
+        loading: action.loading,
+      };
+    case 'onlyFilter':
+      return {
+        ...state,
+        filters: action.filters,
+      };
 
     case 'initialize':
       return {
