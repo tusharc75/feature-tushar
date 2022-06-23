@@ -27,7 +27,7 @@ import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgG
 import { Link } from 'react-router-dom'
 import SendEmail from './../SendEmail';
 
-const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, seIsShowIssue, updateStatus }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, seIsShowIssue, updateStatus, checkReceivedProduct }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -144,6 +144,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 setNextStep(true)
                 seIsShowIssue(true)
             }
+            checkReceivedProduct(data)
             dispatch({ type: "initialize", data: rows, count: rows.length });
             dispatch({ type: "loading", loading: false });
         }).catch((error) => {
