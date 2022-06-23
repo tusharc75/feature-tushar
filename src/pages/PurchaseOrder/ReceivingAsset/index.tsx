@@ -16,8 +16,8 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
 import SendEmail from './../SendEmail';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Edit } from '@material-ui/icons';
 import RejectProduct from './RejectProduct';
+import TransformIcon from '@material-ui/icons/Transform';
 
 const ReceivingAsset = ({
   purchaseOrderData,
@@ -222,31 +222,31 @@ const ReceivingAsset = ({
           .reduce((sum, row) => row.values['scrapQuantity'] + sum, 0);
       }
     });
+    
     setColumns([
       ...column,
       ...[
         {
           accessor: 'action',
           Header: '',
-          minWidth: 100,
-          width: 100,
+          minWidth: 80,
+          width: 80,
           sticky: 'right',
           disableFilters: true,
           canDrag: false,
           Cell: ({ row }) => (
             <>
-              {permissions?.purchaseOrder?.isUpdate && (
-                <HtmlTooltip title="Reject">
+              {permissions?.purchaseOrder?.isUpdate && row.original?.actualReceived && (
+                <HtmlTooltip title="Reject/Replacement">
                   <span>
                     <IconButton
-                      disabled={row.original?.actualReceived && row.original?.actualReceived > 0 ? false : true}
                       size="small"
                       aria-label="reject"
                       onClick={() => {
                         setRejectProductDialog(row.original);
                       }}
                     >
-                      <Edit fontSize="small" color={row.original?.actualReceived && row.original?.actualReceived > 0 ? 'primary' : 'disabled'} />
+                      <TransformIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </span>
                 </HtmlTooltip>

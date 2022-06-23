@@ -8,11 +8,12 @@ import { Formik, Form, Field } from 'formik';
 import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { convertInventory, productInventory } from 'src/constants/helpers';
+import { productInventory } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 
 const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
@@ -41,14 +42,11 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
   const handleSubmit = (values) => {
     const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
     const data = {
-      _id: product._id, //unique id
+      _id: product._id,
       comment: values.comment,
-      product: product.productId, //product id
+      product: product.productId,
       qty: parseInt(values.qty),
-      //serlized assets id
       serialNumber: serialNumberIds.map((item) => item?._id),
-      //wrehouse where it has been reshived
-      warehouse
     };
     setLoading(true);
     axiosInstance()
@@ -68,18 +66,14 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
-
     const validateQty = product?.inventoryQty;
-
     if (parseInt(values?.qty) > validateQty) {
-      errors['qty'] = 'Qty cannot be more than inventory';
+      errors['qty'] = 'Qty cannot be more than received quantity';
     }
-
     const serialNumbersList = values['serialNumbers'];
     if (serialNumbersList?.length > parseInt(values?.qty)) {
       errors['serialNumbers'] = `Please select serial numbers same as quantity`;
     }
-
     return errors;
   }
 
@@ -100,7 +94,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogHeader
-              title={`Reject Product`}
+              title={`Reject/Replacement Product`}
               showRequiredLabel={true}
               onClose={handleClose}
               isMinimized={!fullScreen}
@@ -112,8 +106,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
             <CustomDialogContent>
               <List style={{ padding: 0 }}>
                 <ListItem key={product.productId}>
-                  <ListItemText primary={product?.productName} secondary={`Inventory - ${product?.inventoryQty || 0}`} />
-
+                  <ListItemText primary={product?.productName} secondary={`Received Quantity - ${product?.inventoryQty || 0}`} />
                   <Field
                     component={TextFieldFormik}
                     margin="dense"
@@ -138,7 +131,8 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
                   label="Comment"
                   name="comment"
                   variant="outlined"
-                  row={3}
+                  rows={3}
+                  multiline
                   fullWidth
                   value={values['comment']}
                   error={touched['comment'] && Boolean(errors['comment'])}
