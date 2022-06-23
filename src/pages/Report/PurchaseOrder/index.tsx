@@ -123,7 +123,10 @@ const Report = () => {
           .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
             if (field?.fieldData.fieldName === 'productName') {
-              resourceFieldData.push({ ...field, fieldData: { ...field.fieldData, type: 'dropDown', option: productOption?.Product || [] } });
+              resourceFieldData.push({
+                ...field,
+                fieldData: { ...field.fieldData, type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+              });
               columns.push({
                 field: 'productName',
                 headerName: field?.fieldData?.fieldLabel,
@@ -158,14 +161,16 @@ const Report = () => {
           ...tempFrameworkComponent
         };
         setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
-        columns = [...columns, {
-          field: 'soldQty',
-          headerName: 'Sold Qty',
-          show: true,
-          disabled: false,
-          filter: false, sortable: false,
-          cellRenderer: 'commonRenderer'
-        }];
+        columns = [
+          ...columns,
+          {
+            field: 'soldQty',
+            headerName: 'Sold Qty',
+            show: true,
+            disabled: false,
+            cellRenderer: 'commonRenderer'
+          }
+        ];
       }
 
       if (resourceCamelCase === 'productAverageCost') {
@@ -234,6 +239,11 @@ const Report = () => {
       initialRender.current = false;
     }
   }, []);
+  // React.useEffect(() => {
+  //   if (!showGrid) {
+  //     dispatch({ type: 'filter', filters: {} });
+  //   }
+  // }, [showGrid]);
 
   React.useEffect(() => {
     if (showGrid) {
@@ -296,9 +306,7 @@ const Report = () => {
    */
   const fetchResourceData = () => {
     setShowGrid(true);
-
     let filterQuery = getFilter();
-
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -414,6 +422,7 @@ const Report = () => {
       }
     }
     if (!isObjectEmpty(filters)) {
+      console.log(filters);
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
@@ -521,6 +530,8 @@ const Report = () => {
                           disableElevation
                           onClick={() => {
                             setShowGrid(false);
+                            dispatch({type: 'onlyLoading', loading: false})
+                            dispatch({type: 'onlyFilter', filters: {}})
                           }}
                           startIcon={<MdChevronLeft />}
                         >

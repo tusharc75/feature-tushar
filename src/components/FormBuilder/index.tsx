@@ -22,8 +22,12 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
     margin: 10
   },
-  screenHeightAuto: {
-    height: 'calc(85vh - 194px)',
+  screenHeightAutoFormBuilder: {
+    height: 'calc(100vh - 200px)',
+    overflow: 'auto'
+  },
+  screenHeightAutoFormTemplate: {
+    height: 'calc(100vh - 300px)',
     overflow: 'auto'
   },
   screenHeight: {
@@ -113,7 +117,8 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
             </Box>
           </Grid>
           <Grid item xs={12} md={9} sm={8}>
-            <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={classes.screenHeightAuto}>
+            <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={module === 'form-builder' ?
+              classes.screenHeightAutoFormBuilder : classes.screenHeightAutoFormTemplate}>
               <DropMaster
                 addSection={addSection}
                 setSection={setSection}
