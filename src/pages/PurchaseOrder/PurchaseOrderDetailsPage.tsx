@@ -281,9 +281,9 @@ const PurchaseOrderDetailsPage = () => {
                           size="small"
                           onClick={openActions}
                           aria-controls="action-menu"
-                          endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                          endIcon={<ExpandMore />}
                         >
-                          {isMobile && !isTablet ? <GrStatusGood size={18} style={{ color: 'var(--warning-darken)' }} /> : 'Change Status'}
+                          {'Change Status'}
                         </Button>
                         <Menu
                           anchorEl={anchorEl}

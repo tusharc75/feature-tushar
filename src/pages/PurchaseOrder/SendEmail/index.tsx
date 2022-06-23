@@ -16,7 +16,7 @@ import { IoMdDownload } from "react-icons/io";
 const SendEmail = ({ purchaseOrderData }) => {
 
     const toastConfig = useContext(CustomToastContext);
-    
+
     const { state: { user, permissions } }: any = useData();
 
     const [sendEmail, setSendEmail] = useState(false);
@@ -166,11 +166,10 @@ const SendEmail = ({ purchaseOrderData }) => {
                 <Box display="flex">
                     {permissions?.purchaseOrder?.isRead && !isMobile && (
                         <Button
-                            variant={isMobile && !isTablet ? "text" : "outlined"}
+                            variant="outlined"
                             color="primary"
                             type="button"
                             size="small"
-                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
                             startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
                             disabled={loading === "view"}
                             onClick={() => { handleViewPdf(false) }}
@@ -181,11 +180,10 @@ const SendEmail = ({ purchaseOrderData }) => {
                     <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && (
                         <Button
-                            variant={isMobile && !isTablet ? "text" : "outlined"}
+                            variant="outlined"
                             color="primary"
                             type="button"
                             size="small"
-                            style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                             startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
                             disabled={loading === "download"}
                             onClick={() => { handleViewPdf(true) }}
@@ -195,10 +193,9 @@ const SendEmail = ({ purchaseOrderData }) => {
                     )}
                     <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && <Button
-                        variant={isMobile && !isTablet ? "text" : "outlined"}
+                        variant="outlined"
                         color="primary"
                         size="small"
-                        style={isMobile && !isTablet ? { color: "var(--danger-light)" } : {}}
                         disabled={loading === "email"}
                         startIcon={isMobile ? '' : <MdEmail />}
                         onClick={() => {
