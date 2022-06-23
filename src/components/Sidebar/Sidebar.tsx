@@ -211,6 +211,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   history.push('/');
                 }}
                 primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
+                className={`wordWrap`}
               />
             </ListItem>
             {permissions?.dashboard?.isRead && !isOffline && (
@@ -226,7 +227,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     <ListItemIcon>
                       <MdOutlineDashboard size={15} className="sidebar-icon" />
                     </ListItemIcon>
-                    <ListItemText primary="Dashboards" />
+                    <ListItemText primary="Dashboards" className={`wordWrap`} />
                   </ListItem>
                 </Tooltip>
               </Link>
@@ -244,7 +245,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     <ListItemIcon>
                       <AiOutlineFileText size={16} className="sidebar-icon" />
                     </ListItemIcon>
-                    <ListItemText primary="Reports" />
+                    <ListItemText primary="Reports" className={`wordWrap`} />
                   </ListItem>
                 </Tooltip>
               </Link>
