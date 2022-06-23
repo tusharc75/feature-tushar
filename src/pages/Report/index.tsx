@@ -365,6 +365,7 @@ const Report = () => {
                           disableElevation
                           onClick={() => {
                             setShowGrid(false);
+                            dispatch({type: 'onlyFilter', filters: {}})
                           }}
                           startIcon={<MdChevronLeft />}
                         >
