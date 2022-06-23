@@ -190,6 +190,10 @@ const SerializedAsset = () => {
               return null;
             };
           }
+          if (e.field === 'currentOwner') {
+            e.filter = false
+            e.sortable = false
+          }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {

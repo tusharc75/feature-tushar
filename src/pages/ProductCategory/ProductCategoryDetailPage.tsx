@@ -33,23 +33,15 @@ const ProductCategoryDetailPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [productCategoryResource, setProductCategoryResource] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
-
-    routes.address,
+    routes.productCategory,
   ]);
-
-
-
-
 
   useEffect(() => {
     if (id) {
       getProductCategoryFields();
       fetchProductCategoryData();
-
     }
   }, [id]);
-
-
 
   const fetchProductCategoryData = async () => {
     setLoading(true);
@@ -57,7 +49,7 @@ const ProductCategoryDetailPage = () => {
       const {
         data: { data },
       } = await axiosInstance().get(`/product-category/${id}`);
-      
+
 
       handleMainPoints(data);
       setHeadingLbl(data.name);
@@ -85,9 +77,7 @@ const ProductCategoryDetailPage = () => {
     axiosInstance()
       .get("/field?resource=Product Category")
       .then(({ data }) => {
-
         setCategoryFields(data.data?.filter((field) => field.isRead))
-
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -96,7 +86,7 @@ const ProductCategoryDetailPage = () => {
 
   const handleDeleteProductCategory = () => {
     if (id) {
-      if (permissions?.address?.isDelete) {
+      if (permissions?.productCategory?.isDelete) {
         axiosInstance()
           .put(`/product-category/remove`, { ids: [id] })
           .then(({ data }) => {
@@ -136,7 +126,7 @@ const ProductCategoryDetailPage = () => {
           //   fetchProductCategoryData();
           // }}
           productCategoryId={id}
-          isUpdateDisabled = {false}
+          isUpdateDisabled={false}
           isClone={false}
           onSuccess={() => {
             fetchProductCategoryData();
@@ -188,7 +178,7 @@ const ProductCategoryDetailPage = () => {
                   mainPoints={mainPoints}
                   showHeading={true}
                 >
-                  {permissions?.address?.isUpdate && (
+                  {permissions?.productCategory?.isUpdate && (
                     <Button
                       variant="contained"
                       color="primary"
@@ -199,12 +189,12 @@ const ProductCategoryDetailPage = () => {
                     </Button>
                   )}
                   <Box component="span" marginX={1} />
-                  {permissions?.address?.isDelete && (
+                  {permissions?.productCategory?.isDelete && (
                     <span
                       title={
                         id
-                          ? "Primarily selected address can't be deleted"
-                          : "Permanently delete this address"
+                          ? "Primarily selected product category can't be deleted"
+                          : "Permanently delete this product Category"
                       }
                     >
                       <DeleteButton

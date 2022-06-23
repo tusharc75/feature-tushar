@@ -55,7 +55,7 @@ const History = ({ product, warehouse }) => {
     };
 
     const columns = [
-        { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer" },
+        { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer", filter: false, sortable: false },
         { field: "referenceType", headerName: "Reference Type", show: true, cellRenderer: "commonRenderer" },
         { field: "reference", headerName: "Reference", show: true, cellRenderer: "referenceRenderer" },
         { field: "type", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
@@ -64,6 +64,7 @@ const History = ({ product, warehouse }) => {
             headerName: "Credit/Debit",
             show: true,
             cellRenderer: "commonRenderer",
+            filter: false, sortable: false,
             cellStyle: params => {
                 if (params?.data?.type === "Credit") {
                     return { backgroundColor: "#90ee90" }
@@ -73,7 +74,7 @@ const History = ({ product, warehouse }) => {
                 };
             }
         },
-        { field: "finalInventory", headerName: "Final Inventory", show: true, cellRenderer: "commonRenderer" },
+        { field: "finalInventory", headerName: "Final Inventory", show: true, cellRenderer: "commonRenderer", filter: false, sortable: false, },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
         { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
         { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },

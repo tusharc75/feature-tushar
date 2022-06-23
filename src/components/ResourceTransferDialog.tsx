@@ -93,7 +93,7 @@ export default function ResourceTransferDialog(props) {
         <DialogContent>
             <Box p={2}>
                 <Typography>
-                    {`First you have to transfer all the resources related to this ${fromResource.name} to another ${resource}`}
+                    {`First you have to transfer all the resources related to this to another ${resource}`}
                 </Typography>
             </Box>
             <Box p={2}>
@@ -133,7 +133,7 @@ export default function ResourceTransferDialog(props) {
         {showConfirmDialog ? (
             <ConfirmationDialog
                 open={showConfirmDialog}
-                message={`All Resources related to ${fromResource?.name} is transferred to ${toResource?.optionLabel}. Are you want to continue to delete ${fromResource?.name}?`}
+                message={`All Resources related to this is transferred to ${toResource?.optionLabel}. Are you want to continue to delete ?`}
                 onClose={() =>
                     setShowConfirmDialog(false)
                 }

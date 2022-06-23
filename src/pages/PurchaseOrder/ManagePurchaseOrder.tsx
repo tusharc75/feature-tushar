@@ -64,7 +64,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     setPurchaseOrderData(data)
                     if (isClone) {
                         const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data
-                        rest['purchaseOrderNumber'] = `PO_${generateUniqueIdOnly()}`
+                        //rest['purchaseOrderNumber'] = `PO_${generateUniqueIdOnly()}`
                         rest["status"] = "New"
                         setInitialData({
                             fields: fieldsDataForCreate,
@@ -84,7 +84,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
             }
             else {
                 let createValues: any = getObjKeys("", fieldsDataForCreate)
-                createValues.purchaseOrderNumber = `PO_${generateUniqueIdOnly()}`
+                //createValues.purchaseOrderNumber = `PO_${generateUniqueIdOnly()}`
                 if (productId && createValues) {
                     createValues["product"] = productId
                 }
@@ -474,8 +474,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                 {...field}
                                                                                 disabled={Boolean(purchaseOrderId) && field.disableOnEdit && !isClone}
                                                                                 values={values}
-                                                                                maxDate={deliveryDateMax ? deliveryDateMax : undefined}
-                                                                                minDate={deliveryDateMax ? undefined : moment(new Date())}
+                                                                                //maxDate={deliveryDateMax ? deliveryDateMax : undefined}
+                                                                                //minDate={deliveryDateMax ? undefined : moment(new Date())}
                                                                                 errors={errors}
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}

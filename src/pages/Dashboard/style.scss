@@ -15,6 +15,7 @@
   .single_card {
     -webkit-perspective: 900px;
     perspective: 900px;
+    background-color: transparent;
 
     .card_content {
       position: relative;
@@ -22,15 +23,15 @@
       text-align: center;
       transition: transform 0.1s;
       transform-style: preserve-3d;
-      background: #ffffff;
+      background: transparent;
       border: 1px solid rgba(0, 0, 0, 0.2);
       border-radius: 6px;
 
       .card_back,
       .card_front {
+        text-align: left;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
-        text-align: left;
       }
 
       .card_back {
