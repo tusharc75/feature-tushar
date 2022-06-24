@@ -355,9 +355,9 @@ export default function AccountDetailPage(props) {
           current: true,
           parentAccount: data.parentAccount
             ? {
-                _id: data.parentAccount.optionValue,
-                accountName: data.parentAccount.optionLabel
-              }
+              _id: data.parentAccount.optionValue,
+              accountName: data.parentAccount.optionLabel
+            }
             : null,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
           // parentAccountName: data.parentAccount?.optionLabel,
@@ -842,8 +842,8 @@ export default function AccountDetailPage(props) {
                             ? accountClass.mobile_button_layout_secondary
                             : ''
                           : isMobile
-                          ? accountClass.mobile_button_layout
-                          : ''
+                            ? accountClass.mobile_button_layout
+                            : ''
                       }
                       onClick={() => {
                         setShowApproveDisapproveConfirmBox(true);
@@ -881,12 +881,12 @@ export default function AccountDetailPage(props) {
                 )}
 
                 {!isOffline &&
-                permissions &&
-                permissions[accountResource] &&
-                permissions[accountResource].isDelete &&
-                accountData?.owner?.optionValue &&
-                user?.user?._id &&
-                accountData.owner.optionValue === user.user._id ? (
+                  permissions &&
+                  permissions[accountResource] &&
+                  permissions[accountResource].isDelete &&
+                  accountData?.owner?.optionValue &&
+                  user?.user?._id &&
+                  accountData.owner.optionValue === user.user._id ? (
                   <DeleteButton
                     id="detailDeleteButton"
                     text={isMobile ? <MdDelete size={20} /> : 'Delete'}
@@ -1000,7 +1000,7 @@ export default function AccountDetailPage(props) {
                       />
                     </Box>
                   </TabPanel>
-                  {!isOffline && accountResource === 'customerAccount' && permissions?.productInventory && (
+                  {!isOffline && accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
                     <TabPanel value={tabValue} index={3}>
                       <Warehouse reference={accountResource} api={accountApi} id={id} />
                     </TabPanel>
@@ -1279,13 +1279,13 @@ export default function AccountDetailPage(props) {
                             access: true
                           }
                         ]}
-                        handleActivityRefresh={() => {}}
+                        handleActivityRefresh={() => { }}
                         emails={
                           relatedContacts && relatedContacts.length > 0
                             ? cloneDeep(relatedContacts).reduce((emails, contact) => {
-                                if (contact?.email) emails.push(contact.email);
-                                return emails;
-                              }, [])
+                              if (contact?.email) emails.push(contact.email);
+                              return emails;
+                            }, [])
                             : []
                         }
                       />
@@ -1392,9 +1392,8 @@ export default function AccountDetailPage(props) {
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
-            message={`Are you sure you want to delete this Account ${
-              deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
-            }`}
+            message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
+              }`}
             onClose={() => {
               setShowConfirmBox(false);
               setDeleteAccountId({});
@@ -1453,7 +1452,7 @@ export default function AccountDetailPage(props) {
             accountId={editAccountData._id ? editAccountData._id : accountData?._id}
             formValues={formValues}
             handleValuesChange={handleValuesChange}
-            handleAddressDataSource={() => {}}
+            handleAddressDataSource={() => { }}
           />
         ) : null}
 
