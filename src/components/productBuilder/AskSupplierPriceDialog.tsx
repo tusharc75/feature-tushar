@@ -16,6 +16,7 @@ import { useContext, useState } from "react";
 import emailStyles from "../../pages/Activity/Email/email.module.scss";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
+import { isMobile, isTablet } from "react-device-detect";
 
 const AskSupplierPriceDialog = (props) => {
 
@@ -33,6 +34,7 @@ const AskSupplierPriceDialog = (props) => {
     const [contantValue, setContantValue] = useState(null);
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
     const toastConfig = useContext(CustomToastContext);
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
 
     const getFileIconSrc = (file) => {
@@ -172,9 +174,9 @@ const AskSupplierPriceDialog = (props) => {
     return (
         <>
             <Dialog
-                maxWidth="lg"
+                maxWidth={'md'}
                 fullWidth={true}
-                fullScreen={false}
+                fullScreen={fullScreen || isMobile || isTablet}
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
                 onClose={() => {
@@ -183,12 +185,15 @@ const AskSupplierPriceDialog = (props) => {
                 open={askSupplierPriceDialog}
                 disableBackdropClick={true}
             >
-                <CustomDialogHeader title="Ask Supplier Price Dialog" onClose={() => {
+                <CustomDialogHeader title="Ask Supplier Price" onClose={() => {
                     setAskSupplierPriceDialog(false)
                 }}
-                    isMinimized={!false}
-                    onMinimizeMaximize={() => { }}
+                    isMinimized={!fullScreen}
+                    onMinimizeMaximize={() => {
+                        setFullScreen((prevState) => !prevState);
+                    }}
                     showManimizeMaximize={true}
+                    showRequiredLabel={false}
                 />
 
                 <CustomDialogContent>
@@ -253,9 +258,9 @@ const AskSupplierPriceDialog = (props) => {
                     <CustomButton
                         variant="contained"
                         color="primary"
-                        onClick={()=>handelAskPriceToSupplier(contantValue)}
+                        onClick={() => handelAskPriceToSupplier(contantValue)}
                     >
-                        Submit
+                        Send
                     </CustomButton>
                 </CustomDialogFooter>
 
