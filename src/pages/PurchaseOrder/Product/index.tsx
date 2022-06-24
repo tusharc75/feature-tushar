@@ -370,7 +370,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     fullHeight={true}
                     renderedFrom={renderedFrom}
                     onClone={() => { }}
-
                 /> :
                 <CustomAgGridEditable
                     columns={columns}
