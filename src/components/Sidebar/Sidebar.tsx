@@ -10,7 +10,7 @@ import './Sidebar.scss';
 import { ChevronRight, ExpandMore, ExpandLess } from '@material-ui/icons';
 import { kebabCase, lowerCase, sortBy } from 'lodash';
 
-import { FaRegUserCircle, FaRegRegistered } from 'react-icons/fa';
+import { FaRegUserCircle, FaReact, FaRegRegistered } from 'react-icons/fa';
 import { MdOutlineDashboard, MdOutlineLocalActivity } from 'react-icons/md';
 import { RiFolderSettingsLine, RiAccountPinCircleFill, RiShieldUserLine } from 'react-icons/ri';
 import { SiCivicrm } from 'react-icons/si';
@@ -71,6 +71,10 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     {
       key: 'CRM +',
       icon: <SiCivicrm size={15} className="sidebar-icon" />
+    },
+    {
+      key: 'ROM',
+      icon: <FaRegRegistered size={15} className="sidebar-icon" />
     }
   ];
 
@@ -211,7 +215,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   history.push('/');
                 }}
                 primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
-                // className={`wordWrap`}
+              // className={`wordWrap`}
               />
             </ListItem>
             {permissions?.dashboard?.isRead && !isOffline && (
@@ -268,7 +272,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                       <ListItemIcon>
                         {iconMapping.find((mapping) => {
                           return mapping.key === listItem.section;
-                        })?.icon || <FaRegRegistered size={16} className="sidebar-icon" /> || <AiOutlineSetting size={18} className="sidebar-icon" />}
+                        })?.icon || <FaReact size={16} className="sidebar-icon" />}
                       </ListItemIcon>
                       <ListItemText primary={listItem.section} className={`wordWrap`} />
                       {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
