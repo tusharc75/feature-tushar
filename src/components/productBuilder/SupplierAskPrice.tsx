@@ -23,7 +23,7 @@ import { CommonRenderer, DateTimeRenderer } from "../AgGridComponents/CustomAgGr
 
 const renderedFrom = "quoteSupplierPrice";
 const localStorageSelectedRecords = `${renderedFrom}_selected`;
-const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit", "supplierAccount"]
+const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit", "supplierAccount", "responseDate","supplierContact"]
 let levalOrderBy = [
     "product",
     "product-custom",
@@ -67,7 +67,8 @@ const SupplierAskPrice = (props) => {
             let rows = data.products.map((item, index) => {
                 let res: any = {
                     ...prepareDataForGrid(item),
-                    totalCost: item.totalCost || item.costPrice
+                    totalCost: item.totalCost || item.costPrice,
+                    supplierContact: item?.supplierContact?.optionLabel ? item?.supplierContact?.optionLabel : ""
                 };
                 return res;
             });
@@ -83,15 +84,25 @@ const SupplierAskPrice = (props) => {
                 ...tempFrameworkComponent,
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
-            columns = sortBy([...columns, {
+            columns = sortBy([...columns,{
+                "field": "supplierContact",
+                "headerName": "Supplier Contact",
+                "width": 180,
+                "show": true,
+                "disabled": false,
+                "cellRenderer": "commonRenderer",
+                "leval": "product",
+                "order": 3
+            },{
                 "field": "responseDate",
                 "headerName": "Rate Submit Date",
                 "width": 180,
                 "show": true,
                 "disabled": false,
                 "cellRenderer": "dateTimeRenderer",
-                "leval": "product"
-            }], function (item: any) {
+                "leval": "product",
+                "order": 3
+            },], function (item: any) {
                 return levalOrderBy.indexOf(item.leval)
             });
             setColumns([...columns])
