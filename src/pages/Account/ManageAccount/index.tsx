@@ -6,6 +6,7 @@ import {
   sidebarResource,
   initializeDropdownById,
   formFieldNames,
+  getObjKeysWithValues,
 } from "../../../constants/helpers";
 import { useData } from "../../../StateProvider/Provider";
 import axiosInstance from "../../../axios/axiosInstance";
@@ -65,18 +66,15 @@ export default function ManageAccountDialog(props) {
             .then(({ data: dataToClone }) => {
               if (dataToClone) {
                 dataToClone.data.accountName = "";
-                // dataToClone.data.billingAddress = [];
-                // dataToClone.data.shippingAddress = [];
-
               }
               setAccountData({
                 fields: newFields,
                 initialValues: dataToClone.data
-                  ? dataToClone.data
+                  ? getObjKeysWithValues(dataToClone.data, newFields)
                   : getObjKeys("", newFields),
               });
               setFormValues(dataToClone.data
-                ? dataToClone.data
+                ? getObjKeysWithValues(dataToClone.data, newFields)
                 : getObjKeys("", newFields))
               setTimeout(() => setLoading(false), 500);
             })
