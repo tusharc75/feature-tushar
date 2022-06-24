@@ -37,6 +37,8 @@ import { prepareDataForGrid } from "../../constants/helpers";
 import SupplierAskPrice from "./SupplierAskPrice";
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { Link, useHistory } from 'react-router-dom';
+import MuiPickersUtilsProvider from "@material-ui/pickers/MuiPickersUtilsProvider";
+import AskSupplierPriceDialog from "./AskSupplierPriceDialog";
 
 let levalOrderBy = [
   "product",
@@ -82,6 +84,7 @@ const ProductBuilder = (props) => {
   const [isClone, setIsClone] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openSupplierPriceDialog, setOpenSupplierPriceDialog] = useState(false);
+  const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
   const [supplierData, setSupplierData] = useState(null)
   const { getColumnData } = useColumns();
   // const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
@@ -150,7 +153,7 @@ const ProductBuilder = (props) => {
         commonRenderer: CommonRenderer,
         productNameRenderer: ProductNameRenderer,
         actionsRenderer: ActionsRenderer,
-        productTypeRenderer:ProductTypeRenderer,
+        productTypeRenderer: ProductTypeRenderer,
         ...tempFrameworkComponent,
       }
       setFrameWorkComponent({ ...tempFrameworkComponent })
@@ -583,7 +586,7 @@ const ProductBuilder = (props) => {
     }
   };
 
-  const handelAskPriceToSupplier = () => {
+  const handelAskPriceToSupplier = (content) => {
 
     let data: any = {
       "products": selectedRecords?.map(d => {
@@ -594,7 +597,8 @@ const ProductBuilder = (props) => {
       }),
       "quote": quoteData?._id,
       "productBuilder": productBuilderId,
-      "protected": true
+      "protected": true,
+      "body": content
     }
     axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
       dispatch({ type: "selection", selectedRecords: [] })
@@ -604,6 +608,7 @@ const ProductBuilder = (props) => {
         type: "success",
         open: true,
       });
+      setAskSupplierPriceDialog(false)
     })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -641,7 +646,7 @@ const ProductBuilder = (props) => {
               color="primary"
               size="small"
               className="float-right ml-1 mr-2"
-              onClick={handelAskPriceToSupplier}
+              onClick={() => { setAskSupplierPriceDialog(true) }}
               disabled={checkUniqTemplate()}
               aria-controls="action-menu">
               {isMobile && !isTablet ? "Supplier" : "Ask Price to Supplier"}
@@ -898,73 +903,12 @@ const ProductBuilder = (props) => {
           /> : null
       }
 
-      {/* {
-        showProductNumberOrProductNameUpdate.open && <Dialog
-          maxWidth="lg"
-          fullWidth={true}
-          fullScreen={false}
-          TransitionComponent={CustomDialogTransition}
-          aria-labelledby="customized-dialog-title"
-          onClose={() => {
-            setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-          }}
-          open={showProductNumberOrProductNameUpdate.open}
-          disableBackdropClick={true}
-        >
-          <CustomDialogHeader title="Update" onClose={() => {
-            setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-          }}
-            isMinimized={!false}
-            onMinimizeMaximize={() => { }}
-            showManimizeMaximize={true}
-          />
-
-          <CustomDialogContent>
-
-            <TextField id="standard-basic" label={showProductNumberOrProductNameUpdate.title}
-              value={showProductNumberOrProductNameUpdate.value}
-              fullWidth
-              onChange={(e) => {
-                setShowProductNumberOrProductNameUpdate((prevState) => {
-                  return { ...prevState, value: e.target.value }
-                })
-              }}
-            />
-
-          </CustomDialogContent>
-
-          <CustomDialogFooter>
-            <Button type="button" variant="outlined" color="primary" size="small" onClick={() => {
-              setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-            }}>
-              Cancel
-            </Button>
-
-            <CustomButton
-              variant="contained"
-              color="primary"
-              onClick={(e) => {
-
-                let updatedData = [...dataRows];
-                updatedData[showProductNumberOrProductNameUpdate.indexOfRecord][showProductNumberOrProductNameUpdate.property] = showProductNumberOrProductNameUpdate.value;
-
-                dispatch({ type: "initialize", data: updatedData, count: updatedData.length });
-                setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-
-                onCellValueChanged({
-                  data: updatedData[showProductNumberOrProductNameUpdate.indexOfRecord],
-                  column: { colId: showProductNumberOrProductNameUpdate.property },
-                  newValue: showProductNumberOrProductNameUpdate.value
-                })
-
-              }}
-            >
-              Save
-            </CustomButton>
-          </CustomDialogFooter>
-
-        </Dialog>
-      } */}
+      {
+        askSupplierPriceDialog && <AskSupplierPriceDialog
+          setAskSupplierPriceDialog={setAskSupplierPriceDialog}
+          askSupplierPriceDialog={askSupplierPriceDialog}
+          handelAskPriceToSupplier={handelAskPriceToSupplier} />
+      }
     </Box>
   );
 };

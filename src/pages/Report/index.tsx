@@ -85,10 +85,14 @@ const Report = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === "quotes" ? "quoteBuilder" : resourceCamelCase]) {
+      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]) {
         o.fieldData.primaryField = true;
       }
-      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase === "quotes" ? "quoteBuilder" : resourceCamelCase}Detail`].path);
+      let currentColumn = getColumnData(
+        routes[resourceCamelCase]?.title,
+        o?.fieldData,
+        routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
+      );
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -365,7 +369,7 @@ const Report = () => {
                           disableElevation
                           onClick={() => {
                             setShowGrid(false);
-                            dispatch({type: 'onlyFilter', filters: {}})
+                            dispatch({ type: 'onlyFilter', filters: {} });
                           }}
                           startIcon={<MdChevronLeft />}
                         >
@@ -374,7 +378,7 @@ const Report = () => {
                       </Box>
                     )}
                     <MdDescription size={22} className="headerLogo" />
-                    <span className="listingHeader">{` ${selectedReportView?.name ?? 'Reports'}`}</span>
+                    <span className="listingHeader">{`${showGrid ? selectedReportView?.name ?? 'Reports' : 'Reports'}`}</span>
                   </Box>
                 </Grid>
               </Grid>
@@ -425,7 +429,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => { }}
+                      onEdit={() => {}}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -440,8 +444,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => { }}
-                      onClone={(data) => { }}
+                      onDelete={(data) => {}}
+                      onClone={(data) => {}}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
