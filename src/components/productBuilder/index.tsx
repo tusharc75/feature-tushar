@@ -36,6 +36,7 @@ import CustomButton from "../Helpers/CustomButton";
 import { prepareDataForGrid } from "../../constants/helpers";
 import SupplierAskPrice from "./SupplierAskPrice";
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import { Link, useHistory } from 'react-router-dom';
 
 let levalOrderBy = [
   "product",
@@ -149,6 +150,7 @@ const ProductBuilder = (props) => {
         commonRenderer: CommonRenderer,
         productNameRenderer: ProductNameRenderer,
         actionsRenderer: ActionsRenderer,
+        productTypeRenderer:ProductTypeRenderer,
         ...tempFrameworkComponent,
       }
       setFrameWorkComponent({ ...tempFrameworkComponent })
@@ -264,6 +266,12 @@ const ProductBuilder = (props) => {
     </>
   );
 
+  const ProductTypeRenderer = (params) => (
+    <Link className="link text-truncate" title={params?.data?.productName} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+      {params?.data?.productName}
+    </Link>
+  );
+
   const GenrateColoum = (fields, column, rendererNames) => {
     let _fields = fields;
     if (stage && stage === "product") {
@@ -345,18 +353,31 @@ const ProductBuilder = (props) => {
       }
       else {
         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
-          if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-            if (!ele.isFormula && !ele.isUneditable && Editable) {
-              if (ele.type === "decimal" || ele.type === "percent") {
-                currentColumn.columnData.cellEditor = "numericCellEditor";
+          if (ele.fieldName === 'productName') {
+            column.push({
+              pivotIndex: 0,
+              field: ele?.fieldName,
+              headerName: ele?.fieldLabel,
+              show: true,
+              disabled: true,
+              cellRenderer: 'productTypeRenderer',
+              primaryField: true
+            })
+            rendererNames.push('productTypeRenderer')
+          } else {
+            let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
+            if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
+              if (!ele.isFormula && !ele.isUneditable && Editable) {
+                if (ele.type === "decimal" || ele.type === "percent") {
+                  currentColumn.columnData.cellEditor = "numericCellEditor";
+                }
+                currentColumn.columnData.editable = true;
               }
-              currentColumn.columnData.editable = true;
             }
-          }
-          column.push({ ...currentColumn.columnData, leval: ele.leval });
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName)
+            column.push({ ...currentColumn.columnData, leval: ele.leval });
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
           }
         }
       }
