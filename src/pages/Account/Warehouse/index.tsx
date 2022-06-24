@@ -10,15 +10,11 @@ import { useData } from "src/StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import routes from "src/components/Helpers/Routes";
-import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
 import { useHistory } from "react-router-dom";
 import useColumns, { getFrameworkComponents, getStaticFields } from "src/constants/useColumns";
-import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
 import { Button, Grid, IconButton, Menu, MenuItem, Tooltip } from "@material-ui/core";
 import { AddOutlined, Delete, ExpandMore } from "@material-ui/icons";
 import ConfirmationDialogRaw from "src/components/Helpers/ConfirmationDialog";
-import { styles } from "@material-ui/pickers/views/Calendar/Calendar";
-import { MdAdd } from "react-icons/md";
 import WarhouseList from "./WarhouseList";
 import { camelCase } from 'lodash'
 
@@ -87,7 +83,6 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
                 setFrameWorkComponent({ ...tempFrameworkComponent });
                 columns = [...columns, ...getStaticFields()];
                 setColumns([...columns]);
-                fetchAccountWarehouse()
             })
     }
 
@@ -134,8 +129,6 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
                 toastConfig.setToastConfig(err)
                 setIsDeleting(false)
             })
-
-
     }
 
     const handleAddWarehouse = (rows) => {
