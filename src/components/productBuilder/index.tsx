@@ -33,9 +33,9 @@ import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomButton from "../Helpers/CustomButton";
-import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import SupplierAskPrice from "./SupplierAskPrice";
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 
 let levalOrderBy = [
   "product",
@@ -82,7 +82,7 @@ const ProductBuilder = (props) => {
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openSupplierPriceDialog, setOpenSupplierPriceDialog] = useState(false);
   const [supplierData, setSupplierData] = useState(null)
-
+  const { getColumnData } = useColumns();
   // const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
   //   useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
 
