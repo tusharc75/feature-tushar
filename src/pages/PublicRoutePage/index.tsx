@@ -99,7 +99,7 @@ const PublicRoutePage = () => {
             .catch((error) => {
                 setValidPassword(false)
                 toastConfig.setToastConfig({
-                    message: `Password is wrong`,
+                    message: `Password is not correct`,
                     type: "error",
                     open: true,
                 });
@@ -130,51 +130,49 @@ const PublicRoutePage = () => {
                 </Grid>
             </Grid>
             {passwordVerification ?
-                <>{validPassword ?
-                    <Box style={{ padding: "10px", display: "flex", justifyContent: "center" }}>
-                        <Box style={{ marginTop: "50px", width: "400px" }} boxShadow={3}>
 
-                            <Grid spacing={1} style={{ padding: "10px", display: "flex", justifyContent: "center" }} container>
-                                <Grid item xs={12} sm={12} md={12} >
-                                    <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={"Authentication Required"}>
-                                        Authentication Required
-                                    </h1>
-                                </Grid>
+                <Box style={{ padding: "10px", display: "flex", justifyContent: "center" }}>
+                    <Box style={{ marginTop: "50px", width: "400px" }} boxShadow={3}>
 
-                                <Grid item xs={10} sm={10} md={10} >
-                                    <TextField
-                                        id="outlined-full-width"
-                                        margin="normal"
-                                        variant="outlined"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        label="Password"
-                                        name="Password"
-                                        type="password"
-                                        placeholder="Please enter password"
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        fullWidth
-                                        size="small"
-                                    />
-                                </Grid>
-                                <Grid item xs={10} sm={10} md={10} >
-                                    <Button
-                                        style={{ marginBottom: "20px" }}
-                                        variant="contained"
-                                        color="primary"
-                                        size="medium"
-                                        fullWidth
-                                        onClick={fetchResourceData}
-                                    >
-                                        Submit
-                                    </Button>
-                                </Grid>
+                        <Grid spacing={1} style={{ padding: "10px", display: "flex", justifyContent: "center" }} container>
+                            <Grid item xs={12} sm={12} md={12} >
+                                <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={"Authentication Required"}>
+                                    Authentication Required
+                                </h1>
                             </Grid>
-                        </Box>
-                    </Box> : null}
 
-                </>
+                            <Grid item xs={10} sm={10} md={10} >
+                                <TextField
+                                    id="outlined-full-width"
+                                    margin="normal"
+                                    variant="outlined"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    label="Password"
+                                    name="Password"
+                                    type="password"
+                                    placeholder="Please enter password"
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    fullWidth
+                                    size="small"
+                                />
+                            </Grid>
+                            <Grid item xs={10} sm={10} md={10} >
+                                <Button
+                                    style={{ marginBottom: "20px" }}
+                                    variant="contained"
+                                    color="primary"
+                                    size="medium"
+                                    fullWidth
+                                    onClick={fetchResourceData}
+                                >
+                                    Submit
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </Box>
                 : !valid ?
                     <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
                         Link is expired or already used
