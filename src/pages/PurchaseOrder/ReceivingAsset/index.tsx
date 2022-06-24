@@ -222,7 +222,7 @@ const ReceivingAsset = ({
           .reduce((sum, row) => row.values['scrapQuantity'] + sum, 0);
       }
     });
-    
+
     setColumns([
       ...column,
       ...[
@@ -236,7 +236,7 @@ const ReceivingAsset = ({
           canDrag: false,
           Cell: ({ row }) => (
             <>
-              {permissions?.purchaseOrder?.isUpdate && row.original?.actualReceived && (
+              {(permissions?.purchaseOrder?.isUpdate && row?.original?.inventoryQty) ? (
                 <HtmlTooltip title="Reject/Replacement">
                   <span>
                     <IconButton
@@ -250,7 +250,7 @@ const ReceivingAsset = ({
                     </IconButton>
                   </span>
                 </HtmlTooltip>
-              )}
+              ) : null}
             </>
           )
         }
