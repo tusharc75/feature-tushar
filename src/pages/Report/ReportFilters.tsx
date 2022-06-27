@@ -411,7 +411,6 @@ const ReportFilters = (props: FiltersProps) => {
                         InputLabelProps={{
                           shrink: true
                         }}
-                        margin="dense"
                       />
                     </Grid>
                   )}
@@ -434,7 +433,6 @@ const ReportFilters = (props: FiltersProps) => {
                         InputLabelProps={{
                           shrink: true
                         }}
-                        margin="dense"
                       />
                     </Grid>
                   )}
@@ -495,7 +493,6 @@ const ReportFilters = (props: FiltersProps) => {
                   InputLabelProps={{
                     shrink: true
                   }}
-                  margin="dense"
                 />
               </Grid>
             )}
@@ -518,7 +515,6 @@ const ReportFilters = (props: FiltersProps) => {
                   InputLabelProps={{
                     shrink: true
                   }}
-                  margin="dense"
                 />
               </Grid>
             )}

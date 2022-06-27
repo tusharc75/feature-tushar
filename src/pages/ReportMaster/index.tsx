@@ -41,7 +41,7 @@ const ReportMaster = () => {
                     <Grid key={report.key} item xs={12} sm={12} md={6} lg={4}>
                       <Link
                         to={`/reports${
-                          report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.key) : routes[report.key]?.path
+                          report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path
                         }`}
                       >
                         <Box border={1} borderColor="grey.300" bgcolor="grey.100" borderRadius={1} p={2}>

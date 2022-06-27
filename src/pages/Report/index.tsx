@@ -333,7 +333,7 @@ const Report = () => {
     <MuiPickersUtilsProvider utils={MomentUtils}>
       <div>
         <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
+          <Grid item xs={10}>
             <CustomBreadCrumbs
               routes={[
                 { title: 'Reports', path: '/reports' },
@@ -342,7 +342,7 @@ const Report = () => {
             />
           </Grid>
 
-          <Grid item md={8} sm={1} xs={2}>
+          <Grid item xs={2}>
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
                 <Grid container justifyContent="flex-end">
