@@ -411,7 +411,6 @@ const ReportFilters = (props: FiltersProps) => {
                         InputLabelProps={{
                           shrink: true
                         }}
-                        margin="dense"
                       />
                     </Grid>
                   )}
@@ -434,7 +433,6 @@ const ReportFilters = (props: FiltersProps) => {
                         InputLabelProps={{
                           shrink: true
                         }}
-                        margin="dense"
                       />
                     </Grid>
                   )}
@@ -495,7 +493,6 @@ const ReportFilters = (props: FiltersProps) => {
                   InputLabelProps={{
                     shrink: true
                   }}
-                  margin="dense"
                 />
               </Grid>
             )}
@@ -518,14 +515,13 @@ const ReportFilters = (props: FiltersProps) => {
                   InputLabelProps={{
                     shrink: true
                   }}
-                  margin="dense"
                 />
               </Grid>
             )}
           </Grid>
         </Box>
         <Box mt={2}>
-          {!resource?.includes('Purchase Order') && (
+          {!resource?.includes('Purchase Order Type') && (
             <Box height={'100%'} mb={2}>
               <Autocomplete
                 options={reportList}
