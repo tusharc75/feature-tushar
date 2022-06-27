@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
-import { camelCase, filter, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
@@ -106,6 +106,15 @@ const Report = () => {
     };
     setFrameWorkComponent({ ...tempFrameworkComponent });
     columns = [...columns, ...getStaticFields()];
+    if (resourceStartCase === 'Purchase Order') {
+      columns.splice(1, 0, {
+        field: 'poAmount',
+        headerName: 'Purchase Order Amount',
+        show: true,
+        disabled: false,
+        cellRenderer: 'commonRenderer'
+      });
+    }
     setColumns([...columns]);
     setLoadingColumns(false);
   };
@@ -324,7 +333,7 @@ const Report = () => {
     <MuiPickersUtilsProvider utils={MomentUtils}>
       <div>
         <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
+          <Grid item xs={10}>
             <CustomBreadCrumbs
               routes={[
                 { title: 'Reports', path: '/reports' },
@@ -333,7 +342,7 @@ const Report = () => {
             />
           </Grid>
 
-          <Grid item md={8} sm={1} xs={2}>
+          <Grid item xs={2}>
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
                 <Grid container justifyContent="flex-end">

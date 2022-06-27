@@ -672,7 +672,7 @@ function App() {
             <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/purchase-order/:type`}>
+            <PrivateRoute exact path={`${routes.reports.path}/purchase-order-type/:type`}>
               <PurchaseOrderReport />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
