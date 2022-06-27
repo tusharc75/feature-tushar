@@ -29,7 +29,8 @@ const ReceivingAsset = ({
   isTabletScreen,
   showActivity,
   renderedFrom,
-  checkReceivedProduct
+  checkReceivedProduct,
+  allowedToEdit
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -236,7 +237,7 @@ const ReceivingAsset = ({
           canDrag: false,
           Cell: ({ row }) => (
             <>
-              {(permissions?.purchaseOrder?.isUpdate && row?.original?.inventoryQty) ? (
+              {(permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.inventoryQty) ? (
                 <HtmlTooltip title="Reject/Replacement">
                   <span>
                     <IconButton
@@ -268,7 +269,7 @@ const ReceivingAsset = ({
       let rows = result?.data?.data?.map((item) => {
         let finalObject = prepareDataForGrid(item);
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === item._id);
-        finalObject['allowedToEdit'] = true;
+        finalObject['allowedToEdit'] = allowedToEdit;
         let res: any = {
           ...finalObject,
           type: 'Product',
@@ -324,7 +325,7 @@ const ReceivingAsset = ({
     <>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
-          <Button
+          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && <Button
             variant={'contained'}
             color="primary"
             size="small"
@@ -335,7 +336,7 @@ const ReceivingAsset = ({
             }}
           >
             {`Receive`}
-          </Button>
+          </Button>}
         </Box>
         <div className="d-flex gap-2">
           <SendEmail purchaseOrderData={purchaseOrderData} />
