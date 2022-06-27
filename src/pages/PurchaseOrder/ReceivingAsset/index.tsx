@@ -214,13 +214,24 @@ const ReceivingAsset = ({
     });
     column.push({
       accessor: 'scrapQuantity',
-      Header: 'Scrap Quantity',
+      Header: 'Reject Quantity',
       width: 300,
       Cell: ({ row }) => (row.original['scrapQuantity'] ? <p>{row.original['scrapQuantity']}</p> : <NoDataCell />),
       Footer: (info) => {
         return info?.rows
           ?.filter((f) => f.values.hasOwnProperty('scrapQuantity') && !isNaN(f.values['scrapQuantity']))
           .reduce((sum, row) => row.values['scrapQuantity'] + sum, 0);
+      }
+    });
+    column.push({
+      accessor: 'rejectQuantity',
+      Header: 'Reject/Replacement Quantity',
+      width: 300,
+      Cell: ({ row }) => (row.original['rejectQuantity'] ? <p>{row.original['rejectQuantity']}</p> : <NoDataCell />),
+      Footer: (info) => {
+        return info?.rows
+          ?.filter((f) => f.values.hasOwnProperty('rejectQuantity') && !isNaN(f.values['rejectQuantity']))
+          .reduce((sum, row) => row.values['rejectQuantity'] + sum, 0);
       }
     });
 
@@ -310,7 +321,7 @@ const ReceivingAsset = ({
         res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - subRows?.length : 0;
         return res;
       });
-      if (rows.every((d) => d.qty === d.actualReceived)) {
+      if (rows.every((d) => d.qty === (d.actualReceived + (d.scrapQuantity || 0)))) {
         setDisableCreateAsset(true);
       }
       checkReceivedProduct(result?.data?.data);

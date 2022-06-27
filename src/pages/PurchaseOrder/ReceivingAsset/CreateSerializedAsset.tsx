@@ -245,7 +245,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                                 {...params}
                                                                                                 variant="outlined"
                                                                                                 name="plants"
-                                                                                                label="Plants"
+                                                                                                label="Plant"
                                                                                                 error={validate([data]).warehouse}
                                                                                                 helperText={validate([data]).warehouse ? "Plant is required" : ""}
                                                                                                 required
@@ -309,13 +309,13 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                         <Grid item xs={12} md={4}>
                                                                                             <Field
                                                                                                 fullWidth
-                                                                                                label='Scrap Quantity'
+                                                                                                label='Reject Quantity'
                                                                                                 variant="outlined"
                                                                                                 type="number"
                                                                                                 size="small"
                                                                                                 component={TextField}
                                                                                                 name="scrapQuantity"
-                                                                                                placeholder="Scrap Quantity"
+                                                                                                placeholder="Reject Quantity"
                                                                                                 value={data.scrapQuantity}
                                                                                                 onChange={(e) => {
                                                                                                     const value = e.target.value.replace(/[^0-9]/g, '');
