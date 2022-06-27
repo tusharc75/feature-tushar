@@ -17,7 +17,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
@@ -694,6 +694,7 @@ export default function Contact(props) {
             type: 'success',
             message: data.message
           });
+          removeLocalStorage(`${localStorageSelectedRecords}`)
           getContacts();
         })
         .catch((error) => {
