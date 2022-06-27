@@ -258,7 +258,7 @@ const PurchaseOrderDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={purchaseOrderData?.purchaseOrderNumber} mainPoints={null} showHeading={true}>
-                  {permissions?.purchaseOrder?.isUpdate &&
+                  {permissions?.purchaseOrder?.isUpdate && allowedToEdit &&
                     ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)
                     && (
                       <Button
@@ -272,7 +272,7 @@ const PurchaseOrderDetailsPage = () => {
                         {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                       </Button>
                     )}
-                  {permissions?.purchaseOrder?.isUpdate && [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status)
+                  {permissions?.purchaseOrder?.isUpdate && allowedToEdit && [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status)
                     && (
                       <>
                         <Button
@@ -427,6 +427,7 @@ const PurchaseOrderDetailsPage = () => {
                                 isTabletScreen={isTabletScreen}
                                 stepFullScreen={stepFullScreen}
                                 showActivity={showActivity}
+                                allowedToEdit={allowedToEdit}
                                 checkReceivedProduct={checkReceivedProduct}
                               />
                             )}</ContentFullScreen>

@@ -29,7 +29,8 @@ const ReceivingAsset = ({
   isTabletScreen,
   showActivity,
   renderedFrom,
-  checkReceivedProduct
+  checkReceivedProduct,
+  allowedToEdit
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -213,13 +214,24 @@ const ReceivingAsset = ({
     });
     column.push({
       accessor: 'scrapQuantity',
-      Header: 'Scrap Quantity',
+      Header: 'Reject Quantity',
       width: 300,
       Cell: ({ row }) => (row.original['scrapQuantity'] ? <p>{row.original['scrapQuantity']}</p> : <NoDataCell />),
       Footer: (info) => {
         return info?.rows
           ?.filter((f) => f.values.hasOwnProperty('scrapQuantity') && !isNaN(f.values['scrapQuantity']))
           .reduce((sum, row) => row.values['scrapQuantity'] + sum, 0);
+      }
+    });
+    column.push({
+      accessor: 'rejectQuantity',
+      Header: 'Reject/Replacement Quantity',
+      width: 300,
+      Cell: ({ row }) => (row.original['rejectQuantity'] ? <p>{row.original['rejectQuantity']}</p> : <NoDataCell />),
+      Footer: (info) => {
+        return info?.rows
+          ?.filter((f) => f.values.hasOwnProperty('rejectQuantity') && !isNaN(f.values['rejectQuantity']))
+          .reduce((sum, row) => row.values['rejectQuantity'] + sum, 0);
       }
     });
 
@@ -236,7 +248,7 @@ const ReceivingAsset = ({
           canDrag: false,
           Cell: ({ row }) => (
             <>
-              {(permissions?.purchaseOrder?.isUpdate && row?.original?.inventoryQty) ? (
+              {(permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.inventoryQty) ? (
                 <HtmlTooltip title="Reject/Replacement">
                   <span>
                     <IconButton
@@ -268,7 +280,7 @@ const ReceivingAsset = ({
       let rows = result?.data?.data?.map((item) => {
         let finalObject = prepareDataForGrid(item);
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === item._id);
-        finalObject['allowedToEdit'] = true;
+        finalObject['allowedToEdit'] = allowedToEdit;
         let res: any = {
           ...finalObject,
           type: 'Product',
@@ -309,7 +321,7 @@ const ReceivingAsset = ({
         res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - subRows?.length : 0;
         return res;
       });
-      if (rows.every((d) => d.qty === d.actualReceived)) {
+      if (rows.every((d) => d.qty === (d.actualReceived + (d.scrapQuantity || 0)))) {
         setDisableCreateAsset(true);
       }
       checkReceivedProduct(result?.data?.data);
@@ -324,7 +336,7 @@ const ReceivingAsset = ({
     <>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
-          <Button
+          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && <Button
             variant={'contained'}
             color="primary"
             size="small"
@@ -335,7 +347,7 @@ const ReceivingAsset = ({
             }}
           >
             {`Receive`}
-          </Button>
+          </Button>}
         </Box>
         <div className="d-flex gap-2">
           <SendEmail purchaseOrderData={purchaseOrderData} />
