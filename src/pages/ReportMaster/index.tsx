@@ -5,7 +5,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { REPORT_LIST } from './../../constants/helpers';
 import { MdDescription } from 'react-icons/md';
 import { Link } from 'react-router-dom';
-import { camelCase, kebabCase } from 'lodash';
+import { kebabCase } from 'lodash';
 import { useData } from '../../StateProvider/Provider';
 
 const ReportMaster = () => {
@@ -39,7 +39,11 @@ const ReportMaster = () => {
                 return (
                   permissions[report.permission]?.isRead && (
                     <Grid key={report.key} item xs={12} sm={12} md={6} lg={4}>
-                      <Link to={`/reports${report.type !== 'dynamic' ? `${routes[report.permission]?.path}/` + kebabCase(report.key) : routes[report.key]?.path}`}>
+                      <Link
+                        to={`/reports${
+                          report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.key) : routes[report.key]?.path
+                        }`}
+                      >
                         <Box border={1} borderColor="grey.300" bgcolor="grey.100" borderRadius={1} p={2}>
                           <Typography variant="h6">
                             <MdDescription size={25} className="headerLogo mr-2 pt-1" />

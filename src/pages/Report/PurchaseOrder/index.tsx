@@ -85,50 +85,50 @@ const Report = () => {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        POFields.filter((field) => ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach(
-          (field: any) => {
-            if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
-              resourceFieldData.push(field);
-              columns.push({
-                field: 'purchaseOrder',
-                headerName: field?.fieldData?.fieldLabel,
-                show: true,
-                disabled: false,
-                cellRenderer: 'purchaseOrderRenderer'
-              });
-            }
-            if (field?.fieldData.fieldName === 'supplierAccount') {
-              resourceFieldData.push(field);
-              columns.push({
-                field: 'supplierAccount',
-                headerName: field?.fieldData?.fieldLabel,
-                show: true,
-                disabled: false,
-                cellRenderer: 'supplierRenderer'
-              });
-            }
-            if (field?.fieldData.fieldName === 'warehouse') {
-              resourceFieldData.push(field);
-              columns.push({
-                field: 'warehouse',
-                headerName: field?.fieldData?.fieldLabel,
-                show: true,
-                disabled: false,
-                cellRenderer: 'plantRenderer'
-              });
-            }
-            if (field?.fieldData.fieldName === 'purchaseOrderDate') {
-              resourceFieldData.push(field);
-              columns.push({
-                field: 'purchaseOrderDate',
-                headerName: field?.fieldData?.fieldLabel,
-                show: true,
-                disabled: false,
-                cellRenderer: 'dateRenderer'
-              });
-            }
+        POFields.filter((field) =>
+          ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
+        ).forEach((field: any) => {
+          if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
+            resourceFieldData.push(field);
+            columns.push({
+              field: 'purchaseOrder',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'purchaseOrderRenderer'
+            });
           }
-        );
+          if (field?.fieldData.fieldName === 'supplierAccount') {
+            resourceFieldData.push(field);
+            columns.push({
+              field: 'supplierAccount',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'supplierRenderer'
+            });
+          }
+          if (field?.fieldData.fieldName === 'warehouse') {
+            resourceFieldData.push(field);
+            columns.push({
+              field: 'warehouse',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'plantRenderer'
+            });
+          }
+          if (field?.fieldData.fieldName === 'purchaseOrderDate') {
+            resourceFieldData.push(field);
+            columns.push({
+              field: 'purchaseOrderDate',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'dateRenderer'
+            });
+          }
+        });
 
         productFields
           .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
@@ -136,7 +136,7 @@ const Report = () => {
             if (field?.fieldData.fieldName === 'productName') {
               resourceFieldData.push({
                 ...field,
-                fieldData: { ...field.fieldData, fieldName: "productId", type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+                fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
               });
               columns.push({
                 field: 'productName',
@@ -214,7 +214,8 @@ const Report = () => {
             headerName: 'Quantity',
             show: true,
             disabled: false,
-            filter: false, sortable: false,
+            filter: false,
+            sortable: false,
             cellRenderer: 'commonRenderer'
           },
           {
@@ -222,7 +223,8 @@ const Report = () => {
             headerName: 'Unit Price',
             show: true,
             disabled: false,
-            filter: false, sortable: false,
+            filter: false,
+            sortable: false,
             cellRenderer: 'commonRenderer'
           },
           {
@@ -230,7 +232,8 @@ const Report = () => {
             headerName: 'Total',
             show: true,
             disabled: false,
-            filter: false, sortable: false,
+            filter: false,
+            sortable: false,
             cellRenderer: 'commonRenderer'
           }
         ];
@@ -309,7 +312,7 @@ const Report = () => {
     productRenderer: ProductRenderer,
     plantRenderer: PlantRenderer,
     supplierRenderer: SupplierRenderer,
-    dateRenderer: DateRenderer,
+    dateRenderer: DateRenderer
   };
 
   /**
@@ -542,7 +545,7 @@ const Report = () => {
                           disableElevation
                           onClick={() => {
                             setShowGrid(false);
-                            dispatch({type: 'onlyFilter', filters: {}})
+                            dispatch({ type: 'onlyFilter', filters: {} });
                           }}
                           startIcon={<MdChevronLeft />}
                         >
@@ -562,7 +565,7 @@ const Report = () => {
                 resourceColumns={resourceColumns}
                 betweenDate={betweenDate}
                 setBetweenDate={setBetweenDate}
-                resource={`Purchase Order ${resourceStartCase}`}
+                resource={resourceStartCase}
                 setSelectedData={setSelectedData}
                 loading={loading}
                 fetchReportData={fetchResourceData}

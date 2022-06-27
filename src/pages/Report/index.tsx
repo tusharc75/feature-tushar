@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
-import { camelCase, filter, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
@@ -106,6 +106,15 @@ const Report = () => {
     };
     setFrameWorkComponent({ ...tempFrameworkComponent });
     columns = [...columns, ...getStaticFields()];
+    if (resourceStartCase === 'Purchase Order') {
+      columns.splice(1, 0, {
+        field: 'poAmount',
+        headerName: 'Purchase Order Amount',
+        show: true,
+        disabled: false,
+        cellRenderer: 'commonRenderer'
+      });
+    }
     setColumns([...columns]);
     setLoadingColumns(false);
   };
