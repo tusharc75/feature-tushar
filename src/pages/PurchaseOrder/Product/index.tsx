@@ -31,7 +31,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
-    const allowedToEdit = hasPermission || permissions?.purchaseOrder.isUpdate
+    const allowedToEdit = hasPermission && permissions?.purchaseOrder.isUpdate
 
     const [columns, setColumns] = useState([])
 
@@ -106,7 +106,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
             let rows = data?.map((item, index) => {
                 let finalObject = prepareDataForGrid(item);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
-                finalObject["allowedToEdit"] = true
+                finalObject["allowedToEdit"] = allowedToEdit
                 let res: any = {
                     ...finalObject,
                 };
