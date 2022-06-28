@@ -21,7 +21,8 @@ import {
   customerContact,
   supplierContact,
   quote,
-  getLocalStorageArrayData
+  getLocalStorageArrayData,
+  removeLocalStorage
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -702,7 +703,7 @@ const QuoteBuilders = () => {
             storedSelectedIds = storedSelectedIds.filter(id => id !== idToDeleteFromLocalStorage)
           })
           localStorage.setItem(localStorageSelectedRecords, JSON.stringify(storedSelectedIds));
-
+          removeLocalStorage(localStorageSelectedRecords)
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
