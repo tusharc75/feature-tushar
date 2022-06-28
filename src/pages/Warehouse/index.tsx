@@ -303,8 +303,8 @@ const AddressResource = () => {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -323,7 +323,7 @@ const AddressResource = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -410,6 +410,7 @@ const AddressResource = () => {
               if (gridApi) gridApi.deselectAll()
               else fetchWarehouses()
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

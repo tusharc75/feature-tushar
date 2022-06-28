@@ -141,9 +141,11 @@ const TransferAsset = () => {
       });
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterTransferAssets=${selectedType}`;
-
+    if (isExport) {
+      deepFilter = `filterTransferAssets=${selectedType}`;
+    }
     if (fromRental) {
       let filterById = [];
       filterById.push({ field: "rentalJob", term: fromRental?._id });
@@ -163,7 +165,7 @@ const TransferAsset = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -171,7 +173,7 @@ const TransferAsset = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -339,6 +341,7 @@ const TransferAsset = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchTransferAsset();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

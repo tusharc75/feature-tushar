@@ -23,7 +23,8 @@ import {
   warehouse as warehouseHelper,
   INVENTORY_STATUS,
   COLOUR_MASTER,
-  getLocalStorageArrayData
+  getLocalStorageArrayData,
+  removeLocalStorage
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -43,6 +44,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { camelCase } from 'lodash';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@material-ui/icons/Warning';
+import moment from 'moment';
 
 const SerializedAsset = () => {
   const renderedFrom = camelCase(routes?.serializedAsset.title);
@@ -166,15 +168,32 @@ const SerializedAsset = () => {
           if (e.field === 'assetNumber') {
             e.cellRenderer = 'assetNumberRenderer';
             e.cellStyle = (params) => {
-              if (
-                [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(
-                  params?.data?.status
-                )
-              ) {
+              if ([INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)) {
                 return { backgroundColor: COLOUR_MASTER.lostAssets.background };
               }
+              // if (params.data?.recertDate) {
+              //   var a = moment(params.data?.recertDate);
+              //   var b = moment();
+              //   const days = a.diff(b, 'days')
+              //   if (days <= 60 && days >= 30) {
+              //     return { backgroundColor: "#ACF1C8" };
+              //   }
+              //   else if (days < 30 && days >= 15) {
+              //     return { backgroundColor: "#FAE498" };
+              //   }
+              //   else if (days < 15 && days >= 0) {
+              //     return { backgroundColor: "#FEB1B1" };
+              //   }
+              //   else if (days < 0) {
+              //     return { backgroundColor: "#FEB1B1" };
+              //   }
+              // }
               return null;
             };
+          }
+          if (e.field === 'currentOwner') {
+            e.filter = false
+            e.sortable = false
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
@@ -276,7 +295,7 @@ const SerializedAsset = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (subleaseAsset) {
       deepFilter = `${deepFilter}&subleaseAsset=1`;
@@ -305,6 +324,7 @@ const SerializedAsset = () => {
     axiosInstance()
       .put(`${serializedAsset.api}/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords)
         fetchProductInventory();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -447,48 +467,49 @@ const SerializedAsset = () => {
             <Grid item xs={12} sm={12} md={8} className="d-flex align-items-center gap-1">
               <GiStockpiles size={20} style={{ paddingBottom: '3px' }} className="headerLogo" />
               <span className="listingHeader">{routes.serializedAsset?.title} </span>
-              {warehouse && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Plants : ${warehouse.optionLabel}`}
-                  onDelete={() => {
-                    setWarehouse(null);
-                  }}
-                />
-              )}
-              {redirectProduct && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Product : ${redirectProduct.name}`}
-                  onDelete={() => {
-                    setRedirectProduct(null);
-                  }}
-                />
-              )}
-              {fromPurchaseOrder?.pOId ? (
-                <>
-                  {fromPurchaseOrder?.productId && (
+              {(warehouse || warehouse || fromPurchaseOrder?.pOId) ?
+                <Fragment>
+                  {warehouse && (
                     <Chip
                       className="ml-3"
                       color="primary"
-                      label={`Product : ${fromPurchaseOrder.productName}`}
+                      label={`Plants : ${warehouse.optionLabel}`}
                       onDelete={() => {
-                        setFromPurchaseOrder(null);
+                        setWarehouse(null);
                       }}
                     />
                   )}
-                  <Chip
-                    className="ml-3"
-                    color="primary"
-                    label={`Purchase Order : ${fromPurchaseOrder.pOName}`}
-                    onDelete={() => {
-                      setFromPurchaseOrder(null);
-                    }}
-                  />
-                </>
-              ) : (
+                  {redirectProduct && (
+                    <Chip
+                      className="ml-3"
+                      color="primary"
+                      label={`Product : ${redirectProduct.name}`}
+                      onDelete={() => {
+                        setRedirectProduct(null);
+                      }}
+                    />
+                  )}
+                  {fromPurchaseOrder?.productId && (
+                    <Fragment>
+                      <Chip
+                        className="ml-3"
+                        color="primary"
+                        label={`Product : ${fromPurchaseOrder.productName}`}
+                        onDelete={() => {
+                          setFromPurchaseOrder(null);
+                        }}
+                      />
+                      <Chip
+                        className="ml-3"
+                        color="primary"
+                        label={`Purchase Order : ${fromPurchaseOrder.pOName}`}
+                        onDelete={() => {
+                          setFromPurchaseOrder(null);
+                        }}
+                      />
+                    </Fragment>
+                  )}
+                </Fragment> :
                 <Fragment>
                   <Autocomplete
                     style={{ width: '250px' }}
@@ -580,21 +601,7 @@ const SerializedAsset = () => {
                       label="Sublease Assets"
                     />
                   )}
-                  {/* <FormControlLabel
-                    control={
-                      <Checkbox
-                        name="isNonSerializedAsset"
-                        checked={isNonSerializedAsset}
-                        onChange={(e) => {
-                          setNonSerializedAsset(e.target.checked);
-                        }}
-                        color="primary"
-                      />
-                    }
-                    label="Non Serialized Assets"
-                  /> */}
-                </Fragment>
-              )}
+                </Fragment>}
             </Grid>
             <Grid md={4} sm={12} xs={12} container className={`${styles.filter_side} align-items-center`}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -686,8 +693,7 @@ const SerializedAsset = () => {
                         >
                           {`Status Change - ${INVENTORY_STATUS.lost}`}
                         </MenuItem>
-                      </>
-                    }
+                      </>}
                   </Menu>
                 </Grid>
               </Box>
@@ -749,6 +755,47 @@ const SerializedAsset = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchProductInventory}
               showOnlyShowFilteredRecordSwitch={true}
+              rowClassRules={{
+                "light-red-data-row":
+                  function (params) {
+                    if (params.data?.recertDate) {
+                      var a = moment(params.data?.recertDate);
+                      var b = moment();
+                      const days = a.diff(b, 'days')
+                      if (days < 15 && days >= 0) {
+                        return true;
+                      }
+                      else if (days < 0) {
+                        return true;
+                      }
+                    }
+                    return false
+                  },
+                "light-yellow-data-row":
+                  function (params) {
+                    if (params.data?.recertDate) {
+                      var a = moment(params.data?.recertDate);
+                      var b = moment();
+                      const days = a.diff(b, 'days')
+                      if (days < 30 && days >= 15) {
+                        return true;
+                      }
+                    }
+                    return false
+                  },
+                "light-green-data-row":
+                  function (params) {
+                    if (params.data?.recertDate) {
+                      var a = moment(params.data?.recertDate);
+                      var b = moment();
+                      const days = a.diff(b, 'days')
+                      if (days <= 60 && days >= 30) {
+                        return true;
+                      }
+                    }
+                    return false
+                  },
+              }}
             />
           ) : null
         ) : (

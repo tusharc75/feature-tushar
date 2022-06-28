@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, IconButton } from '@material-ui/core';
+import { FileCopy } from '@material-ui/icons';
 import { useHistory, Link } from 'react-router-dom';
 import { MdDashboardCustomize } from 'react-icons/md';
 
@@ -72,6 +73,9 @@ const Dashboards = () => {
           onDelete={() => setShowDeleteDialog({ ...showDeleteDialog, open: true, data: [data?._id] })}
           entity=""
         />
+        <IconButton size="small" onClick={() => history.push(`dashboard-master/${params.data._id}?type=clone`)}>
+          <FileCopy fontSize="small" color="primary" />
+        </IconButton>
       </HideWhenOffline>
     );
   };
@@ -123,7 +127,7 @@ const Dashboards = () => {
           <Box display={'flex'} alignItems="center">
             <MdDashboardCustomize size={22} className="headerLogo" />
             <Box ml={1}>
-              <span className="listingHeader">Dashboards Master</span>
+              <span className="listingHeader">Dashboard Master</span>
             </Box>
           </Box>
           <Box py={'6px'}>

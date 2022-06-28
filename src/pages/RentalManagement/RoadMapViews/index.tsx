@@ -94,7 +94,6 @@ const customDeliveredNodeStyle = {
 };
 
 const RentalManagementViews = (props) => {
-
   const { rentalName, rentalId, status } = props;
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
@@ -118,6 +117,8 @@ const RentalManagementViews = (props) => {
       const subLease = viewsData?.data?.data?.sublease;
       const transferAsset = viewsData?.data?.data?.transferAsset;
       const allAssets = viewsData?.data?.data?.transferAssetData;
+      const consumeProducts = product?.consumeProducts;
+      const consumeID = `consume-product`;
 
       const loadingTicket = ticketData?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.loading);
       const receivingTicket = ticketData?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.receiving);
@@ -144,19 +145,28 @@ const RentalManagementViews = (props) => {
       xPosition += 300;
       const allPackages = product?.material?.filter((item) => item.type === 'package').map((item) => item._id);
       const allPackagesAndProductIds = product?.material?.map((item) => item._id);
-      // var materialIds = [];
-      // const allNonSerializedProductIds = product?.material
-      //   ?.filter((i) => !i?.productDetail?.serializedProduct && !materialIds.includes(i?.materialId))
-      //   .map((item) => {
-      //     materialIds.push(item?.materialId);
-      //     return item._id;
-      //   });
-      const allMaterialWithId = {};
-      product?.material
-        ?.filter((i) => !i?.productDetail?.serializedProduct)
-        ?.map((item) => {
-          allMaterialWithId[item?._id] = item?.materialId;
+      const assetsInLoading = {};
+      loadingTicket?.map((item) => {
+        item?.products?.map((i) => {
+          assetsInLoading[i?.product] = item._id;
         });
+      });
+      const assetsInReceiving = {};
+      receivingTicket?.map((item) => {
+        item?.products?.map((i) => {
+          assetsInReceiving[i?.product] = item._id;
+        });
+      });
+      const assetsInReturn = {};
+      returnTicket?.map((item) => {
+        item?.products?.map((i) => {
+          assetsInReturn[i?.product] = item._id;
+        });
+      });
+      const assetsInConsume = {};
+      consumeProducts?.map((item) => {
+        assetsInConsume[item?.product] = consumeID;
+      });
 
       if (allPackages.length) xPosition += 300;
       var pakcageIdx = 0;
@@ -168,28 +178,34 @@ const RentalManagementViews = (props) => {
         if (item.type !== 'package') {
           productColSystem[item._id] = productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition;
         }
-        flow.push({
-          id: `${item._id}`,
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          type: 'default',
-          data: {
-            ref_type: item.type,
-            ref_id: item.materialId,
-            label: (
-              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {item.productDetail?.productName || item.packageDetail?.packageName}
-                <br />
-                {_.startCase(_.camelCase(item.type))}
-              </div>
-            )
-          },
-          position: {
-            x: item.type === 'package' ? xPosition - 300 : productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition,
-            y: item.type === 'package' ? pakcageIdx * 80 : productIdx * 80
-          },
-          style: item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
-        });
+        if (
+          item?.productDetail?.serializedProduct &&
+          !assetsInLoading[item?.materialId] &&
+          !assetsInReceiving[item?.materialId] &&
+          !assetsInReturn[item?.materialId]
+        )
+          flow.push({
+            id: `${item._id}`,
+            sourcePosition: 'right',
+            targetPosition: 'left',
+            type: 'default',
+            data: {
+              ref_type: item.type,
+              ref_id: item.materialId,
+              label: (
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item.productDetail?.productName || item.packageDetail?.packageName}
+                  <br />
+                  {_.startCase(_.camelCase(item.type))}
+                </div>
+              )
+            },
+            position: {
+              x: item.type === 'package' ? xPosition - 300 : productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition,
+              y: item.type === 'package' ? pakcageIdx * 80 : productIdx * 80
+            },
+            style: item.type === 'package' ? customNodeStyles.package : customNodeStyles.product
+          });
         const pos = item.type === 'package' ? xPosition - 300 : productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition;
         if (lastIndex < pos) lastIndex = pos;
         item.type === 'package' ? (pakcageIdx += 1) : (productIdx += 1);
@@ -217,35 +233,6 @@ const RentalManagementViews = (props) => {
       const purchaseOrderInAssets = product?.inventory
         ?.filter((item) => item.inventoryDetail.purchaseOrder)
         .map((item) => item.inventoryDetail.purchaseOrder);
-      // purchaseOrder?.map((item: any, index) => {
-      //   if (purchaseOrderInAssets.includes(item._id)) {
-      //     flow.push({
-      //       id: `${item._id}`,
-      //       sourcePosition: 'right',
-      //       targetPosition: 'left',
-      //       type: 'default',
-      //       data: {
-      //         ref_type: 'purchaseOrder',
-      //         ref_id: item._id,
-      //         label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.purchaseOrderNumber}</div>
-      //       },
-      //       position: { x: xPosition, y: purchaseAndSubLeaseIdx * 80 },
-      //       style: customNodeStyles.purchaseOrder
-      //     });
-      //     purchaseAndSubLeaseIdx += 1;
-      //   }
-      //   product?.inventory?.map((data) => {
-      //     if (purchaseArr.includes(data.inventoryDetail.purchaseOrder) && data.inventoryDetail.purchaseOrder === item._id) {
-      //       flowEdge.push({
-      //         id: `edge-purchseOrder-${item._id}-${_.random(0, 1000)}`,
-      //         source: `${data._id}`,
-      //         arrowHeadType: 'arrow',
-      //         target: `${item._id}`
-      //       });
-      //     }
-      //   });
-      // });
-
       const bulkAssetArr = bulkAsset?.map((item) => item._id);
       const bulkAssetInAssets = product?.inventory
         ?.filter((item) => item.inventoryDetail.bulkAssetCreation)
@@ -384,23 +371,17 @@ const RentalManagementViews = (props) => {
           source: purchaseArr.includes(item.inventoryDetail.purchaseOrder)
             ? `${item.inventoryDetail.purchaseOrder}`
             : subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
-              ? `${item.inventoryDetail.supplierAccount}`
-              : bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)
-                ? `${item.inventoryDetail.bulkAssetCreation}`
-                : allAssets[item.inventoryDetail.assetNumber] !== undefined
-                  ? allAssets[item.inventoryDetail.assetNumber]
-                  : `${item._id}`,
+            ? `${item.inventoryDetail.supplierAccount}`
+            : bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)
+            ? `${item.inventoryDetail.bulkAssetCreation}`
+            : allAssets[item.inventoryDetail.assetNumber] !== undefined
+            ? allAssets[item.inventoryDetail.assetNumber]
+            : `${item._id}`,
           arrowHeadType: 'arrow',
           target: `${item.inventoryDetail.assetNumber}`
         });
       });
 
-      const assetsInLoading = {};
-      loadingTicket?.map((item) => {
-        item?.products?.map((i) => {
-          assetsInLoading[i?.product] = item._id;
-        });
-      });
       var loadingProductData = [];
       product?.material
         ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInLoading[i?.materialId] && i.type !== 'package')
@@ -519,17 +500,12 @@ const RentalManagementViews = (props) => {
         });
       });
 
-      const assetsInReceiving = {};
-      receivingTicket?.map((item) => {
-        item?.products?.map((i) => {
-          assetsInReceiving[i?.product] = item._id;
-        });
-      });
-
       const loadingAssetsXPosition = xPosition + 300;
       var receivingProductData = [];
       product?.material
-        ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInReceiving[i?.materialId] && i.type !== 'package')
+        ?.filter(
+          (i) => !i?.productDetail?.serializedProduct && (assetsInReceiving[i?.materialId] || assetsInConsume[i?.materialId]) && i.type !== 'package'
+        )
         .map((item) => {
           if (!receivingProductData.includes(`${item.materialId}`)) {
             receivingProductData.push(`${item.materialId}`);
@@ -567,9 +543,16 @@ const RentalManagementViews = (props) => {
             arrowHeadType: 'arrow',
             target: `${assetsInReceiving[item?.materialId]}`
           });
+          flowEdge.push({
+            id: `edge-assets-product-${item?.materialId}-${assetsInConsume[item?.materialId]}-${_.random(0, 1000)}`,
+            source: `${item.materialId}`,
+            arrowHeadType: 'arrow',
+            target: `${assetsInConsume[item?.materialId]}`
+          });
         });
 
       xPosition += 600;
+      var lastYPosition = 0;
       var receivingAndReturnIdx = 0;
       receivingTicket?.map((item: any) => {
         flow.push({
@@ -606,6 +589,7 @@ const RentalManagementViews = (props) => {
           position: { x: xPosition, y: receivingAndReturnIdx * 80 },
           style: item.status === 'Delivered' ? customDeliveredNodeStyle.receivingTicket : customNodeStyles.receivingTicket
         });
+        lastYPosition = receivingAndReturnIdx * 80;
         receivingAndReturnIdx += 1;
         item.productInventory?.map((product: any) => {
           flowEdge.push({
@@ -617,12 +601,6 @@ const RentalManagementViews = (props) => {
         });
       });
 
-      const assetsInReturn = {};
-      returnTicket?.map((item) => {
-        item?.products?.map((i) => {
-          assetsInReturn[i?.product] = item._id;
-        });
-      });
       var returnProductData = [];
       product?.material
         ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInReturn[i?.materialId] && i.type !== 'package')
@@ -699,6 +677,7 @@ const RentalManagementViews = (props) => {
           position: { x: xPosition, y: receivingAndReturnIdx * 80 },
           style: item.status === 'Delivered' ? customDeliveredNodeStyle.returnTicket : customNodeStyles.returnTicket
         });
+        lastYPosition = receivingAndReturnIdx * 80;
         receivingAndReturnIdx += 1;
         item.productInventory?.map((product: any) => {
           flowEdge.push({
@@ -710,7 +689,35 @@ const RentalManagementViews = (props) => {
         });
       });
 
-      if ((status === RENTAL_STATUS.cancelled || status === RENTAL_STATUS.closed) && (receivingTicket.length || returnTicket.length)) {
+      if (consumeProducts.length > 0) {
+        flow.push({
+          id: consumeID,
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          type: 'default',
+          data: {
+            ref_type: 'consume product',
+            ref_id: '',
+            label: (
+              <HtmlTooltip arrow placement="top" title={<>Consume Products</>}>
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  Consume Products
+                  {/* {item.ticketName}
+                  <br />
+                  {item.ticketType} Ticket */}
+                </div>
+              </HtmlTooltip>
+            )
+          },
+          position: { x: xPosition, y: lastYPosition + 80 },
+          style: customNodeStyles.loadingTicket
+        });
+      }
+
+      if (
+        (status === RENTAL_STATUS.cancelled || status === RENTAL_STATUS.closed) &&
+        (receivingTicket.length || returnTicket.length || consumeProducts.length)
+      ) {
         xPosition += 300;
         const endRentalTicketId = '12345678900987654123456';
         flow.push({
@@ -742,6 +749,13 @@ const RentalManagementViews = (props) => {
             target: `${endRentalTicketId}`
           });
         });
+        consumeProducts.length &&
+          flowEdge.push({
+            id: `edge-consume-last-rental`,
+            source: consumeID,
+            arrowHeadType: 'arrow',
+            target: `${endRentalTicketId}`
+          });
       }
 
       setFlowData([...flow, ...flowEdge]);
@@ -793,77 +807,80 @@ const RentalManagementViews = (props) => {
     }
   };
 
-  return (<ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
-    <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
-      <Box>
-        <Button
-          variant={'outlined'}
-          color="default"
-          size="small"
-          onClick={() => {
-            setColorInfo(!colorInfo);
-          }}
-          aria-controls="action-menu"
-        >
-          {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
-        </Button>
-      </Box>
-      {colorInfo &&
+  return (
+    <ContentFullScreen title="Views" fullScreen={fullDialogueOpen} setFullScreen={false} isheader={false}>
+      <Box marginLeft={2} marginTop={1} display="flex" flexDirection="column">
         <Box>
-          <div style={{ marginLeft: 'auto', marginRight: 'auto', position: 'absolute', zIndex: 9999 }}>
-            <Paper elevation={3} variant="outlined" >
-              <Box display="flex" flexDirection="column">
-                {Object.keys(customNodeStyles).map((key) => {
-                  return (<Box p={1}>
-                    <div
-                      style={{
-                        display: 'inline-flex',
-                        height: '12px',
-                        width: '12px',
-                        marginRight: '5px',
-                        borderRadius: '100%',
-                        background: `${customNodeStyles[key].background}`,
-                        borderColor: `1px solid ${customNodeStyles[key].borderColor}`
-                      }}
-                    ></div>
-                    {customNodeStyles[key].name}
-                  </Box>
-                  );
-                })}
-              </Box>
-            </Paper>
-          </div>
-        </Box>}
-    </Box>
-    <div style={fullDialogueOpen ? { height: '95vh' } : { height: '68vh' }}>
-      {!loading ? (
-        flowData.length ? (
-          <Fragment>
-            <ReactFlowProvider>
-              <ReactFlow
-                elements={flowData || []}
-                onLoad={onLoad}
-                selectNodesOnDrag={false}
-                snapToGrid={true}
-                snapGrid={[15, 15]}
-                onElementClick={onElementClick}
-              >
-                <Controls>
-                  <ControlButton onClick={() => (fullDialogueOpen ? setFullDialogueOpen(false) : setFullDialogueOpen(true))}>
-                    <MdZoomOutMap />
-                  </ControlButton>
-                </Controls>
-              </ReactFlow>
-            </ReactFlowProvider>
-          </Fragment>
+          <Button
+            variant={'outlined'}
+            color="default"
+            size="small"
+            onClick={() => {
+              setColorInfo(!colorInfo);
+            }}
+            aria-controls="action-menu"
+          >
+            {'Color Info'} {colorInfo ? <ExpandLess /> : <ExpandMore />}
+          </Button>
+        </Box>
+        {colorInfo && (
+          <Box>
+            <div style={{ marginLeft: 'auto', marginRight: 'auto', position: 'absolute', zIndex: 9999 }}>
+              <Paper elevation={3} variant="outlined">
+                <Box display="flex" flexDirection="column">
+                  {Object.keys(customNodeStyles).map((key) => {
+                    return (
+                      <Box p={1}>
+                        <div
+                          style={{
+                            display: 'inline-flex',
+                            height: '12px',
+                            width: '12px',
+                            marginRight: '5px',
+                            borderRadius: '100%',
+                            background: `${customNodeStyles[key].background}`,
+                            borderColor: `1px solid ${customNodeStyles[key].borderColor}`
+                          }}
+                        ></div>
+                        {customNodeStyles[key].name}
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </Paper>
+            </div>
+          </Box>
+        )}
+      </Box>
+      <div style={fullDialogueOpen ? { height: '95vh' } : { height: '68vh' }}>
+        {!loading ? (
+          flowData.length ? (
+            <Fragment>
+              <ReactFlowProvider>
+                <ReactFlow
+                  elements={flowData || []}
+                  onLoad={onLoad}
+                  selectNodesOnDrag={false}
+                  snapToGrid={true}
+                  snapGrid={[15, 15]}
+                  onElementClick={onElementClick}
+                >
+                  <Controls>
+                    <ControlButton onClick={() => (fullDialogueOpen ? setFullDialogueOpen(false) : setFullDialogueOpen(true))}>
+                      <MdZoomOutMap />
+                    </ControlButton>
+                  </Controls>
+                </ReactFlow>
+              </ReactFlowProvider>
+            </Fragment>
+          ) : (
+            <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
+          )
         ) : (
-          <div className="d-flex align-items-center justify-content-center h-100 w-100">No Data to Show.</div>
-        )
-      ) : (
-        <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
-      )}
-    </div>
-  </ContentFullScreen>
+          <div className="d-flex align-items-center justify-content-center h-100 w-100">Loading Views...</div>
+        )}
+      </div>
+    </ContentFullScreen>
   );
 };
 

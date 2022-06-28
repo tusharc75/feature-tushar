@@ -12,7 +12,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { transferInventory } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, transferInventory } from 'src/constants/helpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import queryString from 'query-string';
 import Steps from 'src/pages/RentalManagement/Steps';
@@ -22,15 +22,19 @@ import Activity from 'src/components/Activity';
 import TabPanel from 'src/components/TabPanel';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import HideWhenOffline from 'src/components/HideWhenOffline';
 import Products from './Products';
-import Processing from './SerializesAssets';
+import SerializesAssets from './SerializesAssets';
 import LoadingTicket from './LoadingTicket';
 import { camelCase } from 'lodash';
+import ContentFullScreen from '../../components/ContentFullScreen';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
   const toastConfig = useContext(CustomToastContext);
+
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const isTabletScreen = useMediaQuery('(max-width:960px)');
+
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -42,7 +46,6 @@ const TransferInventoryDetailPage = () => {
   const [headingLabel, setHeadingLabel] = useState('');
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [isDeleting, setDeleting] = useState(false);
   const [transferInventoryData, setTransferInventoryData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -55,6 +58,13 @@ const TransferInventoryDetailPage = () => {
   const [nextStep, setNextStep] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
+
+  const [transferInvSteps, setTransferInvSteps] = useState([]);
+
+  const [canReceive, setCanReceive] = useState(false);
+  const [canLoad, setCanLoad] = useState(false);
+
 
   useEffect(() => {
     return history.listen((location) => {
@@ -107,19 +117,53 @@ const TransferInventoryDetailPage = () => {
     axiosInstance()
       .get(`${routes.transferInventory.path}/${id}`)
       .then(({ data: { data } }) => {
-        getRessourceFields();
-        setTransferInventoryData(data);
-        setHeadingLabel(data.transferNumber);
-        setCustomizedRoutes([routes.transferInventory, { title: data.transferNumber }]);
-        setCurrentStep(transferInventorySteps.indexOf(data?.processStatus) !== -1 ? transferInventorySteps.indexOf(data?.processStatus) : 0);
-        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
-        if (permissions?.transferInventory?.isUpdate && openEdit === 'true') {
-          setOpenUpdateDialog(true);
-          const params = new URLSearchParams();
-          params.delete('openEdit');
-          history.push({ search: params.toString() });
+        const transferData = data;
+
+        const userEntity = user?.entity?.map((e) => e._id) ?? [];
+        if (data?.transferFromPlant?.entity?.length) {
+          setCanLoad(data?.transferFromPlant?.entity?.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0);
         }
+        else {
+          setCanLoad(true);
+        }
+
+        if (data?.transfertoPlant?.entity?.length) {
+          setCanReceive(data?.transfertoPlant?.entity?.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0);
+        }
+        else {
+          setCanReceive(true);
+        }
+
+        axiosInstance()
+          .get(`${routes.transferInventory.path}/${id}/product`)
+          .then(({ data: { data } }) => {
+
+            var isSerializedAssetsStep = false;
+            data?.products?.forEach((e) => {
+              if (e?.productDetail?.serializedProduct) {
+                isSerializedAssetsStep = true
+              }
+            })
+            var steps = transferInventorySteps;
+            // if (!isSerializedAssetsStep) {
+            //   steps = steps?.filter((e) => e !== "Serialized Assets")
+            // }
+            steps = steps?.filter((e) => e !== "Serialized Assets")
+            setTransferInvSteps(steps)
+            getRessourceFields();
+            setHeadingLabel(transferData.transferNumber);
+            setCustomizedRoutes([routes.transferInventory, { title: transferData.transferNumber }]);
+            setCurrentStep(steps.indexOf(transferData?.processStatus) !== -1 ? steps.indexOf(transferData?.processStatus) : 0);
+            const isAllowedToEdit = [...(transferData.collaborator ?? []), transferData.owner].some((d) => d?.optionValue === user?.user?._id);
+            setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
+            setTransferInventoryData(transferData);
+            if (permissions?.transferInventory?.isUpdate && openEdit === 'true') {
+              setOpenUpdateDialog(true);
+              const params = new URLSearchParams();
+              params.delete('openEdit');
+              history.push({ search: params.toString() });
+            }
+          })
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -168,7 +212,7 @@ const TransferInventoryDetailPage = () => {
           message: `Status updated ${status} Successfully`
         });
         if (status === TRANSFER_INVENTORY_STATUS.delivered) {
-          updateProcessStatus(2);
+          updateProcessStatus(1);
         }
         fetchTransferInventoryData();
       })
@@ -180,7 +224,7 @@ const TransferInventoryDetailPage = () => {
   const updateProcessStatus = (step: number) => {
     axiosInstance()
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
-        processStatus: transferInventorySteps[step]
+        processStatus: transferInvSteps[step]
       })
       .then(() => { })
       .catch((error) => {
@@ -191,6 +235,15 @@ const TransferInventoryDetailPage = () => {
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
   };
+
+  useEffect(() => {
+    if (isSmallScreen && tabValue === 0) {
+      setActivityShow(true);
+    } else {
+      setActivityShow(false);
+    }
+  }, [isSmallScreen, tabValue]);
+
 
   return (
     <>
@@ -263,7 +316,6 @@ const TransferInventoryDetailPage = () => {
                 />
                 <div className={'uio'}> </div>
               </Tabs>
-
               <TabPanel value={tabValue} index={0}>
                 <Box>
                   {loading || !transferInventoryData ? (
@@ -275,91 +327,97 @@ const TransferInventoryDetailPage = () => {
                   )}
                 </Box>
               </TabPanel>
-
               <TabPanel value={tabValue} index={1}>
-                <Box my={2}>
-                  <Steps
-                    steps={transferInventorySteps}
-                    currentStep={currentStep}
-                    setCurrentStep={setCurrentStep}
-                    isNextStep={false}
-                    nextStep={nextStep}
-                    updateStatus={updateProcessStatus}
-                    isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
-                  />
-                  <Box my={1}>
-                    {currentStep === 0 && (
-                      <Products
-                        transferInventoryData={transferInventoryData}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
-                    {currentStep === 1 && (
-                      <Processing
-                        transferInventoryData={transferInventoryData}
-                        updateTransferInventoryStatus={updateStatus}
-                        currentStep={currentStep}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-2`}
-                        statusOptions={statusOptions}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
-                    {currentStep === 2 && (
-                      <LoadingTicket
-                        transferInventoryData={transferInventoryData}
-                        updateStatus={updateStatus}
-                        renderedFrom={`${renderedFrom}_grid-3`}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
-                  </Box>
-                </Box>
+                {transferInventoryData &&
+                  <Paper>
+                    <Steps
+                      steps={transferInvSteps}
+                      currentStep={currentStep}
+                      setCurrentStep={setCurrentStep}
+                      isNextStep={false}
+                      nextStep={nextStep}
+                      updateStatus={updateProcessStatus}
+                      isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
+                      setStepFullScreen={() => setStepFullScreen(true)}
+                    />
+                    <ContentFullScreen title={transferInvSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                      {transferInvSteps[currentStep] === "Add Products" && (
+                        <Products
+                          transferInventoryData={transferInventoryData}
+                          setNextStep={setNextStep}
+                          renderedFrom={`${renderedFrom}_grid-1`}
+                          allowedToEdit={allowedToEdit}
+                          updateStatus={updateStatus}
+                          fetchTransferInventoryData={fetchTransferInventoryData}
+                        />
+                      )}
+                      {transferInvSteps[currentStep] === "Serialized Assets" && (
+                        <SerializesAssets
+                          transferInventoryData={transferInventoryData}
+                          setNextStep={setNextStep}
+                          renderedFrom={`${renderedFrom}_grid-2`}
+                          allowedToEdit={allowedToEdit}
+                          stepFullScreen={stepFullScreen}
+                          isTabletScreen={isTabletScreen}
+                          isSmallScreen={isSmallScreen}
+                          showActivity={showActivity}
+                          canLoad={canLoad}
+                        />
+                      )}
+                      {transferInvSteps[currentStep] === "Loading Ticket" && (
+                        <LoadingTicket
+                          transferInventoryData={transferInventoryData}
+                          updateStatus={updateStatus}
+                          renderedFrom={`${renderedFrom}_grid-3`}
+                          allowedToEdit={allowedToEdit}
+                          canLoad={canLoad}
+                          canReceive={canReceive}
+                        />
+                      )}
+                    </ContentFullScreen>
+                  </Paper>
+                }
               </TabPanel>
             </Paper>
           </div>
           <Box my={1} />
         </div>
         <div className="position-relative">
-          <HideWhenOffline>
-            <Paper>
-              {!isSmallScreen && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
-              )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    {transferInventoryData && (
-                      <div>
-                        <Activity
-                          resourceId={transferInventoryData?._id}
-                          resource={transferInventory.resource}
-                          // restrictedAddActivities={
-                          //   permissions && permissions['transferInventory'] && permissions['rentalManagement'].isUpdate
-                          //   ? []
-                          //   : ['Attachment', 'Case']
-                          // }
-                          relatedTo={[
-                            {
-                              access: true,
-                              referenceId: transferInventoryData?._id,
-                              type: 'transferInventory'
-                            }
-                          ]}
-                          handleActivityRefresh={() => { }}
-                          emails={[]}
-                        />
-                      </div>
-                    )}
-                  </Grid>
+          <Paper>
+            {!isSmallScreen && (
+              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>
+            )}
+            <div style={{ display: showActivity ? 'block' : 'none' }}>
+              <Grid container>
+                <Grid item xs={12}>
+                  {transferInventoryData && (
+                    <div>
+                      <Activity
+                        resourceId={transferInventoryData?._id}
+                        resource={ACTIVITY_RESOURCE.transferInventory}
+                        // restrictedAddActivities={
+                        //   permissions && permissions['transferInventory'] && permissions['rentalManagement'].isUpdate
+                        //   ? []
+                        //   : ['Attachment', 'Case']
+                        // }
+                        relatedTo={[
+                          {
+                            access: true,
+                            referenceId: transferInventoryData?._id,
+                            type: ACTIVITY_RESOURCE.transferInventory
+                          }
+                        ]}
+                        handleActivityRefresh={() => { }}
+                        emails={[]}
+                      />
+                    </div>
+                  )}
                 </Grid>
-              </div>
-            </Paper>
-          </HideWhenOffline>
+              </Grid>
+            </div>
+          </Paper>
         </div>
       </div>
       {showConfirmBox && (

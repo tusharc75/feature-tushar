@@ -14,7 +14,7 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageOpportunityDialog from './ManageOpportunityDialog/ManageOpportunityDialog';
 import { cloneDeep } from 'lodash';
-import CustomMobileStepperOpportunities from "../../components/CustomMobileStepperOpportunities"
+import CustomMobileStepperOpportunities from '../../components/CustomMobileStepperOpportunities';
 import {
   customerAccount,
   supplierAccount,
@@ -40,10 +40,10 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import { SVG } from '../../assets';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
-import { MdDelete, MdEdit } from "react-icons/md";
-import { BiEdit } from "react-icons/bi";
-import contactClass from "../Contact/contact.module.scss";
-import accountClass from "../Account/account.module.scss";
+import { MdDelete, MdEdit } from 'react-icons/md';
+import { BiEdit } from 'react-icons/bi';
+import contactClass from '../Contact/contact.module.scss';
+import accountClass from '../Account/account.module.scss';
 
 const recordsPerLine = 3;
 function OpportunityDetailsPage() {
@@ -73,7 +73,7 @@ function OpportunityDetailsPage() {
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
-  const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' })
+  const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
   const parsed = queryString.parse(history.location.search);
   const { openEdit } = parsed;
 
@@ -96,8 +96,8 @@ function OpportunityDetailsPage() {
   const [, setShowAtLast] = useState(false);
   const [, setAdditionalFieldName] = useState('');
   const handleActivityHideShow = () => {
-    setActivityShow(!showActivity)
-  }
+    setActivityShow(!showActivity);
+  };
 
   const handleOpenUpdateDialog = () => {
     if (activeStep === steps.length - 1) {
@@ -134,9 +134,9 @@ function OpportunityDetailsPage() {
 
   useEffect(() => {
     if (isSmallScreen) {
-      setActivityShow(true)
+      setActivityShow(true);
     }
-  }, [isSmallScreen])
+  }, [isSmallScreen]);
 
   useEffect(() => {
     if (
@@ -239,7 +239,7 @@ function OpportunityDetailsPage() {
 
         if (data[sidebarResource.lead] && data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]) {
           let tempName = data[sidebarResource.lead][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')][0];
-          setParentLead({ leadName: `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`, leadId: tempName._id })
+          setParentLead({ leadName: `${tempName.firstName} ${tempName.middleName} ${tempName.lastName}`, leadId: tempName._id });
         }
 
         setQuotes(
@@ -514,7 +514,7 @@ function OpportunityDetailsPage() {
       ...data
     };
 
-    const updatedOpportunityFields = [...opportunityFieldData, ...sectionFields.map((item) => item.fieldData)]
+    const updatedOpportunityFields = [...opportunityFieldData, ...sectionFields.map((item) => item.fieldData)];
     const updatedData = {
       ...getObjKeysWithValues(updatedOpportunityData, updatedOpportunityFields),
       [processFieldName]: steps[tempActiveStep].text,
@@ -570,9 +570,9 @@ function OpportunityDetailsPage() {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} >
+      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
         <div>
-          <Paper style={isMobile ? { width: "98%" } : {}}>
+          <Paper style={isMobile ? { width: '98%' } : {}}>
             {!opportunityData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
@@ -590,25 +590,25 @@ function OpportunityDetailsPage() {
                 showHeading={true}
               >
                 {allowedToEdit ? (
-                  <Button variant={isMobile && !isTablet ? "text" : "contained"}
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
                     size="small"
                     onClick={handleOpenUpdateDialog}
-                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
-                    style={isMobile && !isTablet ? { color: "#43aeaa" } : {}}
+                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                   >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : "Edit"}
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 ) : null}
                 {opportunityPermissions.isDelete &&
-                  opportunityData?.owner.optionValue &&
-                  user?.user?._id &&
-                  opportunityData.owner.optionValue === user.user._id ? (
+                opportunityData?.owner.optionValue &&
+                user?.user?._id &&
+                opportunityData.owner.optionValue === user.user._id ? (
                   <DeleteButton
-                    text={isMobile && !isTablet ? <MdDelete size={20} /> : "Delete"}
+                    text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
                     onClick={() => setShowConfirmBox(true)}
-                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ""}
-
+                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
                   />
                 ) : null}
               </DetailsPageHeader>
@@ -619,7 +619,6 @@ function OpportunityDetailsPage() {
               activeStep={activeStep}
               handleMarkAsCompleted={handleMarkAsCompleted}
             />
-
 
             {loading ? (
               <Grid container spacing={2}>
@@ -639,7 +638,7 @@ function OpportunityDetailsPage() {
               <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
             )}
 
-            <div className="p-3">
+            <div className="p-3 modified_style_of_accordion">
               {opportunityData && permissions?.supplierContact?.isRead && (
                 <OpportunityContacts
                   contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
@@ -690,6 +689,9 @@ function OpportunityDetailsPage() {
                   permissions={permissions}
                   isAddProjectSale={true}
                   isAllowedToEdit={allowedToEdit}
+                  accountId={opportunityData?._id}
+                  accountName={opportunityData?.opportunityName}
+                  resource={sidebarResource.opportunity}
                 />
               )}
               {permissions?.quoteBuilder?.isRead && (
@@ -712,7 +714,7 @@ function OpportunityDetailsPage() {
             </div>
           </Paper>
         </div>
-        <div className={isMobile ? "position-relative mb-5" : "position-relative"}>
+        <div className={isMobile ? 'position-relative mb-5' : 'position-relative'}>
           {/* {showActivity ?
             <Paper>
               {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
@@ -750,10 +752,12 @@ function OpportunityDetailsPage() {
             </span>} */}
 
           <Paper>
-            {!isSmallScreen && <span className={`${showActivity ? "activityHide" : "activityShow"} cursor-pointer`} onClick={handleActivityHideShow}>
-              {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-            </span>}
-            <div style={{ display: showActivity ? "block" : "none" }}>
+            {!isSmallScreen && (
+              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>
+            )}
+            <div style={{ display: showActivity ? 'block' : 'none' }}>
               {!opportunityData ? (
                 <Box>
                   <Skeleton variant="text" width="100px" height="25px" />
@@ -763,7 +767,7 @@ function OpportunityDetailsPage() {
                   ))}
                 </Box>
               ) : (
-                <div >
+                <div>
                   <Activity
                     resourceId={opportunityData?._id}
                     resource={opportunityResource}
@@ -774,7 +778,7 @@ function OpportunityDetailsPage() {
                         access: true
                       }
                     ]}
-                    handleActivityRefresh={() => { }}
+                    handleActivityRefresh={() => {}}
                     emails={contactsEmailsData}
                   />
                 </div>
@@ -807,7 +811,7 @@ function OpportunityDetailsPage() {
           dataToUpdate={opportunityData}
           resource={null}
           isRedirectTodetailPage={false}
-        // opportunityApi={opportunityApi}
+          // opportunityApi={opportunityApi}
         />
       )}
 

@@ -114,6 +114,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
           coloum.push({
             accessor: element.fieldName,
             Header: element.fieldLabel,
+            disableFilters: true,
             Cell: ({ row }) => (
               row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
             )
@@ -475,9 +476,9 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
             width={
               stepFullScreen ? "100%" :
                 isTabletScreen
-                  ? "calc(100vw - 20px)"
+                  ? "calc(100vw)"
                   : isSmallScreen
-                    ? "calc(100vw - 78px)"
+                    ? "calc(100vw)"
                     : showActivity ? "100%" : "calc(100vw - 103px)"
             }
             height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 350px)"}

@@ -15,7 +15,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from 'src/components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import { transferInventory, isObjectEmpty, gridLoadingTimeout } from 'src/constants/helpers';
+import { transferInventory, isObjectEmpty, gridLoadingTimeout, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -120,20 +120,15 @@ const TransferInventory = () => {
       .then(({ data }) => {
         let rows = data.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-
-          finalObject['canDelete'] = permissions?.transferInventory?.isDelete;
-
+          finalObject['canDelete'] = (permissions?.transferInventory?.isDelete && u?.status === TRANSFER_INVENTORY_STATUS.new && u?.products?.length === 0)
+            && [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-
-          finalObject['allowedToEdit'] = permissions?.transferInventory?.isUpdate;
-
+          finalObject['allowedToEdit'] = permissions?.transferInventory?.isUpdate && [...(u.collaborator || []), u.owner].some((d) => d?.optionValue === user?.user?._id);
           return finalObject;
         });
-
         data.data = data.data?.map((u, i) => ({
           ...prepareDataForGrid(u, user)
         }));
-
         dispatch({ type: 'initialize', data: rows, count: data.count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -145,13 +140,14 @@ const TransferInventory = () => {
       });
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterTransferInventory=${selectedType}`;
+  const getQueryString = (isExport = false) => {
 
-    if (fromRental) {
-      let filterById = [];
-      filterById.push({ field: 'rentalJob', term: fromRental?._id });
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterTransferInventory=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterTransferInventory=${selectedType}`;
+    }
+    else {
+      deepFilter = `?page=${page}&limit=${limit}&filterTransferInventory=${selectedType}`;
     }
 
     if (!isObjectEmpty(filters)) {
@@ -162,7 +158,7 @@ const TransferInventory = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -170,7 +166,7 @@ const TransferInventory = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -241,7 +237,7 @@ const TransferInventory = () => {
           </IconButton>
         </HtmlTooltip>
       )}
-      {permissions?.transferInventory?.isDelete && params?.data.status === 'New' && (
+      {(params?.data?.canDelete) && (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -308,7 +304,7 @@ const TransferInventory = () => {
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
             permissions={permissions?.transferInventory}
-            module="purchase order"
+            module="transfer inventory"
             api={transferInventory.api}
             afterImportCompleted={() => {
               fetchTransferInventory();
@@ -321,6 +317,7 @@ const TransferInventory = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchTransferInventory();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
@@ -395,16 +392,6 @@ const TransferInventory = () => {
                   </div>
                 </HideWhenOffline>
               }
-              {/* {fromRental && (
-                <Chip
-                  className="ml-3"
-                  color="primary"
-                  label={`Rental Job : ${fromRental?.rentalJobName}`}
-                  onDelete={() => {
-                    setFromRental(null);
-                  }}
-                />
-              )} */}
             </Grid>
             <Grid xs={12} sm={12} md={6} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -433,45 +420,6 @@ const TransferInventory = () => {
                       </Button>
                     )}
                   </Grid>
-
-                  {/* <HtmlTooltip title={selectedRecords.length > 0 ? '' : 'Please select some records'}>
-                    <span>
-                      <Button
-                        className={isMobile ? 'mobile_button' : styles.action_submit_btn}
-                        variant={isMobile ? 'text' : 'contained'}
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        disabled={selectedRecords.length === 0 || selectedRecords.filter((t: any) => t.status !== 'New').length > 0}
-                        aria-controls="action-menu"
-                      >
-                        {isMobile ? '' : 'Actions'} <ExpandMore />
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
-                  <Menu
-                    anchorEl={anchorEl}
-                    keepMounted
-                    getContentAnchorEl={null}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    id="action-menu"
-                    open={Boolean(anchorEl)}
-                    onClose={closeActions}
-                  >
-                    {permissions?.transferInventory?.isDelete && (
-                      <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        Delete
-                      </MenuItem>
-                    )}
-                  </Menu> */}
                 </Grid>
               </Box>
             </Grid>
@@ -491,7 +439,9 @@ const TransferInventory = () => {
                 dataRows={dataRows}
                 selectedRecords={selectedRecords}
                 dispatch={dispatch}
-                onEdit={() => { }}
+                onEdit={(data) => {
+                  history.push(`${routes.transferInventoryDetail.path}/${data._id}`);
+                }}
                 extraParamsToCheckDelete={true}
                 onDelete={(data) => {
                   setDeleteRecord(data);

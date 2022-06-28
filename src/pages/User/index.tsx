@@ -20,7 +20,7 @@ import { FaUserCheck, FaUserAltSlash, FaSuitcase, IoCreateSharp, MdEmail } from 
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, getLocalStorageArrayData } from './../../constants/helpers'
+import { userType, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { camelCase, uniqBy } from "lodash";
@@ -291,7 +291,7 @@ const User: FC = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return deepFilter;
   };
@@ -488,6 +488,7 @@ const User: FC = () => {
       axiosInstance()
         .put(`/user/remove`, { ids: [...recs] })
         .then(({ data }) => {
+          removeLocalStorage(localStorageSelectedRecords)
           toastConfig.setToastConfig({
             open: true,
             type: "success",
@@ -825,8 +826,8 @@ const User: FC = () => {
             open={isConfirmDialogVisible}
             message={
               unAssignLoading ?
-                `Are you sure you want to un-assign user from entity ${entityRoleRedirectDetails.name || ""}?`
-                : `Are you sure you want to delete user ${deleteRec.name || ""}?`}
+                `Are you sure you want to un-assign user from entity ${entityRoleRedirectDetails?.name || ""}?`
+                : `Are you sure you want to delete user ${deleteRec?.name || ""}?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);

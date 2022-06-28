@@ -103,7 +103,8 @@ const RepairType = () => {
             let rows = dataToProcess.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some(s => s._id === u._id);
-                finalObject["canDelete"] = false;
+                finalObject["allowedToEdit"] = permissions?.repairType?.isUpdate;
+                finalObject["canDelete"] = permissions?.repairType?.isDelete;
                 let res = {
                     ...finalObject,
                 };
@@ -144,13 +145,13 @@ const RepairType = () => {
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
         if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
+            deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
         }
         if (showFilteredRecordsOnly) {
             const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];

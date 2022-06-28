@@ -21,7 +21,7 @@ import { Link } from "react-router-dom";
 import { fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
 
 
-const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrentStep, currentStep, handleAttachments, statusOptions, renderedFrom }) => {
+const IssuPO = ({ purchaseOrderData, handleViewPdf, updateStatus, setCurrentStep, currentStep, handleAttachments, statusOptions, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -37,7 +37,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
         { field: "productNumber", headerName: "Product Number", show: true, cellRenderer: "commonRenderer" },
         { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
     ])
-    
+
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
     const NameRenderer = (params) => (
@@ -121,7 +121,7 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
     }, []);
 
     return (<>
-        <Box display="flex" justifyContent="flex-end" m={1}>
+        {/* <Box display="flex" justifyContent="flex-end" m={1}>
             {statusOptions?.findIndex(d => d.optionLabel === PURCHASE_ORDER_STATUS.issued) >
                 statusOptions.findIndex(d => d.optionLabel === purchaseOrderData?.status) &&
                 <Box display="flex" justifyContent="flex-end" p="4px">
@@ -132,14 +132,14 @@ const IssuPO = ({ purchaseOrderData, handleViewPdf, handleUpdateData, setCurrent
                         size="small"
                         onClick={() => {
                             setCurrentStep(currentStep + 1)
-                            handleUpdateData({ "status": "Issued" })
+                            updateStatus("Issued")
                         }}
                     >
                         Issue
                     </Button>
                 </Box>
             }
-        </Box>
+        </Box> */}
         <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns && frameWorkComponent ?
                 isMobile && !isTablet && !isTablet ? <CustomSwipableList

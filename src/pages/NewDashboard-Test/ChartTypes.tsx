@@ -9,7 +9,6 @@ import styles from '../KpiDashboard/dashboard.module.scss';
 import FiltersDropdown from './FiltersDropdown';
 import axiosInstance from 'src/axios/axiosInstance';
 import ExportDropdown from './ExportDropdown';
-import getMappedData from './getMappedData';
 import TableView from './TableView';
 import { GlobalFiltersType } from './GlobalFilter';
 
@@ -18,22 +17,14 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { startCase } from 'lodash';
 import MapView from './MapView';
+import { IFormDataType } from '../DashboardBuilder/builderHelpers';
+import getStaticData from './getStaticData';
+import StaticCards from './StaticCards';
 
-export type ChartDataType = {
-  col: any;
-  chartType: string;
-  filters: { key: string; title: string; multiple: boolean }[];
-  chartTitle: string;
-  kpi: string;
-  hasFilters: boolean;
-  hasTableView: boolean;
-  hasExport: boolean;
-  uniqueId: string;
+export interface ChartDataType extends IFormDataType {
   axis?: string;
-  hasStatus?: boolean;
-  statusOptions?: { optionValue: string; optionLabel: string }[];
   numberOfCards?: number;
-};
+}
 interface Props {
   commonSalesData?: any;
   setCommonSalesData?: any;
@@ -113,6 +104,10 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
         }
       }
     });
+
+    if (chart.kpi?.currencyConverter) {
+      url = `${url}currency=${globalFilters?.currency || currency}`;
+    }
     return url;
   };
 
@@ -124,10 +119,16 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   const fetchData = () => {
     const urlParams = getParams();
     setLoading(true);
+    let url = `kpi/${chart.kpi.kpi}?&entity=${selectedEntity}&${urlParams}`;
     axiosInstance()
-      .get(`kpi/${chart.kpi}?entity=${selectedEntity}&${urlParams}`)
+      .get(url)
       .then(async ({ data: { data } }) => {
-        setChartData(data);
+        if (chart.kpi?.custom) {
+          const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
+          setChartData(cardData);
+        } else {
+          setChartData(data);
+        }
         setLoading(false);
       })
       .catch((err: any) => {
@@ -139,37 +140,21 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   const idsWithAdditionStatus = ['openQuotesByCustomer', 'openQuoteByRep'];
 
   return (
-    <Grid item xs={12} md={chart.col}>
-      {chart.chartType === 'cards' ? (
+    <Grid item xs={12} md={chart.column}>
+      {chart.graphType === 'Custom' ? (
         <Grid container spacing={1}>
-          {loading
-            ? [...Array(chart.numberOfCards).keys()].map((_, index) => (
-                <Grid item xs={12} sm={6} md={3} key={index + 1}>
-                  <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
-                    <Skeleton variant="text" width={150} height={30} />
-                    <Skeleton variant="text" width={100} height={20} />
-                  </Box>
-                </Grid>
-              ))
-            : !chartData || chartData.length === 0
-            ? null
-            : Object.keys(chartData?.cardData).map((key, index) => (
-                <Grid item xs={12} sm={6} md={3} key={index + 1}>
-                  <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
-                    <Box>
-                      <Typography className={styles.price}>{chartData?.cardData[key] ? chartData?.cardData[key] : 0}</Typography>
-                      <Typography variant="h6" className={chartData?.additionalData ? styles.title : styles.title_sub}>
-                        {key}
-                      </Typography>
-                      {chartData?.additionalData && (
-                        <p className={styles.hit_ratio}>
-                          Hit Ratio: {chartData?.additionalData[key] ? (chartData?.additionalData[key]).toFixed(2) : 0} %
-                        </p>
-                      )}
-                    </Box>
-                  </Box>
-                </Grid>
-              ))}
+          {loading ? (
+            [...Array(4).keys()].map((_, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index + 1}>
+                <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
+                  <Skeleton variant="text" width={150} height={30} />
+                  <Skeleton variant="text" width={100} height={20} />
+                </Box>
+              </Grid>
+            ))
+          ) : !chartData ? null : (
+            <StaticCards chartData={chartData} />
+          )}
         </Grid>
       ) : (
         <Box component={Paper} p={'8px'} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
@@ -204,7 +189,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                     Export to
                   </Button>
                 )}
-                {chart.hasTableView && (
+                {chart.hasTableView && chartData?.tableData && (
                   <Button
                     disabled={loading}
                     color="primary"
@@ -223,39 +208,39 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
             {chart.chartTitle && (
               <Typography component="div" align="center" color="textPrimary">
                 <h4>
-                  {chart.chartTitle.includes('currency')
-                    ? startCase(chart.chartTitle.replace(/currency/gi, globalFilters.currency || currency))
-                    : startCase(chart.chartTitle.replace(/Type/gi, filterValues?.status?.optionLabel || 'Open'))}
+                  {chart.chartTitle.includes('CUR')
+                    ? startCase(chart.chartTitle.replace(/CUR/gi, globalFilters.currency || currency))
+                    : startCase(chart.chartTitle.replace(/statusType/gi, filterValues?.status?.optionLabel || 'Open'))}
                 </h4>
               </Typography>
             )}
           </Box>
 
-          <Box minHeight={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500}>
+          <Box minHeight={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500}>
             {loading ? (
               <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
             ) : !chartData || chartData.length === 0 ? (
               <Loader noLoader={true} text="No Data Avaiable" style={{ minHeight: '100%' }} />
-            ) : chart.chartType !== 'list' ? (
+            ) : chart.graphType !== 'Table' ? (
               chart.hasTableView && tableView ? (
                 <TableView
                   id={chart.uniqueId}
-                  type={chart.chartType}
-                  chartData={chartData.tableData}
+                  type={chart.chartType?.toLowerCase()}
+                  chartData={chartData?.tableData}
                   isScreenSmall={isScreenSmall}
                   currency={globalFilters.currency || currency}
                   selectedDashboard={globalFilters?.dashboardType}
                 />
-              ) : chart.chartType === 'map' ? (
-                <MapView height={isScreenSmall ? 350 : chart.col <= 6 ? 400 : 500} data={chartData} />
+              ) : chart.graphType === 'Map' ? (
+                <MapView height={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
               ) : (
                 <Chart
                   id={chart.uniqueId}
-                  type={chart.chartType}
+                  type={chart.chartType?.toLowerCase()}
                   data={chartData}
                   options={{
                     maintainAspectRatio: false,
-                    indexAxis: chart.axis
+                    indexAxis: chart?.axis
                   }}
                 />
               )
@@ -263,7 +248,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
               <TableView
                 id={chart.uniqueId}
                 type={chart.chartType}
-                chartData={chartData}
+                chartData={chartData?.tableData}
                 isScreenSmall={isScreenSmall}
                 currency={globalFilters.currency || currency}
                 selectedDashboard={globalFilters?.dashboardType}
@@ -283,7 +268,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           isAssetDashboard={globalFilters.dashboardType?.includes('Asset')}
           filterOptions={{
             ...filterData,
-            [chart.hasStatus && 'status']: chart.statusOptions
+            status: chart.statusOptions
           }}
         />
       )}
@@ -292,9 +277,10 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           anchorEl={anchorElExport}
           setAnchorClose={setAnchorElExport}
           currency={globalFilters.currency || currency}
-          tableData={chartData ? (chart.chartType === 'list' ? chartData : chartData.tableData) : []}
+          tableData={chartData ? chartData?.tableData : []}
           chart={chart}
-          chartData={chartData}
+          isTableView={chartData?.graphType !== 'Table' && tableView}
+          chartData={chartData?.tableData}
         />
       )}
     </Grid>

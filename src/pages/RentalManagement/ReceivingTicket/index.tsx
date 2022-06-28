@@ -31,7 +31,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { getRentalProductAssets, getRentalDeliveryTicket, uniqueProduct, getNestedQty } from './../rentalOfflineHelper';
+import { getRentalProductAssets, getRentalDeliveryTicket, uniqueProduct } from './../rentalOfflineHelper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import MultipleTicket from "../../DeliveryTicket/MultipleTicket";
 import ManageRepairJob from '../../RepairJob/ManageRepairJob'
@@ -72,6 +72,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
 
   const [showConformationConsume, setShowConformationConsume] = useState(false);
+  const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
+
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 
@@ -209,10 +211,11 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       })
 
       products = uniqueProduct(material)
-
       products?.forEach((element) => {
-        var qty = getNestedQty(material, element);
+        var qty = element.qty;
+
         var consumeQty = 0;
+
         consumeProducts?.filter(e => e.product === element.materialId)?.forEach((e) => {
           consumeQty = consumeQty + e.qty;
         })
@@ -241,6 +244,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           productAssets.push(obj)
           qty = qty - ele.qty;
         })
+
         if (qty > 0) {
           const obj: any = {}
           obj._id = element.materialId
@@ -293,7 +297,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               productAssets[index]['receivingTicketId'] = obj?._id;
               productAssets[index]['receivingTicketStatus'] = obj?.status;
             }
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['loadingTicketId']) {
+            if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['returnTicketId']) {
               productAssets[index]['returnTicket'] = obj?.ticketName;
               productAssets[index]['returnTicketId'] = obj?._id;
               productAssets[index]['returnTicketStatus'] = obj?.status;
@@ -572,9 +576,19 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     let data = {}
     const receivingTicketId = uniq(map(selectedRecords, 'receivingTicketId'));
     const returnTicketId = uniq(map(selectedRecords, 'returnTicketId'));
-    const ticketIds = [...receivingTicketId, ...returnTicketId]
+    const ticketIds: any = [];
+    receivingTicketId?.forEach((e) => {
+      if (e && e !== undefined) {
+        ticketIds.push(e)
+      }
+    })
+    returnTicketId?.forEach((e) => {
+      if (e && e !== undefined) {
+        ticketIds.push(e)
+      }
+    })
     if (ticketIds.length) {
-      data["_ids"] = ticketIds?.map((e) => e);
+      data["_ids"] = ticketIds;
       data["status"] = DELIVERY_TICKET_STATUS.delivered
       data["signatures"] = []
       axiosInstance().post(`${deliveryTicket.api}/updatebulk`, data).then(({ data: { data } }) => {
@@ -592,14 +606,22 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
   const handleConsumProduct = (data) => {
     const products = []
-    selectedRecords?.forEach((e) => {
-      products.push({ product: e.materialId, qty: parseInt(data.qty) })
-    })
+    if (data) {
+      selectedRecords?.forEach((e) => {
+        products.push({ product: e.materialId, qty: parseInt(data.qty) })
+      })
+    }
+    else {
+      selectedRecords?.forEach((e) => {
+        products.push({ product: e.materialId, qty: parseInt(e.qty) })
+      })
+    }
     setOkBtnLoading(true);
     axiosInstance().post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { "products": products })
       .then(({ data }) => {
         setOkBtnLoading(false);
         setShowConformationConsume(false);
+        setShowConformationConsumeMultiple(false);
         fetchRecords();
       })
       .catch((error) => {
@@ -729,11 +751,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               }}>{INVENTORY_STATUS.needRecert}</MenuItem>
             </Fragment>
           }
-          {(selectedRecords?.length === 1 && selectedRecords?.filter((f) => f.type === "Product"
-            && f.hasOwnProperty("loadingTicketId") && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length) &&
+          {(selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")
+            && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length) &&
             <MenuItem onClick={() => {
               setAnchorEl(null)
-              setShowConformationConsume(true)
+              if (selectedRecords?.length === 1) {
+                setShowConformationConsume(true)
+              }
+              else {
+                setShowConformationConsumeMultiple(true)
+              }
             }}>{RENTAL_INTERNAL_ASSET_STATUS.consumed}</MenuItem>
           }
         </Menu>
@@ -1154,6 +1181,19 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         onClose={() => setShowNonSerializeAsset({ open: false, data: {} })}
       />
     }
+    {showConformationConsumeMultiple && (
+      <ConfirmationDialog
+        open={showConformationConsumeMultiple}
+        message={`Are you sure you want to consumed selected products?`}
+        onClose={() => {
+          setShowConformationConsumeMultiple(false);
+        }}
+        onOk={() => {
+          handleConsumProduct(null)
+        }}
+        okBtnLoading={okBtnLoading}
+      />
+    )}
   </>
   );
 };

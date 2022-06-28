@@ -12,7 +12,8 @@ import {
   salesOrder,
   sidebarResource,
   prepareDataForGrid,
-  getLocalStorageArrayData
+  getLocalStorageArrayData,
+  removeLocalStorage
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -229,8 +230,11 @@ const SalesOrder = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterSalesOrder=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterSalesOrder=${selectedType}`;
+    }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
@@ -270,7 +274,7 @@ const SalesOrder = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -289,37 +293,11 @@ const SalesOrder = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          let res = {
-            ...finalObject
-            // canDelete: u.owner?.optionValue === user?.user._id,
-            // allowedToEdit: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue == user?.user?._id),
-            // lead: u.staticData && u.staticData.lead && u.staticData.lead.concatedName,
-            // leadId: u.staticData && u.staticData.lead && u.staticData.lead._id,
-            // leadEntity: u.staticData && u.staticData.lead && u.staticData.lead?.entity,
-            // approved: u.staticData?.approved,
-            // isChecked: false,
-
-            // masterAccount: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?.accountName : '',
-            // masterAccountId: u.parentHierarchy.length > 0 ? u.parentHierarchy.find((d) => d.parentAccount === '')?._id : ''
-          };
-          return res;
+          finalObject["isChecked"] = false;
+          finalObject["allowedToEdit"] = permissions?.salesOrder?.isUpdate;
+          finalObject["canDelete"] = permissions?.salesOrder?.isDelete;
+          return finalObject;
         });
-
-        // let rows = data.map((u) => {
-        //   const { owner, collaborator, createdBy, updatedBy, customerAccount, ...restProperties } = u;
-
-        //   let res = {
-        //     ...restProperties,
-        //     id: u._id,
-        //     ownerId: u.createdBy?.user?._id,
-        //     createdBy: u.createdBy?.user?.concatedName,
-        //     createdByDate: u.createdBy?.date,
-        //     updatedBy: u.updatedBy?.user?.concatedName,
-        //     updatedByDate: u.updatedBy?.date
-        //   };
-        //   return res;
-        // });
-
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -381,6 +359,7 @@ const SalesOrder = () => {
             type: 'success',
             message: data.message
           });
+          removeLocalStorage(localStorageSelectedRecords)
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -421,6 +400,7 @@ const SalesOrder = () => {
                     if (gridApi) gridApi.deselectAll();
                     else fetchSalesOrder();
                   }}
+                  additionalParams={getQueryString(true)}
                 />
               </Grid>
             </Grid>

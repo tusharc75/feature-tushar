@@ -102,6 +102,7 @@ import InventoryProduct from './pages/ProductInventory';
 import Logout from './pages/Auth/Logout';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import Report from './pages/Report';
+import PurchaseOrderReport from './pages/Report/PurchaseOrder';
 import ReportMaster from './pages/ReportMaster';
 import CustomerSign from './pages/DeliveryTicket/CustomerSign';
 import EcommercePolicy from './pages/EcommercePolicy';
@@ -128,6 +129,12 @@ import RepairType from './pages/RepairType';
 import RepairTypeDetailsPage from './pages/RepairType/RepairTypeDetailsPage';
 import ResourceCalendar from './pages/ResourceCalender';
 import ResourceCalendarData from './pages/ResourceCalender/ResourceCalendar';
+import CageManagement from './pages/CageManagement';
+import SerializedAssetTest from './pages/SerializedAsset-test';
+import ProductAuction from './pages/productAuction';
+import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDetailsPage';
+import ConvertInventory from './pages/ConvertInventory';
+import PublicRoutePage from './pages/PublicRoutePage';
 
 var notificationInterval: any = null;
 
@@ -298,7 +305,7 @@ function App() {
       }
     }
     if (user?.user?.customerContactId) {
-      redirectToAnotherScreen = routes?.pos?.path
+      redirectToAnotherScreen = routes?.pos?.path;
     }
 
     return !user ? (
@@ -457,7 +464,7 @@ function App() {
             <PrivateRoute exact path="/activity">
               <Activitydemo />
             </PrivateRoute>
-            <PrivateRoute exact path="/product-inventory">
+            <PrivateRoute exact path={routes.productInventory.path}>
               <InventoryProduct />
             </PrivateRoute>
             <PrivateRoute exact path={routes.activityEmail.path}>
@@ -489,6 +496,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAsset.path}>
               <SerializedAsset />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.serializedAsset.path + '-new'}>
+              <SerializedAssetTest />
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedAssetDetail.path + '/:id'}>
               <SerializedAssetDetailsPage />
@@ -662,6 +672,9 @@ function App() {
             <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.reports.path}/purchase-order-type/:type`}>
+              <PurchaseOrderReport />
+            </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />
             </PrivateRoute>
@@ -695,10 +708,10 @@ function App() {
             <PrivateRoute exact path={`${routes.posProductDetail.path}/:id/:warehouseId`}>
               <PosProductDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={"/dashboard-master/:id"}>
+            <PrivateRoute exact path={'/dashboard-master/:id'}>
               <DashboardBuilder />
             </PrivateRoute>
-            <PrivateRoute exact path={"/dashboard-master"}>
+            <PrivateRoute exact path={'/dashboard-master'}>
               <DashboardsList />
             </PrivateRoute>
             <Route exact path={'/customer-sign/:id'}>
@@ -707,6 +720,21 @@ function App() {
             <PrivateRoute exact path="/new-dashboard">
               <NewDashboard />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.cageManagement.path}`}>
+              <CageManagement />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productAuction.path}`}>
+              <ProductAuction />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productAuctionDetail.path}/:id`}>
+              <ProductAuctionDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.inventoryToAsset.path}>
+              <ConvertInventory />
+            </PrivateRoute>
+            <Route exact path={'/public/:id'}>
+              <PublicRoutePage />
+            </Route>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>

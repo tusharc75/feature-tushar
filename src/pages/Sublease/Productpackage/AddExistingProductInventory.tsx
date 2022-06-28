@@ -173,7 +173,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                             <SearchBox
                                 onSearch={handleSearch}
                                 searchbox="terms_header_search_bar"
-                                width="300px"
+                                width="250px"
                                 value={search}
                             />
                             <Box ml={1}>

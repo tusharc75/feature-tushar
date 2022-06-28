@@ -5,7 +5,7 @@ import routes from "src/components/Helpers/Routes";
 import { useData } from "src/StateProvider/Provider";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder } from "src/constants/helpers";
+import { purchaseOrder, PURCHASE_ORDER_STATUS } from "src/constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
@@ -25,12 +25,13 @@ import { RiEditCircleLine } from "react-icons/ri";
 import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import { CheckboxRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { Link } from 'react-router-dom'
+import SendEmail from './../SendEmail';
 
-const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission }) => {
+const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, renderedFrom, allowedToEdit: hasPermission, seIsShowIssue, updateStatus, checkReceivedProduct }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
-    const allowedToEdit = hasPermission || permissions?.purchaseOrder.isUpdate
+    const allowedToEdit = hasPermission && permissions?.purchaseOrder.isUpdate
 
     const [columns, setColumns] = useState([])
 
@@ -71,7 +72,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 columns.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
             }
             if (e?.fieldData?.fieldName === "serializedProduct") {
-                columns.push({ field: "serializedProduct", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "checkboxRenderer" })
+                columns.push({ field: "serializedProductView", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
             }
         })
         const fields = await fetch_po_product_fields(purchaseOrderData?.currency);
@@ -105,13 +106,14 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
             let rows = data?.map((item, index) => {
                 let finalObject = prepareDataForGrid(item);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
-                finalObject["allowedToEdit"] = true
+                finalObject["allowedToEdit"] = allowedToEdit
                 let res: any = {
                     ...finalObject,
                 };
                 res.productName = item.productDetail?.productName
                 res.productNumber = item.productDetail?.productNumber
                 res.serializedProduct = item.productDetail?.serializedProduct
+                res.serializedProductView = item.productDetail?.serializedProduct ? "Yes" : "No"
                 res.productDetail = item.productDetail
                 if (item?.qty === 0) {
                     res.isValid = false;
@@ -127,13 +129,22 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 else {
                     res.isValid = true
                 }
+                res.hideSelection = item.actualReceived ? true : false
                 return res;
             });
-            if (rows.filter(_rows => _rows.isValid === false).length > 0) {
+            if (rows.length === 0) {
                 setNextStep(false)
-            } else {
-                setNextStep(true)
+                seIsShowIssue(false)
             }
+            else if (rows.filter(_rows => _rows.isValid === false).length > 0) {
+                setNextStep(false)
+                seIsShowIssue(false)
+            }
+            else {
+                setNextStep(true)
+                seIsShowIssue(true)
+            }
+            checkReceivedProduct(data)
             dispatch({ type: "initialize", data: rows, count: rows.length });
             dispatch({ type: "loading", loading: false });
         }).catch((error) => {
@@ -199,10 +210,14 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         let tempProductArray = rows?.map(d => ({
             "productId": d.productId || d._id,
             "qty": d.qty ? parseInt(d.qty) : 1,
-            "expectedDelivery": purchaseOrderData?.deliveryDate
+            "expectedDelivery": purchaseOrderData?.deliveryDate,
+            "unit": d?.unitMain?.length ? d?.unitMain[0] : "",
         }))
         axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { "orderDetails": tempProductArray })
             .then(() => {
+                if (purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
+                    updateStatus(PURCHASE_ORDER_STATUS.inProgress)
+                }
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
                 setAddingProducts(false)
@@ -216,6 +231,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     const handleUpdateQty = (rows) => {
         axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
             .then(() => {
+                if (purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
+                    updateStatus(PURCHASE_ORDER_STATUS.inProgress)
+                }
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
                 setSelectedProductData(null)
@@ -244,23 +262,25 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         <Fragment>
             {allowedToEdit && <Box display="flex" justifyContent="space-between" m={1}>
                 <Box display="flex" alignItems="center">
+                    {permissions?.product?.isCreate ?
+                        <>
+                            <Button
+                                variant={"contained"}
+                                color="primary"
+                                size="small"
+                                // style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
+                                onClick={() => {
+                                    setIsAddNewProduct(true);
+                                }}
+                            >
+                                {isMobile && !isTablet ? "Add" : `Add New ${routes.product.title}`}
+                            </Button>
+                            <Box mx={isMobile ? 0.5 : 1} />
+                        </> : null}
                     <Button
                         variant={"contained"}
                         color="primary"
                         size="small"
-                        // style={isMobile && !isTablet ? { color: "var(--secondary)" } : {}}
-                        onClick={() => {
-                            setIsAddNewProduct(true);
-                        }}
-                    >
-                        {isMobile && !isTablet ? "Add" : `Add New ${routes.product.title}`}
-                    </Button>
-                    <Box mx={isMobile ? 0.5 : 1} />
-                    <Button
-                        variant={"contained"}
-                        color="primary"
-                        size="small"
-                        // style={isMobile && !isTablet ? { color: "var(--warning-darken)" } : {}}
                         onClick={() => {
                             setAddProductDialog(true);
                         }}
@@ -269,23 +289,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
-
-                    <Box display={isMobile ? "none" : "flex"} justifyContent="flex-end">
-                        <Button
-                            variant={isMobile && !isTablet ? "text" : "contained"}
-                            color="primary"
-                            size="small"
-                            style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                            disabled={selectedRecords.length === 0}
-                            onClick={() => {
-                                setIsBulkEdit(true)
-                                setShowProductDialog(true)
-                            }}
-
-                        >
-                            {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : `Bulk Edit`}
-                        </Button>
-                    </Box>
+                    <SendEmail
+                        purchaseOrderData={purchaseOrderData}
+                    />
                     <HtmlTooltip title="Please select some product">
                         <Button
                             variant={"outlined"}
@@ -299,7 +305,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                             <ExpandMore fontSize="small" />
                         </Button>
                     </HtmlTooltip>
-                    {isMobile ? <Menu
+                    <Menu
                         anchorEl={anchorEl}
                         keepMounted
                         getContentAnchorEl={null}
@@ -311,9 +317,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
                     >
-
                         <MenuItem disabled={selectedRecords.length === 0}
                             onClick={() => {
+                                closeActions()
                                 setIsBulkEdit(true)
                                 setShowProductDialog(true)
                             }}>
@@ -324,26 +330,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                             setShowDeleteConfirmBox(true)
                             setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
                         }}>Delete</MenuItem>}
-                    </Menu> :
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "left",
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}
-                        >
-                            {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
-                                closeActions()
-                                setShowDeleteConfirmBox(true)
-                                setDeletePurchaseOrderProduct(selectedRecords.map(d => d._id))
-                            }}>Delete</MenuItem>}
-                        </Menu>
-                    }
+                    </Menu>
                 </div>
             </Box>}
             {columns && frameWorkComponent ? isMobile && !isTablet ?
@@ -383,7 +370,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     fullHeight={true}
                     renderedFrom={renderedFrom}
                     onClone={() => { }}
-
                 /> :
                 <CustomAgGridEditable
                     columns={columns}
@@ -408,8 +394,17 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     currency={purchaseOrderData?.currency?.toLowerCase()}
                     fromPurchaseOrderGrid={true}
                     rowClassRules={{
+                        "scrap-data-row": function (params) {
+                            if (params?.node?.rowPinned) {
+                                return true
+                            }
+                            return false
+                        },
                         "red-data-row":
                             function (params) {
+                                if (params?.node?.rowPinned) {
+                                    return false
+                                }
                                 return !params?.data?.isValid
                             },
                     }}

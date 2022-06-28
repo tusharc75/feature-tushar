@@ -110,8 +110,8 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
 }
 export const getStaticFields = () => {
     return [
-        { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-        { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }]
+        { field: 'createdBy', headerName: 'Created By', show: true, filter: false, sortable: false, cellRenderer: 'createdByRenderer' },
+        { field: 'updatedBy', headerName: 'Updated By', show: true, filter: false, sortable: false, cellRenderer: 'updatedByRenderer' }]
 }
 
 export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
@@ -370,6 +370,10 @@ export const genrateColoum = (fields, column, rendererNames, editable, renderedF
                         }
                         currentColumn.columnData.editable = true;
                     }
+                }
+                if (ele.type === "date") {
+                    currentColumn.columnData.filter = false;
+                    currentColumn.columnData.sortable = false;
                 }
                 column.push({ ...currentColumn.columnData, leval: ele.leval });
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

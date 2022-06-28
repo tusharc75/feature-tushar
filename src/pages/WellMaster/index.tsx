@@ -137,8 +137,8 @@ const WellMaster = () => {
         });
     };
 
-    const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
+    const getQueryString = (isExport = false) => {
+        let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
         let filterById = [];
 
@@ -159,14 +159,14 @@ const WellMaster = () => {
                     term: filters[field].filter,
                 });
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
         }
 
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
         if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
+            deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
         }
         return deepFilter;
     };
@@ -283,6 +283,7 @@ const WellMaster = () => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchData()
                     }}
+                    additionalParams={getQueryString(true)}
                 />
             </Grid>
         </Grid>

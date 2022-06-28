@@ -12,15 +12,19 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { isMobile } from 'react-device-detect';
+import { INVENTORY_STATUS } from 'src/constants/helpers';
 
 const SerialzedAssets = ({
   allowedToEdit,
   transferInventoryData,
   setNextStep,
-  statusOptions,
-  currentStep,
   renderedFrom,
-  updateTransferInventoryStatus
+  stepFullScreen,
+  isTabletScreen,
+  isSmallScreen,
+  showActivity,
+  canLoad
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -60,17 +64,19 @@ const SerialzedAssets = ({
               <Link className="link" title={row.original.detail} to={`${routes.serializedAssetDetail.path}/${row.original.assetId}`}>
                 <p>{row.original.detail}</p>
               </Link>
-              <HtmlTooltip title={`Remove`}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setShowConfirmBox(true);
-                    setDeleteData([row.original.assetId]);
-                  }}
-                >
-                  <Delete fontSize="small" color="error" />
-                </IconButton>
-              </HtmlTooltip>
+              {(allowedToEdit && row.original.status === INVENTORY_STATUS.reserved) &&
+                <HtmlTooltip title={`Remove`}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setShowConfirmBox(true);
+                      setDeleteData([row.original.assetId]);
+                    }}
+                  >
+                    <Delete fontSize="small" color="error" />
+                  </IconButton>
+                </HtmlTooltip>
+              }
             </Fragment>
           )}
         </div>
@@ -125,6 +131,7 @@ const SerialzedAssets = ({
           assetsData?.forEach((ele) => {
             const element = {};
             element['detail'] = ele?.assetDetail?.assetNumber;
+            element['status'] = ele?.assetDetail?.status;
             element['assetId'] = ele?.asset;
             element['type'] = 'asset';
             element['isValid'] = true;
@@ -199,128 +206,63 @@ const SerialzedAssets = ({
 
   return (
     <Fragment>
-      {/* {currentStep === 1 && statusOptions?.length >= 0 && (
-        <Box mt={1}>
-          <Grid container spacing={2}>
-            <Grid item xs={8} sm={10} md={10}>
-              <Stepper activeStep={statusOptions?.findIndex((f) => f.optionLabel === transferInventoryData?.status)} alternativeLabel>
-                {statusOptions?.map(({ optionLabel }) => (
-                  <Step key={optionLabel}>
-                    <StepLabel>{optionLabel}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-            </Grid>
-            <Grid item xs={4} sm={2} md={2}>
-              {allowedToEdit && transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered && (
-                <Button
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                  onClick={() => {
-                    var index = 0;
-                    if (statusOptions?.findIndex((f) => f.optionLabel === transferInventoryData?.status) >= 0) {
-                      index = statusOptions?.findIndex((f) => f.optionLabel === transferInventoryData?.status) + 1;
-                    }
-                    updateTransferInventoryStatus(statusOptions[index]?.optionLabel);
-                  }}
-                >
-                  {statusOptions?.findIndex((f) => f.optionLabel === transferInventoryData?.status) >= 0
-                    ? statusOptions[statusOptions?.findIndex((f) => f.optionLabel === transferInventoryData?.status) + 1]?.optionLabel
-                    : statusOptions[0]?.optionLabel}
-                </Button>
-              )}
-            </Grid>
-          </Grid>
-        </Box>
-      )} */}
-      {/* {currentStep === 2 && (
-        <Box mt={1} mr={1} display="flex" justifyContent="flex-end">
+      {(allowedToEdit && canLoad) &&
+        <Box display="flex" justifyContent="flex-end" p={1}>
           <Button
-            onClick={() => {
-              setDownlodingFile(true);
-              axiosInstance()
-                .get(`/transfer-inventory/${transferInventoryData._id}/pdf`)
-                .then(({ data }) => {
-                  axiosInstance()
-                    .get(`user/download?fileName=${data.data.fileName}`, {
-                      responseType: 'blob'
-                    })
-                    .then(({ data }) => {
-                      const file = new Blob([data], { type: 'application/pdf' });
-                      const fileURL = URL.createObjectURL(file);
-                      const pdfWindow = window.open();
-                      pdfWindow.location.href = fileURL;
-                      toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-                      setDownlodingFile(false);
-                    })
-                    .catch((err) => {
-                      toastConfig.setToastConfig(err);
-                      setDownlodingFile(false);
-                    });
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                });
-            }}
-            variant={isMobile && !isTablet ? 'text' : 'outlined'}
+            variant="contained"
             color="primary"
             type="button"
             size="small"
-            disabled={downlodingFile || dataRows.length === 0}
-            startIcon={<AiFillFilePdf />}
+            disabled={disableAssignSerializedAssets()}
+            onClick={() => {
+              const product = [];
+              selectedRecords?.forEach((e) => {
+                if (e.type === 'product' && e?.serializedProduct) {
+                  product.push({
+                    _id: e._id,
+                    id: e.product,
+                    productName: e.detail,
+                    qty: e.qty - e.assetAssigned
+                  });
+                }
+              });
+              setAddSerializedAssetDialog({ open: true, product: product });
+            }}
           >
-            {downlodingFile ? 'Please wait...' : 'Preview'}
+            {'Assign ' + routes.serializedAsset.title}
           </Button>
+          {selectedRecords.filter((e: any) => e.type === 'asset').length > 0 &&
+            <Box ml={1}>
+              <Button
+                variant="contained"
+                color="primary"
+                type="button"
+                size="small"
+                disabled={selectedRecords.filter((e: any) => e.type === 'asset').length === 0}
+                onClick={() => {
+                  const assets = selectedRecords.filter((e: any) => e.type === 'asset')
+                  setShowConfirmBox(true);
+                  setDeleteData(assets.map((a: any) => a.assetId));
+                }}
+              >
+                Remove
+              </Button>
+            </Box>}
         </Box>
-      )} */}
-      <Box display="flex" justifyContent="flex-end" alignItems="center" p={1}>
-        <Button
-          variant="contained"
-          color="primary"
-          type="button"
-          size="small"
-          disabled={disableAssignSerializedAssets()}
-          onClick={() => {
-            const product = [];
-            selectedRecords?.forEach((e) => {
-              if (e.type === 'product') {
-                product.push({
-                  _id: e._id,
-                  id: e.product,
-                  productName: e.detail,
-                  qty: e.qty - e.assetAssigned
-                });
-              }
-            });
-            setAddSerializedAssetDialog({ open: true, product: product });
-          }}
-        >
-          {'Assign ' + routes.serializedAsset.title}
-        </Button>
-        {selectedRecords.filter((e: any) => e.type === 'asset').length > 0 &&
-          <Box ml={1}>
-            <Button
-              variant="contained"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={selectedRecords.filter((e: any) => e.type === 'asset').length === 0}
-              onClick={() => {
-                const assets = selectedRecords.filter((e: any) => e.type === 'asset')
-                setShowConfirmBox(true);
-                setDeleteData(assets.map((a: any) => a.assetId));
-              }}
-            >
-              Remove
-            </Button>
-          </Box>}
-      </Box>
-      <Box mt={1}>
+      }
+      <Box
+        zIndex={5}
+        width={
+          stepFullScreen ? "100%" :
+            isTabletScreen ? "calc(100vw)"
+              : isSmallScreen ? "calc(100vw)"
+                : showActivity ? "100%" : "calc(100vw - 103px)"
+        }
+        height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 350px)"}
+      >
         {rowsData ? (
           <CustomReactTable
-            height={'calc(100vh - 365px)'}
+            height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 365px)"}
             columns={columns}
             data={rowsData}
             onSelect={setSelectedRecords}

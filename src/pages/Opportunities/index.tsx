@@ -27,7 +27,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { prepareDataForGrid } from "../../constants/helpers"
 import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
 import { MdAccountCircle, MdAdd } from "react-icons/md";
-import { AiFillCrown,SiMarketo,AiFillFileMarkdown,FaPercentage } from "react-icons/all";
+import { AiFillCrown, SiMarketo, AiFillFileMarkdown, FaPercentage } from "react-icons/all";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaSuitcase } from 'react-icons/fa';
@@ -54,7 +54,7 @@ const Opportunities = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const {getColumnData} = useColumns();
+  const { getColumnData } = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
@@ -296,9 +296,11 @@ const Opportunities = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterOpportunities=${selectedType}`;
-
+    if (isExport) {
+      deepFilter = `filterOpportunities=${selectedType}`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -332,7 +334,7 @@ const Opportunities = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -516,6 +518,7 @@ const Opportunities = () => {
                     if (gridApi) gridApi.deselectAll()
                     else fetchOpportunities()
                   }}
+                  additionalParams={getQueryString(true)}
                 />
               </Grid>
             </Grid>
@@ -559,67 +562,67 @@ const Opportunities = () => {
 
         {
           Object.keys(frameWorkComponent).length > 0 ?
-            isMobile && !isTablet ? 
-              
-            
-              <CustomSwipableList
-              allowSelection={true}
-              allowSwipe={true}
-              permissions={permissions[opportunityResource]}
-              primaryField={columns?.find(d => d.field)}
-              onClick={(data) => {
-                history.push(`${routes.opportunityDetail.path}/${data._id}`)
-              }}
-              dataRows={dataRows}
-              selectedRecords={selectedRecords}
-              dispatch={dispatch}
-              onEdit={(data) => {
-                history.push(`${routes.opportunityDetail.path}/${data._id}?openEdit=true`)
-              }}
-              extraParamsToCheckDelete={true}
-              onDelete={(data) => {
-                setSingleOpportunityDelete({
-                  show: true,
-                  id: data._id,
-                  opportunityName: `${data.opportunityName}`
-                })
-              }}
-              rowCount={rowCount}
-              page={page}
-              loading={loading}
-              additionalDetails={[
-                {
-                  icon: <FaSuitcase size={18} />,
-                  field: "customerAccountName"
-                },
-                
+            isMobile && !isTablet ?
 
-              ]}
-              chips={[
-                {
-                  icon: <FaPercentage/>,
-                  label: "Probability :",
-                  field: "probability" 
-                  
-                },
-                {
-                  icon: <AiFillFileMarkdown/>,
-                  label:"Market:",
-                  field:"marketSegment",
-                },
-                {
-                  icon: <SiMarketo/>,
-                  label:"Sub-Market:",
-                  field:"subMarketSegment"
-                },
-              
-              ]}
-              owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-              onCreate={false}
-              showClone={true}
-              onClone={(data) => {  setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: data._id })}}
-              renderedFrom={opportunityResource}
-            />
+
+              <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions[opportunityResource]}
+                primaryField={columns?.find(d => d.field)}
+                onClick={(data) => {
+                  history.push(`${routes.opportunityDetail.path}/${data._id}`)
+                }}
+                dataRows={dataRows}
+                selectedRecords={selectedRecords}
+                dispatch={dispatch}
+                onEdit={(data) => {
+                  history.push(`${routes.opportunityDetail.path}/${data._id}?openEdit=true`)
+                }}
+                extraParamsToCheckDelete={true}
+                onDelete={(data) => {
+                  setSingleOpportunityDelete({
+                    show: true,
+                    id: data._id,
+                    opportunityName: `${data.opportunityName}`
+                  })
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                additionalDetails={[
+                  {
+                    icon: <FaSuitcase size={18} />,
+                    field: "customerAccountName"
+                  },
+
+
+                ]}
+                chips={[
+                  {
+                    icon: <FaPercentage />,
+                    label: "Probability :",
+                    field: "probability"
+
+                  },
+                  {
+                    icon: <AiFillFileMarkdown />,
+                    label: "Market:",
+                    field: "marketSegment",
+                  },
+                  {
+                    icon: <SiMarketo />,
+                    label: "Sub-Market:",
+                    field: "subMarketSegment"
+                  },
+
+                ]}
+                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                onCreate={false}
+                showClone={true}
+                onClone={(data) => { setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: data._id }) }}
+                renderedFrom={opportunityResource}
+              />
               :
               <CustomAgGrid
                 columns={columns}

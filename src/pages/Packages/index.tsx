@@ -269,8 +269,11 @@ const PackageList = () => {
         }
     };
 
-    const getQueryString = () => {
+    const getQueryString = (isExport = false) => {
         let deepFilter = `?page=${page}&limit=${limit}&filterpackagess=${selectedType}`;
+        if (isExport) {
+            deepFilter = `filterpackagess=${selectedType}`;
+        }
         if (accountDetails.accountId) {
             if (accountDetails.resource === customerAccount.accountResource) {
                 deepFilter = `${deepFilter}&filterById=${JSON.stringify([
@@ -309,7 +312,7 @@ const PackageList = () => {
         }
 
         if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
+            deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
         }
 
         return deepFilter;
@@ -473,6 +476,7 @@ const PackageList = () => {
                                             if (gridApi) gridApi.deselectAll()
                                             else fetchPackages()
                                         }}
+                                        additionalParams={getQueryString(true)}
                                     />
                                 </Grid>
                             </Grid>

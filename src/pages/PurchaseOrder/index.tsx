@@ -24,7 +24,7 @@ import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
 import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
 import { prepareDataForGrid } from "src/constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
-import { AiFillCrown, MdAdd, MdSort, MdFilterList } from "react-icons/all";
+import { AiFillCrown, MdAdd, MdSort, MdFilterList, MdAccountCircle } from "react-icons/all";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
@@ -167,8 +167,11 @@ const PurchaseOrder = () => {
         });
     };
 
-    const getQueryString = () => {
+    const getQueryString = (isExport = false) => {
         let deepFilter = `?page=${page}&limit=${limit}&filterPurchaseOrders=${selectedType}`;
+        if (isExport) {
+            deepFilter = `filterPurchaseOrders=${selectedType}`;
+        }
         let filterById = [];
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
@@ -187,13 +190,13 @@ const PurchaseOrder = () => {
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
         if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
+            deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
         }
         if (showFilteredRecordsOnly) {
             const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -327,6 +330,7 @@ const PurchaseOrder = () => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchPurchaseOrder()
                     }}
+                    additionalParams={getQueryString(true)}
                 />
             </Grid>
         </Grid>
@@ -512,11 +516,20 @@ const PurchaseOrder = () => {
                             loading={loading}
                             additionalDetails={[
                                 {
-                                    icon: <FaSuitcase size={18} />,
+                                    icon: <MdAccountCircle size={18} />,
                                     field: 'supplierAccount'
                                 }
                             ]}
                             chips={[
+                                {
+                                    label: "Purchase Order Date:  ",
+                                    fieldType: "date",
+                                    field: "purchaseOrderDate",
+                                },
+                                {
+                                    label: "Plant:  ",
+                                    field: "warehouse",
+                                },
                                 {
                                     label: "Delivery Date: ",
                                     field: "deliveryDate",
@@ -527,10 +540,7 @@ const PurchaseOrder = () => {
                                     label: "Status: ",
                                     field: "status",
                                 },
-                                {
-                                    label: "SupplierContact:  ",
-                                    field: "supplierContact",
-                                },
+
                             ]}
                             onCreate={false}
                             showClone={true}

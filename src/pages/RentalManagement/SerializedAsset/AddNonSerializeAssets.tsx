@@ -50,7 +50,7 @@ const useClasses = makeStyles(() => ({
     display: 'none'
   },
   tableContainer: {
-    maxHeight: 600
+    maxHeight: "calc(100vh - 200px)"
   }
 }));
 
@@ -144,7 +144,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
             serializedProduct: foundProduct?.serializedProduct,
             ['srno']: item[0],
             ['Name']: item[1],
-            ["Asset Number"]: item[2]
+            ["Asset Number"]: item[2]?.toString()
           };
           return tableObj;
         });

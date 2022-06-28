@@ -16,7 +16,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { gridLoadingTimeout, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, gridPageSizes, isObjectEmpty, removeLocalStorage } from '../../constants/helpers';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
@@ -256,8 +256,8 @@ const ProductCategory = () => {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -279,7 +279,7 @@ const ProductCategory = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -332,7 +332,6 @@ const ProductCategory = () => {
       }
     }
     catch (e) {
-      console.log(e)
     }
   }
 
@@ -410,6 +409,7 @@ const ProductCategory = () => {
     axiosInstance()
       .put(`/product-category/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords)
         fetchProductCategory();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -467,12 +467,17 @@ const ProductCategory = () => {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchProductCategory();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

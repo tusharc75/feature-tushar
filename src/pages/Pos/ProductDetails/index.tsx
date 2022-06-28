@@ -46,7 +46,8 @@ const useStyles = makeStyles(() => ({
         width: 500,
         height: 500,
         boxShadow: "10px 10px 20px 10px rgba(0,0,0,0.2)",
-        zIndex: 9999999
+        zIndex: 9999999,
+        backgroundColor: 'white'
     },
     zoomContainer: {
         width: '200%',
@@ -123,7 +124,7 @@ const ProductDetails = () => {
     }
 
     const fetchCart = () => {
-        axiosInstance().get(`/pos/cart`)
+        axiosInstance().get(`/pos/cart/${warehouseId}`)
             .then(({ data: { data } }) => {
                 setCart(data)
                 fetchProductData()
@@ -300,7 +301,7 @@ const ProductDetails = () => {
                                                         color="secondary"
                                                         size="small"
                                                         style={{ border: "1px solid" }}
-                                                        disabled={cartProduct?.qty >= productData?.availableInventory}
+                                                        disabled={productData?.availableInventory > 0 ? false : true}
                                                         onClick={() => { handleUpdateCart(cartProduct, "add") }}>
                                                         <AddIcon fontSize="small" />
                                                     </IconButton >

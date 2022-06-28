@@ -118,7 +118,7 @@ const ReportFilters = (props: FiltersProps) => {
 
   const handleSelectFilter = (name, value) => {
     let fieldProps: any = {};
-    if (!name.includes('Date')) {
+    if (!name?.includes('Date')) {
       fieldProps.type = resourceOptions[name].type;
       fieldProps.lookup = resourceOptions[name].lookup;
     } else {
@@ -142,14 +142,19 @@ const ReportFilters = (props: FiltersProps) => {
   };
 
   const handleRemoveOption = () => {
+    setReportList((prevState) => {
+      return prevState.filter((item) => item._id !== showConfirmDialog.id);
+    });
     setDeleting(true);
-    setReportList((prevList) => prevList.filter((list) => list._id === showConfirmDialog.id));
     axiosInstance()
       .put(`report-colum-setting/remove`, {
         ids: [showConfirmDialog.id]
       })
       .then(() => {
         setDeleting(false);
+        if (selectedReportView._id === showConfirmDialog.id) {
+          setSelectedReportView(null);
+        }
         setShowConfirmDialog({ open: false, id: null, name: '' });
       })
       .catch((err) => {
@@ -162,8 +167,8 @@ const ReportFilters = (props: FiltersProps) => {
     setBetweenDate((prevState) => {
       let keys = prevState ? Object.keys(prevState) : [];
       keys.forEach((key) => {
-        if (key.includes('to') || key.includes('from')) {
-          if (!selectedResources.map((d) => d.fieldName).includes(key.split('_')[1])) {
+        if (key?.includes('to') || key?.includes('from')) {
+          if (!selectedResources?.map((d) => d.fieldName)?.includes(key.split('_')[1])) {
             delete prevState[key];
           }
         }
@@ -171,7 +176,7 @@ const ReportFilters = (props: FiltersProps) => {
       return prevState;
     });
     setIsStatusPeriod(
-      resource.includes('Serialized Asset') &&
+      resource?.includes('Serialized Asset') &&
         Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
         formValues?.hasOwnProperty('status') &&
         formValues.status.length > 0
@@ -182,8 +187,8 @@ const ReportFilters = (props: FiltersProps) => {
     setStatusPeriodDate((prevState) => {
       let keys = prevState ? Object.keys(prevState) : [];
       keys.forEach((key) => {
-        if (key.includes('to') || key.includes('from')) {
-          if (!selectedResources.map((d) => d.fieldName).includes(key.split('_')[1])) {
+        if (key?.includes('to') || key?.includes('from')) {
+          if (!selectedResources?.map((d) => d.fieldName)?.includes(key.split('_')[1])) {
             delete prevState[key];
           }
         }
@@ -198,7 +203,7 @@ const ReportFilters = (props: FiltersProps) => {
     const dateProperties = dateKeys.map((key) => key.split('_')[1]);
 
     dateProperties.forEach((key) => {
-      let err = {...errors};
+      let err = { ...errors };
 
       const from = new Date(allDateData[`from_${key}`]).getTime();
       const to = new Date(allDateData[`to_${key}`]).getTime();
@@ -304,7 +309,6 @@ const ReportFilters = (props: FiltersProps) => {
             if (val.filter((f) => f.fieldName === 'all').length > 0) {
               setSelectedResources(filterOptions);
             } else {
-              console.log(val, reason);
               setSelectedResources(val);
             }
 
@@ -314,7 +318,7 @@ const ReportFilters = (props: FiltersProps) => {
                 const dataKeys = Object?.keys(prev);
                 if (dataKeys && dataKeys.length) {
                   dataKeys.forEach((key) => {
-                    if (!selectedKeys.includes(key)) {
+                    if (!selectedKeys?.includes(key)) {
                       delete prev[key];
                     }
                   });
@@ -326,7 +330,7 @@ const ReportFilters = (props: FiltersProps) => {
                 const dataKeys = Object?.keys(prev);
                 if (dataKeys && dataKeys.length) {
                   dataKeys.forEach((key) => {
-                    if (!selectedKeys.includes(key)) {
+                    if (!selectedKeys?.includes(key)) {
                       delete prev[key];
                     }
                   });
@@ -341,7 +345,7 @@ const ReportFilters = (props: FiltersProps) => {
           renderInput={(params) => <TextField {...params} variant="outlined" label="Select Filter" size="small" />}
         />
         <Box py={2}>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} alignItems="center">
             {selectedResources.length > 0 ? (
               selectedResources.map((field: any) => (
                 <React.Fragment key={field._id}>
@@ -364,103 +368,19 @@ const ReportFilters = (props: FiltersProps) => {
                   )}
 
                   {field.type === 'date' && (
-                    <>
-                      <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth size="small" variant="outlined">
-                          <InputLabel id="duration">Select Duration</InputLabel>
-                          <Select
-                            labelId="duration"
-                            id="time-duration"
-                            value={field.timeFrame}
-                            onChange={(e) => {
-                              handleDuration(e.target.value, field);
-                              const tempArray = [...selectedResources];
-                              let tempIndex = tempArray.findIndex((d) => d?.fieldName === field?.fieldName);
-                              tempArray[tempIndex].timeFrame = e.target.value;
-                              setSelectedResources(tempArray);
-                            }}
-                          >
-                            <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                            <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                            <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                            <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                            <MenuItem value={'custom'}>Custom</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <KeyboardDatePicker
-                          autoOk
-                          disabled={field.timeFrame !== 'custom'}
-                          fullWidth
-                          size="medium"
-                          variant="inline"
-                          inputVariant="outlined"
-                          name={`from_${field.fieldName}`}
-                          label={`From ${field.fieldLabel}`}
-                          value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
-                          onChange={(date: any) => {
-                            setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
-                          }}
-                          format={dateFormat}
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          margin="dense"
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <KeyboardDatePicker
-                          autoOk
-                          fullWidth
-                          disabled={field.timeFrame !== 'custom'}
-                          size="medium"
-                          variant="inline"
-                          inputVariant="outlined"
-                          name={`to_${field.fieldName}`}
-                          label={`To ${field.fieldLabel}`}
-                          value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
-                          onChange={(date: any) => {
-                            setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
-                          }}
-                          format={dateFormat}
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          margin="dense"
-                        />
-                      </Grid>
-                    </>
-                  )}
-                </React.Fragment>
-              ))
-            ) : (
-              <Box textAlign="center" width="100%">
-                <Typography>No filters selected</Typography>
-              </Box>
-            )}
-            {isStatusPeriod ? (
-              <>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={<Checkbox checked={statusPeriod} onChange={(e) => setStatusPeriod((state: boolean) => !state)} name="statusPeriod" />}
-                    label="Status Period"
-                  />
-                </Grid>
-
-                {statusPeriod && (
-                  <>
-                    {' '}
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth size="small" variant="outlined">
-                        <InputLabel id="duration">Select Duration</InputLabel>
+                        <InputLabel id={field.fieldName}>Select Duration</InputLabel>
                         <Select
-                          labelId="duration"
-                          id="time-duration"
+                          labelId={field.fieldName}
+                          id={`time-${field.fieldName}`}
                           value={statusTimeFrame}
                           onChange={(e) => {
-                            handleDuration(e.target.value, null, true);
-                            setStatusTimeFrame(e.target.value);
+                            handleDuration(e.target.value, field);
+                            const tempArray = [...selectedResources];
+                            let tempIndex = tempArray.findIndex((d) => d?.fieldName === field?.fieldName);
+                            tempArray[tempIndex].timeFrame = e.target.value;
+                            setSelectedResources(tempArray);
                           }}
                         >
                           <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
@@ -471,88 +391,171 @@ const ReportFilters = (props: FiltersProps) => {
                         </Select>
                       </FormControl>
                     </Grid>
+                  )}
+                  {field.type === 'date' && (
                     <Grid item xs={12} sm={6}>
                       <KeyboardDatePicker
                         autoOk
+                        disabled={field.timeFrame !== 'custom'}
                         fullWidth
-                        disabled={statusTimeFrame !== 'custom'}
-                        size="medium"
+                        size="small"
                         variant="inline"
                         inputVariant="outlined"
-                        name={`from_statusPeriod`}
-                        label={`From Status Period`}
-                        value={statusPeriodDate && statusPeriodDate[`from_statusPeriod`] ? statusPeriodDate[`from_statusPeriod`] : null}
+                        name={`from_${field.fieldName}`}
+                        label={`From ${field.fieldLabel}`}
+                        value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
                         onChange={(date: any) => {
-                          setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: date }));
+                          setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
                         }}
                         format={dateFormat}
                         InputLabelProps={{
                           shrink: true
                         }}
-                        margin="dense"
                       />
                     </Grid>
+                  )}
+                  {field.type === 'date' && (
                     <Grid item xs={12} sm={6}>
                       <KeyboardDatePicker
                         autoOk
                         fullWidth
-                        size="medium"
+                        disabled={field.timeFrame !== 'custom'}
+                        size="small"
                         variant="inline"
-                        disabled={statusTimeFrame !== 'custom'}
                         inputVariant="outlined"
-                        name={`to_statusPeriod`}
-                        label={`To Status Period`}
-                        value={statusPeriodDate && statusPeriodDate[`to_statusPeriod`] ? statusPeriodDate[`to_statusPeriod`] : null}
+                        name={`to_${field.fieldName}`}
+                        label={`To ${field.fieldLabel}`}
+                        value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
                         onChange={(date: any) => {
-                          setStatusPeriodDate((prevState) => ({ ...prevState, [`to_statusPeriod`]: date }));
+                          setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
                         }}
                         format={dateFormat}
                         InputLabelProps={{
                           shrink: true
                         }}
-                        margin="dense"
                       />
                     </Grid>
-                  </>
-                )}
-              </>
-            ) : null}
+                  )}
+                </React.Fragment>
+              ))
+            ) : (
+              <Box textAlign="center" width="100%">
+                <Typography>No filters selected</Typography>
+              </Box>
+            )}
+            {isStatusPeriod && (
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={<Checkbox checked={statusPeriod} onChange={(e) => setStatusPeriod((state: boolean) => !state)} name="statusPeriod" />}
+                  label="Status Period"
+                />
+              </Grid>
+            )}
+
+            {isStatusPeriod && statusPeriod && (
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small" variant="outlined">
+                  <InputLabel id="statusPeriod">Select Duration</InputLabel>
+                  <Select
+                    labelId="statusPeriod"
+                    id="time-duration"
+                    value={statusTimeFrame}
+                    onChange={(e) => {
+                      handleDuration(e.target.value, null, true);
+                      setStatusTimeFrame(e.target.value);
+                    }}
+                  >
+                    <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                    <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                    <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                    <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                    <MenuItem value={'custom'}>Custom</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
+            {isStatusPeriod && statusPeriod && (
+              <Grid item xs={12} sm={6}>
+                <KeyboardDatePicker
+                  autoOk
+                  fullWidth
+                  disabled={statusTimeFrame !== 'custom'}
+                  size="small"
+                  variant="inline"
+                  inputVariant="outlined"
+                  name={`from_statusPeriod`}
+                  label={`From Status Period`}
+                  value={statusPeriodDate && statusPeriodDate[`from_statusPeriod`] ? statusPeriodDate[`from_statusPeriod`] : null}
+                  onChange={(date: any) => {
+                    setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: date }));
+                  }}
+                  format={dateFormat}
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                />
+              </Grid>
+            )}
+            {isStatusPeriod && statusPeriod && (
+              <Grid item xs={12} sm={6}>
+                <KeyboardDatePicker
+                  autoOk
+                  fullWidth
+                  size="small"
+                  variant="inline"
+                  disabled={statusTimeFrame !== 'custom'}
+                  inputVariant="outlined"
+                  name={`to_statusPeriod`}
+                  label={`To Status Period`}
+                  value={statusPeriodDate && statusPeriodDate[`to_statusPeriod`] ? statusPeriodDate[`to_statusPeriod`] : null}
+                  onChange={(date: any) => {
+                    setStatusPeriodDate((prevState) => ({ ...prevState, [`to_statusPeriod`]: date }));
+                  }}
+                  format={dateFormat}
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                />
+              </Grid>
+            )}
           </Grid>
         </Box>
         <Box mt={2}>
-          <Box height={'100%'} mb={2}>
-            <Autocomplete
-              options={reportList}
-              value={selectedReportView}
-              noOptionsText="No views were found"
-              onChange={(_, val) => {
-                setSelectedReportView(val);
-              }}
-              fullWidth
-              renderOption={(option) => (
-                <React.Fragment>
-                  <Box display={'flex'} width="100%" justifyContent="space-between">
-                    {option.name}
-                    {isDeleting ? (
-                      <CircularProgress size={18} color="inherit" />
-                    ) : (
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowConfirmDialog({ open: true, id: option._id, name: option.name });
-                        }}
-                      >
-                        <Delete color="error" />
-                      </IconButton>
-                    )}
-                  </Box>
-                </React.Fragment>
-              )}
-              getOptionLabel={(option) => option.name}
-              renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
-            />
-          </Box>
+          {!resource?.includes('Purchase Order Type') && (
+            <Box height={'100%'} mb={2}>
+              <Autocomplete
+                options={reportList}
+                value={selectedReportView}
+                noOptionsText="No views were found"
+                onChange={(_, val) => {
+                  setSelectedReportView(val);
+                }}
+                fullWidth
+                renderOption={(option) => (
+                  <React.Fragment>
+                    <Box display={'flex'} width="100%" justifyContent="space-between">
+                      {option.name}
+                      {isDeleting ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowConfirmDialog({ open: true, id: option._id, name: option.name });
+                          }}
+                        >
+                          <Delete color="error" />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </React.Fragment>
+                )}
+                getOptionLabel={(option) => option.name}
+                renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
+              />
+            </Box>
+          )}
           <Button
             onClick={fetchReportData}
             startIcon={loading ? <CircularProgress color="inherit" size={18} /> : <List />}

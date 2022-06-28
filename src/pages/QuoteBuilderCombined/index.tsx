@@ -21,7 +21,8 @@ import {
   customerContact,
   supplierContact,
   quote,
-  getLocalStorageArrayData
+  getLocalStorageArrayData,
+  removeLocalStorage
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -435,8 +436,12 @@ const QuoteBuilders = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterQuotes=${selectedType}`;
+
+    if (isExport) {
+      deepFilter = `filterQuotes=${selectedType}`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -501,9 +506,7 @@ const QuoteBuilders = () => {
           term: filters[field].filter,
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(
-        updatedFilters
-      )}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -513,7 +516,7 @@ const QuoteBuilders = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
 
     return deepFilter;
@@ -700,7 +703,7 @@ const QuoteBuilders = () => {
             storedSelectedIds = storedSelectedIds.filter(id => id !== idToDeleteFromLocalStorage)
           })
           localStorage.setItem(localStorageSelectedRecords, JSON.stringify(storedSelectedIds));
-
+          removeLocalStorage(localStorageSelectedRecords)
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -748,6 +751,7 @@ const QuoteBuilders = () => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchQuoteBuilder()
                     }}
+                    additionalParams={getQueryString(true)}
                   />
                 </Grid>
               </Grid>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
-import { camelCase, filter, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
@@ -30,7 +30,7 @@ const Report = () => {
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   } = useData();
   let { resource } = useParams();
   let history = useHistory();
@@ -63,41 +63,60 @@ const Report = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
-  const fetchGridColumns = () => {
+  const fetchGridColumns = async () => {
     setLoadingColumns(true);
-    axiosInstance()
-      .get(`/field?resource=${resourceStartCase}`)
-      .then(({ data: { data } }) => {
-        setResourceColumns(data);
-        setLoadingColumns(false);
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase]) {
-            o.fieldData.primaryField = true;
-          }
-          let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase}Detail`].path);
-
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
+    const {
+      data: { data }
+    }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`);
+    if (resourceStartCase === 'Serialized Asset') {
+      const {
+        data: { data: lookupResource }
+      } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+      if (lookupResource) {
+        data?.forEach((e) => {
+          if (e?.fieldData?.fieldName === 'currentOwner') {
+            e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
           }
         });
-
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
-      })
-      .catch((error) => {
-        setLoadingColumns(false);
-        toastConfig.setToastConfig(error);
+      }
+    }
+    setResourceColumns(data);
+    setLoadingColumns(false);
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]) {
+        o.fieldData.primaryField = true;
+      }
+      let currentColumn = getColumnData(
+        routes[resourceCamelCase]?.title,
+        o?.fieldData,
+        routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
+      );
+      if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName);
+        }
+      }
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    columns = [...columns, ...getStaticFields()];
+    if (resourceStartCase === 'Purchase Order') {
+      columns.splice(1, 0, {
+        field: 'poAmount',
+        headerName: 'Purchase Order Amount',
+        show: true,
+        disabled: false,
+        cellRenderer: 'commonRenderer'
       });
+    }
+    setColumns([...columns]);
+    setLoadingColumns(false);
   };
 
   React.useEffect(() => {
@@ -121,7 +140,7 @@ const Report = () => {
     if (showGrid) {
       fetchResourceData();
     }
-  }, [page, sorting, search, limit, filters, pageSizes]);
+  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   React.useEffect(() => {
     // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
@@ -199,13 +218,16 @@ const Report = () => {
   };
 
   // Create and return query for filters
-  const getFilter = () => {
-    let filterQuery = `page=${page}&limit=${limit}&`;
+  const getFilter = (isExport = false) => {
+    let filterQuery = `page=${page}&`;
+    if (!isExport) {
+      filterQuery = `limit=${limit}&`;
+    }
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${search}&`;
+      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
     }
     if (selectedResources.length > 0) {
       let deepFilter = [];
@@ -229,7 +251,7 @@ const Report = () => {
           options.forEach((o: any) => {
             deepFilter.push({
               field: key,
-              term: o.optionValue
+              term: encodeURIComponent(o.optionValue)
             });
           });
         });
@@ -260,7 +282,7 @@ const Report = () => {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: filters[field].filter
+          term: encodeURIComponent(filters[field].filter)
         });
       });
       filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
@@ -279,16 +301,18 @@ const Report = () => {
   };
 
   const exportData = () => {
-    if ((selectedData && Object.keys(selectedData).length === 0) || !selectedData || isExporting) return;
+    if (isExporting) return;
     toastConfig.setToastConfig({
       open: true,
       message: 'Please wait exporting data',
       type: 'info'
     });
     setExporting(true);
-    let filterQuery = getFilter();
+    let filterQuery = getFilter(true);
     axiosInstance()
-      .get(`${routes[resourceCamelCase].path}/report/export?export=1&${filterQuery}`)
+      .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report/export?export=1&${filterQuery}`, {
+        responseType: 'arraybuffer'
+      })
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);
@@ -309,7 +333,7 @@ const Report = () => {
     <MuiPickersUtilsProvider utils={MomentUtils}>
       <div>
         <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
+          <Grid item xs={10}>
             <CustomBreadCrumbs
               routes={[
                 { title: 'Reports', path: '/reports' },
@@ -318,7 +342,7 @@ const Report = () => {
             />
           </Grid>
 
-          <Grid item md={8} sm={1} xs={2}>
+          <Grid item xs={2}>
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
                 <Grid container justifyContent="flex-end">
@@ -354,6 +378,7 @@ const Report = () => {
                           disableElevation
                           onClick={() => {
                             setShowGrid(false);
+                            dispatch({ type: 'onlyFilter', filters: {} });
                           }}
                           startIcon={<MdChevronLeft />}
                         >
@@ -362,7 +387,7 @@ const Report = () => {
                       </Box>
                     )}
                     <MdDescription size={22} className="headerLogo" />
-                    <span className="listingHeader">{` ${selectedReportView?.name ?? 'Reports'}`}</span>
+                    <span className="listingHeader">{`${showGrid ? selectedReportView?.name ?? 'Reports' : 'Reports'}`}</span>
                   </Box>
                 </Grid>
               </Grid>
@@ -436,6 +461,7 @@ const Report = () => {
                     <CustomAgGrid
                       setSelectedReportView={setSelectedReportView}
                       selectedReportView={selectedReportView}
+                      reportSave={true}
                       columns={columns}
                       dataRows={dataRows}
                       frameworkComponents={frameWorkComponent}

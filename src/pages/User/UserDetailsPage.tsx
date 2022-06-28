@@ -116,7 +116,7 @@ const UserDetailsPage = () => {
   const [customerAccountRelatedData, setCustomerAccountRelatedData] = useState(null);
   const [supplierAccountRelatedData, setSupplierAccountRelatedData] = useState(null);
   const [supplierContactRelatedData, setSupplierContactRelatedData] = useState(null);
-  const [quotesRelatedData, setQuotesRelatedData] = useState(null)
+  const [quotesRelatedData, setQuotesRelatedData] = useState(null);
   const [userPermissions, setUserPermissions] = useState(null);
   const [unionRoleData, setUnionRoleData] = useState(null);
   const [entityAccess, setEntityAccess] = useState([]);
@@ -337,7 +337,7 @@ const UserDetailsPage = () => {
     setUserTrackingDataLoading(true);
     const parsedFromTime = convertDate(trackingTime.between.from);
     const parsedToTime = convertDate(trackingTime.between.to);
-    const { from, to } = trackingTime.between
+    const { from, to } = trackingTime.between;
 
     const hour = 1000 * 60 * 60;
     const day = 1000 * 60 * 60 * 24;
@@ -358,8 +358,6 @@ const UserDetailsPage = () => {
           return aDate - bDate;
         });
 
-
-
         data.forEach((obj) => {
           labels.push(moment(obj?.date).format('DD/MMM'));
           dataSets.push(Math.ceil(obj?.totalDuration / time));
@@ -368,7 +366,7 @@ const UserDetailsPage = () => {
           labels: labels,
           datasets: [
             {
-              label: `Total Duration (${dateDiff > 90 ? "In Days" : "In Hours"})`,
+              label: `Total Duration (${dateDiff > 90 ? 'In Days' : 'In Hours'})`,
               data: dataSets,
               borderColor: 'rgba(75,192,192,1)'
             }
@@ -395,9 +393,9 @@ const UserDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);
@@ -1208,7 +1206,7 @@ const UserDetailsPage = () => {
                 </Grid>
               </Grid> */}
 
-              <div className="p-3">
+              <div className="p-3 modified_style_of_accordion">
                 {permissions?.[opportunity.opportunityResource]?.isRead && (
                   <OpportunityAccordionInUserDetail
                     opportunities={[...(opportunityRelatedData?.Owner ?? []), ...(opportunityRelatedData?.Collaborator ?? [])]}
@@ -1285,18 +1283,16 @@ const UserDetailsPage = () => {
                     isAllowedToEdit={false}
                   />
                 )}
-                {
-                  permissions?.[quoteBuilder.qbResource]?.isRead && (
-                    <QuotesInAccordion
-                      recordsPerLine={3}
-                      quotes={[...(quotesRelatedData?.Owner ?? []), ...(quotesRelatedData?.Collaborator ?? [])]}
-                      expanded={false}
-                      fetchData={() => fetchUserRelatedDetail()}
-                      quoteBuilderPermission={permissions?.[quoteBuilder.qbResource]}
-                      isAllowedToUpdate={false}
-                    />
-                  )
-                }
+                {permissions?.[quoteBuilder.qbResource]?.isRead && (
+                  <QuotesInAccordion
+                    recordsPerLine={3}
+                    quotes={[...(quotesRelatedData?.Owner ?? []), ...(quotesRelatedData?.Collaborator ?? [])]}
+                    expanded={false}
+                    fetchData={() => fetchUserRelatedDetail()}
+                    quoteBuilderPermission={permissions?.[quoteBuilder.qbResource]}
+                    isAllowedToUpdate={false}
+                  />
+                )}
               </div>
             </Paper>
           </div>
@@ -1424,8 +1420,8 @@ const UserDetailsPage = () => {
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-                : ''
+              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+              : ''
           }
           onClose={() => {
             setShowConfirmBox(false);

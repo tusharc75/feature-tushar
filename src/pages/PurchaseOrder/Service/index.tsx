@@ -4,7 +4,7 @@ import axiosInstance from "src/axios/axiosInstance";
 import { useData } from "src/StateProvider/Provider";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { purchaseOrder } from "src/constants/helpers";
+import { purchaseOrder, PURCHASE_ORDER_STATUS } from "src/constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
@@ -19,8 +19,9 @@ import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import { fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
+import SendEmail from './../SendEmail';
 
-const Product = ({ purchaseOrderData, renderedFrom }) => {
+const Product = ({ purchaseOrderData, setNextStep, renderedFrom, seIsShowIssue }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -38,6 +39,10 @@ const Product = ({ purchaseOrderData, renderedFrom }) => {
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
 
     useEffect(() => {
+        if ([PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status)) {
+            setNextStep(false)
+        }
+        seIsShowIssue(true)
         fetchPurchaseOrderService();
     }, [purchaseOrderData]);
 
@@ -173,10 +178,13 @@ const Product = ({ purchaseOrderData, renderedFrom }) => {
                             setSelectedServiceData(null)
                         }}
                     >
-                       Add Services and Consumables
+                        Add Services and Consumables
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
+                    <SendEmail
+                        purchaseOrderData={purchaseOrderData}
+                    />
                     <HtmlTooltip title="Please select some product">
                         <span>
                             <Button

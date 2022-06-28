@@ -558,13 +558,6 @@ export default function TinyMCE(props) {
                                     'bold italic backcolor | alignleft aligncenter ' +
                                     'alignright alignjustify | bullist numlist outdent indent ',
                                 content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-
-                                // setup: (editor) => {
-                                //     editor.ui.registry.addButton("myCustomToolbarButton", {
-                                //         text: "Upload File",
-                                //         onAction: () => console.log("button text")
-                                //     });
-                                // }
                             }}
                         />
                     </div>

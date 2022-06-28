@@ -259,8 +259,11 @@ const RepairJob = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterRepairJobs=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterRepairJobs=${selectedType}`;
+    }
     let filterById = [];
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
@@ -295,7 +298,7 @@ const RepairJob = () => {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -439,6 +442,7 @@ const RepairJob = () => {
                     if (gridApi) gridApi.deselectAll()
                     else fetchRepairJobs()
                   }}
+                  additionalParams={getQueryString(true)}
                 />
               </Grid>
             </Grid>
@@ -527,8 +531,8 @@ const RepairJob = () => {
                   }
                 ]}
                 onCreate={false}
-                showClone={false}
-                onClone={() => { }}
+                showClone={true}
+                onClone={(data) => { setShowManageRepairJobDialog({ open: true, isClone: true, idToClone: data._id }); }}
                 renderedFrom={renderedFrom}
               /> :
               <CustomAgGrid

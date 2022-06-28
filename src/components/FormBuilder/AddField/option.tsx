@@ -225,6 +225,10 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     setIsAsc(!isAsc)
   }
 
+  const clearAll = () => {
+    setOptions(defaultOption)
+  }
+
   return (<Box pt={2} pb={2}>
     {(values["type"] === "dropDown" || values["type"] === "multiSelect") && (
       <Grid spacing={3} container>
@@ -278,11 +282,19 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     )}
     <Grid spacing={3} container>
       <Grid item xs={12} sm={6} md={6}>
-        <Typography variant="body2">Options
-          <IconButton className="ml-2 p-0" color="primary" size="small" onClick={sortOptions}  >
-            <SortIcon fontSize="small" />
-          </IconButton>
-        </Typography>
+        <Box display="flex">
+          <Box>
+            <Typography variant="body2">Options
+              <IconButton className="ml-2 p-0" color="primary" size="small" onClick={sortOptions}  >
+                <SortIcon fontSize="small" />
+              </IconButton>
+            </Typography>
+          </Box>
+          <Box ml={2}>
+            <Typography variant="body2" className="cursor-pointer" onClick={clearAll}>Clear All
+            </Typography>
+          </Box>
+        </Box>
       </Grid>
       <Grid item xs={12} sm={6} md={6} container justify="flex-end">
         <label

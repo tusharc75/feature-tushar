@@ -99,6 +99,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
                 coloum.push({
                     accessor: element.fieldName,
                     Header: element.fieldLabel,
+                    disableFilters: true,
                     Cell: ({ row }) => (
                         row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
                     )
@@ -412,9 +413,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
                     zIndex={5}
                     width={
                         isTabletScreen
-                            ? "calc(100vw - 20px)"
+                            ? "calc(100vw)"
                             : isSmallScreen
-                                ? "calc(100vw - 78px)"
+                                ? "calc(100vw)"
                                 : showActivity ? "100%" : "calc(100vw - 100px)"
                     }
                     height="calc(100vh - 330px)"

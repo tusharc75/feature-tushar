@@ -127,6 +127,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 coloum.push({
                     accessor: element.fieldName,
                     Header: element.fieldLabel,
+                    disableFilters: true,
                     Cell: ({ row }) => (
                         row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
                     )
@@ -351,6 +352,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
             .then(() => {
                 setDeleting(false)
                 fetchProductInventory()
+                setAnchorEl(null)
                 setDeleteData(null)
             }).catch((error) => {
                 setDeleting(false)
@@ -407,6 +409,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
     const closeActions = () => {
         setAnchorEl(null);
     };
+
     return (<Fragment>
         <Grid container spacing={2} >
             {allowedToEdit &&
@@ -446,8 +449,25 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                             }
                         </Box>
                         <Box display="flex">
+                            {(material?.length && !isIssued && !rowsData?.some(f => !f.isValid)) ?
+                                <Fragment>
+                                    <HtmlTooltip title={"Start Sublease"}>
+                                        <Button
+                                            variant={isMobile && !isTablet ? "text" : "contained"}
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => { issueSublease() }}
+                                            disabled={isIssueing}
+                                            endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
+                                        >
+                                            {isMobile && !isTablet ? <MdDelete size={20} /> : "Start Sublease"}
+                                        </Button>
+                                    </HtmlTooltip>
+                                    <Box mx={1} />
+                                </Fragment>
+                                : null}
                             <Button
-                                // disabled={Boolean(!selectedBrand)}
+                                disabled={selectedProducts?.length ? false : true}
                                 variant={isMobile && !isTablet ? 'text' : 'outlined'}
                                 color="default"
                                 size="small"
@@ -472,7 +492,10 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                                 <MenuItem
                                     color="primary"
                                     disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                                    onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
+                                    onClick={() => {
+                                        setAnchorEl(null)
+                                        setIsProductEdit({ open: true, isBulkedit: true })
+                                    }}
                                 >
                                     {"Bulk Edit"}
                                 </MenuItem>
@@ -492,13 +515,6 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                                 >
                                     {"Delete"}
                                 </MenuItem>
-                                <MenuItem
-                                    color="primary"
-                                    onClick={() => { issueSublease() }}
-                                    disabled={isIssueing}
-                                >
-                                    {"Start Sublease"}
-                                </MenuItem>
                             </Menu>
                         </Box>
                     </Box>
@@ -507,7 +523,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 {columns && rowsData ?
                     <Box
                         zIndex={5}
-                        width={stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw - 20px)' : isSmallScreen ? 'calc(100vw - 78px)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
+                        width={stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
                         height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                     >
                         <CustomReactTable

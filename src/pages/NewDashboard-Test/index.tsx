@@ -1,14 +1,11 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import { camelCase } from 'lodash';
+import { Box, Grid } from '@material-ui/core';
 import React from 'react';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
 
 import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import ChartTypes from './ChartTypes';
-import seed from './seed';
 import countriesData from 'src/constants/Country.json';
 import GlobalFilter from './GlobalFilter';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -33,18 +30,25 @@ const DashbaordNew = () => {
   const [dashboardLoading, setDashboardLoading] = React.useState(false);
   const [dashboardList, setDashboardList] = React.useState([]);
   const [charts, setCharts] = React.useState([]);
-  const [globalFilters, setGlobalFilters] = React.useState({
-    dashboardType: '',
-    currency: '',
-    between: {
-      from: new Date(moment().subtract(1, 'year').calendar()),
-      to: new Date()
-    }
+  const [globalFilters, setGlobalFilters] = React.useState(() => {
+    const selectedDashboard = localStorage.getItem('selectedDashboard') ? localStorage.getItem('selectedDashboard') : '';
+
+    return {
+      dashboardType: selectedDashboard,
+      currency: '',
+      between: {
+        from: new Date(moment().subtract(1, 'year').calendar()),
+        to: new Date()
+      }
+    };
   });
 
   React.useEffect(() => {
-    fetchDashboards();
-  }, []);
+    const selectedDashboard = dashboardList.find((d) => d.name === globalFilters?.dashboardType);
+    if (selectedDashboard) {
+      setCharts(selectedDashboard?.charts || []);
+    }
+  }, [globalFilters?.dashboardType]);
 
   React.useEffect(() => {
     (async () => {
@@ -65,27 +69,41 @@ const DashbaordNew = () => {
             marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
             subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
             countryBillTo: countriesData,
-            countrySellTo: countriesData
+            countrySellTo: countriesData,
+            country: countriesData
           });
         });
       } catch (error) {
         alert(JSON.stringify(error));
       }
     })();
+    fetchDashboards();
   }, []);
 
   const fetchDashboards = () => {
+    setDashboardLoading(true);
     axiosInstance()
       .get('/dashboard-master')
       .then(({ data: { data } }) => {
         if (data?.length) {
-          setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
-          setCharts(data[0].charts);
+          const savedSelected = localStorage.getItem('selectedDashboard');
+          if (!savedSelected) {
+            setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
+            setCharts(data[0]?.charts);
+          } else {
+            setGlobalFilters((prevState) => ({ ...prevState, dashboardType: savedSelected }));
+            const selectedDashboard = data.find((d) => d.name === savedSelected);
+            if (selectedDashboard) {
+              setCharts(selectedDashboard?.charts || []);
+            }
+          }
           setDashboardList(data);
+          setDashboardLoading(false);
         }
       })
       .catch((err) => {
         setToastConfig(err);
+        setDashboardLoading(false);
       });
   };
 
@@ -103,22 +121,31 @@ const DashbaordNew = () => {
               setGlobalFilters={setGlobalFilters}
             />
             <Box bgcolor="#efefef" p={1} pt={1}>
-              <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
-                {charts.map((chart: ChartDataType, index: number) => (
-                  <ChartTypes
-                    globalFilters={globalFilters}
-                    key={chart.chartType + ' ' + index + 1}
-                    chart={chart}
-                    filterData={{ ...filtersOptions }}
-                    commonSalesData={commonSalesData}
-                    setCommonSalesData={setCommonSalesData}
-                  />
-                ))}
-              </Grid>
+              {dashboardLoading ? (
+                <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboards..." />
+              ) : (
+                <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
+                  {charts.map((chart: ChartDataType, index: number) => (
+                    <ChartTypes
+                      globalFilters={globalFilters}
+                      key={chart.chartType + ' ' + index + 1}
+                      chart={chart}
+                      filterData={{ ...filtersOptions }}
+                      commonSalesData={commonSalesData}
+                      setCommonSalesData={setCommonSalesData}
+                    />
+                  ))}
+                  {globalFilters.dashboardType?.includes('Asset') && (
+                    <Grid item xs={12}>
+                      <AssetStats />
+                    </Grid>
+                  )}
+                </Grid>
+              )}
             </Box>
           </React.Fragment>
         ) : (
-          <Loader minHeight="100%" noLoader={false} text="Loading..." />
+          <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
         )}
       </div>
     </MuiPickersUtilsProvider>

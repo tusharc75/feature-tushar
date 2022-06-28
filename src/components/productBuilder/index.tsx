@@ -5,6 +5,7 @@ import AddExistingProduct from "./AddExistingProduct";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import ProductDialog from "./ProductDialog";
 import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
@@ -32,8 +33,12 @@ import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomButton from "../Helpers/CustomButton";
-import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
+import SupplierAskPrice from "./SupplierAskPrice";
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import { Link, useHistory } from 'react-router-dom';
+import MuiPickersUtilsProvider from "@material-ui/pickers/MuiPickersUtilsProvider";
+import AskSupplierPriceDialog from "./AskSupplierPriceDialog";
 
 let levalOrderBy = [
   "product",
@@ -60,7 +65,8 @@ const ProductBuilder = (props) => {
     permissions,
     fromQuote,
     setColumnForPDFExcel,
-    fullScreen = false
+    fullScreen = false,
+    quoteData = null
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -77,6 +83,10 @@ const ProductBuilder = (props) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isClone, setIsClone] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
+  const [openSupplierPriceDialog, setOpenSupplierPriceDialog] = useState(false);
+  const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
+  const [supplierData, setSupplierData] = useState(null)
+  const { getColumnData } = useColumns();
   // const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
   //   useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
 
@@ -100,17 +110,6 @@ const ProductBuilder = (props) => {
       gridApi.setRowData([]);
     }
     axiosInstance().get(`/productbuilder/getproduct/${id}`).then(({ data: { data } }) => {
-      setProductData(data);
-      let rows = data.product.map((item, index) => {
-        let res: any = {
-          ...prepareDataForGrid(item),
-        };
-        res.srno = index + 1;
-        res.isChecked = false;
-        res.canDelete = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
-        res.allowedToEdit = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
-        return res;
-      });
       let columns = []
       columns = [
         {
@@ -154,6 +153,7 @@ const ProductBuilder = (props) => {
         commonRenderer: CommonRenderer,
         productNameRenderer: ProductNameRenderer,
         actionsRenderer: ActionsRenderer,
+        productTypeRenderer: ProductTypeRenderer,
         ...tempFrameworkComponent,
       }
       setFrameWorkComponent({ ...tempFrameworkComponent })
@@ -161,6 +161,18 @@ const ProductBuilder = (props) => {
       if (setColumnForPDFExcel) {
         setColumnForPDFExcel([...columns].filter(d => d.field !== "srno").map(d => d.headerName))
       }
+      setProductData(data);
+      let rows = data.product.map((item, index) => {
+        let res: any = {
+          ...prepareDataForGrid(item),
+        };
+        res.srno = index + 1;
+        res.isChecked = false;
+        res.canDelete = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
+        res.allowedToEdit = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
+        res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && columns.some(d => d.field.includes("supplier"))
+        return res;
+      });
       dispatch({ type: "initialize", data: rows, count: rows.length });
       setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
       refreshProducts(data);
@@ -169,6 +181,12 @@ const ProductBuilder = (props) => {
         toastConfig.setToastConfig(error);
       });
   };
+
+  const supplierPriceDialogData = (product) => {
+    setOpenSupplierPriceDialog(true)
+    setSupplierData(product)
+
+  }
 
   const ActionsRenderer = (params) => {
     const permission = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
@@ -201,6 +219,21 @@ const ProductBuilder = (props) => {
             color={permission ? "primary" : "disabled"}
           />
         </IconButton>
+        {params.data?.isSupplierExist && (
+          <IconButton
+            disabled={params.data?.isSupplierExist ? false : true}
+            size="small"
+            aria-label="Supplier"
+            onClick={() => {
+              supplierPriceDialogData(params.data)
+            }}
+          >
+            <VisibilityIcon
+              fontSize="small"
+              color={params.data?.isSupplierExist ? "primary" : "disabled"}
+            />
+          </IconButton>
+        )}
         <IconButton
           disabled={permission ? false : true}
           size="small"
@@ -234,6 +267,12 @@ const ProductBuilder = (props) => {
         <>{params.data.srno}</>
       )}
     </>
+  );
+
+  const ProductTypeRenderer = (params) => (
+    <Link className="link text-truncate" title={params?.data?.productName} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+      {params?.data?.productName}
+    </Link>
   );
 
   const GenrateColoum = (fields, column, rendererNames) => {
@@ -317,18 +356,31 @@ const ProductBuilder = (props) => {
       }
       else {
         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
-          if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-            if (!ele.isFormula && !ele.isUneditable && Editable) {
-              if (ele.type === "decimal" || ele.type === "percent") {
-                currentColumn.columnData.cellEditor = "numericCellEditor";
+          if (ele.fieldName === 'productName') {
+            column.push({
+              pivotIndex: 0,
+              field: ele?.fieldName,
+              headerName: ele?.fieldLabel,
+              show: true,
+              disabled: true,
+              cellRenderer: 'productTypeRenderer',
+              primaryField: true
+            })
+            rendererNames.push('productTypeRenderer')
+          } else {
+            let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
+            if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
+              if (!ele.isFormula && !ele.isUneditable && Editable) {
+                if (ele.type === "decimal" || ele.type === "percent") {
+                  currentColumn.columnData.cellEditor = "numericCellEditor";
+                }
+                currentColumn.columnData.editable = true;
               }
-              currentColumn.columnData.editable = true;
             }
-          }
-          column.push({ ...currentColumn.columnData, leval: ele.leval });
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName)
+            column.push({ ...currentColumn.columnData, leval: ele.leval });
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
           }
         }
       }
@@ -534,6 +586,35 @@ const ProductBuilder = (props) => {
     }
   };
 
+  const handelAskPriceToSupplier = (content) => {
+
+    let data: any = {
+      "products": selectedRecords?.map(d => {
+        return {
+          "productId": d?.productId,
+          "uniqueId": d?._id
+        }
+      }),
+      "quote": quoteData?._id,
+      "productBuilder": productBuilderId,
+      "protected": true,
+      "body": content
+    }
+    axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
+      dispatch({ type: "selection", selectedRecords: [] })
+      fetchProduct(productBuilderId);
+      toastConfig.setToastConfig({
+        message: `Email has been sent to suppliers`,
+        type: "success",
+        open: true,
+      });
+      setAskSupplierPriceDialog(false)
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Box p={1} pt={0}>
       {Editable && (
@@ -558,6 +639,18 @@ const ProductBuilder = (props) => {
                 else fetchProduct(productBuilderId)
               }}
             />
+          )}
+          {isPriceBuilder && fromQuote && permissions.isUpdate && columns && columns.some(d => d.field.includes("supplier")) && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              className="float-right ml-1 mr-2"
+              onClick={() => { setAskSupplierPriceDialog(true) }}
+              disabled={checkUniqTemplate()}
+              aria-controls="action-menu">
+              {isMobile && !isTablet ? "Supplier" : "Ask Price to Supplier"}
+            </Button>
           )}
           {stage === "cost" && permissions.isUpdate && (
             <Button
@@ -742,6 +835,17 @@ const ProductBuilder = (props) => {
           stage={stage}
         />
       )}
+      {openSupplierPriceDialog && (
+        <SupplierAskPrice
+          supplierData={supplierData}
+          handleClose={() => setOpenSupplierPriceDialog(false)}
+          productBuilderId={productBuilderId}
+          onSuccess={() => {
+            setOpenSupplierPriceDialog(false);
+            fetchProduct(productBuilderId)
+          }}
+        />
+      )}
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
@@ -799,73 +903,12 @@ const ProductBuilder = (props) => {
           /> : null
       }
 
-      {/* {
-        showProductNumberOrProductNameUpdate.open && <Dialog
-          maxWidth="lg"
-          fullWidth={true}
-          fullScreen={false}
-          TransitionComponent={CustomDialogTransition}
-          aria-labelledby="customized-dialog-title"
-          onClose={() => {
-            setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-          }}
-          open={showProductNumberOrProductNameUpdate.open}
-          disableBackdropClick={true}
-        >
-          <CustomDialogHeader title="Update" onClose={() => {
-            setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-          }}
-            isMinimized={!false}
-            onMinimizeMaximize={() => { }}
-            showManimizeMaximize={true}
-          />
-
-          <CustomDialogContent>
-
-            <TextField id="standard-basic" label={showProductNumberOrProductNameUpdate.title}
-              value={showProductNumberOrProductNameUpdate.value}
-              fullWidth
-              onChange={(e) => {
-                setShowProductNumberOrProductNameUpdate((prevState) => {
-                  return { ...prevState, value: e.target.value }
-                })
-              }}
-            />
-
-          </CustomDialogContent>
-
-          <CustomDialogFooter>
-            <Button type="button" variant="outlined" color="primary" size="small" onClick={() => {
-              setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-            }}>
-              Cancel
-            </Button>
-
-            <CustomButton
-              variant="contained"
-              color="primary"
-              onClick={(e) => {
-
-                let updatedData = [...dataRows];
-                updatedData[showProductNumberOrProductNameUpdate.indexOfRecord][showProductNumberOrProductNameUpdate.property] = showProductNumberOrProductNameUpdate.value;
-
-                dispatch({ type: "initialize", data: updatedData, count: updatedData.length });
-                setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-
-                onCellValueChanged({
-                  data: updatedData[showProductNumberOrProductNameUpdate.indexOfRecord],
-                  column: { colId: showProductNumberOrProductNameUpdate.property },
-                  newValue: showProductNumberOrProductNameUpdate.value
-                })
-
-              }}
-            >
-              Save
-            </CustomButton>
-          </CustomDialogFooter>
-
-        </Dialog>
-      } */}
+      {
+        askSupplierPriceDialog && <AskSupplierPriceDialog
+          setAskSupplierPriceDialog={setAskSupplierPriceDialog}
+          askSupplierPriceDialog={askSupplierPriceDialog}
+          handelAskPriceToSupplier={handelAskPriceToSupplier} />
+      }
     </Box>
   );
 };

@@ -1,19 +1,19 @@
-import { useState, useEffect, Fragment } from "react";
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
-import { CreateEvent } from "./CreateEvent";
-import { GetEvent, DeleteEvent } from "../../../axios/activity";
-import Typography from "@material-ui/core/Typography";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import IconButton from "@material-ui/core/IconButton";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import Dialog from "@material-ui/core/Dialog";
-import { ListRelatedTo } from "../Helpers/ListRelatedTo";
-import { ViewAll } from "../Helpers/ViewAll";
-import ActivityLoader from "../../Helpers/ActivityLoader";
-import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, displayDate } from "../../../constants/helpers";
+import { useState, useEffect, Fragment } from 'react';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import { CreateEvent } from './CreateEvent';
+import { GetEvent, DeleteEvent } from '../../../axios/activity';
+import Typography from '@material-ui/core/Typography';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import IconButton from '@material-ui/core/IconButton';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import Dialog from '@material-ui/core/Dialog';
+import { ListRelatedTo } from '../Helpers/ListRelatedTo';
+import { ViewAll } from '../Helpers/ViewAll';
+import ActivityLoader from '../../Helpers/ActivityLoader';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
 
 export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -22,7 +22,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  
+
   useEffect(() => {
     fetchEvent();
   }, []);
@@ -32,7 +32,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     await GetEvent(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setEvents(data);
-        onSetCount("Event", data.length);
+        onSetCount('Event', data.length);
         setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
       })
       .catch((err) => {
@@ -66,7 +66,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         fetchEvent();
         handleActivityRefresh();
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const handleClose = () => {
@@ -85,11 +85,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
             <Box className="activity" key={_event._id}>
               <Box>
                 <Grid container>
-                  <Grid
-                    item
-                    xs={10}
-                    className="d-flex align-items-center gap-1"
-                  >
+                  <Grid item xs={10} className="d-flex align-items-center gap-1 ">
                     <Typography
                       variant="subtitle2"
                       className="cursor-pointer"
@@ -100,17 +96,10 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                     >
                       {_event.name}
                     </Typography>
-                    <span className="activity-date">
-                      End Date : {displayDate(_event.endDate)}
-                    </span>
+                    <span className="activity-date">End Date : {displayDate(_event.endDate)}</span>
                   </Grid>
                   <Grid item xs={2} container justify="flex-end">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      aria-label="delete"
-                      onClick={(event) => handleOpenMenu(event, _event._id)}
-                    >
+                    <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _event._id)}>
                       <MoreHorizIcon />
                     </IconButton>
                   </Grid>
@@ -119,10 +108,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
               <Box pt={1}>
                 <Grid container>
                   <Grid item xs={6}>
-                    <ListRelatedTo
-                      relatedTo={_event.relatedTo}
-                      originRelatedTo={relatedTo}
-                    />
+                    <ListRelatedTo relatedTo={_event.relatedTo} originRelatedTo={relatedTo} />
                     {/* <Chip label={_event.status} size="small" color="primary" /> */}
                   </Grid>
                 </Grid>
@@ -136,13 +122,7 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
           <Typography variant="subtitle2">No Past Event</Typography>
         </Box>
       )}
-      <Menu
-        id="simple-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleCloseMenu}
-      >
+      <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
         <MenuItem onClick={handleEdit}>Edit</MenuItem>
         <MenuItem onClick={handleDelete}>Delete</MenuItem>
       </Menu>
@@ -150,24 +130,26 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
-        onClose={() => {
-          handleClose()
-          setFullScreen(false);
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            handleClose();
+            setFullScreen(false);
+          }
         }}
         fullWidth
-        fullScreen={fullScreen || (isMobile || isTablet)}
+        fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
       >
         <CreateEvent
           eventId={eventId}
           handleClose={() => {
-            handleClose()
+            handleClose();
             setFullScreen(false);
           }}
           relatedTo={relatedTo}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
+            setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
         />

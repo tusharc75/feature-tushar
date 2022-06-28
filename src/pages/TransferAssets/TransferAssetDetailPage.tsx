@@ -184,16 +184,15 @@ const TransferAssetDetailPage = () => {
         }
 
         const userEntity = user?.entity?.map((e) => e._id) ?? [];
-        const warehouseEntity =
-          data?.transferType === 'Internal'
-            ? data?.transfertoPlant?.entity
-            : data?.transferType === 'External Customer'
-            ? data?.transfertoCustomer?.entity
-            : data?.transfertoSupplier?.entity;
+        const warehouseEntity = data?.transferType === 'Internal' ? data?.transfertoPlant?.entity : data?.transferType === 'External Customer' ? data?.transfertoCustomer?.entity : data?.transfertoSupplier?.entity;
 
-        const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
-
-        setCanReceive(isReceiveable);
+        if (warehouseEntity?.length) {
+          const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
+          setCanReceive(isReceiveable);
+        }
+        else {
+          setCanReceive(true);
+        }
 
         if (permissions?.transferAsset?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
@@ -243,7 +242,7 @@ const TransferAssetDetailPage = () => {
           .get(`${routes.transferAsset.path}/get-asset/${id}`)
           .then(({ data: { data } }) => {
             data = [
-              ...data?.map((d: any) => ({
+              ...data?.assets?.map((d: any) => ({
                 ...d,
                 productDescription: d?.product?.optionLabel ?? '',
                 productId: d?.product?.optionValue ?? '',
@@ -491,7 +490,6 @@ const TransferAssetDetailPage = () => {
                         setPrevStep={setPrevStep}
                         transferAssetId={id}
                         transferAssetData={transferAssetData}
-                        fetchAssets={fetchAssets}
                         permissions={permissions}
                         setNextStep={setNextStep}
                         setExistingAssets={setExistingAssets}
@@ -503,7 +501,6 @@ const TransferAssetDetailPage = () => {
                         renderedFrom={`${renderedFrom}_grid-2`}
                         allowedToEdit={allowedToEdit || isProcessor}
                         canReceive={canReceive}
-                        fetchTransferAssetData={fetchTransferAssetData}
                       />
                     )}
                     {currentStep === 2 && (
@@ -562,7 +559,7 @@ const TransferAssetDetailPage = () => {
                               type: ACTIVITY_RESOURCE.transferAsset
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>
