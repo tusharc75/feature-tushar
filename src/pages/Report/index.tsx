@@ -251,7 +251,7 @@ const Report = () => {
           options.forEach((o: any) => {
             deepFilter.push({
               field: key,
-              term: encodeURIComponent(o.optionValue)
+              term: o.optionValue
             });
           });
         });
@@ -274,7 +274,7 @@ const Report = () => {
       }
 
       if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
+        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
       }
     }
     if (!isObjectEmpty(filters)) {

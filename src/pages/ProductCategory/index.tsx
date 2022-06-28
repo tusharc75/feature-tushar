@@ -16,7 +16,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { getLocalStorageArrayData, gridLoadingTimeout, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, gridPageSizes, isObjectEmpty, removeLocalStorage } from '../../constants/helpers';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
@@ -409,6 +409,7 @@ const ProductCategory = () => {
     axiosInstance()
       .put(`/product-category/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords)
         fetchProductCategory();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);

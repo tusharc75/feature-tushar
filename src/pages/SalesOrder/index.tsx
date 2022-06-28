@@ -12,7 +12,8 @@ import {
   salesOrder,
   sidebarResource,
   prepareDataForGrid,
-  getLocalStorageArrayData
+  getLocalStorageArrayData,
+  removeLocalStorage
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -358,6 +359,7 @@ const SalesOrder = () => {
             type: 'success',
             message: data.message
           });
+          removeLocalStorage(localStorageSelectedRecords)
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});

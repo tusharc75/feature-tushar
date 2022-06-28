@@ -45,10 +45,10 @@ const ReportMaster = () => {
         <Container maxWidth="lg">
           <Box p={3}>
             <Grid container spacing={2}>
-              {REPORT_LIST.map((report: any) => {
+              {REPORT_LIST.map((report: any, index: any) => {
                 return (
                   permissions[report.permission]?.isRead && (
-                    <Grid key={report.key} item xs={12} sm={12} md={6} lg={4}>
+                    <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
                       <Link
                         to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`}
                       >
