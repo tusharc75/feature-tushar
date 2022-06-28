@@ -135,6 +135,7 @@ import ProductAuction from './pages/productAuction';
 import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDetailsPage';
 import ConvertInventory from './pages/ConvertInventory';
 import PublicRoutePage from './pages/PublicRoutePage';
+import ScheduleReport from './pages/ScheduleReport';
 
 var notificationInterval: any = null;
 
@@ -240,7 +241,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -674,6 +675,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/purchase-order-type/:type`}>
               <PurchaseOrderReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`/schedule-report`}>
+              <ScheduleReport />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />
