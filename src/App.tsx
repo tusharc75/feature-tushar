@@ -136,6 +136,7 @@ import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDeta
 import ConvertInventory from './pages/ConvertInventory';
 import PublicRoutePage from './pages/PublicRoutePage';
 import ImportExport from './pages/ImportExport';
+import ScheduleReport from './pages/ScheduleReport';
 
 var notificationInterval: any = null;
 
@@ -675,6 +676,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/purchase-order-type/:type`}>
               <PurchaseOrderReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`/schedule-report`}>
+              <ScheduleReport />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />

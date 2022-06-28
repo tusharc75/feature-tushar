@@ -72,7 +72,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'erecs',
         'resource-calendar',
         'serialized-asset-new',
-        'import-export'
+        'import-export',
+        'schedule-report'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
