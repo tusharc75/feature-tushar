@@ -25,30 +25,20 @@ const customNodeStyles = {
     name: 'Purchase Order',
     ...COLOUR_MASTER.purchaseOrder
   },
-  package: {
-    name: 'Package',
-    ...COLOUR_MASTER.package
-  },
   product: {
     name: 'Product',
     ...COLOUR_MASTER.product
   },
-
   productAssets: {
     name: 'Assets',
     ...COLOUR_MASTER.assets
   },
-  lostAssets: {
-    name: 'Lost Assets',
-    ...COLOUR_MASTER.lostAssets
+  serialNumber: {
+    name: 'Serial Number',
+    ...COLOUR_MASTER.transferAsset
   },
-  scrapAssets: {
-    name: 'Scrap Assets',
-    ...COLOUR_MASTER.scrapAssets
-  },
-
-  receivingTicket: {
-    name: 'Receiving Ticket',
+  receiving: {
+    name: 'Receiving',
     ...COLOUR_MASTER.receivingTicket
   }
 };
@@ -146,12 +136,7 @@ const PurchaseOrderViews = (props) => {
               )
             },
             position: { x: xPosition, y: assetYIdx * 80 },
-            style:
-              item?.status === INVENTORY_STATUS.scrap || item?.status === INVENTORY_STATUS.lost
-                ? item?.status === INVENTORY_STATUS.scrap
-                  ? customNodeStyles.scrapAssets
-                  : customNodeStyles.lostAssets
-                : customNodeStyles.productAssets
+            style: customNodeStyles.productAssets
           });
           assetYIdx += 1;
           flowEdge.push({
@@ -174,12 +159,7 @@ const PurchaseOrderViews = (props) => {
               label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item?.serialNumber}</div>
             },
             position: { x: xPosition, y: assetYIdx * 80 },
-            style:
-              item?.status === INVENTORY_STATUS.scrap || item?.status === INVENTORY_STATUS.lost
-                ? item?.status === INVENTORY_STATUS.scrap
-                  ? customNodeStyles.scrapAssets
-                  : customNodeStyles.lostAssets
-                : customNodeStyles.productAssets
+            style: customNodeStyles.serialNumber
           });
           assetYIdx += 1;
           flowEdge.push({
@@ -203,7 +183,7 @@ const PurchaseOrderViews = (props) => {
             label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Received</div>
           },
           position: { x: xPosition, y: 80 },
-          style: customNodeStyles.receivingTicket
+          style: customNodeStyles.receiving
         });
         allProducts
           ?.filter((i) => !serialisedAssetInProduct[i?.productId] && i?.actualReceived > 0)
