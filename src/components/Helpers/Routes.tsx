@@ -537,6 +537,13 @@ const routes = {
         ? storedRoutes.InventoryToAsset?.title
         : RESOURCE_LABEL.inventoryToAsset,
     path: '/inventory-to-asset'
+  },
+  importExport: {
+    title:
+      storedRoutes && storedRoutes.InventoryToAsset && storedRoutes.InventoryToAsset.title
+        ? storedRoutes.InventoryToAsset?.title
+        : RESOURCE_LABEL.importExport,
+    path: '/import-export'
   }
 };
 

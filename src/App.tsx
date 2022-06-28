@@ -135,6 +135,7 @@ import ProductAuction from './pages/productAuction';
 import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDetailsPage';
 import ConvertInventory from './pages/ConvertInventory';
 import PublicRoutePage from './pages/PublicRoutePage';
+import ImportExport from './pages/ImportExport';
 
 var notificationInterval: any = null;
 
@@ -240,7 +241,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -731,6 +732,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.inventoryToAsset.path}>
               <ConvertInventory />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.importExport.path}>
+              <ImportExport />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
