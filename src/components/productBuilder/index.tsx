@@ -867,44 +867,34 @@ const ProductBuilder = (props) => {
           }}
         />
       )}
+      {showConfirmDialog ?
+        <ConfirmCancelDialog
+          open={showConfirmDialog}
+          close={() => setShowConfirmDialog(false)}
+          onSave={() => {
+            setShowConfirmDialog(false)
+            // e.preventDefault();
+            // const err = Object.keys(errors);
+            // if (err.length) {
+            // const input = document.querySelector(
+            //   `input[name=${err[0]}]`,
+            // );
 
+            // input.scrollIntoView({
+            //   behavior: 'smooth',
+            //   block: 'center',
+            //   inline: 'start',
+            // });
+          }}
+          onClose={() => {
+            setShowConfirmDialog(false)
 
-
-
-
-      {
-        showConfirmDialog ?
-          <ConfirmCancelDialog
-            open={showConfirmDialog}
-            close={() => setShowConfirmDialog(false)}
-            onSave={() => {
-              setShowConfirmDialog(false)
-              // e.preventDefault();
-              // const err = Object.keys(errors);
-              // if (err.length) {
-              // const input = document.querySelector(
-              //   `input[name=${err[0]}]`,
-              // );
-
-              // input.scrollIntoView({
-              //   behavior: 'smooth',
-              //   block: 'center',
-              //   inline: 'start',
-              // });
-
-            }
-
-            }
-            onClose={() => {
-              setShowConfirmDialog(false)
-
-              setProductId(null);
-            }}
-          /> : null
+            setProductId(null);
+          }}
+        /> : null
       }
-
-      {
-        askSupplierPriceDialog && <AskSupplierPriceDialog
+      {askSupplierPriceDialog &&
+        <AskSupplierPriceDialog
           setAskSupplierPriceDialog={setAskSupplierPriceDialog}
           askSupplierPriceDialog={askSupplierPriceDialog}
           handelAskPriceToSupplier={handelAskPriceToSupplier} />
