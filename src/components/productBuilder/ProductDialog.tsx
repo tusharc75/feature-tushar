@@ -35,12 +35,14 @@ import InfoIcon from '@material-ui/icons/Info';
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
 const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, handleSaveProduct, stage }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const [showCloseConfirmBox,setShowCloseConfirmBox] = useState(false);
   const [productFields, setProductFields] = useState([]);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [productData, setProductData] = useState(null);
+
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
   const [isAddField, setIsAddField] = useState(false);
   const [fields, setFields] = useState([]);
   const [sectionName, setSectionName] = useState('');
@@ -301,7 +303,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                   if (!isEqual(ref.current.values, initialData.values)) {
                     setShowConfirmDialog(true);
                   } else {
-                    setShowCloseConfirmBox(true);
+                    handleClose();
                   }
                 }}
                 isMinimized={!fullScreen}
@@ -375,8 +377,8 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                               ? true
                                               : false
                                             : ['productCategory', 'productTemplate', 'entity', 'priceTemplate'].includes(field.fieldName)
-                                            ? true
-                                            : false
+                                              ? true
+                                              : false
                                         }
                                       />
                                     ) : field.fieldName === 'supplier' ? (
@@ -460,14 +462,14 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                                                     ? true
                                                     : false
                                                   : ['productCategory', 'productTemplate', 'entity', 'priceTemplate'].includes(field.fieldName)
-                                                  ? true
-                                                  : false
+                                                    ? true
+                                                    : false
                                               }
                                               imageOrFileUploadCompletePercentage={
                                                 ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                                   ? (completePercentage) => {
-                                                      setUploadingImageOrFileProgress(completePercentage);
-                                                    }
+                                                    setUploadingImageOrFileProgress(completePercentage);
+                                                  }
                                                   : null
                                               }
                                               setValues={setValues}
@@ -534,7 +536,7 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
                     } else {
-                      setShowCloseConfirmBox(true);
+                      handleClose();
                     }
                   }}
                 >
@@ -570,20 +572,6 @@ const CreateProduct = ({ productBuilderId, productId, isClone, handleClose, hand
                   }}
                 />
               ) : null}
-
-              {showCloseConfirmBox && (
-                <ConfirmationDialog
-                  open={showCloseConfirmBox}
-                  message={`Are you sure you want to leave?`}
-                  onClose={() => {
-                    setShowCloseConfirmBox(false);
-                  }}
-                  onOk={() => {
-                    setShowCloseConfirmBox(false);
-                    handleClose();
-                  }}
-                />
-              )}
             </Fragment>
           )}
         </Formik>
