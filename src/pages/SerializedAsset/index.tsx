@@ -23,7 +23,8 @@ import {
   warehouse as warehouseHelper,
   INVENTORY_STATUS,
   COLOUR_MASTER,
-  getLocalStorageArrayData
+  getLocalStorageArrayData,
+  removeLocalStorage
 } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
@@ -323,6 +324,7 @@ const SerializedAsset = () => {
     axiosInstance()
       .put(`${serializedAsset.api}/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords)
         fetchProductInventory();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
