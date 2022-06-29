@@ -188,6 +188,35 @@ const Report = () => {
         let {
           data: { data: productFields }
         } = await axiosInstance().get(`/field?resource=Product`);
+        let {
+          data: { data: POFields }
+        } = await axiosInstance().get(`/field?resource=Purchase Order`);
+
+        POFields.filter((field) => ['purchaseOrderDate', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          if (field?.fieldData.fieldName === 'warehouse') {
+            resourceFieldData.push(field);
+            columns.push({
+              field: 'warehouse',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'plantRenderer'
+            });
+          }
+          if (field?.fieldData.fieldName === 'purchaseOrderDate') {
+            resourceFieldData.push({
+              ...field,
+              fieldData: { ...field.fieldData, fieldLabel: 'Date', fieldName: 'date', type: 'date' }
+            });
+            columns.push({
+              field: 'date',
+              headerName: 'Date',
+              show: true,
+              disabled: false,
+              cellRenderer: 'dateRenderer'
+            });
+          }
+        });
 
         productFields.forEach((o: any) => {
           if (o?.fieldData.fieldName === 'productCategory') {
