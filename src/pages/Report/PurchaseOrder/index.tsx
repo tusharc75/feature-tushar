@@ -15,13 +15,13 @@ import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridCompone
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from 'src/constants/helpers';
+import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, productInventory, isObjectEmpty } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from '../ReportFilters';
-import { DateRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { DateRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import HistoryIcon from '@material-ui/icons/History';
 import AverageCostHistory from '../AverageCostHistory';
 
@@ -221,7 +221,7 @@ const Report = () => {
             disabled: false,
             filter: false,
             sortable: false,
-            cellRenderer: 'commonRenderer'
+            cellRenderer: 'numberRenderer'
           },
           {
             field: 'averagePrice',
@@ -230,7 +230,7 @@ const Report = () => {
             disabled: false,
             filter: false,
             sortable: false,
-            cellRenderer: 'commonRenderer'
+            cellRenderer: 'numberRenderer'
           },
           {
             field: 'totalPrice',
@@ -239,7 +239,7 @@ const Report = () => {
             disabled: false,
             filter: false,
             sortable: false,
-            cellRenderer: 'commonRenderer'
+            cellRenderer: 'numberRenderer'
           }
         ];
       }
@@ -331,6 +331,7 @@ const Report = () => {
     plantRenderer: PlantRenderer,
     supplierRenderer: SupplierRenderer,
     actionsRenderer: ActionsRenderer,
+    numberRenderer: NumberRenderer,
     dateRenderer: DateRenderer
   };
 
@@ -353,8 +354,8 @@ const Report = () => {
     axiosInstance()
       .get(
         `${resourceCamelCase === 'purchaseOrderProduct'
-          ? '/product-inventory/report/purchase-order-product-wise-report'
-          : 'product-inventory/report/purchase-order-price'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report`
+          : `${productInventory.api}/report/purchase-order-price`
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -490,8 +491,8 @@ const Report = () => {
     axiosInstance()
       .get(
         `${resourceCamelCase === 'purchaseOrderProduct'
-          ? '/product-inventory/report/purchase-order-product-wise-report/export'
-          : 'product-inventory/report/purchase-order-price/export'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
+          : `${productInventory.api}/report/purchase-order-price/export`
         }${filterQuery}`,
         {
           responseType: 'arraybuffer'

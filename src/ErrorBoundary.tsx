@@ -37,7 +37,7 @@ class ErrorBoundary extends React.Component<any, any> {
               Something went wrong!
             </Typography>
             <Typography variant="h4" className={styles.message}>
-              Our team has been notified. If the problem persists, please contact eQuip-T support.
+              Our team has been notified. If the problem persists, please contact Equipt support.
             </Typography>
             <Button variant="contained" color="primary" className={styles.reload} onClick={() => (window.location.href = '/')}>
               Try again

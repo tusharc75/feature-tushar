@@ -5,10 +5,10 @@ import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridCo
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout, } from 'src/constants/helpers';
+import { gridLoadingTimeout, productInventory, } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { CommonRenderer, DateTimeRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import { CommonRenderer, NumberRenderer, DateTimeRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
 import { capitalize } from "lodash";
 import { Link } from 'react-router-dom'
 import NoDataCell from "../../../components/Helpers/NoDataCell";
@@ -35,24 +35,13 @@ const AverageCostHistory = ({ handleClose, product, warehouse }) => {
         }
         let data;
         const query = warehouse ? `?warehouse=${warehouse}` : ``;
-        const response = await axiosInstance().get(`/history/product-ledger/${product}${query}`)
+        const response = await axiosInstance().get(`${productInventory.api}/report/product-price-of-product/${product}${query}`)
         data = response?.data?.data
         let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
-            finalObject.type = capitalize(u.type)
-            finalObject.serialNumber = u?.serialNumber?.map((e) => e.serialNumber)?.toString()
+            finalObject.finalQty = finalObject.qty - (finalObject.soldQty || 0);
+            finalObject.amount = finalObject.finalQty * finalObject.price;
             return finalObject;
-        });
-
-        var qty = 0;
-        rows?.slice().reverse().forEach(function (item) {
-            if (item.type === "Credit") {
-                qty = qty + item?.qty
-            }
-            else {
-                qty = qty - item?.qty
-            }
-            item.finalInventory = qty;
         });
         dispatch({ type: "initialize", data: rows, count: rows.length });
         setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
@@ -62,12 +51,11 @@ const AverageCostHistory = ({ handleClose, product, warehouse }) => {
         { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer", filter: false, sortable: false },
         { field: "referenceType", headerName: "Reference Type", show: true, cellRenderer: "commonRenderer" },
         { field: "reference", headerName: "Reference", show: true, cellRenderer: "referenceRenderer" },
-        { field: "qty", headerName: "Quantity", show: true, cellRenderer: "commonRenderer", filter: false, sortable: false, },
-        { field: "soldQty", headerName: "Sold Quantity", show: true, cellRenderer: "commonRenderer", filter: false, sortable: false, },
-        { field: "finalQty", headerName: "Final Quantity", show: true, cellRenderer: "commonRenderer", filter: false, sortable: false, },
-        { field: "price", headerName: "Unit Rate", show: true, cellRenderer: "commonRenderer", filter: false, sortable: false, },
-        { field: "amount", headerName: "Amount", show: true, cellRenderer: "commonRenderer", filter: false, sortable: false, },
-        { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
+        { field: "qty", headerName: "Quantity", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
+        { field: "soldQty", headerName: "Sold Quantity", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
+        { field: "finalQty", headerName: "Final Quantity", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
+        { field: "price", headerName: "Unit Rate", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
+        { field: "amount", headerName: "Amount", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
     ];
 
     const ReferenceRenderer = (params) =>
@@ -104,6 +92,7 @@ const AverageCostHistory = ({ handleClose, product, warehouse }) => {
     const frameworkComponents = {
         referenceRenderer: ReferenceRenderer,
         commonRenderer: CommonRenderer,
+        numberRenderer: NumberRenderer,
         dateTimeRenderer: DateTimeRenderer
     };
 
@@ -137,7 +126,7 @@ const AverageCostHistory = ({ handleClose, product, warehouse }) => {
                             loading={loading}
                             isClientSideGrid={true}
                             allowSelection={false}
-                            renderedFrom={"product_history"}
+                            renderedFrom={"product_price_history"}
                             refreshGrid={fetchRecords}
                         />
                         : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
