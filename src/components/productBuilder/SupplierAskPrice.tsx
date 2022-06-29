@@ -13,17 +13,19 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import { CustomDialogTransition } from "../../constants/helpers";
 import { Link } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
-import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
+import { Box, Chip, IconButton, Menu, MenuItem } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import { CommonRenderer, DateTimeRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
+import AskSupplierPriceDialog from "./AskSupplierPriceDialog";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 
 const renderedFrom = "quoteSupplierPrice";
 const localStorageSelectedRecords = `${renderedFrom}_selected`;
-const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit", "supplierAccount", "responseDate","supplierContact"]
+const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit", "supplierAccount", "responseDate", "supplierContact", "status"]
 let levalOrderBy = [
     "product",
     "product-custom",
@@ -43,17 +45,33 @@ const SupplierAskPrice = (props) => {
 
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+    const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
+    const [rejectId, setRejectId] = useState(null);
 
     useEffect(() => {
         fetchProduct()
     }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
 
-    const ProductNameRenderer = params => (
-        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
-            {params.value}
-        </Link>
-    )
+    const ActionsRenderer = (params) => {
+        return (
+            <>
+                <IconButton
+                    size="small"
+                    aria-label="Delete"
+                    onClick={() => {
+                        setAskSupplierPriceDialog(true)
+                        setRejectId(params.data._id)
+                    }}
+                >
+                    <DeleteIcon
+                        fontSize="small"
+                        color={"error"}
+                    />
+                </IconButton>
+            </>
+        );
+    };
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
@@ -81,10 +99,11 @@ const SupplierAskPrice = (props) => {
             tempFrameworkComponent = {
                 commonRenderer: CommonRenderer,
                 dateTimeRenderer: DateTimeRenderer,
+                actionsRenderer: ActionsRenderer,
                 ...tempFrameworkComponent,
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
-            columns = sortBy([...columns,{
+            columns = sortBy([...columns, {
                 "field": "supplierContact",
                 "headerName": "Supplier Contact",
                 "width": 180,
@@ -93,7 +112,16 @@ const SupplierAskPrice = (props) => {
                 "cellRenderer": "commonRenderer",
                 "leval": "product",
                 "order": 3
-            },{
+            }, {
+                "field": "status",
+                "headerName": "Status",
+                "width": 180,
+                "show": true,
+                "disabled": false,
+                "cellRenderer": "commonRenderer",
+                "leval": "product",
+                "order": 3
+            }, {
                 "field": "responseDate",
                 "headerName": "Rate Submit Date",
                 "width": 180,
@@ -214,6 +242,20 @@ const SupplierAskPrice = (props) => {
         });
 
     }
+    const handleReject = (content) => {
+        axiosInstance().put(`/quote-builder/apply-reject/${rejectId}`, { "body": content }).then(({ data }) => {
+            toastConfig.setToastConfig({
+                message: data?.message,
+                type: "success",
+                open: true,
+            });
+            fetchProduct()
+            setAskSupplierPriceDialog(false)
+        })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+    }
 
     return (<Dialog
         fullScreen={true}
@@ -244,7 +286,8 @@ const SupplierAskPrice = (props) => {
                     limit={limit}
                     pageSizes={pageSizes}
                     page={page}
-                    allowAction={false}
+                    allowAction={true}
+                    actionWidth={100}
                     loading={loading}
                     refreshGrid={fetchProduct}
                     renderedFrom={renderedFrom}
@@ -253,6 +296,13 @@ const SupplierAskPrice = (props) => {
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
+        {askSupplierPriceDialog &&
+            <AskSupplierPriceDialog
+                setAskSupplierPriceDialog={setAskSupplierPriceDialog}
+                askSupplierPriceDialog={askSupplierPriceDialog}
+                from="SupplierAskPrice"
+                handleReject={handleReject} />
+        }
     </Dialog>
     );
 }
