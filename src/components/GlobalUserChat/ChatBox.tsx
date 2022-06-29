@@ -81,7 +81,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
 
   return (
     <Box height={isSmallScreen ? '100%' : '400px'} className="global-chatbox">
-      {selectedChat.chatTitle === 'eQuip-t User' && (
+      {selectedChat.chatTitle === 'Equipt User' && (
         <div className="not-found">
           <p>Account Deleted</p>
         </div>
@@ -109,7 +109,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
                   }}
                 >
                   {selectedChat && chatUsers?.length > 2 ? (
-                    <p className="username">{!user(data) ? 'eQuip-t User' : user(data)?._id !== currentUser && user(data)?.firstName}</p>
+                    <p className="username">{!user(data) ? 'Equipt User' : user(data)?._id !== currentUser && user(data)?.firstName}</p>
                   ) : null}
                   <div className="msg-data">
                     <div className="msg-info">
@@ -127,7 +127,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
       {!loadingChat && (
         <form onSubmit={sendMessage} className={isSmallScreen ? 'chatbox-input_mobile' : 'chatbox-input'}>
           <input
-            disabled={selectedChat.chatTitle === 'eQuip-t User'}
+            disabled={selectedChat.chatTitle === 'Equipt User'}
             placeholder="Start Typing..."
             value={messageValue}
             onChange={(e) => setMessageValue(e.target.value)}
@@ -136,7 +136,7 @@ const ChatBox = ({ user: loggedInUser, isSmallScreen }) => {
           <Box mr={1}>
             <IconButton
               color="primary"
-              disabled={!messageValue || selectedChat.chatTitle === 'eQuip-t User' || isMsgSending}
+              disabled={!messageValue || selectedChat.chatTitle === 'Equipt User' || isMsgSending}
               type="submit"
               size="small"
             >

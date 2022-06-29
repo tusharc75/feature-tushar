@@ -1,5 +1,5 @@
 import MomentUtils from "@date-io/moment";
-import { Box, Button, Grid, IconButton, Paper, Typography } from "@material-ui/core";
+import { Box, Button, Grid, IconButton, Paper, TextField, Typography } from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import MuiPickersUtilsProvider from "@material-ui/pickers/MuiPickersUtilsProvider";
 import { CustomDialogTransition, imageUploadMaxSize } from "src/constants/helpers";
@@ -17,6 +17,7 @@ import emailStyles from "../../pages/Activity/Email/email.module.scss";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
 import { isMobile, isTablet } from "react-device-detect";
+import { Autocomplete } from "@material-ui/lab";
 
 const AskSupplierPriceDialog = (props) => {
 
@@ -24,6 +25,9 @@ const AskSupplierPriceDialog = (props) => {
         setAskSupplierPriceDialog,
         askSupplierPriceDialog,
         handelAskPriceToSupplier,
+        supplierContactData,
+        from,
+        handleReject
     } = props;
 
     const [otherAttachments, setOtherAttachments] = useState([]);
@@ -35,6 +39,7 @@ const AskSupplierPriceDialog = (props) => {
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
     const toastConfig = useContext(CustomToastContext);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    const [contactId, setContactId] = useState([]);
 
 
     const getFileIconSrc = (file) => {
@@ -201,6 +206,31 @@ const AskSupplierPriceDialog = (props) => {
                         <Box padding={1}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
+                                    {from != "SupplierAskPrice" && <Autocomplete
+                                        multiple
+                                        options={[{ _id: "All", concatedName: "All" }, ...supplierContactData]}
+                                        getOptionLabel={(option: any) => (option ? option?.accountName ? `${option?.concatedName} - ${option?.accountName?.optionLabel}` : `${option?.concatedName}` : '')}
+                                        value={
+                                            supplierContactData.filter((data) => contactId?.some((d) => d === data._id)).length
+                                                ? supplierContactData.filter((data) => contactId?.some((d) => d === data._id))
+                                                : []
+                                        }
+                                        onChange={(e, val: any) => {
+                                            val?.some(d => d?._id === "All") ?
+                                                setContactId(supplierContactData?.map((d) => d._id))
+                                                : setContactId(val && val?.map((d) => d._id))
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                margin="dense"
+                                                name="contact"
+                                                label="Contact"
+                                                variant="outlined"
+                                                fullWidth
+                                            />
+                                        )}
+                                    />}
                                     <Box>
                                         {renderFileThumbnails}
                                         <ImageAttachments
@@ -255,13 +285,22 @@ const AskSupplierPriceDialog = (props) => {
                         Cancel
                     </Button>
 
-                    <CustomButton
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handelAskPriceToSupplier(contantValue)}
-                    >
-                        Send
-                    </CustomButton>
+                    {from === "SupplierAskPrice" ?
+                        <CustomButton
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleReject(contantValue)}
+                        >
+                            Submit
+                        </CustomButton>
+                        : <CustomButton
+                            variant="contained"
+                            color="primary"
+                            disabled={supplierContactData.length === 0}
+                            onClick={() => handelAskPriceToSupplier(contantValue, contactId)}
+                        >
+                            Send
+                        </CustomButton>}
                 </CustomDialogFooter>
 
             </Dialog>

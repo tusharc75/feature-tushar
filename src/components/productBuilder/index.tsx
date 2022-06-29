@@ -24,7 +24,7 @@ import BulkEditDialog from "./BulkEditDialog";
 import Loader from "../Loader";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { handleAutoCalculation, extractFields } from "../../constants/formulaUtility";
-import { CustomDialogTransition, gridLoadingTimeout } from "../../constants/helpers";
+import { CustomDialogTransition, gridLoadingTimeout, supplierContact } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { AiTwotoneEdit } from 'react-icons/ai';
@@ -39,6 +39,7 @@ import useColumns, { getStaticFields, getFrameworkComponents } from '../../const
 import { Link, useHistory } from 'react-router-dom';
 import MuiPickersUtilsProvider from "@material-ui/pickers/MuiPickersUtilsProvider";
 import AskSupplierPriceDialog from "./AskSupplierPriceDialog";
+import { useData } from './../../StateProvider/Provider';
 
 let levalOrderBy = [
   "product",
@@ -85,6 +86,7 @@ const ProductBuilder = (props) => {
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openSupplierPriceDialog, setOpenSupplierPriceDialog] = useState(false);
   const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
+  const [supplierContactData, setSupplierContactData] = useState([]);
   const [supplierData, setSupplierData] = useState(null)
   const { getColumnData } = useColumns();
   // const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
@@ -92,7 +94,9 @@ const ProductBuilder = (props) => {
 
   const [dataToShowForMobile, setDataToShowForMobile] = useState([]);
   const [priceTemplateField, setPriceTemplateField] = useState(null)
-
+  const {
+    state: { user }
+  }: any = useData();
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -170,7 +174,7 @@ const ProductBuilder = (props) => {
         res.isChecked = false;
         res.canDelete = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
         res.allowedToEdit = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
-        res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && columns.some(d => d.field.includes("supplier"))
+        res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
         return res;
       });
       dispatch({ type: "initialize", data: rows, count: rows.length });
@@ -586,7 +590,7 @@ const ProductBuilder = (props) => {
     }
   };
 
-  const handelAskPriceToSupplier = (content) => {
+  const handelAskPriceToSupplier = (content, contactId) => {
 
     let data: any = {
       "products": selectedRecords?.map(d => {
@@ -598,7 +602,8 @@ const ProductBuilder = (props) => {
       "quote": quoteData?._id,
       "productBuilder": productBuilderId,
       "protected": true,
-      "body": content
+      "body": content ? content : "",
+      "supplierContact": contactId
     }
     axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
       dispatch({ type: "selection", selectedRecords: [] })
@@ -640,13 +645,33 @@ const ProductBuilder = (props) => {
               }}
             />
           )}
-          {isPriceBuilder && fromQuote && permissions.isUpdate && columns && columns.some(d => d.field.includes("supplier")) && (
+          {isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
             <Button
               variant="contained"
               color="primary"
               size="small"
               className="float-right ml-1 mr-2"
-              onClick={() => { setAskSupplierPriceDialog(true) }}
+              onClick={() => {
+                let tempSupplierAccountId = []
+                selectedRecords?.forEach(element => {
+                  if (tempSupplierAccountId.findIndex(d => d === element?.supplierAccountId) === -1) {
+                    tempSupplierAccountId.push(element?.supplierAccountId)
+                  }
+                  element?.restsupplierAccount?.forEach(d => {
+                    if (tempSupplierAccountId.findIndex(e => e === d.optionValue) === -1) {
+                      tempSupplierAccountId.push(d.optionValue)
+                    }
+                  })
+                });
+                axiosInstance().get(`${supplierContact.contactApi}?filterById=${JSON.stringify([{ "field": "accountName", "term": { "$in": tempSupplierAccountId } }])}&filterType=and`).then(({ data: { data, count } }) => {
+                  setSupplierContactData(data)
+                  setAskSupplierPriceDialog(true)
+                })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+
+              }}
               disabled={checkUniqTemplate()}
               aria-controls="action-menu">
               {isMobile && !isTablet ? "Supplier" : "Ask Price to Supplier"}
@@ -897,7 +922,8 @@ const ProductBuilder = (props) => {
         <AskSupplierPriceDialog
           setAskSupplierPriceDialog={setAskSupplierPriceDialog}
           askSupplierPriceDialog={askSupplierPriceDialog}
-          handelAskPriceToSupplier={handelAskPriceToSupplier} />
+          handelAskPriceToSupplier={handelAskPriceToSupplier}
+          supplierContactData={supplierContactData} />
       }
     </Box>
   );

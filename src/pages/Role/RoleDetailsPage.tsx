@@ -75,21 +75,28 @@ const RoleDetailsPage = () => {
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
   const [entityAccess, setEntityAccess] = useState([]);
+
   const [open, setOpen] = useState({
     rentalManagement: false,
     sublease: false,
-    purchaseOrder: false
+    purchaseOrder: false,
+    quoteBuilder: false,
   });
+
   const [policyFieldCheckBox, SetPolicyFieldCheckBox] = useState({
     isPricingRentalManagement: false,
     isPricingSublease: false,
-    isPricingPurchaseOrder: false
+    isPricingPurchaseOrder: false,
+    isQuoteAskSupplierPrice: false
   });
+
   const [resourceCheckbox, setResourceCheckBox] = useState({
     rentalManagement: false,
     sublease: false,
-    purchaseOrder: false
+    purchaseOrder: false,
+    quoteBuilder: false,
   });
+
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false);
   const [dashBoardOption, setDashBoardOption] = useState([]);
   const [dashboardName, setDashboardName] = useState([]);
@@ -109,6 +116,11 @@ const RoleDetailsPage = () => {
       resource: 'Purchase Order',
       fieldLabel: 'Pricing Information',
       fieldName: 'isPricingPurchaseOrder'
+    },
+    {
+      resource: 'Quote Builder',
+      fieldLabel: 'Ask Supplier Price',
+      fieldName: 'isQuoteAskSupplierPrice'
     }
   ];
 
@@ -145,6 +157,7 @@ const RoleDetailsPage = () => {
     }
     // eslint-disable-next-line
   }, [roleData]);
+
   useEffect(() => {
     const data = {
       name: values.name,
@@ -166,15 +179,19 @@ const RoleDetailsPage = () => {
   const handlePolicyCheckBox = (checkBoxType, e, type = null, resourceObject = null) => {
     if (checkBoxType === 'Select-All') {
       setIsPolicyCheckBoxChecked(e.target.checked);
+
       setResourceCheckBox({
         rentalManagement: e.target.checked,
         purchaseOrder: e.target.checked,
-        sublease: e.target.checked
+        sublease: e.target.checked,
+        quoteBuilder: e.target.checked
       });
+
       SetPolicyFieldCheckBox({
         isPricingPurchaseOrder: e.target.checked,
         isPricingRentalManagement: e.target.checked,
-        isPricingSublease: e.target.checked
+        isPricingSublease: e.target.checked,
+        isQuoteAskSupplierPrice: e.target.checked
       });
     }
     if (checkBoxType === 'Policy-CheckBox') {
@@ -456,7 +473,7 @@ const RoleDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={headingLbl} showHeading={true}>
-                  {permissions.role.isUpdate && !isEditDeleteDisable ? (
+                  {permissions.role.isUpdate ? (
                     <Button disabled={isUpdating || checkError()} variant="contained" color="primary" size="small" onClick={handleUpdateRole}>
                       {isUpdating ? <CircularProgress size={22} /> : 'Update'}
                     </Button>
@@ -703,10 +720,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-              : entityDeleteRec
-              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-              : ''
+                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                : entityDeleteRec
+                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                  : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
