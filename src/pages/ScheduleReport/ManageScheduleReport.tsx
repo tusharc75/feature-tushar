@@ -15,7 +15,7 @@ type ValueTypes = {
   scheduleName: string;
   reportName: string;
   filters: any[];
-  resource: any[];
+  resource: any;
   columns: any[];
   subscribeUsers: any[];
   frequency: string;
@@ -104,6 +104,41 @@ const ManageScheduleReport = ({ handleClose }) => {
     setFilterValues((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  const formikValidator = (values: ValueTypes) => {
+    let errors = {};
+
+    if (!values.scheduleName) {
+      errors['scheduleName'] = 'Schedule name is required';
+    }
+    if (!values.resource) {
+      errors['resource'] = 'Resource is required';
+    }
+    if (!values.reportName) {
+      errors['reportName'] = 'Report name is required';
+    }
+    if (!values.subscribeUsers) {
+      errors['subscribeUsers'] = 'Subscribe users is required';
+    }
+
+    if (!values.frequency) {
+      errors['frequency'] = 'Frequency is required';
+    } else {
+      if (values.frequency === 'Daily' && !values.time) {
+        errors['time'] = 'Time is required';
+      }
+
+      if (values.frequency === 'Weekly' && !values.day) {
+        errors['day'] = 'Day is required';
+      }
+
+      if (values.frequency === 'Monthly' && !values.date) {
+        errors['date'] = 'Date is required';
+      }
+    }
+
+    return errors;
+  };
+
   const handleSubmit = (values: ValueTypes) => {
     console.log(values);
   };
@@ -120,7 +155,7 @@ const ManageScheduleReport = ({ handleClose }) => {
         initialValues={{
           scheduleName: '',
           reportName: '',
-          resource: [],
+          resource: {},
           filters: [],
           columns: [],
           subscribeUsers: [],
@@ -130,8 +165,9 @@ const ManageScheduleReport = ({ handleClose }) => {
           date: new Date()
         }}
         onSubmit={handleSubmit}
+        validate={formikValidator}
       >
-        {({ values, errors, touched, setFieldValue, submitForm }) => (
+        {({ values, errors, touched, setFieldValue }) => (
           <>
             <CustomDialogContent>
               <Grid container spacing={2}>
@@ -145,8 +181,8 @@ const ManageScheduleReport = ({ handleClose }) => {
                     size="small"
                     label="Schedule Name"
                     variant="outlined"
-                    error={touched['scheduleName'] && !Boolean(errors['scheduleName'])}
-                    helperText={touched['scheduleName'] && errors['scheduleName']}
+                    error={Boolean(errors['scheduleName'])}
+                    helperText={errors['scheduleName']}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -173,8 +209,8 @@ const ManageScheduleReport = ({ handleClose }) => {
                       <TextField
                         {...params}
                         required
-                        error={touched['resource'] && !Boolean(errors['resource'])}
-                        helperText={touched['resource'] && errors['resource']}
+                        error={Boolean(errors['resource'])}
+                        helperText={errors['resource']}
                         label="Resource"
                         variant="outlined"
                         name="resource"
@@ -192,8 +228,8 @@ const ManageScheduleReport = ({ handleClose }) => {
                     label="Report Name"
                     required
                     variant="outlined"
-                    error={touched['reportName'] && !Boolean(errors['reportName'])}
-                    helperText={touched['reportName'] && errors['reportName']}
+                    error={Boolean(errors['reportName'])}
+                    helperText={errors['reportName']}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -211,8 +247,8 @@ const ManageScheduleReport = ({ handleClose }) => {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        error={touched['filters'] && !Boolean(errors['filters'])}
-                        helperText={touched['filters'] && errors['filters']}
+                        error={Boolean(errors['filters'])}
+                        helperText={errors['filters']}
                         label="Filters"
                         name="filters"
                         variant="outlined"
@@ -247,8 +283,8 @@ const ManageScheduleReport = ({ handleClose }) => {
                     onChange={(_, newVal) => setFieldValue('columns', newVal)}
                     renderInput={(params) => (
                       <TextField
-                        error={touched['columns'] && !Boolean(errors['columns'])}
-                        helperText={touched['columns'] && errors['columns']}
+                        error={Boolean(errors['columns'])}
+                        helperText={errors['columns']}
                         {...params}
                         label="Columns"
                         name="columns"
@@ -267,8 +303,8 @@ const ManageScheduleReport = ({ handleClose }) => {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        error={touched['subscribeUsers'] && !Boolean(errors['subscribeUsers'])}
-                        helperText={touched['subscribeUsers'] && errors['subscribeUsers']}
+                        error={!Boolean(errors['subscribeUsers'])}
+                        helperText={errors['subscribeUsers']}
                         label="Subscibe User"
                         name="subscribeUsers"
                         required
@@ -295,8 +331,7 @@ const ManageScheduleReport = ({ handleClose }) => {
                       <ToggleButton value="Monthly">Monthly</ToggleButton>
                     </ToggleButtonGroup>
 
-                    {values?.frequency === 'daily' && <Box></Box>}
-                    {values?.frequency === 'weekly' && (
+                    {values?.frequency === 'Weekly' && (
                       <Box mt={2}>
                         <Typography color="textPrimary">Days</Typography>
                         <ToggleButtonGroup size="small" value={values.day} exclusive onChange={(_, val) => setFieldValue('day', val)}>
@@ -310,7 +345,7 @@ const ManageScheduleReport = ({ handleClose }) => {
                         </ToggleButtonGroup>
                       </Box>
                     )}
-                    {values?.frequency === 'monthly' && (
+                    {values?.frequency === 'Monthly' && (
                       <Box mt={2}>
                         <KeyboardDatePicker
                           views={['date']}
@@ -321,10 +356,11 @@ const ManageScheduleReport = ({ handleClose }) => {
                           inputVariant="outlined"
                           label="Date"
                           name="date"
+                          required={values.frequency === 'Monthly'}
                           format={dateFormatForInputControl}
                           value={values.date}
-                          error={touched['date'] && !Boolean(errors['date'])}
-                          helperText={touched['date'] && errors['date']}
+                          error={!Boolean(errors['date'])}
+                          helperText={errors['date']}
                           onChange={(date) => setFieldValue('date', date)}
                         />
                       </Box>
@@ -339,9 +375,10 @@ const ManageScheduleReport = ({ handleClose }) => {
                         name="time"
                         label="Time"
                         autoOk
+                        required={Boolean(values.frequency)}
                         value={values.time}
-                        error={touched['time'] && !Boolean(errors['time'])}
-                        helperText={touched['time'] && errors['time']}
+                        error={Boolean(errors['time'])}
+                        helperText={errors['time']}
                         onChange={(date) => setFieldValue('time', date)}
                         KeyboardButtonProps={{
                           'aria-label': 'change time'
@@ -356,7 +393,7 @@ const ManageScheduleReport = ({ handleClose }) => {
               <Button variant="contained" color="primary" size="small">
                 Cancel
               </Button>
-              <Button variant="outlined" color="primary" size="small" onSubmit={submitForm}>
+              <Button type="submit" variant="outlined" color="primary" size="small">
                 Save
               </Button>
             </CustomDialogFooter>
