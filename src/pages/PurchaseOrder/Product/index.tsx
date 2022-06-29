@@ -418,6 +418,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     type={"product"}
                     refrenceType="purchaseOrder"
                     renderedFrom={renderedFrom}
+                    ignoreIds={dataRows?.map((e) => e?.productId)}
                 />
             }
             {isAddNewProduct && (

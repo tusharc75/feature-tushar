@@ -1,6 +1,6 @@
 {
     "id": "OMS",
-    "name": "eQuip-t OMS",
+    "name": "Equipt OMS",
     "icons": [
         {
             "src": "favicon.ico",
@@ -59,7 +59,7 @@
             "density": "4.0"
         }
     ],
-    "short_name": "eQuip-t OMS",
+    "short_name": "Equipt OMS",
     "start_url": ".",
     "display": "standalone",
     "theme_color": "#000000",

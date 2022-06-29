@@ -347,7 +347,7 @@ function App() {
               severity="success"
             >
               <div style={{ display: 'flex', width: '100%', alignItems: 'start', justifyContent: 'space-between', gap: 20 }}>
-                <div style={{ flex: 1 }}>New Version of eQuip-T OM is available. Please refresh to get the latest changes.</div>
+                <div style={{ flex: 1 }}>New Version of Equipt Portal is available. Please refresh to get the latest changes.</div>
                 <Button className="snackbar-button" size="medium" variant="contained" color="secondary" onClick={updateServiceWorker}>
                   Refresh
                 </Button>
