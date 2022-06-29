@@ -201,8 +201,8 @@ const PurchaseOrderDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const updateStatus = (status) => {
@@ -230,18 +230,19 @@ const PurchaseOrderDetailsPage = () => {
   };
 
   const checkReceivedProduct = (products) => {
-    if (products?.length) {
-      var isReceived = false;
+    if (products?.length && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.closed) {
+      var isCompleteReceived = false;
+      var isPartialReceived = products?.some((e) => e?.actualReceived);
       if (products?.filter((e) => e?.qty - ((e?.actualReceived || 0) + (e?.scrapQuantity || 0)) > 0).length > 0) {
-        isReceived = false;
+        isCompleteReceived = false;
       } else {
-        isReceived = true;
+        isCompleteReceived = true;
       }
-      if (isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.received) {
+      if (isPartialReceived && !isCompleteReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.partialReceived) {
+        updateStatus(PURCHASE_ORDER_STATUS.partialReceived);
+      }
+      if (isCompleteReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.received) {
         updateStatus(PURCHASE_ORDER_STATUS.received);
-      }
-      if (!isReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
-        updateStatus(PURCHASE_ORDER_STATUS.inProgress);
       }
     }
   };
@@ -485,8 +486,8 @@ const PurchaseOrderDetailsPage = () => {
                           resource={ACTIVITY_RESOURCE.purchaseOrder}
                           restrictedAddActivities={
                             permissions &&
-                            permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`] &&
-                            permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`].isUpdate
+                              permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`] &&
+                              permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }
@@ -497,7 +498,7 @@ const PurchaseOrderDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>

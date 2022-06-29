@@ -215,9 +215,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
         }))
         axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { "orderDetails": tempProductArray })
             .then(() => {
-                if (purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
-                    updateStatus(PURCHASE_ORDER_STATUS.inProgress)
-                }
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
                 setAddingProducts(false)
@@ -231,9 +228,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     const handleUpdateQty = (rows) => {
         axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
             .then(() => {
-                if (purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
-                    updateStatus(PURCHASE_ORDER_STATUS.inProgress)
-                }
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
                 setSelectedProductData(null)

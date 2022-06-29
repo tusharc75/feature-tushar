@@ -1690,9 +1690,11 @@ export const SUBLEASE_STATUS = {
 };
 
 export const PURCHASE_ORDER_STATUS = {
-  new: 'New',
-  inProgress: 'In-Progress',
+  //new: 'New',
+  //inProgress: 'In-Progress',
   //issued: 'Issued',
+  open: 'Open',
+  partialReceived: 'Partial Received',
   received: 'Received',
   //readyToInvoice: 'Ready to Invoice',
   //invoiced: 'Invoiced',
