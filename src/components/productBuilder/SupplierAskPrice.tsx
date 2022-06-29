@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import Dialog from '@material-ui/core/Dialog'
 import axiosInstance from '../../axios/axiosInstance'
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, product } from '../../constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, product, removeLocalStorage } from '../../constants/helpers';
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
@@ -13,17 +13,20 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import { CustomDialogTransition } from "../../constants/helpers";
 import { Link } from "react-router-dom";
 import routes from "../../components/Helpers/Routes";
-import { Box, Chip, Menu, MenuItem } from "@material-ui/core";
+import { Box, Chip, IconButton, Menu, MenuItem } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import TextField from "@material-ui/core/TextField";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import { CommonRenderer, DateTimeRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
+import AskSupplierPriceDialog from "./AskSupplierPriceDialog";
+import DeleteIcon from "@material-ui/icons/Delete";
+import DeleteButton from "../Helpers/DeleteButton";
 
 
 const renderedFrom = "quoteSupplierPrice";
 const localStorageSelectedRecords = `${renderedFrom}_selected`;
-const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit", "supplierAccount", "responseDate","supplierContact"]
+const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit", "supplierAccount", "responseDate", "supplierContact", "status"]
 let levalOrderBy = [
     "product",
     "product-custom",
@@ -43,17 +46,11 @@ const SupplierAskPrice = (props) => {
 
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+    const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
 
     useEffect(() => {
         fetchProduct()
     }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
-
-
-    const ProductNameRenderer = params => (
-        <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
-            {params.value}
-        </Link>
-    )
 
     const fetchProduct = () => {
         dispatch({ type: "loading", loading: true });
@@ -70,6 +67,7 @@ const SupplierAskPrice = (props) => {
                     totalCost: item.totalCost || item.costPrice,
                     supplierContact: item?.supplierContact?.optionLabel ? item?.supplierContact?.optionLabel : ""
                 };
+                res.hideSelection = item.status !== "Submit" ? true : false
                 return res;
             });
             let columns = []
@@ -84,7 +82,7 @@ const SupplierAskPrice = (props) => {
                 ...tempFrameworkComponent,
             }
             setFrameWorkComponent({ ...tempFrameworkComponent })
-            columns = sortBy([...columns,{
+            columns = sortBy([...columns, {
                 "field": "supplierContact",
                 "headerName": "Supplier Contact",
                 "width": 180,
@@ -93,7 +91,16 @@ const SupplierAskPrice = (props) => {
                 "cellRenderer": "commonRenderer",
                 "leval": "product",
                 "order": 3
-            },{
+            }, {
+                "field": "status",
+                "headerName": "Status",
+                "width": 180,
+                "show": true,
+                "disabled": false,
+                "cellRenderer": "commonRenderer",
+                "leval": "product",
+                "order": 3
+            }, {
                 "field": "responseDate",
                 "headerName": "Rate Submit Date",
                 "width": 180,
@@ -203,6 +210,7 @@ const SupplierAskPrice = (props) => {
 
         axiosInstance().put(`/quote-builder/apply-supplier-price`, tempData).then(({ data }) => {
             onSuccess()
+            removeLocalStorage(localStorageSelectedRecords)
             toastConfig.setToastConfig({
                 message: data?.message,
                 type: "success",
@@ -213,6 +221,21 @@ const SupplierAskPrice = (props) => {
             dispatch({ type: "loading", loading: false });
         });
 
+    }
+    const handleReject = (content) => {
+        axiosInstance().put(`/quote-builder/apply-reject/${getLocalStorageArrayData(localStorageSelectedRecords)[0]?._id}`, { "body": content ? content : "" }).then(({ data }) => {
+            removeLocalStorage(localStorageSelectedRecords)
+            toastConfig.setToastConfig({
+                message: data?.message,
+                type: "success",
+                open: true,
+            });
+            fetchProduct()
+            setAskSupplierPriceDialog(false)
+        })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
     }
 
     return (<Dialog
@@ -229,6 +252,14 @@ const SupplierAskPrice = (props) => {
                         <Box ml={1} mt={1} >
                             <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={getLocalStorageArrayData(localStorageSelectedRecords).length === 1 ? false : true}>
                                 Apply</Button>
+                        </Box>
+                        <Box ml={1} mt={1} >
+                            <DeleteButton
+                                id="detailDeleteButton"
+                                text={'Reject'}
+                                onClick={() => setAskSupplierPriceDialog(true)}
+                                disabled={getLocalStorageArrayData(localStorageSelectedRecords).length === 1 ? false : true}
+                            />
                         </Box>
                     </Grid>
                 </Grid>
@@ -253,6 +284,13 @@ const SupplierAskPrice = (props) => {
                 />
                 : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
         </div>
+        {askSupplierPriceDialog &&
+            <AskSupplierPriceDialog
+                setAskSupplierPriceDialog={setAskSupplierPriceDialog}
+                askSupplierPriceDialog={askSupplierPriceDialog}
+                from="SupplierAskPrice"
+                handleReject={handleReject} />
+        }
     </Dialog>
     );
 }

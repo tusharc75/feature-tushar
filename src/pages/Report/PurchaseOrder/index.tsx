@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
-import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
+import { Grid, useTheme, useMediaQuery, Button, Box, Tooltip, IconButton } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
@@ -15,13 +15,15 @@ import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridCompone
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from 'src/constants/helpers';
+import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, productInventory, isObjectEmpty } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from '../ReportFilters';
-import { DateRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { DateRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import HistoryIcon from '@material-ui/icons/History';
+import AverageCostHistory from '../AverageCostHistory';
 
 let cancelTokenSource = null;
 
@@ -63,6 +65,9 @@ const Report = () => {
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
+
+  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: "", warehouse: "" });
+
 
   const fetchGridColumns = async () => {
     try {
@@ -245,7 +250,7 @@ const Report = () => {
             disabled: false,
             filter: false,
             sortable: false,
-            cellRenderer: 'commonRenderer'
+            cellRenderer: 'numberRenderer'
           },
           {
             field: 'averagePrice',
@@ -254,7 +259,7 @@ const Report = () => {
             disabled: false,
             filter: false,
             sortable: false,
-            cellRenderer: 'commonRenderer'
+            cellRenderer: 'numberRenderer'
           },
           {
             field: 'totalPrice',
@@ -263,10 +268,11 @@ const Report = () => {
             disabled: false,
             filter: false,
             sortable: false,
-            cellRenderer: 'commonRenderer'
+            cellRenderer: 'numberRenderer'
           }
         ];
       }
+
       setResourceColumns(resourceFieldData);
       setLoadingColumns(false);
       setColumns(columns);
@@ -282,11 +288,6 @@ const Report = () => {
       initialRender.current = false;
     }
   }, []);
-  // React.useEffect(() => {
-  //   if (!showGrid) {
-  //     dispatch({ type: 'filter', filters: {} });
-  //   }
-  // }, [showGrid]);
 
   React.useEffect(() => {
     if (showGrid) {
@@ -330,10 +331,27 @@ const Report = () => {
       {params.value}
     </Link>
   );
+
   const SupplierRenderer = (params: any) => (
     <Link className="link" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`}>
       {params.value}
     </Link>
+  );
+
+  const ActionsRenderer = (params) => (
+    <>
+      <Tooltip title="View History">
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setShowPriceHistory({ open: true, product: params?.data?._id, warehouse: null })
+          }}
+        >
+          <HistoryIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
+    </>
   );
 
   const customFrameworkComponents = {
@@ -341,6 +359,8 @@ const Report = () => {
     productRenderer: ProductRenderer,
     plantRenderer: PlantRenderer,
     supplierRenderer: SupplierRenderer,
+    actionsRenderer: ActionsRenderer,
+    numberRenderer: NumberRenderer,
     dateRenderer: DateRenderer
   };
 
@@ -362,10 +382,9 @@ const Report = () => {
 
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? '/product-inventory/report/purchase-order-product-wise-report'
-            : 'product-inventory/report/purchase-order-price'
+        `${resourceCamelCase === 'purchaseOrderProduct'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report`
+          : `${productInventory.api}/report/purchase-order-price`
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -500,10 +519,9 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? '/product-inventory/report/purchase-order-product-wise-report/export'
-            : 'product-inventory/report/purchase-order-price/export'
+        `${resourceCamelCase === 'purchaseOrderProduct'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
+          : `${productInventory.api}/report/purchase-order-price/export`
         }${filterQuery}`,
         {
           responseType: 'arraybuffer'
@@ -537,7 +555,6 @@ const Report = () => {
               ]}
             />
           </Grid>
-
           <Grid item xs={2}>
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
@@ -622,60 +639,27 @@ const Report = () => {
             ) : (
               <div>
                 {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                  isSmall ? (
-                    <CustomSwipableList
-                      allowSelection={false}
-                      allowSwipe={false}
-                      permissions={permissions[resourceCamelCase]}
-                      primaryField={columns?.find((d) => d.primaryField)}
-                      onClick={(data) => {
-                        history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
-                      }}
-                      selectedRecords={[]}
-                      dataRows={dataRows}
-                      dispatch={dispatch}
-                      onEdit={() => {}}
-                      extraParamsToCheckDelete={false}
-                      rowCount={rowCount}
-                      page={page}
-                      loading={loading}
-                      chips={columns
-                        .filter((col) => col.hasOwnProperty('cellRendererParams'))
-                        .map((col) => ({
-                          field: col.field,
-                          label: col.headerName
-                        }))}
-                      additionalDetails={[]}
-                      owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                      onCreate={false}
-                      showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
-                      renderedFrom={routes.transferAsset?.title}
-                    />
-                  ) : (
-                    <CustomAgGrid
-                      setSelectedReportView={setSelectedReportView}
-                      selectedReportView={selectedReportView}
-                      columns={columns}
-                      dataRows={dataRows}
-                      frameworkComponents={frameWorkComponent}
-                      setGridApi={setGridApi}
-                      dispatch={dispatch}
-                      rowCount={rowCount}
-                      limit={limit}
-                      pageSizes={pageSizes}
-                      page={page}
-                      actionWidth={100}
-                      loading={loading}
-                      renderedFrom={renderedFrom}
-                      allowSelection={false}
-                      allowAction={false}
-                      refreshGrid={fetchResourceData}
-                      showOnlyShowFilteredRecordSwitch={false}
-                    />
-                  )
-                ) : (
+                  (<CustomAgGrid
+                    setSelectedReportView={setSelectedReportView}
+                    selectedReportView={selectedReportView}
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameWorkComponent}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={100}
+                    loading={loading}
+                    renderedFrom={renderedFrom}
+                    allowSelection={false}
+                    allowAction={resourceCamelCase === 'productAverageCost'}
+                    refreshGrid={fetchResourceData}
+                    showOnlyShowFilteredRecordSwitch={false}
+                  />
+                  )) : (
                   <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
                 )}
               </div>
@@ -683,6 +667,14 @@ const Report = () => {
           </>
         </CustomContainer>
       </div>
+      {showPriceHistory.open &&
+        <AverageCostHistory
+          product={showPriceHistory.product}
+          warehouse={showPriceHistory.warehouse}
+          handleClose={() => {
+            setShowPriceHistory({ open: false, product: "", warehouse: "" })
+          }}
+        />}
     </MuiPickersUtilsProvider>
   );
 };
