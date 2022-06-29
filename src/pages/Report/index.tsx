@@ -433,7 +433,7 @@ const Report = () => {
                       permissions={permissions[resourceCamelCase]}
                       primaryField={columns?.find((d) => d.primaryField)}
                       onClick={(data) => {
-                        history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
+                        // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
                       }}
                       selectedRecords={[]}
                       dataRows={dataRows}

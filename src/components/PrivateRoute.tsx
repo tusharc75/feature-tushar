@@ -70,7 +70,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'bulk-asset-creation',
         'erecs',
         'resource-calendar',
-        'serialized-asset-new'
+        'serialized-asset-new',
+        'schedule-report'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
