@@ -394,12 +394,12 @@ const Products = ({ transferInventoryData, setNextStep, renderedFrom, allowedToE
       </Box>
       {openAddNewInventory && transferInventoryData?.transferFromPlant?.optionValue && (
         <AddInventory
-          existingProducts={dataRows}
           isAdding={isAdding}
           submit={handleSave}
           close={closeDialog}
           plantId={transferInventoryData?.transferFromPlant?.optionValue}
           renderedFrom={`${renderedFrom}_sub-1`}
+          ignoreIds={dataRows?.map((e) => e.productId)}
         />
       )}
       {showConfirmBox && (
