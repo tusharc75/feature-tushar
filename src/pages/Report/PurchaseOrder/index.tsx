@@ -66,7 +66,8 @@ const Report = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
-  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', warehouse: '' });
+  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: "", warehouse: "" });
+  const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
 
   const fetchGridColumns = async () => {
     try {
@@ -412,6 +413,9 @@ const Report = () => {
 
   // Create and return query for filters
   const getFilter = (isExport = false) => {
+
+    setShowPricefilter({ warehouse: null, fromDate: null, toDate: null })
+
     let filterQuery = `page=${page}&`;
     if (!isExport) {
       filterQuery = `limit=${limit}&`;
@@ -420,7 +424,7 @@ const Report = () => {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
+      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
     if (selectedResources.length > 0) {
       let deepFilter = [];
@@ -430,6 +434,9 @@ const Report = () => {
         const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
 
         let filterById = idFilter.map((key) => {
+          if (key === "warehouse") {
+            setShowPricefilter((prevState) => ({ ...prevState, warehouse: options.map((d: any) => d.optionValue) }));
+          }
           const options = selectedData[key].value;
           return {
             field: key,
@@ -444,7 +451,7 @@ const Report = () => {
           options.forEach((o: any) => {
             deepFilter.push({
               field: key,
-              term: encodeURIComponent(o.optionValue)
+              term: o.optionValue
             });
           });
         });
@@ -458,6 +465,12 @@ const Report = () => {
         const fields = Object.keys(betweenDate);
         fields.forEach((field) => {
           if (betweenDate[field]) {
+            if (field === "from_date") {
+              setShowPricefilter((prevState) => ({ ...prevState, fromDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+            }
+            if (field === "to_date") {
+              setShowPricefilter((prevState) => ({ ...prevState, toDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+            }
             deepFilter.push({
               field,
               term: moment(betweenDate[field]).format('MM/DD/YYYY')
@@ -467,19 +480,18 @@ const Report = () => {
       }
 
       if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
+        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
       }
     }
     if (!isObjectEmpty(filters)) {
-      console.log(filters);
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: encodeURIComponent(filters[field].filter)
+          term: filters[field].filter
         });
       });
-      filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
+      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&`;
     }
 
     if (statusPeriod && statusPeriodDate) {
@@ -654,15 +666,15 @@ const Report = () => {
           </>
         </CustomContainer>
       </div>
-      {showPriceHistory.open && (
+      {showPriceHistory.open && 
         <AverageCostHistory
           product={showPriceHistory.product}
           warehouse={showPriceHistory.warehouse}
           handleClose={() => {
             setShowPriceHistory({ open: false, product: '', warehouse: '' });
           }}
-        />
-      )}
+          showPricefilter={showPricefilter}
+        />}
     </MuiPickersUtilsProvider>
   );
 };
