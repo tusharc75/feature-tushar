@@ -17,6 +17,8 @@ import SalesOrderQtyDialog from './SalesOrderQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import InfoIcon from "@material-ui/icons/Info";
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { isMobile } from "react-device-detect";
 
 const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActivity, renderedFrom }) => {
 
@@ -161,6 +163,30 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
                 })
             }
         });
+        {
+            isMobile ? <Box display={"none"} /> : coloum.push({
+                accessor: 'action',
+                Header: '',
+                minWidth: 50,
+                width: 50,
+                sticky: 'right',
+                disableFilters: true,
+                canDrag: false,
+                Cell: ({ row }) =>
+                    !row.original.hideSelection && (
+                        <IconButton
+                            size="small"
+                            aria-label="Details"
+                            onClick={() => {
+                                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                                setDeleteData(obj);
+                            }}
+                        >
+                            <DeleteIcon fontSize="small" color="error" />
+                        </IconButton>
+                    )
+            });
+        }
         coloum.forEach(element => {
             if (element.accessor.includes("detail")) {
                 element["Footer"] = () => {
