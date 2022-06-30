@@ -154,7 +154,7 @@ const Zone = () => {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-      {permissions?.zone?.isDelete && params?.data?.createdById == user?.user?._id ? (
+      {permissions?.zone?.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -475,7 +475,7 @@ const Zone = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!(permissions?.zone.isDelete && !selectedRecords?.some((record) => record.createdById !== user?.user?._id))}
+                      disabled={!permissions?.zone.isDelete}
                       onClick={() => {
                         closeActions();
                         setShowDeleteConfirmBox(true);

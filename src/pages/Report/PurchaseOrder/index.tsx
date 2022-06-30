@@ -428,7 +428,7 @@ const Report = () => {
   const getFilter = (isExport = false) => {
 
     setShowPricefilter({ warehouse: null, fromDate: null, toDate: null })
-    
+
     let filterQuery = `page=${page}&`;
     if (!isExport) {
       filterQuery = `limit=${limit}&`;
@@ -437,7 +437,7 @@ const Report = () => {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
+      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
     if (selectedResources.length > 0) {
       let deepFilter = [];
@@ -464,7 +464,7 @@ const Report = () => {
           options.forEach((o: any) => {
             deepFilter.push({
               field: key,
-              term: encodeURIComponent(o.optionValue)
+              term: o.optionValue
             });
           });
         });
@@ -493,19 +493,18 @@ const Report = () => {
       }
 
       if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
+        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
       }
     }
     if (!isObjectEmpty(filters)) {
-      console.log(filters);
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: encodeURIComponent(filters[field].filter)
+          term: filters[field].filter
         });
       });
-      filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
+      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&`;
     }
 
     if (statusPeriod && statusPeriodDate) {

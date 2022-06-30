@@ -242,14 +242,10 @@ const Address = () => {
           </IconButton>
         </span>
       </Tooltip>
-
-      <Tooltip
-        className={addressPermissions.isDelete && params?.data?.createdById === user?.user?._id ? '' : 'cursor-stop'}
-        title={addressPermissions.isDelete && params?.data?.createdById === user?.user?._id ? 'Delete' : "You don't have permission to delete"}
-      >
+      <Tooltip className={addressPermissions.isDelete ? '' : 'cursor-stop'} title={addressPermissions.isDelete ? 'Delete' : "You don't have permission to delete"} >
         <span>
           <IconButton
-            disabled={!addressPermissions.isDelete && params?.dataa?.createdById !== user?.user?._id}
+            disabled={!addressPermissions.isDelete}
             aria-label="Delete"
             onClick={() => {
               setDeleteRecord(params.data);
