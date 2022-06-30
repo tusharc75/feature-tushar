@@ -27,16 +27,14 @@ interface Props {
   existingProducts: any[];
 }
 
-const AddInventory = (props: Props) => {
+const AddInventory = ({ plantId, close, isAdding, submit, renderedFrom, ignoreIds }) => {
 
-  const { plantId, close, isAdding, submit, renderedFrom, existingProducts } = props;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null)
-
 
   useEffect(() => {
     removeLocalStorage(localStorageSelectedRecords)
@@ -95,8 +93,6 @@ const AddInventory = (props: Props) => {
       .get(`${productInventory.api}?wareHouse=${plantId}&${queryString}`)
       .then(({ data: { data, count } }) => {
         const selectedProducts = getLocalStorageArrayData(localStorageSelectedRecords);
-        const exisitingIds = existingProducts.map((d: any) => d.productName);
-        data = data.filter((d: any) => !exisitingIds.includes(d.productName));
         let rows = data?.map((u: any) => {
           const selectedData = selectedProducts.find((d: any) => d._id === u._id);
           let finalObject = prepareDataForGrid(u);
@@ -127,7 +123,13 @@ const AddInventory = (props: Props) => {
   };
 
   const getQueryString = () => {
+
     let deepFilter = `page=${page}&limit=${limit}`;
+
+    if (ignoreIds?.length) {
+      deepFilter = deepFilter + `&ignoreIds=${JSON.stringify(ignoreIds)}`
+    }
+
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
@@ -146,9 +148,11 @@ const AddInventory = (props: Props) => {
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
+    
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
+
     return `${deepFilter}&filterType=and`;
   };
 
