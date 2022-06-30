@@ -425,7 +425,7 @@ const Product = () => {
           </IconButton>
         </Tooltip>
       )}
-      {productPermissions.isDelete && params?.data?.createdById == user?.user?._id ? (
+      {productPermissions.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             size="small"

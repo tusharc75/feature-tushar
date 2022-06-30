@@ -29,14 +29,14 @@ import CustomAgGrid, {
   reducer,
 } from "../../components/AgGridComponents/CustomAgGrid";
 import { Menu, MenuItem } from "@material-ui/core";
-import {AddOutlined, ExpandMore} from "@material-ui/icons";
+import { AddOutlined, ExpandMore } from "@material-ui/icons";
 import { gridLoadingTimeout, prepareDataForGrid } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
 import styles from "../Leads/Header.module.scss";
-import {MdAdd} from "react-icons/all";
+import { MdAdd } from "react-icons/all";
 import { camelCase } from "lodash";
 
 const ProductBuilder = () => {
@@ -104,8 +104,7 @@ const ProductBuilder = () => {
   );
 
   const ActionsRenderer = (params) => {
-    const hasPermission =
-      permission?.isDelete && params.data.createdById === user?._id;
+    const hasPermission = permission?.isDelete;
     return (
       <span title={hasPermission ? "" : "You don't have permission to delete"}>
         <IconButton
@@ -136,7 +135,7 @@ const ProductBuilder = () => {
         let rows = data.map((u) => {
 
           let finalObject = prepareDataForGrid(u);
-          finalObject["canDelete"] = permission.isDelete && finalObject["createdById"] === user?._id;;
+          finalObject["canDelete"] = permission.isDelete;
           finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
           finalObject["allowedToEdit"] = permission.isUpdate;
           return {
@@ -208,7 +207,6 @@ const ProductBuilder = () => {
       }
     } else {
       const notYou = selectedRecords.filter((d) => d.createdById !== user?._id);
-
       if (notYou.length) {
         setShowDeleteWarningConfirmBox(true);
       } else {
@@ -245,12 +243,12 @@ const ProductBuilder = () => {
                   className={isMobile ? "mobile_button" : styles.add_submit_btn}
                   startIcon={isMobile ? null : <AddOutlined />}
                 >
-                  {isMobile ? <MdAdd size={23}/> : "Add"}
+                  {isMobile ? <MdAdd size={23} /> : "Add"}
                 </Button>
               )}
               {permission?.isDelete && (
                 <Button
-                    className={isMobile ? "mobile_button ml-2" : `${styles.action_submit_btn} ${"ml-2"}`}
+                  className={isMobile ? "mobile_button ml-2" : `${styles.action_submit_btn} ${"ml-2"}`}
                   // className={styles.action_submit_btn}
                   variant={isMobile ? "text" : "contained"}
                   color="default"
@@ -259,7 +257,7 @@ const ProductBuilder = () => {
                   aria-controls="action-menu"
                   disabled={selectedRecords.length > 0 ? false : true}
                 >
-                  {isMobile ? "" :  "Actions" } <ExpandMore/>
+                  {isMobile ? "" : "Actions"} <ExpandMore />
                 </Button>
               )}
               <Menu
