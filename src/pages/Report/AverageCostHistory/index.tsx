@@ -17,7 +17,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 
-const AverageCostHistory = ({ handleClose, product, warehouse }) => {
+const AverageCostHistory = ({ handleClose, product, warehouse, showPricefilter }) => {
 
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -34,7 +34,16 @@ const AverageCostHistory = ({ handleClose, product, warehouse }) => {
             gridApi.setRowData([]);
         }
         let data;
-        const query = warehouse ? `?warehouse=${warehouse}` : ``;
+        let query = "";
+        if (showPricefilter?.warehouse || showPricefilter?.fromDate) {
+            query = "?"
+            if (showPricefilter?.warehouse) {
+                query = query + `warehouse=${JSON.stringify(showPricefilter?.warehouse)}&`
+            }
+            if (showPricefilter?.fromDate) {
+                query = query + `from=${showPricefilter?.fromDate}&to=${showPricefilter?.toDate}`
+            }
+        }
         const response = await axiosInstance().get(`${productInventory.api}/report/product-price-of-product/${product}${query}`)
         data = response?.data?.data
         let rows = data.map((u) => {

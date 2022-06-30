@@ -67,7 +67,7 @@ const Report = () => {
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
   const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: "", warehouse: "" });
-
+  const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
 
   const fetchGridColumns = async () => {
     try {
@@ -426,6 +426,9 @@ const Report = () => {
 
   // Create and return query for filters
   const getFilter = (isExport = false) => {
+
+    setShowPricefilter({ warehouse: null, fromDate: null, toDate: null })
+    
     let filterQuery = `page=${page}&`;
     if (!isExport) {
       filterQuery = `limit=${limit}&`;
@@ -444,6 +447,9 @@ const Report = () => {
         const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
 
         let filterById = idFilter.map((key) => {
+          if (key === "warehouse") {
+            setShowPricefilter((prevState) => ({ ...prevState, warehouse: options.map((d: any) => d.optionValue) }));
+          }
           const options = selectedData[key].value;
           return {
             field: key,
@@ -472,6 +478,12 @@ const Report = () => {
         const fields = Object.keys(betweenDate);
         fields.forEach((field) => {
           if (betweenDate[field]) {
+            if (field === "from_date") {
+              setShowPricefilter((prevState) => ({ ...prevState, fromDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+            }
+            if (field === "to_date") {
+              setShowPricefilter((prevState) => ({ ...prevState, toDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+            }
             deepFilter.push({
               field,
               term: moment(betweenDate[field]).format('MM/DD/YYYY')
@@ -674,6 +686,7 @@ const Report = () => {
           handleClose={() => {
             setShowPriceHistory({ open: false, product: "", warehouse: "" })
           }}
+          showPricefilter={showPricefilter}
         />}
     </MuiPickersUtilsProvider>
   );
