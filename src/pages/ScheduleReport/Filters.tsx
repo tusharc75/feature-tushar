@@ -5,11 +5,13 @@ import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { dateFormat } from 'src/constants/helpers';
+import { startCase } from 'lodash';
 
 const Filters = ({
   selectedResources,
   handleSelectFilter,
   formValues,
+  resource,
   betweenDate,
   setBetweenDate,
   statusPeriod,
@@ -21,6 +23,26 @@ const Filters = ({
 }) => {
   const [isStatusPeriod, setIsStatusPeriod] = React.useState(false);
   const [errors, setErrors] = React.useState({});
+
+  React.useEffect(() => {
+    setBetweenDate((prevState) => {
+      let keys = prevState ? Object.keys(prevState) : [];
+      keys.forEach((key) => {
+        if (key?.includes('to') || key?.includes('from')) {
+          if (!selectedResources?.map((d) => d.fieldName)?.includes(key.split('_')[1])) {
+            delete prevState[key];
+          }
+        }
+      });
+      return prevState;
+    });
+    setIsStatusPeriod(
+      resource?.includes('Serialized Asset') &&
+        Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
+        formValues?.hasOwnProperty('status') &&
+        formValues.status.length > 0
+    );
+  }, [selectedResources, formValues]);
 
   const handleDuration = (timeFrameTemp, field, isStatus = false) => {
     switch (timeFrameTemp) {
@@ -88,6 +110,31 @@ const Filters = ({
         break;
     }
   };
+
+  React.useEffect(() => {
+    const allDateData = { ...betweenDate, ...statusPeriodDate };
+    const dateKeys = Object.keys(allDateData);
+    const dateProperties = dateKeys.map((key) => key.split('_')[1]);
+
+    dateProperties.forEach((key) => {
+      let err = { ...errors };
+
+      const from = new Date(allDateData[`from_${key}`]).getTime();
+      const to = new Date(allDateData[`to_${key}`]).getTime();
+
+      if (from >= to || to <= from) {
+        err[key] = `From ${startCase(key)} should be less then To ${startCase(key)}`;
+      } else {
+        if (errors[key]) {
+          setErrors((prev) => {
+            delete prev[key];
+            return prev;
+          });
+        }
+      }
+      setErrors(err);
+    });
+  }, [betweenDate, statusPeriodDate]);
 
   return (
     <>
