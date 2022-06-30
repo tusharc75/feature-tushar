@@ -286,7 +286,6 @@ const Header = (props) => {
                   }
                   {
                     userPermissions.isUpdate && <MenuItem
-                      disabled={userSetupDisabled}
                       onClick={() => {
                         handleResetPassword();
                         closeActions();
