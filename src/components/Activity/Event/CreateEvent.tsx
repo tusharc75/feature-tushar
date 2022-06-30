@@ -192,8 +192,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   };
 
   function validate(values) {
-    const startDate = new Date(values.startDate)
-    const endDate = new Date(values.endDate)
+    const startDate = new Date(values?.startDate)
+    const endDate = new Date(values?.endDate)
     startDate.setHours(0, 0, 0, 0)
     endDate.setHours(0, 0, 0, 0)
     const errors = {};
@@ -201,15 +201,15 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
       errors["endDate"] = "End date should be greater then start date";
       return errors;
     }
-    if (startDate.getDate() === endDate.getDate()) {
-      if (new Date(values.startTime).getTime() > new Date(values.endTime).getTime()) {
+    if (moment(startDate)?.format("MM-DD-YYYY") === moment(endDate)?.format("MM-DD-YYYY")) {
+      if (new Date(values?.startTime)?.getTime() > new Date(values?.endTime).getTime()) {
         errors["endTime"] = "End time should be greater then start time";
       }
     }
-    if (new Date(values.startTime).toString() === "Invalid Date") {
+    if (new Date(values.startTime)?.toString() === "Invalid Date") {
       errors["startTime"] = "Invalid Time";
     }
-    if (new Date(values.endTime).toString() === "Invalid Date") {
+    if (new Date(values.endTime)?.toString() === "Invalid Date") {
       errors["endTime"] = "Invalid Time";
     }
     return errors;
