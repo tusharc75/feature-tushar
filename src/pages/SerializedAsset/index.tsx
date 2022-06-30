@@ -289,13 +289,13 @@ const SerializedAsset = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     if (subleaseAsset) {
       deepFilter = `${deepFilter}&subleaseAsset=1`;
