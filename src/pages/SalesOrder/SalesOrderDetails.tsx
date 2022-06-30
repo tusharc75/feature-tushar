@@ -128,12 +128,6 @@ const SalesOrderDetails = () => {
       });
   }
 
-  // const handleMainPoints = (data) => {
-  //   let mainPoint = {};
-  //   mainPoint['Sales Order No.'] = data?.salesOrderNo || '';
-  //   setMainPoints(mainPoint);
-  // };
-
   const getRessourceFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Sales Order');
@@ -205,7 +199,7 @@ const SalesOrderDetails = () => {
     axiosInstance().patch(`${salesOrder.api}/status/${salesOrderData._id}`, { status: status }).then(({ data: { data } }) => {
       fetchSalesOrderData();
       if (status === "Invoiced") {
-        setCurrentStep(4)
+        setCurrentStep(1)
       }
       toastConfig.setToastConfig({
         open: true,
