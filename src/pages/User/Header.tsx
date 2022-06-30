@@ -27,6 +27,7 @@ const Header = (props) => {
     onEntityRoleRedirectDetailRemove,
     unAssignUsersFromEntity,
     openUserSetupDialog,
+    handleResetPassword,
     userSetupDisabled,
     selectedRecordsLength = 0,
     manageDeleteUser,
@@ -281,6 +282,17 @@ const Header = (props) => {
                       }}
                     >
                       User Setup
+                    </MenuItem>
+                  }
+                  {
+                    userPermissions.isUpdate && <MenuItem
+                      disabled={userSetupDisabled}
+                      onClick={() => {
+                        handleResetPassword();
+                        closeActions();
+                      }}
+                    >
+                      Reset Password
                     </MenuItem>
                   }
 
