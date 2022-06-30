@@ -28,6 +28,7 @@ const ManageScheduleReport = ({ handleClose }) => {
   const formikRef = React.useRef<FormikProps<ValueTypes>>(null);
   const [filterValues, setFilterValues] = React.useState({});
   const [resourceColumns, setResourceColumns] = React.useState([]);
+  const [usersList, setUsersList] = React.useState([]);
   const [filterOptions, setFilterOptions] = React.useState([]);
   const [resourceOptions, setResourceOptions] = React.useState(null);
   const [selectedData, setSelectedData] = React.useState(null);
@@ -37,6 +38,19 @@ const ManageScheduleReport = ({ handleClose }) => {
   const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
 
   React.useEffect(() => {
+    axiosInstance()
+      .get('/activity/user')
+      .then(({ data: { data } }) => {
+        let userData = data.map((_user) => ({
+          userId: _user._id,
+          name: _user.firstName + ' ' + _user.lastName
+        }));
+        setUsersList(userData);
+      });
+  }, []);
+
+  React.useEffect(() => {
+    if (!formikRef.current || !formikRef.current?.values?.resource) return;
     if (!resourceColumns && resourceColumns.length === 0) return;
 
     const optionsData: any = {};
@@ -58,7 +72,7 @@ const ManageScheduleReport = ({ handleClose }) => {
     setResourceOptions(optionsData);
     // setFormValues(null);
     setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
-  }, [resourceColumns]);
+  }, [resourceColumns, formikRef.current?.values?.resource]);
 
   const fetchGridColumns = async (resource: string) => {
     const {
@@ -155,7 +169,7 @@ const ManageScheduleReport = ({ handleClose }) => {
         initialValues={{
           scheduleName: '',
           reportName: '',
-          resource: {},
+          resource: null,
           filters: [],
           columns: [],
           subscribeUsers: [],
@@ -260,6 +274,7 @@ const ManageScheduleReport = ({ handleClose }) => {
                 <Filters
                   selectedResources={values.filters}
                   handleSelectFilter={handleSelectFilter}
+                  resource={formikRef.current?.values.resource?.title}
                   formValues={filterValues}
                   betweenDate={betweenDate}
                   setBetweenDate={setBetweenDate}
@@ -295,15 +310,17 @@ const ManageScheduleReport = ({ handleClose }) => {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Autocomplete
-                    options={[]}
+                    options={usersList}
                     fullWidth
                     size="small"
+                    getOptionLabel={(option) => option.name}
+                    getOptionSelected={(option, value) => option.userId === value.userId}
                     value={values.subscribeUsers}
                     onChange={(_, newVal) => setFieldValue('subscribeUsers', newVal)}
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        error={!Boolean(errors['subscribeUsers'])}
+                        error={Boolean(errors['subscribeUsers'])}
                         helperText={errors['subscribeUsers']}
                         label="Subscibe User"
                         name="subscribeUsers"
@@ -390,7 +407,7 @@ const ManageScheduleReport = ({ handleClose }) => {
               </Grid>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button variant="contained" color="primary" size="small">
+              <Button variant="contained" color="primary" size="small" onClick={handleClose}>
                 Cancel
               </Button>
               <Button type="submit" variant="outlined" color="primary" size="small">

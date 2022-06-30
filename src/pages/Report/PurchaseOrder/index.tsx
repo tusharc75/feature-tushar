@@ -66,8 +66,7 @@ const Report = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
-  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: "", warehouse: "" });
-
+  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', warehouse: '' });
 
   const fetchGridColumns = async () => {
     try {
@@ -200,25 +199,11 @@ const Report = () => {
         POFields.filter((field) => ['purchaseOrderDate', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
           if (field?.fieldData.fieldName === 'warehouse') {
             resourceFieldData.push(field);
-            columns.push({
-              field: 'warehouse',
-              headerName: field?.fieldData?.fieldLabel,
-              show: true,
-              disabled: false,
-              cellRenderer: 'plantRenderer'
-            });
           }
           if (field?.fieldData.fieldName === 'purchaseOrderDate') {
             resourceFieldData.push({
               ...field,
               fieldData: { ...field.fieldData, fieldLabel: 'Date', fieldName: 'date', type: 'date' }
-            });
-            columns.push({
-              field: 'date',
-              headerName: 'Date',
-              show: true,
-              disabled: false,
-              cellRenderer: 'dateRenderer'
             });
           }
         });
@@ -345,7 +330,7 @@ const Report = () => {
           size="small"
           aria-label="Clone"
           onClick={() => {
-            setShowPriceHistory({ open: true, product: params?.data?._id, warehouse: null })
+            setShowPriceHistory({ open: true, product: params?.data?._id, warehouse: null });
           }}
         >
           <HistoryIcon fontSize="small" color="primary" />
@@ -382,9 +367,10 @@ const Report = () => {
 
     axiosInstance()
       .get(
-        `${resourceCamelCase === 'purchaseOrderProduct'
-          ? `${productInventory.api}/report/purchase-order-product-wise-report`
-          : `${productInventory.api}/report/purchase-order-price`
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? `${productInventory.api}/report/purchase-order-product-wise-report`
+            : `${productInventory.api}/report/purchase-order-price`
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -519,9 +505,10 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${resourceCamelCase === 'purchaseOrderProduct'
-          ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
-          : `${productInventory.api}/report/purchase-order-price/export`
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
+            : `${productInventory.api}/report/purchase-order-price/export`
         }${filterQuery}`,
         {
           responseType: 'arraybuffer'
@@ -639,7 +626,7 @@ const Report = () => {
             ) : (
               <div>
                 {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                  (<CustomAgGrid
+                  <CustomAgGrid
                     setSelectedReportView={setSelectedReportView}
                     selectedReportView={selectedReportView}
                     columns={columns}
@@ -659,7 +646,7 @@ const Report = () => {
                     refreshGrid={fetchResourceData}
                     showOnlyShowFilteredRecordSwitch={false}
                   />
-                  )) : (
+                ) : (
                   <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
                 )}
               </div>
@@ -667,14 +654,15 @@ const Report = () => {
           </>
         </CustomContainer>
       </div>
-      {showPriceHistory.open &&
+      {showPriceHistory.open && (
         <AverageCostHistory
           product={showPriceHistory.product}
           warehouse={showPriceHistory.warehouse}
           handleClose={() => {
-            setShowPriceHistory({ open: false, product: "", warehouse: "" })
+            setShowPriceHistory({ open: false, product: '', warehouse: '' });
           }}
-        />}
+        />
+      )}
     </MuiPickersUtilsProvider>
   );
 };
