@@ -238,7 +238,7 @@ const AddressResource = () => {
           </IconButton>
         </span>
       </Tooltip>
-      {warehousePermissions.isDelete && params?.data?.createdById === user?.user?._id ? (
+      {warehousePermissions.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
