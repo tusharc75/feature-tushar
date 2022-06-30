@@ -227,7 +227,7 @@ const Report = () => {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
+      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
     if (selectedResources.length > 0) {
       let deepFilter = [];
@@ -251,7 +251,7 @@ const Report = () => {
           options.forEach((o: any) => {
             deepFilter.push({
               field: key,
-              term: encodeURIComponent(o.optionValue)
+              term: o.optionValue
             });
           });
         });
@@ -274,7 +274,7 @@ const Report = () => {
       }
 
       if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
+        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
       }
     }
     if (!isObjectEmpty(filters)) {
@@ -282,7 +282,7 @@ const Report = () => {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: encodeURIComponent(filters[field].filter)
+          term: encodeURI(filters[field].filter)
         });
       });
       filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
@@ -433,7 +433,7 @@ const Report = () => {
                       permissions={permissions[resourceCamelCase]}
                       primaryField={columns?.find((d) => d.primaryField)}
                       onClick={(data) => {
-                        history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
+                        // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
                       }}
                       selectedRecords={[]}
                       dataRows={dataRows}

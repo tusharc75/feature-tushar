@@ -135,6 +135,7 @@ import ProductAuction from './pages/productAuction';
 import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDetailsPage';
 import ConvertInventory from './pages/ConvertInventory';
 import PublicRoutePage from './pages/PublicRoutePage';
+import ScheduleReport from './pages/ScheduleReport';
 
 var notificationInterval: any = null;
 
@@ -240,7 +241,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -346,7 +347,7 @@ function App() {
               severity="success"
             >
               <div style={{ display: 'flex', width: '100%', alignItems: 'start', justifyContent: 'space-between', gap: 20 }}>
-                <div style={{ flex: 1 }}>New Version of eQuip-T OM is available. Please refresh to get the latest changes.</div>
+                <div style={{ flex: 1 }}>New Version of Equipt Portal is available. Please refresh to get the latest changes.</div>
                 <Button className="snackbar-button" size="medium" variant="contained" color="secondary" onClick={updateServiceWorker}>
                   Refresh
                 </Button>
@@ -674,6 +675,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.reports.path}/purchase-order-type/:type`}>
               <PurchaseOrderReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`/schedule-report`}>
+              <ScheduleReport />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />

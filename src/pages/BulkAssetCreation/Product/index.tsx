@@ -433,6 +433,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                     type={"product"}
                     refrenceType="bulkAssetCreation"
                     renderedFrom={renderedFrom}
+                    ignoreIds={[]}
                 />
             }
             {showProductDialog &&

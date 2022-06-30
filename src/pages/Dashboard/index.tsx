@@ -6,7 +6,6 @@ import { camelCase, kebabCase, sortBy } from 'lodash';
 import styles from './Dashboard.module.scss';
 
 import './style.scss';
-// import crmImage from '../../assets/dashboard_images/eQuip-t_dashboard.svg';
 import { SVG, IMAGE_WIDTH, IMAGE_HEIGHT } from '../../assets/dashboard_images';
 import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL, FORM_ICON, GEN_ICON } from '../../assets/dashboard_images/constants/imageTypes';
 import Icon from '@material-ui/core/Icon';
