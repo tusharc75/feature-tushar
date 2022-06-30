@@ -564,6 +564,24 @@ const User: FC = () => {
     }
   }
 
+  const handleResetPassword = () => {
+    let recs = selectedRecords.map((o) => o?.email)
+    if (recs && recs.length > 0) {
+      axiosInstance()
+        .post(`/user/forget-passwords`, { "emails": [...recs] })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   const isLoggedInUserBrandAdmin = 'userType' in user?.user && user?.user?.userType === userType.brandAdmin;
   const isRoleSetUpPermission = permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate;
   const isUserSetupPermission = isLoggedInUserBrandAdmin || isRoleSetUpPermission;
@@ -744,6 +762,7 @@ const User: FC = () => {
               columns={columns}
               dispatch={dispatch}
               filters={filters}
+              handleResetPassword={handleResetPassword}
             />
           </div>
 
