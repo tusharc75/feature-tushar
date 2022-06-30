@@ -351,7 +351,7 @@ const Product = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     const filterById = [];
     if (productCategory && productCategory !== '') {
@@ -367,7 +367,7 @@ const Product = () => {
       deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
     }
 
-    if (updatedFilters.length > 0) return `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (updatedFilters.length > 0) return `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
 
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
