@@ -106,20 +106,22 @@ export default function ManageAccount(props) {
       }
     }
 
-    if (fromProject) {
-      setOwnerCollaboratorCommonDataSource(owners);
-      setOwnerDataSource(owners);
-      setCollaboratorDataSource(collaborators);
-    } else {
-      let ownerCollaboratorDropdownData = accountData.fields.filter(
-        (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
-      );
-      if (ownerCollaboratorDropdownData.length > 0) {
-        setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
-        setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
-        setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
-      }
+    let ownerCollaboratorDropdownData = accountData.fields.filter(
+      (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
+    );
+    if (ownerCollaboratorDropdownData.length > 0) {
+      setOwnerCollaboratorCommonDataSource(ownerCollaboratorDropdownData[0].option);
+      setOwnerDataSource(ownerCollaboratorDropdownData[0].option);
+      setCollaboratorDataSource(ownerCollaboratorDropdownData[0].option);
     }
+
+    // if (fromProject) {
+    //   setOwnerCollaboratorCommonDataSource(owners);
+    //   setOwnerDataSource(owners);
+    //   setCollaboratorDataSource(collaborators);
+    // } else {
+
+    // }
 
     const parentAccountDropdownData = accountData.fields.find(
       (d) => d.fieldName === "parentAccount"
@@ -400,7 +402,6 @@ export default function ManageAccount(props) {
                                         name={field.fieldName}
                                         type={field.type}
                                         options={
-                                          // fromProject ? owners : ownerDataSource
                                           ownerDataSource
                                         }
                                         onChange={(e, val) => {
@@ -458,7 +459,6 @@ export default function ManageAccount(props) {
                                         size="small"
                                         disabled={disableOwnerSelection || (!isNew && field.disableOnEdit)}
                                         onOpen={() =>
-                                          // !fromProject &&
                                           onOwnerDropdownOpen(
                                             values.collaborator, values.entity ? values.entity : []
                                           )
@@ -496,7 +496,6 @@ export default function ManageAccount(props) {
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         onOpen={() =>
-                                          // !fromProject &&
                                           onCollaboratorOwnerMultiselectOpen(
                                             values.owner, values.entity ? values.entity : []
                                           )

@@ -227,7 +227,7 @@ const Report = () => {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
+      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
     if (selectedResources.length > 0) {
       let deepFilter = [];
@@ -282,7 +282,7 @@ const Report = () => {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: encodeURIComponent(filters[field].filter)
+          term: encodeURI(filters[field].filter)
         });
       });
       filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;

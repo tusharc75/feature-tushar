@@ -318,7 +318,7 @@ export default function Contact(props) {
         var str = [];
         for (var p in obj)
           if (obj.hasOwnProperty(p)) {
-            str.push('{colName=' + encodeURIComponent(p) + ',' + 'colValue=' + encodeURIComponent(obj[p].filter) + '}');
+            str.push('{colName=' + encodeURI(p) + ',' + 'colValue=' + encodeURI(obj[p].filter) + '}');
           }
         return str.join(',');
       };
@@ -553,7 +553,7 @@ export default function Contact(props) {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -561,7 +561,7 @@ export default function Contact(props) {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
