@@ -17,23 +17,16 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 
-const CreateInventoryCycle = (props) => {
+const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDisabled = false, isClone = false }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const { inventoryCycleId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
+
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [formValues, setFormValues] = useState({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [saveClick, setSaveClick] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
-
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
-  };
 
   const handleSubmit = (values) => {
     setSaveClick(true);
@@ -41,9 +34,14 @@ const CreateInventoryCycle = (props) => {
       values._id = inventoryCycleId;
       axiosInstance()
         .put(`/inventory-cycle`, values)
-        .then(({ data: { data } }) => {
+        .then(({ data }) => {
           setLoading(false);
           onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
         })
         .catch((error) => {
           setLoading(false);
@@ -53,13 +51,13 @@ const CreateInventoryCycle = (props) => {
     } else {
       axiosInstance()
         .post(`/inventory-cycle`, values)
-        .then(({ data: { data } }) => {
+        .then(({ data }) => {
           setLoading(false);
           onSuccess(data);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: 'Inventory Cycle Created Successfully'
+            message: data.message
           });
         })
         .catch((error) => {
@@ -91,13 +89,11 @@ const CreateInventoryCycle = (props) => {
                   fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
                 });
-                setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
               } else {
                 setInitialData({
                   fields: fieldsDataForUpdate,
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)
                 });
-                setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate));
               }
             })
             .catch((error) => {
@@ -108,13 +104,13 @@ const CreateInventoryCycle = (props) => {
             fields: fieldsDataForCreate,
             values: getObjKeys('', fieldsDataForCreate)
           });
-          setFormValues(getObjKeys('', fieldsDataForCreate));
         }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   }, [inventoryCycleId]);
+
   return (
     <Dialog
       maxWidth="md"
@@ -140,14 +136,8 @@ const CreateInventoryCycle = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={
-                  isClone
-                    ? `Clone - ${cloneHeading}`
-                    : inventoryCycleId
-                    ? !isUpdateDisabled
-                      ? 'Update ' + routes.inventoryCycle.title
-                      : values['name']
-                    : 'Create ' + routes.inventoryCycle.title
+                title={isClone ? `Clone - ${cloneHeading}` : inventoryCycleId ? !isUpdateDisabled ? 'Update ' + routes.inventoryCycle.title
+                  : values['name'] : 'Create ' + routes.inventoryCycle.title
                 }
                 onClose={() => {
                   if (
@@ -175,7 +165,6 @@ const CreateInventoryCycle = (props) => {
                     errors={errors}
                     values={values}
                     setFieldValue={(name, value) => {
-                      handleValuesChange({ [name]: value });
                       setFieldValue(name, value);
                     }}
                     touched={touched}
@@ -237,4 +226,4 @@ const CreateInventoryCycle = (props) => {
   );
 };
 
-export default CreateInventoryCycle;
+export default ManageInventoryCycle;

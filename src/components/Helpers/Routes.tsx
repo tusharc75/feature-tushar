@@ -539,17 +539,11 @@ const routes = {
     path: '/inventory-to-asset'
   },
   inventoryCycle: {
-    title:
-      storedRoutes && storedRoutes.inventoryCycle && storedRoutes.inventoryCycle.title
-        ? storedRoutes.inventoryCycle?.title
-        : RESOURCE_LABEL.inventoryCycle,
+    title: storedRoutes && storedRoutes?.inventoryCycle && storedRoutes?.inventoryCycle.title ? storedRoutes?.inventoryCycle?.title : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle'
   },
   inventoryCycleDetail: {
-    title:
-      storedRoutes && storedRoutes.inventoryCycle && storedRoutes.inventoryCycle.title
-        ? storedRoutes.inventoryCycle?.title
-        : RESOURCE_LABEL.inventoryCycle,
+    title: storedRoutes && storedRoutes?.inventoryCycle && storedRoutes?.inventoryCycle?.title ? storedRoutes?.inventoryCycle?.title : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle/detail'
   }
 };
