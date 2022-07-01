@@ -887,6 +887,10 @@ export const displayDate = (date) => {
   return date ? moment(date).format(dateFormat) : date;
 };
 
+export const displayDateTime = (date) => {
+  return date ? moment(date).format(dateTimeFormat) : date;
+};
+
 export const displayCardDate = (date) => {
   return date ? moment(date).format(cardDateFormat) : date;
 };

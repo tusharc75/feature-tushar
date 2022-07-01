@@ -22,7 +22,7 @@ import axiosInstance from "../../axios/axiosInstance";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
 import CopyToClipboard from "../Helpers/CopyToClipboard";
-import { displayDate, getUniqueCurrencies } from "../../constants/helpers";
+import { displayDate, displayDateTime, getUniqueCurrencies } from "../../constants/helpers";
 import HtmlTooltip from "../CustomTooltipTitle";
 import CarouselDialog from "../CarouselDialog";
 import { camelCase } from "lodash";
@@ -206,6 +206,11 @@ const Details = (props: DetailProps) => {
     } else if (input.type === "date") {
       text = values[input.fieldName]
         ? displayDate(values[input.fieldName])
+        : "-";
+    }
+    else if (input.type === "dateTime") {
+      text = values[input.fieldName]
+        ? displayDateTime(values[input.fieldName])
         : "-";
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : "-";
