@@ -51,6 +51,8 @@ const ProductAuction = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
 
+    console.log(state);
+
   const [isOpenDialog, setisOpenDialog] = useState(false);
 
   const {
