@@ -180,6 +180,7 @@ const Header = (props) => {
                   variant={isMobile && !isTablet ? "text" : "contained"}
                   color="default"
                   size="small"
+                  disabled={selectedRecordsLength === 0}
                   onClick={openActions}
                   aria-controls="action-menu"
                 >

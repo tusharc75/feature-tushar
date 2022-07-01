@@ -57,6 +57,8 @@ import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
 import PurchaseOrderViews from './RoadMapViews';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
@@ -267,17 +269,22 @@ const PurchaseOrderDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={purchaseOrderData?.purchaseOrderNumber} mainPoints={null} showHeading={true}>
-                  {permissions?.purchaseOrder?.isUpdate && allowedToEdit && ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={handleOpenUpdateDialog}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
+                  {![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) && (
+                    <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`}>
+                      <span>
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenUpdateDialog}
+                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                          style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                          disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
+                        >
+                          {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                        </Button>
+                      </span>
+                    </HtmlTooltip>
                   )}
                   {permissions?.purchaseOrder?.isUpdate && allowedToEdit && [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                     <>
