@@ -33,7 +33,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
       }
     } else if (
       pathname === '/' ||
-      ['dashboards',
+      [
+        'dashboards',
         'case',
         'task',
         'attachment',
@@ -58,7 +59,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'product-inventory',
         'entity',
         'logout',
-        "address",
+        'address',
         'reports',
         'e-commerce-policy',
         'sublease',
@@ -71,7 +72,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'erecs',
         'resource-calendar',
         'serialized-asset-new',
-        'schedule-report'
+        'schedule-report',
+        'inventory-cycle'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
@@ -95,9 +97,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
               <p>Checking Credentials...</p>
             </div>
           ) : access ? (
-            <Layout>
-              {children}
-            </Layout>
+            <Layout>{children}</Layout>
           ) : (
             <Unauthorized />
           )
