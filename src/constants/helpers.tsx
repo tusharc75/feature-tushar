@@ -336,7 +336,8 @@ export const RESOURCE_LABEL = {
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
   productAuction: 'Product Auction',
-  inventoryToAsset: 'Inventory to Asset'
+  inventoryToAsset: 'Inventory to Asset',
+  inventoryCycle: 'InventoryCycle'
 };
 
 export const CHILD_RESOURCE = {
