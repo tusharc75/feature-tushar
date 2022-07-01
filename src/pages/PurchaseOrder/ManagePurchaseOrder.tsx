@@ -203,7 +203,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
         }
     };
 
-
     const isFieldNotTouched = (initialData, values) => {
         return Object.values(
             simplifyValues(initialData.values, formsData[0]?.sectionFields || [])

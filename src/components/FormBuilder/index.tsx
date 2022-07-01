@@ -77,8 +77,8 @@ export const FormBuilder = ({ section, setSection, deleteField, setDeleteField, 
   var filterFieldType = [];
   var isCalculativeField = true;
   if (module === 'form-builder') {
-    filterFieldType = ['DECIMAL', 'CURRENCYAMOUNT', 'FORMULA', 'VLOOKUPDROPDOWN', 'CONVERTER'];
-    isCalculativeField = false;
+    //filterFieldType = ['DECIMAL', 'CURRENCYAMOUNT', 'FORMULA', 'VLOOKUPDROPDOWN', 'CONVERTER'];
+    isCalculativeField = true;
   }
   if (subForms.includes(resource)) {
     filterFieldType = []
