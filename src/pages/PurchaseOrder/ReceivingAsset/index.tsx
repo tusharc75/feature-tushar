@@ -56,7 +56,7 @@ const ReceivingAsset = ({
     const column = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
     const productFields = productResult?.data?.data?.filter((e) =>
-      ['productName', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+      ['productName', 'productNumber', 'productDescription', 'serializedProduct'].includes(e?.fieldData?.fieldName)
     );
     productFields?.forEach((e) => {
       if (e?.fieldData?.fieldName === 'productName') {
@@ -90,6 +90,14 @@ const ReceivingAsset = ({
           Header: e?.fieldData?.fieldLabel,
           width: 300,
           Cell: ({ row }) => (row.original.productNumber ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />)
+        });
+      }
+      if (e?.fieldData?.fieldName === 'productDescription') {
+        column.push({
+          accessor: 'productDescription',
+          Header: e?.fieldData?.fieldLabel,
+          width: 300,
+          Cell: ({ row }) => (row.original.productDescription ? <p className="text-truncate">{row.original.productDescription}</p> : <NoDataCell />)
         });
       }
       if (e?.fieldData?.fieldName === 'serializedProduct') {
