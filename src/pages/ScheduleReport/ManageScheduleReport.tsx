@@ -1,5 +1,5 @@
-import React from 'react';
-import { Dialog, Grid, Box, Button, TextField, Typography } from '@material-ui/core';
+import React, { useContext } from 'react';
+import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { Formik, FormikProps } from 'formik';
 import { KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
@@ -10,13 +10,14 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import Filters from './Filters';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 type ValueTypes = {
   scheduleName: string;
   reportName: string;
   filters: any[];
   resource: any;
-  columns: any[];
+  column: any[];
   subscribeUsers: any[];
   frequency: string;
   time: any;
@@ -24,16 +25,18 @@ type ValueTypes = {
   date: any;
 };
 
-const ManageScheduleReport = ({ handleClose }) => {
+const ManageScheduleReport = ({ handleClose, onSuccess }) => {
   const formikRef = React.useRef<FormikProps<ValueTypes>>(null);
+  const { setToastConfig } = useContext(CustomToastContext);
   const [filterValues, setFilterValues] = React.useState({});
   const [resourceColumns, setResourceColumns] = React.useState([]);
   const [usersList, setUsersList] = React.useState([]);
   const [filterOptions, setFilterOptions] = React.useState([]);
   const [resourceOptions, setResourceOptions] = React.useState(null);
   const [selectedData, setSelectedData] = React.useState(null);
-  const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
+  const [statusTimeFrame, setStatusTimeFrame] = React.useState('custom');
   const [statusPeriod, setStatusPeriod] = React.useState(false);
+  const [isSubmitting, setSubmitting] = React.useState(false);
   const [betweenDate, setBetweenDate] = React.useState(null);
   const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
 
@@ -130,7 +133,7 @@ const ManageScheduleReport = ({ handleClose }) => {
     if (!values.reportName) {
       errors['reportName'] = 'Report name is required';
     }
-    if (!values.subscribeUsers) {
+    if (values.subscribeUsers.length === 0) {
       errors['subscribeUsers'] = 'Subscribe users is required';
     }
 
@@ -153,8 +156,59 @@ const ManageScheduleReport = ({ handleClose }) => {
     return errors;
   };
 
+  const handleChange = (name: string, value: any) => {
+    if (!formikRef.current) return;
+    formikRef.current.setFieldValue(name, value);
+  };
+
   const handleSubmit = (values: ValueTypes) => {
-    console.log(values);
+    const filters = [];
+    if (selectedData) {
+      const filterKeys = Object.keys(selectedData);
+      filterKeys.forEach((key) => {
+        if (selectedData[key] && selectedData[key]?.value?.length) {
+          let obj = {
+            term: key,
+            value: selectedData[key]?.value.map((item) => item.optionValue)
+          };
+
+          filters.push(obj);
+        }
+      });
+    }
+
+    if (betweenDate) {
+      const filterKeys = Object.keys(betweenDate);
+      filterKeys.forEach((key) => {
+        if (betweenDate[key] && betweenDate[key]?.value?.length) {
+          let obj = {
+            term: key,
+            value: betweenDate[key]
+          };
+
+          filters.push(obj);
+        }
+      });
+    }
+
+    const newValues = {
+      ...values,
+      filters,
+      resource: values.resource?.key,
+      column: values.column.map((field) => field.fieldName),
+      time: new Date(values.time).toLocaleTimeString(),
+      date: new Date(values.date).getDate().toLocaleString(),
+      subscribeUsers: values.subscribeUsers.map((user) => user.userId)
+    };
+
+    axiosInstance()
+      .post(`/schedule-report`, newValues)
+      .then(() => {
+        onSuccess();
+      })
+      .catch((err) => {
+        setToastConfig(err);
+      });
   };
 
   return (
@@ -171,17 +225,18 @@ const ManageScheduleReport = ({ handleClose }) => {
           reportName: '',
           resource: null,
           filters: [],
-          columns: [],
+          column: [],
           subscribeUsers: [],
           frequency: 'Daily',
           time: new Date(),
-          day: 'monday',
+          day: 'Monday',
           date: new Date()
         }}
         onSubmit={handleSubmit}
         validate={formikValidator}
+        validateOnBlur
       >
-        {({ values, errors, touched, setFieldValue }) => (
+        {({ values, errors, submitForm }) => (
           <>
             <CustomDialogContent>
               <Grid container spacing={2}>
@@ -189,7 +244,7 @@ const ManageScheduleReport = ({ handleClose }) => {
                   <TextField
                     value={values.scheduleName}
                     required
-                    onChange={(e) => setFieldValue('scheduleName', e.target.value)}
+                    onChange={(e) => handleChange('scheduleName', e.target.value)}
                     fullWidth
                     name="scheduleName"
                     size="small"
@@ -210,9 +265,10 @@ const ManageScheduleReport = ({ handleClose }) => {
                     fullWidth
                     size="small"
                     getOptionLabel={(option) => option.title}
+                    getOptionSelected={(option, value) => option.key === value.key}
                     value={values.resource}
                     onChange={(_, newVal) => {
-                      setFieldValue('resource', newVal);
+                      handleChange('resource', newVal);
                       if (newVal) {
                         fetchGridColumns(newVal.title);
                       } else {
@@ -235,7 +291,7 @@ const ManageScheduleReport = ({ handleClose }) => {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     value={values.reportName}
-                    onChange={(e) => setFieldValue('reportName', e.target.value)}
+                    onChange={(e) => handleChange('reportName', e.target.value)}
                     fullWidth
                     name="reportName"
                     size="small"
@@ -256,7 +312,7 @@ const ManageScheduleReport = ({ handleClose }) => {
                     getOptionSelected={(option, val) => option.fieldName === val.fieldName}
                     getOptionLabel={(option) => option.fieldLabel}
                     onChange={(_, newVal) => {
-                      setFieldValue('filters', newVal);
+                      handleChange('filters', newVal);
                     }}
                     renderInput={(params) => (
                       <TextField
@@ -294,8 +350,8 @@ const ManageScheduleReport = ({ handleClose }) => {
                     size="small"
                     getOptionSelected={(option, val) => option.fieldName === val.fieldName}
                     getOptionLabel={(option) => option.fieldLabel}
-                    value={values.columns}
-                    onChange={(_, newVal) => setFieldValue('columns', newVal)}
+                    value={values.column}
+                    onChange={(_, newVal) => handleChange('columns', newVal)}
                     renderInput={(params) => (
                       <TextField
                         error={Boolean(errors['columns'])}
@@ -312,11 +368,12 @@ const ManageScheduleReport = ({ handleClose }) => {
                   <Autocomplete
                     options={usersList}
                     fullWidth
+                    multiple
                     size="small"
                     getOptionLabel={(option) => option.name}
                     getOptionSelected={(option, value) => option.userId === value.userId}
                     value={values.subscribeUsers}
-                    onChange={(_, newVal) => setFieldValue('subscribeUsers', newVal)}
+                    onChange={(_, newVal) => handleChange('subscribeUsers', newVal)}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -341,7 +398,7 @@ const ManageScheduleReport = ({ handleClose }) => {
                       size="small"
                       value={values?.frequency ?? 'Daily'}
                       exclusive
-                      onChange={(_, val) => setFieldValue('frequency', val)}
+                      onChange={(_, val) => handleChange('frequency', val)}
                     >
                       <ToggleButton value="Daily">Daily</ToggleButton>
                       <ToggleButton value="Weekly">Weekly</ToggleButton>
@@ -351,14 +408,14 @@ const ManageScheduleReport = ({ handleClose }) => {
                     {values?.frequency === 'Weekly' && (
                       <Box mt={2}>
                         <Typography color="textPrimary">Days</Typography>
-                        <ToggleButtonGroup size="small" value={values.day} exclusive onChange={(_, val) => setFieldValue('day', val)}>
-                          <ToggleButton value="sunday">Sun</ToggleButton>
-                          <ToggleButton value="monday">Mon</ToggleButton>
-                          <ToggleButton value="tuesday">Tue</ToggleButton>
-                          <ToggleButton value="wednesday">Wed</ToggleButton>
-                          <ToggleButton value="thursday">Thu</ToggleButton>
-                          <ToggleButton value="friday">Fri</ToggleButton>
-                          <ToggleButton value="saturday">Sat</ToggleButton>
+                        <ToggleButtonGroup size="small" value={values.day} exclusive onChange={(_, val) => handleChange('day', val)}>
+                          <ToggleButton value="Sunday">Sun</ToggleButton>
+                          <ToggleButton value="Monday">Mon</ToggleButton>
+                          <ToggleButton value="Tuesday">Tue</ToggleButton>
+                          <ToggleButton value="Wednesday">Wed</ToggleButton>
+                          <ToggleButton value="Thursday">Thu</ToggleButton>
+                          <ToggleButton value="Friday">Fri</ToggleButton>
+                          <ToggleButton value="Saturday">Sat</ToggleButton>
                         </ToggleButtonGroup>
                       </Box>
                     )}
@@ -378,7 +435,7 @@ const ManageScheduleReport = ({ handleClose }) => {
                           value={values.date}
                           error={!Boolean(errors['date'])}
                           helperText={errors['date']}
-                          onChange={(date) => setFieldValue('date', date)}
+                          onChange={(date) => handleChange('date', date)}
                         />
                       </Box>
                     )}
@@ -396,7 +453,7 @@ const ManageScheduleReport = ({ handleClose }) => {
                         value={values.time}
                         error={Boolean(errors['time'])}
                         helperText={errors['time']}
-                        onChange={(date) => setFieldValue('time', date)}
+                        onChange={(date) => handleChange('time', date)}
                         KeyboardButtonProps={{
                           'aria-label': 'change time'
                         }}
@@ -407,10 +464,18 @@ const ManageScheduleReport = ({ handleClose }) => {
               </Grid>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button variant="contained" color="primary" size="small" onClick={handleClose}>
+              <Button disabled={isSubmitting} variant="contained" color="primary" size="small" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" variant="outlined" color="primary" size="small">
+              <Button
+                startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+                disabled={isSubmitting}
+                type="submit"
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={submitForm}
+              >
                 Save
               </Button>
             </CustomDialogFooter>
