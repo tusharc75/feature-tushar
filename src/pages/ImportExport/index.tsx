@@ -81,7 +81,6 @@ const BrandBackup = () => {
         }
       })
       .then(({ data }) => {
-        // console.log(data);
         setExcelUploadUrl(data?.url);
         setImgUploading(false);
         toastConfig.setToastConfig({
@@ -89,7 +88,7 @@ const BrandBackup = () => {
           type: 'success',
           message: 'File uploaded successfully'
         });
-        // fetchImportHistory();
+        fetchImportExportHistory();
       })
       .catch((err) => {
         setImgUploading(false);
@@ -100,31 +99,6 @@ const BrandBackup = () => {
         }
       });
   };
-
-  // const handleImportExcel = async () => {
-  //   const data = {
-  //     url: excelUploadUrl,
-  //     resource: selectResource
-  //   };
-  //   await axiosInstance()
-  //     .post(`/import-export/import`, data)
-  //     .then(({ data }) => {
-  //       fetchImportExportHistory();
-  //       toastConfig.setToastConfig({
-  //         open: true,
-  //         type: 'success',
-  //         message: 'File imported successfully'
-  //       });
-  //       // fetchImportHistory();
-  //     })
-  //     .catch((err) => {
-  //       toastConfig.setToastConfig({
-  //         open: true,
-  //         type: err?.type || 'error',
-  //         message: err?.message || 'Something went wrong'
-  //       });
-  //     });
-  // };
 
   const handleExportExcel = async () => {
     axiosInstance()
@@ -174,8 +148,8 @@ const BrandBackup = () => {
           <>
             <Button
               onClick={() => {
-                handleDownloadFile(params.row.fileName);
-                setFileName(params.row.fileName);
+                handleDownloadFile(params.row._id);
+                setFileName(params.row._id);
               }}
               variant="contained"
               color="primary"
@@ -267,17 +241,17 @@ const BrandBackup = () => {
   //     });
   // };
 
-  const handleDownloadFile = (fileName) => {
+  const handleDownloadFile = (fileId) => {
+    console.log(fileId);
     setDownloading(true);
-    const body = {
-      fileName: fileName,
-      brand: selectedBrand.id
-    };
     axiosInstance()
-      .post(`/export/download-file`, body)
+      .get(`/import-export/download-file/${fileId}`, {
+        responseType: 'arraybuffer'
+      })
       .then((data) => {
         setDownloading(false);
-        let fileText = data?.data?.fileData;
+        let fileText = data.data;
+        const fileName = fileText.headers['content-disposition'].split('filename=')[1];
         fileText && download(fileName, fileText);
         toastConfig.setToastConfig({
           open: true,
@@ -292,17 +266,24 @@ const BrandBackup = () => {
       });
   };
 
-  function download(filename, text) {
-    var element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    element.setAttribute('download', filename);
+  function download(filename, arrayBuffer) {
+    const blob = new Blob([arrayBuffer as any]);
 
-    element.style.display = 'none';
-    document.body.appendChild(element);
-
-    element.click();
-
-    document.body.removeChild(element);
+    //Check the Browser type and download the File.
+    const isIE = false || !!document['documentMode'];
+    if (isIE) {
+      //@ts-ignore
+      window.navigator.msSaveBlob(blob, fileName);
+    } else {
+      var url = window.URL || window.webkitURL;
+      let link = url.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.setAttribute('download', fileName);
+      a.setAttribute('href', link);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   }
 
   return (
@@ -383,7 +364,13 @@ const BrandBackup = () => {
                           accept=".xlsx,.csv"
                         />
                         <label htmlFor={`file`}>
-                          <Button size="small" variant="outlined" component="span" disabled={isImgUploading} startIcon={<AiOutlineUpload />}>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            component="span"
+                            disabled={isImgUploading || !selectResource}
+                            startIcon={<AiOutlineUpload />}
+                          >
                             Import Data
                           </Button>
                         </label>
