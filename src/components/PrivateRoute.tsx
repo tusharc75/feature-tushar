@@ -63,7 +63,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'reports',
         'e-commerce-policy',
         'sublease',
-        'new-dashboard',
+        'old-dashboard',
         'transfer-inventory',
         'zone',
         'well-master',

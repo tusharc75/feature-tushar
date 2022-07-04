@@ -606,6 +606,9 @@ export const profileMenuItems = {
   securityPrivacy: 5
 };
 
+export const SCHEDULE_FREQUENCY = ['Daily', 'Weekly', 'Monthly'];
+export const FREQUENCY_WEEKS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
   //let selectedEntity = localStorage.getItem("selectedEntity")
   //let isCreate = (val === "") ? true : false

@@ -391,7 +391,7 @@ const Report = () => {
         data = data.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
           if (finalObject?.listPrice) {
-            finalObject.margin = (finalObject?.listPrice + (finalObject?.averagePrice || 0)) / finalObject?.listPrice
+            finalObject.margin = ((finalObject?.listPrice + (finalObject?.averagePrice || 0)) / finalObject?.listPrice)?.toFixed(2)
           }
           return finalObject;
         });
