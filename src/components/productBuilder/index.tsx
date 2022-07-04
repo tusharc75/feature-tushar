@@ -590,7 +590,7 @@ const ProductBuilder = (props) => {
     }
   };
 
-  const handelAskPriceToSupplier = (content, contactId) => {
+  const handelAskPriceToSupplier = (content, contactId, selectedFields = []) => {
 
     let data: any = {
       "products": selectedRecords?.map(d => {
@@ -603,7 +603,9 @@ const ProductBuilder = (props) => {
       "productBuilder": productBuilderId,
       "protected": true,
       "body": content ? content : "",
-      "supplierContact": contactId
+      "supplierContact": contactId,
+      "requiredFields": selectedFields
+
     }
     axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
       dispatch({ type: "selection", selectedRecords: [] })
@@ -923,7 +925,11 @@ const ProductBuilder = (props) => {
           setAskSupplierPriceDialog={setAskSupplierPriceDialog}
           askSupplierPriceDialog={askSupplierPriceDialog}
           handelAskPriceToSupplier={handelAskPriceToSupplier}
-          supplierContactData={supplierContactData} />
+          supplierContactData={supplierContactData}
+          productBuilderId={productBuilderId}
+          productDataList={productData?.product?.filter((data) =>
+            selectedRecords.some((rec) => rec._id === data._id)
+          )} />
       }
     </Box>
   );

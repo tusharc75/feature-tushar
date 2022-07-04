@@ -111,7 +111,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                 fields = [...fields, ...ele.fields]
             })
 
-            GenrateColoum([...new Map(fields.map(item => [item["_id"], item])).values()], columns, rendererNames);
+            GenrateColoum([...new Map(fields.map(item => [item["_id"], item])).values()], columns, rendererNames, data?.requiredFields);
 
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
@@ -133,7 +133,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     };
 
 
-    const GenrateColoum = (fields, column, rendererNames) => {
+    const GenrateColoum = (fields, column, rendererNames, requiredFields) => {
         let _fields = fields;
 
         _fields.forEach((ele) => {
@@ -183,11 +183,11 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = displayColumns.includes(ele.fieldName) ? true : false
+                            col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
                             col.disabled = false
                             col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
-                            if (ele.fieldName === "totalCostPerUnit") {
+                            if (requiredFields.includes(ele.fieldName)) {
                                 col.cellEditor = "numericCellEditor";
                                 col.editable = true;
                             }
@@ -216,18 +216,18 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     }
 
     const onCellValueChanged = (row) => {
+        let productIndex = productData.findIndex(d => d.uniqueId === row.data?.uniqueId)
         let tempData = {
             "uniqueId": row.data?.uniqueId,
-            "costPrice": parseInt(row?.newValue === "" ? 0 : row?.newValue)
+            [row?.column?.colId]: parseInt(row?.data[row?.column?.colId] === "" ? 0 : row?.data[row?.column?.colId])
         }
-        let productIndex = productData.findIndex(d => d.uniqueId === tempData.uniqueId)
         if (productIndex === -1) {
             setProductData((prevState) => ([...prevState, tempData]))
         }
         else {
             let tempProductData = productData
-            tempProductData[productIndex].costPrice = tempData.costPrice
-            setProductData(tempProductData.filter(d => d.costPrice !== 0))
+            tempProductData[productIndex][row?.column?.colId] = tempData[row?.column?.colId]
+            setProductData(tempProductData)
         }
 
     }
@@ -261,7 +261,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={productData.length === 0 || productData.some(d => d?.costPrice === 0)}
+                    disabled={productData.length === 0}
                     onClick={handleSubmit}
                 >
                     Submit
