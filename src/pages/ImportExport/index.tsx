@@ -1,19 +1,46 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import Layout from '../../components/Layout';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { Box, Container, Grid, Paper, Button, CircularProgress, Card, Typography } from '@material-ui/core';
+import { Box, Container, Grid, Paper, Button, CircularProgress, Card, Typography, Tabs, Tab } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import axiosInstance from '../../axios/axiosInstance';
 import { DataGrid } from '@material-ui/data-grid';
-import { AiOutlineUpload } from 'react-icons/all';
+import { AiOutlineImport, AiOutlineUpload, BiExport, BiImport } from 'react-icons/all';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { documentUploadMaxSize, resourceNames, RESOURCE_LABEL } from '../../constants/helpers';
 import CustomContainer from 'src/components/CustomContainer';
+import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer, DateTimeRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+// import { TabPanel } from '@material-ui/lab';
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: any;
+  value: any;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
+      {children}
+    </div>
+  );
+}
+
+function a11yProps(index: any) {
+  return {
+    id: `main-tab-${index}`,
+    'aria-controls': `main-tabpanel-${index}`
+  };
+}
 const BrandBackup = () => {
   const [brandOptions, setBrandOptions] = useState([]);
+  const [rowsExport, setRowsExport] = useState([]);
+  const [rowsImport, setRowsImport] = useState([]);
   const [rows, setRows] = useState([]);
   const [rowsRestore, setRowsRestore] = useState([]);
   const toastConfig = useContext(CustomToastContext);
@@ -29,18 +56,28 @@ const BrandBackup = () => {
   const [excelUploadUrl, setExcelUploadUrl] = useState(null);
   const [selectResource, setSelectResource] = useState(null);
   const fileUploadMaxSize = { ...documentUploadMaxSize };
+  const [loading, setLoading] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   useEffect(() => {
-    fetchImportExportHistory();
-  }, [selectResource]);
+    tabValue === 0 ? fetchAllImportHistory() : fetchAllExportHistory();
+  }, [selectResource, tabValue]);
 
-  const fetchImportExportHistory = async () => {
+  const fetchAllExportHistory = async () => {
+    setLoading(true);
     axiosInstance()
-      .get(`/import-export/${selectResource ? `?resource=${selectResource}` : ''}`)
+      .get(`/import-export/all-export-data${selectResource ? `?resource=${selectResource}` : ''}`)
       .then((data) => {
-        console.log(data);
-        setRows(data?.data?.data?.filter((x) => x?.type === 'Export'));
-        setRowsRestore(data?.data?.data?.filter((x) => x?.type === 'Import'));
+        console.log(data?.data?.data);
+        setRowsExport(data?.data?.data);
+        setLoading(false);
       })
       .catch((err) => {
         toastConfig.setToastConfig({
@@ -48,6 +85,25 @@ const BrandBackup = () => {
           type: 'error',
           message: err?.error || 'Something went wrong'
         });
+        setLoading(false);
+      });
+  };
+  const fetchAllImportHistory = async () => {
+    setLoading(true);
+    axiosInstance()
+      .get(`/import-export/all-import-data${selectResource ? `?resource=${selectResource}` : ''}`)
+      .then((data) => {
+        console.log(data?.data?.data);
+        setRowsImport(data?.data?.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: err?.error || 'Something went wrong'
+        });
+        setLoading(false);
       });
   };
 
@@ -88,7 +144,7 @@ const BrandBackup = () => {
           type: 'success',
           message: 'File uploaded successfully'
         });
-        fetchImportExportHistory();
+        fetchAllImportHistory();
       })
       .catch((err) => {
         setImgUploading(false);
@@ -104,7 +160,7 @@ const BrandBackup = () => {
     axiosInstance()
       .get(`/import-export/export${selectResource ? `?resource=${selectResource}` : ''}`)
       .then((data) => {
-        fetchImportExportHistory();
+        fetchAllExportHistory();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -114,132 +170,83 @@ const BrandBackup = () => {
       .catch((err) => {});
   };
 
-  const columns = [
+  const exportColumn = [
     {
       field: 'resource',
       headerName: 'Resource',
       width: 200,
-      valueGetter: (params) => {
-        return params?.row?.resource;
-      }
+      cellRenderer: 'NumberRenderer'
     },
     {
       field: 'date',
       headerName: 'Date & Time',
       width: 200,
-      valueGetter: (params) => {
-        return params.row.date.substring(0, 10) + ' ' + params.row.date.substring(11, 19);
-      }
+      cellRenderer: 'DateTimeRenderer'
     },
     {
       field: 'status',
       headerName: 'Status',
       width: 200,
-      valueGetter: (params) => {
-        return params?.row?.status;
-      }
-    },
-    {
-      field: 'download',
-      headerName: 'Action',
-      width: 170,
-      renderCell: (params) => {
-        return (
-          <>
-            <Button
-              onClick={() => {
-                handleDownloadFile(params.row._id);
-                setFileName(params.row._id);
-              }}
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={params.row.status !== 'Complete'}
-            >
-              {downloading && fileName === params.row.fileName ? (
-                <>
-                  <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
-                  Downloading ...{' '}
-                </>
-              ) : (
-                '  Download'
-              )}
-            </Button>
-          </>
-        );
-      }
+      cellRenderer: 'CommonRenderer'
     }
+    // {
+    //   field: 'fileName',
+    //   headerName: 'Action',
+    //   width: 170,
+    //   cellRenderer: (params) => {
+    //     return (
+    //       <>
+    //         <Button
+    //           onClick={() => {
+    //             handleDownloadFile(params.row._id);
+    //             setFileName(params.row._id);
+    //           }}
+    //           variant="contained"
+    //           color="primary"
+    //           size="small"
+    //           disabled={params.row.status !== 'Complete'}
+    //         >
+    //           {downloading && fileName === params.row.fileName ? (
+    //             <>
+    //               <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
+    //               Downloading ...{' '}
+    //             </>
+    //           ) : (
+    //             '  Download'
+    //           )}
+    //         </Button>
+    //       </>
+    //     );
+    //   }
+    // }
   ];
 
-  const columns2 = [
+  const importColumn = [
     {
       field: 'resource',
       headerName: 'Resource',
+      show: true,
+      primaryField: true,
+      disabled: false,
       width: 200,
-      valueGetter: (params) => {
-        return params?.row?.resource;
-      }
+      cellRenderer: 'NumberRenderer'
+      // valueGetter: (params) => {
+      //   return params?.row?.resource;
+      // }
     },
     {
       field: 'date',
       headerName: 'Date & Time',
       width: 400,
-      valueGetter: (params) => {
-        return params.row.date.substring(0, 10) + ' ' + params.row.date.substring(11, 19);
-      }
+      cellRenderer: 'DateTimeRenderer'
     },
     {
       field: 'status',
       headerName: 'Status',
       width: 200,
-      valueGetter: (params) => {
-        return params?.row?.status;
-      }
+      cellRenderer: 'CommonRenderer'
     }
   ];
-
-  // const handleRestoreFile = (fileName) => {
-  //   setRestoring(true);
-  //   const body = {
-  //     fileName: fileName
-  //   };
-  //   axiosInstance()
-  //     .post(`/export/import-json`, body)
-  //     .then(({ data: { data } }) => {
-  //       setRestoring(false);
-  //       // fetchExportHistory();
-  //       toastConfig.setToastConfig({
-  //         open: true,
-  //         type: 'success',
-  //         message: 'Restored  successfully'
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       setRestoring(false);
-  //       console.error(error, 'error');
-  //       toastConfig.setToastConfig(error);
-  //     });
-  // };
-
-  // const handleBackup = () => {
-  //   setSending(true);
-  //   axiosInstance()
-  //     .get(`/export/export-json/${selectedBrand.id}`)
-  //     .then(({ data: { data } }) => {
-  //       setSending(false);
-  //       // fetchExportHistory();
-  //       toastConfig.setToastConfig({
-  //         open: true,
-  //         type: 'success',
-  //         message: 'Backup created successfully'
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       setSending(false);
-  //       console.error(error, 'error');
-  //       toastConfig.setToastConfig(error);
-  //     });
-  // };
 
   const handleDownloadFile = (fileId) => {
     console.log(fileId);
@@ -287,73 +294,75 @@ const BrandBackup = () => {
   }
 
   return (
-    <Layout>
-      <Fragment>
-        <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
-            <CustomBreadCrumbs routes={[routes.importExport]} />
-          </Grid>
+    <Fragment>
+      <Grid container className="headerbox">
+        <Grid item md={4} sm={11} xs={10}>
+          <CustomBreadCrumbs routes={[routes.importExport]} />
         </Grid>
-        <CustomContainer styles={{ paddingLeft: '0rem' }}>
-          <Box style={{ marginTop: '1.5rem', marginLeft: '1rem', marginRight: '1rem' }}>
-            <Grid container xs={12} lg={5} md={5} style={{ marginBottom: '0.5rem' }}>
-              <Autocomplete
-                id="export-resources"
-                options={Object.keys(resourceNames)?.map((key) => resourceNames[key])}
-                renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
-                getOptionLabel={(option) => option}
-                onChange={(e, val) => {
-                  setSelectResource(val);
+      </Grid>
+      <CustomContainer styles={{ paddingLeft: '0rem' }}>
+        <Box>
+          <Grid container xs={12} lg={5} md={5} style={{ marginBottom: '0.5rem', marginLeft: '0.5rem' }}>
+            <Autocomplete
+              id="export-resources"
+              options={Object.keys(resourceNames)?.map((key) => resourceNames[key])}
+              renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" margin="dense" required={true} />}
+              getOptionLabel={(option) => option}
+              onChange={(e, val) => {
+                setSelectResource(val);
+              }}
+              fullWidth={true}
+            />
+          </Grid>
+          <Box>
+            <>
+              <Tabs
+                className="quote-tab"
+                value={tabValue}
+                onChange={handleMainTabChange}
+                textColor="primary"
+                TabIndicatorProps={{
+                  style: {
+                    display: 'none'
+                  }
                 }}
-                fullWidth={true}
-              />
-            </Grid>
-            <Grid container spacing={2}>
-              <Grid item xs={12} lg={6} md={6}>
-                <Box>
-                  <Card variant="outlined">
-                    <Box p={2}>
-                      <span className="listingHeader">Export File</span>
-                    </Box>
-                    <Box p={2}>
-                      <Button
-                        type="button"
-                        size="small"
-                        color="primary"
-                        variant="contained"
-                        onClick={handleExportExcel}
-                        disabled={selectResource == null}
-                      >
-                        Export Data
-                      </Button>
-                    </Box>
-                    <Box p={2}>
-                      <span className="listingHeader">{selectResource ? selectResource : 'All'} Export History</span>
-                      <br />
-                      <div style={{ height: 200, width: '100%' }}>
-                        <DataGrid rows={rows} columns={columns} pageSize={5} rowsPerPageOptions={[5]} getRowId={(row) => row._id} />
-                      </div>
-                    </Box>
-                  </Card>
-                </Box>
-              </Grid>
-              <Grid item xs={12} lg={6} md={6}>
-                <Box>
-                  <Card variant="outlined">
-                    <Box p={2}>
-                      <span className="listingHeader">Import File</span>
-                    </Box>
+              >
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 1 ? 'white' : '',
+                    color: tabValue === 1 ? '#163340' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <BiImport className="mr-1" fontSize="inherit" />
+                      Import
+                    </div>
+                  }
+                  {...a11yProps(0)}
+                />
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 2 ? 'white' : '',
+                    color: tabValue === 2 ? 'blue' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <BiExport className="mr-1" fontSize="inherit" />
+                      Export
+                    </div>
+                  }
+                  {...a11yProps(1)}
+                />
+                <div className={'uio'}> </div>
+              </Tabs>
 
-                    <Box style={{ display: 'flex', gap: '1rem' }}>
-                      <Box p={2}>
-                        {isImgUploading && (
-                          <>
-                            <CircularProgress variant="determinate" value={excelUploadProgress} />
-                            <Box>
-                              <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
-                            </Box>
-                          </>
-                        )}
+              <TabPanel value={tabValue} index={0}>
+                <Box mt={2} className="bg-white">
+                  <Grid container xs={12} lg={5} md={5} style={{ padding: '1rem', paddingTop: 0 }}>
+                    <Box style={{ display: 'flex' }}>
+                      <Box style={{ marginRight: '0.5rem' }}>
                         <input
                           id={`file`}
                           name={`file`}
@@ -369,28 +378,80 @@ const BrandBackup = () => {
                             variant="outlined"
                             component="span"
                             disabled={isImgUploading || !selectResource}
-                            startIcon={<AiOutlineUpload />}
+                            startIcon={<AiOutlineImport />}
                           >
                             Import Data
                           </Button>
                         </label>
                       </Box>
+                      {isImgUploading && (
+                        <>
+                          <CircularProgress variant="determinate" value={excelUploadProgress} size={30} />
+                          <Box>
+                            <Typography variant="caption" component="div" color="textSecondary">{`${excelUploadProgress}%`}</Typography>
+                          </Box>
+                        </>
+                      )}
                     </Box>
-                    <Box p={2}>
-                      <span className="listingHeader">{selectResource ? selectResource : 'All'} Import History</span>
-                      <br />
-                      <div style={{ height: 200, width: '100%' }}>
-                        <DataGrid rows={rowsRestore} columns={columns2} pageSize={5} rowsPerPageOptions={[5]} getRowId={(row) => row._id} />
-                      </div>
-                    </Box>
-                  </Card>
+                  </Grid>
                 </Box>
-              </Grid>
-            </Grid>
+                <CustomAgGrid
+                  columns={importColumn}
+                  dataRows={rowsImport}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={intialState.rowCount}
+                  limit={intialState.limit}
+                  pageSizes={intialState.pageSizes}
+                  page={intialState.page}
+                  isClientSideGrid={true}
+                  loading={loading}
+                  allowSelection={false}
+                  allowAction={false}
+                  refreshGrid={fetchAllImportHistory}
+                />
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={1}>
+                <Box mt={2} className="bg-white">
+                  <Grid container xs={12} lg={5} md={5} style={{ padding: '1rem', paddingTop: 0 }}>
+                    <Button
+                      type="button"
+                      size="small"
+                      color="primary"
+                      variant="contained"
+                      onClick={handleExportExcel}
+                      disabled={selectResource == null}
+                    >
+                      Export Data
+                    </Button>
+                  </Grid>
+                </Box>
+                <CustomAgGrid
+                  columns={exportColumn}
+                  dataRows={rowsExport}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={intialState.rowCount}
+                  limit={intialState.limit}
+                  pageSizes={intialState.pageSizes}
+                  page={intialState.page}
+                  isClientSideGrid={true}
+                  allowAction={true}
+                  // actionWidth={150}
+                  actionLabel="Action"
+                  loading={loading}
+                  allowSelection={false}
+                  refreshGrid={fetchAllExportHistory}
+                />
+              </TabPanel>
+            </>
           </Box>
-        </CustomContainer>
-      </Fragment>
-    </Layout>
+        </Box>
+      </CustomContainer>
+    </Fragment>
   );
 };
 

@@ -339,7 +339,7 @@ export const RESOURCE_LABEL = {
   cageManagement: 'Cage Management',
   productAuction: 'Product Auction',
   inventoryToAsset: 'Inventory to Asset',
-  importExport: 'Import/Export',
+  importExport: 'Import-Export',
   inventoryCycle: 'Inventory Cycle'
 };
 
