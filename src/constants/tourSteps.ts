@@ -2,7 +2,7 @@ import { Step } from 'react-joyride';
 
 export const DashboardSteps: Step[] = [
   {
-    title: 'Welcome to the eQuip-T',
+    title: 'Welcome to the Equipt',
     content: 'Click next to start the tour',
     placement: 'center',
     target: '#root'

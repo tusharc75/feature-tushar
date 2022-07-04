@@ -10,7 +10,7 @@ import { CustomToastContext } from "../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, generateUniqueIdOnly, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, purchaseOrder, setFieldsInAscendingOrder, supplierAccount, supplierContact } from "../../constants/helpers";
+import { CustomDialogTransition, generateUniqueIdOnly, getCollaboratorDropdownDataSource, getOwnerDropdownDataSource, purchaseOrder, PURCHASE_ORDER_STATUS, setFieldsInAscendingOrder, supplierAccount, supplierContact } from "../../constants/helpers";
 import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import { Box, Grid, IconButton, Tooltip } from '@material-ui/core';
@@ -73,6 +73,13 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                         setCloneHeading(purchaseOrderNumber);
                         setLoading(false)
                     } else {
+                        if (data?.status === PURCHASE_ORDER_STATUS.received) {
+                            fieldsDataForUpdate?.forEach((e) => {
+                                if (e?.fieldName === 'warehouse') {
+                                    e.disableOnEdit = true
+                                }
+                            })
+                        }
                         setInitialData({
                             fields: fieldsDataForUpdate,
                             values: getObjKeysWithValues(data, fieldsDataForUpdate),
@@ -196,7 +203,6 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
         }
     };
 
-
     const isFieldNotTouched = (initialData, values) => {
         return Object.values(
             simplifyValues(initialData.values, formsData[0]?.sectionFields || [])
@@ -261,7 +267,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     setValues,
                 }) => (
                     <Fragment>
-                        <CustomDialogHeader title={purchaseOrderId ? (isClone ? `Clone - ${cloneHeading}` : `Update [ ${purchaseOrderData?.purchaseOrderNumber || ""} ]`) : "Create " + routes.purchaseOrder.title}
+                        <CustomDialogHeader title={purchaseOrderId ? (isClone ? `Clone - ${cloneHeading}` : `Update - ${purchaseOrderData?.purchaseOrderNumber || ""}`) : "Create " + routes.purchaseOrder.title}
                             onClose={() => {
                                 if (isFieldNotTouched(initialData, values)) onClose()
                                 else setShowConfirmDialog(true)
@@ -474,8 +480,8 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                                                                                 {...field}
                                                                                 disabled={Boolean(purchaseOrderId) && field.disableOnEdit && !isClone}
                                                                                 values={values}
-                                                                                maxDate={deliveryDateMax ? deliveryDateMax : undefined}
-                                                                                minDate={deliveryDateMax ? undefined : moment(new Date())}
+                                                                                //maxDate={deliveryDateMax ? deliveryDateMax : undefined}
+                                                                                //minDate={deliveryDateMax ? undefined : moment(new Date())}
                                                                                 errors={errors}
                                                                                 touched={touched}
                                                                                 label={field.fieldLabel}

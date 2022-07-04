@@ -178,10 +178,10 @@ const DOARequest = () => {
   return (
     <Fragment>
       <Grid container className="headerbox">
-        <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-          <div className="d-flex align-items-center">
-            <CustomBreadCrumbs routes={[{ title: routes.DOARequest.title }]} />
-          </div>
+        <Grid item md={4} sm={11} xs={10}>
+          <CustomBreadCrumbs routes={[routes.DOARequest]} />
+        </Grid>
+        <Grid item md={8} sm={1} xs={2}>
         </Grid>
       </Grid>
       <CustomContainer>

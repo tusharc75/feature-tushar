@@ -39,9 +39,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, seIsShowIssue }
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
 
     useEffect(() => {
-        if ([PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status)) {
-            setNextStep(false)
-        }
         seIsShowIssue(true)
         fetchPurchaseOrderService();
     }, [purchaseOrderData]);

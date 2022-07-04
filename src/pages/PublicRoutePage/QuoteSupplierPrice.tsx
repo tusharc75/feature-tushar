@@ -69,28 +69,6 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
             "isRead": true,
             "isUpdate": true
         },
-        {
-            "fieldData": {
-                "_id": "628e0cb1dc9001aec1d293db",
-                "fieldLabel": "Quote Date",
-                "type": "date",
-                "option": [],
-                "required": false,
-                "isTooltip": false,
-                "tooltipMessage": "",
-                "editAble": true,
-                "deletAble": true,
-                "order": 3,
-                "sectionName": "Quote Information",
-                "fieldName": "quoteDate",
-                "resource": "Quotes",
-                "brand": "62666e58de44fa0e29624707",
-                "roleType": 0
-            },
-            "isCreate": true,
-            "isRead": true,
-            "isUpdate": true
-        },
 
     ]
 
@@ -133,7 +111,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                 fields = [...fields, ...ele.fields]
             })
 
-            GenrateColoum([...new Map(fields.map(item => [item["_id"], item])).values()], columns, rendererNames);
+            GenrateColoum([...new Map(fields.map(item => [item["_id"], item])).values()], columns, rendererNames, data?.requiredFields);
 
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
@@ -155,7 +133,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     };
 
 
-    const GenrateColoum = (fields, column, rendererNames) => {
+    const GenrateColoum = (fields, column, rendererNames, requiredFields) => {
         let _fields = fields;
 
         _fields.forEach((ele) => {
@@ -205,11 +183,11 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = displayColumns.includes(ele.fieldName) ? true : false
+                            col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
                             col.disabled = false
                             col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
-                            if (ele.fieldName === "totalCostPerUnit") {
+                            if (requiredFields.includes(ele.fieldName)) {
                                 col.cellEditor = "numericCellEditor";
                                 col.editable = true;
                             }
@@ -238,18 +216,18 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     }
 
     const onCellValueChanged = (row) => {
+        let productIndex = productData.findIndex(d => d.uniqueId === row.data?.uniqueId)
         let tempData = {
             "uniqueId": row.data?.uniqueId,
-            "costPrice": parseInt(row?.newValue === "" ? 0 : row?.newValue)
+            [row?.column?.colId]: parseInt(row?.data[row?.column?.colId] === "" ? 0 : row?.data[row?.column?.colId])
         }
-        let productIndex = productData.findIndex(d => d.uniqueId === tempData.uniqueId)
         if (productIndex === -1) {
             setProductData((prevState) => ([...prevState, tempData]))
         }
         else {
             let tempProductData = productData
-            tempProductData[productIndex].costPrice = tempData.costPrice
-            setProductData(tempProductData.filter(d => d.costPrice !== 0))
+            tempProductData[productIndex][row?.column?.colId] = tempData[row?.column?.colId]
+            setProductData(tempProductData)
         }
 
     }
@@ -264,11 +242,11 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
 
         axios.post(backendApi + `/quote-builder/supplier-price-response`, tempData).then(({ data }) => {
             setIsSubmited(true)
-            toastConfig.setToastConfig({
-                message: data.message,
-                type: "success",
-                open: true,
-            });
+            // toastConfig.setToastConfig({
+            //     message: data.message,
+            //     type: "success",
+            //     open: true,
+            // });
         })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -283,57 +261,59 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={productData.length === 0 || productData.some(d => d?.costPrice === 0)}
+                    disabled={productData.length === 0}
                     onClick={handleSubmit}
                 >
                     Submit
                 </Button>}
                 <Box mx={1} />
             </Box>
-            {quoteDetailsData ? (
-                <DetailsPage
-                    data={quoteDetailsData}
-                    fields={quoteFields}
-                />
-            ) : null}
+
             {isSubmited ?
                 <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
                     Thanks for your submission
                 </h1>
+                :
+                <>
+                    {quoteDetailsData ? (
+                        <DetailsPage
+                            data={quoteDetailsData}
+                            fields={quoteFields}
+                        />
+                    ) : null}
+                    <Box mt={2} p={2}>
+                        <>
+                            <div className={"detail-box-content"}>
+                                <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                <h3 className="form-label-style" title={" Product List"}>
+                                    Product List
+                                </h3>
+                            </div>
+                            {
+                                columns ?
+                                    <CustomAgGridEditable
+                                        columns={columns}
+                                        dataRows={dataRows}
+                                        frameworkComponents={frameWorkComponent}
+                                        setGridApi={setGridApi}
+                                        dispatch={dispatch}
+                                        rowCount={rowCount}
+                                        limit={limit}
+                                        pageSizes={pageSizes}
+                                        page={page}
+                                        allowAction={false}
+                                        loading={loading}
+                                        allowSelection={false}
+                                        showOnlyShowFilteredRecordSwitch={true}
+                                        refreshGrid={fetchProduct}
+                                        renderedFrom={renderedFrom}
+                                        isClientSideGrid={true}
+                                        onCellValueChanged={onCellValueChanged} />
+                                    : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
 
-                : <Box mt={2} p={2}>
-                    <>
-                        <div className={"detail-box-content"}>
-                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                            <h3 className="form-label-style" title={" Product List"}>
-                                Product List
-                            </h3>
-                        </div>
-                        {
-                            columns ?
-                                <CustomAgGridEditable
-                                    columns={columns}
-                                    dataRows={dataRows}
-                                    frameworkComponents={frameWorkComponent}
-                                    setGridApi={setGridApi}
-                                    dispatch={dispatch}
-                                    rowCount={rowCount}
-                                    limit={limit}
-                                    pageSizes={pageSizes}
-                                    page={page}
-                                    allowAction={false}
-                                    loading={loading}
-                                    allowSelection={false}
-                                    showOnlyShowFilteredRecordSwitch={true}
-                                    refreshGrid={fetchProduct}
-                                    renderedFrom={renderedFrom}
-                                    isClientSideGrid={true}
-                                    onCellValueChanged={onCellValueChanged} />
-                                : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-
-                    </>
-                </Box>}
-
+                        </>
+                    </Box>
+                </>}
         </>
     );
 }

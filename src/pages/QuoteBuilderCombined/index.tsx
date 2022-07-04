@@ -21,7 +21,8 @@ import {
   customerContact,
   supplierContact,
   quote,
-  getLocalStorageArrayData
+  getLocalStorageArrayData,
+  removeLocalStorage
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -505,7 +506,7 @@ const QuoteBuilders = () => {
           term: filters[field].filter,
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -515,7 +516,7 @@ const QuoteBuilders = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
 
     return deepFilter;
@@ -702,7 +703,7 @@ const QuoteBuilders = () => {
             storedSelectedIds = storedSelectedIds.filter(id => id !== idToDeleteFromLocalStorage)
           })
           localStorage.setItem(localStorageSelectedRecords, JSON.stringify(storedSelectedIds));
-
+          removeLocalStorage(localStorageSelectedRecords)
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});

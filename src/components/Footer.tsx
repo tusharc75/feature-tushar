@@ -17,7 +17,7 @@ const Footer = () => {
         variant="subtitle1"
         color="textSecondary"
       >
-        eQuip-T &copy; 2021
+        Equipt &copy; 2022
       </Typography>
     </div>
   );

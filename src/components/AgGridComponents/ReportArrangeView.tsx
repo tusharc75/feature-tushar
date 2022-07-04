@@ -103,6 +103,14 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
       }
     });
 
+    const allNotVisible = columns.some((col) => col.show === false);
+
+    if (allNotVisible) {
+      setAllChecked(false);
+    } else {
+      setAllChecked(true);
+    }
+
     newCols = newCols.filter((item) => item);
 
     setSortedColumns(newCols);
@@ -110,19 +118,25 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
 
   const handleToggle = (column: any) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
+    const checked = event.target.checked;
     const getFieldIndex = sortedColumns.findIndex((d) => d.field === column.field);
-    newColumns[getFieldIndex].show = event.target.checked;
+    newColumns[getFieldIndex].show = checked;
 
+    if (!checked) {
+      setAllChecked(false);
+    }
     setSortedColumns(newColumns);
   };
 
   const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newColumns = [...sortedColumns];
+    const checked = event.target.checked;
     newColumns?.forEach((e: any) => {
       if (!e.disabled) {
-        e.show = event.target.checked;
+        e.show = checked;
       }
     });
+    setAllChecked(checked);
     setSortedColumns(newColumns);
   };
 

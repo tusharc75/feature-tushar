@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
-import { camelCase, filter, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
@@ -85,10 +85,14 @@ const Report = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === "quotes" ? "quoteBuilder" : resourceCamelCase]) {
+      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]) {
         o.fieldData.primaryField = true;
       }
-      let currentColumn = getColumnData(routes[resourceCamelCase]?.title, o?.fieldData, routes[`${resourceCamelCase === "quotes" ? "quoteBuilder" : resourceCamelCase}Detail`].path);
+      let currentColumn = getColumnData(
+        routes[resourceCamelCase]?.title,
+        o?.fieldData,
+        routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
+      );
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -102,6 +106,15 @@ const Report = () => {
     };
     setFrameWorkComponent({ ...tempFrameworkComponent });
     columns = [...columns, ...getStaticFields()];
+    if (resourceStartCase === 'Purchase Order') {
+      columns.splice(1, 0, {
+        field: 'poAmount',
+        headerName: 'Purchase Order Amount',
+        show: true,
+        disabled: false,
+        cellRenderer: 'commonRenderer'
+      });
+    }
     setColumns([...columns]);
     setLoadingColumns(false);
   };
@@ -214,7 +227,7 @@ const Report = () => {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
+      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
     if (selectedResources.length > 0) {
       let deepFilter = [];
@@ -238,7 +251,7 @@ const Report = () => {
           options.forEach((o: any) => {
             deepFilter.push({
               field: key,
-              term: encodeURIComponent(o.optionValue)
+              term: o.optionValue
             });
           });
         });
@@ -261,7 +274,7 @@ const Report = () => {
       }
 
       if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
+        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
       }
     }
     if (!isObjectEmpty(filters)) {
@@ -269,7 +282,7 @@ const Report = () => {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
-          term: encodeURIComponent(filters[field].filter)
+          term: encodeURI(filters[field].filter)
         });
       });
       filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
@@ -320,7 +333,7 @@ const Report = () => {
     <MuiPickersUtilsProvider utils={MomentUtils}>
       <div>
         <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
+          <Grid item xs={10}>
             <CustomBreadCrumbs
               routes={[
                 { title: 'Reports', path: '/reports' },
@@ -329,7 +342,7 @@ const Report = () => {
             />
           </Grid>
 
-          <Grid item md={8} sm={1} xs={2}>
+          <Grid item xs={2}>
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
                 <Grid container justifyContent="flex-end">
@@ -365,7 +378,7 @@ const Report = () => {
                           disableElevation
                           onClick={() => {
                             setShowGrid(false);
-                            dispatch({type: 'onlyFilter', filters: {}})
+                            dispatch({ type: 'onlyFilter', filters: {} });
                           }}
                           startIcon={<MdChevronLeft />}
                         >
@@ -374,7 +387,7 @@ const Report = () => {
                       </Box>
                     )}
                     <MdDescription size={22} className="headerLogo" />
-                    <span className="listingHeader">{` ${selectedReportView?.name ?? 'Reports'}`}</span>
+                    <span className="listingHeader">{`${showGrid ? selectedReportView?.name ?? 'Reports' : 'Reports'}`}</span>
                   </Box>
                 </Grid>
               </Grid>
@@ -420,12 +433,12 @@ const Report = () => {
                       permissions={permissions[resourceCamelCase]}
                       primaryField={columns?.find((d) => d.primaryField)}
                       onClick={(data) => {
-                        history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
+                        // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
                       }}
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => { }}
+                      onEdit={() => {}}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -440,8 +453,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => { }}
-                      onClone={(data) => { }}
+                      onDelete={(data) => {}}
+                      onClone={(data) => {}}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (

@@ -31,7 +31,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
-    const allowedToEdit = hasPermission || permissions?.purchaseOrder.isUpdate
+    const allowedToEdit = hasPermission && permissions?.purchaseOrder.isUpdate
 
     const [columns, setColumns] = useState([])
 
@@ -63,7 +63,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
 
     const fetchFields = async () => {
         const productResult = await axiosInstance().get('/field?resource=Product&view=true')
-        const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+        const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "productDescription", "serializedProduct"].includes(e?.fieldData?.fieldName));
         productFields?.forEach((e) => {
             if (e?.fieldData?.fieldName === "productName") {
                 columns.push({ field: "productName", headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
@@ -73,6 +73,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
             }
             if (e?.fieldData?.fieldName === "serializedProduct") {
                 columns.push({ field: "serializedProductView", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+            }
+            if (e?.fieldData?.fieldName === "productDescription") {
+                columns.push({ field: "productDescription", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
             }
         })
         const fields = await fetch_po_product_fields(purchaseOrderData?.currency);
@@ -106,12 +109,13 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
             let rows = data?.map((item, index) => {
                 let finalObject = prepareDataForGrid(item);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === item._id);
-                finalObject["allowedToEdit"] = true
+                finalObject["allowedToEdit"] = allowedToEdit
                 let res: any = {
                     ...finalObject,
                 };
                 res.productName = item.productDetail?.productName
                 res.productNumber = item.productDetail?.productNumber
+                res.productDescription = item.productDetail?.productDescription
                 res.serializedProduct = item.productDetail?.serializedProduct
                 res.serializedProductView = item.productDetail?.serializedProduct ? "Yes" : "No"
                 res.productDetail = item.productDetail
@@ -212,12 +216,10 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
             "qty": d.qty ? parseInt(d.qty) : 1,
             "expectedDelivery": purchaseOrderData?.deliveryDate,
             "unit": d?.unitMain?.length ? d?.unitMain[0] : "",
+            "costCode": d?.costCode ? d?.costCode : "",
         }))
         axiosInstance().post(`${purchaseOrder.api}/product/${purchaseOrderData._id}/add`, { "orderDetails": tempProductArray })
             .then(() => {
-                if (purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
-                    updateStatus(PURCHASE_ORDER_STATUS.inProgress)
-                }
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
                 setAddingProducts(false)
@@ -231,9 +233,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
     const handleUpdateQty = (rows) => {
         axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderData._id}/update`, { products: rows })
             .then(() => {
-                if (purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.inProgress) {
-                    updateStatus(PURCHASE_ORDER_STATUS.inProgress)
-                }
                 setAddProductDialog(false)
                 fetchPurchaseOrderProduct()
                 setSelectedProductData(null)
@@ -370,7 +369,6 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     fullHeight={true}
                     renderedFrom={renderedFrom}
                     onClone={() => { }}
-
                 /> :
                 <CustomAgGridEditable
                     columns={columns}
@@ -425,6 +423,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                     type={"product"}
                     refrenceType="purchaseOrder"
                     renderedFrom={renderedFrom}
+                    ignoreIds={dataRows?.map((e) => e?.productId)}
                 />
             }
             {isAddNewProduct && (

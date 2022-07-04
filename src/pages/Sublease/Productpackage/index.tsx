@@ -580,6 +580,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 type={addExistingProductDialog.type}
                 refrenceType="sublease"
                 renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
+                ignoreIds={[]}
             />
         }
     </Fragment >

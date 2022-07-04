@@ -24,7 +24,7 @@ import BulkEditDialog from "./BulkEditDialog";
 import Loader from "../Loader";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { handleAutoCalculation, extractFields } from "../../constants/formulaUtility";
-import { CustomDialogTransition, gridLoadingTimeout } from "../../constants/helpers";
+import { CustomDialogTransition, gridLoadingTimeout, supplierContact } from "../../constants/helpers";
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { AiTwotoneEdit } from 'react-icons/ai';
@@ -33,9 +33,13 @@ import CustomDialogContent from "../CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
 import CustomButton from "../Helpers/CustomButton";
-import { getColumnData, getStaticFields, getFrameworkComponents, getSortedColumns } from "../../constants/columns"
 import { prepareDataForGrid } from "../../constants/helpers";
 import SupplierAskPrice from "./SupplierAskPrice";
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import { Link, useHistory } from 'react-router-dom';
+import MuiPickersUtilsProvider from "@material-ui/pickers/MuiPickersUtilsProvider";
+import AskSupplierPriceDialog from "./AskSupplierPriceDialog";
+import { useData } from './../../StateProvider/Provider';
 
 let levalOrderBy = [
   "product",
@@ -81,14 +85,18 @@ const ProductBuilder = (props) => {
   const [isClone, setIsClone] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openSupplierPriceDialog, setOpenSupplierPriceDialog] = useState(false);
+  const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
+  const [supplierContactData, setSupplierContactData] = useState([]);
   const [supplierData, setSupplierData] = useState(null)
-
+  const { getColumnData } = useColumns();
   // const [showProductNumberOrProductNameUpdate, setShowProductNumberOrProductNameUpdate] =
   //   useState({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
 
   const [dataToShowForMobile, setDataToShowForMobile] = useState([]);
   const [priceTemplateField, setPriceTemplateField] = useState(null)
-
+  const {
+    state: { user }
+  }: any = useData();
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -149,6 +157,7 @@ const ProductBuilder = (props) => {
         commonRenderer: CommonRenderer,
         productNameRenderer: ProductNameRenderer,
         actionsRenderer: ActionsRenderer,
+        productTypeRenderer: ProductTypeRenderer,
         ...tempFrameworkComponent,
       }
       setFrameWorkComponent({ ...tempFrameworkComponent })
@@ -165,7 +174,7 @@ const ProductBuilder = (props) => {
         res.isChecked = false;
         res.canDelete = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
         res.allowedToEdit = permissions?.isUpdate && fromQuote ? hasPermission ? true : false : true;
-        res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && columns.some(d => d.field.includes("supplier"))
+        res.isSupplierExist = isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
         return res;
       });
       dispatch({ type: "initialize", data: rows, count: rows.length });
@@ -264,6 +273,12 @@ const ProductBuilder = (props) => {
     </>
   );
 
+  const ProductTypeRenderer = (params) => (
+    <Link className="link text-truncate" title={params?.data?.productName} to={`${routes.productDetail.path}/${params.data?.productId}`}>
+      {params?.data?.productName}
+    </Link>
+  );
+
   const GenrateColoum = (fields, column, rendererNames) => {
     let _fields = fields;
     if (stage && stage === "product") {
@@ -345,18 +360,31 @@ const ProductBuilder = (props) => {
       }
       else {
         if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-          let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
-          if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-            if (!ele.isFormula && !ele.isUneditable && Editable) {
-              if (ele.type === "decimal" || ele.type === "percent") {
-                currentColumn.columnData.cellEditor = "numericCellEditor";
+          if (ele.fieldName === 'productName') {
+            column.push({
+              pivotIndex: 0,
+              field: ele?.fieldName,
+              headerName: ele?.fieldLabel,
+              show: true,
+              disabled: true,
+              cellRenderer: 'productTypeRenderer',
+              primaryField: true
+            })
+            rendererNames.push('productTypeRenderer')
+          } else {
+            let currentColumn: any = getColumnData(routes.productBuilder.title, ele, routes.productBuilder.path, true)
+            if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
+              if (!ele.isFormula && !ele.isUneditable && Editable) {
+                if (ele.type === "decimal" || ele.type === "percent") {
+                  currentColumn.columnData.cellEditor = "numericCellEditor";
+                }
+                currentColumn.columnData.editable = true;
               }
-              currentColumn.columnData.editable = true;
             }
-          }
-          column.push({ ...currentColumn.columnData, leval: ele.leval });
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName)
+            column.push({ ...currentColumn.columnData, leval: ele.leval });
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName)
+            }
           }
         }
       }
@@ -562,7 +590,7 @@ const ProductBuilder = (props) => {
     }
   };
 
-  const handelAskPriceToSupplier = () => {
+  const handelAskPriceToSupplier = (content, contactId, selectedFields = []) => {
 
     let data: any = {
       "products": selectedRecords?.map(d => {
@@ -573,7 +601,11 @@ const ProductBuilder = (props) => {
       }),
       "quote": quoteData?._id,
       "productBuilder": productBuilderId,
-      "protected": true
+      "protected": true,
+      "body": content ? content : "",
+      "supplierContact": contactId,
+      "requiredFields": selectedFields
+
     }
     axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
       dispatch({ type: "selection", selectedRecords: [] })
@@ -583,6 +615,7 @@ const ProductBuilder = (props) => {
         type: "success",
         open: true,
       });
+      setAskSupplierPriceDialog(false)
     })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -614,13 +647,33 @@ const ProductBuilder = (props) => {
               }}
             />
           )}
-          {isPriceBuilder && fromQuote && permissions.isUpdate && columns && columns.some(d => d.field.includes("supplier")) && (
+          {isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
             <Button
               variant="contained"
               color="primary"
               size="small"
               className="float-right ml-1 mr-2"
-              onClick={handelAskPriceToSupplier}
+              onClick={() => {
+                let tempSupplierAccountId = []
+                selectedRecords?.forEach(element => {
+                  if (tempSupplierAccountId.findIndex(d => d === element?.supplierAccountId) === -1) {
+                    tempSupplierAccountId.push(element?.supplierAccountId)
+                  }
+                  element?.restsupplierAccount?.forEach(d => {
+                    if (tempSupplierAccountId.findIndex(e => e === d.optionValue) === -1) {
+                      tempSupplierAccountId.push(d.optionValue)
+                    }
+                  })
+                });
+                axiosInstance().get(`${supplierContact.contactApi}?filterById=${JSON.stringify([{ "field": "accountName", "term": { "$in": tempSupplierAccountId } }])}&filterType=and`).then(({ data: { data, count } }) => {
+                  setSupplierContactData(data)
+                  setAskSupplierPriceDialog(true)
+                })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+
+              }}
               disabled={checkUniqTemplate()}
               aria-controls="action-menu">
               {isMobile && !isTablet ? "Supplier" : "Ask Price to Supplier"}
@@ -841,109 +894,43 @@ const ProductBuilder = (props) => {
           }}
         />
       )}
+      {showConfirmDialog ?
+        <ConfirmCancelDialog
+          open={showConfirmDialog}
+          close={() => setShowConfirmDialog(false)}
+          onSave={() => {
+            setShowConfirmDialog(false)
+            // e.preventDefault();
+            // const err = Object.keys(errors);
+            // if (err.length) {
+            // const input = document.querySelector(
+            //   `input[name=${err[0]}]`,
+            // );
 
-
-
-
-
-      {
-        showConfirmDialog ?
-          <ConfirmCancelDialog
-            open={showConfirmDialog}
-            close={() => setShowConfirmDialog(false)}
-            onSave={() => {
-              setShowConfirmDialog(false)
-              // e.preventDefault();
-              // const err = Object.keys(errors);
-              // if (err.length) {
-              // const input = document.querySelector(
-              //   `input[name=${err[0]}]`,
-              // );
-
-              // input.scrollIntoView({
-              //   behavior: 'smooth',
-              //   block: 'center',
-              //   inline: 'start',
-              // });
-
-            }
-
-            }
-            onClose={() => {
-              setShowConfirmDialog(false)
-
-              setProductId(null);
-            }}
-          /> : null
-      }
-
-      {/* {
-        showProductNumberOrProductNameUpdate.open && <Dialog
-          maxWidth="lg"
-          fullWidth={true}
-          fullScreen={false}
-          TransitionComponent={CustomDialogTransition}
-          aria-labelledby="customized-dialog-title"
+            // input.scrollIntoView({
+            //   behavior: 'smooth',
+            //   block: 'center',
+            //   inline: 'start',
+            // });
+          }}
           onClose={() => {
-            setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
+            setShowConfirmDialog(false)
+
+            setProductId(null);
           }}
-          open={showProductNumberOrProductNameUpdate.open}
-          disableBackdropClick={true}
-        >
-          <CustomDialogHeader title="Update" onClose={() => {
-            setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-          }}
-            isMinimized={!false}
-            onMinimizeMaximize={() => { }}
-            showManimizeMaximize={true}
-          />
-
-          <CustomDialogContent>
-
-            <TextField id="standard-basic" label={showProductNumberOrProductNameUpdate.title}
-              value={showProductNumberOrProductNameUpdate.value}
-              fullWidth
-              onChange={(e) => {
-                setShowProductNumberOrProductNameUpdate((prevState) => {
-                  return { ...prevState, value: e.target.value }
-                })
-              }}
-            />
-
-          </CustomDialogContent>
-
-          <CustomDialogFooter>
-            <Button type="button" variant="outlined" color="primary" size="small" onClick={() => {
-              setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-            }}>
-              Cancel
-            </Button>
-
-            <CustomButton
-              variant="contained"
-              color="primary"
-              onClick={(e) => {
-
-                let updatedData = [...dataRows];
-                updatedData[showProductNumberOrProductNameUpdate.indexOfRecord][showProductNumberOrProductNameUpdate.property] = showProductNumberOrProductNameUpdate.value;
-
-                dispatch({ type: "initialize", data: updatedData, count: updatedData.length });
-                setShowProductNumberOrProductNameUpdate({ open: false, title: "", property: "", value: "", indexOfRecord: -1, record: null })
-
-                onCellValueChanged({
-                  data: updatedData[showProductNumberOrProductNameUpdate.indexOfRecord],
-                  column: { colId: showProductNumberOrProductNameUpdate.property },
-                  newValue: showProductNumberOrProductNameUpdate.value
-                })
-
-              }}
-            >
-              Save
-            </CustomButton>
-          </CustomDialogFooter>
-
-        </Dialog>
-      } */}
+        /> : null
+      }
+      {askSupplierPriceDialog &&
+        <AskSupplierPriceDialog
+          setAskSupplierPriceDialog={setAskSupplierPriceDialog}
+          askSupplierPriceDialog={askSupplierPriceDialog}
+          handelAskPriceToSupplier={handelAskPriceToSupplier}
+          supplierContactData={supplierContactData}
+          productBuilderId={productBuilderId}
+          productDataList={productData?.product?.filter((data) =>
+            selectedRecords.some((rec) => rec._id === data._id)
+          )} />
+      }
     </Box>
   );
 };
