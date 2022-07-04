@@ -1,39 +1,41 @@
-import React from 'react';
-import { Dialog, Grid, Box, Button, TextField, Typography } from '@material-ui/core';
+import React, { useContext } from 'react';
+import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { Formik, FormikProps } from 'formik';
 import { KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
 
-import { dateFormatForInputControl, REPORT_LIST } from 'src/constants/helpers';
+import { dateFormatForInputControl, REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import Filters from './Filters';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 type ValueTypes = {
   scheduleName: string;
-  reportName: string;
   filters: any[];
   resource: any;
-  columns: any[];
-  subscribeUsers: any[];
+  column: any[];
+  subscribeUser: any[];
   frequency: string;
   time: any;
   day: string;
   date: any;
 };
 
-const ManageScheduleReport = ({ handleClose }) => {
+const ManageScheduleReport = ({ handleClose, onSuccess }) => {
   const formikRef = React.useRef<FormikProps<ValueTypes>>(null);
+  const { setToastConfig } = useContext(CustomToastContext);
   const [filterValues, setFilterValues] = React.useState({});
   const [resourceColumns, setResourceColumns] = React.useState([]);
   const [usersList, setUsersList] = React.useState([]);
   const [filterOptions, setFilterOptions] = React.useState([]);
   const [resourceOptions, setResourceOptions] = React.useState(null);
   const [selectedData, setSelectedData] = React.useState(null);
-  const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
+  const [statusTimeFrame, setStatusTimeFrame] = React.useState('custom');
   const [statusPeriod, setStatusPeriod] = React.useState(false);
+  const [isSubmitting, setSubmitting] = React.useState(false);
   const [betweenDate, setBetweenDate] = React.useState(null);
   const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
 
@@ -74,26 +76,84 @@ const ManageScheduleReport = ({ handleClose }) => {
     setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
   }, [resourceColumns, formikRef.current?.values?.resource]);
 
-  const fetchGridColumns = async (resource: string) => {
-    const {
-      data: { data }
-    }: any = await axiosInstance().get(`/field?resource=${resource}`);
-    if (resource === 'Serialized Asset') {
-      const {
-        data: { data: lookupResource }
-      } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
-      if (lookupResource) {
-        data?.forEach((e) => {
-          if (e?.fieldData?.fieldName === 'currentOwner') {
-            e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+  const fetchGridColumns = async (resource: any) => {
+    console.log(resource);
+    if (resource.key === 'purchaseOrderType') {
+      let resourceFieldData = [];
+      if (resource.title === 'Purchase Order Product') {
+        let {
+          data: { data: POFields }
+        } = await axiosInstance().get(`/field?resource=Purchase Order`);
+        let {
+          data: { data: productFields }
+        } = await axiosInstance().get(`/field?resource=Product`);
+        let {
+          data: { data: productOption }
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+
+        POFields.filter((field) =>
+          ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
+        ).forEach((field: any) => {
+          resourceFieldData.push(field);
+        });
+
+        productFields
+          .filter((field) => ['productName'].includes(field?.fieldData.fieldName))
+          .forEach((field: any) => {
+            resourceFieldData.push({
+              ...field,
+              fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+            });
+          });
+      } else if (resource.title === 'Product Average Costing') {
+        let {
+          data: { data: productFields }
+        } = await axiosInstance().get(`/field?resource=Product`);
+        let {
+          data: { data: POFields }
+        } = await axiosInstance().get(`/field?resource=Purchase Order`);
+
+        POFields.filter((field) => ['purchaseOrderDate', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          if (field?.fieldData.fieldName === 'warehouse') {
+            resourceFieldData.push(field);
+          }
+          if (field?.fieldData.fieldName === 'purchaseOrderDate') {
+            resourceFieldData.push({
+              ...field,
+              fieldData: { ...field.fieldData, fieldLabel: 'Date', fieldName: 'date', type: 'date' }
+            });
+          }
+        });
+
+        productFields.forEach((o: any) => {
+          if (o?.fieldData.fieldName === 'productCategory') {
+            resourceFieldData.push(o);
           }
         });
       }
+
+      setResourceColumns(resourceFieldData);
+    } else {
+      const {
+        data: { data }
+      }: any = await axiosInstance().get(`/field?resource=${resource.title}`);
+      if (resource.title === 'Serialized Asset') {
+        const {
+          data: { data: lookupResource }
+        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+        if (lookupResource) {
+          data?.forEach((e) => {
+            if (e?.fieldData?.fieldName === 'currentOwner') {
+              e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+            }
+          });
+        }
+      }
+      setResourceColumns(data);
     }
-    setResourceColumns(data);
   };
 
-  const handleSelectFilter = (name, value) => {
+  const handleSelectFilter = (name: string, value: any) => {
     let fieldProps: any = {};
     if (!name?.includes('Date')) {
       fieldProps.type = resourceOptions[name].type;
@@ -127,11 +187,8 @@ const ManageScheduleReport = ({ handleClose }) => {
     if (!values.resource) {
       errors['resource'] = 'Resource is required';
     }
-    if (!values.reportName) {
-      errors['reportName'] = 'Report name is required';
-    }
-    if (!values.subscribeUsers) {
-      errors['subscribeUsers'] = 'Subscribe users is required';
+    if (values.subscribeUser.length === 0) {
+      errors['subscribeUser'] = 'Subscribe users is required';
     }
 
     if (!values.frequency) {
@@ -153,8 +210,62 @@ const ManageScheduleReport = ({ handleClose }) => {
     return errors;
   };
 
+  const handleChange = (name: string, value: any) => {
+    if (!formikRef.current) return;
+    formikRef.current.setFieldValue(name, value);
+  };
+
   const handleSubmit = (values: ValueTypes) => {
-    console.log(values);
+    setSubmitting(true);
+    const filters = [];
+    if (selectedData) {
+      const filterKeys = Object.keys(selectedData);
+      filterKeys.forEach((key) => {
+        if (selectedData[key] && selectedData[key]?.value?.length) {
+          let obj = {
+            term: key,
+            value: selectedData[key]?.value.map((item) => item.optionValue)
+          };
+
+          filters.push(obj);
+        }
+      });
+    }
+
+    if (betweenDate) {
+      const filterKeys = Object.keys(betweenDate);
+      filterKeys.forEach((key) => {
+        if (betweenDate[key] && betweenDate[key]?.value?.length) {
+          let obj = {
+            term: key,
+            value: betweenDate[key]
+          };
+
+          filters.push(obj);
+        }
+      });
+    }
+
+    const newValues = {
+      ...values,
+      filters,
+      resource: values.resource?.key,
+      column: values.column.length > 0 ? values.column.map((field) => field.fieldName) : [],
+      time: new Date(values.time).toLocaleTimeString(),
+      date: new Date(values.date).getDate().toLocaleString(),
+      subscribeUser: values.subscribeUser.map((user) => user.userId)
+    };
+
+    axiosInstance()
+      .post(`/schedule-report`, newValues)
+      .then(() => {
+        onSuccess();
+        setSubmitting(false);
+      })
+      .catch((err) => {
+        setSubmitting(false);
+        setToastConfig(err);
+      });
   };
 
   return (
@@ -168,249 +279,267 @@ const ManageScheduleReport = ({ handleClose }) => {
         }}
         initialValues={{
           scheduleName: '',
-          reportName: '',
           resource: null,
           filters: [],
-          columns: [],
-          subscribeUsers: [],
+          column: [],
+          subscribeUser: [],
           frequency: 'Daily',
           time: new Date(),
-          day: 'monday',
+          day: 'Monday',
           date: new Date()
         }}
         onSubmit={handleSubmit}
         validate={formikValidator}
+        validateOnBlur
       >
-        {({ values, errors, touched, setFieldValue }) => (
+        {({ values, errors, submitForm }) => (
           <>
             <CustomDialogContent>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    value={values.scheduleName}
-                    required
-                    onChange={(e) => setFieldValue('scheduleName', e.target.value)}
-                    fullWidth
-                    name="scheduleName"
-                    size="small"
-                    label="Schedule Name"
-                    variant="outlined"
-                    error={Boolean(errors['scheduleName'])}
-                    helperText={errors['scheduleName']}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Autocomplete
-                    options={REPORT_LIST.filter((item) => item.type === 'dynamic').map((item) => {
-                      return {
-                        title: item.title,
-                        key: item.permission
-                      };
-                    })}
-                    fullWidth
-                    size="small"
-                    getOptionLabel={(option) => option.title}
-                    value={values.resource}
-                    onChange={(_, newVal) => {
-                      setFieldValue('resource', newVal);
-                      if (newVal) {
-                        fetchGridColumns(newVal.title);
-                      } else {
-                        setResourceColumns([]);
-                      }
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        required
-                        error={Boolean(errors['resource'])}
-                        helperText={errors['resource']}
-                        label="Resource"
-                        variant="outlined"
-                        name="resource"
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    value={values.reportName}
-                    onChange={(e) => setFieldValue('reportName', e.target.value)}
-                    fullWidth
-                    name="reportName"
-                    size="small"
-                    label="Report Name"
-                    required
-                    variant="outlined"
-                    error={Boolean(errors['reportName'])}
-                    helperText={errors['reportName']}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Autocomplete
-                    options={filterOptions}
-                    fullWidth
-                    multiple
-                    size="small"
-                    value={values.filters}
-                    getOptionSelected={(option, val) => option.fieldName === val.fieldName}
-                    getOptionLabel={(option) => option.fieldLabel}
-                    onChange={(_, newVal) => {
-                      setFieldValue('filters', newVal);
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        error={Boolean(errors['filters'])}
-                        helperText={errors['filters']}
-                        label="Filters"
-                        name="filters"
-                        variant="outlined"
-                      />
-                    )}
-                  />
-                </Grid>
+              <div className={'detail-box-content'}>
+                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Schedule Information</h2>
+              </div>
 
-                <Filters
-                  selectedResources={values.filters}
-                  handleSelectFilter={handleSelectFilter}
-                  resource={formikRef.current?.values.resource?.title}
-                  formValues={filterValues}
-                  betweenDate={betweenDate}
-                  setBetweenDate={setBetweenDate}
-                  statusPeriod={statusPeriod}
-                  statusTimeFrame={statusTimeFrame}
-                  statusPeriodDate={statusPeriodDate}
-                  setStatusPeriod={setStatusPeriod}
-                  setStatusPeriodDate={setStatusPeriodDate}
-                  setStatusTimeFrame={setStatusTimeFrame}
-                />
-
-                <Grid item xs={12} sm={6}>
-                  <Autocomplete
-                    options={resourceColumns.map((item) => item.fieldData)}
-                    fullWidth
-                    multiple
-                    size="small"
-                    getOptionSelected={(option, val) => option.fieldName === val.fieldName}
-                    getOptionLabel={(option) => option.fieldLabel}
-                    value={values.columns}
-                    onChange={(_, newVal) => setFieldValue('columns', newVal)}
-                    renderInput={(params) => (
-                      <TextField
-                        error={Boolean(errors['columns'])}
-                        helperText={errors['columns']}
-                        {...params}
-                        label="Columns"
-                        name="columns"
-                        variant="outlined"
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Autocomplete
-                    options={usersList}
-                    fullWidth
-                    size="small"
-                    getOptionLabel={(option) => option.name}
-                    getOptionSelected={(option, value) => option.userId === value.userId}
-                    value={values.subscribeUsers}
-                    onChange={(_, newVal) => setFieldValue('subscribeUsers', newVal)}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        error={Boolean(errors['subscribeUsers'])}
-                        helperText={errors['subscribeUsers']}
-                        label="Subscibe User"
-                        name="subscribeUsers"
-                        required
-                        variant="outlined"
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography color="textPrimary" style={{ fontSize: 18 }}>
-                    Schedule
-                  </Typography>
-                  <Box mt={2}>
-                    <Typography color="textPrimary">Frequency</Typography>
-                    <Box mt={1} />
-                    <ToggleButtonGroup
+              <Box my={2}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      value={values.scheduleName}
+                      required
+                      onChange={(e) => handleChange('scheduleName', e.target.value)}
+                      fullWidth
+                      name="scheduleName"
                       size="small"
-                      value={values?.frequency ?? 'Daily'}
-                      exclusive
-                      onChange={(_, val) => setFieldValue('frequency', val)}
-                    >
-                      <ToggleButton value="Daily">Daily</ToggleButton>
-                      <ToggleButton value="Weekly">Weekly</ToggleButton>
-                      <ToggleButton value="Monthly">Monthly</ToggleButton>
-                    </ToggleButtonGroup>
+                      label="Schedule Name"
+                      variant="outlined"
+                      error={Boolean(errors['scheduleName'])}
+                      helperText={errors['scheduleName']}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Autocomplete
+                      options={REPORT_LIST.map((item) => {
+                        let obj: { title: string; key: string } = {
+                          title: item.title,
+                          key: item.key
+                        };
 
-                    {values?.frequency === 'Weekly' && (
-                      <Box mt={2}>
-                        <Typography color="textPrimary">Days</Typography>
-                        <ToggleButtonGroup size="small" value={values.day} exclusive onChange={(_, val) => setFieldValue('day', val)}>
-                          <ToggleButton value="sunday">Sun</ToggleButton>
-                          <ToggleButton value="monday">Mon</ToggleButton>
-                          <ToggleButton value="tuesday">Tue</ToggleButton>
-                          <ToggleButton value="wednesday">Wed</ToggleButton>
-                          <ToggleButton value="thursday">Thu</ToggleButton>
-                          <ToggleButton value="friday">Fri</ToggleButton>
-                          <ToggleButton value="saturday">Sat</ToggleButton>
-                        </ToggleButtonGroup>
-                      </Box>
-                    )}
-                    {values?.frequency === 'Monthly' && (
-                      <Box mt={2}>
-                        <KeyboardDatePicker
-                          views={['date']}
-                          openTo="date"
-                          autoOk
-                          size="small"
-                          variant="inline"
-                          inputVariant="outlined"
-                          label="Date"
-                          name="date"
-                          required={values.frequency === 'Monthly'}
-                          format={dateFormatForInputControl}
-                          value={values.date}
-                          error={!Boolean(errors['date'])}
-                          helperText={errors['date']}
-                          onChange={(date) => setFieldValue('date', date)}
+                        return obj;
+                      })}
+                      fullWidth
+                      size="small"
+                      getOptionLabel={(option) => option.title}
+                      getOptionSelected={(option, value) => option.title === value.title}
+                      value={values.resource}
+                      onChange={(_, newVal) => {
+                        handleChange('resource', newVal);
+                        if (newVal) {
+                          fetchGridColumns(newVal);
+                        } else {
+                          setResourceColumns([]);
+                        }
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          required
+                          error={Boolean(errors['resource'])}
+                          helperText={errors['resource']}
+                          label="Resource"
+                          variant="outlined"
+                          name="resource"
                         />
-                      </Box>
-                    )}
-
-                    <Box mt={2}>
-                      <KeyboardTimePicker
-                        margin="normal"
-                        inputVariant="outlined"
-                        size="small"
-                        id="time-picker"
-                        name="time"
-                        label="Time"
-                        autoOk
-                        required={Boolean(values.frequency)}
-                        value={values.time}
-                        error={Boolean(errors['time'])}
-                        helperText={errors['time']}
-                        onChange={(date) => setFieldValue('time', date)}
-                        KeyboardButtonProps={{
-                          'aria-label': 'change time'
-                        }}
-                      />
-                    </Box>
-                  </Box>
+                      )}
+                    />
+                  </Grid>
                 </Grid>
-              </Grid>
+              </Box>
+
+              <div className={'detail-box-content'}>
+                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Filters</h2>
+              </div>
+
+              <Box my={2}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Autocomplete
+                      options={filterOptions}
+                      fullWidth
+                      multiple
+                      size="small"
+                      value={values.filters}
+                      getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                      getOptionLabel={(option) => option.fieldLabel}
+                      onChange={(_, newVal) => {
+                        handleChange('filters', newVal);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          error={Boolean(errors['filters'])}
+                          helperText={errors['filters']}
+                          label="Filters"
+                          name="filters"
+                          variant="outlined"
+                        />
+                      )}
+                    />
+                  </Grid>
+
+                  <Filters
+                    selectedResources={values.filters}
+                    handleSelectFilter={handleSelectFilter}
+                    resource={formikRef.current?.values.resource?.title}
+                    formValues={filterValues}
+                    betweenDate={betweenDate}
+                    setBetweenDate={setBetweenDate}
+                    statusPeriod={statusPeriod}
+                    statusTimeFrame={statusTimeFrame}
+                    statusPeriodDate={statusPeriodDate}
+                    setStatusPeriod={setStatusPeriod}
+                    setStatusPeriodDate={setStatusPeriodDate}
+                    setStatusTimeFrame={setStatusTimeFrame}
+                  />
+
+                  <Grid item xs={12} sm={6}>
+                    <Autocomplete
+                      options={resourceColumns.map((item) => item.fieldData)}
+                      fullWidth
+                      multiple
+                      size="small"
+                      getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                      getOptionLabel={(option) => option.fieldLabel}
+                      value={values.column}
+                      onChange={(_, newVal) => handleChange('column', newVal)}
+                      renderInput={(params) => (
+                        <TextField
+                          error={Boolean(errors['column'])}
+                          helperText={errors['column']}
+                          {...params}
+                          label="Columns"
+                          name="columns"
+                          variant="outlined"
+                        />
+                      )}
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <div className={'detail-box-content'}>
+                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Others</h2>
+              </div>
+
+              <Box my={2}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Autocomplete
+                      options={usersList}
+                      fullWidth
+                      multiple
+                      size="small"
+                      getOptionLabel={(option) => option.name}
+                      getOptionSelected={(option, value) => option.userId === value.userId}
+                      value={values.subscribeUser}
+                      onChange={(_, newVal) => handleChange('subscribeUser', newVal)}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          error={Boolean(errors['subscribeUser'])}
+                          helperText={errors['subscribeUser']}
+                          label="Subscibe User"
+                          name="subscribeUser"
+                          required
+                          variant="outlined"
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <KeyboardTimePicker
+                      inputVariant="outlined"
+                      size="small"
+                      id="time-picker"
+                      name="time"
+                      label="Time"
+                      autoOk
+                      fullWidth
+                      required={Boolean(values.frequency)}
+                      value={values.time}
+                      error={Boolean(errors['time'])}
+                      helperText={errors['time']}
+                      onChange={(date) => handleChange('time', date)}
+                      KeyboardButtonProps={{
+                        'aria-label': 'change time'
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Box mt={2}>
+                      <Typography color="textPrimary">Schedule Frequency</Typography>
+                      <Box mt={1} />
+                      <ToggleButtonGroup
+                        size="small"
+                        value={values?.frequency ?? 'Daily'}
+                        exclusive
+                        onChange={(_, val) => handleChange('frequency', val)}
+                      >
+                        {SCHEDULE_FREQUENCY.map((freq) => (
+                          <ToggleButton key={freq} value={freq}>
+                            {freq}
+                          </ToggleButton>
+                        ))}
+                      </ToggleButtonGroup>
+
+                      {values?.frequency === 'Weekly' && (
+                        <Box mt={2}>
+                          <Typography color="textPrimary">Days</Typography>
+                          <ToggleButtonGroup size="small" value={values.day} exclusive onChange={(_, val) => handleChange('day', val)}>
+                            {FREQUENCY_WEEKS.map((week) => (
+                              <ToggleButton key={week} value={week}>
+                                {week.substring(0, 3)}
+                              </ToggleButton>
+                            ))}
+                          </ToggleButtonGroup>
+                        </Box>
+                      )}
+                      {values?.frequency === 'Monthly' && (
+                        <Box mt={2}>
+                          <KeyboardDatePicker
+                            views={['date']}
+                            openTo="date"
+                            autoOk
+                            size="small"
+                            variant="inline"
+                            inputVariant="outlined"
+                            label="Date"
+                            name="date"
+                            required={values.frequency === 'Monthly'}
+                            format={dateFormatForInputControl}
+                            value={values.date}
+                            error={!Boolean(errors['date'])}
+                            helperText={errors['date']}
+                            onChange={(date) => handleChange('date', date)}
+                          />
+                        </Box>
+                      )}
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button variant="contained" color="primary" size="small" onClick={handleClose}>
+              <Button disabled={isSubmitting} variant="contained" color="primary" size="small" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" variant="outlined" color="primary" size="small">
+              <Button
+                startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+                disabled={isSubmitting}
+                type="submit"
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={submitForm}
+              >
                 Save
               </Button>
             </CustomDialogFooter>

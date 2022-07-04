@@ -169,6 +169,7 @@ const Filters = ({
                     value={statusTimeFrame}
                     onChange={(e) => {
                       handleDuration(e.target.value, field);
+                      setStatusTimeFrame(e.target.value);
                       //   const tempArray = [...selectedResources];
                       //   let tempIndex = tempArray.findIndex((d) => d?.fieldName === field?.fieldName);
                       //   tempArray[tempIndex].timeFrame = e.target.value;
@@ -188,7 +189,7 @@ const Filters = ({
               <Grid item xs={12} sm={6}>
                 <KeyboardDatePicker
                   autoOk
-                  disabled={field.timeFrame !== 'custom'}
+                  disabled={statusTimeFrame !== 'custom'}
                   fullWidth
                   size="small"
                   variant="inline"
@@ -211,7 +212,7 @@ const Filters = ({
                 <KeyboardDatePicker
                   autoOk
                   fullWidth
-                  disabled={field.timeFrame !== 'custom'}
+                  disabled={statusTimeFrame !== 'custom'}
                   size="small"
                   variant="inline"
                   inputVariant="outlined"

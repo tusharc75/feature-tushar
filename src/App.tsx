@@ -579,10 +579,10 @@ function App() {
               <QuoteDetail />
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboards'}>
-              <NewDashboard />
-            </PrivateRoute>
-            <PrivateRoute exact path={'/new-dashboard'}>
               <NewDashboardTest />
+            </PrivateRoute>
+            <PrivateRoute exact path={'/old-dashboard'}>
+              <NewDashboard />
             </PrivateRoute>
             {/* <Route exact path={"/dashboards"}>
               <KpiDashboard />
@@ -723,9 +723,6 @@ function App() {
             <Route exact path={'/customer-sign/:id'}>
               <CustomerSign />
             </Route>
-            <PrivateRoute exact path="/new-dashboard">
-              <NewDashboard />
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.cageManagement.path}`}>
               <CageManagement />
             </PrivateRoute>
