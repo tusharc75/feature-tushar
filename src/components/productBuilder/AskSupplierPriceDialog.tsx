@@ -12,7 +12,7 @@ import TinyMce from "../TinyMCE"
 import DeleteIcon from "@material-ui/icons/Delete";
 import { GoArrowDown } from "react-icons/go";
 import { fileIcons } from "../Activity/Email/FileIcons";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import emailStyles from "../../pages/Activity/Email/email.module.scss";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
@@ -27,7 +27,9 @@ const AskSupplierPriceDialog = (props) => {
         handelAskPriceToSupplier,
         supplierContactData,
         from,
-        handleReject
+        handleReject,
+        productDataList,
+        productBuilderId
     } = props;
 
     const [otherAttachments, setOtherAttachments] = useState([]);
@@ -40,7 +42,23 @@ const AskSupplierPriceDialog = (props) => {
     const toastConfig = useContext(CustomToastContext);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [contactId, setContactId] = useState([]);
+    const [fields, setFields] = useState([]);
+    const [selectedFields, setSelectedFields] = useState([]);
 
+
+    useEffect(() => {
+        axiosInstance().get(`/productbuilder/getoneproduct/${productBuilderId}/${productDataList[0]?._id}`).then(({ data: { data } }) => {
+            var _fields = [];
+            data.productData.fields.forEach((_f) => {
+                if (_f.sectionName === "Cost Calculation" && (_f.formula === undefined || _f.formula === null || _f.formula === "")) {
+                    _fields.push({ ..._f })
+                }
+            })
+            setFields(_fields)
+        }).catch((error) => {
+            toastConfig.setToastConfig(error);
+        });
+    }, []);
 
     const getFileIconSrc = (file) => {
         let extension = file.substring(file.lastIndexOf(".")).toLowerCase();
@@ -231,9 +249,34 @@ const AskSupplierPriceDialog = (props) => {
                                             />
                                         )}
                                     />}
+                                    {from != "SupplierAskPrice" && <Autocomplete
+                                        multiple
+                                        options={[{ fieldName: "All", fieldLabel: "All" }, ...fields]}
+                                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                                        value={
+                                            fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName)).length
+                                                ? fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName))
+                                                : []
+                                        }
+                                        onChange={(e, val: any) => {
+                                            val?.some(d => d?.fieldName === "All") ?
+                                                setSelectedFields(fields?.map((d) => d?.fieldName))
+                                                : setSelectedFields(val && val?.map((d) => d?.fieldName))
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                margin="dense"
+                                                name="field"
+                                                label="Field"
+                                                variant="outlined"
+                                                fullWidth
+                                            />
+                                        )}
+                                    />}
                                     <Box>
-                                        {renderFileThumbnails}
-                                        <ImageAttachments
+                                        {otherAttachments && otherAttachments.length > 0 && renderFileThumbnails}
+                                        {otherAttachments && otherAttachments.length > 0 && <ImageAttachments
                                             imageAttachments={fileImageAttachments}
                                             onImageClick={(attachment) => {
                                                 setImageSource(attachment);
@@ -242,8 +285,8 @@ const AskSupplierPriceDialog = (props) => {
                                             isCreateOnly={true}
                                             onDelete={handleDeleteFileImageAttachment}
                                             emailId={null}
-                                        />
-                                        <ImageAttachments
+                                        />}
+                                        {otherAttachments && otherAttachments.length > 0 && <ImageAttachments
                                             imageAttachments={imageAttachments}
                                             onImageClick={(attachment) => {
                                                 setImageSource(attachment);
@@ -252,7 +295,7 @@ const AskSupplierPriceDialog = (props) => {
                                             isCreateOnly={true}
                                             onDelete={handleDeleteImageAttachment}
                                             emailId={null}
-                                        />
+                                        />}
                                         <TinyMce
                                             onChange={(value) => {
                                                 setContantValue(value)
@@ -296,8 +339,8 @@ const AskSupplierPriceDialog = (props) => {
                         : <CustomButton
                             variant="contained"
                             color="primary"
-                            disabled={supplierContactData.length === 0}
-                            onClick={() => handelAskPriceToSupplier(contantValue, contactId)}
+                            disabled={supplierContactData.length === 0 || fields.length === 0}
+                            onClick={() => handelAskPriceToSupplier(contantValue, contactId, selectedFields)}
                         >
                             Send
                         </CustomButton>}
