@@ -20,7 +20,7 @@ import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constan
 import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { DateRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { DateRenderer, CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import ManageScheduleReport from './ManageScheduleReport';
 
 const ScheduleReport = () => {
@@ -143,11 +143,30 @@ const ScheduleReport = () => {
   const exportData = () => {};
 
   const fetchResourceData = async () => {
-    const {
-      data: { data }
-    } = await axiosInstance().get(`schedule-report`);
+    dispatch({ type: 'loading', loading: true });
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    try {
+      let {
+        data: { data, count }
+      } = await axiosInstance().get(`schedule-report`);
 
-    console.log(data);
+      data = data.map((u: any) => {
+        let finalObject = prepareDataForGrid(u);
+        return finalObject;
+      });
+      console.log(data);
+      // dispatch({ type: 'initialize', data: data, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } catch (error) {
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+      toastConfig.setToastConfig(error);
+    }
   };
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -205,64 +224,63 @@ const ScheduleReport = () => {
                 </Box>
               </Grid>
             </Grid>
-
-            <div>
-              {columns ? (
-                isSmall ? (
-                  <CustomSwipableList
-                    allowSelection={false}
-                    allowSwipe={false}
-                    permissions={permissions?.reports}
-                    primaryField={columns?.find((d) => d.primaryField)}
-                    onClick={(data) => {
-                      //   history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
-                    }}
-                    selectedRecords={[]}
-                    dataRows={dataRows}
-                    dispatch={dispatch}
-                    onEdit={() => {}}
-                    extraParamsToCheckDelete={false}
-                    rowCount={rowCount}
-                    page={page}
-                    loading={loading}
-                    chips={columns
-                      .filter((col) => col.hasOwnProperty('cellRendererParams'))
-                      .map((col) => ({
-                        field: col.field,
-                        label: col.headerName
-                      }))}
-                    additionalDetails={[]}
-                    owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                    onCreate={false}
-                    showClone={false}
-                    onDelete={(data) => {}}
-                    onClone={(data) => {}}
-                    renderedFrom={routes.transferAsset?.title}
-                  />
-                ) : (
-                  <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameWorkComponent}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={100}
-                    loading={loading}
-                    renderedFrom={renderedFrom}
-                    allowSelection={false}
-                    allowAction={false}
-                    refreshGrid={fetchResourceData}
-                    showOnlyShowFilteredRecordSwitch={false}
-                  />
-                )
+          </div>
+          <div>
+            {columns ? (
+              isSmall ? (
+                <CustomSwipableList
+                  allowSelection={false}
+                  allowSwipe={false}
+                  permissions={permissions?.reports}
+                  primaryField={columns?.find((d) => d.primaryField)}
+                  onClick={(data) => {
+                    //   history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
+                  }}
+                  selectedRecords={[]}
+                  dataRows={dataRows}
+                  dispatch={dispatch}
+                  onEdit={() => {}}
+                  extraParamsToCheckDelete={false}
+                  rowCount={rowCount}
+                  page={page}
+                  loading={loading}
+                  chips={columns
+                    .filter((col) => col.hasOwnProperty('cellRendererParams'))
+                    .map((col) => ({
+                      field: col.field,
+                      label: col.headerName
+                    }))}
+                  additionalDetails={[]}
+                  owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                  onCreate={false}
+                  showClone={false}
+                  onDelete={(data) => {}}
+                  onClone={(data) => {}}
+                  renderedFrom={routes.transferAsset?.title}
+                />
               ) : (
-                <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
-              )}
-            </div>
+                <CustomAgGrid
+                  columns={columns}
+                  dataRows={dataRows}
+                  frameworkComponents={frameWorkComponent}
+                  setGridApi={setGridApi}
+                  dispatch={dispatch}
+                  rowCount={rowCount}
+                  limit={limit}
+                  pageSizes={pageSizes}
+                  page={page}
+                  actionWidth={100}
+                  loading={loading}
+                  renderedFrom={renderedFrom}
+                  allowSelection={true}
+                  allowAction={true}
+                  refreshGrid={fetchResourceData}
+                  showOnlyShowFilteredRecordSwitch={false}
+                />
+              )
+            ) : (
+              <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
+            )}
           </div>
         </CustomContainer>
       </div>

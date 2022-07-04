@@ -137,6 +137,8 @@ import ConvertInventory from './pages/ConvertInventory';
 import PublicRoutePage from './pages/PublicRoutePage';
 import ImportExport from './pages/ImportExport';
 import ScheduleReport from './pages/ScheduleReport';
+import InventoryCycle from './pages/InventoryCycle';
+import InventoryCycleDetailPage from './pages/InventoryCycle/InventoryCycleDetailPage';
 
 var notificationInterval: any = null;
 
@@ -348,7 +350,7 @@ function App() {
               severity="success"
             >
               <div style={{ display: 'flex', width: '100%', alignItems: 'start', justifyContent: 'space-between', gap: 20 }}>
-                <div style={{ flex: 1 }}>New Version of eQuip-T OM is available. Please refresh to get the latest changes.</div>
+                <div style={{ flex: 1 }}>New Version of Equipt Portal is available. Please refresh to get the latest changes.</div>
                 <Button className="snackbar-button" size="medium" variant="contained" color="secondary" onClick={updateServiceWorker}>
                   Refresh
                 </Button>
@@ -739,6 +741,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.importExport.path}>
               <ImportExport />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.inventoryCycle.path}>
+              <InventoryCycle />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.inventoryCycleDetail.path}/:id`}>
+              <InventoryCycleDetailPage />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

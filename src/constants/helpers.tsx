@@ -198,7 +198,9 @@ export const sidebarResource = {
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
   productAuction: 'Product Auction',
-  inventoryToAsset: 'Inventory to Asset'
+  inventoryToAsset: 'Inventory to Asset',
+  inventoryCycle: 'Inventory Cycle',
+  dashboardMaster: 'Dashboard Master'
 };
 
 export const resourceNames = {
@@ -337,7 +339,8 @@ export const RESOURCE_LABEL = {
   cageManagement: 'Cage Management',
   productAuction: 'Product Auction',
   inventoryToAsset: 'Inventory to Asset',
-  importExport: 'Import/Export'
+  importExport: 'Import/Export',
+  inventoryCycle: 'Inventory Cycle'
 };
 
 export const CHILD_RESOURCE = {
@@ -883,6 +886,10 @@ export const yyyyMMDD = (dateToBeFormatted) => {
 
 export const displayDate = (date) => {
   return date ? moment(date).format(dateFormat) : date;
+};
+
+export const displayDateTime = (date) => {
+  return date ? moment(date).format(dateTimeFormat) : date;
 };
 
 export const displayCardDate = (date) => {

@@ -11,7 +11,8 @@ import { useData } from "../../../StateProvider/Provider";
 import { isMobile, isTablet } from "react-device-detect";
 import {
     CustomDialogTransition, customerAccount, customerContact, getCollaboratorDropdownDataSource, getObjKeys,
-    getObjKeysWithValues, getOwnerDropdownDataSource, isFieldNotTouched, salesOrder, setFieldsInAscendingOrder, yupSchema
+    getObjKeysWithValues, getOwnerDropdownDataSource, isFieldNotTouched, salesOrder, setFieldsInAscendingOrder, yupSchema,
+    generateUniqueIdOnly
 } from "../../../constants/helpers";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
@@ -189,7 +190,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             let fieldData;
             const response: any = await axiosInstance().get("/field?resource=Sales Order");
             fieldData = response?.data?.data;
-     
+
             const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
@@ -202,6 +203,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                     if (isClone) {
                         const { _id, brand, createdBy, entity, history, products, status, salesOrderNo, updatedBy, ...rest } = data
                         rest.status = "New"
+                        rest.salesOrderNo = `SO_${generateUniqueIdOnly()}`
                         setCloneHeading(salesOrderNo)
                         setSalesData({
                             fields: fieldsDataForCreate,
@@ -218,13 +220,13 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                         setFormValues(getObjKeysWithValues(data, fieldsDataForUpdate))
                         setLoading(false)
                     }
-
                 } catch (error) {
                     toastConfig.setToastConfig(error);
                 }
             }
             else {
-                let initialData = { ...getObjKeys("", fieldsDataForCreate), currency: user.user?.brandCurrency || "" };
+                let initialData = { ...getObjKeys("", fieldsDataForCreate), currency: user.user?.brandCurrency || "", };
+                initialData['salesOrderNo'] = `SO_${generateUniqueIdOnly()}`
                 setSalesData({
                     fields: fieldsDataForCreate,
                     initialValues: initialData,

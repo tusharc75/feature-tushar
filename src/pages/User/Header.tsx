@@ -27,6 +27,7 @@ const Header = (props) => {
     onEntityRoleRedirectDetailRemove,
     unAssignUsersFromEntity,
     openUserSetupDialog,
+    handleResetPassword,
     userSetupDisabled,
     selectedRecordsLength = 0,
     manageDeleteUser,
@@ -179,6 +180,7 @@ const Header = (props) => {
                   variant={isMobile && !isTablet ? "text" : "contained"}
                   color="default"
                   size="small"
+                  disabled={selectedRecordsLength === 0}
                   onClick={openActions}
                   aria-controls="action-menu"
                 >
@@ -281,6 +283,16 @@ const Header = (props) => {
                       }}
                     >
                       User Setup
+                    </MenuItem>
+                  }
+                  {
+                    userPermissions.isUpdate && <MenuItem
+                      onClick={() => {
+                        handleResetPassword();
+                        closeActions();
+                      }}
+                    >
+                      Reset Password
                     </MenuItem>
                   }
 

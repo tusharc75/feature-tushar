@@ -383,7 +383,7 @@ export default function Account(props) {
         var str = [];
         for (var p in obj)
           if (obj.hasOwnProperty(p)) {
-            str.push('{colName=' + encodeURIComponent(p) + ',' + 'colValue=' + encodeURIComponent(obj[p].filter) + '}');
+            str.push('{colName=' + encodeURI(p) + ',' + 'colValue=' + encodeURI(obj[p].filter) + '}');
           }
         return str.join(',');
       };
@@ -665,7 +665,7 @@ export default function Account(props) {
       });
     }
 
-    deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
 
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
@@ -693,20 +693,20 @@ export default function Account(props) {
     setOpen(false);
     history.replace(
       queryType && queryColFilter && querySearch
-        ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}&search=${querySearch}`
+        ? `?page=${page}&type=${queryType}&approval=${encodeURI(options[index])}&colFilter=${queryColFilter}&search=${querySearch}`
         : queryType && queryColFilter
-          ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}`
+          ? `?page=${page}&type=${queryType}&approval=${encodeURI(options[index])}&colFilter=${queryColFilter}`
           : queryType && querySearch
-            ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}&search=${search}`
+            ? `?page=${page}&type=${queryType}&approval=${encodeURI(options[index])}&search=${search}`
             : querySearch && queryColFilter
-              ? `?page=${page}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}&search=${search}`
+              ? `?page=${page}&approval=${encodeURI(options[index])}&colFilter=${queryColFilter}&search=${search}`
               : queryType
-                ? `?page=${page}&type=${queryType}&approval=${encodeURIComponent(options[index])}`
+                ? `?page=${page}&type=${queryType}&approval=${encodeURI(options[index])}`
                 : queryColFilter
-                  ? `?page=${page}&approval=${encodeURIComponent(options[index])}&colFilter=${queryColFilter}`
+                  ? `?page=${page}&approval=${encodeURI(options[index])}&colFilter=${queryColFilter}`
                   : querySearch
-                    ? `?page=${page}&approval=${encodeURIComponent(options[index])}&search=${search}`
-                    : `?page=${page}&approval=${encodeURIComponent(options[index])}`
+                    ? `?page=${page}&approval=${encodeURI(options[index])}&search=${search}`
+                    : `?page=${page}&approval=${encodeURI(options[index])}`
     );
   };
 
