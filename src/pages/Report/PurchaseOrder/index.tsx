@@ -257,6 +257,17 @@ const Report = () => {
             cellRenderer: 'numberRenderer'
           }
         ];
+        if (productFields?.filter((e) => e.fieldData.fieldName === "listPrice")?.length) {
+          columns.push({
+            field: 'margin',
+            headerName: 'Margin',
+            show: true,
+            disabled: false,
+            filter: false,
+            sortable: false,
+            cellRenderer: 'numberRenderer'
+          })
+        }
       }
 
       setResourceColumns(resourceFieldData);
@@ -368,10 +379,9 @@ const Report = () => {
 
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? `${productInventory.api}/report/purchase-order-product-wise-report`
-            : `${productInventory.api}/report/purchase-order-price`
+        `${resourceCamelCase === 'purchaseOrderProduct'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report`
+          : `${productInventory.api}/report/purchase-order-price`
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -379,10 +389,12 @@ const Report = () => {
       )
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
-          let finalObject = prepareDataForGrid(u);
+          let finalObject: any = prepareDataForGrid(u);
+          if (finalObject?.listPrice) {
+            finalObject.margin = (finalObject?.listPrice + (finalObject?.averagePrice || 0)) / finalObject?.listPrice
+          }
           return finalObject;
         });
-
         dispatch({ type: 'initialize', data: data, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -517,10 +529,9 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
-            : `${productInventory.api}/report/purchase-order-price/export`
+        `${resourceCamelCase === 'purchaseOrderProduct'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
+          : `${productInventory.api}/report/purchase-order-price/export`
         }${filterQuery}`,
         {
           responseType: 'arraybuffer'
@@ -666,7 +677,7 @@ const Report = () => {
           </>
         </CustomContainer>
       </div>
-      {showPriceHistory.open && 
+      {showPriceHistory.open &&
         <AverageCostHistory
           product={showPriceHistory.product}
           warehouse={showPriceHistory.warehouse}
