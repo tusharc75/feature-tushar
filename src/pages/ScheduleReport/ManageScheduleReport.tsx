@@ -17,7 +17,7 @@ type ValueTypes = {
   filters: any[];
   resource: any;
   column: any[];
-  subscribeUser: any[];
+  subscribeUsers: any[];
   frequency: string;
   time: any;
   day: string;
@@ -187,8 +187,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess }) => {
     if (!values.resource) {
       errors['resource'] = 'Resource is required';
     }
-    if (values.subscribeUser.length === 0) {
-      errors['subscribeUser'] = 'Subscribe users is required';
+    if (values.subscribeUsers.length === 0) {
+      errors['subscribeUsers'] = 'Subscribe users is required';
     }
 
     if (!values.frequency) {
@@ -253,7 +253,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess }) => {
       column: values.column.length > 0 ? values.column.map((field) => field.fieldName) : [],
       time: new Date(values.time).toLocaleTimeString(),
       date: new Date(values.date).getDate().toLocaleString(),
-      subscribeUser: values.subscribeUser.map((user) => user.userId)
+      subscribeUsers: values.subscribeUsers.map((user) => user.userId)
     };
 
     axiosInstance()
@@ -282,7 +282,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess }) => {
           resource: null,
           filters: [],
           column: [],
-          subscribeUser: [],
+          subscribeUsers: [],
           frequency: 'Daily',
           time: new Date(),
           day: 'Monday',
@@ -439,15 +439,15 @@ const ManageScheduleReport = ({ handleClose, onSuccess }) => {
                       size="small"
                       getOptionLabel={(option) => option.name}
                       getOptionSelected={(option, value) => option.userId === value.userId}
-                      value={values.subscribeUser}
-                      onChange={(_, newVal) => handleChange('subscribeUser', newVal)}
+                      value={values.subscribeUsers}
+                      onChange={(_, newVal) => handleChange('subscribeUsers', newVal)}
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          error={Boolean(errors['subscribeUser'])}
-                          helperText={errors['subscribeUser']}
+                          error={Boolean(errors['subscribeUsers'])}
+                          helperText={errors['subscribeUsers']}
                           label="Subscibe User"
-                          name="subscribeUser"
+                          name="subscribeUsers"
                           required
                           variant="outlined"
                         />
