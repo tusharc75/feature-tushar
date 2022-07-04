@@ -140,6 +140,7 @@
           -webkit-transition: all 0.4s;
           -o-transition: all 0.4s;
           transition: all 0.4s;
+          min-height: 110px;
         }
 
         .card_front_content .view_all_button {
@@ -182,6 +183,7 @@
               line-height: 1.5;
               padding-bottom: 35px;
               font-size: 14px;
+              min-height: 98px;
             }
           }
         }
@@ -209,6 +211,7 @@
               line-height: 1.5;
               padding-bottom: 35px;
               font-size: 14px;
+              min-height: 98px;
             }
           }
         }
