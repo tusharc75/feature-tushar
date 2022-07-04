@@ -51,7 +51,7 @@ const ProductAuction = () => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
 
-    console.log(state);
+  console.log(state);
 
   const [isOpenDialog, setisOpenDialog] = useState(false);
 
@@ -100,13 +100,10 @@ const ProductAuction = () => {
       gridApi.setRowData([]);
     }
     const queryString = getQueryString();
-    let dataToProcess, count;
     axiosInstance()
       .get(`${productAuction.api}${queryString}`)
-      .then(({ data }) => {
-        dataToProcess = data?.data;
-        count = data?.count;
-        let rows = dataToProcess.map((u) => {
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.productAuction?.isUpdate;
@@ -120,14 +117,14 @@ const ProductAuction = () => {
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
-            count: data.count,
+            count: count,
             selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
-            count: data.count,
+            count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }

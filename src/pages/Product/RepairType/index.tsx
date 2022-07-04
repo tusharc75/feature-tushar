@@ -38,8 +38,7 @@ const ProductRepairType = (props: Props) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
   const {
     state: { user, permissions, selectedEntity }
@@ -75,7 +74,6 @@ const ProductRepairType = (props: Props) => {
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
-        columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
       });
   };
@@ -88,22 +86,19 @@ const ProductRepairType = (props: Props) => {
     const queryString = getQueryString();
     axiosInstance()
       .get(`${routes.product.path}/${id}/repair-type${queryString}`)
-      .then(({ data }) => {
-        const dataToProcess = data?.data;
-        let rows = dataToProcess.map((u) => {
+      .then(({ data: { data } }) => {
+        let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           let res = {
             ...finalObject
           };
           return res;
         });
-
         dispatch({
           type: 'initialize',
           data: rows,
           count: data.length
         });
-
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);

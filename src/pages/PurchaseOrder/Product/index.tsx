@@ -115,6 +115,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 };
                 res.productName = item.productDetail?.productName
                 res.productNumber = item.productDetail?.productNumber
+                res.productDescription = item.productDetail?.productDescription
                 res.serializedProduct = item.productDetail?.serializedProduct
                 res.serializedProductView = item.productDetail?.serializedProduct ? "Yes" : "No"
                 res.productDetail = item.productDetail
