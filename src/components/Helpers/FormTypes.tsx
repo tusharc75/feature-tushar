@@ -1937,7 +1937,7 @@ const FormTypes = (props) => {
           variant="inline"
           inputVariant="outlined"
           ampm={false}
-          value={values[name] || new Date('2018-01-01T00:00:00.000Z')}
+          value={values[name]}
           name={name}
           label={getLabel(label)}
           onChange={(date) => setFieldValue(name, date)}

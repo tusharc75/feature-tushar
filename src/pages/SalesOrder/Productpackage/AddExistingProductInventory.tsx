@@ -6,7 +6,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress, IconButton, TextField, Tooltip } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
 import { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import { gridLoadingTimeout, CustomDialogTransition, product, packages, isObjectEmpty, prepareDataForGrid } from '../../../constants/helpers';
+import { gridLoadingTimeout, CustomDialogTransition, product, packages, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -18,28 +18,26 @@ import useColumns, { getStaticFields, getFrameworkComponents } from "../../../co
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, salesOrderData, renderedFrom }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, ignoreIds, isAddingProducts, salesOrderData, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const {
-        state: { selectedEntity }
-    }: any = useData();
+    const { state: { selectedEntity } }: any = useData();
     const [packageDialog, setPackageDialog] = useState(false);
-    const [productData, setProductData] = useState([]);
     const [packageProductData, setPackageProductData] = useState([]);
-    const [selectedProduct, setSelectedProduct] = useState({ name: "", id: "", quantity: 0 });
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
-    const [materialList, setMaterialList] = useState([]);
+
     const { getColumnData } = useColumns();
+
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
     const defaultColumns = type === "product" ?
         [
             { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-            { field: "inventoryInWarehouseCount", headerName: "Available Asset", show: true, disabled: true, cellRenderer: "commonRenderer", editable: false }
+            { field: "inventory", headerName: "Inventory", show: true, disabled: true, cellRenderer: "commonRenderer", editable: false }
         ]
         : [
             { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
@@ -59,20 +57,25 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? `/sales-order/product-with-inventory` : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
-            setMaterialList(JSON.parse(JSON.stringify(data)));
+        axiosInstance().get(`${type === "product" ? `/product-inventory` : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
+            const selectedProducts = getLocalStorageArrayData(localStorageSelectedRecords);
             let rows = data.map((u) => {
+                const selectedData = selectedProducts.find((d: any) => d._id === u._id);
                 let finalObject = prepareDataForGrid(u);
                 finalObject["id"] = u._id;
                 finalObject["type"] = type;
-                finalObject["qty"] = 0;
                 finalObject["productCategory"] = u.productCategory?.optionLabel;
                 finalObject["priceTemplate"] = u.priceTemplate?.optionLabel
+                finalObject['inventory'] = u?.inventory ? (u?.inventory - (u?.softHold || 0)) : 0;
+                finalObject['qty'] = selectedData ? selectedData.qty : finalObject['inventory'] ? 1 : 0;
+                finalObject["unitMain"] = u.unit
+                if (type === "product") {
+                    finalObject['hideSelection'] = finalObject['inventory'] ? false : true;
+                }
                 return {
                     ...finalObject,
                 };
             });
-
             dispatch({ type: "initialize", data: rows, count: count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {
@@ -82,10 +85,16 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     };
 
     const getQueryString = () => {
-        let deepFilter = type === "product" ? `?warehouse=${salesOrderData?.warehouse?.optionValue ?? salesOrderData?.plant?.optionValue}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
+
+        let deepFilter = type === "product" ? `?wareHouse=${salesOrderData?.warehouse?.optionValue ??
+            salesOrderData?.plant?.optionValue}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
 
         if (type !== "product") {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`
+        }
+
+        if (ignoreIds?.length) {
+            deepFilter = deepFilter + `&ignoreIds=${JSON.stringify(ignoreIds)}`
         }
 
         if (!isObjectEmpty(filters)) {
@@ -101,13 +110,16 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
+
+        if (showFilteredRecordsOnly) {
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
+        }
+
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
         return deepFilter;
     };
-
-
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -148,36 +160,11 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
         }
     };
 
-    const NameRenderer = (params) => (
-        <span
-            className="cursor-pointer link ml-1"
-            onClick={() => {
-                setPackageDialog(true)
-                fetchPackageProduct(params.data.id)
-                setSelectedProduct({ name: params.data.packageName, id: params.data.id, quantity: params.data.quantity })
-            }}>{params.value}</span>
-    );
-
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
     };
 
     const onCellValueChanged = (row) => {
-    }
-
-    const handleSubmit = () => {
-        dispatch({ type: "loading", loading: true });
-        let tempProduct = productData
-        tempProduct.find(d => d.id === selectedProduct.id).quantity = selectedProduct.quantity
-        setProductData(tempProduct)
-        setPackageDialog(false)
-        if (gridApi) {
-            gridApi.setRowData(productData);
-        }
-        // dispatch({ type: "update", data: productData, count: productData.length });
-        setTimeout(() => {
-            dispatch({ type: "loading", loading: false });
-        }, gridLoadingTimeout);
     }
 
     return (<Fragment>
@@ -202,13 +189,11 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                                 <Button
                                     size="small"
                                     color="primary"
-                                    onClick={() => addProductInventory(materialList.filter((data) =>
-                                        selectedRecords.some((rec) => rec.id === data._id)
-                                    ))}
+                                    onClick={() => addProductInventory(getLocalStorageArrayData(localStorageSelectedRecords))}
                                     variant="contained"
-                                    disabled={!Boolean(selectedRecords.length) || isAddingProducts}
+                                    disabled={!Boolean(getLocalStorageArrayData(localStorageSelectedRecords)?.length) || isAddingProducts}
                                     endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
-                                    {selectedRecords.length ? "(" + selectedRecords.length + ")  " : ""}
+                                    {getLocalStorageArrayData(localStorageSelectedRecords)?.length ? "(" + getLocalStorageArrayData(localStorageSelectedRecords)?.length + ")  " : ""}
                                     Add</Button>
                             </Box>
                         </Grid>
