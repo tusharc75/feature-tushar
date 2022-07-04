@@ -63,79 +63,71 @@ const ScheduleReport = () => {
       disabled: false,
       cellRenderer: 'commonRenderer',
       primaryField: false
+    },
+    {
+      field: 'brand',
+      headerName: 'Brand',
+      show: true,
+      disabled: false,
+      cellRenderer: 'commonRenderer',
+      primaryField: false
+    },
+    {
+      field: 'column',
+      headerName: 'Columns',
+      show: true,
+      disabled: false,
+      cellRenderer: 'commonRenderer',
+      primaryField: false
+    },
+    {
+      field: 'subscribeUsers',
+      headerName: 'Subscribe Users',
+      show: true,
+      disabled: false,
+      cellRenderer: 'commonRenderer',
+      primaryField: false
+    },
+    {
+      field: 'frequency',
+      headerName: 'Frequency',
+      show: true,
+      disabled: false,
+      cellRenderer: 'commonRenderer',
+      primaryField: false
+    },
+    {
+      field: 'day',
+      headerName: 'Day',
+      show: true,
+      disabled: false,
+      cellRenderer: 'commonRenderer',
+      primaryField: false
+    },
+    {
+      field: 'time',
+      headerName: 'Time',
+      show: true,
+      disabled: false,
+      cellRenderer: 'commonRenderer',
+      primaryField: false
+    },
+    {
+      field: 'createdBy',
+      headerName: 'Created By',
+      show: true,
+      disabled: false,
+      cellRenderer: 'dateRenderer',
+      primaryField: false
+    },
+    {
+      field: 'updatedBy',
+      headerName: 'Updated By',
+      show: true,
+      disabled: false,
+      cellRenderer: 'dateRenderer',
+      primaryField: false
     }
-    // {
-    //   field: 'reportName',
-    //   headerName: 'Report Name',
-    //   show: true,
-    //   disabled: false,
-    //   cellRenderer: 'commonRenderer',
-    //   primaryField: false
-    // },
-    // {
-    //   field: 'filters',
-    //   headerName: 'Filters',
-    //   show: true,
-    //   disabled: false,
-    //   cellRenderer: 'commonRenderer',
-    //   primaryField: false
-    // },
-    // {
-    //   field: 'columns',
-    //   headerName: 'Columns',
-    //   show: true,
-    //   disabled: false,
-    //   cellRenderer: 'commonRenderer',
-    //   primaryField: false
-    // },
-    // {
-    //   field: 'subscribeUsers',
-    //   headerName: 'Subscribe Users',
-    //   show: true,
-    //   disabled: false,
-    //   cellRenderer: 'commonRenderer',
-    //   primaryField: false
-    // },
-    // {
-    //   field: 'frequency',
-    //   headerName: 'Frequency',
-    //   show: true,
-    //   disabled: false,
-    //   cellRenderer: 'commonRenderer',
-    //   primaryField: false
-    // },
-    // {
-    //   field: 'day',
-    //   headerName: 'Day',
-    //   show: true,
-    //   disabled: false,
-    //   cellRenderer: 'commonRenderer',
-    //   primaryField: false
-    // },
-    // {
-    //   field: 'time',
-    //   headerName: 'Time',
-    //   show: true,
-    //   disabled: false,
-    //   cellRenderer: 'commonRenderer',
-    //   primaryField: false
-    // },
-    // {
-    //   field: 'createdBy',
-    //   headerName: 'Created By',
-    //   show: true,
-    //   disabled: false,
-    //   cellRenderer: 'dateRenderer',
-    //   primaryField: false
-    // },
-    // {
-    //   field: 'updatedBy',
-    //   headerName: 'Updated By',
-    //   show: true,
-    //   disabled: false,
-    //   cellRenderer: 'dateRenderer',
-    //   primaryField: false
-    // }
   ]);
   const [gridApi, setGridApi] = React.useState(null);
   const [state, dispatch] = React.useReducer(reducer, intialState);
@@ -161,9 +153,13 @@ const ScheduleReport = () => {
       data = data.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
         finalObject.resource = startCase(finalObject.resource);
+        finalObject.column = finalObject.column
+          .split(',')
+          .map((s: string) => startCase(s))
+          .join(', ');
         return finalObject;
       });
-      // console.log(data);
+      console.log(data);
       dispatch({ type: 'initialize', data: data, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -178,7 +174,7 @@ const ScheduleReport = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      <HtmlTooltip title="Clone">
+      {/* <HtmlTooltip title="Clone">
         <IconButton
           size="small"
           aria-label="Clone"
@@ -188,7 +184,7 @@ const ScheduleReport = () => {
         >
           <FileCopy color="primary" />
         </IconButton>
-      </HtmlTooltip>
+      </HtmlTooltip> */}
 
       <HtmlTooltip title="Delete">
         <IconButton
@@ -294,15 +290,15 @@ const ScheduleReport = () => {
                   </Box>
                   <Box>
                     <Button
-                      onClick={openActions}
-                      disabled={!permissions?.report?.isDelete || selectedRecords.lenght === 0}
+                      disabled={!permissions?.report?.isDelete || selectedRecords.length === 0}
                       variant="outlined"
                       size="small"
                       color="primary"
+                      onClick={() => setShowDeleteConfirmBox(true)}
                     >
-                      Actions
+                      Delete
                     </Button>
-                    <Menu
+                    {/* <Menu
                       anchorEl={anchorEl}
                       keepMounted
                       getContentAnchorEl={null}
@@ -323,7 +319,7 @@ const ScheduleReport = () => {
                       >
                         Delete
                       </MenuItem>
-                    </Menu>
+                    </Menu> */}
                   </Box>
                 </Box>
               </Grid>
