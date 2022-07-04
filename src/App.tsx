@@ -136,6 +136,8 @@ import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDeta
 import ConvertInventory from './pages/ConvertInventory';
 import PublicRoutePage from './pages/PublicRoutePage';
 import ScheduleReport from './pages/ScheduleReport';
+import InventoryCycle from './pages/InventoryCycle';
+import InventoryCycleDetailPage from './pages/InventoryCycle/InventoryCycleDetailPage';
 
 var notificationInterval: any = null;
 
@@ -735,6 +737,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.inventoryToAsset.path}>
               <ConvertInventory />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.inventoryCycle.path}>
+              <InventoryCycle />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.inventoryCycleDetail.path}/:id`}>
+              <InventoryCycleDetailPage />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
