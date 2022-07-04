@@ -118,13 +118,9 @@ const PurchaseOrder = () => {
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        let dataToProcess, count;
-        axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data }) => {
-            dataToProcess = data?.data;
-            count = data?.count;
-
-            let rows = dataToProcess.map((u) => {
-                const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
+        axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data: { data, count } }) => {
+            let rows = data?.map((u) => {
+                const { owner, collaborator, ...restProperties } = u;
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = selectedRecords?.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = (
@@ -132,14 +128,6 @@ const PurchaseOrder = () => {
                         (d) => d?.optionValue === user?.user?._id
                     )
                 );
-                finalObject["owerCollaboratorInitialsOrImages"] = [];
-                if (finalObject["owner"])
-                    finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
-                finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
-                    if (f.initials) {
-                        f.initials = f.initials.split(" ").map((i) => i[0]).join("");
-                    }
-                })
                 let res = {
                     ...finalObject,
                 };
@@ -148,15 +136,15 @@ const PurchaseOrder = () => {
             if (appendRows) {
                 dispatch({
                     type: "initialize", data: [...dataRows, ...rows],
-                    count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+                    count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
                 });
             } else {
                 dispatch({
-                    type: "initialize", data: rows, count: data.count,
+                    type: "initialize", data: rows, count: count,
                     selectedRecords: rows.filter(f => f.isChecked === true)
                 });
             }
-            dispatch({ type: "initialize", data: rows, count: data.count });
+            dispatch({ type: "initialize", data: rows, count: count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);

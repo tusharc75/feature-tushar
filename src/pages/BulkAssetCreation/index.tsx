@@ -116,14 +116,8 @@ const BulkAssetCreation = () => {
         }
 
         const queryString = getQueryString();
-        let dataToProcess, count;
-        axiosInstance().get(`${bulkAssetCreation.api}${queryString}`).then(({ data }) => {
-            dataToProcess = data?.data;
-            count = data?.count;
-
-            let rows = dataToProcess.map((u) => {
-                const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
-
+        axiosInstance().get(`${bulkAssetCreation.api}${queryString}`).then(({ data: { data, count } }) => {
+            let rows = data?.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = (
@@ -131,17 +125,6 @@ const BulkAssetCreation = () => {
                         (d) => d?.optionValue === user?.user?._id
                     )
                 );
-
-                finalObject["owerCollaboratorInitialsOrImages"] = [];
-                if (finalObject["owner"])
-                    finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
-
-                finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
-                    if (f.initials) {
-                        f.initials = f.initials.split(" ").map((i) => i[0]).join("");
-                    }
-                })
-
                 let res = {
                     ...finalObject,
                 };
@@ -150,31 +133,15 @@ const BulkAssetCreation = () => {
             if (appendRows) {
                 dispatch({
                     type: "initialize", data: [...dataRows, ...rows],
-                    count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+                    count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
                 });
             } else {
                 dispatch({
-                    type: "initialize", data: rows, count: data.count,
+                    type: "initialize", data: rows, count: count,
                     selectedRecords: rows.filter(f => f.isChecked === true)
                 });
             }
-
-            if (gridApi) {
-                try {
-                    let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
-                    if (oldSelectedRecords.length > 0) {
-                        gridApi.forEachNode(function (node) {
-                            node.setSelected(
-                                oldSelectedRecords.some((o) => o === node.data._id)
-                            );
-                        });
-                    }
-                } catch (ex) {
-                    console.error("Error in getting selected records from local storage")
-                }
-            }
-
-            dispatch({ type: "initialize", data: rows, count: data.count });
+            dispatch({ type: "initialize", data: rows, count: count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
@@ -190,7 +157,7 @@ const BulkAssetCreation = () => {
         let filterById = [];
         if (isExport) {
             deepFilter = `filterBulkAssetCreation=${selectedType}`;
-          }
+        }
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }
