@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Box, Button, IconButton } from '@material-ui/core';
-import { FileCopy } from '@material-ui/icons';
+import { Delete, FileCopy } from '@material-ui/icons';
 import { useHistory, Link } from 'react-router-dom';
 import { MdDashboardCustomize } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -14,13 +14,14 @@ import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridCompone
 import { useData } from 'src/StateProvider/Provider';
 import { baseURL } from './builderHelpers';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
-import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
-import { prepareDataForGrid } from "src/constants/helpers"
+import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
+import { prepareDataForGrid } from 'src/constants/helpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const Dashboards = () => {
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity },
+    state: { permissions }
   }: any = useData();
   const { setToastConfig } = React.useContext(CustomToastContext);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState({ open: false, data: [], isLoading: false });
@@ -28,7 +29,7 @@ const Dashboards = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
-  const [columns, setColumns] = useState([])
+  const [columns, setColumns] = useState([]);
 
   React.useEffect(() => {
     fetchFields();
@@ -67,16 +68,29 @@ const Dashboards = () => {
     const { data } = params;
     return (
       <>
-        <GridDeleteIcon
-          hasDeletePermission={true}
-          ownerId={data?.createdBy?.user}
-          userId={user?.user?._id}
-          onDelete={() => setShowDeleteDialog({ ...showDeleteDialog, open: true, data: [data?._id] })}
-          entity=""
-        />
-        <IconButton size="small" onClick={() => history.push(`dashboard-master/${params.data._id}?type=clone`)}>
-          <FileCopy fontSize="small" color="primary" />
-        </IconButton>
+        <HtmlTooltip title="Delete">
+          <span>
+            <IconButton
+              disabled={!permissions?.dashboardMaster.isDelete}
+              size="small"
+              onClick={() => setShowDeleteDialog({ ...showDeleteDialog, open: true, data: [data?._id] })}
+            >
+              <Delete fontSize="small" color={permissions?.dashboardMaster.isDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+
+        <HtmlTooltip title="Clone">
+          <span>
+            <IconButton
+              disabled={!permissions?.dashboardMaster.isCreate}
+              size="small"
+              onClick={() => history.push(`dashboard-master/${params.data._id}?type=clone`)}
+            >
+              <FileCopy fontSize="small" color={permissions?.dashboardMaster.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
       </>
     );
   };
@@ -94,10 +108,11 @@ const Dashboards = () => {
         show: true,
         disabled: true,
         cellRenderer: 'nameRenderer'
-      }, ...getStaticFields()
-    ]
-    setColumns(coloum)
-  }
+      },
+      ...getStaticFields()
+    ];
+    setColumns(coloum);
+  };
 
   const fetchDashboards = () => {
     dispatch({ type: 'loading', loading: true });
@@ -110,7 +125,7 @@ const Dashboards = () => {
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           let res = {
-            ...finalObject,
+            ...finalObject
           };
           return res;
         });
@@ -147,16 +162,11 @@ const Dashboards = () => {
             </Box>
           </Box>
           <Box py={'6px'}>
-            {permissions?.dashboardMaster?.isCreate &&
-              <Button
-                color="primary"
-                variant="contained"
-                size="small"
-                disableRipple
-                onClick={() => history.push(`dashboard-master/new`)}>
+            {permissions?.dashboardMaster.isCreate && (
+              <Button color="primary" variant="contained" size="small" disableRipple onClick={() => history.push(`dashboard-master/new`)}>
                 Add
               </Button>
-            }
+            )}
             <Box component="span" ml={1} />
             <DeleteButton
               disabled={selectedRecords.length === 0}
