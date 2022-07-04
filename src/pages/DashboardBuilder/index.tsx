@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Box, Button, IconButton } from '@material-ui/core';
-import { FileCopy } from '@material-ui/icons';
+import { Delete, FileCopy } from '@material-ui/icons';
 import { useHistory, Link } from 'react-router-dom';
 import { MdDashboardCustomize } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -16,6 +16,7 @@ import { baseURL } from './builderHelpers';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
 import { prepareDataForGrid } from 'src/constants/helpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const Dashboards = () => {
   const history = useHistory();
@@ -67,16 +68,29 @@ const Dashboards = () => {
     const { data } = params;
     return (
       <>
-        <GridDeleteIcon
-          hasDeletePermission={permissions?.dashboardMaster.isDelete}
-          ownerId={null}
-          userId={null}
-          onDelete={() => setShowDeleteDialog({ ...showDeleteDialog, open: true, data: [data?._id] })}
-          entity=""
-        />
-        <IconButton size="small" onClick={() => history.push(`dashboard-master/${params.data._id}?type=clone`)}>
-          <FileCopy fontSize="small" color="primary" />
-        </IconButton>
+        <HtmlTooltip title="Delete">
+          <span>
+            <IconButton
+              disabled={!permissions?.dashboardMaster.isDelete}
+              size="small"
+              onClick={() => setShowDeleteDialog({ ...showDeleteDialog, open: true, data: [data?._id] })}
+            >
+              <Delete fontSize="small" color={permissions?.dashboardMaster.isDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+
+        <HtmlTooltip title="Clone">
+          <span>
+            <IconButton
+              disabled={!permissions?.dashboardMaster.isCreate}
+              size="small"
+              onClick={() => history.push(`dashboard-master/${params.data._id}?type=clone`)}
+            >
+              <FileCopy fontSize="small" color={permissions?.dashboardMaster.isCreate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
       </>
     );
   };

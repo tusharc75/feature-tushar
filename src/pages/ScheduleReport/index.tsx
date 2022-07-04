@@ -153,6 +153,7 @@ const ScheduleReport = () => {
       data = data.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
         finalObject.resource = startCase(finalObject.resource);
+        finalObject.subscribeUsers = finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ');
         finalObject.column = finalObject.column
           .split(',')
           .map((s: string) => startCase(s))
