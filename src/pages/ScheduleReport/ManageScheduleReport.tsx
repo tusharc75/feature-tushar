@@ -1,9 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { Formik, FormikProps } from 'formik';
 import { KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
-
 import { dateFormatForInputControl, REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -11,6 +10,8 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import Filters from './Filters';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
 
 type ValueTypes = {
   scheduleName: string;
@@ -38,6 +39,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess }) => {
   const [isSubmitting, setSubmitting] = React.useState(false);
   const [betweenDate, setBetweenDate] = React.useState(null);
   const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
+
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   React.useEffect(() => {
     axiosInstance()
@@ -269,8 +272,24 @@ const ManageScheduleReport = ({ handleClose, onSuccess }) => {
   };
 
   return (
-    <Dialog open onClose={handleClose} fullWidth maxWidth="sm">
-      <CustomDialogHeader title="Add Schedule Report" onClose={handleClose} />
+    <Dialog
+      open
+      maxWidth="md"
+      fullScreen={fullScreen || isMobile || isTablet}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          handleClose();
+        }
+      }}
+      fullWidth >
+      <CustomDialogHeader
+        title="Add Schedule Report"
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen((prevState) => !prevState);
+        }}
+        showManimizeMaximize={true}
+        onClose={handleClose} />
       <Formik
         innerRef={(ref) => {
           if (ref) {
@@ -296,9 +315,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess }) => {
           <>
             <CustomDialogContent>
               <div className={'detail-box-content'}>
+                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                 <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Schedule Information</h2>
               </div>
-
               <Box my={2}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
@@ -353,11 +372,10 @@ const ManageScheduleReport = ({ handleClose, onSuccess }) => {
                   </Grid>
                 </Grid>
               </Box>
-
               <div className={'detail-box-content'}>
+                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                 <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Filters</h2>
               </div>
-
               <Box my={2}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
@@ -424,11 +442,10 @@ const ManageScheduleReport = ({ handleClose, onSuccess }) => {
                   </Grid>
                 </Grid>
               </Box>
-
               <div className={'detail-box-content'}>
+                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                 <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Others</h2>
               </div>
-
               <Box my={2}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
@@ -528,14 +545,14 @@ const ManageScheduleReport = ({ handleClose, onSuccess }) => {
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button disabled={isSubmitting} variant="contained" color="primary" size="small" onClick={handleClose}>
+              <Button disabled={isSubmitting} color="primary" size="small" onClick={handleClose}>
                 Cancel
               </Button>
               <Button
                 startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
                 disabled={isSubmitting}
                 type="submit"
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 size="small"
                 onClick={submitForm}
