@@ -114,12 +114,8 @@ const Sublease = () => {
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        let dataToProcess, count;
-        axiosInstance().get(`${sublease.api}${queryString}`).then(({ data }) => {
-            dataToProcess = data?.data;
-            count = data?.count;
-            let rows = dataToProcess.map((u) => {
-                const { owner, collaborator } = u;
+        axiosInstance().get(`${sublease.api}${queryString}`).then(({ data: { data, count } }) => {
+            let rows = data?.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
                 finalObject["canDelete"] = false;
@@ -128,15 +124,6 @@ const Sublease = () => {
                         (d) => d?.optionValue === user?.user?._id
                     )
                 );
-                finalObject["owerCollaboratorInitialsOrImages"] = [];
-                if (finalObject["owner"])
-                    finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
-
-                finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
-                    if (f.initials) {
-                        f.initials = f.initials.split(" ").map((i) => i[0]).join("");
-                    }
-                })
                 let res = {
                     ...finalObject,
                 };
@@ -145,15 +132,14 @@ const Sublease = () => {
             if (appendRows) {
                 dispatch({
                     type: "initialize", data: [...dataRows, ...rows],
-                    count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+                    count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
                 });
             } else {
                 dispatch({
-                    type: "initialize", data: rows, count: data.count,
+                    type: "initialize", data: rows, count: count,
                     selectedRecords: rows.filter(f => f.isChecked === true)
                 });
             }
-            // dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
@@ -169,7 +155,7 @@ const Sublease = () => {
         let filterById = [];
         if (isExport) {
             deepFilter = `filterSublease=${selectedType}`;
-          }
+        }
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }

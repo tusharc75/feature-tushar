@@ -83,14 +83,11 @@ const AddRepairType = (props: Props) => {
       gridApi.setRowData([]);
     }
     const queryString = getQueryString();
-    let dataToProcess, count;
     axiosInstance()
       .get(`${repairType.api}${queryString}`)
-      .then(({ data }) => {
-        dataToProcess = data?.data;
-        count = data?.count;
-        dataToProcess = dataToProcess.filter((d: any) => !exisitingIds.includes(d._id));
-        let rows = dataToProcess.map((u) => {
+      .then(({ data: { data, count } }) => {
+        data = data?.filter((d: any) => !exisitingIds.includes(d._id));
+        let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = false;
@@ -103,14 +100,14 @@ const AddRepairType = (props: Props) => {
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
-            count: data.count,
+            count: count,
             selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
-            count: data.count,
+            count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
@@ -213,7 +210,7 @@ const AddRepairType = (props: Props) => {
                 history.push(`${routes.repairJobDetail.path}/${data._id}?openEdit=true`);
               }}
               extraParamsToCheckDelete={false}
-              onDelete={() => {}}
+              onDelete={() => { }}
               rowCount={rowCount}
               page={page}
               loading={loading}
@@ -221,7 +218,7 @@ const AddRepairType = (props: Props) => {
               chips={[]}
               onCreate={false}
               showClone={true}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
