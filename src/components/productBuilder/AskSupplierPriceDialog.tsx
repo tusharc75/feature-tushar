@@ -47,17 +47,19 @@ const AskSupplierPriceDialog = (props) => {
 
 
     useEffect(() => {
-        axiosInstance().get(`/productbuilder/getoneproduct/${productBuilderId}/${productDataList[0]?._id}`).then(({ data: { data } }) => {
-            var _fields = [];
-            data.productData.fields.forEach((_f) => {
-                if (_f.sectionName === "Cost Calculation" && (_f.formula === undefined || _f.formula === null || _f.formula === "")) {
-                    _fields.push({ ..._f })
-                }
-            })
-            setFields(_fields)
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
+        if(from !== "SupplierAskPrice"){
+            axiosInstance().get(`/productbuilder/getoneproduct/${productBuilderId}/${productDataList[0]?._id}`).then(({ data: { data } }) => {
+                var _fields = [];
+                data.productData.fields.forEach((_f) => {
+                    if (_f.sectionName === "Cost Calculation" && (_f.formula === undefined || _f.formula === null || _f.formula === "")) {
+                        _fields.push({ ..._f })
+                    }
+                })
+                setFields(_fields)
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+        }
     }, []);
 
     const getFileIconSrc = (file) => {
@@ -243,33 +245,9 @@ const AskSupplierPriceDialog = (props) => {
                                                 {...params}
                                                 margin="dense"
                                                 name="contact"
-                                                label="Contact"
+                                                label="Supplier Contact"
                                                 variant="outlined"
-                                                fullWidth
-                                            />
-                                        )}
-                                    />}
-                                    {from != "SupplierAskPrice" && <Autocomplete
-                                        multiple
-                                        options={[{ fieldName: "All", fieldLabel: "All" }, ...fields]}
-                                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                                        value={
-                                            fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName)).length
-                                                ? fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName))
-                                                : []
-                                        }
-                                        onChange={(e, val: any) => {
-                                            val?.some(d => d?.fieldName === "All") ?
-                                                setSelectedFields(fields?.map((d) => d?.fieldName))
-                                                : setSelectedFields(val && val?.map((d) => d?.fieldName))
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                margin="dense"
-                                                name="field"
-                                                label="Field"
-                                                variant="outlined"
+                                                required
                                                 fullWidth
                                             />
                                         )}
@@ -315,6 +293,32 @@ const AskSupplierPriceDialog = (props) => {
                                             isSendToCustomer={false}
                                         />
                                     </Box>
+                                    {from != "SupplierAskPrice" && <Autocomplete
+                                        multiple
+                                        options={[{ fieldName: "All", fieldLabel: "All" }, ...fields]}
+                                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                                        value={
+                                            fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName)).length
+                                                ? fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName))
+                                                : []
+                                        }
+                                        onChange={(e, val: any) => {
+                                            val?.some(d => d?.fieldName === "All") ?
+                                                setSelectedFields(fields?.map((d) => d?.fieldName))
+                                                : setSelectedFields(val && val?.map((d) => d?.fieldName))
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                margin="dense"
+                                                name="field"
+                                                label="Required Field"
+                                                variant="outlined"
+                                                required
+                                                fullWidth
+                                            />
+                                        )}
+                                    />}
                                 </Grid>
                             </Grid>
                         </Box>
@@ -339,7 +343,7 @@ const AskSupplierPriceDialog = (props) => {
                         : <CustomButton
                             variant="contained"
                             color="primary"
-                            disabled={supplierContactData.length === 0 || fields.length === 0}
+                            disabled={contactId.length === 0 || selectedFields.length === 0}
                             onClick={() => handelAskPriceToSupplier(contantValue, contactId, selectedFields)}
                         >
                             Send
