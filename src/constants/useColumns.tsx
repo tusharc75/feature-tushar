@@ -7,6 +7,7 @@ import {
     UpdatedByRenderer,
     CommonRendererWithCopy,
     DateRenderer,
+    DateTimeRenderer,
     LinkRenderer,
     ImageRenderer,
     NameRenderer,
@@ -80,6 +81,12 @@ export const getFrameworkComponents = (rendererNameList, showStaticRenderers = f
             result = {
                 ...result,
                 "dateRenderer": DateRenderer
+            }
+        }
+        else if (o === "dateTimeRenderer") {
+            result = {
+                ...result,
+                "dateTimeRenderer": DateTimeRenderer
             }
         }
         else if (o === "checkboxRenderer") {
@@ -269,6 +276,16 @@ export default function useColumns() {
                         filter: false
                     },
                     rendererName: 'dateRenderer',
+                }
+            }
+            else if (field?.type === "dateTime") {
+                return {
+                    columnData: {
+                        ...commonFieldData,
+                        cellRenderer: "dateTimeRenderer",
+                        filter: false
+                    },
+                    rendererName: 'dateTimeRenderer',
                 }
             }
             else if (field?.type === "checkBox") {
