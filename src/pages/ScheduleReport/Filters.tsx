@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select } from '@material-ui/core';
+import { Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select } from '@material-ui/core';
 import moment from 'moment';
 
 import FormTypes from 'src/components/Helpers/FormTypes';
