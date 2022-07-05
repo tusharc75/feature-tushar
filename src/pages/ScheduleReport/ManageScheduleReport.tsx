@@ -145,7 +145,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     if (!resourceColumns && resourceColumns.length === 0) return;
 
     const optionsData: any = {};
-    console.log(resourceColumns);
     const filteredData = [...resourceColumns]
       .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'date'))
       .map((d: any) => {
@@ -392,10 +391,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         }
       });
     }
-
-    console.log(filters);
-
-    return;
 
     const newValues = {
       ...values,
