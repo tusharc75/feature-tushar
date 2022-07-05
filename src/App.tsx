@@ -135,6 +135,7 @@ import ProductAuction from './pages/productAuction';
 import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDetailsPage';
 import ConvertInventory from './pages/ConvertInventory';
 import PublicRoutePage from './pages/PublicRoutePage';
+import ImportExport from './pages/ImportExport';
 import ScheduleReport from './pages/ScheduleReport';
 import InventoryCycle from './pages/InventoryCycle';
 import InventoryCycleDetailPage from './pages/InventoryCycle/InventoryCycleDetailPage';
@@ -734,6 +735,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.inventoryToAsset.path}>
               <ConvertInventory />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.importExport.path}>
+              <ImportExport />
             </PrivateRoute>
             <PrivateRoute exact path={routes.inventoryCycle.path}>
               <InventoryCycle />

@@ -26,7 +26,7 @@ import DeleteButton from "../Helpers/DeleteButton";
 
 const renderedFrom = "quoteSupplierPrice";
 const localStorageSelectedRecords = `${renderedFrom}_selected`;
-const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit", "supplierAccount", "responseDate", "supplierContact", "status"]
+const displayColumns = ["qty", "productName", "productDesc", "unit", "supplierAccount", "responseDate", "supplierContact", "status"]
 let levalOrderBy = [
     "product",
     "product-custom",
@@ -60,8 +60,9 @@ const SupplierAskPrice = (props) => {
         }
 
         axiosInstance().get(`/quote-builder/supplier-response/${supplierData?._id}`).then(({ data: { data } }) => {
-
+            let requiredFields = []
             let rows = data.products.map((item, index) => {
+                if (item?.requiredFields) requiredFields = [...requiredFields, ...item?.requiredFields]
                 let res: any = {
                     ...prepareDataForGrid(item),
                     totalCost: item.totalCost || item.costPrice,
@@ -73,7 +74,7 @@ const SupplierAskPrice = (props) => {
             let columns = []
             let rendererNames = [];
 
-            GenrateColoum(data.fields, columns, rendererNames);
+            GenrateColoum(data.fields, columns, rendererNames, Array.from(new Set(requiredFields)));
 
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
@@ -122,7 +123,7 @@ const SupplierAskPrice = (props) => {
         });
     };
 
-    const GenrateColoum = (fields, column, rendererNames) => {
+    const GenrateColoum = (fields, column, rendererNames, requiredFields) => {
         let _fields = fields;
 
         _fields.forEach((ele) => {
@@ -136,7 +137,7 @@ const SupplierAskPrice = (props) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = displayColumns.includes(ele.fieldName) ? true : false
+                            col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
                             col.disabled = false
                             col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
@@ -154,7 +155,7 @@ const SupplierAskPrice = (props) => {
                                 col.field = fieldName
                                 col.headerName = fieldLabel
                                 col.width = 180
-                                col.show = displayColumns.includes(ele.fieldName) ? true : false
+                                col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
                                 col.disabled = false
                                 col.leval = ele.leval
                                 col.cellRenderer = "commonRenderer";
@@ -172,7 +173,7 @@ const SupplierAskPrice = (props) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = displayColumns.includes(ele.fieldName) ? true : false
+                            col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
                             col.disabled = false
                             col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
@@ -188,7 +189,7 @@ const SupplierAskPrice = (props) => {
                         col.field = ele.fieldName
                         col.headerName = ele.fieldLabel
                         col.width = 180
-                        col.show = displayColumns.includes(ele.fieldName) ? true : false
+                        col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
                         col.disabled = false
                         col.leval = ele.leval
                         col.cellRenderer = "commonRenderer";
