@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import Layout from '../../components/Layout';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { Box, Container, Grid, Paper, Button, CircularProgress, Card, Typography, Tabs, Tab } from '@material-ui/core';
+import { Box, Container, Grid, Paper, Button, CircularProgress, Card, Typography, Tabs, Tab, IconButton, Tooltip } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import axiosInstance from '../../axios/axiosInstance';
@@ -13,6 +13,7 @@ import { documentUploadMaxSize, resourceNames, RESOURCE_LABEL } from '../../cons
 import CustomContainer from 'src/components/CustomContainer';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateTimeRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import { GetApp } from '@material-ui/icons';
 // import { TabPanel } from '@material-ui/lab';
 
 interface TabPanelProps {
@@ -188,39 +189,55 @@ const BrandBackup = () => {
       headerName: 'Status',
       width: 200,
       cellRenderer: 'CommonRenderer'
+    },
+    {
+      field: 'status',
+      headerName: 'Action',
+      width: 170,
+      cellRenderer: 'actionRenderer'
     }
-    // {
-    //   field: 'fileName',
-    //   headerName: 'Action',
-    //   width: 170,
-    //   cellRenderer: (params) => {
-    //     return (
-    //       <>
-    //         <Button
-    //           onClick={() => {
-    //             handleDownloadFile(params.row._id);
-    //             setFileName(params.row._id);
-    //           }}
-    //           variant="contained"
-    //           color="primary"
-    //           size="small"
-    //           disabled={params.row.status !== 'Complete'}
-    //         >
-    //           {downloading && fileName === params.row.fileName ? (
-    //             <>
-    //               <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
-    //               Downloading ...{' '}
-    //             </>
-    //           ) : (
-    //             '  Download'
-    //           )}
-    //         </Button>
-    //       </>
-    //     );
-    //   }
-    // }
   ];
+  const ActionRenderer = (params) => (
+    <>
+      {/* <Button
+        onClick={() => {
+          handleDownloadFile(params.row._id);
+          setFileName(params.row._id);
+        }}
+        variant="contained"
+        color="primary"
+        size="small"
+        disabled={params.row.status !== 'Complete'}
+      >
+        {downloading && fileName === params.row.fileName ? (
+          <>
+            <CircularProgress color="inherit" size={14} style={{ marginRight: '10px' }} />
+            Downloading ...{' '}
+          </>
+        ) : (
+          '  Download'
+        )}
+      </Button> */}
+      <Tooltip title={params?.value === 'Complete' ? 'Download' : 'Download Not available'}>
+        <IconButton
+          size="small"
+          color="inherit"
+          onClick={() => {
+            if (params?.value === 'Complete') {
+              // handleDownloadFile(params.row._id);
+              // setFileName(params.row._id);
+            }
+          }}
+        >
+          <GetApp color={params?.value === 'Complete' ? 'secondary' : 'disabled'} fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </>
+  );
 
+  const frameworkComponents = {
+    actionRenderer: ActionRenderer
+  };
   const importColumn = [
     {
       field: 'resource',
@@ -431,7 +448,7 @@ const BrandBackup = () => {
                 <CustomAgGrid
                   columns={exportColumn}
                   dataRows={rowsExport}
-                  frameworkComponents={frameWorkComponent}
+                  frameworkComponents={frameworkComponents}
                   setGridApi={setGridApi}
                   dispatch={dispatch}
                   rowCount={intialState.rowCount}
@@ -439,9 +456,8 @@ const BrandBackup = () => {
                   pageSizes={intialState.pageSizes}
                   page={intialState.page}
                   isClientSideGrid={true}
-                  allowAction={true}
+                  allowAction={false}
                   // actionWidth={150}
-                  actionLabel="Action"
                   loading={loading}
                   allowSelection={false}
                   refreshGrid={fetchAllExportHistory}
