@@ -213,7 +213,7 @@ function App() {
   });
 
   useEffect(() => {
-    if (!mappedEntities) {
+    if (!mappedEntities && localStorage.getItem('token')) {
       axiosInstance()
         .get(`${entityApi}`)
         .then(({ data: { data } }) => {

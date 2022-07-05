@@ -7,14 +7,14 @@ import FormTypes from './FormTypes';
 import { setFieldsInAscendingOrder } from '../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
-import ManageAddressDialog from "../../components/Address/ManageAddressDialog"
+import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
 
 const InputField = (props) => {
   const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, ...rest } = props;
 
   const [formsData, setFormsData] = useState([]);
   const [addressOptions, setAddressOptions] = useState([]);
-  const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false })
+  const [addressOpen, setAddressOpen] = useState({ open: false, isClone: false });
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const {
     state: { user, permissions }
@@ -22,7 +22,7 @@ const InputField = (props) => {
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(fieldsData));
-    const addressOption = fieldsData.find((obj) => obj?.fieldName === "address")
+    const addressOption = fieldsData.find((obj) => obj?.fieldName === 'address');
     setAddressOptions(addressOption?.option);
     // eslint-disable-next-line
   }, [fieldsData]);
@@ -56,10 +56,57 @@ const InputField = (props) => {
                       fields={fieldsData}
                       fieldData={field}
                     />
+                  ) : field.fieldName === 'day' ? (
+                    values.recurrence === 'Monthly' && (
+                      <Grid item xs={12} sm={6} md={6}>
+                        <FormTypes
+                          {...rest}
+                          values={values}
+                          errors={errors}
+                          touched={touched}
+                          label={field.fieldLabel}
+                          name={field.fieldName}
+                          type={field.type}
+                          options={field.option}
+                          setFieldValue={setFieldValue}
+                          required={field.required}
+                          isTooltip={field.isTooltip}
+                          tooltipMessage={field.tooltipMessage}
+                          fields={fieldsData}
+                          fieldData={field}
+                        />
+                      </Grid>
+                    )
+                  ) : field.fieldName === 'dayName' ? (
+                    values.recurrence === 'Weekly' && (
+                      <Grid item xs={12} sm={6} md={6}>
+                        <FormTypes
+                          {...rest}
+                          values={values}
+                          errors={errors}
+                          touched={touched}
+                          label={field.fieldLabel}
+                          name={field.fieldName}
+                          type={field.type}
+                          options={field.option}
+                          setFieldValue={setFieldValue}
+                          required={field.required}
+                          isTooltip={field.isTooltip}
+                          tooltipMessage={field.tooltipMessage}
+                          fields={fieldsData}
+                          fieldData={field}
+                        />
+                      </Grid>
+                    )
                   ) : field.fieldName === 'address' ? (
                     <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                       <Grid container spacing={1}>
-                        <Grid item xs={permissions?.warehouse?.isCreate ? 10 : 11} sm={permissions?.warehouse?.isCreate ? 10 : 11} md={permissions?.isCreate ? 10 : 11}>
+                        <Grid
+                          item
+                          xs={permissions?.warehouse?.isCreate ? 10 : 11}
+                          sm={permissions?.warehouse?.isCreate ? 10 : 11}
+                          md={permissions?.isCreate ? 10 : 11}
+                        >
                           <FormTypes
                             {...rest}
                             values={values}
@@ -127,25 +174,25 @@ const InputField = (props) => {
                         onChange={
                           field.fieldName === 'currency'
                             ? (e, val) => {
-                              if (val && val.currencyCode) {
-                                setFieldValue(field.fieldName, val.currencyCode);
-                                setCurrencySymbol(val.symbolNative);
-                              } else {
-                                setFieldValue(field.fieldName, '');
-                                setCurrencySymbol(null);
+                                if (val && val.currencyCode) {
+                                  setFieldValue(field.fieldName, val.currencyCode);
+                                  setCurrencySymbol(val.symbolNative);
+                                } else {
+                                  setFieldValue(field.fieldName, '');
+                                  setCurrencySymbol(null);
+                                }
                               }
-                            }
                             : field.type === 'dropDown'
-                              ? (e, val) => {
+                            ? (e, val) => {
                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
                               }
-                              : null
+                            : null
                         }
                         imageOrFileUploadCompletePercentage={
                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                             ? (completePercentage) => {
-                              onImageUploadCompletePercentage(completePercentage);
-                            }
+                                onImageUploadCompletePercentage(completePercentage);
+                              }
                             : null
                         }
                         fields={fieldsData}
@@ -158,7 +205,7 @@ const InputField = (props) => {
                   <ManageAddressDialog
                     onClose={() => setAddressOpen({ open: false, isClone: false })}
                     onSuccess={(data) => {
-                      setFieldValue("address", data._id)
+                      setFieldValue('address', data._id);
                       setAddressOptions((prevState) => {
                         return [
                           ...prevState,
@@ -168,9 +215,9 @@ const InputField = (props) => {
                             order: addressOptions.length,
                             default: false
                           }
-                        ]
-                      })
-                      setAddressOpen({ open: false, isClone: false })
+                        ];
+                      });
+                      setAddressOpen({ open: false, isClone: false });
                     }}
                   />
                 )}
