@@ -72,6 +72,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'erecs',
         'resource-calendar',
         'serialized-asset-new',
+        'import-export',
         'schedule-report',
         'inventory-cycle'
       ].indexOf(pathnames[0]) >= 0
