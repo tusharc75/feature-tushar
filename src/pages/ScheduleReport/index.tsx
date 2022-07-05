@@ -39,9 +39,8 @@ const ScheduleReport = () => {
   let history = useHistory();
   const renderedFrom = 'schedule-report';
 
-  const [openManageDialog, setOpenManageDialog] = React.useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = React.useState(false);
-  const [showManageDialog, setShowManageDialog] = React.useState({ open: false, isClone: false, idToClone: null });
+  const [showManageDialog, setShowManageDialog] = React.useState({ open: false, id: null });
   const [deleteRecord, setDeleteRecord] = React.useState(null);
   const [isDeleting, setDeleting] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -53,7 +52,7 @@ const ScheduleReport = () => {
       headerName: 'Schedule Name',
       show: true,
       disabled: false,
-      cellRenderer: 'commonRenderer',
+      cellRenderer: 'scheduleNameRenderer',
       primaryField: true
     },
     {
@@ -67,6 +66,14 @@ const ScheduleReport = () => {
     {
       field: 'brand',
       headerName: 'Brand',
+      show: true,
+      disabled: false,
+      cellRenderer: 'commonRenderer',
+      primaryField: false
+    },
+    {
+      field: 'filters',
+      headerName: 'Filters',
       show: true,
       disabled: false,
       cellRenderer: 'commonRenderer',
@@ -104,6 +111,14 @@ const ScheduleReport = () => {
       cellRenderer: 'commonRenderer',
       primaryField: false
     },
+    // {
+    //   field: 'date',
+    //   headerName: 'Date',
+    //   show: true,
+    //   disabled: false,
+    //   cellRenderer: 'commonRenderer',
+    //   primaryField: false
+    // },
     {
       field: 'time',
       headerName: 'Time',
@@ -152,15 +167,19 @@ const ScheduleReport = () => {
 
       data = data.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.resource = startCase(finalObject.resource);
-        finalObject.subscribeUsers = finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ');
+        finalObject.subscribeUsers = finalObject.subscribeUsers.length
+          ? finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ')
+          : [];
+        finalObject.date = new Date(finalObject.date).toDateString();
+        finalObject.time = new Date(finalObject.time).toLocaleTimeString();
         finalObject.column = finalObject.column
           .split(',')
           .map((s: string) => startCase(s))
           .join(', ');
+        finalObject.filters = finalObject.filters.length > 0 ? finalObject.filters.map((item) => startCase(item.term)) : [];
         return finalObject;
       });
-      console.log(data);
+
       dispatch({ type: 'initialize', data: data, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -202,8 +221,17 @@ const ScheduleReport = () => {
     </>
   );
 
+  function ScheduleNameRenderer(params) {
+    return (
+      <span onClick={() => setShowManageDialog({ open: true, id: params.data._id })} className="cursor-pointer link">
+        {params.value}
+      </span>
+    );
+  }
+
   const frameworkComponents = {
-    actionsRenderer: ActionsRenderer
+    actionsRenderer: ActionsRenderer,
+    scheduleNameRenderer: ScheduleNameRenderer
   };
 
   const handleDelete = () => {
@@ -231,14 +259,6 @@ const ScheduleReport = () => {
         setShowDeleteConfirmBox(false);
         toastConfig.setToastConfig(err);
       });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   return (
@@ -285,7 +305,7 @@ const ScheduleReport = () => {
               <Grid item xs={8}>
                 <Box display="flex" alignItems="center" justifyContent="flex-end">
                   <Box mr={1}>
-                    <Button onClick={() => setOpenManageDialog(true)} variant="contained" size="small" color="primary">
+                    <Button onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))} variant="contained" size="small" color="primary">
                       Add
                     </Button>
                   </Box>
@@ -387,13 +407,14 @@ const ScheduleReport = () => {
       </div>
 
       <React.Fragment>
-        {openManageDialog && (
+        {showManageDialog.open && (
           <ManageScheduleReport
+            id={showManageDialog.id}
             onSuccess={() => {
               fetchResourceData();
-              setOpenManageDialog(false);
+              setShowManageDialog({ open: false, id: null });
             }}
-            handleClose={() => setOpenManageDialog(false)}
+            handleClose={() => setShowManageDialog({ open: false, id: null })}
           />
         )}
       </React.Fragment>
