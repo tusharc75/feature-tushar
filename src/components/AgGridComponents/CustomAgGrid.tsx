@@ -176,19 +176,23 @@ export default function CustomAgGrid({
   const enableRowDrag = cols.some((d) => d.rowDrag);
 
   useEffect(() => {
-    if ((reportSave && selectedReportView) || renderedFrom.includes('report')) {
+    if ((reportSave && selectedReportView) || renderedFrom.includes('_report')) {
       const newColumnsState = reportSave && selectedReportView ? selectedReportView.columnState : localStorage.getItem(renderedFrom);
       const parseColumns = JSON.parse(newColumnsState);
       let newColumns = [];
+
       cols.forEach((col) => {
         let newColObject = { ...col };
-        parseColumns.forEach((column) => {
-          if (newColObject.field === column.colId) {
-            newColObject.show = !column.hide;
-          }
-        });
+        if (parseColumns) {
+          parseColumns.forEach((column) => {
+            if (newColObject.field === column.colId) {
+              newColObject.show = !column.hide;
+            }
+          });
+        }
         newColumns.push(newColObject);
       });
+
       setColumns(newColumns);
     } else {
       setColumns(cols);
