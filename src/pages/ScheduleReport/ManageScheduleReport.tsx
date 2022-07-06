@@ -57,6 +57,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           await fetchGridColumns(resource);
 
           let newData: ValueTypes = {
+            ...data,
             scheduleName: data?.scheduleName,
             resource,
             frequency: data?.frequency,
@@ -96,6 +97,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
       if (newData?.filters.length > 0) {
         const filters = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term === filter.fieldName) > -1);
+
+        const dateFields = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term.split('_')[1] === filter.fieldName) > -1);
+
         const filterData = newData.filters.reduce(
           (acc, val) => ({
             ...acc,
@@ -104,8 +108,15 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           {}
         );
 
-        newData.filters = filters;
+        const dateFilterData = {};
+        newData.filters
+          .filter((item) => item.term.includes('from_') || item.term.includes('to_'))
+          .forEach(({ term, value }) => {
+            dateFilterData[term] = value;
+          });
 
+        newData.filters = [...filters, ...dateFields];
+        setBetweenDate(dateFilterData);
         setFilterValues(filterData);
       }
       if (newData?.column.length > 0) {
@@ -402,16 +413,40 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       subscribeUsers: values.subscribeUsers.map((user) => user.userId)
     };
 
-    axiosInstance()
-      .post(`/schedule-report`, newValues)
-      .then(() => {
-        onSuccess();
-        setSubmitting(false);
-      })
-      .catch((err) => {
-        setSubmitting(false);
-        setToastConfig(err);
-      });
+    if (id) {
+      let newData = { ...scheduleData, ...newValues };
+      axiosInstance()
+        .put(`/schedule-report`, newData)
+        .then(() => {
+          setToastConfig({
+            type: 'success',
+            message: 'Schedule report successfully updated',
+            open: true
+          });
+          onSuccess();
+          setSubmitting(false);
+        })
+        .catch((err) => {
+          setSubmitting(false);
+          setToastConfig(err);
+        });
+    } else {
+      axiosInstance()
+        .post(`/schedule-report`, newValues)
+        .then(() => {
+          setToastConfig({
+            type: 'success',
+            message: 'Schedule report successfully created',
+            open: true
+          });
+          onSuccess();
+          setSubmitting(false);
+        })
+        .catch((err) => {
+          setSubmitting(false);
+          setToastConfig(err);
+        });
+    }
   };
 
   return (
@@ -427,7 +462,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       fullWidth
     >
       <CustomDialogHeader
-        title="Add Schedule Report"
+        title={`${id ? 'Edit' : 'Add'} Schedule Report`}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen((prevState) => !prevState);
@@ -700,7 +735,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   size="small"
                   onClick={submitForm}
                 >
-                  Save
+                  {id ? 'Update' : 'Save'}
                 </Button>
               </CustomDialogFooter>
             </>
@@ -713,7 +748,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             Cancel
           </Button>
           <Button disabled={true} type="submit" variant="contained" color="primary" size="small">
-            Save
+            {id ? 'Update' : 'Save'}
           </Button>
         </CustomDialogFooter>
       )}

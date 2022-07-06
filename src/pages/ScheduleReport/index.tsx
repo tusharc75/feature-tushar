@@ -253,12 +253,25 @@ const ScheduleReport = () => {
         setDeleteRecord(null);
         setShowDeleteConfirmBox(false);
         fetchResourceData();
+        toastConfig.setToastConfig({
+          type: 'success',
+          message: 'Schedule report successfully deleted',
+          open: true
+        });
       })
       .catch((err) => {
         setDeleting(false);
         setShowDeleteConfirmBox(false);
         toastConfig.setToastConfig(err);
       });
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
   return (
@@ -315,11 +328,11 @@ const ScheduleReport = () => {
                       variant="outlined"
                       size="small"
                       color="primary"
-                      onClick={() => setShowDeleteConfirmBox(true)}
+                      onClick={openActions}
                     >
-                      Delete
+                      Actions
                     </Button>
-                    {/* <Menu
+                    <Menu
                       anchorEl={anchorEl}
                       keepMounted
                       getContentAnchorEl={null}
@@ -332,7 +345,7 @@ const ScheduleReport = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={!permissions?.report?.isDelete}
+                        disabled={!permissions?.report?.isDelete || selectedRecords.length === 0}
                         onClick={() => {
                           closeActions();
                           setShowDeleteConfirmBox(true);
@@ -340,7 +353,7 @@ const ScheduleReport = () => {
                       >
                         Delete
                       </MenuItem>
-                    </Menu> */}
+                    </Menu>
                   </Box>
                 </Box>
               </Grid>
