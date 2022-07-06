@@ -47,7 +47,7 @@ const AskSupplierPriceDialog = (props) => {
 
 
     useEffect(() => {
-        if(from !== "SupplierAskPrice"){
+        if (from !== "SupplierAskPrice") {
             axiosInstance().get(`/productbuilder/getoneproduct/${productBuilderId}/${productDataList[0]?._id}`).then(({ data: { data } }) => {
                 var _fields = [];
                 data.productData.fields.forEach((_f) => {
@@ -210,7 +210,7 @@ const AskSupplierPriceDialog = (props) => {
                 open={askSupplierPriceDialog}
                 disableBackdropClick={true}
             >
-                <CustomDialogHeader title="Ask Supplier Price" onClose={() => {
+                <CustomDialogHeader title={from != "SupplierAskPrice" ? "Reject Supplier Price" : "Ask Supplier Price"} onClose={() => {
                     setAskSupplierPriceDialog(false)
                 }}
                     isMinimized={!fullScreen}
@@ -224,7 +224,7 @@ const AskSupplierPriceDialog = (props) => {
                 <CustomDialogContent>
                     <MuiPickersUtilsProvider utils={MomentUtils}>
                         <Box padding={1}>
-                            <Grid container spacing={3}>
+                            <Grid container spacing={1}>
                                 <Grid item xs={12}>
                                     {from != "SupplierAskPrice" && <Autocomplete
                                         multiple
@@ -252,6 +252,8 @@ const AskSupplierPriceDialog = (props) => {
                                             />
                                         )}
                                     />}
+                                </Grid>
+                                <Grid item xs={12}>
                                     <Box>
                                         {otherAttachments && otherAttachments.length > 0 && renderFileThumbnails}
                                         {otherAttachments && otherAttachments.length > 0 && <ImageAttachments
@@ -293,6 +295,8 @@ const AskSupplierPriceDialog = (props) => {
                                             isSendToCustomer={false}
                                         />
                                     </Box>
+                                </Grid>
+                                <Grid item xs={12}>
                                     {from != "SupplierAskPrice" && <Autocomplete
                                         multiple
                                         options={[{ fieldName: "All", fieldLabel: "All" }, ...fields]}

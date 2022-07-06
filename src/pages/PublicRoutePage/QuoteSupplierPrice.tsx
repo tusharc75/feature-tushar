@@ -31,6 +31,8 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
     const [productData, setProductData] = useState([]);
+    const [productArray, setProductArray] = useState([]);
+    const [requireFieldArray, setRequireFieldArray] = useState([]);
     const [quoteDetailsData, setQuoteDetailsData] = useState(null);
     const [isSubmited, setIsSubmited] = useState(false);
 
@@ -92,6 +94,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                 res.isChecked = false;
                 return res;
             });
+            setProductArray(rows)
             let columns = []
             columns = [
                 {
@@ -110,7 +113,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
             data.products?.forEach((ele) => {
                 fields = [...fields, ...ele.fields]
             })
-
+            setRequireFieldArray(data?.requiredFields)
             GenrateColoum([...new Map(fields.map(item => [item["_id"], item])).values()], columns, rendererNames, data?.requiredFields);
 
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
@@ -229,7 +232,6 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
             tempProductData[productIndex][row?.column?.colId] = tempData[row?.column?.colId]
             setProductData(tempProductData)
         }
-
     }
 
     const handleSubmit = () => {
@@ -261,7 +263,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={productData.length === 0}
+                    disabled={productArray.length !== productData.length}
                     onClick={handleSubmit}
                 >
                     Submit
