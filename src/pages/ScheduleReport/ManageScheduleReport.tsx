@@ -108,6 +108,19 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           {}
         );
 
+        const selectedFiltersData = filters.reduce(
+          (acc, val) => ({
+            ...acc,
+            [val.fieldName]: {
+              type: val.type,
+              lookup: val.lookup,
+              value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))
+            }
+          }),
+          {}
+        );
+
+        setSelectedData(selectedFiltersData);
         const dateFilterData = {};
         newData.filters
           .filter((item) => item.term.includes('from_') || item.term.includes('to_'))
@@ -373,7 +386,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   };
 
   const handleSubmit = (values: ValueTypes) => {
-    setSubmitting(true);
     const filters = [];
     if (selectedData) {
       const filterKeys = Object.keys(selectedData);
@@ -413,8 +425,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       subscribeUsers: values.subscribeUsers.map((user) => user.userId)
     };
 
+    setSubmitting(true);
     if (id) {
-      let newData = { ...scheduleData, ...newValues };
+      let newData = { _id: id, ...newValues };
       axiosInstance()
         .put(`/schedule-report`, newData)
         .then(() => {
