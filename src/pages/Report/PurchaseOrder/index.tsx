@@ -428,16 +428,20 @@ const Report = () => {
 
     setShowPricefilter({ warehouse: null, fromDate: null, toDate: null })
 
-    let filterQuery = `page=${page}&`;
+    let filterQuery = ``;
+
     if (!isExport) {
-      filterQuery = `limit=${limit}&`;
+      filterQuery = `page=${page}&limit=${limit}&`;
     }
+
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
+
     if (search) {
       filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
+
     if (selectedResources.length > 0) {
       let deepFilter = [];
       if (selectedData) {
@@ -525,6 +529,12 @@ const Report = () => {
       message: 'Please wait exporting data',
       type: 'info'
     });
+    let columns = [];
+    if (gridApi) {
+      console.log(gridApi)
+      columns = gridApi.columnController.displayedColumns;
+      columns = columns.map((col) => col.colId);
+    }
     setExporting(true);
     let filterQuery = getFilter(true);
     axiosInstance()
@@ -532,7 +542,7 @@ const Report = () => {
         `${resourceCamelCase === 'purchaseOrderProduct'
           ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
           : `${productInventory.api}/report/purchase-order-price/export`
-        }${filterQuery}`,
+        }${filterQuery}&exportColumn=${JSON.stringify(columns)}`,
         {
           responseType: 'arraybuffer'
         }
