@@ -56,15 +56,20 @@ const ViewSupplierPriceDialog = (props) => {
         aria-labelledby="customized-dialog-title"
         open={true}
     >
-        <CustomDialogHeader title={"View Supplier Price"} onClose={handleClose} ></CustomDialogHeader>
-        {productDataList && productDataList.map(data => (
-            <ProductGridSupplierAskPrice
-                productData={data} handleAdd={handleAdd}
-                handleReject={(data) => {
-                    setRejectId(data)
-                    setAskSupplierPriceDialog(true)
-                }} />
-        ))}
+        <CustomDialogHeader title={"View Supplier Price"} onClose={handleClose} showRequiredLabel={false} ></CustomDialogHeader>
+        {productDataList && productDataList.length !== 0 ?
+            productDataList.map(data => (
+                <ProductGridSupplierAskPrice
+                    productData={data} handleAdd={handleAdd}
+                    handleReject={(data) => {
+                        setRejectId(data)
+                        setAskSupplierPriceDialog(true)
+                    }} />
+            ))
+            :
+            <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
+                No supplier price
+            </h1>}
         {askSupplierPriceDialog &&
             <AskSupplierPriceDialog
                 setAskSupplierPriceDialog={setAskSupplierPriceDialog}

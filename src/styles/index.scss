@@ -527,6 +527,10 @@ body::-webkit-scrollbar-thumb {
   height: calc(100vh - 430px);
 }
 
+.supplier-price-edit-grid {
+  height: calc(100vh - 530px);
+}
+
 .form-label-style:nth-child(1) {
   margin-top: 0.5rem;
 }
@@ -1539,6 +1543,10 @@ body::-webkit-scrollbar-thumb {
 @media only screen and (max-height: 700px) {
   .product-builder-edit-grid {
     height: calc(100vh - 300px);
+  }
+
+  .supplier-price-edit-grid {
+    height: calc(100vh - 400px);
   }
 }
 
