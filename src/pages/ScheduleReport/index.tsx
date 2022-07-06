@@ -1,14 +1,10 @@
-import React from 'react';
-import { useParams, useHistory, Link } from 'react-router-dom';
+import React, { useState, useReducer, useContext, useEffect, Fragment } from 'react';
 import { Grid, useTheme, useMediaQuery, Button, Box, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
-import axios from 'axios';
-import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
 import styles from 'src/pages/Leads/Header.module.scss';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomContainer from 'src/components/CustomContainer';
@@ -16,37 +12,33 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from 'src/constants/helpers';
+import { prepareDataForGrid, gridLoadingTimeout } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
-import { DateRenderer, CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import ManageScheduleReport from './ManageScheduleReport';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete, FileCopy } from '@material-ui/icons';
+import useColumns, { getStaticFields, staticFrameworkRender } from "../../constants/useColumns"
+import { ExpandMore } from '@material-ui/icons';
 
 const ScheduleReport = () => {
+
   const theme = useTheme();
-  const [isExporting, setIsExporting] = React.useState(false);
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
-  const initialRender = React.useRef(true);
-  const toastConfig = React.useContext(CustomToastContext);
-  const {
-    state: { permissions, selectedEntity }
-  } = useData();
-  let { resource } = useParams();
-  let history = useHistory();
+
+  const toastConfig = useContext(CustomToastContext);
+  const { state: { permissions, selectedEntity } } = useData();
   const renderedFrom = 'schedule-report';
 
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = React.useState(false);
-  const [showManageDialog, setShowManageDialog] = React.useState({ open: false, id: null });
-  const [deleteRecord, setDeleteRecord] = React.useState(null);
-  const [isDeleting, setDeleting] = React.useState(false);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, id: null });
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [isDeleting, setDeleting] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   // Grid Configs
-  const [columns] = React.useState([
+  const [columns] = useState([
     {
       field: 'scheduleName',
       headerName: 'Schedule Name',
@@ -58,14 +50,6 @@ const ScheduleReport = () => {
     {
       field: 'resource',
       headerName: 'Resource',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer',
-      primaryField: false
-    },
-    {
-      field: 'brand',
-      headerName: 'Brand',
       show: true,
       disabled: false,
       cellRenderer: 'commonRenderer',
@@ -111,14 +95,6 @@ const ScheduleReport = () => {
       cellRenderer: 'commonRenderer',
       primaryField: false
     },
-    // {
-    //   field: 'date',
-    //   headerName: 'Date',
-    //   show: true,
-    //   disabled: false,
-    //   cellRenderer: 'commonRenderer',
-    //   primaryField: false
-    // },
     {
       field: 'time',
       headerName: 'Time',
@@ -127,33 +103,16 @@ const ScheduleReport = () => {
       cellRenderer: 'commonRenderer',
       primaryField: false
     },
-    {
-      field: 'createdBy',
-      headerName: 'Created By',
-      show: true,
-      disabled: false,
-      cellRenderer: 'dateRenderer',
-      primaryField: false
-    },
-    {
-      field: 'updatedBy',
-      headerName: 'Updated By',
-      show: true,
-      disabled: false,
-      cellRenderer: 'dateRenderer',
-      primaryField: false
-    }
+    ...getStaticFields()
   ]);
-  const [gridApi, setGridApi] = React.useState(null);
-  const [state, dispatch] = React.useReducer(reducer, intialState);
+
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, selectedRecords, sorting, search, limit, filters, pageSizes } = state;
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchResourceData();
   }, []);
-
-  //Export Data
-  const exportData = () => {};
 
   const fetchResourceData = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -205,7 +164,6 @@ const ScheduleReport = () => {
           <FileCopy color="primary" />
         </IconButton>
       </HtmlTooltip> */}
-
       <HtmlTooltip title="Delete">
         <IconButton
           size="small"
@@ -230,32 +188,31 @@ const ScheduleReport = () => {
   }
 
   const frameworkComponents = {
+    scheduleNameRenderer: ScheduleNameRenderer,
     actionsRenderer: ActionsRenderer,
-    scheduleNameRenderer: ScheduleNameRenderer
+    ...staticFrameworkRender
   };
 
   const handleDelete = () => {
     let ids = [];
-
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
       ids = selectedRecords.map((item) => item._id);
     }
-
     setDeleting(true);
     axiosInstance()
       .put('schedule-report/remove', {
         ids
       })
-      .then(() => {
+      .then(({ data }) => {
         setDeleting(false);
         setDeleteRecord(null);
         setShowDeleteConfirmBox(false);
         fetchResourceData();
         toastConfig.setToastConfig({
           type: 'success',
-          message: 'Schedule report successfully deleted',
+          message: data.message,
           open: true
         });
       })
@@ -286,24 +243,7 @@ const ScheduleReport = () => {
               ]}
             />
           </Grid>
-
           <Grid item xs={2}>
-            <Grid container direction="row">
-              <Grid item xs={12} sm={12}>
-                <Grid container justifyContent="flex-end">
-                  <div id="importExportLinks" style={{ minWidth: 80 }}>
-                    <span
-                      aria-disabled={isExporting}
-                      onClick={exportData}
-                      className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
-                      style={{ color: theme.palette.info.light }}
-                    >
-                      Export All
-                    </span>
-                  </div>
-                </Grid>
-              </Grid>
-            </Grid>
           </Grid>
         </Grid>
         <CustomContainer>
@@ -324,13 +264,14 @@ const ScheduleReport = () => {
                   </Box>
                   <Box>
                     <Button
-                      disabled={!permissions?.report?.isDelete || selectedRecords.length === 0}
                       variant="outlined"
+                      color="default"
                       size="small"
-                      color="primary"
                       onClick={openActions}
+                      aria-controls="action-menu"
+                      disabled={selectedRecords.length === 0}
                     >
-                      Actions
+                      Actions <ExpandMore />
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -345,7 +286,7 @@ const ScheduleReport = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={!permissions?.report?.isDelete || selectedRecords.length === 0}
+                        disabled={!permissions?.report?.isDelete}
                         onClick={() => {
                           closeActions();
                           setShowDeleteConfirmBox(true);
@@ -366,14 +307,14 @@ const ScheduleReport = () => {
                   allowSelection={false}
                   allowSwipe={false}
                   permissions={permissions?.reports}
-                  primaryField={columns?.find((d) => d.primaryField)}
+                  primaryField={columns?.find((d: any) => d.primaryField)}
                   onClick={(data) => {
                     //   history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
                   }}
                   selectedRecords={[]}
                   dataRows={dataRows}
                   dispatch={dispatch}
-                  onEdit={() => {}}
+                  onEdit={() => { }}
                   extraParamsToCheckDelete={false}
                   rowCount={rowCount}
                   page={page}
@@ -388,8 +329,8 @@ const ScheduleReport = () => {
                   owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                   onCreate={false}
                   showClone={false}
-                  onDelete={(data) => {}}
-                  onClone={(data) => {}}
+                  onDelete={(data) => { }}
+                  onClone={(data) => { }}
                   renderedFrom={routes.transferAsset?.title}
                 />
               ) : (
@@ -418,8 +359,7 @@ const ScheduleReport = () => {
           </div>
         </CustomContainer>
       </div>
-
-      <React.Fragment>
+      <Fragment>
         {showManageDialog.open && (
           <ManageScheduleReport
             id={showManageDialog.id}
@@ -430,9 +370,8 @@ const ScheduleReport = () => {
             handleClose={() => setShowManageDialog({ open: false, id: null })}
           />
         )}
-      </React.Fragment>
-
-      <React.Fragment>
+      </Fragment>
+      <Fragment>
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
@@ -445,7 +384,7 @@ const ScheduleReport = () => {
             onOk={handleDelete}
           />
         )}
-      </React.Fragment>
+      </Fragment>
     </MuiPickersUtilsProvider>
   );
 };

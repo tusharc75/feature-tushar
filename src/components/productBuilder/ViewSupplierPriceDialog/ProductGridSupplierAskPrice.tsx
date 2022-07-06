@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog'
 import axiosInstance from '../../../axios/axiosInstance'
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, product, removeLocalStorage } from '../../../constants/helpers';
+import { dateTimeFormat, getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, product, removeLocalStorage } from '../../../constants/helpers';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from '../../Helpers/CommonSkeleton'
 import CustomAgGrid, { reducer, intialState } from "../../AgGridComponents/CustomAgGrid";
@@ -21,6 +21,7 @@ import { CommonRenderer, DateTimeRenderer } from "src/components/AgGridComponent
 import DeleteButton from "src/components/Helpers/DeleteButton";
 import Loader from "src/components/Loader";
 import CustomAgGridEditable from "src/components/AgGridComponents/CustomAgGridEditable";
+import moment from "moment";
 
 
 
@@ -79,25 +80,7 @@ const ProductGridSupplierAskPrice = (props) => {
             ...tempFrameworkComponent,
         }
         setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = sortBy([...columns, {
-            "field": "status",
-            "headerName": "Status",
-            "width": 180,
-            "show": true,
-            "disabled": false,
-            "cellRenderer": "commonRenderer",
-            "leval": "product",
-            "order": 3
-        }, {
-            "field": "responseDate",
-            "headerName": "Rate Submit Date",
-            "width": 180,
-            "show": true,
-            "disabled": false,
-            "cellRenderer": "dateTimeRenderer",
-            "leval": "product",
-            "order": 3
-        },], function (item: any) {
+        columns = sortBy([...columns], function (item: any) {
             return levalOrderBy.indexOf(item.leval)
         });
         setColumns([...columns])
@@ -186,10 +169,10 @@ const ProductGridSupplierAskPrice = (props) => {
 
     return (
         <>
-            <Box mb={2} padding={2} >
-                <Box mb={2} padding={2} style={{ border: "1px solid #D4D6D7", borderRadius: 4 }}>
+            <Box padding={2} >
+                <Box padding={2} style={{ border: "1px solid #D4D6D7", borderRadius: 4 }}>
                     <Grid container >
-                        <Grid item xs={12} sm={6} md={6} container justify="flex-start">
+                        <Grid item xs={12} sm={3} md={3} container justify="flex-start">
                             {productData?.supplierAccount?.optionLabel &&
                                 <Grid item xs={12} sm={12} md={12}>
                                     <Typography variant="subtitle2">
@@ -203,7 +186,21 @@ const ProductGridSupplierAskPrice = (props) => {
                                     </Typography>
                                 </Grid>}
                         </Grid>
-                        {productData?.status !== "Reject" && <Grid item xs={12} sm={6} md={6} container justify="flex-end">
+                        <Grid item xs={12} sm={3} md={3} container justify="flex-start">
+                            {productData?.status &&
+                                <Grid item xs={12} sm={12} md={12}>
+                                    <Typography variant="subtitle2">
+                                        {`Status : ${productData?.status} `}
+                                    </Typography>
+                                </Grid>}
+                            {productData?.responseDate &&
+                                <Grid item xs={12} sm={12} md={12}>
+                                    <Typography variant="subtitle2">
+                                        {`Response Date : ${moment(productData?.responseDate)?.format(dateTimeFormat)}`}
+                                    </Typography>
+                                </Grid>}
+                        </Grid>
+                        {productData?.status === "Submit" && <Grid item xs={12} sm={6} md={6} container justify="flex-end">
                             <Box ml={1} mt={1} >
                                 <Button size="small"
                                     color="primary"
@@ -236,10 +233,9 @@ const ProductGridSupplierAskPrice = (props) => {
                             allowAction={false}
                             allowSelection={false}
                             loading={loading}
-                            refreshGrid={fetchProduct}
                             renderedFrom={renderedFrom}
-                            showOnlyShowFilteredRecordSwitch={true}
-                            className={"product-builder-edit-grid"}
+                            showOnlyShowFilteredRecordSwitch={false}
+                            className={"supplier-price-edit-grid"}
                             onCellValueChanged={() => { }} />
                         : <Loader style={{ minHeight: 300 }} text="Loading..." />}
                 </Box>
