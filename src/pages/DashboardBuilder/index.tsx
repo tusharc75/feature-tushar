@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Box, Button, IconButton } from '@material-ui/core';
-import { Delete, FileCopy } from '@material-ui/icons';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Delete, ExpandMore, FileCopy } from '@material-ui/icons';
 import { useHistory, Link } from 'react-router-dom';
 import { MdDashboardCustomize } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -26,6 +26,8 @@ const Dashboards = () => {
   const { setToastConfig } = React.useContext(CustomToastContext);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState({ open: false, data: [], isLoading: false });
   const [gridApi, setGridApi] = React.useState(null);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
 
@@ -148,6 +150,14 @@ const Dashboards = () => {
     });
   };
 
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
   return (
     <React.Fragment>
       <div className="headerbox">
@@ -168,7 +178,7 @@ const Dashboards = () => {
               </Button>
             )}
             <Box component="span" ml={1} />
-            <DeleteButton
+            {/* <DeleteButton
               disabled={selectedRecords.length === 0}
               text="Delete"
               onClick={() => {
@@ -178,7 +188,44 @@ const Dashboards = () => {
                   data: selectedRecords.map((d: any) => d._id)
                 });
               }}
-            />
+            /> */}
+            <Button
+              variant="outlined"
+              color="default"
+              size="small"
+              endIcon={<ExpandMore />}
+              onClick={openActions}
+              aria-controls="action-menu"
+              disabled={selectedRecords.length === 0}
+            >
+              Actions
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem
+                disabled={!permissions?.report?.isDelete}
+                onClick={() => {
+                  closeActions();
+                  setShowDeleteDialog({
+                    ...showDeleteDialog,
+                    open: true,
+                    data: selectedRecords.map((d: any) => d._id)
+                  });
+                }}
+              >
+                Delete
+              </MenuItem>
+            </Menu>
           </Box>
         </Box>
         <CustomAgGrid
