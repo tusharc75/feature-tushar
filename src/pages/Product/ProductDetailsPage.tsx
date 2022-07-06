@@ -36,7 +36,7 @@ import accountClass from '../Account/account.module.scss';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
 import InventoryHistory from './InventoryHistory';
-
+import CostDetails from './CostDetails';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -680,6 +680,13 @@ const ProductDetailsPage = () => {
                   </Paper>
                 </Box>
                 : null}
+              {permissions?.productInventory?.isRead &&
+                <Box mb={2}>
+                  <CostDetails
+                    product={id}
+                    productData={productData}
+                  />
+                </Box>}
             </Grid>
           ) : null}
         </Grid>
