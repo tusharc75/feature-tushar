@@ -34,7 +34,8 @@ const CostDetails = ({ product, productData }) => {
                     </Box>
                     <Box mx={2} mt={1} mb={1} display="flex" justifyContent="space-between">
                         <Typography variant="subtitle2">Margin</Typography>
-                        <Typography variant="subtitle2">{(((productData?.listPrice || 0) + averageCost) / (productData?.listPrice || 0)).toFixed(2)}</Typography>
+                        <Typography variant="subtitle2">{(productData?.listPrice || 0) === 0 ?
+                            0 : (((productData?.listPrice || 0) + averageCost) / (productData?.listPrice || 0)).toFixed(2)}</Typography>
                     </Box>
                 </> : [1, 2].map((i) => (
                     <BoxWithBorder
