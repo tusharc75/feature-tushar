@@ -307,12 +307,22 @@ const Report = () => {
       message: 'Please wait exporting data',
       type: 'info'
     });
+    let columns = [];
+    if (gridApi) {
+      columns = gridApi.columnController.displayedColumns;
+      columns = columns.map((col) => col.colId);
+    }
     setExporting(true);
     let filterQuery = getFilter(true);
     axiosInstance()
-      .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report/export?export=1&${filterQuery}`, {
-        responseType: 'arraybuffer'
-      })
+      .get(
+        `${
+          resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'
+        }/report/export?exportColumn=${columns}&export=1&${filterQuery}`,
+        {
+          responseType: 'arraybuffer'
+        }
+      )
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);
