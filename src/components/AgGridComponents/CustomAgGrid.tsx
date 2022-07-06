@@ -176,7 +176,7 @@ export default function CustomAgGrid({
   const enableRowDrag = cols.some((d) => d.rowDrag);
 
   useEffect(() => {
-    if ((reportSave && selectedReportView) || renderedFrom.includes('_report')) {
+    if ((reportSave && selectedReportView) || renderedFrom?.includes('_report')) {
       const newColumnsState = reportSave && selectedReportView ? selectedReportView.columnState : localStorage.getItem(renderedFrom);
       const parseColumns = JSON.parse(newColumnsState);
       let newColumns = [];

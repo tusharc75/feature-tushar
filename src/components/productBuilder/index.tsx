@@ -724,7 +724,12 @@ const ProductBuilder = (props) => {
             </MenuItem>
             <MenuItem disabled={selectedRecords.length ? false : true} onClick={handleOpenAddField}>Add Field</MenuItem>
             {isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice &&
-              (<MenuItem onClick={() => setShowViewSupplierPrice(true)}>View Supplier Price</MenuItem>)
+              (<MenuItem onClick={() => {
+                closeActions()
+                setShowViewSupplierPrice(true)
+              }}>
+                View Supplier Price
+              </MenuItem>)
             }
           </Menu>
         </div>
