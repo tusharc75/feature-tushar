@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { Formik, FormikProps } from 'formik';
@@ -27,48 +27,44 @@ type ValueTypes = {
 };
 
 const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
-  const formikRef = React.useRef<FormikProps<ValueTypes>>(null);
-  const { setToastConfig } = React.useContext(CustomToastContext);
-  const [filterValues, setFilterValues] = React.useState({});
-  const [scheduleData, setScheduleData] = React.useState(null);
-  const [formData, setFormData] = React.useState(null);
-  const [resourceColumns, setResourceColumns] = React.useState([]);
-  const [usersList, setUsersList] = React.useState([]);
-  const [filterOptions, setFilterOptions] = React.useState([]);
-  const [resourceOptions, setResourceOptions] = React.useState(null);
-  const [selectedData, setSelectedData] = React.useState(null);
-  const [statusTimeFrame, setStatusTimeFrame] = React.useState('custom');
-  const [statusPeriod, setStatusPeriod] = React.useState(false);
-  const [isSubmitting, setSubmitting] = React.useState(false);
-  const [betweenDate, setBetweenDate] = React.useState(null);
-  const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
 
-  const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
+  const formikRef = useRef<FormikProps<ValueTypes>>(null);
 
-  React.useEffect(() => {
+  const { setToastConfig } = useContext(CustomToastContext);
+  const [filterValues, setFilterValues] = useState({});
+  const [scheduleData, setScheduleData] = useState(null);
+  const [formData, setFormData] = useState(null);
+  const [resourceColumns, setResourceColumns] = useState([]);
+  const [usersList, setUsersList] = useState([]);
+  const [filterOptions, setFilterOptions] = useState([]);
+  const [resourceOptions, setResourceOptions] = useState(null);
+  const [selectedData, setSelectedData] = useState(null);
+  const [statusTimeFrame, setStatusTimeFrame] = useState('custom');
+  const [statusPeriod, setStatusPeriod] = useState(false);
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [betweenDate, setBetweenDate] = useState(null);
+  const [statusPeriodDate, setStatusPeriodDate] = useState(null);
+
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
+  useEffect(() => {
     if (id) {
       (async () => {
         try {
-          let {
-            data: { data }
-          } = await axiosInstance().get(`/schedule-report/${id}`);
+          let { data: { data } } = await axiosInstance().get(`/schedule-report/${id}`);
           let resource: any = REPORT_LIST.find((item) => item.title === data.resource);
           resource = { title: resource.title, key: resource.key };
           await fetchGridColumns(resource);
-
-          let newData: ValueTypes = {
-            ...data,
+          let newData: any = {
             scheduleName: data?.scheduleName,
             resource,
             frequency: data?.frequency,
             time: data?.time,
             week: data?.week,
-            date: data?.date || new Date(),
-            filters: data.filters,
-            column: data.column,
-            subscribeUsers: data.subscribeUsers
+            filters: data?.filters,
+            column: data?.column,
+            subscribeUsers: data?.subscribeUsers
           };
-
           setScheduleData(newData);
         } catch (err) {
           setToastConfig(err);
@@ -84,12 +80,11 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         frequency: 'Daily',
         time: new Date(),
         week: '',
-        date: new Date()
       });
     }
   }, [id]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!scheduleData) return;
 
     const initializeData = () => {
@@ -152,7 +147,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     return () => clearTimeout(timeout);
   }, [scheduleData, filterOptions, resourceColumns]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     axiosInstance()
       .get('/activity/user')
       .then(({ data: { data } }) => {
@@ -164,7 +159,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       });
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // if (!formikRef.current || !formikRef.current?.values?.resource) return;
     if (!resourceColumns && resourceColumns.length === 0) return;
 
@@ -421,7 +416,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       resource: values.resource?.title,
       column: values.column.length > 0 ? values.column.map((field) => field.fieldName) : [],
       time: new Date(values.time),
-      date: new Date(values.date),
       subscribeUsers: values.subscribeUsers.map((user) => user.userId)
     };
 
@@ -430,10 +424,10 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       let newData = { _id: id, ...newValues };
       axiosInstance()
         .put(`/schedule-report`, newData)
-        .then(() => {
+        .then(({ data }) => {
           setToastConfig({
             type: 'success',
-            message: 'Schedule report successfully updated',
+            message: data.message,
             open: true
           });
           onSuccess();
@@ -446,10 +440,10 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     } else {
       axiosInstance()
         .post(`/schedule-report`, newValues)
-        .then(() => {
+        .then(({ data }) => {
           setToastConfig({
             type: 'success',
-            message: 'Schedule report successfully created',
+            message: data.message,
             open: true
           });
           onSuccess();
