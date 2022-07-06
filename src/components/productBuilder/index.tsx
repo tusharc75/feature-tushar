@@ -40,6 +40,7 @@ import { Link, useHistory } from 'react-router-dom';
 import MuiPickersUtilsProvider from "@material-ui/pickers/MuiPickersUtilsProvider";
 import AskSupplierPriceDialog from "./AskSupplierPriceDialog";
 import { useData } from './../../StateProvider/Provider';
+import ViewSupplierPriceDialog from "./ViewSupplierPriceDialog";
 
 let levalOrderBy = [
   "product",
@@ -81,6 +82,7 @@ const ProductBuilder = (props) => {
   const [showCloseConfirmBox, setShowCloseConfirmBox] = useState(false);
   const [addFieldData, setaddFieldData] = useState({ section: [], fields: [] });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [showViewSupplierPrice, setShowViewSupplierPrice] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isClone, setIsClone] = useState(false);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
@@ -700,7 +702,7 @@ const ProductBuilder = (props) => {
               className="float-right"
               onClick={openActions}
               startIcon={<ExpandMore />}
-              disabled={selectedRecords.length ? false : true}
+
               aria-controls="action-menu">
               {isMobile && !isTablet ? "" : "Actions"}
             </Button>
@@ -717,10 +719,13 @@ const ProductBuilder = (props) => {
             open={Boolean(anchorEl)}
             onClose={closeActions}
           >
-            <MenuItem onClick={() => setShowDeleteConfirmBox(true)}>
+            <MenuItem disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)}>
               Delete
             </MenuItem>
-            <MenuItem onClick={handleOpenAddField}>Add Field</MenuItem>
+            <MenuItem disabled={selectedRecords.length ? false : true} onClick={handleOpenAddField}>Add Field</MenuItem>
+            {isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice &&
+              (<MenuItem onClick={() => setShowViewSupplierPrice(true)}>View Supplier Price</MenuItem>)
+            }
           </Menu>
         </div>
       )}
@@ -873,6 +878,15 @@ const ProductBuilder = (props) => {
           }}
         />
       )}
+      {showViewSupplierPrice && <ViewSupplierPriceDialog
+        quoteData={quoteData}
+        handleClose={() => setShowViewSupplierPrice(false)}
+        productBuilderId={productBuilderId}
+        onSuccess={() => {
+          setShowViewSupplierPrice(false);
+          fetchProduct(productBuilderId)
+        }}
+      />}
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
