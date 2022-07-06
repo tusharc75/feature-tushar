@@ -1,7 +1,7 @@
 import React, { useState, useReducer, useContext, useEffect, Fragment } from 'react';
 import { Grid, useTheme, useMediaQuery, Button, Box, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { camelCase, startCase } from 'lodash';
-import { MdDescription, MdChevronLeft } from 'react-icons/md';
+import { startCase } from 'lodash';
+import { MdDescription } from 'react-icons/md';
 import styles from 'src/pages/Leads/Header.module.scss';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -18,17 +18,17 @@ import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwip
 import ManageScheduleReport from './ManageScheduleReport';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete, FileCopy } from '@material-ui/icons';
-import useColumns, { getStaticFields, staticFrameworkRender } from "../../constants/useColumns"
-import { ExpandMore } from '@material-ui/icons';
+import { Delete, ExpandMore } from '@material-ui/icons';
+import { getStaticFields, staticFrameworkRender } from '../../constants/useColumns';
 
 const ScheduleReport = () => {
-
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
 
   const toastConfig = useContext(CustomToastContext);
-  const { state: { permissions, selectedEntity } } = useData();
+  const {
+    state: { permissions, selectedEntity }
+  } = useData();
   const renderedFrom = 'schedule-report';
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -243,8 +243,7 @@ const ScheduleReport = () => {
               ]}
             />
           </Grid>
-          <Grid item xs={2}>
-          </Grid>
+          <Grid item xs={2}></Grid>
         </Grid>
         <CustomContainer>
           <div className="header-panel">
@@ -267,11 +266,12 @@ const ScheduleReport = () => {
                       variant="outlined"
                       color="default"
                       size="small"
+                      endIcon={<ExpandMore />}
                       onClick={openActions}
                       aria-controls="action-menu"
                       disabled={selectedRecords.length === 0}
                     >
-                      Actions <ExpandMore />
+                      Actions
                     </Button>
                     <Menu
                       anchorEl={anchorEl}
@@ -314,7 +314,7 @@ const ScheduleReport = () => {
                   selectedRecords={[]}
                   dataRows={dataRows}
                   dispatch={dispatch}
-                  onEdit={() => { }}
+                  onEdit={() => {}}
                   extraParamsToCheckDelete={false}
                   rowCount={rowCount}
                   page={page}
@@ -329,8 +329,8 @@ const ScheduleReport = () => {
                   owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                   onCreate={false}
                   showClone={false}
-                  onDelete={(data) => { }}
-                  onClone={(data) => { }}
+                  onDelete={(data) => {}}
+                  onClone={(data) => {}}
                   renderedFrom={routes.transferAsset?.title}
                 />
               ) : (

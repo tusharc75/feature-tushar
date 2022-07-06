@@ -23,11 +23,10 @@ type ValueTypes = {
   frequency: string;
   time: any;
   week: string;
-  date: any;
+  day: any;
 };
 
 const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
-
   const formikRef = useRef<FormikProps<ValueTypes>>(null);
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -51,7 +50,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     if (id) {
       (async () => {
         try {
-          let { data: { data } } = await axiosInstance().get(`/schedule-report/${id}`);
+          let {
+            data: { data }
+          } = await axiosInstance().get(`/schedule-report/${id}`);
           let resource: any = REPORT_LIST.find((item) => item.title === data.resource);
           resource = { title: resource.title, key: resource.key };
           await fetchGridColumns(resource);
@@ -59,6 +60,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             scheduleName: data?.scheduleName,
             resource,
             frequency: data?.frequency,
+            day: data?.day,
             time: data?.time,
             week: data?.week,
             filters: data?.filters,
@@ -80,6 +82,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         frequency: 'Daily',
         time: new Date(),
         week: '',
+        day: new Date().getDay().toString()
       });
     }
   }, [id]);
@@ -367,8 +370,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         errors['week'] = 'Day is required';
       }
 
-      if (values.frequency === 'Monthly' && !values.date) {
-        errors['date'] = 'Date is required';
+      if (values.frequency === 'Monthly' && !values.day) {
+        errors['day'] = 'Date is required';
       }
     }
 
@@ -698,7 +701,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             <ToggleButtonGroup size="small" value={values.week} exclusive onChange={(_, val) => handleChange('week', val)}>
                               {FREQUENCY_WEEKS.map((week) => (
                                 <ToggleButton key={week} value={week}>
-                                  {week.substring(0, 3)}
+                                  {week}
                                 </ToggleButton>
                               ))}
                             </ToggleButtonGroup>
@@ -706,21 +709,24 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         )}
                         {values?.frequency === 'Monthly' && (
                           <Box mt={2}>
-                            <KeyboardDatePicker
-                              views={['date']}
-                              openTo="date"
-                              autoOk
+                            <Autocomplete
+                              options={[...new Array(31).keys()].map((_, index) => `${index + 1}`)}
+                              style={{ width: 200 }}
                               size="small"
-                              variant="inline"
-                              inputVariant="outlined"
-                              label="Date"
-                              name="date"
-                              required={values.frequency === 'Monthly'}
-                              format={dateFormatForInputControl}
-                              value={values.date}
-                              error={!Boolean(errors['date'])}
-                              helperText={errors['date']}
-                              onChange={(date) => handleChange('date', date)}
+                              onChange={(_, newVal) => {
+                                handleChange('day', newVal);
+                              }}
+                              value={values['day']}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Day"
+                                  name="day"
+                                  variant="outlined"
+                                  error={Boolean(errors['day'])}
+                                  helperText={errors['day']}
+                                />
+                              )}
                             />
                           </Box>
                         )}
