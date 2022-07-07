@@ -895,6 +895,7 @@ const User: FC = () => {
                 setShowDeleteDialog(false)
               }}
               handleDelete={() => {
+                removeLocalStorage(localStorageSelectedRecords)
                 setDeleteUser([])
                 setShowDeleteDialog(false)
                 fetchUsers()

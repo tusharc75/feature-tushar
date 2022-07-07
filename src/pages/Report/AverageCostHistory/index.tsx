@@ -17,7 +17,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 
-const AverageCostHistory = ({ handleClose, product, warehouse, showPricefilter }) => {
+const AverageCostHistory = ({ handleClose, product, productName, showPricefilter }) => {
 
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -115,7 +115,7 @@ const AverageCostHistory = ({ handleClose, product, warehouse, showPricefilter }
             fullWidth
         >
             <CustomDialogHeader
-                title={'History'}
+                title={`History - ${productName}`}
                 onClose={handleClose}
                 showRequiredLabel={false}
             ></CustomDialogHeader>
