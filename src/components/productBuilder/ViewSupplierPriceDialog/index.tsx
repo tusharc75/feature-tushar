@@ -80,7 +80,7 @@ const ViewSupplierPriceDialog = (props) => {
     const handleAdd = (requestId) => {
 
         axiosInstance().put(`/quote-builder/apply-bulk-supplier-price`, { "requestId": requestId }).then(({ data: { data } }) => {
-            handleClose()
+            onSuccess()
             fetchProductGridData()
         }).catch((error) => {
             toastConfig.setToastConfig(error);
@@ -110,50 +110,55 @@ const ViewSupplierPriceDialog = (props) => {
         <CustomDialogHeader title={"View Supplier Price"} onClose={handleClose} showRequiredLabel={false} ></CustomDialogHeader>
         {productDataList && productDataList.length !== 0 ?
             productDataList.map((data, index) => (
-                <div className="p-1 modified_style_of_accordion">
-                    <Accordion expanded={Boolean(expandSupplierGrid === index)} className="omsAccordian accordProject">
-                        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                            <Grid container className="pos_rel">
-                                <div className="clicker_div" onClick={() => expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index)}></div>
-                                <Grid item xs={12} sm={12} md={12}>
-                                    <Box display="flex">
-                                        <Box>
-                                            <IconButton size="small" onClick={() => expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index)}>{expandSupplierGrid === index ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+
+                <Box ml={2} mr={2}>
+                    <div className="p-1 modified_style_of_accordion_supplier_ask_price">
+                        <Accordion expanded={Boolean(expandSupplierGrid === index)}  className="omsAccordian accordSupplierAskPrice">
+                            <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+                                <Grid container className="pos_rel">
+                                    <div className="clicker_div" onClick={() => expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index)}></div>
+                                    <Grid item xs={12} sm={12} md={12}>
+                                        <Box display="flex">
+                                            <Box>
+                                                <IconButton size="small" onClick={() => expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index)}>{expandSupplierGrid === index ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+                                            </Box>
+                                            <Box padding="5px">
+                                                <Typography variant="subtitle2">
+                                                    {data?.supplierAccount?.optionLabel && `Supplier Account : ${data?.supplierAccount?.optionLabel}`}&nbsp;&nbsp;&nbsp;&nbsp; {data?.status && `Status : ${data?.status} `}
+                                                </Typography>
+                                            </Box>
                                         </Box>
-                                        <Box padding="5px">
-                                            <Typography variant="subtitle2">
-                                                {data?.supplierAccount?.optionLabel && `Supplier Account : ${data?.supplierAccount?.optionLabel}`}&nbsp;&nbsp;&nbsp;&nbsp; {data?.status && `Status : ${data?.status} `}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            {expandSupplierGrid === index && (
-                                <ProductGridSupplierAskPrice
-                                    productData={data} handleAdd={handleAdd}
-                                    handleReject={(data) => {
-                                        setRejectId(data)
-                                        setAskSupplierPriceDialog(true)
-                                    }} />
-                            )}
-                        </AccordionDetails>
-                    </Accordion>
-                </div>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                {expandSupplierGrid === index && (
+                                    <ProductGridSupplierAskPrice
+                                        productData={data} handleAdd={handleAdd}
+                                        handleReject={(data) => {
+                                            setRejectId(data)
+                                            setAskSupplierPriceDialog(true)
+                                        }} />
+                                )}
+                            </AccordionDetails>
+                        </Accordion>
+                    </div>
+                </Box>
+
             ))
             :
             <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
                 No supplier price
             </h1>}
-        {askSupplierPriceDialog &&
+        {
+            askSupplierPriceDialog &&
             <AskSupplierPriceDialog
                 setAskSupplierPriceDialog={setAskSupplierPriceDialog}
                 askSupplierPriceDialog={askSupplierPriceDialog}
                 from="SupplierAskPrice"
                 handleReject={handleReject} />
         }
-    </Dialog>
+    </Dialog >
     );
 }
 
