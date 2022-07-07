@@ -64,6 +64,7 @@ const ReceivingAsset = ({
           accessor: 'productName',
           Header: 'Detail',
           width: 300,
+          disabled: true,
           Cell: ({ row }) => (
             <p className="text-truncate">
               {row.original.type === 'Product' ? (
@@ -391,7 +392,7 @@ const ReceivingAsset = ({
             fetchProduct();
           }}
           title="Receiving"
-          productList={selectedRecords.filter((d) => d.qty !== d.actualReceived)}
+          productList={selectedRecords.filter((d) => d.qty !== (d.actualReceived + (d.scrapQuantity || 0)))}
           purchaseOrderData={purchaseOrderData}
           updateStatus={updateStatus}
         />
