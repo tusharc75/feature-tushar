@@ -35,6 +35,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     const [requireFieldArray, setRequireFieldArray] = useState([]);
     const [quoteDetailsData, setQuoteDetailsData] = useState(null);
     const [isSubmited, setIsSubmited] = useState(false);
+    const [disabledSubmitButton, setDisabledSubmitButton] = useState(true);
 
     const quoteFields = [
         {
@@ -219,6 +220,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     }
 
     const onCellValueChanged = (row) => {
+        let tempFieldsNumber = []
         let productIndex = productData.findIndex(d => d.uniqueId === row.data?.uniqueId)
         let tempData = {
             "uniqueId": row.data?.uniqueId,
@@ -226,11 +228,13 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
         }
         if (productIndex === -1) {
             setProductData((prevState) => ([...prevState, tempData]))
+            if (requireFieldArray.length === 1) setDisabledSubmitButton(productArray.length !== [...productData, tempData].length)
         }
         else {
             let tempProductData = productData
             tempProductData[productIndex][row?.column?.colId] = tempData[row?.column?.colId]
             setProductData(tempProductData)
+            setDisabledSubmitButton(productArray.length !== tempProductData.length || tempProductData.length === 0 || !tempProductData.every(data => Object.keys(data).length === (requireFieldArray.length + 1)))
         }
     }
 
@@ -263,7 +267,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={productArray.length !== productData.length}
+                    disabled={disabledSubmitButton}
                     onClick={handleSubmit}
                 >
                     Submit
