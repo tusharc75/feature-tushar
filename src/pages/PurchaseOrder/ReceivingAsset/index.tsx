@@ -392,7 +392,7 @@ const ReceivingAsset = ({
             fetchProduct();
           }}
           title="Receiving"
-          productList={selectedRecords.filter((d) => d.qty !== (d.actualReceived + (d.scrapQuantity || 0)))}
+          productList={selectedRecords.filter((d) => d.type === "Product" && d.qty !== (d.actualReceived + (d.scrapQuantity || 0)))}
           purchaseOrderData={purchaseOrderData}
           updateStatus={updateStatus}
         />

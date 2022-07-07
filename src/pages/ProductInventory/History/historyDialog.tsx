@@ -8,7 +8,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import History from './index';
 
 
-const HistoryDialog = ({ close, product, warehouse }) => {
+const HistoryDialog = ({ close, product, warehouse, productName }) => {
 
     return (<Dialog
         fullScreen
@@ -18,7 +18,7 @@ const HistoryDialog = ({ close, product, warehouse }) => {
         fullWidth
     >
         <CustomDialogHeader
-            title={'History'}
+            title={`History - ${productName}`}
             onClose={close}
             showRequiredLabel={false}
         ></CustomDialogHeader>

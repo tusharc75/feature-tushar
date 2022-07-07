@@ -66,7 +66,7 @@ const Report = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
-  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: "", warehouse: "" });
+  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: "", productName: "" });
   const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
 
   const fetchGridColumns = async () => {
@@ -342,7 +342,7 @@ const Report = () => {
           size="small"
           aria-label="Clone"
           onClick={() => {
-            setShowPriceHistory({ open: true, product: params?.data?._id, warehouse: null });
+            setShowPriceHistory({ open: true, product: params?.data?._id, productName: params?.data?.productName });
           }}
         >
           <HistoryIcon fontSize="small" color="primary" />
@@ -690,9 +690,9 @@ const Report = () => {
       {showPriceHistory.open &&
         <AverageCostHistory
           product={showPriceHistory.product}
-          warehouse={showPriceHistory.warehouse}
+          productName={showPriceHistory.productName}
           handleClose={() => {
-            setShowPriceHistory({ open: false, product: '', warehouse: '' });
+            setShowPriceHistory({ open: false, product: '', productName: '' });
           }}
           showPricefilter={showPricefilter}
         />}
