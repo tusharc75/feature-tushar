@@ -316,9 +316,9 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'
-        }/report/export?exportColumn=${columns}&export=1&${filterQuery}`,
+        `${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report/export?exportColumn=${JSON.stringify(
+          columns
+        )}&export=1&${filterQuery}`,
         {
           responseType: 'arraybuffer'
         }
