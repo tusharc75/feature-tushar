@@ -10,7 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AddSerialNumber from './AddSerialNumber';
 
 
-const SerialNumberDialog = ({ close, product, warehouse }) => {
+const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
 
 
     const [serialNumberCount, setSerialNumberCount] = useState(0);
@@ -47,7 +47,7 @@ const SerialNumberDialog = ({ close, product, warehouse }) => {
         fullWidth
     >
         <CustomDialogHeader
-            title={'Serial Number'}
+            title={`Serial Number - ${productName}`}
             onClose={close}
             showRequiredLabel={false}
         ></CustomDialogHeader>
