@@ -2236,3 +2236,198 @@ svg.MuiSvgIcon-root {
     }
   }
 }
+
+// STYLE FOR Quote supplier ask price
+.modified_style_of_accordion_supplier_ask_price {
+  .MuiAccordion-root.MuiPaper-root {
+    background-color: transparent;
+    height: unset;
+  }
+
+  .pos_rel {
+    position: relative;
+  }
+
+  .clicker_div {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 32px;
+    z-index: 1;
+    cursor: pointer;
+  }
+
+  .MuiPaper-root {
+    border: 0 !important;
+    height: 100%;
+  }
+
+  .MuiAccordion-root {
+    border: 0;
+    box-shadow: none;
+
+    & .MuiButtonBase-root.MuiAccordionSummary-root {
+      background: #f6f6f6 !important;
+      box-shadow: none !important;
+      color: #329592 !important;
+      border: 1px solid #eaeaea;
+      min-height: unset;
+      padding: 4px 0;
+      border-radius: 4px;
+
+      &[aria-expanded='true'] {
+        background-color: var(--new_theme_color) !important;
+
+        & * {
+          color: #fff;
+          fill: #fff;
+        }
+      }
+    }
+
+    & .MuiCollapse-root {
+      background-color: var(--white);
+
+      & .MuiAccordionDetails-root {
+        padding: 0;
+        margin: 0;
+
+        .MuiCardContent-root,
+        .MuiCardContent-root.detailListing.custom_card_style_for_contact_details {
+          background-color: #ddf0f0;
+          padding: 20px 29px;
+          padding-bottom: 11px !important;
+          height: 100%;
+          align-items: flex-start;
+
+          .cardStyle {
+            display: none;
+          }
+
+          svg {
+            display: inline-block;
+          }
+
+          .detailCardHeader {
+            margin-bottom: 15px;
+            padding: 0;
+          }
+
+          a {
+            color: var(--primary);
+            transition: color 0.4s;
+
+            &:hover {
+              color: var(--link);
+            }
+          }
+
+          .buttonClass li .MuiListItemText-root span {
+            display: inline-block;
+            background: #298b87;
+            padding: 5px 10px;
+            color: white;
+            line-height: 1;
+            border-radius: 2px;
+            margin-bottom: 5px;
+          }
+
+          .buttonClass li .MuiListItemAvatar-root {
+            margin-right: 5px;
+          }
+
+          .MuiListItem-root {
+            align-items: flex-start;
+
+            .MuiListItemAvatar-root svg {
+              margin-top: 8px;
+            }
+          }
+        }
+      }
+
+      .btn-view {
+        position: relative;
+        top: unset;
+        left: unset;
+        right: unset;
+        bottom: unset;
+        justify-content: flex-start;
+        background-color: #fff;
+        border: 2px solid #329592;
+        border-radius: 5px;
+        max-width: max-content;
+        padding: 5px 20px;
+        transition: background 0.4s;
+        margin: 15px 0 0 0;
+
+        &:hover {
+          background-color: var(--primary) !important;
+          border-color: transparent;
+          color: var(--white);
+        }
+
+        & span {
+          color: #59a4a1;
+          transition: color 0.4s, fill 0.3s;
+        }
+
+        & svg {
+          fill: #59a4a1;
+          transition: color 0.4s, fill 0.3s;
+          margin-left: 10px;
+        }
+
+        &:hover span {
+          color: #fff;
+        }
+
+        &:hover svg {
+          fill: #fff;
+        }
+
+        &.expander {
+          margin-left: auto;
+          margin-right: auto;
+          padding: 0px;
+          border-radius: 50%;
+          border-color: transparent;
+          margin-bottom: -5px;
+
+          svg {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            margin: 0;
+          }
+
+          &:hover {
+            color: var(--primary);
+            border-color: transparent;
+            background-color: transparent !important;
+
+            .show_more_text {
+              color: var(--primary);
+            }
+
+            svg {
+              fill: unset;
+            }
+          }
+        }
+      }
+    }
+
+    & .MuiCollapse-hidden {
+      margin: 0;
+      transition: margin 274ms;
+    }
+  }
+
+  @media all and (max-width: 600px) {
+    & {
+      padding: 0.3rem !important;
+    }
+  }
+}

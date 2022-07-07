@@ -700,6 +700,7 @@ const ProductBuilder = (props) => {
               color="primary"
               size="small"
               className="float-right"
+              disabled={isPriceBuilder && fromQuote && permissions.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice ? false : selectedRecords.length ? false : true}
               onClick={openActions}
               startIcon={<ExpandMore />}
 

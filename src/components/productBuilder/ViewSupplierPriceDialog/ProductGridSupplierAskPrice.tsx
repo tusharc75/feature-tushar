@@ -169,7 +169,6 @@ const ProductGridSupplierAskPrice = (props) => {
 
     return (
         <>
-            <Box padding={2} >
                 <Box padding={2} style={{ border: "1px solid #D4D6D7", borderRadius: 4 }}>
                     <Grid container >
                         <Grid item xs={12} sm={3} md={3} container justify="flex-start">
@@ -233,8 +232,6 @@ const ProductGridSupplierAskPrice = (props) => {
                             onCellValueChanged={() => { }} />
                         : <Loader style={{ minHeight: 300 }} text="Loading..." />}
                 </Box>
-            </Box>
-
         </>
     );
 }
