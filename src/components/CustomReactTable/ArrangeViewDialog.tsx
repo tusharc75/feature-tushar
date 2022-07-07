@@ -354,12 +354,10 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
             searchedColumns.map((column, index) => (
               <ListItem key={`${column.id}-${index}`} divider disableGutters disabled={column.disabled} className={column.sticky ? "d-none" : ""}>
                 <ListItemText id="switch-list-column" primary={column.Header} />
-                <ListItemSecondaryAction>
-                  {
-                    column.sticky ? "" : <Switch size="small" checked={column.isVisible} onChange={(e) => {
-                      handleToggle(column, e)
-                    }} />
-                  }
+                <ListItemSecondaryAction >
+                  {column.sticky ? "" : <Switch size="small" checked={column.isVisible} onChange={(e) => {
+                    handleToggle(column, e)
+                  }} />}
                 </ListItemSecondaryAction>
               </ListItem>
             ))
@@ -471,7 +469,7 @@ const RenderListItem = (props: ItemProps) => {
       </ListItemIcon>
       <ListItemText id={column.id} primary={column.Header} />
       <ListItemSecondaryAction>
-        <Switch size="small" checked={column.isVisible} onChange={(e) => {
+        <Switch size="small" disabled={column.disabled} checked={column.isVisible} onChange={(e) => {
           handleToggle(column, e)
         }} />
       </ListItemSecondaryAction>
