@@ -53,8 +53,8 @@ const InventoryProduct = () => {
   const [columns, setColumns] = useState(null);
 
   const [softHold, setSoftHold] = useState({ open: false, data: {} });
-  const [showHistory, setShowHistory] = useState({ open: false, product: "" });
-  const [showSerialNumber, setShowSerialNumber] = useState({ open: false, product: "" });
+  const [showHistory, setShowHistory] = useState({ open: false, product: "", productName: "" });
+  const [showSerialNumber, setShowSerialNumber] = useState({ open: false, product: "", productName: "" });
 
   const [inventory, setInventory] = useState({ open: false, product: [], type: "" });
 
@@ -312,7 +312,7 @@ const InventoryProduct = () => {
             size="small"
             aria-label="Clone"
             onClick={() => {
-              setShowHistory({ open: true, product: params?.data?.productId })
+              setShowHistory({ open: true, product: params?.data?.productId, productName: params?.data?.productName })
             }}
           >
             <HistoryIcon fontSize="small" color="primary" />
@@ -326,7 +326,7 @@ const InventoryProduct = () => {
               size="small"
               aria-label="Clone"
               onClick={() => {
-                setShowSerialNumber({ open: true, product: params?.data?.productId })
+                setShowSerialNumber({ open: true, product: params?.data?.productId, productName: params?.data?.productName })
               }}
             >
               <VisibilityOutlinedIcon fontSize="small" color="primary" />
@@ -352,13 +352,13 @@ const InventoryProduct = () => {
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState && columns) {
-      columns?.forEach((item) => {
-          columnState.forEach((d) => {
-              if (d.colId === item.field) {
-                  item.show = !d.hide;
-              }
-          });
+    columns?.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
       });
+    });
   }
 
   return (
@@ -531,15 +531,17 @@ const InventoryProduct = () => {
 
         {showHistory.open &&
           <HistoryDialog
-            close={() => setShowHistory({ open: false, product: "" })}
+            close={() => setShowHistory({ open: false, product: "", productName: "" })}
             product={showHistory.product}
             warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
+            productName={showHistory.productName}
           />}
 
         {showSerialNumber.open &&
           <SerialNumberDialog
-            close={() => setShowSerialNumber({ open: false, product: "" })}
+            close={() => setShowSerialNumber({ open: false, product: "", productName: "" })}
             product={showSerialNumber.product}
+            productName={showSerialNumber.productName}
             warehouse={plantId === "All" ? plantOptions.filter(d => d._id !== "All").map(d => d._id).toString() : plantId}
           />}
         {inventory.open &&
