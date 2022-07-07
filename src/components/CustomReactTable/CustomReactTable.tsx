@@ -187,11 +187,8 @@ export default function CustomReactTable({
     )
 
     const filterTypes = React.useMemo(
-        () => ({
-            filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue)
-        }),
-        [],
-    );
+        () => ({ filterRowsWithSubrows: (rows, id, filterValue) => columnFilter(rows, id, filterValue) }),
+        []);
 
     const {
         getTableProps,
@@ -200,7 +197,6 @@ export default function CustomReactTable({
         headerGroups,
         footerGroups,
         prepareRow,
-
         allColumns,
         setHiddenColumns,
         getToggleHideAllColumnsProps,
@@ -264,24 +260,22 @@ export default function CustomReactTable({
     )
 
     useEffect(() => {
-        //  Suggested by aman - 16-Nov-2021 - PO-174
         rows.forEach((d) => {
             if (d.subRows && d.subRows.length < 20) {
                 toggleAllRowsExpanded(true);
                 toggleRowExpanded(d.id, true)
             }
         })
-
         try {
             const storedColumns = localStorage.getItem(renderedFrom)
             if (storedColumns) {
+                console.log(storedColumns)
                 setColumnOrder(JSON.parse(storedColumns).map(m => m.id));
-                setHiddenColumns(JSON.parse(storedColumns).filter(f => f.isVisible === false).map(m => m.id))
+                setHiddenColumns(JSON.parse(storedColumns).filter(f => f.isVisible === false && !['expander','selection']?.includes(f.id)).map(m => m.id))
             }
         } catch (ex) {
             console.error(`Error while getting stored data from local storage - ${renderedFrom}`)
         }
-
     }, [])
 
     // useEffect(() => {
