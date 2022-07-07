@@ -588,7 +588,7 @@ export default function CustomAgGridEditable({
             </AgGridReact>
           </div>
 
-          {allowPagination && className !== "supplier-price-edit-grid" && (
+          {allowPagination && (
             <TablePagination
               component="div"
               count={rowCount}

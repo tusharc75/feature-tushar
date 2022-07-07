@@ -6,7 +6,55 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 import { CustomDialogTransition } from "../../../constants/helpers";
 import ProductGridSupplierAskPrice from "./ProductGridSupplierAskPrice";
 import AskSupplierPriceDialog from "../AskSupplierPriceDialog";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import MuiAccordion from '@material-ui/core/Accordion';
+import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
+import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
+import { withStyles } from '@material-ui/core/styles';
+import { Box, Grid, IconButton, Typography } from "@material-ui/core";
 
+const Accordion = withStyles({
+    root: {
+        border: '1px solid rgba(0, 0, 0, .125)',
+        '&:not(:last-child)': {
+            borderBottom: 0
+        },
+        '&:before': {
+            display: 'none'
+        },
+        '&$expanded': {
+            margin: 'auto'
+        }
+    },
+    expanded: {}
+})(MuiAccordion);
+
+const AccordionSummary = withStyles({
+    root: {
+        backgroundColor: 'white',
+        borderBottom: '1px solid #f1ece8',
+        background: '#ffffff',
+        fontWeight: 'bold',
+        padding: '0px',
+        '&$expanded': {
+            minHeight: 46
+        }
+    },
+    content: {
+        '&$expanded': {
+            margin: '15px 0'
+        }
+    },
+    expanded: {}
+})(MuiAccordionSummary);
+
+const AccordionDetails = withStyles((theme) => ({
+    root: {
+        padding: theme.spacing(1),
+        display: 'block'
+    }
+}))(MuiAccordionDetails);
 const ViewSupplierPriceDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
@@ -14,6 +62,7 @@ const ViewSupplierPriceDialog = (props) => {
     const [productDataList, setproductDataList] = useState([]);
     const [rejectId, setRejectId] = useState(null);
     const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
+    const [expandSupplierGrid, setExpandSupplierGrid] = useState(0);
 
     useEffect(() => {
         fetchProductGridData()
@@ -32,6 +81,7 @@ const ViewSupplierPriceDialog = (props) => {
 
         axiosInstance().put(`/quote-builder/apply-bulk-supplier-price`, { "requestId": requestId }).then(({ data: { data } }) => {
             handleClose()
+            fetchProductGridData()
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
@@ -45,6 +95,7 @@ const ViewSupplierPriceDialog = (props) => {
                 open: true,
             });
             setAskSupplierPriceDialog(false)
+            fetchProductGridData()
         })
             .catch((error) => {
                 toastConfig.setToastConfig(error);
@@ -58,13 +109,38 @@ const ViewSupplierPriceDialog = (props) => {
     >
         <CustomDialogHeader title={"View Supplier Price"} onClose={handleClose} showRequiredLabel={false} ></CustomDialogHeader>
         {productDataList && productDataList.length !== 0 ?
-            productDataList.map(data => (
-                <ProductGridSupplierAskPrice
-                    productData={data} handleAdd={handleAdd}
-                    handleReject={(data) => {
-                        setRejectId(data)
-                        setAskSupplierPriceDialog(true)
-                    }} />
+            productDataList.map((data, index) => (
+                <div className="p-1 modified_style_of_accordion">
+                    <Accordion expanded={Boolean(expandSupplierGrid === index)} className="omsAccordian accordProject">
+                        <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
+                            <Grid container className="pos_rel">
+                                <div className="clicker_div" onClick={() => expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index)}></div>
+                                <Grid item xs={12} sm={12} md={12}>
+                                    <Box display="flex">
+                                        <Box>
+                                            <IconButton size="small" onClick={() => expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index)}>{expandSupplierGrid === index ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+                                        </Box>
+                                        <Box padding="5px">
+                                            <Typography variant="subtitle2">
+                                                {data?.supplierAccount?.optionLabel && `Supplier Account : ${data?.supplierAccount?.optionLabel}`}&nbsp;&nbsp;&nbsp;&nbsp; {data?.status && `Status : ${data?.status} `}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            {expandSupplierGrid === index && (
+                                <ProductGridSupplierAskPrice
+                                    productData={data} handleAdd={handleAdd}
+                                    handleReject={(data) => {
+                                        setRejectId(data)
+                                        setAskSupplierPriceDialog(true)
+                                    }} />
+                            )}
+                        </AccordionDetails>
+                    </Accordion>
+                </div>
             ))
             :
             <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
