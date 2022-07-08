@@ -88,7 +88,7 @@ const ViewSupplierPriceDialog = (props) => {
     };
 
     const handleReject = (content) => {
-        axiosInstance().put(`/quote-builder/apply-reject/${rejectId}`, { "body": content ? content : "" }).then(({ data }) => {
+        axiosInstance().put(`/quote-builder/apply-reject/${rejectId}`, { "body": content ? content : "", "protected": true }).then(({ data }) => {
             toastConfig.setToastConfig({
                 message: data?.message,
                 type: "success",
@@ -113,7 +113,7 @@ const ViewSupplierPriceDialog = (props) => {
 
                 <Box ml={2} mr={2}>
                     <div className="p-1 modified_style_of_accordion_supplier_ask_price">
-                        <Accordion expanded={Boolean(expandSupplierGrid === index)}  className="omsAccordian accordSupplierAskPrice">
+                        <Accordion expanded={Boolean(expandSupplierGrid === index)} className="omsAccordian accordSupplierAskPrice">
                             <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                                 <Grid container className="pos_rel">
                                     <div className="clicker_div" onClick={() => expandSupplierGrid === index ? setExpandSupplierGrid(null) : setExpandSupplierGrid(index)}></div>

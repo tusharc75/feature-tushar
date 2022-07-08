@@ -224,7 +224,7 @@ const SupplierAskPrice = (props) => {
 
     }
     const handleReject = (content) => {
-        axiosInstance().put(`/quote-builder/apply-reject/${getLocalStorageArrayData(localStorageSelectedRecords)[0]?._id}`, { "body": content ? content : "" }).then(({ data }) => {
+        axiosInstance().put(`/quote-builder/apply-reject/${getLocalStorageArrayData(localStorageSelectedRecords)[0]?._id}`, { "body": content ? content : "", "protected": true }).then(({ data }) => {
             removeLocalStorage(localStorageSelectedRecords)
             toastConfig.setToastConfig({
                 message: data?.message,
