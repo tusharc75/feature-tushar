@@ -452,8 +452,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
+    columns?.forEach((item) => {
+      columnState?.forEach((d) => {
         if (d.colId === item.field) {
           item.show = !d.hide;
         }
@@ -627,6 +627,26 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       .catch((error) => {
         toastConfig.setToastConfig(error);
       })
+  }
+
+  const handleChangeStatus = () => {
+    setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
+    axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
+      comment: statusToUpdate.message,
+      assets: selectedRecords.map(m => m?._id ?? m?.id),
+      status: statusToUpdate.status,
+      reference: {
+        _id: rentalManagementData._id,
+        type: "Rental"
+      }
+    }).then(({ data }) => {
+      setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
+      fetchRecords();
+      toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
+    }).catch((error) => {
+      setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
+      toastConfig.setToastConfig(error)
+    })
   }
 
   useEffect(() => {
@@ -1084,25 +1104,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           </Button>
           <Button
             size="small"
-            onClick={() => {
-              setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
-              axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
-                comment: statusToUpdate.message,
-                assets: selectedRecords.map(m => m?._id ?? m?.id),
-                status: statusToUpdate.status,
-                reference: {
-                  _id: rentalManagementData._id,
-                  type: "Rental"
-                }
-              }).then(({ data }) => {
-                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
-                setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
-                fetchRecords();
-              }).catch((error) => {
-                setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
-                toastConfig.setToastConfig(error)
-              })
-            }}
+            onClick={handleChangeStatus}
             disabled={statusToUpdate.isUpdating}
             variant="contained"
             color="primary"
