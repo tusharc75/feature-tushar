@@ -374,7 +374,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       } else if (values.time) {
         errors['time'] = '';
       }
-      Filters;
 
       if (values.frequency === 'Weekly' && !values.week) {
         errors['week'] = 'Day is required';
