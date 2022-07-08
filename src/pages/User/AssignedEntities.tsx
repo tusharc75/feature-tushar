@@ -151,7 +151,7 @@ export default function AssignedEntities({
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to un-assign  ${currentEntity.entity.entityName} ?`}
+          message={`Are you sure you want to un-assign  ${currentEntity?.entity?.entityName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

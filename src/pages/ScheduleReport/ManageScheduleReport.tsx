@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { Formik, FormikProps } from 'formik';
-import { KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
-import { dateFormatForInputControl, REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS } from 'src/constants/helpers';
+import { KeyboardTimePicker } from '@material-ui/pickers';
+import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -351,27 +351,41 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
     if (!values.scheduleName) {
       errors['scheduleName'] = 'Schedule name is required';
+    } else {
+      errors['scheduleName'] = '';
     }
     if (!values.resource) {
       errors['resource'] = 'Resource is required';
+    } else {
+      errors['resource'] = null;
     }
     if (values.subscribeUsers.length === 0) {
       errors['subscribeUsers'] = 'Subscribe users is required';
+    } else {
+      errors['subscribeUsers'] = '';
     }
 
     if (!values.frequency) {
       errors['frequency'] = 'Frequency is required';
     } else {
+      errors['frequency'] = '';
       if (values.frequency === 'Daily' && !values.time) {
         errors['time'] = 'Time is required';
+      } else if (values.time) {
+        errors['time'] = '';
       }
+      Filters;
 
       if (values.frequency === 'Weekly' && !values.week) {
         errors['week'] = 'Day is required';
+      } else if (values.week) {
+        errors['week'] = '';
       }
 
       if (values.frequency === 'Monthly' && !values.day) {
         errors['day'] = 'Date is required';
+      } else {
+        errors['day'] = '';
       }
     }
 
@@ -381,6 +395,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const handleChange = (name: string, value: any) => {
     if (!formikRef.current) return;
     formikRef.current.setFieldValue(name, value);
+    formikRef.current.setFieldTouched(name, true);
+    formikRef.current.validateForm(formikRef.current.values);
   };
 
   const handleSubmit = (values: ValueTypes) => {
@@ -497,7 +513,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           validate={formikValidator}
           validateOnBlur
         >
-          {({ values, errors, submitForm, setFieldValue }) => (
+          {({ values, errors, submitForm, setFieldValue, touched }) => (
             <>
               <CustomDialogContent>
                 <div className={'detail-box-content'}>
@@ -516,8 +532,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         size="small"
                         label="Schedule Name"
                         variant="outlined"
-                        error={Boolean(errors['scheduleName'])}
-                        helperText={errors['scheduleName']}
+                        error={touched['scheduleName'] && Boolean(errors['scheduleName'])}
+                        helperText={touched['scheduleName'] && errors['scheduleName']}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -549,8 +565,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           <TextField
                             {...params}
                             required
-                            error={Boolean(errors['resource'])}
-                            helperText={errors['resource']}
+                            error={touched['resource'] && Boolean(errors['resource'])}
+                            helperText={touched['resource'] && errors['resource']}
                             label="Resource"
                             variant="outlined"
                             name="resource"
@@ -581,8 +597,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            error={Boolean(errors['filters'])}
-                            helperText={errors['filters']}
+                            error={touched['filters'] && Boolean(errors['filters'])}
+                            helperText={touched['filters'] && errors['filters']}
                             label="Filters"
                             name="filters"
                             variant="outlined"
@@ -618,8 +634,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         onChange={(_, newVal) => handleChange('column', newVal)}
                         renderInput={(params) => (
                           <TextField
-                            error={Boolean(errors['column'])}
-                            helperText={errors['column']}
+                            error={touched['column'] && Boolean(errors['column'])}
+                            helperText={touched['column'] && errors['column']}
                             {...params}
                             label="Columns"
                             name="columns"
@@ -649,8 +665,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            error={Boolean(errors['subscribeUsers'])}
-                            helperText={errors['subscribeUsers']}
+                            error={touched['subscribeUsers'] && Boolean(errors['subscribeUsers'])}
+                            helperText={touched['subscribeUsers'] && errors['subscribeUsers']}
                             label="Subscibe User"
                             name="subscribeUsers"
                             required
@@ -670,8 +686,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         fullWidth
                         required={Boolean(values.frequency)}
                         value={values.time}
-                        error={Boolean(errors['time'])}
-                        helperText={errors['time']}
+                        error={touched['time'] && Boolean(errors['time'])}
+                        helperText={touched['time'] && errors['time']}
                         onChange={(date) => handleChange('time', date)}
                         KeyboardButtonProps={{
                           'aria-label': 'change time'
@@ -698,6 +714,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         {values?.frequency === 'Weekly' && (
                           <Box mt={2}>
                             <Typography color="textPrimary">Days</Typography>
+                            <Box mt={1} />
                             <ToggleButtonGroup size="small" value={values.week} exclusive onChange={(_, val) => handleChange('week', val)}>
                               {FREQUENCY_WEEKS.map((week) => (
                                 <ToggleButton key={week} value={week}>
@@ -723,8 +740,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                                   label="Day"
                                   name="day"
                                   variant="outlined"
-                                  error={Boolean(errors['day'])}
-                                  helperText={errors['day']}
+                                  error={touched['day'] && Boolean(errors['day'])}
+                                  helperText={touched['day'] && errors['day']}
                                 />
                               )}
                             />
