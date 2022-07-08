@@ -93,7 +93,6 @@ const User: FC = () => {
 
   useEffect(() => {
     fetchFields()
-    fetchAllUsers()
     fetchLoggedInUserEntities()
     fetchLoggedInUserRole()
   }, [])
@@ -346,6 +345,7 @@ const User: FC = () => {
         setAllUsers(tempAllUsers)
       })
   }
+
   const fetchUsers = () => {
     const queryString = getQueryString();
     dispatch({ type: "loading", loading: true });
@@ -405,6 +405,7 @@ const User: FC = () => {
         dispatch({ type: "loading", loading: false });
         toastConfig.setToastConfig(error);
       });
+    fetchAllUsers()
     // eslint-disable-next-line
   };
 
