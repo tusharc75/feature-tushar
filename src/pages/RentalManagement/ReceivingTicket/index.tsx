@@ -791,7 +791,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             disabled={(selectedRecords.length === 0) ||
               (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || !f.hasOwnProperty("loadingTicketId")
-                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(f.status)))}
             onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant) }}>
             Create Receiving Ticket</MenuItem>
 
@@ -805,7 +805,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             disabled={(selectedRecords.length === 0)
               || (selectedRecords.some(f =>
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
-                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(f.status)))}
           >
             Create Return Ticket</MenuItem>
 
