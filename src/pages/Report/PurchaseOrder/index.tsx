@@ -28,6 +28,7 @@ import AverageCostHistory from '../AverageCostHistory';
 let cancelTokenSource = null;
 
 const Report = () => {
+  
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const initialRender = React.useRef(true);
@@ -240,7 +241,7 @@ const Report = () => {
           },
           {
             field: 'averagePrice',
-            headerName: 'Unit Price',
+            headerName: 'Average Unit Price',
             show: true,
             disabled: false,
             filter: false,
@@ -269,6 +270,16 @@ const Report = () => {
           })
         }
       }
+
+      columns?.forEach((e) => {
+        if (["productName", "productDescription", "productCategory", "productCondition",
+          "totalQty", "averagePrice", "totalPrice", "margin"].includes(e.field)) {
+          e.show = true;
+        }
+        else {
+          e.show = false;
+        }
+      })
 
       setResourceColumns(resourceFieldData);
       setLoadingColumns(false);
