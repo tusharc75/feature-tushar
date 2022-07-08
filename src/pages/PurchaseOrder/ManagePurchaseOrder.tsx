@@ -65,7 +65,7 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                     if (isClone) {
                         const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data
                         //rest['purchaseOrderNumber'] = `PO_${generateUniqueIdOnly()}`
-                        rest["status"] = "New"
+                        rest["status"] = "Open"
                         setInitialData({
                             fields: fieldsDataForCreate,
                             values: getObjKeysWithValues(rest, fieldsDataForCreate),
