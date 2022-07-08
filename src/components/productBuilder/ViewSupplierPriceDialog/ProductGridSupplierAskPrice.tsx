@@ -103,7 +103,7 @@ const ProductGridSupplierAskPrice = (props) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
+                            col.show = displayColumns?.includes(ele.fieldName) || requiredFields?.includes(ele.fieldName) ? true : false
                             col.disabled = false
                             col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
@@ -121,7 +121,7 @@ const ProductGridSupplierAskPrice = (props) => {
                                 col.field = fieldName
                                 col.headerName = fieldLabel
                                 col.width = 180
-                                col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
+                                col.show = displayColumns?.includes(ele.fieldName) || requiredFields?.includes(ele.fieldName) ? true : false
                                 col.disabled = false
                                 col.leval = ele.leval
                                 col.cellRenderer = "commonRenderer";
@@ -139,7 +139,7 @@ const ProductGridSupplierAskPrice = (props) => {
                             col.field = fieldName
                             col.headerName = fieldLabel
                             col.width = 180
-                            col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
+                            col.show = displayColumns?.includes(ele.fieldName) || requiredFields?.includes(ele.fieldName) ? true : false
                             col.disabled = false
                             col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
@@ -155,7 +155,7 @@ const ProductGridSupplierAskPrice = (props) => {
                         col.field = ele.fieldName
                         col.headerName = ele.fieldLabel
                         col.width = 180
-                        col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
+                        col.show = displayColumns?.includes(ele.fieldName) || requiredFields?.includes(ele.fieldName) ? true : false
                         col.disabled = false
                         col.leval = ele.leval
                         col.cellRenderer = "commonRenderer";
@@ -169,16 +169,9 @@ const ProductGridSupplierAskPrice = (props) => {
 
     return (
         <>
-            <Box padding={2} >
                 <Box padding={2} style={{ border: "1px solid #D4D6D7", borderRadius: 4 }}>
                     <Grid container >
                         <Grid item xs={12} sm={3} md={3} container justify="flex-start">
-                            {productData?.supplierAccount?.optionLabel &&
-                                <Grid item xs={12} sm={12} md={12}>
-                                    <Typography variant="subtitle2">
-                                        {`Supplier Account : ${productData?.supplierAccount?.optionLabel} `}
-                                    </Typography>
-                                </Grid>}
                             {productData?.supplierContact?.optionLabel &&
                                 <Grid item xs={12} sm={12} md={12}>
                                     <Typography variant="subtitle2">
@@ -187,10 +180,10 @@ const ProductGridSupplierAskPrice = (props) => {
                                 </Grid>}
                         </Grid>
                         <Grid item xs={12} sm={3} md={3} container justify="flex-start">
-                            {productData?.status &&
+                            {productData?.requestDate &&
                                 <Grid item xs={12} sm={12} md={12}>
                                     <Typography variant="subtitle2">
-                                        {`Status : ${productData?.status} `}
+                                        {`Request Date : ${moment(productData?.requestDate)?.format(dateTimeFormat)}`}
                                     </Typography>
                                 </Grid>}
                             {productData?.responseDate &&
@@ -239,8 +232,6 @@ const ProductGridSupplierAskPrice = (props) => {
                             onCellValueChanged={() => { }} />
                         : <Loader style={{ minHeight: 300 }} text="Loading..." />}
                 </Box>
-            </Box>
-
         </>
     );
 }
