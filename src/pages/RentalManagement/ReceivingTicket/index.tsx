@@ -133,7 +133,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       setNextStep(false)
       dispatch({ type: "loading", loading: true });
       if (gridApi) {
-        gridApi.deselectAll();
+        gridApi.setRowData([]);
       }
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
       var productAssets: any = [];
