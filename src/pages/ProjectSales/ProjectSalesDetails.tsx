@@ -431,45 +431,25 @@ const ProjectSalesDetails = () => {
                     >
                       <Tab className="tabLayout" label="Header" aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
                       <Tab className="tabLayout" label="OM-Neurons" aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-
                       <Tab
                         className={'tabLayout'}
-                        // style={{
-                        //    background: tabValue === 1 ? 'white' : '',
-                        //    color: tabValue === 1 ? '#163340' : '#163340'
-                        //   }}
-
                         label={<div className="d-flex align-items-center tab-font">Project Team</div>}
                         aria-controls="a11y-tabpanel-2"
                         id="a11y-tab-2"
                       />
-
                       <Tab
                         className={'tabLayout'}
-                        // style={{
-                        //   background: tabValue === 1 ? 'white' : '',
-                        //   color: tabValue === 1 ? '#163340' : '#163340'
-                        // }}
-
                         label="Customer Account"
-                        // {
-                        //   <div className="d-flex align-items-center tab-font">
-                        //      Details
-                        //   </div>
-                        // }
                         aria-controls="a11y-tabpanel-2"
                         id="a11y-tab-2"
                       />
-
                       <div className={'uio'}> </div>
                     </Tabs>
-
                     {currentTabIndex === 0 && (
                       <Box>
                         <DetailsPage data={copyOfProjectSalesData} fields={fiteredFieldToShow} />
                       </Box>
                     )}
-
                     {currentTabIndex === 1 && (
                       <Box>
                         <CustomNodalStructure
@@ -486,10 +466,9 @@ const ProjectSalesDetails = () => {
                         />
                       </Box>
                     )}
-
                     {currentTabIndex === 2 && (
                       <Paper>
-                        <Box style={{ padding: '0px', maxHeight: '450px' }}>
+                        <Box style={{ padding: '0px' }}>
                           <Box width="100%" padding={1} bgcolor="grey.200" display="flex" alignItems="center" justifyContent="space-between">
                             <Typography variant="subtitle2">Project Team</Typography>
                             {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
@@ -528,7 +507,6 @@ const ProjectSalesDetails = () => {
                         </Box>
                       </Paper>
                     )}
-
                     {currentTabIndex === 3 && (
                       <Box>
                         <CustomerAccounts
@@ -556,78 +534,7 @@ const ProjectSalesDetails = () => {
                 )}
               </Box>
             </Paper>
-
             <Box my={1} />
-
-            {/*<Tabs*/}
-            {/*    className="quote-tab"*/}
-            {/*    value={tabValue}*/}
-            {/*    onChange={handleMainTabChange}*/}
-            {/*    textColor="primary"*/}
-            {/*    TabIndicatorProps={{*/}
-            {/*      style: {*/}
-            {/*        display: 'none'*/}
-            {/*      }*/}
-            {/*    }}*/}
-            {/*>*/}
-            {/*  <Tab*/}
-            {/*      className={'tabLayout'}*/}
-            {/*      style={{*/}
-            {/*        background: tabValue === 1 ? 'white' : '',*/}
-            {/*        color: tabValue === 1 ? '#163340' : '#163340'*/}
-            {/*      }}*/}
-
-            {/*      label={*/}
-            {/*        <div className="d-flex align-items-center tab-font">*/}
-            {/*          <FaWpforms className="mr-1" fontSize="inherit" /> Customer Accounts*/}
-            {/*        </div>*/}
-            {/*      }*/}
-
-            {/*      {...a11yProps(0)}*/}
-            {/*  />*/}
-            {/*  <Tab*/}
-            {/*      className={'tabLayout'}*/}
-            {/*      style={{*/}
-            {/*        background: tabValue === 2 ? 'white' : '',*/}
-            {/*        color: tabValue === 2 ? 'blue' : '#163340'*/}
-            {/*      }}*/}
-            {/*      label={*/}
-            {/*        <div className="d-flex align-items-center tab-font">*/}
-            {/*          <BiFoodMenu className="mr-1" fontSize="inherit" /> Project Team*/}
-            {/*        </div>*/}
-            {/*      }*/}
-            {/*      {...a11yProps(1)}*/}
-            {/*  />*/}
-            {/*  <div className={'uio'}>*/}
-
-            {/*  </div>*/}
-            {/*</Tabs>*/}
-
-            {/*<TabPanel value={tabValue} index={0}>*/}
-
-            {/*    /!*<Box my={1} />*!/*/}
-            {/*    <CustomerAccounts*/}
-            {/*        isTeamMember={isTeamMember}*/}
-            {/*        isManager={isManager}*/}
-            {/*        ownerId={projectSalesData?.projectManager?.optionValue}*/}
-            {/*        loading={loading}*/}
-            {/*        handleOpenDialog={handleOpenDialog}*/}
-            {/*        customerAccounts={customerAccounts}*/}
-            {/*        customerContacts={customerContacts}*/}
-            {/*        opportunities={opportunities}*/}
-            {/*        quotes={quotes}*/}
-            {/*        currency={projectSalesData?.currency}*/}
-            {/*        estimatedAmount={projectSalesData?.amount}*/}
-            {/*        marketSegmentId={projectSalesData?.marketSegment?.optionValue}*/}
-            {/*        subMarketSegmentId={projectSalesData?.subMarketSegment?.optionValue}*/}
-            {/*        permissions={permissions?.projectSales}*/}
-            {/*        fetchProjectData={getSalesData}*/}
-            {/*        projectId={id}*/}
-            {/*        users={teamUsers}*/}
-            {/*    />*/}
-
-            {/*</TabPanel>*/}
-
             <TabPanel value={tabValue} index={1}>
               <Paper>
                 <Box style={{ padding: '0px', maxHeight: '450px' }}>
@@ -671,30 +578,6 @@ const ProjectSalesDetails = () => {
             </TabPanel>
           </div>
           <div className="position-relative">
-            {/* {showActivity ?
-              <Paper>
-                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </span>}
-                <Activity
-                  resourceId={id}
-                  resource={projectSales.projectSalesRoute}
-                  relatedTo={[
-                    {
-                      type: projectSales.projectSalesResource,
-                      referenceId: id,
-                      access: true,
-                    }
-                  ]}
-                  handleActivityRefresh={() => { }}
-                  emails={[]}
-                />
-              </Paper>
-              :
-              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon" />
-              </span>} */}
-
             <Paper>
               {!isSmallScreen && (
                 <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
@@ -712,7 +595,7 @@ const ProjectSalesDetails = () => {
                       access: true
                     }
                   ]}
-                  handleActivityRefresh={() => {}}
+                  handleActivityRefresh={() => { }}
                   emails={[]}
                 />
               </div>
@@ -728,8 +611,8 @@ const ProjectSalesDetails = () => {
             deleteRec
               ? `Are you sure you want to delete this ${projectSalesData.projectName} ?`
               : removeUserRec
-              ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
-              : ''
+                ? `Are you sure you want to remove ${removeUserRec.firstName} ${removeUserRec.lastName} ?`
+                : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
