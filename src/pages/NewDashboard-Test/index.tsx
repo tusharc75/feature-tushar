@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -98,8 +98,8 @@ const DashbaordNew = () => {
             }
           }
           setDashboardList(data);
-          setDashboardLoading(false);
         }
+        setDashboardLoading(false);
       })
       .catch((err) => {
         setToastConfig(err);
@@ -119,10 +119,26 @@ const DashbaordNew = () => {
               dashboardList={dashboardList.map((d) => ({ id: d._id, name: d.name }))}
               globalFilters={globalFilters}
               setGlobalFilters={setGlobalFilters}
+              disabled={dashboardList.length === 0}
             />
             <Box bgcolor="#efefef" p={1} pt={1}>
               {dashboardLoading ? (
                 <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboards..." />
+              ) : dashboardList.length === 0 ? (
+                <Box
+                  style={{ height: 'calc(100vh - 110px)', minHeight: '400px' }}
+                  width={'100%'}
+                  display={'flex'}
+                  flexDirection="column"
+                  justifyContent={'center'}
+                  alignItems={'center'}
+                  bgcolor={'rgba(255, 255, 255, 0.7)'}
+                >
+                  <img width={400} height={340} src={placeholder_img} alt="dashboard" />
+                  <Typography color="textSecondary" variant="h5">
+                    You don't have access to any dashboard
+                  </Typography>
+                </Box>
               ) : (
                 <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
                   {charts.map((chart: ChartDataType, index: number) => (
