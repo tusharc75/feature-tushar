@@ -17,6 +17,7 @@ import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { staticFrameworkRender } from '../../constants/useColumns';
 
 const Dashboards = () => {
   const history = useHistory();
@@ -99,7 +100,8 @@ const Dashboards = () => {
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
-    actionsRenderer: ActionRenderer
+    actionsRenderer: ActionRenderer,
+    ...staticFrameworkRender
   };
 
   const fetchFields = () => {
