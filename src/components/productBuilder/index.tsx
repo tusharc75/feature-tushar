@@ -592,7 +592,7 @@ const ProductBuilder = (props) => {
     }
   };
 
-  const handelAskPriceToSupplier = (content, contactId, selectedFields = []) => {
+  const handelAskPriceToSupplier = (content, contactId, selectedFields = [], displayColumns = []) => {
 
     let data: any = {
       "products": selectedRecords?.map(d => {
@@ -606,7 +606,8 @@ const ProductBuilder = (props) => {
       "protected": true,
       "body": content ? content : "",
       "supplierContact": contactId,
-      "requiredFields": selectedFields
+      "requiredFields": selectedFields,
+      "displayColumns": displayColumns
 
     }
     axiosInstance().post(`/quote-builder/ask-price-supplier`, data).then(() => {
