@@ -73,11 +73,11 @@ const Dashboards = () => {
         <HtmlTooltip title="Delete">
           <span>
             <IconButton
-              disabled={!permissions?.dashboardMaster.isDelete}
+              disabled={!permissions?.dashboardMaster?.isDelete}
               size="small"
               onClick={() => setShowDeleteDialog({ ...showDeleteDialog, open: true, data: [data?._id] })}
             >
-              <Delete fontSize="small" color={permissions?.dashboardMaster.isDelete ? 'error' : 'disabled'} />
+              <Delete fontSize="small" color={permissions?.dashboardMaster?.isDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -85,11 +85,11 @@ const Dashboards = () => {
         <HtmlTooltip title="Clone">
           <span>
             <IconButton
-              disabled={!permissions?.dashboardMaster.isCreate}
+              disabled={!permissions?.dashboardMaster?.isCreate}
               size="small"
               onClick={() => history.push(`dashboard-master/${params.data._id}?type=clone`)}
             >
-              <FileCopy fontSize="small" color={permissions?.dashboardMaster.isCreate ? 'primary' : 'disabled'} />
+              <FileCopy fontSize="small" color={permissions?.dashboardMaster?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -172,7 +172,7 @@ const Dashboards = () => {
             </Box>
           </Box>
           <Box py={'6px'}>
-            {permissions?.dashboardMaster.isCreate && (
+            {permissions?.dashboardMaster?.isCreate && (
               <Button color="primary" variant="contained" size="small" disableRipple onClick={() => history.push(`dashboard-master/new`)}>
                 Add
               </Button>

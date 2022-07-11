@@ -23,6 +23,7 @@ const useClasses = makeStyles(() => ({
 }));
 
 const DashboardBuilder = () => {
+
   const classes = useClasses();
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
@@ -237,7 +238,7 @@ const DashboardBuilder = () => {
               label="Dashboard Name"
             />
           </Box>
-          {permissions?.dashboardMaster.isUpdate && (
+          {permissions?.dashboardMaster?.isUpdate && (
             <Box py={'6px'}>
               <Button
                 color="primary"

@@ -56,7 +56,7 @@ const ReceivingAsset = ({
     const column = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
     const productFields = productResult?.data?.data?.filter((e) =>
-      ['productName', 'productNumber', 'productDescription', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+      ['productName', 'productCategory', 'productNumber', 'productDescription', 'serializedProduct'].includes(e?.fieldData?.fieldName)
     );
     productFields?.forEach((e) => {
       if (e?.fieldData?.fieldName === 'productName') {
@@ -108,6 +108,15 @@ const ReceivingAsset = ({
           width: 150,
           Cell: ({ row }) =>
             row.original.type === 'Product' ? <p className="text-truncate">{row.original.serializedProductView}</p> : <NoDataCell />
+        });
+      }
+      if (e?.fieldData?.fieldName === 'productCategory') {
+        column.push({
+          accessor: 'productCategory',
+          Header: e?.fieldData?.fieldLabel,
+          width: 150,
+          Cell: ({ row }) =>
+            row.original.type === 'Product' ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />
         });
       }
     });
@@ -298,6 +307,7 @@ const ReceivingAsset = ({
           productDescription: item?.productDetail?.productDescription,
           serializedProduct: item?.productDetail?.serializedProduct,
           serializedProductView: item.productDetail?.serializedProduct ? 'Yes' : 'No',
+          productCategory: item.productDetail?.productCategory?.optionLabel,
           productId: item?.productDetail?._id
         };
         if (item.qty === item.actualReceived + (item?.scrapQuantity || 0)) {
