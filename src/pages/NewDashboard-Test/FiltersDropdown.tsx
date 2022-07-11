@@ -9,23 +9,23 @@ interface Props {
   values: any;
   setValues: any;
   filterOptions: any;
-  isAssetDashboard: boolean;
+  isCRM: boolean;
 }
 
-const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues, isAssetDashboard }: Props) => {
+const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values, setValues, isCRM }: Props) => {
   React.useEffect(() => {
     if (!filters) return;
     filters.forEach((filter) => {
       setValues((prevState: any) => ({
         ...prevState,
-        [filter.key]: filter?.multiple ? [] : {}
+        [filter.key]: filter?.multiple ? [] : filter.key === 'status' && isCRM ? { optionValue: 'open', optionLabel: 'Open' } : {}
       }));
     });
   }, [filters]);
 
   const handleChange = (key: string, val: any) => {
-    if(key === 'marketSegment'){
-      setValues((prevState:any) => ({...prevState, subMarketSegment: {}}))
+    if (key === 'marketSegment') {
+      setValues((prevState: any) => ({ ...prevState, subMarketSegment: {} }));
     }
     setValues((prevState: any) => ({ ...prevState, [key]: val }));
   };

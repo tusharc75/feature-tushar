@@ -63,7 +63,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
 
     const fetchFields = async () => {
         const productResult = await axiosInstance().get('/field?resource=Product&view=true')
-        const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "productDescription", "serializedProduct"].includes(e?.fieldData?.fieldName));
+        const productFields = productResult?.data?.data?.filter((e) => ["productName", "productCategory", "productNumber", "productDescription", "serializedProduct"].includes(e?.fieldData?.fieldName));
         productFields?.forEach((e) => {
             if (e?.fieldData?.fieldName === "productName") {
                 columns.push({ field: "productName", headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "nameRenderer" })
@@ -76,6 +76,9 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
             }
             if (e?.fieldData?.fieldName === "productDescription") {
                 columns.push({ field: "productDescription", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+            }
+            if (e?.fieldData?.fieldName === "productCategory") {
+                columns.push({ field: "productCategory", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
             }
         })
         const fields = await fetch_po_product_fields(purchaseOrderData?.currency);
@@ -118,6 +121,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 res.productDescription = item.productDetail?.productDescription
                 res.serializedProduct = item.productDetail?.serializedProduct
                 res.serializedProductView = item.productDetail?.serializedProduct ? "Yes" : "No"
+                res.productCategory = item.productDetail?.productCategory?.optionLabel
                 res.productDetail = item.productDetail
                 if (item?.qty === 0) {
                     res.isValid = false;

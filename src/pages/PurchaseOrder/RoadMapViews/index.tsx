@@ -2,15 +2,7 @@ import _ from 'lodash';
 import React, { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import {
-  DELIVERY_TICKET_TYPE,
-  INVENTORY_STATUS,
-  rentalManagement,
-  RENTAL_STATUS,
-  COLOUR_MASTER,
-  purchaseOrder,
-  PURCHASE_ORDER_STATUS
-} from '../../../constants/helpers';
+import { COLOUR_MASTER, purchaseOrder, PURCHASE_ORDER_STATUS } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -232,7 +224,6 @@ const PurchaseOrderViews = (props) => {
           target: `${pId}_closed`
         });
       }
-
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
     } catch (error) {
@@ -257,7 +248,6 @@ const PurchaseOrderViews = (props) => {
         history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'serialNumber':
-        history.push(`${routes.serializedAssetDetail.path}/${element.data.ref_id}`);
         break;
       case 'purchaseOrder':
         history.push(`${routes.purchaseOrderDetail.path}/${element.data.ref_id}`);

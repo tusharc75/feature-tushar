@@ -14,7 +14,6 @@ import DetailsPage from "src/components/Shared/DetailsPage";
 import { FaDiceOne } from "react-icons/fa";
 import axiosInstance from "src/axios/axiosInstance";
 
-const displayColumns = ["qty", "totalCostPerUnit", "productName", "productDesc", "unit"]
 let levalOrderBy = [
     "product",
     "product-custom",
@@ -164,7 +163,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                 fields = [...fields, ...ele.fields]
             })
             setRequireFieldArray(data?.requiredFields)
-            GenrateColoum([...new Map(fields.map(item => [item["_id"], item])).values()], columns, rendererNames, data?.requiredFields, rows);
+            GenrateColoum([...new Map(fields.map(item => [item["_id"], item])).values()], columns, rendererNames, data?.requiredFields, rows, data?.displayColumns);
 
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
@@ -186,99 +185,102 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
     };
 
 
-    const GenrateColoum = (fields, column, rendererNames, requiredFields, rows) => {
+    const GenrateColoum = (fields, column, rendererNames, requiredFields, rows, displayColumns) => {
         let _fields = fields;
         let tempProductData = []
         _fields.forEach((ele) => {
-            if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
-                if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                    ele.displayUnits.forEach((_unit) => {
-                        let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
-                        let fieldLabel = ele.fieldLabel + " " + _unit
-                        if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                            let col: any = {}
-                            col.field = fieldName
-                            col.headerName = fieldLabel
-                            col.width = 180
-                            col.show = displayColumns.includes(ele.fieldName) ? true : false
-                            col.disabled = false
-                            col.leval = ele.leval
-                            col.cellRenderer = "commonRenderer";
-                            column.push(col)
-                        }
-                    })
-                }
-                else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
-                    ele.displayUnits.forEach((_unit) => {
-                        ele.displayCurrency.forEach((_currency) => {
-                            let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
-                            let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
+
+            if (displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName)) {
+                if (ele.type === "converter" || ele.type === "currencyAmount" || ele.isConverter === true) {
+                    if (ele.type !== "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                        ele.displayUnits.forEach((_unit) => {
+                            let fieldName = ele.fieldName + "_" + _unit.toLowerCase()
+                            let fieldLabel = ele.fieldLabel + " " + _unit
                             if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
                                 let col: any = {}
                                 col.field = fieldName
                                 col.headerName = fieldLabel
                                 col.width = 180
-                                col.show = displayColumns.includes(ele.fieldName) ? true : false
+                                col.show = true
                                 col.disabled = false
                                 col.leval = ele.leval
                                 col.cellRenderer = "commonRenderer";
                                 column.push(col)
                             }
                         })
-                    })
+                    }
+                    else if (ele.type === "currencyAmount" && (ele.type === "converter" || ele.isConverter === true)) {
+                        ele.displayUnits.forEach((_unit) => {
+                            ele.displayCurrency.forEach((_currency) => {
+                                let fieldName = ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase()
+                                let fieldLabel = ele.fieldLabel + " " + _unit + "/" + _currency
+                                if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                    let col: any = {}
+                                    col.field = fieldName
+                                    col.headerName = fieldLabel
+                                    col.width = 180
+                                    col.show = true
+                                    col.disabled = false
+                                    col.leval = ele.leval
+                                    col.cellRenderer = "commonRenderer";
+                                    column.push(col)
+                                }
+                            })
+                        })
+                    }
+                    else if (ele.type === "currencyAmount") {
+                        ele.displayCurrency.forEach((_currency) => {
+                            let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
+                            let fieldLabel = ele.fieldLabel + " " + _currency
+                            if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
+                                let col: any = {}
+                                col.field = fieldName
+                                col.headerName = fieldLabel
+                                col.width = 180
+                                col.show = true
+                                col.disabled = false
+                                col.leval = ele.leval
+                                col.cellRenderer = "commonRenderer";
+                                if (requiredFields.includes(ele.fieldName)) {
+                                    col.cellEditor = "numericCellEditor";
+                                    col.editable = true;
+                                    rows.forEach(data => {
+                                        if (data[fieldName]) {
+                                            let productIndex = tempProductData.findIndex(d => d.uniqueId === data?.uniqueId)
+                                            let tempData = {
+                                                "uniqueId": data?.uniqueId,
+                                                [fieldName]: parseInt(data[fieldName] === "" ? 0 : data[fieldName])
+                                            }
+                                            if (productIndex === -1) {
+                                                tempProductData = [...tempProductData, tempData]
+                                            }
+                                            else {
+                                                tempProductData[productIndex][fieldName] = tempData[fieldName]
+                                            }
+                                        }
+                                    })
+                                    setProductData(tempProductData)
+                                }
+                                column.push(col)
+                            }
+                        })
+                    }
                 }
-                else if (ele.type === "currencyAmount") {
-                    ele.displayCurrency.forEach((_currency) => {
-                        let fieldName = ele.fieldName + "_" + _currency.toLowerCase()
-                        let fieldLabel = ele.fieldLabel + " " + _currency
-                        if (column.filter((_c) => _c.field === fieldName && _c.headerName === fieldLabel).length === 0) {
-                            let col: any = {}
-                            col.field = fieldName
-                            col.headerName = fieldLabel
+                else {
+                    if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
+                        let col: any = {}
+                        if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine" || ele.type === "multiSelect") {
+                            col.field = ele.fieldName
+                            col.headerName = ele.fieldLabel
                             col.width = 180
-                            col.show = displayColumns.includes(ele.fieldName) || requiredFields.includes(ele.fieldName) ? true : false
+                            col.show = true
                             col.disabled = false
                             col.leval = ele.leval
                             col.cellRenderer = "commonRenderer";
-                            if (requiredFields.includes(ele.fieldName)) {
-                                col.cellEditor = "numericCellEditor";
-                                col.editable = true;
-                                rows.forEach(data => {
-                                    if (data[fieldName]) {
-                                        let productIndex = tempProductData.findIndex(d => d.uniqueId === data?.uniqueId)
-                                        let tempData = {
-                                            "uniqueId": data?.uniqueId,
-                                            [fieldName]: parseInt(data[fieldName] === "" ? 0 : data[fieldName])
-                                        }
-                                        if (productIndex === -1) {
-                                            tempProductData = [...tempProductData, tempData]
-                                        }
-                                        else {
-                                            tempProductData[productIndex][fieldName] = tempData[fieldName]
-                                        }
-                                    }
-                                })
-                                setProductData(tempProductData)
-                            }
                             column.push(col)
                         }
-                    })
-                }
-            }
-            else {
-                if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
-                    let col: any = {}
-                    if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-                        col.field = ele.fieldName
-                        col.headerName = ele.fieldLabel
-                        col.width = 180
-                        col.show = displayColumns.includes(ele.fieldName) ? true : false
-                        col.disabled = false
-                        col.leval = ele.leval
-                        col.cellRenderer = "commonRenderer";
-                        column.push(col)
-                    }
 
+                    }
                 }
             }
         })
