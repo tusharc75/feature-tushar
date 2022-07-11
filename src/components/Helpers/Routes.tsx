@@ -558,7 +558,7 @@ const routes = {
         ? storedRoutes?.inventoryCycle?.title
         : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle/detail'
-  }
+  },
 };
 
 export default routes;
