@@ -95,7 +95,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     try {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
       if (gridApi) {
-        gridApi.deselectAll();
+        gridApi.setRowData([]);
       }
       var productAssets: any = [];
       var deliveryTicketList: any = [];
