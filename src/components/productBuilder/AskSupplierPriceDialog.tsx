@@ -44,6 +44,7 @@ const AskSupplierPriceDialog = (props) => {
     const [contactId, setContactId] = useState([]);
     const [fields, setFields] = useState([]);
     const [selectedFields, setSelectedFields] = useState([]);
+    const [displayColumns, setDisplayColumns] = useState(["qty", "productName", "productDesc", "unit", "supplierAccount"]);
 
 
     useEffect(() => {
@@ -51,9 +52,7 @@ const AskSupplierPriceDialog = (props) => {
             axiosInstance().get(`/productbuilder/getoneproduct/${productBuilderId}/${productDataList[0]?._id}`).then(({ data: { data } }) => {
                 var _fields = [];
                 data.productData.fields.forEach((_f) => {
-                    if (_f.sectionName === "Cost Calculation" && (_f.formula === undefined || _f.formula === null || _f.formula === "")) {
-                        _fields.push({ ..._f })
-                    }
+                    _fields.push({ ..._f })
                 })
                 setFields(_fields)
             }).catch((error) => {
@@ -302,13 +301,41 @@ const AskSupplierPriceDialog = (props) => {
                                         options={[{ fieldName: "All", fieldLabel: "All" }, ...fields]}
                                         getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
                                         value={
+                                            fields.filter((data) => displayColumns?.some((d) => d === data?.fieldName)).length
+                                                ? fields.filter((data) => displayColumns?.some((d) => d === data?.fieldName))
+                                                : []
+                                        }
+                                        onChange={(e, val: any) => {
+                                            val?.some(d => d?.fieldName === "All") ?
+                                                setDisplayColumns(fields?.map((d) => d?.fieldName))
+                                                : setDisplayColumns(val && val?.map((d) => d?.fieldName))
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                margin="dense"
+                                                name="displayColumns"
+                                                label="Display Columns"
+                                                variant="outlined"
+                                                required
+                                                fullWidth
+                                            />
+                                        )}
+                                    />}
+                                </Grid>
+                                <Grid item xs={12}>
+                                    {from != "SupplierAskPrice" && <Autocomplete
+                                        multiple
+                                        options={[{ fieldName: "All", fieldLabel: "All" }, ...fields.filter(d => d.sectionName === "Cost Calculation" && (d.formula === undefined || d.formula === null || d.formula === ""))]}
+                                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                                        value={
                                             fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName)).length
                                                 ? fields.filter((data) => selectedFields?.some((d) => d === data?.fieldName))
                                                 : []
                                         }
                                         onChange={(e, val: any) => {
                                             val?.some(d => d?.fieldName === "All") ?
-                                                setSelectedFields(fields?.map((d) => d?.fieldName))
+                                                setSelectedFields(fields?.filter(d => d.sectionName === "Cost Calculation" && (d.formula === undefined || d.formula === null || d.formula === "")).map((d) => d?.fieldName))
                                                 : setSelectedFields(val && val?.map((d) => d?.fieldName))
                                         }}
                                         renderInput={(params) => (
@@ -347,8 +374,8 @@ const AskSupplierPriceDialog = (props) => {
                         : <CustomButton
                             variant="contained"
                             color="primary"
-                            disabled={contactId.length === 0 || selectedFields.length === 0}
-                            onClick={() => handelAskPriceToSupplier(contantValue, contactId, selectedFields)}
+                            disabled={contactId.length === 0 || selectedFields.length === 0 || displayColumns.length === 0}
+                            onClick={() => handelAskPriceToSupplier(contantValue, contactId, selectedFields, displayColumns)}
                         >
                             Send
                         </CustomButton>}
