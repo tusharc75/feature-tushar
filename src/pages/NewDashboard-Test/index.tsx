@@ -122,7 +122,9 @@ const DashbaordNew = () => {
               disabled={dashboardList.length === 0}
             />
             <Box bgcolor="#efefef" p={1} pt={1}>
-              {dashboardList.length === 0 ? (
+              {dashboardLoading ? (
+                <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboards..." />
+              ) : dashboardList.length === 0 ? (
                 <Box
                   style={{ height: 'calc(100vh - 110px)', minHeight: '400px' }}
                   width={'100%'}
@@ -137,8 +139,6 @@ const DashbaordNew = () => {
                     You don't have access to any dashboard
                   </Typography>
                 </Box>
-              ) : dashboardLoading ? (
-                <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboards..." />
               ) : (
                 <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
                   {charts.map((chart: ChartDataType, index: number) => (
