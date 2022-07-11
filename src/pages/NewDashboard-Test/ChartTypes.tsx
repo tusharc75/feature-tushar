@@ -265,7 +265,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           filters={chart.filters}
           values={filterValues}
           setValues={setFilterValues}
-          isAssetDashboard={globalFilters.dashboardType?.includes('Asset')}
+          isCRM={globalFilters.dashboardType?.includes('CRM')}
           filterOptions={{
             ...filterData,
             status: chart.statusOptions
