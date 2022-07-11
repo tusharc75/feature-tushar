@@ -94,12 +94,11 @@ const ReportFilters = (props: FiltersProps) => {
 
   React.useEffect(() => {
     if (!resourceColumns && resourceColumns.length === 0) return;
-
     const optionsData: any = {};
     const filteredData = [...resourceColumns]
-      .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'date'))
+      .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect' || d.fieldData.type === 'date'))
       .map((d: any) => {
-        if (d.fieldData.type === 'dropDown') {
+        if (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect') {
           optionsData[d.fieldData.fieldName] = {
             options: d.fieldData.option,
             type: d.fieldData.type,
@@ -112,7 +111,6 @@ const ReportFilters = (props: FiltersProps) => {
         return d.fieldData;
       });
     setResourceOptions(optionsData);
-    // setFormValues(null);
     setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
   }, [resourceColumns]);
 
@@ -177,9 +175,9 @@ const ReportFilters = (props: FiltersProps) => {
     });
     setIsStatusPeriod(
       resource?.includes('Serialized Asset') &&
-        Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
-        formValues?.hasOwnProperty('status') &&
-        formValues.status.length > 0
+      Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
+      formValues?.hasOwnProperty('status') &&
+      formValues.status.length > 0
     );
   }, [selectedResources, formValues]);
 
@@ -228,60 +226,60 @@ const ReportFilters = (props: FiltersProps) => {
         setStatusTimeFrame('1-month');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
 
         break;
       case '3-months':
         setStatusTimeFrame('3-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       case '6-months':
         setStatusTimeFrame('6-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       case '1-year':
         setStatusTimeFrame('1-year');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-              ...prevState,
-              [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
-              [`to_statusPeriod`]: new Date()
-            }))
+            ...prevState,
+            [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`to_statusPeriod`]: new Date()
+          }))
           : setBetweenDate((prevState) => ({
-              ...prevState,
-              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
-              [`to_${field.fieldName}`]: new Date()
-            }));
+            ...prevState,
+            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+            [`to_${field.fieldName}`]: new Date()
+          }));
         break;
 
       default:
@@ -289,6 +287,7 @@ const ReportFilters = (props: FiltersProps) => {
     }
   };
 
+  console.log(filterOptions)
   return (
     <Container maxWidth="sm">
       <Box height={'100%'} my={2}>
