@@ -1,5 +1,4 @@
 import { Grid, Typography, Box, Container, Button } from '@material-ui/core';
-import styles from '../Leads/Header.module.scss';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { REPORT_LIST } from './../../constants/helpers';
@@ -32,11 +31,13 @@ const ReportMaster = () => {
             </Grid>
             <Grid item xs={8} sm={6}>
               <Box display="flex" alignItems="center" justifyContent="flex-end">
-                <Link to={`/schedule-report`}>
-                  <Button variant="outlined" size="small" endIcon={<AiFillCalendar />} color="primary">
-                    Schedule Report
-                  </Button>
-                </Link>
+                {permissions?.scheduleReport.isRead && (
+                  <Link to={`/schedule-report`}>
+                    <Button variant="outlined" size="small" endIcon={<AiFillCalendar />} color="primary">
+                      Schedule Report
+                    </Button>
+                  </Link>
+                )}
               </Box>
             </Grid>
           </Grid>

@@ -452,6 +452,13 @@ const routes = {
     title: storedRoutes && storedRoutes.reports && storedRoutes.reports.title ? storedRoutes.reports?.title : 'Reports',
     path: '/reports'
   },
+  scheduleReport: {
+    title:
+      storedRoutes && storedRoutes.scheduleReport && storedRoutes.scheduleReport.title
+        ? storedRoutes.scheduleReport?.title
+        : RESOURCE_LABEL.scheduleReport,
+    path: '/schedule-report'
+  },
   resourceCalendar: {
     title:
       storedRoutes && storedRoutes.resourceCalendar && storedRoutes.resourceCalendar.title
@@ -558,7 +565,7 @@ const routes = {
         ? storedRoutes?.inventoryCycle?.title
         : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle/detail'
-  },
+  }
 };
 
 export default routes;
