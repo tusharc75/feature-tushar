@@ -30,7 +30,7 @@ const CycleCountDetermination = () => {
   const [warehouse, setWarehouse] = useState(null);
 
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   }: any = useData();
 
   const [open, setOpen] = useState(false);
@@ -46,7 +46,7 @@ const CycleCountDetermination = () => {
   useEffect(() => {
     fetchGridColumns();
     getWarehouse();
-  }, []);
+  }, [selectedEntity]);
 
   useEffect(() => {
     if (warehouse) {
@@ -295,6 +295,7 @@ const CycleCountDetermination = () => {
             }}
             data={editData}
             warehouse={warehouse}
+            warehouseName={warehouseOption?.find((e) => e._id === warehouse)?.warehouseName}
           />
         )}
       </CustomContainer>
