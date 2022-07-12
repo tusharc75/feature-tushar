@@ -558,6 +558,13 @@ const routes = {
         ? storedRoutes?.inventoryCycle?.title
         : RESOURCE_LABEL.inventoryCycle,
     path: '/inventory-cycle/detail'
+  },
+  cycleCountDetermination: {
+    title:
+      storedRoutes && storedRoutes?.cycleCountDetermination && storedRoutes?.cycleCountDetermination?.title
+        ? storedRoutes?.cycleCountDetermination?.title
+        : RESOURCE_LABEL.cycleCountDetermination,
+    path: '/cycle-count-determination'
   }
 };
 

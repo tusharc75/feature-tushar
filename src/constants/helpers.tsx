@@ -340,7 +340,8 @@ export const RESOURCE_LABEL = {
   productAuction: 'Product Auction',
   inventoryToAsset: 'Inventory to Asset',
   importExport: 'Import-Export',
-  inventoryCycle: 'Inventory Cycle'
+  inventoryCycle: 'Inventory Cycle',
+  cycleCountDetermination: 'Cycle Count Determination'
 };
 
 export const CHILD_RESOURCE = {
