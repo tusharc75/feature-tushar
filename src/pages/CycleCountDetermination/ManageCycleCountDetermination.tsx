@@ -10,12 +10,11 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { CustomDialogTransition } from './../../constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 import { Formik, Form, FieldArray, Field } from 'formik';
+import routes from 'src/components/Helpers/Routes';
 
-const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse }) => {
+const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, warehouseName }) => {
 
   const toastConfig = useContext(CustomToastContext);
-
-  console.log(data)
 
   const [users, setUsers] = useState([]);
   const [cycleCodes, setCycleCodes] = useState([]);
@@ -80,7 +79,7 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse }) 
       fullWidth
     >
       <CustomDialogHeader
-        title={'Edit Cycle Count Determination'}
+        title={`${routes.cycleCountDetermination.title} - ${warehouseName}`}
         showRequiredLabel={false}
         onClose={() => {
           onClose();
