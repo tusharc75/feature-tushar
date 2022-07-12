@@ -139,6 +139,7 @@ import ImportExport from './pages/ImportExport';
 import ScheduleReport from './pages/ScheduleReport';
 import InventoryCycle from './pages/InventoryCycle';
 import InventoryCycleDetailPage from './pages/InventoryCycle/InventoryCycleDetailPage';
+import CycleCountDetermination from './pages/CycleCountDetermination';
 
 var notificationInterval: any = null;
 
@@ -744,6 +745,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.inventoryCycleDetail.path}/:id`}>
               <InventoryCycleDetailPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.cycleCountDetermination.path}>
+              <CycleCountDetermination />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
