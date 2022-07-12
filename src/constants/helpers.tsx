@@ -200,7 +200,8 @@ export const sidebarResource = {
   productAuction: 'Product Auction',
   inventoryToAsset: 'Inventory to Asset',
   inventoryCycle: 'Inventory Cycle',
-  dashboardMaster: 'Dashboard Master'
+  dashboardMaster: 'Dashboard Master',
+  scheduleReport: 'Schedule Report'
 };
 
 export const resourceNames = {
@@ -262,6 +263,7 @@ export const resourceNames = {
   bulkAssetCreation: 'Bulk Asset Creation',
   pos: 'Pos',
   report: 'Report',
+  scheduleReport: 'Schedule Report',
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
   productAuction: 'Product Auction'
@@ -335,6 +337,7 @@ export const RESOURCE_LABEL = {
   pos: 'eRECS',
   repairType: 'Repair Types',
   report: 'Report',
+  scheduleReport: 'Schedule Report',
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
   productAuction: 'Product Auction',
