@@ -322,9 +322,16 @@ const CreateFormBuilder = () => {
                   <Autocomplete
                     id="section-name"
                     freeSolo
+                    autoSelect
                     options={sectionNameList}
                     getOptionLabel={(option) => option}
-                    renderInput={(params) => <TextField {...params} label="Section Name" variant="outlined" margin="dense" fullWidth />}
+                    renderInput={(params) =>
+                      <TextField {...params}
+                        label="Section Name"
+                        variant="outlined"
+                        margin="dense"
+                        fullWidth />
+                    }
                     value={sectionName}
                     onChange={(e, value) => {
                       setsectionName(value);

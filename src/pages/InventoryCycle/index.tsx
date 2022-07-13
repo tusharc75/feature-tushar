@@ -18,7 +18,7 @@ import CustomAgGrid, { intialState, reducer } from '../../components/AgGridCompo
 import DeleteIcon from '@material-ui/icons/Delete';
 import { camelCase } from 'lodash';
 import { prepareDataForGrid } from 'src/constants/helpers';
-import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageInventoryCycle from './ManageInventoryCycle';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
@@ -95,6 +95,7 @@ const InventoryCycle = () => {
     axiosInstance()
       .put(`/inventory-cycle/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords)
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);

@@ -31,7 +31,7 @@ const ReportMaster = () => {
             </Grid>
             <Grid item xs={8} sm={6}>
               <Box display="flex" alignItems="center" justifyContent="flex-end">
-                {permissions?.scheduleReport.isRead && (
+                {permissions?.scheduleReport?.isRead && (
                   <Link to={`/schedule-report`}>
                     <Button variant="outlined" size="small" endIcon={<AiFillCalendar />} color="primary">
                       Schedule Report
