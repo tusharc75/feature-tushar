@@ -22,12 +22,15 @@ import { Link } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 
 const CycleCountDetermination = () => {
+
   const renderedFrom = camelCase(`${routes.cycleCountDetermination.title}`);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-  const [plantOptions, setPlantOptions] = useState([]);
-  const [plantId, setPlantId] = useState(null);
+
+  const [warehouseOption, setWarehouseOption] = useState([]);
+  const [warehouse, setWarehouse] = useState(null);
+
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   }: any = useData();
 
   const [open, setOpen] = useState(false);
@@ -40,14 +43,26 @@ const CycleCountDetermination = () => {
   const [editData, setEditData] = useState(null);
   const { dataRows, rowCount, page, limit, pageSizes, appendRows } = state;
 
-  const getPlants = () => {
+  useEffect(() => {
+    fetchGridColumns();
+    getWarehouse();
+  }, [selectedEntity]);
+
+  useEffect(() => {
+    if (warehouse) {
+      fetchCycleCountDetermination();
+    }
+  }, [warehouse]);
+
+  const getWarehouse = () => {
     axiosInstance()
       .get(`/warehouse`)
       .then(({ data: { data } }) => {
-        setPlantOptions([...data]);
-        setPlantId(data[0]._id);
+        setWarehouseOption([...data]);
+        setWarehouse(data[0]._id);
       });
   };
+
   const fetchGridColumns = () => {
     let columns = [];
     let rendererNames = [];
@@ -57,20 +72,24 @@ const CycleCountDetermination = () => {
       nameRenderer: NameRenderer
     };
     setFrameWorkComponent({ ...tempFrameworkComponent });
-    columns = [...columns];
-    setColumns([...columns]);
     setColumns([
-      { field: 'name', headerName: 'Product Category', show: true, cellRenderer: 'nameRenderer', pivotIndex: 0, primaryField: true },
+      {
+        field: 'name',
+        headerName: 'Product Category',
+        show: true,
+        cellRenderer: 'nameRenderer',
+        pivotIndex: 0,
+        primaryField: true
+      },
       {
         field: 'cycleCode',
         headerName: 'Cycle Code',
         show: true,
         cellRenderer: 'commonRenderer'
       },
-
       {
-        field: 'users',
-        headerName: 'Users',
+        field: 'user',
+        headerName: 'User',
         show: true,
         cellRenderer: 'commonRenderer'
       }
@@ -79,38 +98,35 @@ const CycleCountDetermination = () => {
 
   const fetchCycleCountDetermination = () => {
     setLoading(true);
-    axiosInstance()
-      .get(`/cycle-count-determination?wareHouse=${plantId}`)
-      .then(({ data: { data, count } }) => {
-        setLoading(false);
-        setEditData(data);
-        let rows = data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['cycleCode'] = u.cycleCode?.cycleCode;
-          return {
-            ...finalObject
-          };
+    axiosInstance().get(`/cycle-count-determination?wareHouse=${warehouse}`).then(({ data: { data, count } }) => {
+      setLoading(false);
+      setEditData(data);
+      let rows = data?.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        return {
+          ...finalObject
+        };
+      });
+      if (appendRows) {
+        dispatch({
+          type: 'initialize',
+          data: [...dataRows, ...rows],
+          count: count,
+          selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
         });
-        if (appendRows) {
-          dispatch({
-            type: 'initialize',
-            data: [...dataRows, ...rows],
-            count: count,
-            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
-          });
-        } else {
-          dispatch({
-            type: 'initialize',
-            data: rows,
-            count: count,
-            selectedRecords: rows.filter((f) => f.isChecked === true)
-          });
-        }
-        dispatch({ type: 'initialize', data: rows, count: data.count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
+      } else {
+        dispatch({
+          type: 'initialize',
+          data: rows,
+          count: count,
+          selectedRecords: rows.filter((f) => f.isChecked === true)
+        });
+      }
+      dispatch({ type: 'initialize', data: rows, count: data.count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
 
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -120,24 +136,8 @@ const CycleCountDetermination = () => {
   };
 
   const NameRenderer = (params) => {
-    return (
-      <>
-        <span style={{ color: 'blue' }}>
-          <Link to={`${routes.productCategoryDetail.path}/${params.data._id}`}>{params.value}</Link>
-        </span>
-      </>
-    );
+    return (<Link className="link text-truncate" to={`${routes.productCategoryDetail.path}/${params.data._id}`}>{params.value}</Link>);
   };
-
-  useEffect(() => {
-    fetchGridColumns();
-    getPlants();
-  }, []);
-  useEffect(() => {
-    if (plantId) {
-      fetchCycleCountDetermination();
-    }
-  }, [plantId]);
 
   return (
     <Fragment>
@@ -185,13 +185,13 @@ const CycleCountDetermination = () => {
               </div>
               <Autocomplete
                 style={{ width: '250px' }}
-                options={plantOptions}
+                options={warehouseOption}
                 getOptionLabel={(option: any) => option?.warehouseName}
                 disableClearable
-                value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
+                value={warehouseOption.filter((data) => data._id === warehouse).length ? warehouseOption.filter((data) => data._id === warehouse)[0] : ''}
                 onChange={(e, val) => {
                   if (val !== null) {
-                    setPlantId(val && val._id ? val._id : '');
+                    setWarehouse(val && val._id ? val._id : '');
                   }
                   fetchCycleCountDetermination();
                 }}
@@ -239,13 +239,13 @@ const CycleCountDetermination = () => {
                 allowSwipe={true}
                 permissions={permissions.cycleCountDetermination}
                 primaryField={columns?.find((d) => d.primaryField)}
-                onClick={(data) => {}}
+                onClick={(data) => { }}
                 dataRows={dataRows}
                 selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
                 dispatch={dispatch}
-                onEdit={(data) => {}}
+                onEdit={(data) => { }}
                 extraParamsToCheckDelete={true}
-                onDelete={(data) => {}}
+                onDelete={(data) => { }}
                 rowCount={rowCount}
                 page={page}
                 loading={loading}
@@ -253,7 +253,7 @@ const CycleCountDetermination = () => {
                 chips={[]}
                 onCreate={false}
                 showClone={true}
-                onClone={(data) => {}}
+                onClone={(data) => { }}
                 renderedFrom={renderedFrom}
               />
             ) : (
@@ -269,13 +269,13 @@ const CycleCountDetermination = () => {
                 page={page}
                 actionWidth={150}
                 allowAction={false}
-                allowPagination={false}
+                allowPagination={true}
                 allowSelection={false}
                 loading={loading}
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchCycleCountDetermination}
                 isClientSideGrid={true}
-                showOnlyShowFilteredRecordSwitch={true}
+                showOnlyShowFilteredRecordSwitch={false}
               />
             )
           ) : null
@@ -294,7 +294,8 @@ const CycleCountDetermination = () => {
               setOpen(false);
             }}
             data={editData}
-            plant={plantId}
+            warehouse={warehouse}
+            warehouseName={warehouseOption?.find((e) => e._id === warehouse)?.warehouseName}
           />
         )}
       </CustomContainer>
