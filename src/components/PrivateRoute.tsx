@@ -74,7 +74,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'serialized-asset-new',
         'import-export',
         'schedule-report',
-        'inventory-cycle'
+        'inventory-cycle',
+        'cycle-count-determination'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

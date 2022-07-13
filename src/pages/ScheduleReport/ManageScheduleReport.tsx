@@ -348,46 +348,28 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
   const formikValidator = (values: ValueTypes) => {
     let errors = {};
-
     if (!values.scheduleName) {
       errors['scheduleName'] = 'Schedule name is required';
-    } else {
-      errors['scheduleName'] = '';
-    }
+    } 
     if (!values.resource) {
       errors['resource'] = 'Resource is required';
-    } else {
-      errors['resource'] = null;
-    }
-    if (values.subscribeUsers.length === 0) {
+    } 
+    if (values?.subscribeUsers?.length === 0) {
       errors['subscribeUsers'] = 'Subscribe users is required';
-    } else {
-      errors['subscribeUsers'] = '';
-    }
-
+    } 
     if (!values.frequency) {
       errors['frequency'] = 'Frequency is required';
     } else {
-      errors['frequency'] = '';
       if (values.frequency === 'Daily' && !values.time) {
         errors['time'] = 'Time is required';
-      } else if (values.time) {
-        errors['time'] = '';
-      }
-
+      } 
       if (values.frequency === 'Weekly' && !values.week) {
         errors['week'] = 'Day is required';
-      } else if (values.week) {
-        errors['week'] = '';
       }
-
       if (values.frequency === 'Monthly' && !values.day) {
         errors['day'] = 'Date is required';
-      } else {
-        errors['day'] = '';
       }
     }
-
     return errors;
   };
 
@@ -758,7 +740,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                 <Button
                   startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
                   disabled={isSubmitting}
-                  type="submit"
                   variant="contained"
                   color="primary"
                   size="small"
@@ -770,16 +751,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             </>
           )}
         </Formik>
-      )}
-      {!formData && (
-        <CustomDialogFooter>
-          <Button disabled={true} color="primary" variant="outlined" size="small">
-            Cancel
-          </Button>
-          <Button disabled={true} type="submit" variant="contained" color="primary" size="small">
-            {id ? 'Update' : 'Save'}
-          </Button>
-        </CustomDialogFooter>
       )}
     </Dialog>
   );
