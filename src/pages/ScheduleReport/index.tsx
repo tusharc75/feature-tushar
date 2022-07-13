@@ -164,24 +164,34 @@ const ScheduleReport = () => {
           <FileCopy color="primary" />
         </IconButton>
       </HtmlTooltip> */}
-      <HtmlTooltip title="Delete">
-        <IconButton
-          size="small"
-          aria-label="Delete"
-          onClick={() => {
-            setDeleteRecord(params.data);
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          <Delete color="error" />
-        </IconButton>
+      <HtmlTooltip title={permissions?.scheduleReport?.isDelete ? 'Delete' : "You don't have permission"}>
+        <span>
+          <IconButton
+            disabled={!permissions?.scheduleReport?.isDelete}
+            size="small"
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(params.data);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <Delete color={permissions?.scheduleReport?.isDelete ? 'error' : 'disabled'} />
+          </IconButton>
+        </span>
       </HtmlTooltip>
     </>
   );
 
   function ScheduleNameRenderer(params) {
     return (
-      <span onClick={() => setShowManageDialog({ open: true, id: params.data._id })} className="cursor-pointer link">
+      <span
+        onClick={() => {
+          if (permissions?.scheduleReport?.isUpdate) {
+            setShowManageDialog({ open: true, id: params.data._id });
+          }
+        }}
+        className="cursor-pointer link"
+      >
         {params.value}
       </span>
     );
@@ -257,7 +267,13 @@ const ScheduleReport = () => {
               <Grid item xs={8}>
                 <Box display="flex" alignItems="center" justifyContent="flex-end">
                   <Box mr={1}>
-                    <Button onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))} variant="contained" size="small" color="primary">
+                    <Button
+                      disabled={!permissions?.scheduleReport?.isCreate}
+                      onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))}
+                      variant="contained"
+                      size="small"
+                      color="primary"
+                    >
                       Add
                     </Button>
                   </Box>
@@ -269,7 +285,7 @@ const ScheduleReport = () => {
                       endIcon={<ExpandMore />}
                       onClick={openActions}
                       aria-controls="action-menu"
-                      disabled={selectedRecords.length === 0}
+                      disabled={selectedRecords.length === 0 || !permissions?.scheduleReport?.isDelete}
                     >
                       Actions
                     </Button>
