@@ -164,10 +164,10 @@ const ScheduleReport = () => {
           <FileCopy color="primary" />
         </IconButton>
       </HtmlTooltip> */}
-      <HtmlTooltip title={permissions?.scheduleReport.isDelete ? 'Delete' : "You don't have permission"}>
+      <HtmlTooltip title={permissions?.scheduleReport?.isDelete ? 'Delete' : "You don't have permission"}>
         <span>
           <IconButton
-            disabled={!permissions?.scheduleReport.isDelete}
+            disabled={!permissions?.scheduleReport?.isDelete}
             size="small"
             aria-label="Delete"
             onClick={() => {
@@ -175,7 +175,7 @@ const ScheduleReport = () => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <Delete color={permissions?.scheduleReport.isDelete ? 'error' : 'disabled'} />
+            <Delete color={permissions?.scheduleReport?.isDelete ? 'error' : 'disabled'} />
           </IconButton>
         </span>
       </HtmlTooltip>
@@ -186,7 +186,7 @@ const ScheduleReport = () => {
     return (
       <span
         onClick={() => {
-          if (permissions?.scheduleReport.isUpdate) {
+          if (permissions?.scheduleReport?.isUpdate) {
             setShowManageDialog({ open: true, id: params.data._id });
           }
         }}
@@ -268,7 +268,7 @@ const ScheduleReport = () => {
                 <Box display="flex" alignItems="center" justifyContent="flex-end">
                   <Box mr={1}>
                     <Button
-                      disabled={!permissions?.scheduleReport.isCreate}
+                      disabled={!permissions?.scheduleReport?.isCreate}
                       onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))}
                       variant="contained"
                       size="small"
@@ -285,7 +285,7 @@ const ScheduleReport = () => {
                       endIcon={<ExpandMore />}
                       onClick={openActions}
                       aria-controls="action-menu"
-                      disabled={selectedRecords.length === 0 || !permissions?.scheduleReport.isDelete}
+                      disabled={selectedRecords.length === 0 || !permissions?.scheduleReport?.isDelete}
                     >
                       Actions
                     </Button>
