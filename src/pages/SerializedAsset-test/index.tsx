@@ -70,7 +70,6 @@ const SerializedAssetTest = () => {
   const [selectedPlant, setSelectedPlant] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
   const [isNonSerializedAsset, setNonSerializedAsset] = useState(false);
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
     state: { permissions }
@@ -143,7 +142,8 @@ const SerializedAssetTest = () => {
     }
   }, [productCategory]);
 
-  const ActionsRenderer = [{
+  const ActionsRenderer = [
+    {
     accessor: 'action',
     Header: '',
     minWidth: 100,
@@ -182,7 +182,8 @@ const SerializedAssetTest = () => {
         )}
       </>
     )
-  }]
+  }
+]
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -254,7 +255,7 @@ const SerializedAssetTest = () => {
         let rows = data.data?.map((u, user) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
-          finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)].some((s) => s._id === u._id);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
           return {
             ...finalObject
@@ -342,7 +343,7 @@ const SerializedAssetTest = () => {
       deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
+      const savedRecords = selectedRecords;
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
@@ -353,7 +354,7 @@ const SerializedAssetTest = () => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d._id);
+      ids = selectedRecords.map((d) => d._id);
     }
     axiosInstance()
       .put(`${serializedAsset.api}/remove`, { ids: ids })
@@ -369,7 +370,7 @@ const SerializedAssetTest = () => {
   };
 
   const handleStatusUpdate = (status) => {
-    const ids = [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d) => d._id);
+    const ids = selectedRecords.map((d) => d._id);
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
         assets: ids,
@@ -381,7 +382,6 @@ const SerializedAssetTest = () => {
         if (gridApi) {
           gridApi.deselectAll();
         }
-        localStorage.removeItem(localStorageSelectedRecords)
         fetchProductInventory();
         setAnchorEl(null);
         toastConfig.setToastConfig({
@@ -454,8 +454,8 @@ const SerializedAssetTest = () => {
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
-            recordsToExport={[...getLocalStorageArrayData(localStorageSelectedRecords)].length}
-            ids={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? [...getLocalStorageArrayData(localStorageSelectedRecords)].map((obj) => obj._id) : []}
+            recordsToExport={selectedRecords.length}
+            ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
               else fetchProductInventory();
@@ -652,7 +652,7 @@ const SerializedAssetTest = () => {
                     color="default"
                     size="small"
                     onClick={openActions}
-                    disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                    disabled={selectedRecords.length ? false : true}
                     aria-controls="action-menu"
                   >
                     {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
@@ -684,19 +684,19 @@ const SerializedAssetTest = () => {
                           closeActions();
                           handleStatusUpdate(status);
                         }}
-                        disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => [INVENTORY_STATUS.new, INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                        disabled={selectedRecords?.filter((o) => [INVENTORY_STATUS.new, INVENTORY_STATUS.available, INVENTORY_STATUS.underReview, INVENTORY_STATUS.lost].includes(o.status)).length === selectedRecords.length ? false : true}
                       >
                         {`Status Change - ${status}`}
                       </MenuItem>
                     ))}
-                    {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && [...getLocalStorageArrayData(localStorageSelectedRecords)]?.length &&
+                    {permissions?.serializedAsset?.isUpdate && allowUpdateStatus && selectedRecords?.length &&
                       <>
                         <MenuItem
                           onClick={() => {
                             closeActions();
                             handleStatusUpdate(INVENTORY_STATUS.scrap);
                           }}
-                          disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.scrap].includes(o.status)).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                          disabled={selectedRecords?.filter((o) => ![INVENTORY_STATUS.scrap].includes(o.status)).length === selectedRecords.length ? false : true}
                         >
                           {`Status Change - ${INVENTORY_STATUS.scrap}`}
                         </MenuItem>
@@ -705,7 +705,7 @@ const SerializedAssetTest = () => {
                             closeActions();
                             handleStatusUpdate(INVENTORY_STATUS.lost);
                           }}
-                          disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((o) => ![INVENTORY_STATUS.lost].includes(o.status)).length === [...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
+                          disabled={selectedRecords?.filter((o) => ![INVENTORY_STATUS.lost].includes(o.status)).length === selectedRecords.length ? false : true}
                         >
                           {`Status Change - ${INVENTORY_STATUS.lost}`}
                         </MenuItem>
