@@ -201,7 +201,8 @@ export const sidebarResource = {
   inventoryToAsset: 'Inventory to Asset',
   inventoryCycle: 'Inventory Cycle',
   dashboardMaster: 'Dashboard Master',
-  scheduleReport: 'Schedule Report'
+  scheduleReport: 'Schedule Report',
+  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory'
 };
 
 export const resourceNames = {
@@ -344,7 +345,8 @@ export const RESOURCE_LABEL = {
   inventoryToAsset: 'Inventory to Asset',
   importExport: 'Import-Export',
   inventoryCycle: 'Inventory Cycle',
-  cycleCountDetermination: 'Cycle Count Determination'
+  cycleCountDetermination: 'Cycle Count Determination',
+  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory'
 };
 
 export const CHILD_RESOURCE = {
@@ -600,6 +602,13 @@ export const productAuction = {
   route: '/product-auction',
   permission: 'Product Auction',
   resource: 'Product Auction'
+};
+
+export const cycleCountPhysicalInventory = {
+  api: '/inventory-cycle/physical-inventory',
+  route: '/cycle-count-physical-inventory',
+  permission: 'Cycle Count Physical Inventory',
+  resource: 'Cycle Count Physical Inventory'
 };
 
 export const profileMenuItems = {
