@@ -140,6 +140,7 @@ import ScheduleReport from './pages/ScheduleReport';
 import InventoryCycle from './pages/InventoryCycle';
 import InventoryCycleDetailPage from './pages/InventoryCycle/InventoryCycleDetailPage';
 import CycleCountDetermination from './pages/CycleCountDetermination';
+import CycleCountPhysicalInventory from './pages/CycleCountPhysicalInventory';
 
 var notificationInterval: any = null;
 
@@ -748,6 +749,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.cycleCountDetermination.path}>
               <CycleCountDetermination />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.cycleCountPhysicalInventory.path}>
+              <CycleCountPhysicalInventory />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
