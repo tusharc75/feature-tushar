@@ -600,12 +600,10 @@ const DraggableHeader = ({ column, index, reorder }: { column: any; index: numbe
 
   drag(drop(ref));
 
-  const memoizedColumn = React.useMemo(() => column.render('Header'), [column]);
-
   return (
     <TableCell ref={ref} {...column.getHeaderProps()} className="th text-truncate table-header">
       <div style={{ opacity: isDragging ? 0.2 : 1 }} className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
-        <span>{memoizedColumn}</span>
+        <span>{column.render('Header')}</span>
         {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
       </div>
       <div {...column.getResizerProps()} className="resizer" />
