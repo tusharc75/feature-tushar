@@ -27,15 +27,6 @@ import { DndProvider, DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 import { XYCoord } from 'dnd-core';
-import { makeStyles } from '@material-ui/core/styles';
-
-const useStyles = makeStyles({
-  customTable: {
-    "& .MuiTableCell-sizeSmall": {
-      padding: "2px 0px 2px 2px !important" // <-- arbitrary value
-    }
-  },
-});
 
 const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, ...rest }: any, ref) => {
   const defaultRef = React.useRef();
@@ -105,7 +96,6 @@ function CustomReactTable({
   loading
   // customPageSize = 20,
 }) {
-  const classes = useStyles();
   const defaultColumn = React.useMemo(
     () => ({
       // When using the useFlexLayout:
@@ -127,97 +117,77 @@ function CustomReactTable({
     () =>
       expander
         ? [
-          {
-            id: 'expander', // Make sure it has an ID
-            Header: ({ isAllRowsExpanded }) => (
-              <span
-                style={{
-                  paddingLeft: '0.3rem',
-                  color: 'black'
-                }}
-              >
-                {isAllRowsExpanded ? (
-                  <FaAngleDown
-                    style={{ color: 'white' }}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      toggleAllRowsExpanded(false);
-                    }}
-                  />
-                ) : (
-                  <FaAngleRight
-                    style={{ color: 'white' }}
-                    className="cursor-pointer"
-                    onClick={() => {
-                      toggleAllRowsExpanded(true);
-                    }}
-                  />
-                )}
-              </span>
-            ),
-            sticky: 'left',
-            width: isMobile && !isTablet ? 40 : 70,
-            minWidth: isMobile && !isTablet ? 40 : 70,
-            //maxWidth: 70,
-            canDrag: false,
-            Cell: ({ row }) =>
-              row.canExpand ? (
+            {
+              id: 'expander', // Make sure it has an ID
+              Header: ({ isAllRowsExpanded }) => (
                 <span
-                  {...row.getToggleRowExpandedProps({
-                    style: {
-                      paddingLeft: `${row.depth * 2}rem`
-                    }
-                  })}
+                  style={{
+                    paddingLeft: '0.3rem',
+                    color: 'black'
+                  }}
                 >
-                  {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
+                  {isAllRowsExpanded ? (
+                    <FaAngleDown
+                      style={{ color: 'white' }}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        toggleAllRowsExpanded(false);
+                      }}
+                    />
+                  ) : (
+                    <FaAngleRight
+                      style={{ color: 'white' }}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        toggleAllRowsExpanded(true);
+                      }}
+                    />
+                  )}
                 </span>
-              ) : null
-          },
-          {
-            id: 'selection',
-            sticky: "left",
-            width: 50,
-            minWidth: 50,
-            canDrag: false,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <div>
-                <IndeterminateCheckbox from="Header" {...getToggleAllRowsSelectedProps()} />
-              </div>
-            ),
-            Cell: ({ row }) => (
-              row?.original?.hideSelection ? null :
-                <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : "" }}>
-                  <IndeterminateCheckbox from="Cell"  {...row.getToggleRowSelectedProps()} />
-                </div>
-            ),
-          },
-          ...baseColumns.map((m) => {
-            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-          })
-        ]
+              ),
+              sticky: 'left',
+              width: isMobile && !isTablet ? 40 : 70,
+              minWidth: isMobile && !isTablet ? 40 : 70,
+              //maxWidth: 70,
+              canDrag: false,
+              Cell: ({ row }) =>
+                row.canExpand ? (
+                  <span
+                    {...row.getToggleRowExpandedProps({
+                      style: {
+                        paddingLeft: `${row.depth * 2}rem`
+                      }
+                    })}
+                  >
+                    {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
+                  </span>
+                ) : null
+            },
+            {
+              id: 'selection',
+              minWidth: 50,
+              width: 50,
+              maxWidth: 50,
+              Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />,
+              Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            },
+            ...baseColumns.map((m) => {
+              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+            })
+          ]
         : [
-          {
-            id: 'selection',
-            sticky: "left",
-            width: 50,
-            minWidth: 50,
-            canDrag: false,
-            Header: ({ getToggleAllRowsSelectedProps }) => (
-              <div>
-                <IndeterminateCheckbox from="Header" {...getToggleAllRowsSelectedProps()} />
-              </div>
-            ),
-            Cell: ({ row }) => (
-              row?.original?.hideSelection ? null :
-                <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : "" }}>
-                  <IndeterminateCheckbox from="Cell"  {...row.getToggleRowSelectedProps()} />
-                </div>
-            ),
-          },
-          ...baseColumns.map((m) => {
-            return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-          })
-        ],
+            {
+              id: 'selection',
+              minWidth: 50,
+              width: 50,
+              maxWidth: 50,
+              Header: ({ getToggleAllRowsSelectedProps }) => <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />,
+              Cell: ({ row }) => <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            },
+            ...baseColumns.map((m) => {
+              return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
+            })
+          ],
     [baseColumns]
   );
 
@@ -280,12 +250,12 @@ function CustomReactTable({
         pageIndex: currentPage,
         autoResetExpanded: false,
         hiddenColumns: hideSelection ? ['selection', 'action'] : [],
-        // selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
-        //   ? Object.assign(
-        //     {},
-        //     data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
-        //   )
-        //   : {}
+        selectedRowIds: localStorage.getItem(`${renderedFrom}_selected`)
+          ? Object.assign(
+              {},
+              data.map((d) => JSON.parse(localStorage.getItem(`${renderedFrom}_selected`)).some((obj) => obj._id === d._id))
+            )
+          : {}
       },
       getSubRows: (row: any) => row.subRows,
       sortTypes: {
@@ -396,6 +366,7 @@ function CustomReactTable({
       }
     });
     onSelect([...flatSelectedData]);
+    localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([...flatSelectedData]));
     dispatch({
       type: 'selection',
       selectedRecords: [...flatSelectedData]
@@ -509,7 +480,7 @@ function CustomReactTable({
           </Box>
         )}
         <DndProvider backend={HTML5Backend}>
-          <MaUTable {...getTableProps()} size="small" classes={{root: classes.customTable}} className="tableWrap table sticky">
+          <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
             <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
               {headerGroups.map((headerGroup, index) => (
                 <React.Fragment key={index}>
@@ -558,7 +529,7 @@ function CustomReactTable({
                 );
               })}
             </TableBody>
-            {/* {rows?.length > 0 && (
+            {rows?.length > 0 && (
               <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer">
                 {footerGroups.map((group, index) => (
                   <TableRow key={index} {...group.getFooterGroupProps()} className="tr">
@@ -570,7 +541,7 @@ function CustomReactTable({
                   </TableRow>
                 ))}
               </TableFooter>
-            )} */}
+            )}
           </MaUTable>
         </DndProvider>
       </div>
@@ -612,7 +583,7 @@ const DraggableHeader = ({ column, index, reorder }: { column: any; index: numbe
     canDrop: () => !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action'
   });
 
-  const [{ isDragging }, drag, preview] = useDrag({
+  const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.COLUMN,
     item: () => {
       return {
@@ -627,18 +598,12 @@ const DraggableHeader = ({ column, index, reorder }: { column: any; index: numbe
     canDrag: !column?.lockPosition || column?.id !== 'selection' || column?.id !== 'action'
   });
 
-  React.useEffect(() => {
-    preview(getEmptyImage(), { captureDraggingState: true });
-  }, [preview]);
-
   drag(drop(ref));
-
-  const memoizedColumn = React.useMemo(() => column.render('Header'), [column]);
 
   return (
     <TableCell ref={ref} {...column.getHeaderProps()} className="th text-truncate table-header">
-      <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
-        <span>{memoizedColumn}</span>
+      <div style={{ opacity: isDragging ? 0.2 : 1 }} className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps()}>
+        <span>{column.render('Header')}</span>
         {column.isSorted ? column.isSortedDesc ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" /> : ''}
       </div>
       <div {...column.getResizerProps()} className="resizer" />
