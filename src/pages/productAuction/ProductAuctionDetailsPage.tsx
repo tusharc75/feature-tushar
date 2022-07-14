@@ -45,6 +45,7 @@ function a11yProps(index: any) {
 }
 
 const ProductAuctionDetailsPage = () => {
+
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -58,7 +59,6 @@ const ProductAuctionDetailsPage = () => {
   const [fields, setFields] = useState([]);
   const [tabValue, setTabValue] = useState(0);
   const [bids, setBids] = useState([]);
-  const renderedFrom = camelCase(routes?.packages.title);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -104,8 +104,6 @@ const ProductAuctionDetailsPage = () => {
         setShowConfirmBox(false);
       });
   };
-
-  console.log(productAuctionData);
 
   return (
     <Fragment>
@@ -184,13 +182,11 @@ const ProductAuctionDetailsPage = () => {
                     />
                     <div className={'uio'}> </div>
                   </Tabs>
-
                   <TabPanel value={tabValue} index={0}>
                     <DetailsPage data={productAuctionData} fields={fields} />
                   </TabPanel>
-
                   <TabPanel value={tabValue} index={1}>
-                    <BidsPage bids={bids} fetchData={fetchData} />
+                    <BidsPage bids={bids} />
                   </TabPanel>
                 </>
               ) : (

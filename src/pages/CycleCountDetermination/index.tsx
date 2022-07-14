@@ -82,7 +82,7 @@ const CycleCountDetermination = () => {
         primaryField: true
       },
       {
-        field: 'cycleCode',
+        field: 'inventoryCycle',
         headerName: 'Cycle Code',
         show: true,
         cellRenderer: 'commonRenderer'
