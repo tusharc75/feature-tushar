@@ -17,11 +17,11 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
   const toastConfig = useContext(CustomToastContext);
 
   const [users, setUsers] = useState([]);
-  const [cycleCodes, setCycleCodes] = useState([]);
+  const [inventoryCycle, setInventoryCycle] = useState([]);
 
   useEffect(() => {
     fetchUsers();
-    fetchCycleCodes();
+    fetchInventoryCycle();
   }, []);
 
   const fetchUsers = () => {
@@ -33,22 +33,21 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
       });
   };
 
-  const fetchCycleCodes = () => {
+  const fetchInventoryCycle = () => {
     axiosInstance()
       .get(`/inventory-cycle`)
       .then(({ data: { data } }) => {
-        let tempAllCycleCode = data.map((o) => ({ optionValue: o?._id, optionLabel: o?.cycleCode }));
-        setCycleCodes(tempAllCycleCode);
+        setInventoryCycle(data?.map((o) => ({ optionValue: o?._id, optionLabel: o?.cycleCode })));
       });
   };
 
   const handleSave = (values) => {
     const payload = [];
     values?.forEach(element => {
-      if (element?.cycleCode?.optionValue && element?.user?.optionValue) {
+      if (element?.inventoryCycle?.optionValue && element?.user?.optionValue) {
         payload.push({
           productCategory: element._id,
-          cycleCode: element?.cycleCode?.optionValue,
+          inventoryCycle: element?.inventoryCycle?.optionValue,
           user: element?.user?.optionValue
         })
       }
@@ -91,7 +90,7 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
           categoryArray: data.map(d => ({
             "_id": d?._id,
             "categoryName": d?.name,
-            "cycleCode": d?.cycleCode ? d?.cycleCode : "",
+            "inventoryCycle": d?.inventoryCycle ? d?.inventoryCycle : "",
             "user": d?.user ? d?.user : "",
           }))
         }}
@@ -124,19 +123,19 @@ const ManageCycleCountDetermination = ({ onClose, onSuccess, data, warehouse, wa
                               <TableCell align="left">
                                 <Autocomplete
                                   size="small"
-                                  value={data.cycleCode}
-                                  options={cycleCodes}
+                                  value={data.inventoryCycle}
+                                  options={inventoryCycle}
                                   getOptionLabel={(option: any) => option ? option?.optionLabel : ""}
                                   onChange={(_, newValue) => {
                                     arrayHelpers.replace(index, {
                                       ...values.categoryArray[index],
-                                      ["cycleCode"]: newValue,
+                                      ["inventoryCycle"]: newValue,
                                     });
                                   }}
                                   renderInput={(params) => <TextField
                                     {...params}
                                     variant="outlined"
-                                    name="cycleCode"
+                                    name="inventoryCycle"
                                     label="Cycle Code"
                                   />}
                                 />
