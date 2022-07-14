@@ -20,7 +20,15 @@ import { getObjKeys, yupSchema, isFieldNotTouched, setFieldsInAscendingOrder, ge
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import { Formik } from "formik";
+import { object, string } from "yup";
 
+const ManageCycleCountPInventorSchema = object().shape({
+    inventoryCycle: string().required("Please enter inventory cycle"),
+    user: string().required("Please enter user"),
+    productCategory: string().required("Please enter product category"),
+    warehouse: string().required("Please enter warehouse"),
+});
 
 const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
     const theme = useTheme();
@@ -28,7 +36,7 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [optionsArray, setOptionsArray] = useState([]);
-    const [selectedOptions, setSelectedOptions] = useState({ inventoryCycle: null, user: null, productCategory: null, warehouse: null, });
+    const [selectedOptions, setSelectedOptions] = useState({ inventoryCycle: "", user: "", productCategory: "", warehouse: "" });
 
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const history = useHistory();
@@ -57,14 +65,9 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
             });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = (values) => {
         setSubmitting(true);
-        axiosInstance().post(cycleCountPhysicalInventory.api, {
-            warehouse: selectedOptions?.warehouse?.optionValue,
-            productCategory: selectedOptions?.productCategory?.optionValue,
-            inventoryCycle: selectedOptions?.inventoryCycle?.optionValue,
-            user: selectedOptions?.user?.optionValue,
-        })
+        axiosInstance().post(cycleCountPhysicalInventory.api,values )
             .then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
@@ -97,114 +100,144 @@ const ManageCycleCountPInventory = ({ open, close, onSuccess }) => {
                 showManimizeMaximize={true}
             />
 
-            {loading ?
-                <Box p={2} height={500} bgcolor="white">
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-                : (
-                    <>
-                        <CustomDialogContent>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <Autocomplete
-                                        options={optionsArray["Inventory Cycle"]}
-                                        getOptionLabel={(option) => option.optionLabel}
-                                        value={selectedOptions?.inventoryCycle?.optionLabel}
-                                        fullWidth
-                                        onChange={(event, newValue) => {
-                                            selectedOptions["inventoryCycle"] = newValue
-                                            setSelectedOptions(selectedOptions);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label="Inventory Cycle"
-                                                variant="outlined"
-                                                required
-                                            />
-                                        )}
-                                    />
+            {loading ? (
+                <>
+                    <CustomDialogContent>
+                        <Skeleton width="100%" height="70px" />
+                        <Grid container spacing={2}>
+                            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                                <Grid key={i} item xs={12} sm={6} md={6}>
+                                    <Skeleton width="100%" height="60px" />
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <Autocomplete
-                                        options={optionsArray["User"]}
-                                        getOptionLabel={(option) => option.optionLabel}
-                                        value={selectedOptions?.user?.optionLabel}
-                                        fullWidth
-                                        onChange={(event, newValue) => {
-                                            selectedOptions["user"] = newValue
-                                            setSelectedOptions(selectedOptions);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label="Users"
-                                                variant="outlined"
-                                                required
-                                            />
-                                        )}
-                                    />
+                            ))}
+                        </Grid>
+                    </CustomDialogContent>
+                    <CustomDialogFooter>
+                        <Button variant="outlined" size="small" color="primary" disabled={loading}>
+                            Cancel
+                        </Button>
+                        <Button variant="contained" size="small" color="primary" disabled={loading}>
+                            Submit
+                        </Button>
+                    </CustomDialogFooter>
+                </>
+            ) : (
+                <Formik
+                    initialValues={selectedOptions}
+                    onSubmit={handleSubmit}
+                    validationSchema={ManageCycleCountPInventorSchema}
+
+                >
+                    {({ values, errors, setFieldValue, touched, submitForm }) => (
+                        <>
+                            <CustomDialogContent>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} sm={6} md={6}>
+                                        <Autocomplete
+                                            options={optionsArray["Inventory Cycle"]}
+                                            getOptionLabel={(option) => option.optionLabel}
+                                            value={optionsArray["Inventory Cycle"].find(d => values?.inventoryCycle === d?.optionValue)?.optionLabel}
+                                            fullWidth
+                                            onChange={(event, newValue) => {
+                                                setFieldValue("inventoryCycle", newValue?.optionValue);
+                                            }}
+                                            size="small"
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Inventory Cycle"
+                                                    variant="outlined"
+                                                    error={touched["inventoryCycle"] && Boolean(errors["inventoryCycle"])}
+                                                    helperText={touched["inventoryCycle"] && errors["inventoryCycle"]}
+                                                    required
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6} md={6}>
+                                        <Autocomplete
+                                            options={optionsArray["User"]}
+                                            getOptionLabel={(option) => option.optionLabel}
+                                            value={optionsArray["User"].find(d => values?.user === d?.optionValue)?.optionLabel}
+                                            fullWidth
+                                            onChange={(event, newValue) => {
+                                                setFieldValue("user", newValue?.optionValue);
+                                            }}
+                                            size="small"
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Users"
+                                                    variant="outlined"
+                                                    error={touched["user"] && Boolean(errors["user"])}
+                                                    helperText={touched["user"] && errors["user"]}
+                                                    required
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6} md={6}>
+                                        <Autocomplete
+                                            options={optionsArray["Product Category"]}
+                                            getOptionLabel={(option) => option.optionLabel}
+                                            value={optionsArray["Product Category"].find(d => values?.productCategory === d?.optionValue)?.optionLabel}
+                                            fullWidth
+                                            onChange={(event, newValue) => {
+                                                setFieldValue("productCategory", newValue?.optionValue);
+                                            }}
+                                            size="small"
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Product Category"
+                                                    variant="outlined"
+                                                    error={touched["productCategory"] && Boolean(errors["productCategory"])}
+                                                    helperText={touched["productCategory"] && errors["productCategory"]}
+                                                    required
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6} md={6}>
+                                        <Autocomplete
+                                            options={optionsArray["Warehouse"]}
+                                            getOptionLabel={(option) => option.optionLabel}
+                                            value={optionsArray["Warehouse"].find(d => values?.warehouse === d?.optionValue)?.optionLabel}
+                                            fullWidth
+                                            onChange={(event, newValue) => {
+                                                setFieldValue("warehouse", newValue?.optionValue);
+                                            }}
+                                            size="small"
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Warehouse"
+                                                    variant="outlined"
+                                                    error={touched["warehouse"] && Boolean(errors["warehouse"])}
+                                                    helperText={touched["warehouse"] && errors["warehouse"]}
+                                                    required
+                                                />
+                                            )}
+                                        />
+                                    </Grid>
                                 </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <Autocomplete
-                                        options={optionsArray["Product Category"]}
-                                        getOptionLabel={(option) => option.optionLabel}
-                                        value={selectedOptions?.productCategory?.optionLabel}
-                                        fullWidth
-                                        onChange={(event, newValue) => {
-                                            selectedOptions["productCategory"] = newValue
-                                            setSelectedOptions(selectedOptions);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label="Product Category"
-                                                variant="outlined"
-                                                required
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <Autocomplete
-                                        options={optionsArray["Warehouse"]}
-                                        getOptionLabel={(option) => option.optionLabel}
-                                        value={selectedOptions?.warehouse?.optionLabel}
-                                        fullWidth
-                                        onChange={(event, newValue) => {
-                                            selectedOptions["warehouse"] = newValue
-                                            setSelectedOptions(selectedOptions);
-                                        }}
-                                        size="small"
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                label="Warehouse"
-                                                variant="outlined"
-                                                required
-                                            />
-                                        )}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </CustomDialogContent>
-                        <CustomDialogFooter>
-                            <Button size="small" variant="outlined" color="primary" onClick={close}>
-                                Cancel
-                            </Button>
-                            <Button
-                                size="small"
-                                variant="contained"
-                                color="primary"
-                                onClick={handleSubmit} >
-                                {"Submit"}
-                            </Button>
-                        </CustomDialogFooter>
-                    </>
-                )}
+                            </CustomDialogContent>
+                            <CustomDialogFooter>
+                                <Button size="small" variant="outlined" color="primary" onClick={close}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    size="small"
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={submitForm} >
+                                    {"Submit"}
+                                </Button>
+                            </CustomDialogFooter>
+                        </>
+                    )}
+                </Formik>
+            )}
         </Dialog>
     );
 };
