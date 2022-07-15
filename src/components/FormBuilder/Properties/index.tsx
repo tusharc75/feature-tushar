@@ -996,23 +996,20 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Unique"
                       />
                     )}
-                    {initialValues.hasOwnProperty('primaryField') && (
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name="primaryField"
-                            checked={values['primaryField']}
-                            onChange={(e) => {
-                              setFieldValue('primaryField', e.target.checked);
-                              handleValuesChange({ primaryField: e.target.checked });
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Primary Field"
-                      />
-                    )}
-
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="primaryField"
+                          checked={values['primaryField']}
+                          onChange={(e) => {
+                            setFieldValue('primaryField', e.target.checked);
+                            handleValuesChange({ primaryField: e.target.checked });
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Primary Field"
+                    />
                     {fieldData.type === 'imageUpload' && values['isDefaultValue'] ? (
                       <FormTypes
                         values={{ defaultValue: values['defaultValue'] }}

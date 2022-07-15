@@ -13,15 +13,13 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, setFieldsInAscendingOrder, productAuction, generateUniqueIdOnly } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid, Typography, IconButton, TextField } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 
 const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClose, onSuccess }) => {
   const history = useHistory();

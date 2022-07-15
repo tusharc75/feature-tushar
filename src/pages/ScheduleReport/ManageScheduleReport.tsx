@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext, useRef } from 'react';
 import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
-import { Formik, FormikProps } from 'formik';
+import { Form, Formik, FormikProps } from 'formik';
 import { KeyboardTimePicker } from '@material-ui/pickers';
 import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -27,6 +27,7 @@ type ValueTypes = {
 };
 
 const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
+  
   const formikRef = useRef<FormikProps<ValueTypes>>(null);
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -163,9 +164,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   }, []);
 
   useEffect(() => {
-    // if (!formikRef.current || !formikRef.current?.values?.resource) return;
     if (!resourceColumns && resourceColumns.length === 0) return;
-
     const optionsData: any = {};
     const filteredData = [...resourceColumns]
       .filter((d: any) => d.isRead && (d.fieldData.type === 'dropDown' || d.fieldData.type === 'date'))
@@ -183,7 +182,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         return d.fieldData;
       });
     setResourceOptions(optionsData);
-    // setFormValues(null);
     if (id || formikRef.current?.values?.resource) {
       setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
     }
@@ -346,23 +344,23 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     setFilterValues((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const formikValidator = (values: ValueTypes) => {
+  const validate = (values: ValueTypes) => {
     let errors = {};
-    if (!values.scheduleName) {
+    if (!values.scheduleName || values.scheduleName === "") {
       errors['scheduleName'] = 'Schedule name is required';
-    } 
+    }
     if (!values.resource) {
       errors['resource'] = 'Resource is required';
-    } 
+    }
     if (values?.subscribeUsers?.length === 0) {
       errors['subscribeUsers'] = 'Subscribe users is required';
-    } 
+    }
     if (!values.frequency) {
       errors['frequency'] = 'Frequency is required';
     } else {
       if (values.frequency === 'Daily' && !values.time) {
         errors['time'] = 'Time is required';
-      } 
+      }
       if (values.frequency === 'Weekly' && !values.week) {
         errors['week'] = 'Day is required';
       }
@@ -371,13 +369,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       }
     }
     return errors;
-  };
-
-  const handleChange = (name: string, value: any) => {
-    if (!formikRef.current) return;
-    formikRef.current.setFieldValue(name, value);
-    formikRef.current.setFieldTouched(name, true);
-    formikRef.current.validateForm(formikRef.current.values);
   };
 
   const handleSubmit = (values: ValueTypes) => {
@@ -395,7 +386,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         }
       });
     }
-
     if (betweenDate) {
       const filterKeys = Object.keys(betweenDate);
       filterKeys.forEach((key) => {
@@ -491,263 +481,261 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           }}
           initialValues={formData}
           onSubmit={handleSubmit}
-          validate={formikValidator}
-          validateOnBlur
+          validate={validate}
+          validateOnMount
         >
-          {({ values, errors, submitForm, setFieldValue, touched }) => (
+          {({ values, errors, submitForm, setFieldValue, setValues, touched }) => (
             <>
-              <CustomDialogContent>
-                <div className={'detail-box-content'}>
-                  <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                  <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Schedule Information</h2>
-                </div>
-                <Box my={2}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        value={values.scheduleName}
-                        required
-                        onChange={(e) => handleChange('scheduleName', e.target.value)}
-                        fullWidth
-                        name="scheduleName"
-                        size="small"
-                        label="Schedule Name"
-                        variant="outlined"
-                        error={touched['scheduleName'] && Boolean(errors['scheduleName'])}
-                        helperText={touched['scheduleName'] && errors['scheduleName']}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Autocomplete
-                        options={REPORT_LIST.map((item) => {
-                          let obj: { title: string; key: string } = {
-                            title: item.title,
-                            key: item.key
-                          };
-
-                          return obj;
-                        })}
-                        fullWidth
-                        size="small"
-                        getOptionLabel={(option) => option.title}
-                        getOptionSelected={(option, value) => option.title === value.title}
-                        value={values.resource}
-                        onChange={(_, newVal) => {
-                          handleChange('resource', newVal);
-                          if (newVal) {
-                            fetchGridColumns(newVal);
-                          } else {
-                            setResourceColumns([]);
-                          }
-                          setFieldValue('filters', []);
-                          setFieldValue('column', []);
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            required
-                            error={touched['resource'] && Boolean(errors['resource'])}
-                            helperText={touched['resource'] && errors['resource']}
-                            label="Resource"
-                            variant="outlined"
-                            name="resource"
-                          />
-                        )}
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-                <div className={'detail-box-content'}>
-                  <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                  <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Filters</h2>
-                </div>
-                <Box my={2}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <Autocomplete
-                        options={filterOptions}
-                        fullWidth
-                        multiple
-                        size="small"
-                        value={values.filters}
-                        getOptionSelected={(option, val) => option.fieldName === val.fieldName}
-                        getOptionLabel={(option) => option.fieldLabel}
-                        onChange={(_, newVal) => {
-                          handleChange('filters', newVal);
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            error={touched['filters'] && Boolean(errors['filters'])}
-                            helperText={touched['filters'] && errors['filters']}
-                            label="Filters"
-                            name="filters"
-                            variant="outlined"
-                          />
-                        )}
-                      />
-                    </Grid>
-
-                    <Filters
-                      selectedResources={values.filters}
-                      handleSelectFilter={handleSelectFilter}
-                      resource={formikRef.current?.values.resource?.title}
-                      formValues={filterValues}
-                      betweenDate={betweenDate}
-                      setBetweenDate={setBetweenDate}
-                      statusPeriod={statusPeriod}
-                      statusTimeFrame={statusTimeFrame}
-                      statusPeriodDate={statusPeriodDate}
-                      setStatusPeriod={setStatusPeriod}
-                      setStatusPeriodDate={setStatusPeriodDate}
-                      setStatusTimeFrame={setStatusTimeFrame}
-                    />
-
-                    <Grid item xs={12} sm={6}>
-                      <Autocomplete
-                        options={resourceColumns.map((item) => item.fieldData)}
-                        fullWidth
-                        multiple
-                        size="small"
-                        getOptionSelected={(option, val) => option.fieldName === val.fieldName}
-                        getOptionLabel={(option) => option.fieldLabel}
-                        value={values.column}
-                        onChange={(_, newVal) => handleChange('column', newVal)}
-                        renderInput={(params) => (
-                          <TextField
-                            error={touched['column'] && Boolean(errors['column'])}
-                            helperText={touched['column'] && errors['column']}
-                            {...params}
-                            label="Columns"
-                            name="columns"
-                            variant="outlined"
-                          />
-                        )}
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-                <div className={'detail-box-content'}>
-                  <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                  <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Others</h2>
-                </div>
-                <Box my={2}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <Autocomplete
-                        options={usersList}
-                        fullWidth
-                        multiple
-                        size="small"
-                        getOptionLabel={(option) => option.name}
-                        getOptionSelected={(option, value) => option.userId === value.userId}
-                        value={values.subscribeUsers}
-                        onChange={(_, newVal) => handleChange('subscribeUsers', newVal)}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            error={touched['subscribeUsers'] && Boolean(errors['subscribeUsers'])}
-                            helperText={touched['subscribeUsers'] && errors['subscribeUsers']}
-                            label="Subscibe User"
-                            name="subscribeUsers"
-                            required
-                            variant="outlined"
-                          />
-                        )}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <KeyboardTimePicker
-                        inputVariant="outlined"
-                        size="small"
-                        id="time-picker"
-                        name="time"
-                        label="Time"
-                        autoOk
-                        fullWidth
-                        required={Boolean(values.frequency)}
-                        value={values.time}
-                        error={touched['time'] && Boolean(errors['time'])}
-                        helperText={touched['time'] && errors['time']}
-                        onChange={(date) => handleChange('time', date)}
-                        KeyboardButtonProps={{
-                          'aria-label': 'change time'
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Box mt={2}>
-                        <Typography color="textPrimary">Schedule Frequency</Typography>
-                        <Box mt={1} />
-                        <ToggleButtonGroup
+              <Form autoComplete="off" autoCorrect="off" noValidate>
+                <CustomDialogContent>
+                  <div className={'detail-box-content'}>
+                    <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Schedule Information</h2>
+                  </div>
+                  <Box my={2}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          value={values.scheduleName}
+                          required
+                          onChange={(e) => setFieldValue('scheduleName', e.target.value)}
+                          fullWidth
+                          name="scheduleName"
                           size="small"
-                          value={values?.frequency ?? 'Daily'}
-                          exclusive
-                          onChange={(_, val) => handleChange('frequency', val)}
-                        >
-                          {SCHEDULE_FREQUENCY.map((freq) => (
-                            <ToggleButton key={freq} value={freq}>
-                              {freq}
-                            </ToggleButton>
-                          ))}
-                        </ToggleButtonGroup>
-
-                        {values?.frequency === 'Weekly' && (
-                          <Box mt={2}>
-                            <Typography color="textPrimary">Days</Typography>
-                            <Box mt={1} />
-                            <ToggleButtonGroup size="small" value={values.week} exclusive onChange={(_, val) => handleChange('week', val)}>
-                              {FREQUENCY_WEEKS.map((week) => (
-                                <ToggleButton key={week} value={week}>
-                                  {week}
-                                </ToggleButton>
-                              ))}
-                            </ToggleButtonGroup>
-                          </Box>
-                        )}
-                        {values?.frequency === 'Monthly' && (
-                          <Box mt={2}>
-                            <Autocomplete
-                              options={[...new Array(31).keys()].map((_, index) => `${index + 1}`)}
-                              style={{ width: 200 }}
-                              size="small"
-                              onChange={(_, newVal) => {
-                                handleChange('day', newVal);
-                              }}
-                              value={values['day']}
-                              renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  label="Day"
-                                  name="day"
-                                  variant="outlined"
-                                  error={touched['day'] && Boolean(errors['day'])}
-                                  helperText={touched['day'] && errors['day']}
-                                />
-                              )}
+                          label="Schedule Name"
+                          variant="outlined"
+                          error={touched['scheduleName'] && Boolean(errors['scheduleName'])}
+                          helperText={touched['scheduleName'] && errors['scheduleName']}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Autocomplete
+                          options={REPORT_LIST.map((item) => {
+                            let obj: { title: string; key: string } = {
+                              title: item.title,
+                              key: item.key
+                            };
+                            return obj;
+                          })}
+                          fullWidth
+                          size="small"
+                          getOptionLabel={(option) => option.title}
+                          getOptionSelected={(option, value) => option.title === value.title}
+                          value={values.resource}
+                          onChange={(_, newVal) => {
+                            const result = { resource: newVal, filters: [], column: [] }
+                            setValues({ ...values, ...result });
+                            if (newVal) {
+                              fetchGridColumns(newVal);
+                            } else {
+                              setResourceColumns([]);
+                            }
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              required
+                              error={touched['resource'] && Boolean(errors['resource'])}
+                              helperText={touched['resource'] && errors['resource']}
+                              label="Resource"
+                              variant="outlined"
+                              name="resource"
                             />
-                          </Box>
-                        )}
-                      </Box>
+                          )}
+                        />
+                      </Grid>
                     </Grid>
-                  </Grid>
-                </Box>
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <Button disabled={isSubmitting} color="primary" size="small" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <Button
-                  startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
-                  disabled={isSubmitting}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={submitForm}
-                >
-                  {id ? 'Update' : 'Save'}
-                </Button>
-              </CustomDialogFooter>
+                  </Box>
+                  <div className={'detail-box-content'}>
+                    <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Filters</h2>
+                  </div>
+                  <Box my={2}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Autocomplete
+                          options={filterOptions}
+                          fullWidth
+                          multiple
+                          size="small"
+                          value={values.filters}
+                          getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                          getOptionLabel={(option) => option.fieldLabel}
+                          onChange={(_, newVal) => {
+                            setFieldValue('filters', newVal);
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={touched['filters'] && Boolean(errors['filters'])}
+                              helperText={touched['filters'] && errors['filters']}
+                              label="Filters"
+                              name="filters"
+                              variant="outlined"
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Filters
+                        selectedResources={values.filters}
+                        handleSelectFilter={handleSelectFilter}
+                        resource={formikRef.current?.values.resource?.title}
+                        formValues={filterValues}
+                        betweenDate={betweenDate}
+                        setBetweenDate={setBetweenDate}
+                        statusPeriod={statusPeriod}
+                        statusTimeFrame={statusTimeFrame}
+                        statusPeriodDate={statusPeriodDate}
+                        setStatusPeriod={setStatusPeriod}
+                        setStatusPeriodDate={setStatusPeriodDate}
+                        setStatusTimeFrame={setStatusTimeFrame}
+                      />
+                      <Grid item xs={12} sm={6}>
+                        <Autocomplete
+                          options={resourceColumns.map((item) => item.fieldData)}
+                          fullWidth
+                          multiple
+                          size="small"
+                          getOptionSelected={(option, val) => option.fieldName === val.fieldName}
+                          getOptionLabel={(option) => option.fieldLabel}
+                          value={values.column}
+                          onChange={(_, newVal) => setFieldValue('column', newVal)}
+                          renderInput={(params) => (
+                            <TextField
+                              error={touched['column'] && Boolean(errors['column'])}
+                              helperText={touched['column'] && errors['column']}
+                              {...params}
+                              label="Columns"
+                              name="columns"
+                              variant="outlined"
+                            />
+                          )}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                  <div className={'detail-box-content'}>
+                    <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Others</h2>
+                  </div>
+                  <Box my={2}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Autocomplete
+                          options={usersList}
+                          fullWidth
+                          multiple
+                          size="small"
+                          getOptionLabel={(option) => option.name}
+                          getOptionSelected={(option, value) => option.userId === value.userId}
+                          value={values.subscribeUsers}
+                          onChange={(_, newVal) => setFieldValue('subscribeUsers', newVal)}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={touched['subscribeUsers'] && Boolean(errors['subscribeUsers'])}
+                              helperText={touched['subscribeUsers'] && errors['subscribeUsers']}
+                              label="Subscibe User"
+                              name="subscribeUsers"
+                              required
+                              variant="outlined"
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <KeyboardTimePicker
+                          inputVariant="outlined"
+                          size="small"
+                          id="time-picker"
+                          name="time"
+                          label="Time"
+                          autoOk
+                          fullWidth
+                          required={Boolean(values.frequency)}
+                          value={values.time}
+                          error={touched['time'] && Boolean(errors['time'])}
+                          helperText={touched['time'] && errors['time']}
+                          onChange={(date) => setFieldValue('time', date)}
+                          KeyboardButtonProps={{
+                            'aria-label': 'change time'
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Box mt={2}>
+                          <Typography color="textPrimary">Schedule Frequency</Typography>
+                          <Box mt={1} />
+                          <ToggleButtonGroup
+                            size="small"
+                            value={values?.frequency ?? 'Daily'}
+                            exclusive
+                            onChange={(_, val) => setFieldValue('frequency', val)}
+                          >
+                            {SCHEDULE_FREQUENCY.map((freq) => (
+                              <ToggleButton key={freq} value={freq}>
+                                {freq}
+                              </ToggleButton>
+                            ))}
+                          </ToggleButtonGroup>
+
+                          {values?.frequency === 'Weekly' && (
+                            <Box mt={2}>
+                              <Typography color="textPrimary">Days</Typography>
+                              <Box mt={1} />
+                              <ToggleButtonGroup size="small" value={values.week} exclusive onChange={(_, val) => setFieldValue('week', val)}>
+                                {FREQUENCY_WEEKS.map((week) => (
+                                  <ToggleButton key={week} value={week}>
+                                    {week}
+                                  </ToggleButton>
+                                ))}
+                              </ToggleButtonGroup>
+                            </Box>
+                          )}
+                          {values?.frequency === 'Monthly' && (
+                            <Box mt={2}>
+                              <Autocomplete
+                                options={[...new Array(31).keys()].map((_, index) => `${index + 1}`)}
+                                style={{ width: 200 }}
+                                size="small"
+                                onChange={(_, newVal) => {
+                                  setFieldValue('day', newVal);
+                                }}
+                                value={values['day']}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Day"
+                                    name="day"
+                                    variant="outlined"
+                                    error={touched['day'] && Boolean(errors['day'])}
+                                    helperText={touched['day'] && errors['day']}
+                                  />
+                                )}
+                              />
+                            </Box>
+                          )}
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                  <Button disabled={isSubmitting} color="primary" size="small" onClick={handleClose}>
+                    Cancel
+                  </Button>
+                  <Button
+                    startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+                    disabled={isSubmitting}
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={submitForm}
+                  >
+                    {id ? 'Update' : 'Save'}
+                  </Button>
+                </CustomDialogFooter>
+              </Form>
             </>
           )}
         </Formik>

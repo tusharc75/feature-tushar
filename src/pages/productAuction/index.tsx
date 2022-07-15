@@ -33,6 +33,7 @@ import { camelCase } from 'lodash';
 import ManageProductAuction from './ManageProductAuction';
 
 const ProductAuction = () => {
+
   let renderedFrom = camelCase(routes.productAuction?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -48,10 +49,7 @@ const ProductAuction = () => {
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
-
-  console.log(state);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
   const [isOpenDialog, setisOpenDialog] = useState(false);
 
