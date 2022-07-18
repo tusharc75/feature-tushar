@@ -36,7 +36,13 @@ const HistoryDialog = ({ close, product, warehouse, productName }) => {
             </ToggleButtonGroup>
           </Box>
         </Box>
-        {currentView === 'list' ? <History product={product} warehouse={warehouse} /> : <CalendarView product={product} warehouse={warehouse} />}
+        {currentView === 'list' ? (
+          <History product={product} warehouse={warehouse} />
+        ) : (
+          <div>
+            <CalendarView product={product} warehouse={warehouse} />
+          </div>
+        )}
       </CustomDialogContent>
     </Dialog>
   );
