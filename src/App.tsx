@@ -141,6 +141,8 @@ import InventoryCycle from './pages/InventoryCycle';
 import InventoryCycleDetailPage from './pages/InventoryCycle/InventoryCycleDetailPage';
 import CycleCountDetermination from './pages/CycleCountDetermination';
 import CycleCountPhysicalInventory from './pages/CycleCountPhysicalInventory';
+import Quotation from './pages/Quotation';
+import QuotationDetails from './pages/Quotation/QuotationDetails';
 import ServiceMaster from './pages/ServiceMaster';
 import ServiceMasterDetailsPage from './pages/ServiceMaster/ServiceMasterDetailsPage';
 
@@ -754,6 +756,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.cycleCountPhysicalInventory.path}>
               <CycleCountPhysicalInventory />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.quotation.path}>
+              <Quotation />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.quotationDetail.path}/:id`}>
+              <QuotationDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.serviceMaster.path}>
               <ServiceMaster />

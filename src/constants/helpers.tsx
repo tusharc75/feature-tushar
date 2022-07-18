@@ -59,6 +59,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 //export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const salesOrderProcessSteps = ['Add Products', 'Ready To Invoice'];
+export const quotationProcessSteps = ['Add Products', 'Services and Consumables'];
 //export const purchaseOrderSteps = ['Add Products', 'Services and Consumables', 'Receive Products'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
@@ -203,6 +204,7 @@ export const sidebarResource = {
   dashboardMaster: 'Dashboard Master',
   scheduleReport: 'Schedule Report',
   cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
+  quotation:'Quotation',
   serviceMaster: 'Service Master'
 };
 
@@ -268,7 +270,8 @@ export const resourceNames = {
   scheduleReport: 'Schedule Report',
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
-  productAuction: 'Product Auction'
+  productAuction: 'Product Auction',
+  quotation:'Quotation'
 };
 
 export const primaryFields = {
@@ -348,6 +351,7 @@ export const RESOURCE_LABEL = {
   inventoryCycle: 'Inventory Cycle',
   cycleCountDetermination: 'Cycle Count Determination',
   cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
+  quotation: 'Quotation',
   serviceMaster: 'Service Master'
 };
 
@@ -359,7 +363,9 @@ export const CHILD_RESOURCE = {
   repairJobAsset: 'Repair Job Asset',
   salesOrderProduct: 'Sales Order Product',
   salesOrderCost: 'Sales Order Cost',
-  subleaseProduct: 'Sublease Product'
+  subleaseProduct: 'Sublease Product',
+  quotationProduct: 'Quotation Product',
+  quotationCost: 'Quotation Cost',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -421,6 +427,11 @@ export const repairJob = {
 export const salesOrder = {
   api: '/sales-order',
   resource: 'sales-order'
+};
+
+export const quotation = {
+  api: '/quotation',
+  resource: 'quotation'
 };
 
 export const packages = {
@@ -1777,7 +1788,8 @@ export const ACTIVITY_RESOURCE = {
   salesOrder: 'salesOrder',
   bulkAssetCreation: 'bulkAssetCreation',
   serializedAsset: 'serializedAsset',
-  transferInventory: 'transferInventory'
+  transferInventory: 'transferInventory',
+  quotation: 'quotation'
 };
 
 export const REPORT_LIST = [
