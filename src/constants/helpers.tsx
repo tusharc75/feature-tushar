@@ -59,6 +59,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 //export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const salesOrderProcessSteps = ['Add Products', 'Ready To Invoice'];
+export const quotationProcessSteps = ['Add Products', 'Services and Consumables'];
 //export const purchaseOrderSteps = ['Add Products', 'Services and Consumables', 'Receive Products'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
@@ -202,7 +203,9 @@ export const sidebarResource = {
   inventoryCycle: 'Inventory Cycle',
   dashboardMaster: 'Dashboard Master',
   scheduleReport: 'Schedule Report',
-  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory'
+  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
+  quotation:'Quotation',
+  serviceMaster: 'Service Master'
 };
 
 export const resourceNames = {
@@ -267,7 +270,8 @@ export const resourceNames = {
   scheduleReport: 'Schedule Report',
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
-  productAuction: 'Product Auction'
+  productAuction: 'Product Auction',
+  quotation:'Quotation'
 };
 
 export const primaryFields = {
@@ -346,7 +350,9 @@ export const RESOURCE_LABEL = {
   importExport: 'Import-Export',
   inventoryCycle: 'Inventory Cycle',
   cycleCountDetermination: 'Cycle Count Determination',
-  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory'
+  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
+  quotation: 'Quotation',
+  serviceMaster: 'Service Master'
 };
 
 export const CHILD_RESOURCE = {
@@ -357,7 +363,10 @@ export const CHILD_RESOURCE = {
   repairJobAsset: 'Repair Job Asset',
   salesOrderProduct: 'Sales Order Product',
   salesOrderCost: 'Sales Order Cost',
-  subleaseProduct: 'Sublease Product'
+  subleaseProduct: 'Sublease Product',
+  quotationProduct: 'Quotation Product',
+  quotationCost: 'Quotation Cost',
+  quotationService:'Quotation Service'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -419,6 +428,11 @@ export const repairJob = {
 export const salesOrder = {
   api: '/sales-order',
   resource: 'sales-order'
+};
+
+export const quotation = {
+  api: '/quotation',
+  resource: 'quotation'
 };
 
 export const packages = {
@@ -611,6 +625,13 @@ export const cycleCountPhysicalInventory = {
   resource: 'Cycle Count Physical Inventory'
 };
 
+export const serviceMaster = {
+  api: '/service-master',
+  route: '/service-master',
+  permission: 'Service Master',
+  resource: 'Service Master'
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -768,21 +789,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1768,7 +1789,8 @@ export const ACTIVITY_RESOURCE = {
   salesOrder: 'salesOrder',
   bulkAssetCreation: 'bulkAssetCreation',
   serializedAsset: 'serializedAsset',
-  transferInventory: 'transferInventory'
+  transferInventory: 'transferInventory',
+  quotation: 'quotation'
 };
 
 export const REPORT_LIST = [
@@ -1807,8 +1829,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'supplier-account':
@@ -1818,8 +1841,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'lead':
