@@ -217,7 +217,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}`)
         data = response?.data?.data
         setMaterial(JSON.parse(JSON.stringify(data.material)))
-        inventory = data.inventory;
+        inventory = data?.inventory ? data?.inventory : [];
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
             parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
@@ -482,7 +482,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 type={addExistingProductDialog.type}
-                quotationData={quotationData}
+                refrenceType={"Quotation"}
                 ignoreIds={rowsData?.map((e) => e?.materialId)}
             />
         }
