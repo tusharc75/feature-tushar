@@ -75,7 +75,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'import-export',
         'schedule-report',
         'inventory-cycle',
-        'cycle-count-determination'
+        'cycle-count-determination',
+        'quotation'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
