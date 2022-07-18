@@ -471,7 +471,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             message: data.message,
           });
         }).catch((error) => {
-          setAddSerializedAssetDialog({ open: false })
           setAdding(false)
           toastConfig.setToastConfig(error)
         });

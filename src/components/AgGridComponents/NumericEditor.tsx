@@ -130,9 +130,9 @@ export default forwardRef((props: any, ref) => {
             // Gets called once when editing is finished (eg if Enter is pressed).
             // If you return true, then the result of the edit will be ignored.
             isCancelAfterEnd() {
-                // will reject the number if it greater than 1,000,000
+                // will reject the number if it greater than 100,000,000,000
                 // not very practical, but demonstrates the method.
-                return value > 1000000;
+                return value > 100000000000;
             },
         };
     });
