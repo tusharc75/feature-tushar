@@ -588,6 +588,20 @@ const routes = {
     title: storedRoutes && storedRoutes.quotation && storedRoutes.quotation.title ? storedRoutes.quotation?.title : RESOURCE_LABEL.quotation,
     path: '/quotation/detail'
   },
+  serviceMaster: {
+    title:
+      storedRoutes && storedRoutes.serviceMaster && storedRoutes.serviceMaster.title
+        ? storedRoutes.serviceMaster?.title
+        : RESOURCE_LABEL.serviceMaster,
+    path: '/service-master'
+  },
+  serviceMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.serviceMaster && storedRoutes.serviceMaster.title
+        ? storedRoutes.serviceMaster?.title
+        : RESOURCE_LABEL.serviceMaster,
+    path: '/service-master/detail'
+  }
 };
 
 export default routes;
