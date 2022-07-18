@@ -366,6 +366,7 @@ export const CHILD_RESOURCE = {
   subleaseProduct: 'Sublease Product',
   quotationProduct: 'Quotation Product',
   quotationCost: 'Quotation Cost',
+  quotationService:'Quotation Service'
 };
 
 export const sidebarResourceObjectFromValues = () => {

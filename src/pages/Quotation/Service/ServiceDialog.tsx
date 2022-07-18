@@ -1,56 +1,59 @@
-import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment, useRef } from 'react';
-import { Button, Dialog, Grid, Box } from '@material-ui/core';
+import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment } from 'react';
+import {
+  Button,
+  Dialog,
+  Grid,
+  Box,
+} from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import axiosInstance from "../../../axios/axiosInstance";
-import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from "../../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, isFieldNotTouched } from "../../../constants/helpers";
+import { CustomDialogTransition } from "../../../constants/helpers";
 import { Formik, Form } from "formik";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import { fetch_quotation_service_fields } from 'src/components/Quotation/helper';
 
-interface AdditionalCostDialogProps {
+interface ServiceDialogProps {
   onClose: VoidFunction | any;
   currency: string;
-  handleAddCost: VoidFunction | any;
-  handleUpdateCost: VoidFunction | any;
-  costData?: object | any;
+  handleAddService: VoidFunction | any;
+  handleUpdateService: VoidFunction | any;
+  serviceData?: object | any;
 }
 
-const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData }) => {
+const ServiceDialog: FC<ServiceDialogProps> = ({ onClose, currency, handleAddService, handleUpdateService, serviceData }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const ref = useRef(null);
 
   useEffect(() => {
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.quotationCost}`).then(({ data: { data } }) => {
-      const poFields = CURReplaceByCurrencySingle(data, currency);
-      if (costData) {
-        setInitialData({
-          fields: poFields,
-          values: getObjKeysWithValues(costData, poFields),
-        });
-      }
-      else {
-        setInitialData({
-          fields: poFields,
-          values: getObjKeys("", poFields),
-        });
-      }
-      EvaluteproductFields(poFields);
-    })
+    fetchFields()
   }, []);
+
+  const fetchFields = async () => {
+    let poFields = await fetch_quotation_service_fields(currency);
+    if (serviceData) {
+      setInitialData({
+        fields: poFields,
+        values: getObjKeysWithValues(serviceData, poFields),
+      });
+    }
+    else {
+      setInitialData({
+        fields: poFields,
+        values: getObjKeys("", poFields),
+      });
+    }
+    EvaluteproductFields(poFields);
+  }
 
   const EvaluteproductFields = (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
@@ -63,15 +66,15 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   }
 
   const handleSubmit = (values) => {
-    if (!costData) {
+    if (!serviceData) {
       let returnData = []
       returnData = [{ ...values }]
-      handleAddCost(returnData)
+      handleAddService(returnData)
     }
     else {
       let returnData = []
-      returnData = [{ ...values, _id: costData._id }]
-      handleUpdateCost(returnData)
+      returnData = [{ ...values, _id: serviceData._id }]
+      handleUpdateService(returnData)
     }
   };
 
@@ -85,7 +88,6 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   >
     {initialData && initialData.fields.length ?
       <Formik
-        innerRef={ref}
         enableReinitialize={true}
         initialValues={initialData.values}
         validationSchema={yupSchema(initialData.fields)}
@@ -99,14 +101,9 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
         }) => (
           <Fragment>
             <CustomDialogHeader
-              title={costData ? "Edit" : "Add"}
+              title={serviceData ? `Edit ${serviceData?.description || "Services and Consumables"}` : `Services and Consumables`}
               onClose={() => {
-                if (!isEqual(ref?.current?.values, initialData.values)) {
-                  setShowConfirmDialog(true)
-                }
-                else {
-                  onClose()
-                }
+                onClose()
               }}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -183,21 +180,13 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <Button
-                size="small"
-                color="primary"
+              <Button size="small" color="primary"
                 onClick={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true)
-                  }
-                  else {
-                    onClose()
-                  }
+                  onClose()
                 }}
               >{"Close"}</Button>
               <CustomButton
                 loading={loading}
-                disabled={isEqual(ref?.current?.values, initialData.values)}
                 variant="contained"
                 color="primary"
                 type="submit"
@@ -205,19 +194,6 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
               > Save
               </CustomButton>
             </CustomDialogFooter>
-            {showConfirmDialog ?
-              <ConfirmCancelDialog
-                open={showConfirmDialog}
-                onSave={() => {
-                  setShowConfirmDialog(false)
-                  submitForm()
-                }}
-                onClose={() => {
-                  setShowConfirmDialog(false)
-                  onClose()
-                }}
-              /> : null
-            }
           </Fragment>
         )}
       </Formik>
@@ -228,4 +204,4 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   </Dialog>);
 };
 
-export default AdditionalCostDialog;
+export default ServiceDialog;
