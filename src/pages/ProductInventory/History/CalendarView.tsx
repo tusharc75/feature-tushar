@@ -50,8 +50,10 @@ const CalendarView = ({ product, warehouse }) => {
         let sameDateData = datewise.filter((item) => {
           return item.date.split('T')[0] === d.date.split('T')[0];
         });
-
-        let lastFinalInventory = sameDateData[0];
+        let lastFinalInventory;
+        if (sameDateData && sameDateData.length > 0) {
+          lastFinalInventory = sameDateData[0];
+        }
 
         if (lastFinalInventory.date === d.date && !lastFinalInventory?.isFinalInventory) {
           datewiseData.push({
@@ -67,7 +69,7 @@ const CalendarView = ({ product, warehouse }) => {
         return {
           ...d,
           id: d?._id,
-          title: d?.isFinalInventory ? `Final Inventory - (${d.finalInventory})` : `${d?.referenceType} - (QTY: ${d?.qty})`,
+          title: d?.isFinalInventory ? `Final Inventory (${d.finalInventory})` : `${d?.referenceType} (${d?.qty})`,
           start: new Date(d.date),
           end: new Date(d.date)
         };
@@ -88,11 +90,12 @@ const CalendarView = ({ product, warehouse }) => {
       views={{ month: true, week: true, day: true }}
       eventPropGetter={(obj) => ({
         style: {
-          backgroundColor: obj.type === 'credit' ? '#90ee90' : '#FFCCCB',
-          color: '#000011',
+          backgroundColor: obj?.isFinalInventory ? '#047d1c' : obj.type === 'credit' ? '#90ee90' : '#FFCCCB',
+          color: obj?.isFinalInventory ? '#ffffff' : '#000011',
           borderRadius: '4px',
           border: 'none',
-          padding: '8px 16px'
+          padding: '8px 16px',
+          fontWeight: obj?.isFinalInventory ? 'bold' : 'normal'
         }
       })}
     />
