@@ -579,6 +579,20 @@ const routes = {
         ? storedRoutes?.cycleCountPhysicalInventory?.title
         : RESOURCE_LABEL.cycleCountPhysicalInventory,
     path: '/cycle-count-physical-inventory'
+  },
+  serviceMaster: {
+    title:
+      storedRoutes && storedRoutes.serviceMaster && storedRoutes.serviceMaster.title
+        ? storedRoutes.serviceMaster?.title
+        : RESOURCE_LABEL.serviceMaster,
+    path: '/service-master'
+  },
+  serviceMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.serviceMaster && storedRoutes.serviceMaster.title
+        ? storedRoutes.serviceMaster?.title
+        : RESOURCE_LABEL.serviceMaster,
+    path: '/service-master/detail'
   }
 };
 
