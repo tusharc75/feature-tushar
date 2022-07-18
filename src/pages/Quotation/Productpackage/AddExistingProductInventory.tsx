@@ -3,53 +3,51 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
-import { Box, CircularProgress, IconButton, TextField, Tooltip } from "@material-ui/core";
+import { Box, CircularProgress, TextField } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
 import { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import { gridLoadingTimeout, CustomDialogTransition, product, packages, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from '../../../constants/helpers';
+import { gridLoadingTimeout, CustomDialogTransition, packages, product, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../../../components/CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../../../components/CustomDialog/CustomDialogFooter";
 import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
 import { startCase } from "lodash";
 import useColumns, { getStaticFields, getFrameworkComponents } from "../../../constants/useColumns"
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, ignoreIds, isAddingProducts, quotationData, renderedFrom }) => {
+let searchTimeout;
 
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, renderedFrom, refrenceType, ignoreIds }) => {
+
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
     const { state: { selectedEntity } }: any = useData();
-    const [packageDialog, setPackageDialog] = useState(false);
-    const [packageProductData, setPackageProductData] = useState([]);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
+    const { getColumnData } = useColumns();
+
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, showFilteredRecordsOnly } = state;
+
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState({})
 
-    const { getColumnData } = useColumns();
-
-    const localStorageSelectedRecords = `${renderedFrom}_selected`;
-
-    const defaultColumns = type === "product" ?
-        [
-            { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-            { field: "inventory", headerName: "Inventory", show: true, disabled: true, cellRenderer: "commonRenderer", editable: false }
-        ]
-        : [
-            { field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true },
-        ]
+    const defaultColumns = [{ field: "qty", headerName: "Qty", show: true, disabled: true, cellRenderer: "commonRenderer", cellEditor: "numericCellEditor", editable: true }]
 
     useEffect(() => {
-        fetchMaterial()
-    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
-
-    useEffect(() => {
+        localStorage.removeItem(localStorageSelectedRecords)
         fetchGridColumns()
     }, [])
+
+    useEffect(() => {
+        let millisec = Object.keys(search).length > 0 ? 600 : 5;
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        searchTimeout = setTimeout(() => {
+            fetchMaterial()
+        }, millisec);
+    }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
     const fetchMaterial = () => {
         dispatch({ type: "loading", loading: true });
@@ -57,21 +55,21 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? `/product-inventory` : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
-            const selectedProducts = getLocalStorageArrayData(localStorageSelectedRecords);
+        axiosInstance().get(`${type === "product" ? product.api + queryString : packages.packageApi + queryString}`).then(({ data: { data, count } }) => {
             let rows = data.map((u) => {
-                const selectedData = selectedProducts.find((d: any) => d._id === u._id);
                 let finalObject = prepareDataForGrid(u);
+                finalObject["isChecked"] = false;
                 finalObject["id"] = u._id;
                 finalObject["type"] = type;
+                finalObject["qty"] = 1;
+                const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id)
+                if (qtyAdded.length) {
+                    finalObject["qty"] = qtyAdded[0].qty;
+                }
                 finalObject["productCategory"] = u.productCategory?.optionLabel;
                 finalObject["priceTemplate"] = u.priceTemplate?.optionLabel
-                finalObject['inventory'] = u?.inventory ? (u?.inventory - (u?.softHold || 0)) : 0;
-                finalObject['qty'] = selectedData ? selectedData.qty : finalObject['inventory'] ? 1 : 0;
                 finalObject["unitMain"] = u.unit
-                if (type === "product") {
-                    finalObject['hideSelection'] = finalObject['inventory'] ? false : true;
-                }
+                finalObject["pricingMethodMain"] = u.pricingMethod
                 return {
                     ...finalObject,
                 };
@@ -85,36 +83,39 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
     };
 
     const getQueryString = () => {
-
-        let deepFilter = type === "product" ? `?wareHouse=${quotationData?.warehouse?.optionValue ??
-            quotationData?.plant?.optionValue}&page=${page}&limit=${limit}` : `?page=${page}&limit=${limit}`;
-
-        if (type !== "product") {
-            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([{ field: 'packageType', term: 'product' }]))}&filterType=and`
-        }
+        let deepFilter = `?page=${page}&limit=${limit}`;
 
         if (ignoreIds?.length) {
             deepFilter = deepFilter + `&ignoreIds=${JSON.stringify(ignoreIds)}`
         }
 
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+        }
+        const updatedFilters = [];
+        if (type === "package") {
+            updatedFilters.push({ field: 'packageType', term: 'product' })
+        }
+        if (type === "product") {
+            if (refrenceType !== "purchaseOrder") {
+                updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
+            }
+        }
         if (!isObjectEmpty(filters)) {
-            const updatedFilters = [];
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({
                     field: field,
                     term: filters[field].filter
                 })
             });
+        }
+        if (updatedFilters.length) {
             deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
         }
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
-
-        if (showFilteredRecordsOnly) {
-            deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((m) => m._id))}`;
-        }
-
         if (search) {
             deepFilter = `${deepFilter}&search=${search}`;
         }
@@ -135,7 +136,6 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                             rendererNames.push(currentColumn?.rendererName)
                         }
                     }
-
                 })
                 let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
                 tempFrameworkComponent = {
@@ -143,28 +143,24 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                 }
                 setFrameWorkComponent({ ...tempFrameworkComponent })
                 columns = [...columns, ...getStaticFields()]
-                // setColumns([...columns])
                 setColumns([...columns, ...defaultColumns])
             })
     }
-
-    const fetchPackageProduct = (packageId) => {
-        if (type === "package") {
-            axiosInstance().get(`${packages.packageApi}/get-products/${packageId}`).then(({ data: { data } }) => {
-                const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productName, qty: product.qty })) : [];
-                setPackageProductData(newArr);
-            })
-                .catch((err) => {
-                    toastConfig.setToastConfig(err);
-                });
-        }
-    };
 
     const handleSearch = (e) => {
         dispatch({ type: "search", search: e.target.value });
     };
 
-    const onCellValueChanged = (row) => {
+    const onCellValueChanged = ({ data }: any) => {
+        const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)]
+        if (!selectedFromStorage || selectedFromStorage.length === 0) return
+        const updatedRecords = selectedFromStorage.map(d => {
+            if (data._id === d._id) {
+                d.qty = data.qty
+            }
+            return d
+        })
+        localStorage.setItem(localStorageSelectedRecords, JSON.stringify(updatedRecords))
     }
 
     return (<Fragment>
@@ -182,19 +178,21 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                             <SearchBox
                                 onSearch={handleSearch}
                                 searchbox="terms_header_search_bar"
-                                width="300px"
+                                width="250px"
                                 value={search}
                             />
                             <Box ml={1}>
                                 <Button
                                     size="small"
                                     color="primary"
-                                    onClick={() => addProductInventory(getLocalStorageArrayData(localStorageSelectedRecords))}
+                                    onClick={() => {
+                                        addProductInventory(getLocalStorageArrayData(`${localStorageSelectedRecords}`))
+                                    }}
                                     variant="contained"
-                                    disabled={!Boolean(getLocalStorageArrayData(localStorageSelectedRecords)?.length) || isAddingProducts}
+                                    disabled={!getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length || isAddingProducts}
                                     endIcon={isAddingProducts && <CircularProgress size={20} color='primary' />} >
-                                    {getLocalStorageArrayData(localStorageSelectedRecords)?.length ? "(" + getLocalStorageArrayData(localStorageSelectedRecords)?.length + ")  " : ""}
-                                    Add</Button>
+                                    Add{getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? " (" + getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length + ")" : ""}
+                                </Button>
                             </Box>
                         </Grid>
                     </Grid>
@@ -212,66 +210,16 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                         page={page}
                         allowAction={false}
                         loading={loading}
+                        allowSelection={true}
                         onCellValueChanged={onCellValueChanged}
                         showOnlyShowFilteredRecordSwitch={true}
+                        refreshGrid={fetchMaterial}
                         renderedFrom={renderedFrom}
                     />
                     : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
             </div>
         </Dialog>
-        {packageDialog &&
-            <Dialog open fullWidth maxWidth="md" onClose={() => setPackageDialog(false)}>
-                <CustomDialogHeader title={"Package Details"} onClose={() => setPackageDialog(false)} />
-                <CustomDialogContent>
-                    <Box p={2}>
-                        <Grid container spacing={2}>
-                            {packageProductData?.length > 0 && packageProductData?.map((obj) => (
-                                <Fragment key={obj.id}>
-                                    <Grid item xs={5} sm={5}>
-                                        <TextField
-                                            size="small"
-                                            fullWidth
-                                            value={obj?.product}
-                                            type="text"
-                                            disabled
-                                            variant="outlined"
-                                            label="Product"
-                                        />
-                                    </Grid>
-                                    <Grid item xs={5} sm={5}>
-                                        <TextField
-                                            size="small"
-                                            fullWidth
-                                            value={obj?.qty}
-                                            disabled
-                                            type="number"
-                                            onChange={(e) => {
-                                                const val = parseInt(e.target.value);
-                                            }}
-                                            variant="outlined"
-                                            required
-                                            label="Quantity"
-                                        />
-                                    </Grid>
-                                </Fragment>
-                            ))}
-                        </Grid>
-                    </Box>
-                </CustomDialogContent>
-                <CustomDialogFooter>
-                    <Button variant="outlined" color="primary" onClick={() => setPackageDialog(false)}>
-                        Cancel
-                    </Button>
-                    {/* <Button
-                        onClick={handleSubmit}
-                        variant="contained"
-                        color="primary"
-                    >
-                        Save
-                    </Button> */}
-                </CustomDialogFooter>
-            </Dialog>}
-    </Fragment>
+    </Fragment >
     );
 }
 
