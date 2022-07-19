@@ -37,6 +37,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { BiEdit } from 'react-icons/bi';
 import InventoryHistory from './InventoryHistory';
 import CostDetails from './CostDetails';
+import ServiceMaster from './ServiceMaster';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -412,8 +413,11 @@ const ProductDetailsPage = () => {
                 {permissions?.repairType &&
                   <Tab label="Repair Types" value={5} aria-controls="a11y-tabpanel-5" id="a11y-tab-5" />
                 }
+                {permissions?.serviceMaster &&
+                  <Tab label="Service Master" value={6} aria-controls="a11y-tabpanel-6" id="a11y-tab-6" />
+                }
                 {permissions?.productInventory?.isRead &&
-                  <Tab label="History" value={6} aria-controls="a11y-tabpanel-5" id="a11y-tab-5" />
+                  <Tab label="History" value={7} aria-controls="a11y-tabpanel-7" id="a11y-tab-7" />
                 }
               </Tabs>
               {tabValue === 0 &&
@@ -468,6 +472,10 @@ const ProductDetailsPage = () => {
                 <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-4`} />
               )}
               {tabValue === 6 && (
+                <ServiceMaster id={id} renderedFrom={`${renderedFrom}_grid-5`} />
+              )}
+
+              {tabValue === 7 && (
                 <InventoryHistory id={id} />
               )}
             </Paper>
