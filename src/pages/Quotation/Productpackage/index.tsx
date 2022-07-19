@@ -505,6 +505,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
             quoteData={quotationData}
             handleClose={() => setRequestDialog(false)}
             onSuccess={() => {
+                fetchFields()
                 setRequestDialog(false);
             }}
         />}

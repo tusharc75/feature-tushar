@@ -97,10 +97,11 @@ const PriceRequestDialog = (props) => {
         });
     };
 
-    const handleAccept = () => {
-        axiosInstance().put(`/quotation/price-request/${quoteData?._id}/apply-price/${response.id}`, { "responseComment": comment }).then(({ data: { data } }) => {
+    const handleAccept = (responseId) => {
+        axiosInstance().put(`/quotation/price-request/${quoteData?._id}/apply-price/${responseId}`).then(({ data: { data } }) => {
             fetchProductGridData()
             setResponse({ open: false, type: "", id: "" })
+            onSuccess()
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
@@ -111,6 +112,7 @@ const PriceRequestDialog = (props) => {
         axiosInstance().put(`quotation/price-request/${quoteData?._id}/reject-price/${response.id}`, { "responseComment": comment }).then(({ data: { data } }) => {
             fetchProductGridData()
             setResponse({ open: false, type: "", id: "" })
+            onSuccess()
         }).catch((error) => {
             toastConfig.setToastConfig(error);
         });
@@ -143,7 +145,7 @@ const PriceRequestDialog = (props) => {
                                             </Box>
                                             <Box padding="5px">
                                                 <Typography variant="subtitle2">
-                                                    {data?.requestDate && `RequestDate : ${moment(data?.requestDate).format(dateTimeFormat)} `}
+                                                    {data?.requestDate && `Request Date : ${moment(data?.requestDate).format(dateTimeFormat)} `}
                                                 </Typography>
                                             </Box>
                                         </Box>
@@ -157,7 +159,9 @@ const PriceRequestDialog = (props) => {
                                             <Box ml={1} mt={1} >
                                                 <Button size="small"
                                                     color="primary"
-                                                    onClick={() => { setResponse({ open: true, type: "Accept", id: data?._id }) }}
+                                                    onClick={() => {
+                                                        handleAccept(data?._id)
+                                                    }}
                                                     variant="contained"
                                                 >
                                                     Accept</Button>
@@ -183,6 +187,8 @@ const PriceRequestDialog = (props) => {
                                                 renderedFrom="quotation_product_package"
                                                 isClientSideGrid={true}
                                                 hideSelection={true}
+                                                displayCustomReactTableHeaderOptions={false}
+                                                hideExpander={true}
                                             />
                                         </Box>
                                     </>
@@ -210,6 +216,7 @@ const PriceRequestDialog = (props) => {
             >
                 <CustomDialogHeader
                     onClose={() => { setResponse({ open: false, type: "", id: "" }) }}
+                    showRequiredLabel={false}
                     title={"Response comment"}></CustomDialogHeader>
                 <CustomDialogContent>
                     <Box>
@@ -237,7 +244,7 @@ const PriceRequestDialog = (props) => {
                     <Button
                         type="button"
                         color="primary"
-                        variant="contained" onClick={() => { response.type === "Accept" ? handleAccept() : handleReject() }}>Save</Button>
+                        variant="contained" onClick={() => { response.type === "Reject" && handleReject() }}>Save</Button>
                 </CustomDialogFooter>
             </Dialog>
         )
