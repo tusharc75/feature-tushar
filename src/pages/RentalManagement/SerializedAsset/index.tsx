@@ -67,7 +67,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    var { fields: data } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     const coloum: any = [
       {
         accessor: 'srno',

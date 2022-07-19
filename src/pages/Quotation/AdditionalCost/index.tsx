@@ -40,7 +40,7 @@ const AdditionalCost = ({ quotationData, setNextStep, renderedFrom }) => {
 
     const fetchFields = async () => {
         var data = []
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.salesOrderCost}`)
+        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.quotationCost}`)
         data = response?.data?.data
 
         const fields = CURReplaceByCurrencySingle(data, quotationData.currency)

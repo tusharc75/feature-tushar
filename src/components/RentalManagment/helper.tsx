@@ -17,6 +17,7 @@ export const fetch_rental_product_fields = async (currency, isOffline) => {
         data = response?.data?.data;
     }
     data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
+    const allFields = [...data];
     var isRateRequired = false
     data.forEach(element => {
         if (element.fieldName === "price" && element.required) {
@@ -26,7 +27,7 @@ export const fetch_rental_product_fields = async (currency, isOffline) => {
     if (!isRateRequired) {
         data = data.filter((e) => e.sectionName !== "Pricing Information")
     }
-    return data;
+    return { fields: data, allFields: allFields };
 }
 
 export const fetch_rental_cost_fields = async (currency, isOffline) => {

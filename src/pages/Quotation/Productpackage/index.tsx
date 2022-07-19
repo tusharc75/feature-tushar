@@ -19,6 +19,8 @@ import InfoIcon from "@material-ui/icons/Info";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile } from "react-device-detect";
 import { fetch_quotation_product_fields } from "src/components/Quotation/helper";
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import PriceRequestDialog from "./PriceRequestDialog";
 
 const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom }) => {
 
@@ -44,6 +46,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     const [rowsData, setRowsData] = useState(null);
     const [allFields, setAllFields] = useState([]);
     const [isRateRequired, setIsRateRequired] = useState(false);
+    const [requestDialog, setRequestDialog] = useState(false);
 
 
     useEffect(() => {
@@ -217,7 +220,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}`)
         data = response?.data?.data
         setMaterial(JSON.parse(JSON.stringify(data.material)))
-        inventory = data.inventory;
+        inventory = data?.inventory ? data?.inventory : [];
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
             parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
@@ -420,6 +423,18 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                         Delete
                     </Button>
                 </HtmlTooltip>
+                <Box mx={1} />
+                <HtmlTooltip title={"View request records"}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => { setRequestDialog(true) }}
+                        endIcon={<VisibilityIcon fontSize="small" />}
+                    >
+                        View
+                    </Button>
+                </HtmlTooltip>
             </Box>
         </Box>
         {columns && rowsData ?
@@ -444,7 +459,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
                         uniqueKey="_id"
-                        renderedFrom="sales_order_product_package"
+                        renderedFrom="quotation_product_package"
                         isClientSideGrid={true}
                     />
                 </Box>
@@ -482,10 +497,18 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
                 type={addExistingProductDialog.type}
-                quotationData={quotationData}
+                refrenceType={"Quotation"}
                 ignoreIds={rowsData?.map((e) => e?.materialId)}
             />
         }
+        {requestDialog && <PriceRequestDialog
+            quoteData={quotationData}
+            handleClose={() => setRequestDialog(false)}
+            onSuccess={() => {
+                fetchFields()
+                setRequestDialog(false);
+            }}
+        />}
     </Fragment>
     );
 };
