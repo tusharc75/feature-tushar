@@ -150,7 +150,7 @@ const AdditionalCost = ({ salesOrderData, setNextStep, renderedFrom }) => {
                             setSelectedCostData(null)
                         }}
                     >
-                        {isMobile ? <GrBusinessService size={20} /> : "Add Cost"}
+                        {isMobile ? <GrBusinessService size={20} /> : "Add Services and Consumables"}
                     </Button>
                 </Box>
             </Box>
