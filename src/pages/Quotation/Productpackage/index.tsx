@@ -19,6 +19,8 @@ import InfoIcon from "@material-ui/icons/Info";
 import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile } from "react-device-detect";
 import { fetch_quotation_product_fields } from "src/components/Quotation/helper";
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import PriceRequestDialog from "./PriceRequestDialog";
 
 const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom }) => {
 
@@ -44,6 +46,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     const [rowsData, setRowsData] = useState(null);
     const [allFields, setAllFields] = useState([]);
     const [isRateRequired, setIsRateRequired] = useState(false);
+    const [requestDialog, setRequestDialog] = useState(false);
 
 
     useEffect(() => {
@@ -420,6 +423,18 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                         Delete
                     </Button>
                 </HtmlTooltip>
+                <Box mx={1} />
+                <HtmlTooltip title={"View request records"}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => { setRequestDialog(true) }}
+                        endIcon={<VisibilityIcon fontSize="small" />}
+                    >
+                        View
+                    </Button>
+                </HtmlTooltip>
             </Box>
         </Box>
         {columns && rowsData ?
@@ -444,7 +459,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                         onSelect={setSelectedProducts}
                         childrenProperty="subRows"
                         uniqueKey="_id"
-                        renderedFrom="sales_order_product_package"
+                        renderedFrom="quotation_product_package"
                         isClientSideGrid={true}
                     />
                 </Box>
@@ -486,6 +501,13 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                 ignoreIds={rowsData?.map((e) => e?.materialId)}
             />
         }
+        {requestDialog && <PriceRequestDialog
+            quoteData={quotationData}
+            handleClose={() => setRequestDialog(false)}
+            onSuccess={() => {
+                setRequestDialog(false);
+            }}
+        />}
     </Fragment>
     );
 };
