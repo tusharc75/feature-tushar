@@ -188,7 +188,6 @@ const ServiceMaster = (props: Props) => {
         if (ids.length) {
           let selectedArray = JSON.parse(localStorage.getItem(localStorageSelectedRecords));
           selectedArray = selectedArray.filter((item) => !ids.includes(item.id));
-          console.log(selectedArray);
           localStorage.setItem(localStorageSelectedRecords, JSON.stringify(selectedArray));
         }
       })
