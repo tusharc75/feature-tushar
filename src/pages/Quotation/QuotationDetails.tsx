@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { quotation, defaultActivityShow,  getUniqueCurrencies, ACTIVITY_RESOURCE, quotationProcessSteps } from '../../constants/helpers';
+import { quotation, defaultActivityShow, getUniqueCurrencies, ACTIVITY_RESOURCE, quotationProcessSteps } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -28,6 +28,7 @@ import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
+import Service from './Service';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -353,11 +354,17 @@ const QuotationDetails = () => {
                       />
                     )}
                     {currentStep === 1 && quotationData &&
-                      <AdditionalCost
+                      // <AdditionalCost
+                      //   quotationData={quotationData}
+                      //   setNextStep={setNextStep}
+                      //   renderedFrom={`${renderedFrom}_grid-2`}
+                      // />
+                      <Service
                         quotationData={quotationData}
-                        setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
-                      />}
+                        setNextStep={setNextStep}
+                      />
+                    }
                     {/* {currentStep === 2 && quotationData && (
                       <SerializedAsset
                         quotationData={quotationData}

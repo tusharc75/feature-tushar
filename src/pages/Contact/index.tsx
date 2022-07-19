@@ -657,6 +657,7 @@ export default function Contact(props) {
           type: 'success',
           message: data.message
         });
+        removeLocalStorage(`${localStorageSelectedRecords}`)
         getContacts();
       })
       .catch((error) => {

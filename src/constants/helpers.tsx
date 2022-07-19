@@ -58,7 +58,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 //export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
-export const salesOrderProcessSteps = ['Add Products', 'Ready To Invoice'];
+export const salesOrderProcessSteps = ['Add Products','Services and Consumables', 'Ready To Invoice'];
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables'];
 //export const purchaseOrderSteps = ['Add Products', 'Services and Consumables', 'Receive Products'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
@@ -366,6 +366,7 @@ export const CHILD_RESOURCE = {
   subleaseProduct: 'Sublease Product',
   quotationProduct: 'Quotation Product',
   quotationCost: 'Quotation Cost',
+  quotationService:'Quotation Service'
 };
 
 export const sidebarResourceObjectFromValues = () => {
