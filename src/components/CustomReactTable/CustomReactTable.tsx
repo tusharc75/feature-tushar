@@ -79,9 +79,11 @@ export default function CustomReactTable({
     height = "100%",
     hideSelection = false,
     renderedFrom,
-    isClientSideGrid = true
+    isClientSideGrid = true,
     // rowCount,
     // customPageSize = 20,
+    displayCustomReactTableHeaderOptions = true,
+    hideExpander = false
 }) {
     const defaultColumn = React.useMemo(
         () => ({
@@ -95,94 +97,123 @@ export default function CustomReactTable({
     )
 
     const newColumns = React.useMemo(
-        () => [
-            {
-                // Build our expander column
-                id: 'expander', // Make sure it has an ID
-                Header: ({ isAllRowsExpanded }) => (
-                    <span style={{
-                        paddingLeft: "0.3rem",
-                        color: "black"
-                    }}>
-                        {
-                            isAllRowsExpanded ? <FaAngleDown style={{ color: "white" }} className="cursor-pointer" onClick={() => {
-                                toggleAllRowsExpanded(false);
-                            }} /> : <FaAngleRight style={{ color: "white" }} className="cursor-pointer" onClick={() => {
-                                toggleAllRowsExpanded(true);
-                            }} />
-                        }
-                    </span>
-                ),
-                sticky: "left",
-                width: isMobile && !isTablet ? 40 : 70,
-                minWidth: isMobile && !isTablet ? 40 : 70,
-                //maxWidth: 70,
-                canDrag: false,
-                Cell: ({ row }) =>
-                    // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
-                    // to build the toggle for expanding a row
-                    row.canExpand ? (
-                        <span
-                            {...row.getToggleRowExpandedProps({
-                                style: {
-                                    // We can even use the row.depth property
-                                    // and paddingLeft to indicate the depth
-                                    // of the row
-                                    paddingLeft: `${row.depth * 2}rem`
-                                },
-                            })}
-                        >
-                            {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
-                        </span>
-                    ) : null,
-            },
-
-            //  Use below selection if pagination is there
-            // {
-            //     id: 'selection',
-            //     minWidth: 50,
-            //     width: 50,
-            //     maxWidth: 50,
-            //     // The header can use the table's getToggleAllRowsSelectedProps method
-            //     // to render a checkbox
-            //     Header: ({ getToggleAllPageRowsSelectedProps }) => (
-            //         <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
-            //     ),
-            //     // The cell can use the individual row's getToggleRowSelectedProps method
-            //     // to the render a checkbox
-            //     Cell: ({ row }) => (
-            //         <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
-            //     ),
-            // },
-
-            //  Use below selection if pagination is not there
-            {
-                //  Check this example to customize checkbox
-                //  https://github.com/tannerlinsley/react-table/issues/2988
-                id: 'selection',
-                sticky: "left",
-                width: 100,
-                minWidth: 100,
-                //maxWidth: 100,
-                canDrag: false,
-                // The header can use the table's getToggleAllRowsSelectedProps method
-                // to render a checkbox
-                Header: ({ getToggleAllRowsSelectedProps }) => (
-                    <div>
-                        <IndeterminateCheckbox from="Header" {...getToggleAllRowsSelectedProps()} />
-                    </div>
-                ),
-                // The cell can use the individual row's getToggleRowSelectedProps method
-                // to the render a checkbox
-                Cell: ({ row }) => (
-                    row?.original?.hideSelection ? null :
-                        <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : "" }}>
-                            <IndeterminateCheckbox from="Cell"  {...row.getToggleRowSelectedProps()} />
+        () => hideExpander ?
+            [
+                {
+                    //  Check this example to customize checkbox
+                    //  https://github.com/tannerlinsley/react-table/issues/2988
+                    id: 'selection',
+                    sticky: "left",
+                    width: 100,
+                    minWidth: 100,
+                    //maxWidth: 100,
+                    canDrag: false,
+                    // The header can use the table's getToggleAllRowsSelectedProps method
+                    // to render a checkbox
+                    Header: ({ getToggleAllRowsSelectedProps }) => (
+                        <div>
+                            <IndeterminateCheckbox from="Header" {...getToggleAllRowsSelectedProps()} />
                         </div>
-                ),
-            },
-            ...columns.map(m => { return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' } })
-        ],
+                    ),
+                    // The cell can use the individual row's getToggleRowSelectedProps method
+                    // to the render a checkbox
+                    Cell: ({ row }) => (
+                        row?.original?.hideSelection ? null :
+                            <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : "" }}>
+                                <IndeterminateCheckbox from="Cell"  {...row.getToggleRowSelectedProps()} />
+                            </div>
+                    ),
+                },
+                ...columns.map(m => { return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' } })
+            ]
+            : [
+                {
+                    // Build our expander column
+                    id: 'expander', // Make sure it has an ID
+                    Header: ({ isAllRowsExpanded }) => (
+                        <span style={{
+                            paddingLeft: "0.3rem",
+                            color: "black"
+                        }}>
+                            {
+                                isAllRowsExpanded ? <FaAngleDown style={{ color: "white" }} className="cursor-pointer" onClick={() => {
+                                    toggleAllRowsExpanded(false);
+                                }} /> : <FaAngleRight style={{ color: "white" }} className="cursor-pointer" onClick={() => {
+                                    toggleAllRowsExpanded(true);
+                                }} />
+                            }
+                        </span>
+                    ),
+                    sticky: "left",
+                    width: isMobile && !isTablet ? 40 : 70,
+                    minWidth: isMobile && !isTablet ? 40 : 70,
+                    //maxWidth: 70,
+                    canDrag: false,
+                    Cell: ({ row }) =>
+                        // Use the row.canExpand and row.getToggleRowExpandedProps prop getter
+                        // to build the toggle for expanding a row
+                        row.canExpand ? (
+                            <span
+                                {...row.getToggleRowExpandedProps({
+                                    style: {
+                                        // We can even use the row.depth property
+                                        // and paddingLeft to indicate the depth
+                                        // of the row
+                                        paddingLeft: `${row.depth * 2}rem`
+                                    },
+                                })}
+                            >
+                                {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
+                            </span>
+                        ) : null,
+                },
+
+                //  Use below selection if pagination is there
+                // {
+                //     id: 'selection',
+                //     minWidth: 50,
+                //     width: 50,
+                //     maxWidth: 50,
+                //     // The header can use the table's getToggleAllRowsSelectedProps method
+                //     // to render a checkbox
+                //     Header: ({ getToggleAllPageRowsSelectedProps }) => (
+                //         <IndeterminateCheckbox {...getToggleAllPageRowsSelectedProps()} />
+                //     ),
+                //     // The cell can use the individual row's getToggleRowSelectedProps method
+                //     // to the render a checkbox
+                //     Cell: ({ row }) => (
+                //         <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+                //     ),
+                // },
+
+                //  Use below selection if pagination is not there
+                {
+                    //  Check this example to customize checkbox
+                    //  https://github.com/tannerlinsley/react-table/issues/2988
+                    id: 'selection',
+                    sticky: "left",
+                    width: 100,
+                    minWidth: 100,
+                    //maxWidth: 100,
+                    canDrag: false,
+                    // The header can use the table's getToggleAllRowsSelectedProps method
+                    // to render a checkbox
+                    Header: ({ getToggleAllRowsSelectedProps }) => (
+                        <div>
+                            <IndeterminateCheckbox from="Header" {...getToggleAllRowsSelectedProps()} />
+                        </div>
+                    ),
+                    // The cell can use the individual row's getToggleRowSelectedProps method
+                    // to the render a checkbox
+                    Cell: ({ row }) => (
+                        row?.original?.hideSelection ? null :
+                            <div style={{ paddingLeft: row.depth > 0 ? `${row.depth * 2}rem` : "" }}>
+                                <IndeterminateCheckbox from="Cell"  {...row.getToggleRowSelectedProps()} />
+                            </div>
+                    ),
+                },
+                ...columns.map(m => { return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' } })
+            ],
         []
     )
 
@@ -271,7 +302,7 @@ export default function CustomReactTable({
             if (storedColumns) {
                 console.log(storedColumns)
                 setColumnOrder(JSON.parse(storedColumns).map(m => m.id));
-                setHiddenColumns(JSON.parse(storedColumns).filter(f => f.isVisible === false && !['expander','selection']?.includes(f.id)).map(m => m.id))
+                setHiddenColumns(JSON.parse(storedColumns).filter(f => f.isVisible === false && !['expander', 'selection']?.includes(f.id)).map(m => m.id))
             }
         } catch (ex) {
             console.error(`Error while getting stored data from local storage - ${renderedFrom}`)
@@ -309,7 +340,7 @@ export default function CustomReactTable({
     // Render the UI for your table
     return (
         <>
-            <CustomReactTableHeaderOptions
+            {displayCustomReactTableHeaderOptions && <CustomReactTableHeaderOptions
                 columns={allColumns}
                 // setSelectedReportView={setSelectedReportView}
                 // selectedReportView={selectedReportView}
@@ -325,7 +356,7 @@ export default function CustomReactTable({
                 setHiddenColumns={setHiddenColumns}
                 getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
                 setColumnOrder={setColumnOrder}
-            />
+            />}
 
             <div style={{
                 display: "block",
