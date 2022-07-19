@@ -42,7 +42,7 @@ const ServiceMaster = (props: Props) => {
     state;
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { permissions, selectedEntity }
   }: any = useData();
   const { getColumnData } = useColumns();
 
@@ -185,6 +185,12 @@ const ServiceMaster = (props: Props) => {
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setDeleting(false);
+        if (ids.length) {
+          let selectedArray = JSON.parse(localStorage.getItem(localStorageSelectedRecords));
+          selectedArray = selectedArray.filter((item) => !ids.includes(item.id));
+          console.log(selectedArray);
+          localStorage.setItem(localStorageSelectedRecords, JSON.stringify(selectedArray));
+        }
       })
       .catch((error) => {
         setDeleting(false);
