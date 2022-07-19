@@ -18,28 +18,25 @@ const CalendarView = ({ product, warehouse }) => {
 
   const fetchRecords = async () => {
     try {
-      let data;
       const query = warehouse ? `?warehouse=${warehouse}` : ``;
       const response = await axiosInstance().get(`/history/product-ledger/${product}${query}`);
-      const response1 = await axiosInstance().get(`product-inventory/product/upcoming-ledger/${product}?${query}`);
-      data = [...response?.data?.data, ...response1?.data?.data];
-      var qty = 0;
-      data
-        ?.slice()
-        .reverse()
-        .forEach(function (item) {
-          if (item.type === 'Credit') {
-            qty = qty + item?.qty;
-          } else {
-            qty = qty - item?.qty;
-          }
-          item.finalInventory = qty;
-        });
+      const response1 = await axiosInstance().get(`/product-inventory/product/upcoming-ledger/${product}?${query}`);
+      let rows = [...response?.data?.data, ...response1?.data?.data];
+
+      let qty = 0;
+      rows.forEach((item) => {
+        if (item.type === 'credit') {
+          qty += item?.qty;
+        } else {
+          qty -= item?.qty;
+        }
+        item.finalInventory = qty;
+      });
 
       let datewise = [];
       let datewiseData = [];
 
-      datewise = data.sort((a, b) => {
+      datewise = rows.sort((a, b) => {
         let timeA = new Date(a.date).getTime();
         let timeB = new Date(b.date).getTime();
 
