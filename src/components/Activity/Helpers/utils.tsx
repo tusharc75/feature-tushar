@@ -3,8 +3,8 @@ import routes from '../../Helpers/Routes';
 
 export const get_activity_resource = (permissions) => {
   var data = [];
-  for (const key in ACTIVITY_RESOURCE) {
-    if (permissions[key] && permissions[key]?.isRead === true) {
+  for (var key in ACTIVITY_RESOURCE) {
+    if (permissions[key === "quote" ? "quoteBuilder" : key] && permissions[key === "quote" ? "quoteBuilder" : key]?.isRead === true) {
       data.push({ optionLabel: routes[key].title, optionValue: key });
     }
   }
@@ -45,6 +45,8 @@ export const resActivityColors = {
   opportunity: 'rgba(255, 92, 0, .1)',
   user: 'rgba(56, 56, 56, .1)',
   quote: 'rgba(169, 43, 3, .1)',
+  quoteBuilder: 'rgba(169, 43, 3, .1)',
+  quotation: 'rgba(169, 43, 3, .1)',
   projectSales: 'rgba(0, 122, 149, .1)',
   rentalManagement: 'rgba(223, 231, 246, 1)',
   repairJob: 'rgba(223, 231, 246, 1)',
@@ -74,6 +76,8 @@ export const resActivityTextColors = {
   opportunity: 'rgba(255, 92, 0, 1)',
   user: 'rgba(56, 56, 56, 1)',
   quote: 'rgba(169, 43, 3, 1)',
+  quoteBuilder:  'rgba(169, 43, 3, 1)',
+  quotation: 'rgba(169, 43, 3, 1)',
   projectSales: 'rgba(0, 122, 149, 1)',
   rentalManagement: 'rgba(7, 43, 97, 1)',
   repairJob: 'rgba(169, 43, 3, 1)',
