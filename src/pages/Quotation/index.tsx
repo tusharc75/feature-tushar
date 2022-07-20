@@ -2,7 +2,8 @@ import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip, Box } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaRegistered, FaSuitcase } from 'react-icons/fa';
+import { FaSuitcase } from 'react-icons/fa';
+import { GiHiveMind } from "react-icons/gi";
 import { MdContactPhone, RiContactsBookUploadFill, RiShip2Fill, FaWarehouse, SiStatuspage } from 'react-icons/all';
 import {
   isObjectEmpty,
@@ -420,7 +421,7 @@ const Quotation = () => {
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
               canDelete={selectedRecords.length === 0}
-              icon={<FaRegistered className="headerLogo" />}
+              icon={<GiHiveMind className="headerLogo" />}
               heading={routes.quotation.title}
               showTransferEntityDialog={handleTransferEntityDialog}
               columns={columns}

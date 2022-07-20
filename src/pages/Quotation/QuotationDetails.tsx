@@ -231,15 +231,12 @@ const QuotationDetails = () => {
                   </div>
                 ) : (
                   <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
-
                     {(permissions?.quotation?.isUpdate && allowedToEdit) && (
                       <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                         Edit
                       </Button>
                     )}
-
                     {permissions?.quotation?.isDelete && ["Invoiced", "Closed"].indexOf(quotationData?.status) === -1 && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-
                     {permissions?.quotation?.isUpdate && (["Ready to Invoice", "Invoiced"].includes(quotationData?.status)) && (
                       <>
                         <Button
@@ -277,8 +274,6 @@ const QuotationDetails = () => {
                     )}
                   </DetailsPageHeader>
                 )}
-
-
                 <Tabs
                   className="quote-tab"
                   value={tabValue}
@@ -319,7 +314,6 @@ const QuotationDetails = () => {
                   <div className={'uio'}> </div>
 
                 </Tabs>
-
                 <TabPanel value={tabValue} index={0}>
                   <Box>
                     {loading || !quotationFields.length ? (
@@ -333,7 +327,6 @@ const QuotationDetails = () => {
                     )}
                   </Box>
                 </TabPanel>
-
                 <TabPanel value={tabValue} index={1}>
                   <Paper>
                     <Steps
