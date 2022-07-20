@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, CircularProgress, Tab, Tabs, ButtonGroup, Container, InputAdornment, useMediaQuery } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography, IconButton, CircularProgress, Tab, Tabs, ButtonGroup, Container, InputAdornment, useMediaQuery, Menu, MenuItem } from "@material-ui/core";
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
@@ -11,7 +11,7 @@ import CustomReactTable from "../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import Add from "@material-ui/icons/Add";
 import moment from "moment";
-import { quotation, dateFormat, pricingCondition, formatAmountWithCurrency } from "../../../constants/helpers";
+import { quotation, dateFormat, pricingCondition, formatAmountWithCurrency, supplierContact } from "../../../constants/helpers";
 import ConfirmationDialog from "../../../components/Helpers/ConfirmationDialog";
 import QuotationQtyDialog from './QuotationQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
@@ -21,6 +21,8 @@ import { isMobile } from "react-device-detect";
 import { fetch_quotation_product_fields } from "src/components/Quotation/helper";
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import PriceRequestDialog from "./PriceRequestDialog";
+import { ExpandMore } from "@material-ui/icons";
+import AskSupplierPriceDialog from "./AskSupplierPriceDialog";
 
 const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom }) => {
 
@@ -47,6 +49,10 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     const [allFields, setAllFields] = useState([]);
     const [isRateRequired, setIsRateRequired] = useState(false);
     const [requestDialog, setRequestDialog] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
+    const [supplierContactData, setSupplierContactData] = useState([]);
+    const [selectedType, setSelectedType] = useState(null);
 
 
     useEffect(() => {
@@ -107,6 +113,15 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                     disableFilters: true,
                     Cell: ({ row }) => (
                         row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+                    )
+                })
+            }
+            else if (element.fieldName === "supplierAccount") {
+                coloum.push({
+                    accessor: element.fieldName,
+                    Header: element.fieldLabel,
+                    Cell: ({ row }) => (
+                        row.original[element.fieldName] ? <p className="text-truncate">{row.original[element.fieldName].map(d => d?.optionLabel).toString()}</p> : <NoDataCell />
                     )
                 })
             }
@@ -252,7 +267,13 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         setRowsData(rows);
         setSelectedProducts([])
     };
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
 
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
     const handleAdd = async (rows) => {
         setAddingProducts(true)
         const material: any = []
@@ -358,6 +379,35 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         }
     };
 
+    const handelAskPriceToSupplier = (content, contactId, selectedFields = [], displayColumns = []) => {
+
+        let data: any = {
+            "material": selectedProducts?.map(d => {
+                return {
+                    "_id": d?._id,
+                    "materialId": d?.materialId
+                }
+            }),
+            "quotationId": quotationData?._id,
+            "protected": true,
+            "body": content ? content : "",
+            "supplierContact": contactId,
+            "requiredFields": selectedFields,
+        }
+
+        axiosInstance().post(`/quotation/supplier-price-request/ask-price-supplier`, data).then(() => {
+            toastConfig.setToastConfig({
+                message: `Email has been sent to suppliers`,
+                type: "success",
+                open: true,
+            });
+            setAskSupplierPriceDialog(false)
+        })
+            .catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+    };
+
     return (<Fragment>
         <Box display="flex" justifyContent="space-between" m={1}>
             <Box display="flex" alignItems="center">
@@ -424,17 +474,61 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                     </Button>
                 </HtmlTooltip>
                 <Box mx={1} />
-                <HtmlTooltip title={"View request records"}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => { setRequestDialog(true) }}
-                        endIcon={<VisibilityIcon fontSize="small" />}
+                <div className="d-flex gap-2">
+                    <span>
+                        <Button
+                            variant={"outlined"}
+                            color="default"
+                            size="small"
+                            onClick={openActions}
+                            aria-controls="action-menu"
+                        >  {'Actions'} <ExpandMore />
+                        </Button>
+                    </span>
+                    <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "left",
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
                     >
-                        View
-                    </Button>
-                </HtmlTooltip>
+                        <MenuItem
+                            disabled={selectedProducts.length === 0}
+                            onClick={() => {
+                                let tempSupplierAccountId = []
+                                selectedProducts?.forEach(element => {
+                                    element?.supplierAccount?.forEach(e => {
+                                        if (tempSupplierAccountId.findIndex(d => d === e?.optionValue) === -1) {
+                                            tempSupplierAccountId.push(e?.optionValue)
+                                        }
+                                    })
+                                });
+                                axiosInstance().get(`${supplierContact.contactApi}?filterById=${JSON.stringify([{ "field": "accountName", "term": { "$in": tempSupplierAccountId } }])}&filterType=and`).then(({ data: { data, count } }) => {
+                                    setSupplierContactData(data)
+                                    setAskSupplierPriceDialog(true)
+                                })
+                                    .catch((error) => {
+                                        toastConfig.setToastConfig(error);
+                                    });
+                                closeActions()
+                            }}>Ask Price to Supplier</MenuItem>
+                        <MenuItem onClick={() => {
+                            setSelectedType("Supplier")
+                            setRequestDialog(true)
+                            closeActions()
+                        }}>View Supplier Price</MenuItem>
+                        <MenuItem onClick={() => {
+                            setSelectedType("Customer")
+                            setRequestDialog(true)
+                            closeActions()
+                        }}>View Customer Price</MenuItem>
+                    </Menu>
+                </div>
             </Box>
         </Box>
         {columns && rowsData ?
@@ -501,14 +595,24 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                 ignoreIds={rowsData?.map((e) => e?.materialId)}
             />
         }
-        {requestDialog && <PriceRequestDialog
+        {requestDialog && selectedType && <PriceRequestDialog
             quoteData={quotationData}
+            type={selectedType}
             handleClose={() => setRequestDialog(false)}
             onSuccess={() => {
                 fetchFields()
                 setRequestDialog(false);
             }}
         />}
+        {askSupplierPriceDialog &&
+            <AskSupplierPriceDialog
+                setAskSupplierPriceDialog={setAskSupplierPriceDialog}
+                askSupplierPriceDialog={askSupplierPriceDialog}
+                handelAskPriceToSupplier={handelAskPriceToSupplier}
+                supplierContactData={supplierContactData}
+                fields={allFields}
+            />
+        }
     </Fragment>
     );
 };

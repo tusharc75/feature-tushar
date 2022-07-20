@@ -17,62 +17,60 @@ const CalendarView = ({ product, warehouse }) => {
   }, []);
 
   const fetchRecords = async () => {
-    try {
-      const query = warehouse ? `?warehouse=${warehouse}` : ``;
-      const response = await axiosInstance().get(`/history/product-ledger/${product}${query}`);
-      const response1 = await axiosInstance().get(`/product-inventory/product/upcoming-ledger/${product}?${query}`);
-      let rows = [...response?.data?.data, ...response1?.data?.data];
+    const query = warehouse ? `?warehouse=${warehouse}` : ``;
+    const response = await axiosInstance().get(`/history/product-ledger/${product}${query}`);
+    const response1 = await axiosInstance().get(`/product-inventory/product/upcoming-ledger/${product}${query}`);
+    let rows = [...response?.data?.data, ...response1?.data?.data];
 
-      let qty = 0;
-      rows.forEach((item) => {
-        if (item.type === 'credit') {
-          qty += item?.qty;
-        } else {
-          qty -= item?.qty;
-        }
-        item.finalInventory = qty;
+    let qty = 0;
+    rows.forEach((item) => {
+      if (item.type === 'credit') {
+        qty += item?.qty;
+      } else {
+        qty -= item?.qty;
+      }
+      item.finalInventory = qty;
+    });
+
+    let datewise = [];
+    let datewiseData = [];
+
+    datewise = rows.sort((a, b) => {
+      let timeA = new Date(a.date).getTime();
+      let timeB = new Date(b.date).getTime();
+      return timeA - timeB;
+    });
+
+    datewise.forEach((d) => {
+      let sameDateData = datewise.filter((item) => {
+        return moment(item.date).format("MM-DD-YYYY") === moment(d.date).format("MM-DD-YYYY");
       });
+      let lastFinalInventory;
+      if (sameDateData && sameDateData.length > 0) {
+        lastFinalInventory = sameDateData[0];
+      }
 
-      let datewise = [];
-      let datewiseData = [];
-
-      datewise = rows.sort((a, b) => {
-        let timeA = new Date(a.date).getTime();
-        let timeB = new Date(b.date).getTime();
-
-        return timeA - timeB;
-      });
-
-      datewise.forEach((d) => {
-        let sameDateData = datewise.filter((item) => {
-          return item.date.split('T')[0] === d.date.split('T')[0];
-        });
-        let lastFinalInventory;
-        if (sameDateData && sameDateData.length > 0) {
-          lastFinalInventory = sameDateData[0];
-        }
-
-        if (lastFinalInventory.date === d.date && !lastFinalInventory?.isFinalInventory) {
-          datewiseData.push({
-            ...d,
-            isFinalInventory: true
-          });
-        }
-      });
-
-      datewise = [...datewiseData, ...datewise];
-
-      let newData = datewise.map((d) => {
-        return {
+      if (lastFinalInventory.date === d.date && !lastFinalInventory?.isFinalInventory) {
+        datewiseData.push({
           ...d,
-          id: d?._id,
-          title: d?.isFinalInventory ? `Final Inventory (${d.finalInventory})` : `${d?.referenceType} (${d?.qty})`,
-          start: new Date(d.date),
-          end: new Date(d.date)
-        };
-      });
-      setActivities(newData);
-    } catch (error) {}
+          isFinalInventory: true
+        });
+      }
+    });
+
+    datewise = [...datewiseData, ...datewise];
+
+    let newData = datewise.map((d) => {
+      return {
+        ...d,
+        id: d?._id,
+        title: d?.isFinalInventory ? `Final Inventory (${d.finalInventory})` : `${d?.type === "credit" ? "↑" : "↓"} ${d?.referenceType} (${d?.qty})`,
+        start: new Date(d.date),
+        end: new Date(d.date)
+      };
+    });
+
+    setActivities(newData);
   };
 
   return (
@@ -87,8 +85,8 @@ const CalendarView = ({ product, warehouse }) => {
       views={{ month: true, week: true, day: true }}
       eventPropGetter={(obj) => ({
         style: {
-          backgroundColor: obj?.isFinalInventory ? '#047d1c' : obj.type === 'credit' ? '#90ee90' : '#FFCCCB',
-          color: obj?.isFinalInventory ? '#ffffff' : '#000011',
+          backgroundColor: obj?.isFinalInventory ? '#D6F6F6' : obj.type === 'credit' ? '#DBF8DB' : '#FAEAE9',
+          color: '#000011',
           borderRadius: '4px',
           border: 'none',
           padding: '8px 16px',

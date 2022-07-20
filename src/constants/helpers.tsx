@@ -203,6 +203,7 @@ export const sidebarResource = {
   inventoryCycle: 'Inventory Cycle',
   dashboardMaster: 'Dashboard Master',
   scheduleReport: 'Schedule Report',
+  cycleCountDetermination: 'Cycle Count Determination',
   cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
   quotation:'Quotation',
   serviceMaster: 'Service Master'

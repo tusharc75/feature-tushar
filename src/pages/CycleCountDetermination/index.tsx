@@ -168,7 +168,9 @@ const CycleCountDetermination = () => {
                     if (gridApi) gridApi.deselectAll();
                     else fetchCycleCountDetermination();
                   }}
-                  additionalParams={null}
+                  isDownloadExcel={false}
+                  additionalParams={'wareHouse='+warehouse}
+                  onlyExport={false}
                 />
               </Grid>
             </Grid>

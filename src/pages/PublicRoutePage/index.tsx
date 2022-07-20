@@ -7,6 +7,7 @@ import { SVG } from '../../assets';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import QuoteSupplierPrice from "./QuoteSupplierPrice";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import QuotationSupplierPrice from "./QuotationSupplierPrice";
 
 const useStyles = makeStyles((theme) => ({
 
@@ -179,7 +180,8 @@ const PublicRoutePage = () => {
                     </h1>
                     : loading || resourceData ?
                         resourceData?.referenceIdType === "Quotes" ? <QuoteSupplierPrice quoteData={resourceData} openAuthId={id} />
-                            : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                            : resourceData?.referenceIdType === "Quotation" ? <QuotationSupplierPrice quotationData={resourceData} openAuthId={id} />
+                                : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
                         : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
             }
 
