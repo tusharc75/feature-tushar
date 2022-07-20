@@ -62,7 +62,7 @@ const AccordionDetails = withStyles((theme) => ({
 const PriceRequestDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose, quoteData, onSuccess } = props;
+    const { handleClose, quoteData, onSuccess, type } = props;
     const [productDataList, setproductDataList] = useState([]);
     const [response, setResponse] = useState({ open: false, type: "", id: "" });
     const [expandSupplierGrid, setExpandSupplierGrid] = useState(0);
@@ -79,7 +79,11 @@ const PriceRequestDialog = (props) => {
         {
             accessor: 'productName',
             Header: 'Product Name',
-            Cell: ({ row }) => (<p>{row?.original?.productDetail.productName}</p>),
+            Cell: ({ row }) => (
+                type === "Customer" ?
+                    <p>{row?.original?.productDetail.productName}</p>
+                    : <p>{row?.original?.productName}</p>
+            ),
         },
         {
             accessor: 'price',
@@ -89,12 +93,21 @@ const PriceRequestDialog = (props) => {
     ];
 
     const fetchProductGridData = () => {
+        if (type === "Customer") {
+            axiosInstance().get(`/quotation/price-request/${quoteData?._id}`).then(({ data: { data } }) => {
+                setproductDataList(data)
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+        }
+        if (type === "Supplier") {
+            axiosInstance().get(`/quotation/supplier-price-request/quotation-product-supplier-response/${quoteData?._id}`).then(({ data: { data } }) => {
+                setproductDataList(data)
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+        }
 
-        axiosInstance().get(`/quotation/price-request/${quoteData?._id}`).then(({ data: { data } }) => {
-            setproductDataList(data)
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
     };
 
     const handleAccept = (responseId) => {
@@ -123,7 +136,7 @@ const PriceRequestDialog = (props) => {
         aria-labelledby="customized-dialog-title"
         open={true}
     >
-        <CustomDialogHeader title={"View Quotation"} onClose={handleClose} showRequiredLabel={false} ></CustomDialogHeader>
+        <CustomDialogHeader title={`View ${type} Price`} onClose={handleClose} showRequiredLabel={false} ></CustomDialogHeader>
         {productDataList && productDataList.length !== 0 ?
             productDataList.map((data, index) => (
 
@@ -155,7 +168,7 @@ const PriceRequestDialog = (props) => {
                             <AccordionDetails>
                                 {expandSupplierGrid === index && (
                                     <>
-                                        {data?.status === "Request" && <Grid item xs={12} sm={12} md={12} container justify="flex-end">
+                                        { ((type === "Customer" && data?.status === "Request") || (type === "Supplier" && data?.status === "Submit")) && <Grid item xs={12} sm={12} md={12} container justify="flex-end">
                                             <Box ml={1} mt={1} >
                                                 <Button size="small"
                                                     color="primary"
