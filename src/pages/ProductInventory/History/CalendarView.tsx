@@ -85,8 +85,8 @@ const CalendarView = ({ product, warehouse }) => {
       views={{ month: true, week: true, day: true }}
       eventPropGetter={(obj) => ({
         style: {
-          backgroundColor: obj?.isFinalInventory ? '#329592' : obj.type === 'credit' ? '#90ee90' : '#FFCCCB',
-          color: obj?.isFinalInventory ? '#ffffff' : '#000011',
+          backgroundColor: obj?.isFinalInventory ? '#D6F6F6' : obj.type === 'credit' ? '#DBF8DB' : '#FAEAE9',
+          color: '#000011',
           borderRadius: '4px',
           border: 'none',
           padding: '8px 16px',
