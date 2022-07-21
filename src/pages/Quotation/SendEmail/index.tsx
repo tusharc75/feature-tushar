@@ -165,33 +165,29 @@ const SendEmail = ({ quotationData }) => {
             <Box display="flex" alignItems="center">
                 <Box display="flex">
                     <Box mx={1} />
-                    {permissions?.purchaseOrder?.isRead && !isMobile && (
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            type="button"
-                            size="small"
-                            startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
-                            disabled={loading === "view"}
-                            onClick={() => { handleViewPdf(false) }}
-                        >
-                            {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === "view" ? "Please wait..." : "Preview"}
-                        </Button>
-                    )}
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        type="button"
+                        size="small"
+                        startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
+                        disabled={loading === "view"}
+                        onClick={() => { handleViewPdf(false) }}
+                    >
+                        {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === "view" ? "Please wait..." : "Preview"}
+                    </Button>
                     <Box mx={1} />
-                    {permissions?.purchaseOrder?.isRead && (
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            type="button"
-                            size="small"
-                            startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
-                            disabled={loading === "download"}
-                            onClick={() => { handleViewPdf(true) }}
-                        >
-                            {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === "download" ? "Please wait..." : "Download"}
-                        </Button>
-                    )}
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        type="button"
+                        size="small"
+                        startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
+                        disabled={loading === "download"}
+                        onClick={() => { handleViewPdf(true) }}
+                    >
+                        {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === "download" ? "Please wait..." : "Download"}
+                    </Button>
                     {/* <Box mx={1} />
                     {permissions?.purchaseOrder?.isRead && <Button
                         variant="outlined"
