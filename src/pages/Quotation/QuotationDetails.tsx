@@ -21,19 +21,20 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Steps from '../RentalManagement/Steps';
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
-import { isMobile } from 'react-device-detect';
+import { isMobile } from "react-device-detect";
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GrStatusInfo } from 'react-icons/all';
+import { GrStatusInfo } from "react-icons/all";
 import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
 import Service from './Service';
-import QuotationViews from './RoadMapViews';
+import QuoteBuilder from './QuoteBuilder';
+import SendToCustomer from './SendToCustomer';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.quotation.title);
+  const renderedFrom = camelCase(routes?.quotation.title)
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -58,7 +59,7 @@ const QuotationDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
-  const [statusOptions, setStatusOptions] = useState([]);
+  const [statusOptions, setStatusOptions] = useState([])
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -92,11 +93,12 @@ const QuotationDetails = () => {
     }
   }, [isSmallScreen, tabValue]);
 
-  const handleStatusChange = (o) => {
+
+  const handleStatusChange = o => {
     if (o.optionValue && quotationData?.status !== o.optionValue) {
-      updateJobStatus(o.optionValue);
+      updateJobStatus(o.optionValue)
     }
-  };
+  }
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -115,29 +117,28 @@ const QuotationDetails = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(quotationProcessSteps[currentStep]);
+      updateProcessStatus(quotationProcessSteps[currentStep])
     }
   }, [currentStep]);
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${quotation.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+    axiosInstance().put(`${quotation.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  };
+  }
 
   const getRessourceFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Quotation');
-      response?.data?.data.some((o) => {
-        if (o?.fieldData?.fieldName === 'status') {
-          setStatusOptions([...o.fieldData.option]);
-          return true;
+      response?.data?.data.some(o => {
+        if (o?.fieldData?.fieldName === "status") {
+          setStatusOptions([...o.fieldData.option])
+          return true
         }
-      });
+      })
       setQuotationFields(response?.data?.data);
+
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -151,6 +152,7 @@ const QuotationDetails = () => {
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
       data = response?.data?.data;
 
+
       setCurrentStep(quotationProcessSteps.indexOf(data?.processStatus) !== -1 ? quotationProcessSteps.indexOf(data?.processStatus) : 0);
       setHeadingLabel(data.quotationNumber);
       setCustomizedRoutes([routes.quotation, { title: `${data.quotationNumber}` }]);
@@ -159,7 +161,7 @@ const QuotationDetails = () => {
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
 
-      setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
+      setAllowedToEdit(isAllowedToEdit && ["Invoiced", "Closed"].indexOf(data.status) === -1);
 
       if (isAllowedToEdit && openEdit === 'true') {
         setOpenUpdateDialog(true);
@@ -168,6 +170,7 @@ const QuotationDetails = () => {
         history.push({ search: params.toString() });
       }
       setLoading(false);
+
     } catch (error) {
       setLoading(false);
       toastConfig.setToastConfig(error);
@@ -193,23 +196,20 @@ const QuotationDetails = () => {
 
   const updateJobStatus = (status) => {
     // need to change the api
-    axiosInstance()
-      .patch(`${quotation.api}/status/${quotationData._id}`, { status: status })
-      .then(({ data: { data } }) => {
-        fetchQuotationData();
-        if (status === 'Invoiced') {
-          setCurrentStep(1);
-        }
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Status changed to ${status}`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().patch(`${quotation.api}/status/${quotationData._id}`, { status: status }).then(({ data: { data } }) => {
+      fetchQuotationData();
+      if (status === "Invoiced") {
+        setCurrentStep(1)
+      }
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `Status changed to ${status}`
       });
-  };
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
 
   return (
     <>
@@ -233,15 +233,13 @@ const QuotationDetails = () => {
                   </div>
                 ) : (
                   <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
-                    {permissions?.quotation?.isUpdate && allowedToEdit && (
+                    {(permissions?.quotation?.isUpdate && allowedToEdit) && (
                       <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                         Edit
                       </Button>
                     )}
-                    {permissions?.quotation?.isDelete && ['Invoiced', 'Closed'].indexOf(quotationData?.status) === -1 && (
-                      <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                    )}
-                    {permissions?.quotation?.isUpdate && ['Ready to Invoice', 'Invoiced'].includes(quotationData?.status) && (
+                    {permissions?.quotation?.isDelete && ["Invoiced", "Closed"].indexOf(quotationData?.status) === -1 && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                    {permissions?.quotation?.isUpdate && (["Ready to Invoice", "Invoiced"].includes(quotationData?.status)) && (
                       <>
                         <Button
                           variant="outlined"
@@ -249,9 +247,9 @@ const QuotationDetails = () => {
                           size="small"
                           onClick={openActions}
                           aria-controls="action-menu"
-                          endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                          endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
                         >
-                          {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                          {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
                         </Button>
                         <Menu
                           anchorEl={anchorEl}
@@ -263,21 +261,15 @@ const QuotationDetails = () => {
                           }}
                           id="action-menu"
                           open={Boolean(anchorEl)}
-                          onClose={closeActions}
-                        >
+                          onClose={closeActions}>
                           {statusOptions?.map((o, index) => {
-                            return (
-                              <MenuItem
-                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === quotationData?.status)}
-                                onClick={() => {
-                                  closeActions();
-                                  handleStatusChange(o);
-                                }}
-                                value={o}
-                              >
-                                {o?.optionLabel}
-                              </MenuItem>
-                            );
+                            return <MenuItem
+                              disabled={index <= statusOptions.findIndex(d => d.optionLabel === quotationData?.status)}
+                              onClick={() => {
+                                closeActions()
+                                handleStatusChange(o)
+                              }}
+                              value={o}>{o?.optionLabel}</MenuItem>
                           })}
                         </Menu>
                       </>
@@ -312,7 +304,7 @@ const QuotationDetails = () => {
                     className={'tabLayout'}
                     style={{
                       background: tabValue === 2 ? 'white' : '',
-                      color: '#163340'
+                      color: tabValue === 2 ? 'blue' : '#163340'
                     }}
                     label={
                       <div className="d-flex align-items-center tab-font">
@@ -321,20 +313,8 @@ const QuotationDetails = () => {
                     }
                     {...a11yProps(1)}
                   />
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 2 ? 'white' : '',
-                      color: tabValue === 2 ? 'blue' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Views
-                      </div>
-                    }
-                    {...a11yProps(2)}
-                  />
                   <div className={'uio'}> </div>
+
                 </Tabs>
                 <TabPanel value={tabValue} index={0}>
                   <Box>
@@ -357,7 +337,7 @@ const QuotationDetails = () => {
                       steps={quotationProcessSteps}
                       currentStep={currentStep}
                       setCurrentStep={setCurrentStep}
-                      isStepEnded={['Invoiced', 'Closed'].includes(quotationData?.status)}
+                      isStepEnded={["Invoiced", "Closed"].includes(quotationData?.status)}
                     />
                     {currentStep === 0 && quotationData && (
                       <Productpackage
@@ -368,41 +348,30 @@ const QuotationDetails = () => {
                         showActivity={showActivity}
                       />
                     )}
-                    {currentStep === 1 && quotationData && (
-                      // <AdditionalCost
-                      //   quotationData={quotationData}
-                      //   setNextStep={setNextStep}
-                      //   renderedFrom={`${renderedFrom}_grid-2`}
-                      // />
-                      <Service quotationData={quotationData} renderedFrom={`${renderedFrom}_grid-2`} setNextStep={setNextStep} />
-                    )}
-                    {/* {currentStep === 2 && quotationData && (
-                      <SerializedAsset
+                    {currentStep === 1 && quotationData &&
+                      <Service
+                        quotationData={quotationData}
+                        renderedFrom={`${renderedFrom}_grid-2`}
+                        setNextStep={setNextStep}
+                      />
+                    }
+                    {currentStep === 2 && quotationData && (
+                      <QuoteBuilder
                         quotationData={quotationData}
                         setNextStep={setNextStep}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
                         currencySymbol={currencySymbol}
-                        renderedFrom={`${renderedFrom}_grid-3`}  
-                      />
+                        showActivity={showActivity} />
                     )}
                     {currentStep === 3 && quotationData && (
-                      <LoadingTicket
-                        fetchQuotationData={fetchQuotationData}
+                      <SendToCustomer
                         quotationData={quotationData}
-                        currentStep={currentStep}
                         setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-4`}  
-                      />
-                    )} */}
+                        currencySymbol={currencySymbol}
+                        showActivity={showActivity} />
+                    )}
                   </Paper>
                 </TabPanel>
-                <TabPanel value={tabValue} index={2}>
-                  <Box>
-                    <QuotationViews quoteName={headingLabel} quoteId={id} status={'New'} />
-                  </Box>
-                </TabPanel>
+
               </Paper>
             </div>
             <Box my={1} />
@@ -473,7 +442,7 @@ const QuotationDetails = () => {
                                 access: true
                               }
                             ]}
-                            handleActivityRefresh={() => {}}
+                            handleActivityRefresh={() => { }}
                             emails={[]}
                           />
                         </div>
@@ -485,6 +454,7 @@ const QuotationDetails = () => {
             </HideWhenOffline>
           </div>
         </div>
+
       </Fragment>
       {showConfirmBox && (
         <ConfirmationDialog
