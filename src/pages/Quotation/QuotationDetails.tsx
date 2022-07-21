@@ -29,6 +29,8 @@ import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
 import Service from './Service';
+import QuoteBuilder from './QuoteBuilder';
+import SendToCustomer from './SendToCustomer';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -347,37 +349,26 @@ const QuotationDetails = () => {
                       />
                     )}
                     {currentStep === 1 && quotationData &&
-                      // <AdditionalCost
-                      //   quotationData={quotationData}
-                      //   setNextStep={setNextStep}
-                      //   renderedFrom={`${renderedFrom}_grid-2`}
-                      // />
                       <Service
                         quotationData={quotationData}
                         renderedFrom={`${renderedFrom}_grid-2`}
                         setNextStep={setNextStep}
                       />
                     }
-                    {/* {currentStep === 2 && quotationData && (
-                      <SerializedAsset
+                    {currentStep === 2 && quotationData && (
+                      <QuoteBuilder
                         quotationData={quotationData}
                         setNextStep={setNextStep}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
                         currencySymbol={currencySymbol}
-                        renderedFrom={`${renderedFrom}_grid-3`}  
-                      />
+                        showActivity={showActivity} />
                     )}
                     {currentStep === 3 && quotationData && (
-                      <LoadingTicket
-                        fetchQuotationData={fetchQuotationData}
+                      <SendToCustomer
                         quotationData={quotationData}
-                        currentStep={currentStep}
                         setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-4`}  
-                      />
-                    )} */}
+                        currencySymbol={currencySymbol}
+                        showActivity={showActivity} />
+                    )}
                   </Paper>
                 </TabPanel>
 

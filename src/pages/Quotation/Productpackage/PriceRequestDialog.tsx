@@ -111,24 +111,51 @@ const PriceRequestDialog = (props) => {
     };
 
     const handleAccept = (responseId) => {
-        axiosInstance().put(`/quotation/price-request/${quoteData?._id}/apply-price/${responseId}`).then(({ data: { data } }) => {
-            fetchProductGridData()
-            setResponse({ open: false, type: "", id: "" })
-            onSuccess()
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
+        if (type === "Customer") {
+            axiosInstance().put(`/quotation/price-request/${quoteData?._id}/apply-price/${responseId}`).then(({ data: { data } }) => {
+                fetchProductGridData()
+                setResponse({ open: false, type: "", id: "" })
+                onSuccess()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+        }
+        if (type === "Supplier") {
+            axiosInstance().put(`/quotation/supplier-price-request/apply-bulk-supplier-price`, {
+                "requestId": responseId,
+                "quotationId": quoteData?._id
+            }).then(({ data: { data } }) => {
+                fetchProductGridData()
+                setResponse({ open: false, type: "", id: "" })
+                onSuccess()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+        }
 
     };
 
     const handleReject = () => {
-        axiosInstance().put(`quotation/price-request/${quoteData?._id}/reject-price/${response.id}`, { "responseComment": comment }).then(({ data: { data } }) => {
-            fetchProductGridData()
-            setResponse({ open: false, type: "", id: "" })
-            onSuccess()
-        }).catch((error) => {
-            toastConfig.setToastConfig(error);
-        });
+        if (type === "Customer") {
+            axiosInstance().put(`quotation/price-request/${quoteData?._id}/reject-price/${response.id}`, { "responseComment": comment }).then(({ data: { data } }) => {
+                fetchProductGridData()
+                setResponse({ open: false, type: "", id: "" })
+                onSuccess()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+        }
+
+        if (type === "Supplier") {
+            axiosInstance().put(`/quotation/supplier-price-request/apply-reject/${quoteData?._id}/${response.id}`, { "body": comment }).then(({ data: { data } }) => {
+                fetchProductGridData()
+                setResponse({ open: false, type: "", id: "" })
+                onSuccess()
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
+            });
+
+        }
     }
     return (<Dialog
         fullScreen={true}
@@ -168,7 +195,7 @@ const PriceRequestDialog = (props) => {
                             <AccordionDetails>
                                 {expandSupplierGrid === index && (
                                     <>
-                                        { ((type === "Customer" && data?.status === "Request") || (type === "Supplier" && data?.status === "Submit")) && <Grid item xs={12} sm={12} md={12} container justify="flex-end">
+                                        {((type === "Customer" && data?.status === "Request") || (type === "Supplier" && data?.status === "Submit")) && <Grid item xs={12} sm={12} md={12} container justify="flex-end">
                                             <Box ml={1} mt={1} >
                                                 <Button size="small"
                                                     color="primary"
