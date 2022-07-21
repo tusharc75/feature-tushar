@@ -94,14 +94,14 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
         }
         const updatedFilters = [];
-        if (type === "package") {
-            updatedFilters.push({ field: 'packageType', term: 'product' })
-        }
-        if (type === "product") {
-            if (refrenceType !== "purchaseOrder") {
-                updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
-            }
-        }
+        // if (type === "package") {
+        //     updatedFilters.push({ field: 'packageType', term: 'product' })
+        // }
+        // if (type === "product") {
+        //     if (refrenceType !== "purchaseOrder") {
+        //         updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
+        //     }
+        // }
         if (!isObjectEmpty(filters)) {
             Object.keys(filters).forEach(field => {
                 updatedFilters.push({

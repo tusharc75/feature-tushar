@@ -255,9 +255,9 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                 _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
                 _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
             })
-            if (subRows.length === 0) {
-                parent.isValid = false
-            }
+            // if (subRows.length === 0) {
+            //     parent.isValid = false
+            // }
             parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
             parent.subRows = subRows
         });
