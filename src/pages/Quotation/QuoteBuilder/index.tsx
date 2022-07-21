@@ -44,17 +44,12 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             width: 300,
             Cell: ({ row }) => (
                 <div style={{ display: "flex", alignItems: 'center' }}>
-                    {<p
-                        onClick={() => {
-                        }}
-                        className="link text-truncate"
-                        title={row.original.detail}
-                    >
+                    {<p className="text-truncate" title={row.original.detail} >
                         {row.original.detail}
                     </p>}
                     {row.original?.parentId === null &&
                         <Box ml={1} className="d-flex align-items-center">
-                            <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
+                            <span>({row.original?.subRows?.length})</span>
                         </Box>
                     }
                     <Chip
@@ -64,6 +59,12 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
                         color="primary"
                     />
                 </div>
+            )
+        }, {
+            accessor: "leadTime",
+            Header: "Lead Time (Days)",
+            Cell: ({ row }) => (
+                row.original["leadTime"] ? <p>{row.original["leadTime"]}</p> : 0
             )
         }]
         data.forEach(element => {
@@ -178,6 +179,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
             parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
+            parent.leadTime = `${parent.type === "product" ? parent.productDetail?.leadTimeinDays || 0 : parent.packageDetail?.leadTimeinDays || 0}`
             parent.qtyDisplay = parent.qty;
             parent.isValid = parent["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -186,6 +188,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             const subRows: any = data.material.filter((e) => e.parentId === parent._id);
             subRows.forEach((_subRow, j) => {
                 _subRow.detail = `${_subRow.type === "product" ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`
+                _subRow.leadTime = `${_subRow.type === "product" ? _subRow.productDetail?.leadTimeinDays || 0 : _subRow?.serviceDetail?.leadTimeinDays || 0}`
                 _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`
                 _subRow.isValid = _subRow["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
                 _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
