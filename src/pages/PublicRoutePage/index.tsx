@@ -49,6 +49,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PublicRoutePage = () => {
+
     const { id } = useParams();
     const toastConfig = useContext(CustomToastContext);
     const classes = useStyles();
@@ -107,19 +108,14 @@ const PublicRoutePage = () => {
             });
     };
 
+    useEffect(() => {
+        document.title = "Equipt Supplier Portal"
+    }, []);
 
     return (
         <>
-
-            {/* <AppBar position="fixed" className={classes.appBar} color="primary">
-                <Toolbar className={classes.toolbar}>
-                    <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-                        <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
-                    </Box>
-                </Toolbar>
-            </AppBar> */}
             <Grid container className={classes.header}>
-                <Grid item xs={12} md={1} sm={2}>
+                <Grid item container xs={6} md={6} sm={6} justify={"flex-start"}>
                     <img
                         className={classes.logo}
                         src={SVG('LogoNew')}
@@ -127,21 +123,21 @@ const PublicRoutePage = () => {
                         title="eQuipt Logo"
                     />
                 </Grid>
-                <Grid item xs={6} md={2} sm={2} className="pull-right">
+                <Grid item container xs={6} md={6} sm={6} justify={"flex-end"}>
+                    <h2 style={{ paddingTop: "10px", paddingRight: "10px", color: "white", textAlign: "right" }}>
+                        Supplier Portal
+                    </h2>
                 </Grid>
             </Grid>
             {passwordVerification ?
-
                 <Box style={{ padding: "10px", display: "flex", justifyContent: "center" }}>
                     <Box style={{ marginTop: "50px", width: "400px" }} boxShadow={3}>
-
                         <Grid spacing={1} style={{ padding: "10px", display: "flex", justifyContent: "center" }} container>
                             <Grid item xs={12} sm={12} md={12} >
                                 <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={"Authentication Required"}>
                                     Authentication Required
                                 </h1>
                             </Grid>
-
                             <Grid item xs={10} sm={10} md={10} >
                                 <TextField
                                     id="outlined-full-width"
