@@ -401,7 +401,7 @@ const QuotationDetails = () => {
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
                   <Box>
-                    <RoadmapViews quoteName={headingLabel} quoteId={quotationData?._id} status={'New'} />
+                    <RoadmapViews quoteName={headingLabel} quoteId={id} status={'New'} />
                   </Box>
                 </TabPanel>
               </Paper>

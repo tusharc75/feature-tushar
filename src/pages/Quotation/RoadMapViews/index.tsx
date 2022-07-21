@@ -107,7 +107,7 @@ const QuotationViews = (props) => {
           id: `${item._id}`,
           sourcePosition: 'right',
           targetPosition: 'left',
-          type: 'default',
+          type: 'output',
           data: {
             ref_type: item.type,
             ref_id: item.materialId,
