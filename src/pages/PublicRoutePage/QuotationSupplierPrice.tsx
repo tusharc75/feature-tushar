@@ -306,9 +306,9 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
 
     const onCellValueChanged = (row) => {
         let tempFieldsNumber = []
-        let productIndex = productData.findIndex(d => d._id === row.data?._id)
+        let productIndex = productData.findIndex(d => d.uniqueId === row.data?.uniqueId)
         let tempData = {
-            "_id": row.data?._id,
+            "_id": row.data?.uniqueId,
             [`price_${quotationDetailsData?.currency.toLowerCase()}`]: parseInt(row?.data[row?.column?.colId] === "" ? 0 : row?.data[row?.column?.colId])
         }
         if (productIndex === -1) {

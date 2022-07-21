@@ -29,6 +29,7 @@ import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
 import Service from './Service';
+import QuoteBuilder from './QuoteBuilder';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -231,15 +232,12 @@ const QuotationDetails = () => {
                   </div>
                 ) : (
                   <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
-
                     {(permissions?.quotation?.isUpdate && allowedToEdit) && (
                       <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                         Edit
                       </Button>
                     )}
-
                     {permissions?.quotation?.isDelete && ["Invoiced", "Closed"].indexOf(quotationData?.status) === -1 && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-
                     {permissions?.quotation?.isUpdate && (["Ready to Invoice", "Invoiced"].includes(quotationData?.status)) && (
                       <>
                         <Button
@@ -277,8 +275,6 @@ const QuotationDetails = () => {
                     )}
                   </DetailsPageHeader>
                 )}
-
-
                 <Tabs
                   className="quote-tab"
                   value={tabValue}
@@ -319,7 +315,6 @@ const QuotationDetails = () => {
                   <div className={'uio'}> </div>
 
                 </Tabs>
-
                 <TabPanel value={tabValue} index={0}>
                   <Box>
                     {loading || !quotationFields.length ? (
@@ -333,7 +328,6 @@ const QuotationDetails = () => {
                     )}
                   </Box>
                 </TabPanel>
-
                 <TabPanel value={tabValue} index={1}>
                   <Paper>
                     <Steps
@@ -354,37 +348,34 @@ const QuotationDetails = () => {
                       />
                     )}
                     {currentStep === 1 && quotationData &&
-                      // <AdditionalCost
-                      //   quotationData={quotationData}
-                      //   setNextStep={setNextStep}
-                      //   renderedFrom={`${renderedFrom}_grid-2`}
-                      // />
                       <Service
                         quotationData={quotationData}
                         renderedFrom={`${renderedFrom}_grid-2`}
                         setNextStep={setNextStep}
                       />
                     }
-                    {/* {currentStep === 2 && quotationData && (
-                      <SerializedAsset
+                    {currentStep === 2 && quotationData && (
+                      <QuoteBuilder
                         quotationData={quotationData}
                         setNextStep={setNextStep}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
                         currencySymbol={currencySymbol}
-                        renderedFrom={`${renderedFrom}_grid-3`}  
-                      />
+                        showActivity={showActivity} />
                     )}
                     {currentStep === 3 && quotationData && (
-                      <LoadingTicket
-                        fetchQuotationData={fetchQuotationData}
+                      <QuoteBuilder
                         quotationData={quotationData}
-                        currentStep={currentStep}
                         setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-4`}  
-                      />
-                    )} */}
+                        currencySymbol={currencySymbol}
+                        sendToCustomer={true}
+                        showActivity={showActivity} />
+                    )}
+                    {currentStep === 4 && quotationData && (
+                      <QuoteBuilder
+                        quotationData={quotationData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        showActivity={showActivity} />
+                    )}
                   </Paper>
                 </TabPanel>
 
@@ -392,46 +383,8 @@ const QuotationDetails = () => {
             </div>
             <Box my={1} />
           </div>
-
           <div className="position-relative">
             <HideWhenOffline>
-              {/* {showActivity ?
-                <Paper>
-                  {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                    <IoIosArrowDropright className="icon" />
-                  </span>}
-                  <Grid container>
-                    <Grid item xs={12}>
-                      {rentalManagementData && (
-                        <div>
-                          <Activity
-                            resourceId={rentalManagementData._id}
-                            resource={rentalManagement.resource}
-                            restrictedAddActivities={
-                              permissions &&
-                                permissions["rentalManagement"] &&
-                                permissions["rentalManagement"].isUpdate
-                                ? []
-                                : ["Attachment", "Case"]
-                            }
-                            relatedTo={[
-                              {
-                                type: rentalManagement,
-                                referenceId: rentalManagementData._id,
-                                access: true,
-                              },
-                            ]}
-                            handleActivityRefresh={() => { }}
-                            emails={[]}
-                          />
-                        </div>
-                      )}
-                    </Grid>
-                  </Grid>
-                </Paper> :
-                !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropleft className="icon" />
-                </span>} */}
               <Paper>
                 {!isSmallScreen && (
                   <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
