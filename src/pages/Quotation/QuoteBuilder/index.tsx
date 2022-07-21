@@ -17,9 +17,9 @@ import NoDataCell from "src/components/Helpers/NoDataCell";
 import { dateFormat, formatAmountWithCurrency, quotation } from "src/constants/helpers";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
+import SendEmail from "../SendEmail"
 
-
-const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity, }) => {
+const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity, sendToCustomer = false }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -206,42 +206,33 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
     };
 
     return (<Fragment>
-        <Box display="flex" justifyContent="space-between" m={1}>
-            <Box display="flex" alignItems="center">
-                <span className="d-flex align-items-center justify-content-end ml-3">
-                    <Tooltip title="View">
+        <Box pb={2} display="flex" justifyContent="space-between">
+            <Box display="flex" >
+                <SendEmail quotationData={quotationData} />
+            </Box>
+            <Box display="flex">
+                {sendToCustomer ?
+                    <HtmlTooltip title={"Send to customer"}>
                         <Button
-                            onClick={() => {
-                                handleViewPdf(true, false,quotationData);
-                            }}
-                            variant="outlined"
-                            disabled={viewDownloadLoading}
-                            size="small"
-                            className="mr-1 setIconForMobile"
-                            startIcon={isMobile && !isTablet ? '' : <AiOutlineEye />}
+                            variant="contained"
                             color="primary"
-                        >
-                            {isMobile && !isTablet ? <AiOutlineEye size={20} /> : ''}
-                            {isMobile && !isTablet ? '' : 'View'}
-                        </Button>
-                    </Tooltip>
-                    <Tooltip title="Download">
-                        <Button
-                            disabled={viewDownloadLoading}
-                            onClick={() => {
-                                handleViewPdf(false, true,quotationData);
-                            }}
-                            variant="outlined"
                             size="small"
-                            className="mr-1 setIconForMobile"
-                            startIcon={isMobile && !isTablet ? '' : <FiDownloadCloud />}
-                            color="primary"
+                            onClick={() => {
+                                axiosInstance().put(`${quotation.api}/${quotationData?._id}/send-to-customer `)
+                                    .then(({ data }) => {
+                                        toastConfig.setToastConfig({
+                                            open: true,
+                                            type: "success",
+                                            message: "Send to customer Sucessfully",
+                                        });
+                                    }).catch((error) => {
+                                        toastConfig.setToastConfig(error)
+                                    });
+                            }}
                         >
-                            {isMobile && !isTablet ? <FiDownloadCloud size={20} /> : ''}
-                            {isMobile && !isTablet ? '' : 'Download'}
+                            Send to Customer
                         </Button>
-                    </Tooltip>
-                </span>
+                    </HtmlTooltip> : null}
             </Box>
         </Box>
         {columns && rowsData ?

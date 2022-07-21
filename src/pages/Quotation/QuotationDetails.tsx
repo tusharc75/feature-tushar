@@ -30,7 +30,6 @@ import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
 import Service from './Service';
 import QuoteBuilder from './QuoteBuilder';
-import SendToCustomer from './SendToCustomer';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -363,7 +362,15 @@ const QuotationDetails = () => {
                         showActivity={showActivity} />
                     )}
                     {currentStep === 3 && quotationData && (
-                      <SendToCustomer
+                      <QuoteBuilder
+                        quotationData={quotationData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        sendToCustomer={true}
+                        showActivity={showActivity} />
+                    )}
+                    {currentStep === 4 && quotationData && (
+                      <QuoteBuilder
                         quotationData={quotationData}
                         setNextStep={setNextStep}
                         currencySymbol={currencySymbol}
@@ -376,46 +383,8 @@ const QuotationDetails = () => {
             </div>
             <Box my={1} />
           </div>
-
           <div className="position-relative">
             <HideWhenOffline>
-              {/* {showActivity ?
-                <Paper>
-                  {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                    <IoIosArrowDropright className="icon" />
-                  </span>}
-                  <Grid container>
-                    <Grid item xs={12}>
-                      {rentalManagementData && (
-                        <div>
-                          <Activity
-                            resourceId={rentalManagementData._id}
-                            resource={rentalManagement.resource}
-                            restrictedAddActivities={
-                              permissions &&
-                                permissions["rentalManagement"] &&
-                                permissions["rentalManagement"].isUpdate
-                                ? []
-                                : ["Attachment", "Case"]
-                            }
-                            relatedTo={[
-                              {
-                                type: rentalManagement,
-                                referenceId: rentalManagementData._id,
-                                access: true,
-                              },
-                            ]}
-                            handleActivityRefresh={() => { }}
-                            emails={[]}
-                          />
-                        </div>
-                      )}
-                    </Grid>
-                  </Grid>
-                </Paper> :
-                !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropleft className="icon" />
-                </span>} */}
               <Paper>
                 {!isSmallScreen && (
                   <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
