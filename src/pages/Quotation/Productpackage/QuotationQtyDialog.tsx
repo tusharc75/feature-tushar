@@ -44,6 +44,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     isBulkedit
   }) => {
 
+  console.log(rowData)
+
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
@@ -105,7 +107,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
       if (rowData?.[`${rowData.type}Detail`]?.unit) {
         unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
       }
-      if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
+      if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       data.forEach(element => {

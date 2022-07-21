@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from "react";
-import { Grid, Box, Button, Paper, Typography, IconButton, CircularProgress, Tab, Tabs, ButtonGroup, Container, InputAdornment, useMediaQuery, Menu, MenuItem } from "@material-ui/core";
+import { Grid, Box, Button, Paper, Typography, IconButton, CircularProgress, Chip, Tab, Tabs, ButtonGroup, Container, InputAdornment, useMediaQuery, Menu, MenuItem } from "@material-ui/core";
 import axiosInstance from "../../../axios/axiosInstance";
 import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
@@ -23,6 +23,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import PriceRequestDialog from "./PriceRequestDialog";
 import { ExpandMore } from "@material-ui/icons";
 import AskSupplierPriceDialog from "./AskSupplierPriceDialog";
+import { capitalize } from "lodash";
 
 const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom }) => {
 
@@ -78,7 +79,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                     >
                         {row.original.detail}
                     </p>}
-                    {row.original?.type === 'package' &&
+                    {row.original?.parentId === null &&
                         <Box ml={1} className="d-flex align-items-center">
                             <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
                             <HtmlTooltip title="Add Product">
@@ -88,17 +89,19 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                             </HtmlTooltip>
                         </Box>
                     }
-                    <HtmlTooltip title="Details">
-                        <IconButton
-                            size="small"
-                            aria-label="Details"
-                            onClick={() => {
-                                window.open(`${row.original.type === "product" ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`);
-                            }}
-                        >
-                            <InfoIcon fontSize="small" />
-                        </IconButton>
-                    </HtmlTooltip>
+                    <Chip
+                        className="ml-1"
+                        label={`${capitalize(row.original.type)}`}
+                        size="small"
+                        color="primary"
+                        onClick={() => {
+                            window.open(
+                                `${row.original.type === 'product' ? routes.productDetail.path :
+                                    row.original.type === 'package' ? routes.packagesDetail.path :
+                                        routes.serviceMasterDetail.path}/${row.original.materialId}`
+                            );
+                        }}
+                    />
                 </div>
             )
         }]
@@ -243,21 +246,20 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
             parent.isValid = parent["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
             parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-            if (parent.type === "package") {
-                const subRows: any = data.material.filter((e) => e.parentId === parent._id);
-                subRows.forEach((_subRow, j) => {
-                    _subRow.detail = _subRow.productDetail?.productName
-                    _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
-                    _subRow.isValid = _subRow["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
-                    _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-                    _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-                })
-                if (subRows.length === 0) {
-                    parent.isValid = false
-                }
-                parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-                parent.subRows = subRows
+
+            const subRows: any = data.material.filter((e) => e.parentId === parent._id);
+            subRows.forEach((_subRow, j) => {
+                _subRow.detail = `${_subRow.type === "product" ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`
+                _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`
+                _subRow.isValid = _subRow["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
+                _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
+                _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
+            })
+            if (subRows.length === 0) {
+                parent.isValid = false
             }
+            parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+            parent.subRows = subRows
         });
         if (rows.filter(_rows => _rows.isValid === false).length > 0 || rows.length === 0) {
             setNextStep(false)
@@ -267,6 +269,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         setRowsData(rows);
         setSelectedProducts([])
     };
+
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -274,6 +277,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     const closeActions = () => {
         setAnchorEl(null);
     };
+
     const handleAdd = async (rows) => {
         setAddingProducts(true)
         const material: any = []
@@ -321,6 +325,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
             delete element.assetQty
             delete element.productDetail
             delete element.packageDetail
+            delete element.serviceDetail
             delete element.subRows
         });
         setUpdating(true);
