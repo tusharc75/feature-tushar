@@ -234,64 +234,66 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
         }
       }
       let rows: any = []
-      let priceData: any = []
+      //let priceData: any = []
 
-      if (values["unit"] || values["pricingMethod"]) {
-        const material: any = [];
-        selectedProducts.forEach(d => {
-          const element: any = {};
-          element.materialId = d.materialId;
-          element.type = d.type;
-          element.unit = values["unit"] || d.unit;
-          element.pricingMethod = values["pricingMethod"] || d.pricingMethod;
-          element.qty = d.qty;
-          material.push(element);
-        });
-        priceData = await calculatePrice(material);
-      }
+      // if (values["unit"] || values["pricingMethod"]) {
+      //   const material: any = [];
+      //   selectedProducts.forEach(d => {
+      //     const element: any = {};
+      //     element.materialId = d.materialId;
+      //     element.type = d.type;
+      //     element.unit = values["unit"] || d.unit;
+      //     element.pricingMethod = values["pricingMethod"] || d.pricingMethod;
+      //     element.qty = d.qty;
+      //     material.push(element);
+      //   });
+      //   priceData = await calculatePrice(material);
+      // }
 
       selectedProducts.forEach(element => {
 
-        const rateResult = priceData?.filter((e) => e.materialId === element.materialId &&
-          e.materialType === element.type && e.unit === (values["unit"] || element.unit) && e.pricingMethod === (values["pricingMethod"] || element.pricingMethod))
+        // const rateResult = priceData?.filter((e) => e.materialId === element.materialId &&
+        //   e.materialType === element.type && e.unit === (values["unit"] || element.unit) && e.pricingMethod === (values["pricingMethod"] || element.pricingMethod))
 
-        if (rateResult.length && rateResult[0].mrp) {
-          const priceFieldName = `price_${quotationData?.currency?.toLowerCase()}`
-          values[priceFieldName] = rateResult[0].mrp;
-        }
+        // if (rateResult.length && rateResult[0].mrp) {
+        //   const priceFieldName = `price_${quotationData?.currency?.toLowerCase()}`
+        //   values[priceFieldName] = rateResult[0].mrp;
+        // }
 
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-        if (element.type === "product" && element.parentId === null) {
-          rows.push({ ...element, ...calValues })
-        }
-        else if (element.type === "package") {
-          rows.push({ ...element, ...calValues })
-          const product = material.filter((e) => e.parentId === element._id)
-          resetValueZero(product)
-          rows = [...rows, ...product]
-        }
+        rows.push({ ...element, ...calValues })
+
+        // if (element.type === "product" && element.parentId === null) {
+        //   rows.push({ ...element, ...calValues })
+        // }
+        // else if (element.type === "package") {
+        //   rows.push({ ...element, ...calValues })
+        //   const product = material.filter((e) => e.parentId === element._id)
+        //   resetValueZero(product)
+        //   rows = [...rows, ...product]
+        // }
       });
 
       //Code for Bulk Update Only Product in Packages
-      let packageProducts = selectedProducts.filter((ele) => ele.parentId !== null && !selectedProducts.some(f => f._id === ele.parentId));
-      if (packageProducts.length) {
-        const packageIds = uniq(map(packageProducts, 'parentId'))
-        packageIds.forEach((_packageId) => {
-          const packages: any = material.filter((e) => e._id === _packageId)
-          const product: any = material.filter((e) => e.parentId === _packageId)
-          product.forEach((element) => {
-            if (packageProducts.filter((e) => element._id === e._id).length) {
-              const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-              rows.push({ ...element, ...calValues })
-              for (var key in calValues) {
-                element[key] = calValues[key];
-              }
-            }
-          })
-          sumOnParent(packages, product)
-          rows = [...rows, ...packages]
-        })
-      }
+      // let packageProducts = selectedProducts.filter((ele) => ele.parentId !== null && !selectedProducts.some(f => f._id === ele.parentId));
+      // if (packageProducts.length) {
+      //   const packageIds = uniq(map(packageProducts, 'parentId'))
+      //   packageIds.forEach((_packageId) => {
+      //     const packages: any = material.filter((e) => e._id === _packageId)
+      //     const product: any = material.filter((e) => e.parentId === _packageId)
+      //     product.forEach((element) => {
+      //       if (packageProducts.filter((e) => element._id === e._id).length) {
+      //         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
+      //         rows.push({ ...element, ...calValues })
+      //         for (var key in calValues) {
+      //           element[key] = calValues[key];
+      //         }
+      //       }
+      //     })
+      //     sumOnParent(packages, product)
+      //     rows = [...rows, ...packages]
+      //   })
+      // }
       handleSaveData(rows)
     }
     else {

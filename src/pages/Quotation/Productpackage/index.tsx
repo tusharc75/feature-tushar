@@ -104,6 +104,13 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                     />
                 </div>
             )
+        },
+        {
+            accessor: "leadTime",
+            Header: "Lead Time (Days)",
+            Cell: ({ row }) => (
+                row.original["leadTime"] ? <p>{row.original["leadTime"]}</p> : 0
+            )
         }]
         data.forEach(element => {
             if (element.fieldName === "price" && element.required) {
@@ -242,6 +249,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
             parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
+            parent.leadTime = `${parent.type === "product" ? parent.productDetail?.leadTimeinDays || 0 : parent.packageDetail?.leadTimeinDays || 0}`
             parent.qtyDisplay = parent.qty;
             parent.isValid = parent["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -250,6 +258,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
             const subRows: any = data.material.filter((e) => e.parentId === parent._id);
             subRows.forEach((_subRow, j) => {
                 _subRow.detail = `${_subRow.type === "product" ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`
+                _subRow.leadTime = `${_subRow.type === "product" ? _subRow.productDetail?.leadTimeinDays || 0 : _subRow?.serviceDetail?.leadTimeinDays || 0}`
                 _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`
                 _subRow.isValid = _subRow["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
                 _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
