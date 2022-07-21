@@ -11,7 +11,7 @@ import { FiDownloadCloud } from "react-icons/fi";
 import { AiFillEdit, AiOutlineEye, AiOutlineFileExcel, AiOutlineFilePdf } from "react-icons/ai";
 import { GiVintageRobot } from "react-icons/gi";
 import { utils } from "xlsx";
-import { exportToCSV, fetch_quotation_product_fields, handleViewPdf } from "src/components/Quotation/helper";
+import { fetch_quotation_product_fields, handleViewPdf } from "src/components/Quotation/helper";
 import moment from "moment";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import { dateFormat, formatAmountWithCurrency, quotation } from "src/constants/helpers";
@@ -212,7 +212,7 @@ const SendToCustomer = ({ quotationData, setNextStep, currencySymbol, showActivi
                     <Tooltip title="View">
                         <Button
                             onClick={() => {
-                                handleViewPdf(true, false);
+                                handleViewPdf(true, false, quotationData);
                             }}
                             variant="outlined"
                             disabled={viewDownloadLoading}
@@ -229,8 +229,7 @@ const SendToCustomer = ({ quotationData, setNextStep, currencySymbol, showActivi
                         <Button
                             disabled={viewDownloadLoading}
                             onClick={() => {
-                                handleViewPdf(false, true);
-                                exportToCSV();
+                                handleViewPdf(false, true, quotationData);
                             }}
                             variant="outlined"
                             size="small"
@@ -256,25 +255,25 @@ const SendToCustomer = ({ quotationData, setNextStep, currencySymbol, showActivi
                         </Button>
                 </HtmlTooltip> */}
                 <HtmlTooltip title={"Send to customer"}>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={() => {
-                                axiosInstance().put(`${quotation.api}/${quotationData?._id}/send-to-customer `)
-                                    .then(({ data }) => {
-                                        toastConfig.setToastConfig({
-                                            open: true,
-                                            type: "success",
-                                            message: data.message,
-                                        });
-                                    }).catch((error) => {
-                                        toastConfig.setToastConfig(error)
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                            axiosInstance().put(`${quotation.api}/${quotationData?._id}/send-to-customer `)
+                                .then(({ data }) => {
+                                    toastConfig.setToastConfig({
+                                        open: true,
+                                        type: "success",
+                                        message: data.message,
                                     });
-                            }}
-                        >
-                            Send to customer
-                        </Button>
+                                }).catch((error) => {
+                                    toastConfig.setToastConfig(error)
+                                });
+                        }}
+                    >
+                        Send to customer
+                    </Button>
                 </HtmlTooltip>
             </Box>
         </Box>

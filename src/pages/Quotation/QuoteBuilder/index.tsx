@@ -11,7 +11,7 @@ import { FiDownloadCloud } from "react-icons/fi";
 import { AiFillEdit, AiOutlineEye, AiOutlineFileExcel, AiOutlineFilePdf } from "react-icons/ai";
 import { GiVintageRobot } from "react-icons/gi";
 import { utils } from "xlsx";
-import { exportToCSV, fetch_quotation_product_fields, handleViewPdf } from "src/components/Quotation/helper";
+import { fetch_quotation_product_fields, handleViewPdf } from "src/components/Quotation/helper";
 import moment from "moment";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import { dateFormat, formatAmountWithCurrency, quotation } from "src/constants/helpers";
@@ -212,7 +212,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
                     <Tooltip title="View">
                         <Button
                             onClick={() => {
-                                handleViewPdf(true, false);
+                                handleViewPdf(true, false,quotationData);
                             }}
                             variant="outlined"
                             disabled={viewDownloadLoading}
@@ -229,8 +229,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
                         <Button
                             disabled={viewDownloadLoading}
                             onClick={() => {
-                                handleViewPdf(false, true);
-                                exportToCSV();
+                                handleViewPdf(false, true,quotationData);
                             }}
                             variant="outlined"
                             size="small"
