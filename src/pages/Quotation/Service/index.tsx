@@ -20,7 +20,7 @@ import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import { fetch_quotation_service_fields } from "src/components/Quotation/helper";
 
-const Product = ({ quotationData, setNextStep, renderedFrom }) => {
+const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();

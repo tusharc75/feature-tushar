@@ -31,6 +31,7 @@ import { camelCase } from 'lodash';
 import Service from './Service';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
+import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -62,6 +63,7 @@ const QuotationDetails = () => {
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -123,7 +125,7 @@ const QuotationDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${quotation.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -359,44 +361,55 @@ const QuotationDetails = () => {
                       currentStep={currentStep}
                       setCurrentStep={setCurrentStep}
                       isStepEnded={['Invoiced', 'Closed'].includes(quotationData?.status)}
+                      setStepFullScreen={() => setStepFullScreen(true)}
                     />
-                    {currentStep === 0 && quotationData && (
-                      <Productpackage
-                        quotationData={quotationData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        showActivity={showActivity}
-                      />
-                    )}
-                    {currentStep === 1 && quotationData && (
-                      <Service quotationData={quotationData} renderedFrom={`${renderedFrom}_grid-2`} setNextStep={setNextStep} />
-                    )}
-                    {currentStep === 2 && quotationData && (
-                      <QuoteBuilder
-                        quotationData={quotationData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        showActivity={showActivity}
-                      />
-                    )}
-                    {currentStep === 3 && quotationData && (
-                      <QuoteBuilder
-                        quotationData={quotationData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        sendToCustomer={true}
-                        showActivity={showActivity}
-                      />
-                    )}
-                    {currentStep === 4 && quotationData && (
-                      <QuoteBuilder
-                        quotationData={quotationData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        showActivity={showActivity}
-                      />
-                    )}
+                    <ContentFullScreen title={quotationProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                      {currentStep === 0 && quotationData && (
+                        <Productpackage
+                          quotationData={quotationData}
+                          setNextStep={setNextStep}
+                          currencySymbol={currencySymbol}
+                          renderedFrom={`${renderedFrom}_grid-1`}
+                          showActivity={showActivity}
+                          stepFullScreen={stepFullScreen}
+                        />
+                      )}
+                      {currentStep === 1 && quotationData && (
+                        <Service
+                          quotationData={quotationData}
+                          renderedFrom={`${renderedFrom}_grid-2`}
+                          setNextStep={setNextStep}
+                          stepFullScreen={stepFullScreen} />
+                      )}
+                      {currentStep === 2 && quotationData && (
+                        <QuoteBuilder
+                          quotationData={quotationData}
+                          setNextStep={setNextStep}
+                          currencySymbol={currencySymbol}
+                          showActivity={showActivity}
+                          stepFullScreen={stepFullScreen}
+                        />
+                      )}
+                      {currentStep === 3 && quotationData && (
+                        <QuoteBuilder
+                          quotationData={quotationData}
+                          setNextStep={setNextStep}
+                          currencySymbol={currencySymbol}
+                          sendToCustomer={true}
+                          showActivity={showActivity}
+                          stepFullScreen={stepFullScreen}
+                        />
+                      )}
+                      {currentStep === 4 && quotationData && (
+                        <QuoteBuilder
+                          quotationData={quotationData}
+                          setNextStep={setNextStep}
+                          currencySymbol={currencySymbol}
+                          showActivity={showActivity}
+                          stepFullScreen={stepFullScreen}
+                        />
+                      )}
+                    </ContentFullScreen>
                   </Paper>
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
@@ -436,7 +449,7 @@ const QuotationDetails = () => {
                                 access: true
                               }
                             ]}
-                            handleActivityRefresh={() => {}}
+                            handleActivityRefresh={() => { }}
                             emails={[]}
                           />
                         </div>

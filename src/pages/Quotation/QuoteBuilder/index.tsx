@@ -14,19 +14,19 @@ import { utils } from "xlsx";
 import { fetch_quotation_product_fields, handleViewPdf } from "src/components/Quotation/helper";
 import moment from "moment";
 import NoDataCell from "src/components/Helpers/NoDataCell";
-import { dateFormat, formatAmountWithCurrency, quotation } from "src/constants/helpers";
+import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation } from "src/constants/helpers";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
 import SendEmail from "../SendEmail"
 
-const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity, sendToCustomer = false }) => {
+const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity, sendToCustomer = false, stepFullScreen }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
     const [viewDownloadLoading, setViewDownloadLoading] = useState(false);
     const [isRateRequired, setIsRateRequired] = useState(false);
     const [columns, setColumns] = useState(null);
-    const [rowsData, setRowsData] = useState(null);
+    const [rowsData, setRowsData] = useState([]);
     const isSmallScreen = useMediaQuery('(max-width:1300px)');
     const isTabletScreen = useMediaQuery('(max-width:960px)');
 
@@ -44,17 +44,17 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             width: 300,
             Cell: ({ row }) => (
                 <div style={{ display: "flex", alignItems: 'center' }}>
-                    {<p className="text-truncate" title={row.original.detail} >
-                        {row.original.detail}
+                    {<p className="text-truncate" title={row.original?.detail} >
+                        {row.original?.detail}
                     </p>}
-                    {row.original?.parentId === null &&
+                    {row.original?.parentId === null && row.original?.type !=="Service" &&
                         <Box ml={1} className="d-flex align-items-center">
                             <span>({row.original?.subRows?.length})</span>
                         </Box>
                     }
                     <Chip
                         className="ml-1"
-                        label={`${capitalize(row.original.type)}`}
+                        label={`${capitalize(row.original?.type)}`}
                         size="small"
                         color="primary"
                     />
@@ -154,13 +154,13 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             }
             else if (element.accessor === "qtyDisplay") {
                 element["Footer"] = (info) => {
-                    const qtyTotal = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
+                    const qtyTotal = info.rows.filter(f => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor])).reduce((sum, row) => row?.values[element?.accessor] + sum, 0)
                     return <>{qtyTotal}</>
                 }
             }
             else if (element.accessor.includes("finalPrice")) {
                 element["Footer"] = (info) => {
-                    const total = info.rows.filter(f => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor])).reduce((sum, row) => row.values[element.accessor] + sum, 0)
+                    const total = info?.rows.filter(f => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor])).reduce((sum, row) => row?.values[element?.accessor] + sum, 0)
                     return <>{currencySymbol} {formatAmountWithCurrency(quotationData?.currency, total)?.amountWithouCurrencyCode ?? total}</>
                 }
             }
@@ -205,7 +205,22 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
         } else {
             setNextStep(true)
         }
-        setRowsData(rows);
+        const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}`)
+        let serviceRows = serviceResponse?.data?.data?.map((item) => {
+            let finalObject = prepareDataForGrid(item);
+            finalObject["detail"] = item?.serviceName;
+            finalObject["qtyDisplay"] = item?.qty;
+            finalObject["parentId"] = null;
+            finalObject["isValid"] = true;
+            finalObject["hideSelection"] = false;
+            finalObject["assetQty"] = 0;
+            finalObject["type"] = "Service";
+            let res: any = {
+                ...finalObject,
+            };
+            return res;
+        })
+        setRowsData([...rows, ...serviceRows]);
     };
 
     return (<Fragment>
@@ -236,6 +251,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
                             Send to Customer
                         </Button>
                     </HtmlTooltip> : null}
+                <Box p={1} />
             </Box>
         </Box>
         {columns && rowsData ?
@@ -244,16 +260,16 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
                     p="6px"
                     zIndex={5}
                     width={
-                        isTabletScreen
-                            ? "calc(100vw)"
-                            : isSmallScreen
-                                ? "calc(100vw)"
-                                : showActivity ? "100%" : "calc(100vw - 100px)"
+                        stepFullScreen ? '100%'
+                            : isTabletScreen ? "calc(100vw)"
+                                : isSmallScreen
+                                    ? "calc(100vw)"
+                                    : showActivity ? "100%" : "calc(100vw - 100px)"
                     }
-                    height="calc(100vh - 330px)"
+                    height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                 >
                     <CustomReactTable
-                        height="calc(100vh - 345px)"
+                        height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                         columns={columns}
                         data={rowsData}
                         setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
