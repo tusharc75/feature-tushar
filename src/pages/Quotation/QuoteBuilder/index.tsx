@@ -19,7 +19,7 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
 import SendEmail from "../SendEmail"
 
-const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity, sendToCustomer = false, stepFullScreen }) => {
+const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity, sendToCustomer = false, stepFullScreen, fetchQuotationData }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -47,7 +47,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
                     {<p className="text-truncate" title={row.original?.detail} >
                         {row.original?.detail}
                     </p>}
-                    {row.original?.parentId === null && row.original?.type !=="Service" &&
+                    {row.original?.parentId === null && row.original?.type !== "Service" &&
                         <Box ml={1} className="d-flex align-items-center">
                             <span>({row.original?.subRows?.length})</span>
                         </Box>
@@ -228,8 +228,14 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             <Box display="flex" >
                 <SendEmail quotationData={quotationData} />
             </Box>
+            <Box display="flex" >
+                <Typography variant="h6" color={quotationData?.subStatus === "Reject by Customer Waiting for New Price" ? "error" : "secondary"}
+                >{quotationData?.subStatus === "Waiting for Your Acceptance" ? "Waiting for Customer Response" :
+                    quotationData?.subStatus === "Reject by Customer Waiting for New Price" ? "Rejected by Customer" :
+                        quotationData?.subStatus === "Price Approved by Customer" ? "Approved by Customer" : ""}</Typography>
+            </Box>
             <Box display="flex">
-                {sendToCustomer ?
+                {sendToCustomer && !["Waiting for Your Acceptance", "Price Approved by Customer"]?.includes(quotationData?.subStatus) ?
                     <HtmlTooltip title={"Send to customer"}>
                         <Button
                             variant="contained"
@@ -238,6 +244,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
                             onClick={() => {
                                 axiosInstance().put(`${quotation.api}/${quotationData?._id}/send-to-customer `)
                                     .then(({ data }) => {
+                                        fetchQuotationData()
                                         toastConfig.setToastConfig({
                                             open: true,
                                             type: "success",
