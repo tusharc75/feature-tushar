@@ -77,12 +77,12 @@ const PriceRequestDialog = (props) => {
 
     const columns: any = [
         {
-            accessor: 'productName',
-            Header: 'Product Name',
+            accessor: 'detail',
+            Header: 'Detail',
             Cell: ({ row }) => (
                 type === "Customer" ?
                     <p>{row?.original?.productDetail.productName}</p>
-                    : <p>{row?.original?.productName}</p>
+                    : <p>{row?.original?.productName ?? row?.original?.serviceName}</p>
             ),
         },
         {
