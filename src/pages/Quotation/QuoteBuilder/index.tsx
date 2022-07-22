@@ -19,7 +19,7 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
 import SendEmail from "../SendEmail"
 
-const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity, sendToCustomer = false }) => {
+const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity, sendToCustomer = false, stepFullScreen }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -236,6 +236,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
                             Send to Customer
                         </Button>
                     </HtmlTooltip> : null}
+                <Box p={1} />
             </Box>
         </Box>
         {columns && rowsData ?
@@ -244,16 +245,16 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
                     p="6px"
                     zIndex={5}
                     width={
-                        isTabletScreen
-                            ? "calc(100vw)"
-                            : isSmallScreen
-                                ? "calc(100vw)"
-                                : showActivity ? "100%" : "calc(100vw - 100px)"
+                        stepFullScreen ? '100%'
+                            : isTabletScreen ? "calc(100vw)"
+                                : isSmallScreen
+                                    ? "calc(100vw)"
+                                    : showActivity ? "100%" : "calc(100vw - 100px)"
                     }
-                    height="calc(100vh - 330px)"
+                    height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                 >
                     <CustomReactTable
-                        height="calc(100vh - 345px)"
+                        height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                         columns={columns}
                         data={rowsData}
                         setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
