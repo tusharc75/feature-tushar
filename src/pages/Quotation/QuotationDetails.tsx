@@ -388,6 +388,7 @@ const QuotationDetails = () => {
                           currencySymbol={currencySymbol}
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
+                          fetchQuotationData={fetchQuotationData}
                         />
                       )}
                       {currentStep === 3 && quotationData && (
@@ -398,6 +399,8 @@ const QuotationDetails = () => {
                           sendToCustomer={true}
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
+                          fetchQuotationData={fetchQuotationData}
+
                         />
                       )}
                       {currentStep === 4 && quotationData && (
@@ -407,6 +410,7 @@ const QuotationDetails = () => {
                           currencySymbol={currencySymbol}
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
+                          fetchQuotationData={fetchQuotationData}
                         />
                       )}
                     </ContentFullScreen>
