@@ -25,7 +25,7 @@ import { ExpandMore } from "@material-ui/icons";
 import AskSupplierPriceDialog from "./AskSupplierPriceDialog";
 import { capitalize } from "lodash";
 
-const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom }) => {
+const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -551,16 +551,16 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                     p="6px"
                     zIndex={5}
                     width={
-                        isTabletScreen
-                            ? "calc(100vw)"
-                            : isSmallScreen
-                                ? "calc(100vw)"
-                                : showActivity ? "100%" : "calc(100vw - 100px)"
+                        stepFullScreen ? '100%'
+                            : isTabletScreen ? "calc(100vw)"
+                                : isSmallScreen
+                                    ? "calc(100vw)"
+                                    : showActivity ? "100%" : "calc(100vw - 100px)"
                     }
-                    height="calc(100vh - 330px)"
+                    height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                 >
                     <CustomReactTable
-                        height="calc(100vh - 345px)"
+                        height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
                         columns={columns}
                         data={rowsData}
                         setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
