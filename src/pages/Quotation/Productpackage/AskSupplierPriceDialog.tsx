@@ -41,7 +41,7 @@ const AskSupplierPriceDialog = (props) => {
     const toastConfig = useContext(CustomToastContext);
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [contactId, setContactId] = useState([]);
-    const [selectedFields, setSelectedFields] = useState([]);
+    const [selectedFields, setSelectedFields] = useState(fields?.filter(d => d.sectionName === "Supplier Information" && d.type === "currencyAmount" && (d.formula === undefined || d.formula === null || d.formula === "")).map((d) => d?.fieldName));
 
     const getFileIconSrc = (file) => {
         let extension = file.substring(file.lastIndexOf(".")).toLowerCase();
