@@ -178,12 +178,7 @@ const RentalManagementViews = (props) => {
         if (item.type !== 'package') {
           productColSystem[item._id] = productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition;
         }
-        if (
-          item?.productDetail?.serializedProduct &&
-          !assetsInLoading[item?.materialId] &&
-          !assetsInReceiving[item?.materialId] &&
-          !assetsInReturn[item?.materialId]
-        )
+        if (!assetsInLoading[item?.materialId] && !assetsInReceiving[item?.materialId] && !assetsInReturn[item?.materialId])
           flow.push({
             id: `${item._id}`,
             sourcePosition: 'right',
