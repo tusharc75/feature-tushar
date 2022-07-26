@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
+import { useState, useEffect, useContext, Fragment, useMemo } from 'react';
+import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery, Menu, MenuItem, Dialog, Tooltip } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -11,7 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { quotation, defaultActivityShow, getUniqueCurrencies, ACTIVITY_RESOURCE, quotationProcessSteps } from '../../constants/helpers';
+import { quotation, defaultActivityShow, getUniqueCurrencies, ACTIVITY_RESOURCE, quotationProcessSteps, CustomDialogTransition, currencyCodeToSymbol } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
@@ -21,9 +21,9 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Steps from '../RentalManagement/Steps';
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GrStatusInfo, RiFlowChart } from 'react-icons/all';
+import { GiReceiveMoney, GrStatusInfo, RiFlowChart } from 'react-icons/all';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
@@ -32,6 +32,8 @@ import Service from './Service';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -64,6 +66,14 @@ const QuotationDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
+  const [redCard, setRedCard] = useState(false);
+  const [quotationSummary, setQuotationSummary] = useState({
+    totalProfit: null,
+    totalcost: null,
+    totalsale: null
+  });
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -76,6 +86,14 @@ const QuotationDetails = () => {
       'aria-controls': `main-tabpanel-${index}`
     };
   }
+
+  const defaultTotalValue = useMemo(() => {
+    let result = '0';
+    if (quotationData && quotationData?.currency) {
+      result = `${currencyCodeToSymbol(quotationData.currency)} 0`;
+    }
+    return result;
+  }, [quotationData]);
 
   // useEffect(() => {
   //   if (id) {
@@ -214,6 +232,12 @@ const QuotationDetails = () => {
       });
   };
 
+  const findProfitPercentage = (CP, Profit) => {
+    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, "") ?? 0)
+    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, "") ?? 0)
+    return (profit * 100 / parsedCP).toFixed(2);
+  }
+
   return (
     <>
       <Fragment>
@@ -236,15 +260,24 @@ const QuotationDetails = () => {
                   </div>
                 ) : (
                   <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
-                    {permissions?.quotation?.isUpdate && allowedToEdit && (
-                      <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                        Edit
-                      </Button>
+                    {(
+                      <Tooltip title="Quote Summary">
+                        <Button
+                          onClick={() => {
+                            setShowQuotationSummaryDialog(true);
+                          }}
+                          variant="outlined"
+                          size="small"
+                          className="mx-1"
+                          startIcon={<GiReceiveMoney />}
+                          color="primary"
+                        >
+                          {isMobile && !isTablet ? '' : 'Quotation Summary'}
+                        </Button>
+                      </Tooltip>
                     )}
-                    {permissions?.quotation?.isDelete && ['Invoiced', 'Closed'].indexOf(quotationData?.status) === -1 && (
-                      <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                    )}
-                    {permissions?.quotation?.isUpdate && ['Ready to Invoice', 'Invoiced'].includes(quotationData?.status) && (
+                    {/* {permissions?.quotation?.isUpdate && ['In-Progress'].includes(quotationData?.status) && ( */}
+                    {permissions?.quotation?.isUpdate && (
                       <>
                         <Button
                           variant="outlined"
@@ -271,7 +304,7 @@ const QuotationDetails = () => {
                           {statusOptions?.map((o, index) => {
                             return (
                               <MenuItem
-                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === quotationData?.status)}
+                                // disabled={index <= statusOptions.findIndex((d) => d.optionLabel === quotationData?.status)}
                                 onClick={() => {
                                   closeActions();
                                   handleStatusChange(o);
@@ -285,6 +318,16 @@ const QuotationDetails = () => {
                         </Menu>
                       </>
                     )}
+                    {permissions?.quotation?.isUpdate && allowedToEdit && (
+                      <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                        Edit
+                      </Button>
+                    )}
+                    {/* {permissions?.quotation?.isDelete && ['In-Progress', 'Closed'].indexOf(quotationData?.status) === -1 && ( */}
+                    {permissions?.quotation?.isDelete && (
+                      <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                    )}
+
                   </DetailsPageHeader>
                 )}
                 <Tabs
@@ -372,6 +415,7 @@ const QuotationDetails = () => {
                           renderedFrom={`${renderedFrom}_grid-1`}
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
+                          setQuotationSummary={setQuotationSummary}
                         />
                       )}
                       {currentStep === 1 && quotationData && (
@@ -389,6 +433,7 @@ const QuotationDetails = () => {
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
                           fetchQuotationData={fetchQuotationData}
+                          setQuotationSummary={setQuotationSummary}
                         />
                       )}
                       {currentStep === 3 && quotationData && (
@@ -400,7 +445,7 @@ const QuotationDetails = () => {
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
                           fetchQuotationData={fetchQuotationData}
-
+                          setQuotationSummary={setQuotationSummary}
                         />
                       )}
                       {currentStep === 4 && quotationData && (
@@ -411,6 +456,7 @@ const QuotationDetails = () => {
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
                           fetchQuotationData={fetchQuotationData}
+                          setQuotationSummary={setQuotationSummary}
                         />
                       )}
                     </ContentFullScreen>
@@ -491,8 +537,76 @@ const QuotationDetails = () => {
           }}
         />
       )}
+      {showQuotationSummaryDialog && (
+        <Dialog
+          open={showQuotationSummaryDialog}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="md"
+          onClose={() => {
+            setShowQuotationSummaryDialog(false);
+          }}
+          fullWidth
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+        >
+          <CustomDialogHeader
+            title="Quotation Summary"
+            onClose={() => {
+              setShowQuotationSummaryDialog(false);
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+            showRequiredLabel={false}
+          />
+          <CustomDialogContent>
+            <Grid item className="quoteHeader">
+              <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
+                <span className="quoteAmount" title={quotationSummary?.totalProfit?.fullFormatAmount}>
+                  {quotationSummary?.totalProfit?.fullFormatAmount ? quotationSummary?.totalProfit?.fullFormatAmount : defaultTotalValue} {quotationSummary?.totalcost?.fullFormatAmount ? `(${findProfitPercentage(quotationSummary?.totalcost, quotationSummary?.totalProfit)} %)` : ''}
+                </span>
+                <div className={'quoteBoxContent'}>
+                  <span className={'quoteDetailHeading'}>Total Profit </span>
+                </div>
+              </div>
+              <div className="quoteBox quoteCost">
+                <span className="quoteAmount" title={quotationSummary?.totalcost?.fullFormatAmount}>
+                  {quotationSummary?.totalcost?.fullFormatAmount ? quotationSummary?.totalcost?.fullFormatAmount : defaultTotalValue}
+                </span>
+                <div className={'quoteBoxContent'}>
+                  <span className={'quoteDetailHeading'}>Total Cost Price </span>
+                </div>
+              </div>
+              {redCard ? (
+                <div className="quoteBox quoteRed">
+                  <div className={'quoteBoxContent'}>
+                    {' '}
+                    <span>Total Selling Price </span>
+                  </div>
+                  <span className="quoteAmount" title={quotationSummary?.totalsale?.fullFormatAmount}>
+                    {quotationSummary?.totalsale?.fullFormatAmount ? quotationSummary?.totalsale?.fullFormatAmount : defaultTotalValue}
+                  </span>
+                </div>
+              ) : (
+                <div className="quoteBox quoteSale">
+                  <span className="quoteAmount" title={quotationSummary?.totalsale?.fullFormatAmount}>
+                    {quotationSummary?.totalsale?.fullFormatAmount ? quotationSummary?.totalsale?.fullFormatAmount : defaultTotalValue}
+                  </span>
+                  <div className={'quoteBoxContent'}>
+                    <span className={'quoteDetailHeading'}>Total Selling Price </span>
+                  </div>
+                </div>
+              )}
+            </Grid>
+          </CustomDialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
 
 export default QuotationDetails;
+
+
