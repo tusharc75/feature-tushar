@@ -19,7 +19,7 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
 import SendEmail from "../SendEmail"
 
-const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity, sendToCustomer = false, stepFullScreen, fetchQuotationData }) => {
+const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity, sendToCustomer = false, stepFullScreen, fetchQuotationData, setQuotationSummary }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -205,6 +205,14 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
         } else {
             setNextStep(true)
         }
+        const totalFinalPrice = rows.filter(f => f?.parentId === null && f?.hasOwnProperty("finalPrice_" + quotationData?.currency?.toLowerCase()) && !isNaN(f["finalPrice_" + quotationData?.currency?.toLowerCase()])).reduce((sum, row) => row["finalPrice_" + quotationData?.currency?.toLowerCase()] + sum, 0)
+        const totalSupplierPrice = rows.filter(f => f?.parentId === null && f?.hasOwnProperty("supplierPrice_" + quotationData?.currency?.toLowerCase()) && !isNaN(f["supplierPrice_" + quotationData?.currency?.toLowerCase()])).reduce((sum, row) => row["supplierPrice_" + quotationData?.currency?.toLowerCase()] + sum, 0)
+        setQuotationSummary({
+            totalProfit: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice - totalSupplierPrice),
+            totalcost: formatAmountWithCurrency(quotationData?.currency, totalSupplierPrice),
+            totalsale: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice)
+        });
+
         const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}`)
         let serviceRows = serviceResponse?.data?.data?.map((item) => {
             let finalObject = prepareDataForGrid(item);
