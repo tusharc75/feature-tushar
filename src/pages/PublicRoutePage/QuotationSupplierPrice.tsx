@@ -196,7 +196,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                 fields = [...fields, ...ele.fields]
             })
             setRequireFieldArray(data?.requiredFields)
-            GenrateColoum([...new Map(fields.map(item => [item["_id"], item])).values()], columns, rendererNames, data?.requiredFields, rows);
+            GenrateColoum([...new Map(fields.map(item => [item["_id"], item])).values()], columns, rendererNames, data?.requiredFields, rows, data?.quotation);
 
             let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
             tempFrameworkComponent = {
@@ -218,7 +218,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
     };
 
 
-    const GenrateColoum = (fields, column, rendererNames, requiredFields, rows) => {
+    const GenrateColoum = (fields, column, rendererNames, requiredFields, rows, quotation) => {
         let _fields = fields;
         let tempProductData = []
         _fields.forEach((ele) => {
@@ -278,16 +278,19 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                                     col.editable = true;
                                     rows.forEach(data => {
                                         if (data[fieldName]) {
-                                            let productIndex = tempProductData.findIndex(d => d.uniqueId === data?.uniqueId)
+                                            let productIndex = tempProductData.findIndex(d => d._id === data?.uniqueId)
                                             let tempData = {
-                                                "uniqueId": data?.uniqueId,
-                                                [fieldName]: parseInt(data[fieldName] === "" ? 0 : data[fieldName])
+                                                "_id": data?.uniqueId,
+                                                [fieldName]: parseInt(data[fieldName] === "" ? 0 : data[fieldName]),
+                                                [`price_${quotation?.currency.toLowerCase()}`]: parseInt(data[fieldName] === "" ? 0 : data[fieldName]),
+
                                             }
                                             if (productIndex === -1) {
                                                 tempProductData = [...tempProductData, tempData]
                                             }
                                             else {
                                                 tempProductData[productIndex][fieldName] = tempData[fieldName]
+                                                tempProductData[productIndex][`price_${quotation?.currency.toLowerCase()}`] = tempData[fieldName]
                                             }
                                         }
                                     })
@@ -320,7 +323,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
 
     const onCellValueChanged = (row) => {
         let tempFieldsNumber = []
-        let productIndex = productData.findIndex(d => d.uniqueId === row.data?.uniqueId)
+        let productIndex = productData.findIndex(d => d._id === row.data?.uniqueId)
         let tempData = {
             "_id": row.data?.uniqueId,
             [row?.column?.colId]: parseInt(row?.data[row?.column?.colId] === "" ? 0 : row?.data[row?.column?.colId]),
@@ -381,7 +384,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             let formData = new FormData();
             formData.append('file', file);
             axiosInstance()
-                .post(`/quotation-builder/price-request-import/${quotationData?.data?.requestId}`, formData, {
+                .post(`/quotation/supplier-price-request/price-request-import/${quotationData?.data?.requestId}`, formData, {
                     responseType: 'blob',
                     headers: { 'Content-Type': 'multipart/form-data' }
                 })
@@ -415,7 +418,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             message: `Your file will be downloaded/uploaded in a matter of seconds`
         });
         axiosInstance()
-            .get(`/quotation-builder/price-request-template/${quotationData?.data?.requestId}`, {
+            .get(`/quotation/supplier-price-request/price-request-template/${quotationData?.data?.requestId}`, {
                 responseType: 'arraybuffer'
             })
             .then((response) => {
