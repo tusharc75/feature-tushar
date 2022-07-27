@@ -615,8 +615,8 @@ const LeadTimeMaster = () => {
           onClose={() => setShowManageLeadTimeMasterDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={(data) => {
             fetchLeadTimeMasters();
-            history.push(`${routes.leadTimeMasterDetail.path}/${data._id}`);
             setShowManageLeadTimeMasterDialog({ open: false, isClone: false, idToClone: null });
+            history.push(`${routes.leadTimeMasterDetail.path}/${data._id}`);
           }}
         />
       )}
