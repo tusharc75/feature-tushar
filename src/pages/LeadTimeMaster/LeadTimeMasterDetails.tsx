@@ -11,33 +11,15 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import {
-  repairJob,
-  sidebarResource,
-  repairJobProcessSteps,
-  REPAIR_JOB_STATUS,
-  ACTIVITY_RESOURCE,
-  serializedAsset,
-  leadTimeMaster
-} from 'src/constants/helpers';
-import Activity from 'src/components/Activity';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import { sidebarResource, serializedAsset, leadTimeMaster } from 'src/constants/helpers';
 import ManageLeadTimeMaster from './ManageLeadTimeMaster';
 import queryString from 'query-string';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
-import TabPanel from 'src/components/TabPanel';
-import HideWhenOffline from 'src/components/HideWhenOffline';
+import { BiEdit } from 'react-icons/bi';
 import { defaultActivityShow } from 'src/constants/helpers';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
-import Steps from '../RentalManagement/Steps';
-import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from 'lodash';
-import { RiFlowChart } from 'react-icons/ri';
-import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
 import accountClass from '../Account/account.module.scss';
-import { InfoOutlined } from '@material-ui/icons';
 
 function a11yProps(index: any) {
   return {
@@ -65,24 +47,12 @@ const LeadTimeMasterDetails = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [lTMFields, setLTMFields] = useState([]);
 
-  const [showRepairJobCompleteConfirmationDialog, setShowRepairJobCompleteConfirmationDialog] = useState(false);
-
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [nextStep, setNextStep] = useState(true);
-  const [currentStep, setCurrentStep] = useState(null);
 
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
 
   const [locationKeys, setLocationKeys] = useState([]);
-  const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
-
-  const handleActivityHideShow = () => {
-    setActivityShow(!showActivity);
-  };
 
   useEffect(() => {
     return history.listen((location) => {
@@ -115,12 +85,6 @@ const LeadTimeMasterDetails = () => {
     fetchAssetStatusRights();
   }, []);
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 2) {
-      updateProcessStatus(repairJobProcessSteps[currentStep]);
-    }
-  }, [currentStep]);
-
   const getResourceFields = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.leadTimeMaster}`)
@@ -139,7 +103,6 @@ const LeadTimeMasterDetails = () => {
         if (data.data && data.data.length) {
           data.data.some((o) => {
             if (o?.fieldData?.fieldName === 'status') {
-              setAllowUpdateStatus(o?.isUpdate);
               return true;
             }
           });
@@ -153,12 +116,8 @@ const LeadTimeMasterDetails = () => {
       .get(`${leadTimeMaster.api}/${id}`)
       .then(({ data: { data } }) => {
         setLeadTimeMasterData({ ...data });
-        setCurrentStep(repairJobProcessSteps.indexOf(data?.processStatus) !== -1 ? repairJobProcessSteps.indexOf(data?.processStatus) : 0);
-
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        setAllowedToEdit(isAllowedToEdit);
-
-        if (permissions?.repairJob?.isUpdate && openEdit === 'true') {
+        if (permissions?.leadTimeMaster?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
           params.delete('openEdit');
@@ -187,21 +146,6 @@ const LeadTimeMasterDetails = () => {
       });
   };
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
-    history.push(`?tab=${newValue}`);
-    if (newValue === 0) {
-      fetchLeadTimeMasterData();
-    }
-  };
-
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
-  };
-
   useEffect(() => {
     if (isSmallScreen && tabValue === 0) {
       setActivityShow(true);
@@ -218,10 +162,10 @@ const LeadTimeMasterDetails = () => {
       <Grid container spacing={1} className="detail-container">
         <Grid item xs={12} sm={12} md={8}>
           <div>
-            <Paper>
+            <Paper style={{ height: '80vh' }}>
               {leadTimeMasterData ? (
                 <DetailsPageHeader heading={leadTimeMasterData?.leadTimeName} mainPoints={null} showHeading={true}>
-                  {permissions?.leadTimeMaster?.isUpdate && leadTimeMasterData?.status !== REPAIR_JOB_STATUS.completed && (
+                  {permissions?.leadTimeMaster?.isUpdate && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
@@ -238,43 +182,16 @@ const LeadTimeMasterDetails = () => {
               ) : (
                 <Skeleton variant="text" width="150px" height="40px" />
               )}
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 1 ? 'white' : '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <div className={'uio'}> </div>
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <Box>
-                  {leadTimeMasterData && lTMFields.length ? (
-                    <DetailsPage data={leadTimeMasterData} fields={lTMFields} />
-                  ) : (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  )}
-                </Box>
-              </TabPanel>
+              <Box>
+                {' '}
+                {leadTimeMasterData && lTMFields.length ? (
+                  <DetailsPage data={leadTimeMasterData} fields={lTMFields} />
+                ) : (
+                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                )}
+              </Box>
             </Paper>
           </div>
           <Box my={1} />
@@ -284,11 +201,25 @@ const LeadTimeMasterDetails = () => {
             <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
               <Box display={'flex'}>
                 <Box>
-                  <Typography variant="subtitle2">Items Detail</Typography>
+                  <Typography variant="subtitle2">Lead Time Master Steps</Typography>
                 </Box>
               </Box>
             </Box>
-            <Box>sdfsf</Box>
+            {leadTimeMasterData?.steps?.map((steps, index) => (
+              <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                <Grid container>
+                  <Grid item xs={2}>
+                    <Typography variant="body2">{index}</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">{steps?.leadTimeStatus || ''}</Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="body2">{steps?.days || 0} Days</Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            ))}
           </Paper>
         </Grid>
       </Grid>

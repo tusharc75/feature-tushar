@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, CircularProgress, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Button, CircularProgress, Grid, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import FormTypes from '../../components/Helpers/FormTypes';
@@ -12,7 +12,6 @@ import {
   CustomDialogTransition,
   getObjKeys,
   getObjKeysWithValues,
-  repairJob,
   setFieldsInAscendingOrder,
   yupSchema,
   leadTimeMaster
@@ -30,6 +29,10 @@ import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
 import ManageWarehouse from '../Warehouse/ManageWarehouse';
 import { isEqual } from 'lodash';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import { Autocomplete } from '@material-ui/lab';
+import React from 'react';
 
 const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClose, onSuccess, refrenceType = null, refrenceData = null }) => {
   const initialRender = useRef(true);
@@ -51,8 +54,9 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
   const [allFields, setAllFields] = useState([]);
   const [title, setTitle] = useState('');
   const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
-
+  const [leadTimeMasterSteps, setLeadTimeMasterSteps] = useState([]);
   const [disablePlantIfAssetAdded, setDisablePlantIfAssetAdded] = useState(true);
+  const [totalDays, setTotalDays] = useState(0);
 
   const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
 
@@ -75,6 +79,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
           axiosInstance()
             .get(`${leadTimeMaster.api}/` + leadTimeMasterId)
             .then(({ data: { data } }) => {
+              setLeadTimeMasterSteps(data?.steps || []);
               if (isClone) {
                 const { _id, brand, createdBy, history, leadTimeMasterName, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${leadTimeMasterName}`);
@@ -87,7 +92,6 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                 setAllFields(fieldsDataForCreate);
                 setLoading(false);
               } else {
-                console.log(data);
                 setTitle(`Editing - ${data?.leadTimeName}`);
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
@@ -125,6 +129,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
     setSubmitting(true);
     // values._id = leadTimeMasterId;
     if (!leadTimeMasterId) {
+      values.steps = leadTimeMasterSteps;
       axiosInstance()
         .post(`${leadTimeMaster.api}`, values)
         .then(({ data }) => {
@@ -142,6 +147,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
         });
     } else {
       values._id = leadTimeMasterId;
+      values.steps = leadTimeMasterSteps;
       axiosInstance()
         .put(`${leadTimeMaster.api}`, values)
         .then(({ data }) => {
@@ -170,6 +176,27 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
         inline: 'start'
       });
     }
+  };
+
+  const handleAddLTMSteps = () => {
+    setLeadTimeMasterSteps([...leadTimeMasterSteps, { leadTimeStatus: '', days: '' }]);
+  };
+
+  const handleRemoveLTMSteps = (index) => {
+    const data = leadTimeMasterSteps?.filter((e, i) => i !== index);
+    setLeadTimeMasterSteps(data);
+    setTotalDays(data?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
+  };
+  const handleOnDaysChangeValue = (index, value) => {
+    const data = [...leadTimeMasterSteps];
+    data[index].days = parseInt(value) ?? 0;
+    setLeadTimeMasterSteps(data);
+    setTotalDays(data?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
+  };
+  const handleOnLTMStatusChangeValue = (index, value) => {
+    const data = [...leadTimeMasterSteps];
+    data[index].leadTimeStatus = value;
+    setLeadTimeMasterSteps(data);
   };
 
   return (
@@ -241,141 +268,27 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field) => (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    {field.fieldName === 'startDate' ? (
-                                      <FormTypes
-                                        repairJobId={leadTimeMasterId}
-                                        {...field}
-                                        disabled={!leadTimeMasterId && field.disableOnEdit}
-                                        values={values}
-                                        fieldData={field}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        minDate={new Date()}
-                                      />
-                                    ) : field.fieldName === 'expectedCompletionDate' ? (
-                                      <FormTypes
-                                        repairJobId={leadTimeMasterId}
-                                        {...field}
-                                        disabled={!leadTimeMasterId && field.disableOnEdit}
-                                        values={values}
-                                        fieldData={field}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        minDate={values['startDate']}
-                                      />
-                                    ) : field.fieldName === 'plant' || field.fieldName === 'warehouse' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                        <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={permissions?.warehouse?.isCreate ? 11 : 11}
-                                            sm={permissions?.warehouse?.isCreate ? 11 : 11}
-                                            md={permissions?.warehouse?.isCreate ? 11 : 11}
-                                          >
-                                            <FormTypes
-                                              repairJobId={leadTimeMasterId}
-                                              {...field}
-                                              fieldData={field}
-                                              disabled={disablePlantIfAssetAdded || (!leadTimeMasterId && field.disableOnEdit)}
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={optionsPlantsEntity}
-                                              setFieldValue={(name, value) => {
-                                                setFieldValue(name, value);
-                                              }}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field?.isTooltip || false}
-                                              tooltipMessage={field?.tooltipMessage}
-                                              size="small"
-                                            />
-                                          </Grid>
-                                          {permissions?.warehouse?.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Create Plant" className="mt-1">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setShowAddWarehouseDialog(true);
-                                                  }}
-                                                  disabled={disablePlantIfAssetAdded || (!leadTimeMasterId && field.disableOnEdit)}
-                                                  size="small"
-                                                >
-                                                  <AddIcon
-                                                    color={
-                                                      disablePlantIfAssetAdded || (!leadTimeMasterId && field.disableOnEdit) ? 'disabled' : 'primary'
-                                                    }
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )}
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip className="mt-2" title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      </Grid>
-                                    ) : (
-                                      <FormTypes
-                                        repairJobId={leadTimeMasterId}
-                                        {...field}
-                                        disabled={(!leadTimeMasterId && field.disableOnEdit) || field.fieldName === 'leadTimeMasterName'}
-                                        values={values}
-                                        errors={errors}
-                                        fieldData={field}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                            : null
-                                        }
-                                      />
-                                    )}
+                                    <FormTypes
+                                      isNew={Boolean(leadTimeMasterId)}
+                                      {...field}
+                                      fieldData={field}
+                                      disabled={Boolean(leadTimeMasterId) && field.disableOnEdit && !isClone}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                    />
                                   </Grid>
                                 ))}
                               </Grid>
@@ -384,30 +297,102 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                         )
                       );
                     })}
-                  {showAddWarehouseDialog && (
-                    <ManageWarehouse
-                      open={showAddWarehouseDialog}
-                      close={() => setShowAddWarehouseDialog(false)}
-                      isClone={false}
-                      onSuccess={({ data }) => {
-                        if (data._id) {
-                          setShowAddWarehouseDialog(false);
-                          setOptionsPlantsEntity((prevState) => {
-                            return [
-                              ...prevState,
-                              {
-                                optionValue: data._id,
-                                optionLabel: data.warehouseName,
-                                order: optionsPlantsEntity.length,
-                                default: false
-                              }
-                            ];
-                          });
-                          setFieldValue('plant', data._id);
-                        }
-                      }}
-                    />
-                  )}
+                  <div className={'detail-box-content'}>
+                    <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Lead Time Master Steps</h2>
+                  </div>
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <Box
+                        style={{ maxHeight: '350px', overflow: 'auto' }}
+                        bgcolor="white"
+                        border={1}
+                        mt={2}
+                        mb={1}
+                        borderColor="grey.300"
+                        width={'100%'}
+                      >
+                        <Box p={1} bgcolor="grey.200">
+                          <Grid container xs={12}>
+                            <Grid item xs={6}>
+                              <Typography variant="body2">Lead Time Status</Typography>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Typography variant="body2">{leadTimeMasterSteps?.length && totalDays ? `${totalDays} Days` : 'Days'}</Typography>
+                            </Grid>
+                            <Grid item xs={2}>
+                              <Grid container justifyContent="flex-end">
+                                <IconButton
+                                  size="small"
+                                  aria-label="setting"
+                                  onClick={() => {
+                                    handleAddLTMSteps();
+                                  }}
+                                >
+                                  <AddCircleOutlineIcon fontSize="small" />
+                                </IconButton>
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        </Box>
+                        {leadTimeMasterSteps?.map((steps, index) => (
+                          <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                            <Grid container spacing={1}>
+                              <Grid item xs={6}>
+                                <Autocomplete
+                                  options={['fuck', 'u']}
+                                  getOptionLabel={(option) => option}
+                                  value={steps?.leadTimeStatus || ''}
+                                  onChange={(event: any, value) => {
+                                    handleOnLTMStatusChangeValue(index, value);
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Lead Time Status"
+                                      variant="outlined"
+                                      size="small"
+                                      fullWidth
+                                      InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                          <React.Fragment>
+                                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                            {params.InputProps.endAdornment}
+                                          </React.Fragment>
+                                        )
+                                      }}
+                                    />
+                                  )}
+                                />
+                              </Grid>
+                              <Grid item xs={4}>
+                                <TextField
+                                  id="Days-Field"
+                                  variant="outlined"
+                                  margin="dense"
+                                  name="Days"
+                                  label="Days"
+                                  type="number"
+                                  fullWidth
+                                  style={{ margin: 0 }}
+                                  value={steps?.days || ''}
+                                  onChange={(event) => handleOnDaysChangeValue(index, event.target.value)}
+                                />
+                              </Grid>
+                              <Grid item xs={2}>
+                                <Grid container justifyContent="flex-end">
+                                  <IconButton size="small" aria-label="setting" onClick={() => handleRemoveLTMSteps(index)}>
+                                    <RemoveCircleOutlineIcon fontSize="small" />
+                                  </IconButton>
+                                </Grid>
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Grid>
+                  </Grid>
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
