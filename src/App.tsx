@@ -145,6 +145,8 @@ import Quotation from './pages/Quotation';
 import QuotationDetails from './pages/Quotation/QuotationDetails';
 import ServiceMaster from './pages/ServiceMaster';
 import ServiceMasterDetailsPage from './pages/ServiceMaster/ServiceMasterDetailsPage';
+import LeadTimeMaster from './pages/LeadTimeMaster';
+import LeadTimeMasterDetails from './pages/LeadTimeMaster/LeadTimeMasterDetails';
 
 var notificationInterval: any = null;
 
@@ -768,6 +770,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.serviceMasterDetail.path}/:id`}>
               <ServiceMasterDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.leadTimeMaster.path}>
+              <LeadTimeMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.leadTimeMasterDetail.path}/:id`}>
+              <LeadTimeMasterDetails />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
