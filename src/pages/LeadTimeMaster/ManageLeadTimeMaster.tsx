@@ -21,13 +21,8 @@ import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import Skeleton from '@material-ui/lab/Skeleton/Skeleton';
 import { useHistory } from 'react-router-dom';
-import routes from '../../components/Helpers/Routes';
 import { FaDiceOne } from 'react-icons/fa';
-import moment from 'moment';
 import { useData } from '../../StateProvider/Provider';
-import AddIcon from '@material-ui/icons/AddCircle';
-import InfoIcon from '@material-ui/icons/Info';
-import ManageWarehouse from '../Warehouse/ManageWarehouse';
 import { isEqual } from 'lodash';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
@@ -35,30 +30,17 @@ import { Autocomplete } from '@material-ui/lab';
 import React from 'react';
 
 const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClose, onSuccess, refrenceType = null, refrenceData = null }) => {
-  const initialRender = useRef(true);
-
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { permissions, user, selectedEntity }
-  }: any = useData();
-
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
 
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allFields, setAllFields] = useState([]);
   const [title, setTitle] = useState('');
-  const [optionsPlantsEntity, setOptionsPlantsEntity] = useState([]);
   const [leadTimeMasterSteps, setLeadTimeMasterSteps] = useState([]);
-  const [disablePlantIfAssetAdded, setDisablePlantIfAssetAdded] = useState(true);
   const [totalDays, setTotalDays] = useState(0);
-
-  const [showAddWarehouseDialog, setShowAddWarehouseDialog] = useState(false);
 
   const ref = useRef(null);
 
@@ -72,9 +54,6 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-        const plantsOptions = data.find((obj) => ['plant', 'warehouse'].indexOf(obj?.fieldData.fieldName) > -1)?.fieldData?.option ?? [];
-        setOptionsPlantsEntity(plantsOptions);
-
         if (leadTimeMasterId) {
           axiosInstance()
             .get(`${leadTimeMaster.api}/` + leadTimeMasterId)
@@ -83,7 +62,6 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
               if (isClone) {
                 const { _id, brand, createdBy, history, leadTimeMasterName, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${leadTimeMasterName}`);
-                setDisablePlantIfAssetAdded(false);
                 rest.status = `New`;
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -198,6 +176,8 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
     data[index].leadTimeStatus = value;
     setLeadTimeMasterSteps(data);
   };
+
+  const dummyDropDown = "Hello World, This is only for testing purpose!! Don't offend ;)".split(' ');
 
   return (
     <Dialog
@@ -340,7 +320,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                             <Grid container spacing={1}>
                               <Grid item xs={6}>
                                 <Autocomplete
-                                  options={['fuck', 'u']}
+                                  options={dummyDropDown || []}
                                   getOptionLabel={(option) => option}
                                   value={steps?.leadTimeStatus || ''}
                                   onChange={(event: any, value) => {

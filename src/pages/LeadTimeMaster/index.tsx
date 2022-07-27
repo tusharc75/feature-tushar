@@ -1,8 +1,7 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
 import ManageLeadTimeMasterDialog from './ManageLeadTimeMaster';
 import {
@@ -76,9 +75,8 @@ const LeadTimeMaster = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [isAllChecked, setIsAllChecked] = useState(false);
   const [frameworkComponents, setFrameworkComponents] = useState({});
-  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
+  const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState([]);
   const pageTitle = camelCase(`${routes.leadTimeMaster.title}`);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;

@@ -21,13 +21,6 @@ import { camelCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
 import accountClass from '../Account/account.module.scss';
 
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
-
 const LeadTimeMasterDetails = () => {
   const renderedFrom = camelCase(routes?.leadTimeMasterDetail.title);
   const toastConfig = useContext(CustomToastContext);
@@ -50,7 +43,6 @@ const LeadTimeMasterDetails = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
 
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
 
   const [locationKeys, setLocationKeys] = useState([]);
 
@@ -145,14 +137,6 @@ const LeadTimeMasterDetails = () => {
         setShowConfirmBox(false);
       });
   };
-
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
 
   return (
     <>
