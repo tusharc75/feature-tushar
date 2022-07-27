@@ -174,6 +174,7 @@ const CycleCountPInventory = () => {
           allowSelection={false}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
+          isClientSideGrid={true}
         />
         {productDialog.open && (
           <Products
