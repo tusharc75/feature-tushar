@@ -88,7 +88,7 @@ function LeadTimeHeader(props) {
   return (
     <Grid className={styles.filter_side_container} container>
       <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
-        <Grid>
+        <Grid style={{ display: 'flex' }} alignItems={'center'}>
           {icon} <span className="listingHeader">{heading}</span>
         </Grid>
 
@@ -100,7 +100,6 @@ function LeadTimeHeader(props) {
                 id="demo-customized-button"
                 aria-controls="demo-customized-menu"
                 aria-haspopup="true"
-                // aria-expanded={open ? 'true' : undefined}
                 color="secondary"
                 variant="text"
                 disableElevation
@@ -147,23 +146,6 @@ function LeadTimeHeader(props) {
           </>
         )}
 
-        {options && (
-          <ToggleButtonGroup
-            size="small"
-            className="ml-2 align-items-center gap-1 layout-for-mobile "
-            value={options[selectedType - 1].key}
-            exclusive
-            onChange={handleFilter}
-          >
-            {options.map((k, index) => {
-              return (
-                <ToggleButton value={k.key} key={index}>
-                  {k.key}
-                </ToggleButton>
-              );
-            })}
-          </ToggleButtonGroup>
-        )}
         {children}
       </Grid>
       <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
