@@ -265,8 +265,12 @@ const Leads = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterLeads=${selectedType}`;
+
+    if (isExport) {
+      deepFilter = `filterLeads=${selectedType}`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -281,7 +285,7 @@ const Leads = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -289,7 +293,7 @@ const Leads = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
 
     return deepFilter;
@@ -581,6 +585,7 @@ const Leads = () => {
               if (gridApi) gridApi.deselectAll()
               else fetchLeads()
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

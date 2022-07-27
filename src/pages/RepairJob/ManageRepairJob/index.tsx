@@ -68,7 +68,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       const plantsOptions = data.find((obj) => ["plant", "warehouse"].indexOf(obj?.fieldData.fieldName) > -1)?.fieldData?.option ?? [];
-      setOptionsPlantsEntity(plantsOptions?.filter((a) => !a?.entity || a?.entity?.length === 0 || a?.entity?.includes(selectedEntity)));
+      setOptionsPlantsEntity(plantsOptions);
 
       if (repairJobId) {
         axiosInstance().get(`${repairJob.api}/` + repairJobId).then(({ data: { data } }) => {

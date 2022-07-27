@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase, startCase } from 'lodash';
 
-import { CHART_TYPES, FILTERS_OPTIONS, KPIListType, GRAPH_TYPES, kpiList, IFormDataType, defaultFormConfigs, statuses } from './builderHelpers';
+import { CHART_TYPES, FILTERS_OPTIONS, KPIListType, GRAPH_TYPES, IFormDataType, defaultFormConfigs, statuses } from './builderHelpers';
 import axiosInstance from 'src/axios/axiosInstance';
 
 const useClasses = makeStyles(() => ({
@@ -116,7 +116,9 @@ const Builder = (props: Props) => {
                 ...prevState,
                 chartType: val && val.hasOwnProperty('chartType') ? startCase(val?.chartType[0]) : '',
                 graphType: val?.custom ? 'Custom' : val && val.hasOwnProperty('graphType') ? startCase(val?.graphType[0]) : '',
-                chartTitle: val?.name || ''
+                chartTitle: val?.name || '',
+                hasFilters: val?.filters?.length > 0 ? true : false,
+                filters: val?.filters || []
               }));
             }}
             getOptionLabel={(option) => option.name}
@@ -191,6 +193,19 @@ const Builder = (props: Props) => {
           />
         </Box>
 
+        {formValues.chartType === 'Bar' && (
+          <Box mt={2}>
+            <Autocomplete
+              size="small"
+              options={['x', 'y']}
+              value={formValues.axis}
+              onChange={(_, val) => handleChange('axis', val)}
+              getOptionLabel={(option) => option}
+              getOptionSelected={(option, value) => option === value}
+              renderInput={(params) => <TextField {...params} required label="Flow Axis" variant="outlined" />}
+            />
+          </Box>
+        )}
         {/* {isNaN(formValues.column) && (
           <Box mt={2}>
             <TextField required size="small" fullWidth variant="outlined" label={`Custom Column`} />
@@ -238,7 +253,8 @@ const Builder = (props: Props) => {
               multiple
               size="small"
               disableCloseOnSelect
-              options={FILTERS_OPTIONS}
+              options={formValues?.kpi?.filters || []}
+              disabled={!formValues.kpi?.name}
               value={formValues.filters}
               onChange={(_, val) => handleChange('filters', val)}
               getOptionLabel={(option) => option.title}

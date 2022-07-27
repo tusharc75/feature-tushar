@@ -20,7 +20,7 @@ import { FaUserCheck, FaUserAltSlash, FaSuitcase, IoCreateSharp, MdEmail } from 
 import AssignRolesDialog from "../../components/AssignRolesDialog/AssignRolesDialog";
 import CustomContainer from "../../components/CustomContainer";
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { userType, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, getLocalStorageArrayData } from './../../constants/helpers'
+import { userType, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage } from './../../constants/helpers'
 import ManageUserDialog from "./ManageUserDialog";
 import { useHistory } from "react-router-dom";
 import { camelCase, uniqBy } from "lodash";
@@ -93,7 +93,6 @@ const User: FC = () => {
 
   useEffect(() => {
     fetchFields()
-    fetchAllUsers()
     fetchLoggedInUserEntities()
     fetchLoggedInUserRole()
   }, [])
@@ -283,7 +282,7 @@ const User: FC = () => {
           term: filters[field].filter
         })
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`
     }
 
     if (sorting.length > 0) {
@@ -291,7 +290,7 @@ const User: FC = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     return deepFilter;
   };
@@ -346,6 +345,7 @@ const User: FC = () => {
         setAllUsers(tempAllUsers)
       })
   }
+
   const fetchUsers = () => {
     const queryString = getQueryString();
     dispatch({ type: "loading", loading: true });
@@ -405,6 +405,7 @@ const User: FC = () => {
         dispatch({ type: "loading", loading: false });
         toastConfig.setToastConfig(error);
       });
+    fetchAllUsers()
     // eslint-disable-next-line
   };
 
@@ -488,6 +489,7 @@ const User: FC = () => {
       axiosInstance()
         .put(`/user/remove`, { ids: [...recs] })
         .then(({ data }) => {
+          removeLocalStorage(localStorageSelectedRecords)
           toastConfig.setToastConfig({
             open: true,
             type: "success",
@@ -559,6 +561,24 @@ const User: FC = () => {
         .catch((error) => {
           toastConfig.setToastConfig(error);
           setIsConformDialogVisible(false);
+        });
+    }
+  }
+
+  const handleResetPassword = () => {
+    let recs = selectedRecords.map((o) => o?.email)
+    if (recs && recs.length > 0) {
+      axiosInstance()
+        .post(`/user/forget-passwords`, { "emails": [...recs] })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
     }
   }
@@ -743,6 +763,7 @@ const User: FC = () => {
               columns={columns}
               dispatch={dispatch}
               filters={filters}
+              handleResetPassword={handleResetPassword}
             />
           </div>
 
@@ -825,8 +846,8 @@ const User: FC = () => {
             open={isConfirmDialogVisible}
             message={
               unAssignLoading ?
-                `Are you sure you want to un-assign user from entity ${entityRoleRedirectDetails.name || ""}?`
-                : `Are you sure you want to delete user ${deleteRec.name || ""}?`}
+                `Are you sure you want to un-assign user from entity ${entityRoleRedirectDetails?.name || ""}?`
+                : `Are you sure you want to delete user ${deleteRec?.name || ""}?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
@@ -875,6 +896,7 @@ const User: FC = () => {
                 setShowDeleteDialog(false)
               }}
               handleDelete={() => {
+                removeLocalStorage(localStorageSelectedRecords)
                 setDeleteUser([])
                 setShowDeleteDialog(false)
                 fetchUsers()

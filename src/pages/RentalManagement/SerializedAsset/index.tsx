@@ -67,7 +67,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    var { fields: data } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     const coloum: any = [
       {
         accessor: 'srno',
@@ -186,6 +186,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
+          disableFilters: true,
           Cell: ({ row }) => (
             row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
           )
@@ -470,7 +471,6 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             message: data.message,
           });
         }).catch((error) => {
-          setAddSerializedAssetDialog({ open: false })
           setAdding(false)
           toastConfig.setToastConfig(error)
         });

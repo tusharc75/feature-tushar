@@ -133,6 +133,20 @@ import CageManagement from './pages/CageManagement';
 import SerializedAssetTest from './pages/SerializedAsset-test';
 import ProductAuction from './pages/productAuction';
 import ProductAuctionDetailsPage from './pages/productAuction/ProductAuctionDetailsPage';
+import ConvertInventory from './pages/ConvertInventory';
+import PublicRoutePage from './pages/PublicRoutePage';
+import ImportExport from './pages/ImportExport';
+import ScheduleReport from './pages/ScheduleReport';
+import InventoryCycle from './pages/InventoryCycle';
+import InventoryCycleDetailPage from './pages/InventoryCycle/InventoryCycleDetailPage';
+import CycleCountDetermination from './pages/CycleCountDetermination';
+import CycleCountPhysicalInventory from './pages/CycleCountPhysicalInventory';
+import Quotation from './pages/Quotation';
+import QuotationDetails from './pages/Quotation/QuotationDetails';
+import ServiceMaster from './pages/ServiceMaster';
+import ServiceMasterDetailsPage from './pages/ServiceMaster/ServiceMasterDetailsPage';
+import LeadTimeMaster from './pages/LeadTimeMaster';
+import LeadTimeMasterDetails from './pages/LeadTimeMaster/LeadTimeMasterDetails';
 
 var notificationInterval: any = null;
 
@@ -208,7 +222,7 @@ function App() {
   });
 
   useEffect(() => {
-    if (!mappedEntities) {
+    if (!mappedEntities && localStorage.getItem('token')) {
       axiosInstance()
         .get(`${entityApi}`)
         .then(({ data: { data } }) => {
@@ -344,7 +358,7 @@ function App() {
               severity="success"
             >
               <div style={{ display: 'flex', width: '100%', alignItems: 'start', justifyContent: 'space-between', gap: 20 }}>
-                <div style={{ flex: 1 }}>New Version of eQuip-T OM is available. Please refresh to get the latest changes.</div>
+                <div style={{ flex: 1 }}>New Version of Equipt Portal is available. Please refresh to get the latest changes.</div>
                 <Button className="snackbar-button" size="medium" variant="contained" color="secondary" onClick={updateServiceWorker}>
                   Refresh
                 </Button>
@@ -574,10 +588,10 @@ function App() {
               <QuoteDetail />
             </PrivateRoute>
             <PrivateRoute exact path={'/dashboards'}>
-              <NewDashboard />
-            </PrivateRoute>
-            <PrivateRoute exact path={'/new-dashboard'}>
               <NewDashboardTest />
+            </PrivateRoute>
+            <PrivateRoute exact path={'/old-dashboard'}>
+              <NewDashboard />
             </PrivateRoute>
             {/* <Route exact path={"/dashboards"}>
               <KpiDashboard />
@@ -670,8 +684,11 @@ function App() {
             <PrivateRoute exact path={`${routes.reports.path}/:resource`}>
               <Report />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.reports.path}/purchase-order/:type`}>
+            <PrivateRoute exact path={`${routes.reports.path}/purchase-order-type/:type`}>
               <PurchaseOrderReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`/schedule-report`}>
+              <ScheduleReport />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />
@@ -715,9 +732,6 @@ function App() {
             <Route exact path={'/customer-sign/:id'}>
               <CustomerSign />
             </Route>
-            <PrivateRoute exact path="/new-dashboard">
-              <NewDashboard />
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.cageManagement.path}`}>
               <CageManagement />
             </PrivateRoute>
@@ -727,6 +741,45 @@ function App() {
             <PrivateRoute exact path={`${routes.productAuctionDetail.path}/:id`}>
               <ProductAuctionDetailsPage />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.inventoryToAsset.path}>
+              <ConvertInventory />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.importExport.path}>
+              <ImportExport />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.inventoryCycle.path}>
+              <InventoryCycle />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.inventoryCycleDetail.path}/:id`}>
+              <InventoryCycleDetailPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.cycleCountDetermination.path}>
+              <CycleCountDetermination />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.cycleCountPhysicalInventory.path}>
+              <CycleCountPhysicalInventory />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.quotation.path}>
+              <Quotation />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.quotationDetail.path}/:id`}>
+              <QuotationDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.serviceMaster.path}>
+              <ServiceMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serviceMasterDetail.path}/:id`}>
+              <ServiceMasterDetailsPage />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.leadTimeMaster.path}>
+              <LeadTimeMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.leadTimeMasterDetail.path}/:id`}>
+              <LeadTimeMasterDetails />
+            </PrivateRoute>
+            <Route exact path={'/public/:id'}>
+              <PublicRoutePage />
+            </Route>
             <Route path="*" component={NotFound} />
             {/* <Route exact path="/crm/account" component={Account} /> */}
           </Switch>

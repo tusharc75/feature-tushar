@@ -85,6 +85,15 @@ const SalesOrderDetails = () => {
     setActivityShow(!showActivity);
   };
 
+  useEffect(() => {
+    if (isSmallScreen && tabValue === 0) {
+      setActivityShow(true);
+    } else {
+      setActivityShow(false);
+    }
+  }, [isSmallScreen, tabValue]);
+
+
   const handleStatusChange = o => {
     if (o.optionValue && salesOrderData?.status !== o.optionValue) {
       updateJobStatus(o.optionValue)
@@ -118,12 +127,6 @@ const SalesOrderDetails = () => {
         toastConfig.setToastConfig(error);
       });
   }
-
-  // const handleMainPoints = (data) => {
-  //   let mainPoint = {};
-  //   mainPoint['Sales Order No.'] = data?.salesOrderNo || '';
-  //   setMainPoints(mainPoint);
-  // };
 
   const getRessourceFields = async () => {
     try {
@@ -196,7 +199,7 @@ const SalesOrderDetails = () => {
     axiosInstance().patch(`${salesOrder.api}/status/${salesOrderData._id}`, { status: status }).then(({ data: { data } }) => {
       fetchSalesOrderData();
       if (status === "Invoiced") {
-        setCurrentStep(4)
+        setCurrentStep(1)
       }
       toastConfig.setToastConfig({
         open: true,
@@ -352,12 +355,12 @@ const SalesOrderDetails = () => {
                         showActivity={showActivity}
                       />
                     )}
-                    {/* {currentStep === 1 && salesOrderData &&
+                    {currentStep === 1 && salesOrderData &&
                       <AdditionalCost
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
-                      />} */}
+                      />}
                     {/* {currentStep === 2 && salesOrderData && (
                       <SerializedAsset
                         salesOrderData={salesOrderData}
@@ -378,7 +381,7 @@ const SalesOrderDetails = () => {
                         renderedFrom={`${renderedFrom}_grid-4`}  
                       />
                     )} */}
-                    {(currentStep === 1) && salesOrderData && (
+                    {(currentStep === 2) && salesOrderData && (
                       <Invoice
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}

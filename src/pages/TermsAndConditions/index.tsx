@@ -216,7 +216,7 @@ export default function TermsAndCondition(props) {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -224,7 +224,7 @@ export default function TermsAndCondition(props) {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
 
     return deepFilter;

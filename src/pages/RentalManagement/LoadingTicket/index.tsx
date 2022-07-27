@@ -95,7 +95,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     try {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
       if (gridApi) {
-        gridApi.deselectAll();
+        gridApi.setRowData([]);
       }
       var productAssets: any = [];
       var deliveryTicketList: any = [];
@@ -663,46 +663,45 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         />
       )
     }
-    {
-      showRemoveTicketDialog && (
-        <ConfirmationDialog
-          open={showRemoveTicketDialog}
-          message={`Are you sure you want to remove selected records from Loading Ticket?`}
-          onClose={() => {
-            setShowRemoveTicketDialog(false);
-          }}
-          onOk={() => {
-            setOkBtnLoading(true);
+    {showRemoveTicketDialog && (
+      <ConfirmationDialog
+        open={showRemoveTicketDialog}
+        message={`Are you sure you want to remove selected records from Loading Ticket?`}
+        onClose={() => {
+          setShowRemoveTicketDialog(false);
+        }}
+        onOk={() => {
+          setOkBtnLoading(true);
 
-            const groupByCalls = groupBy(selectedRecords, 'loadingTicketId');
-            let apiCalls = [];
+          const groupByCalls = groupBy(selectedRecords, 'loadingTicketId');
+          let apiCalls = [];
 
-            Object.keys(groupByCalls).forEach((key) => {
-              apiCalls.push(
-                axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map((m) => m._id) })
-              );
-            });
+          Object.keys(groupByCalls).forEach((key) => {
+            apiCalls.push(
+              axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map((m) => m._id) })
+            );
+          });
 
-            Promise.all(apiCalls)
-              .then(() => {
-                toastConfig.setToastConfig({
-                  open: true,
-                  type: 'success',
-                  message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)`
-                });
-                fetchRecords();
-              })
-              .catch((error) => {
-                toastConfig.setToastConfig(error);
-              })
-              .finally(() => {
-                setOkBtnLoading(false);
-                setShowRemoveTicketDialog(false);
+          Promise.all(apiCalls)
+            .then(() => {
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)`
               });
-          }}
-          okBtnLoading={okBtnLoading}
-        />
-      )
+              fetchRecords();
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            })
+            .finally(() => {
+              setOkBtnLoading(false);
+              setShowRemoveTicketDialog(false);
+            });
+        }}
+        okBtnLoading={okBtnLoading}
+      />
+    )
     }
     {
       statusToUpdate.open && (

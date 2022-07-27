@@ -56,8 +56,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
 
   const fetchFields = async () => {
     try {
-      let fields = []
-      fields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+      let { fields } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
       const resultCost = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
       fields = [...fields, ...resultCost]
       fields = [...new Map(fields.map(item => [item["fieldName"], item])).values()];
@@ -114,6 +113,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
           coloum.push({
             accessor: element.fieldName,
             Header: element.fieldLabel,
+            disableFilters: true,
             Cell: ({ row }) => (
               row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
             )

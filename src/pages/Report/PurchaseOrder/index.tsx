@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
-import { Grid, useTheme, useMediaQuery, Button, Box } from '@material-ui/core';
+import { Grid, useTheme, useMediaQuery, Button, Box, Tooltip, IconButton } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
@@ -15,22 +15,26 @@ import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridCompone
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from 'src/constants/helpers';
+import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, productInventory, isObjectEmpty } from 'src/constants/helpers';
 import Loader from 'src/components/Loader';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from '../ReportFilters';
+import { DateRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import HistoryIcon from '@material-ui/icons/History';
+import AverageCostHistory from '../AverageCostHistory';
 
 let cancelTokenSource = null;
 
 const Report = () => {
+  
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { permissions }
+    state: { permissions, selectedEntity }
   } = useData();
   const { type } = useParams();
   const history = useHistory();
@@ -63,6 +67,9 @@ const Report = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
+  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: "", productName: "" });
+  const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
+
   const fetchGridColumns = async () => {
     try {
       setLoadingColumns(true);
@@ -80,45 +87,63 @@ const Report = () => {
         let {
           data: { data: POProductFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order Product`);
+        let {
+          data: { data: productOption }
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        POFields.filter((field) => ['purchaseOrderNumber', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach(
-          (field: any) => {
-            if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
-              resourceFieldData.push(field);
-              columns.push({
-                field: 'purchaseOrder',
-                headerName: field?.fieldData?.fieldLabel,
-                show: true,
-                disabled: false,
-                cellRenderer: 'purchaseOrderRenderer'
-              });
-            }
-            if (field?.fieldData.fieldName === 'supplierAccount') {
-              resourceFieldData.push(field);
-              columns.push({
-                field: 'supplierAccount',
-                headerName: field?.fieldData?.fieldLabel,
-                show: true,
-                disabled: false,
-                cellRenderer: 'supplierRenderer'
-              });
-            }
-            if (field?.fieldData.fieldName === 'warehouse') {
-              resourceFieldData.push(field);
-              columns.push({
-                field: 'warehouse',
-                headerName: field?.fieldData?.fieldLabel,
-                show: true,
-                disabled: false,
-                cellRenderer: 'plantRenderer'
-              });
-            }
+        POFields.filter((field) =>
+          ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
+        ).forEach((field: any) => {
+          if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
+            resourceFieldData.push(field);
+            columns.push({
+              field: 'purchaseOrder',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'purchaseOrderRenderer'
+            });
           }
-        );
+          if (field?.fieldData.fieldName === 'supplierAccount') {
+            resourceFieldData.push(field);
+            columns.push({
+              field: 'supplierAccount',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'supplierRenderer'
+            });
+          }
+          if (field?.fieldData.fieldName === 'warehouse') {
+            resourceFieldData.push(field);
+            columns.push({
+              field: 'warehouse',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'plantRenderer'
+            });
+          }
+          if (field?.fieldData.fieldName === 'purchaseOrderDate') {
+            resourceFieldData.push(field);
+            columns.push({
+              field: 'purchaseOrderDate',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'dateRenderer'
+            });
+          }
+        });
+
         productFields
           .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
             if (field?.fieldData.fieldName === 'productName') {
+              resourceFieldData.push({
+                ...field,
+                fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+              });
               columns.push({
                 field: 'productName',
                 headerName: field?.fieldData?.fieldLabel,
@@ -153,17 +178,40 @@ const Report = () => {
           ...tempFrameworkComponent
         };
         setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
-        columns = [...columns];
+        columns = [
+          ...columns,
+          {
+            field: 'soldQty',
+            headerName: 'Sold Qty',
+            show: true,
+            disabled: false,
+            cellRenderer: 'commonRenderer'
+          }
+        ];
       }
 
       if (resourceCamelCase === 'productAverageCost') {
         let {
           data: { data: productFields }
         } = await axiosInstance().get(`/field?resource=Product`);
+        let {
+          data: { data: POFields }
+        } = await axiosInstance().get(`/field?resource=Purchase Order`);
+
+        POFields.filter((field) => ['purchaseOrderDate', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          if (field?.fieldData.fieldName === 'warehouse') {
+            resourceFieldData.push(field);
+          }
+          if (field?.fieldData.fieldName === 'purchaseOrderDate') {
+            resourceFieldData.push({
+              ...field,
+              fieldData: { ...field.fieldData, fieldLabel: 'Date', fieldName: 'date', type: 'date' }
+            });
+          }
+        });
 
         productFields.forEach((o: any) => {
           if (o?.fieldData.fieldName === 'productCategory') {
-            console.log(o);
             resourceFieldData.push(o);
           }
           let currentColumn = getColumnData('Product', o?.fieldData, routes['productDetail'].path);
@@ -187,24 +235,52 @@ const Report = () => {
             headerName: 'Quantity',
             show: true,
             disabled: false,
-            cellRenderer: 'commonRenderer'
+            filter: false,
+            sortable: false,
+            cellRenderer: 'numberRenderer'
           },
           {
             field: 'averagePrice',
-            headerName: 'Unit Price',
+            headerName: 'Average Unit Price',
             show: true,
             disabled: false,
-            cellRenderer: 'commonRenderer'
+            filter: false,
+            sortable: false,
+            cellRenderer: 'numberRenderer'
           },
           {
             field: 'totalPrice',
             headerName: 'Total',
             show: true,
             disabled: false,
-            cellRenderer: 'commonRenderer'
+            filter: false,
+            sortable: false,
+            cellRenderer: 'numberRenderer'
           }
         ];
+        if (productFields?.filter((e) => e.fieldData.fieldName === "listPrice")?.length) {
+          columns.push({
+            field: 'margin',
+            headerName: 'Margin',
+            show: true,
+            disabled: false,
+            filter: false,
+            sortable: false,
+            cellRenderer: 'numberRenderer'
+          })
+        }
       }
+
+      columns?.forEach((e) => {
+        if (["productName", "productDescription", "productCategory", "productCondition",
+          "totalQty", "averagePrice", "totalPrice", "margin"].includes(e.field)) {
+          e.show = true;
+        }
+        else {
+          e.show = false;
+        }
+      })
+
       setResourceColumns(resourceFieldData);
       setLoadingColumns(false);
       setColumns(columns);
@@ -225,7 +301,7 @@ const Report = () => {
     if (showGrid) {
       fetchResourceData();
     }
-  }, [page, sorting, search, limit, filters, pageSizes]);
+  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   React.useEffect(() => {
     // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
@@ -263,17 +339,37 @@ const Report = () => {
       {params.value}
     </Link>
   );
+
   const SupplierRenderer = (params: any) => (
     <Link className="link" title={params.value} to={`${routes.supplierAccountDetail.path}/${params.data.supplierAccountId}`}>
       {params.value}
     </Link>
   );
 
+  const ActionsRenderer = (params) => (
+    <>
+      <Tooltip title="View History">
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setShowPriceHistory({ open: true, product: params?.data?._id, productName: params?.data?.productName });
+          }}
+        >
+          <HistoryIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
+    </>
+  );
+
   const customFrameworkComponents = {
     purchaseOrderRenderer: PurchaseOrderRenderer,
     productRenderer: ProductRenderer,
     plantRenderer: PlantRenderer,
-    supplierRenderer: SupplierRenderer
+    supplierRenderer: SupplierRenderer,
+    actionsRenderer: ActionsRenderer,
+    numberRenderer: NumberRenderer,
+    dateRenderer: DateRenderer
   };
 
   /**
@@ -282,9 +378,7 @@ const Report = () => {
    */
   const fetchResourceData = () => {
     setShowGrid(true);
-
     let filterQuery = getFilter();
-
     if (cancelTokenSource) {
       cancelTokenSource.cancel();
     }
@@ -296,10 +390,9 @@ const Report = () => {
 
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? '/product-inventory/report/purchase-order-product-wise-report'
-            : 'product-inventory/report/purchase-order-price'
+        `${resourceCamelCase === 'purchaseOrderProduct'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report`
+          : `${productInventory.api}/report/purchase-order-price`
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -307,10 +400,12 @@ const Report = () => {
       )
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
-          let finalObject = prepareDataForGrid(u);
+          let finalObject: any = prepareDataForGrid(u);
+          if (finalObject?.listPrice) {
+            finalObject.margin = ((finalObject?.listPrice + (finalObject?.averagePrice || 0)) / finalObject?.listPrice)?.toFixed(2)
+          }
           return finalObject;
         });
-
         dispatch({ type: 'initialize', data: data, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -340,14 +435,24 @@ const Report = () => {
   };
 
   // Create and return query for filters
-  const getFilter = () => {
-    let filterQuery = `page=${page}&limit=${limit}&`;
+  const getFilter = (isExport = false) => {
+
+    setShowPricefilter({ warehouse: null, fromDate: null, toDate: null })
+
+    let filterQuery = ``;
+
+    if (!isExport) {
+      filterQuery = `page=${page}&limit=${limit}&`;
+    }
+
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
+
     if (search) {
-      filterQuery = `${filterQuery}search=${search}&`;
+      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
+
     if (selectedResources.length > 0) {
       let deepFilter = [];
       if (selectedData) {
@@ -356,6 +461,9 @@ const Report = () => {
         const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
 
         let filterById = idFilter.map((key) => {
+          if (key === "warehouse") {
+            setShowPricefilter((prevState) => ({ ...prevState, warehouse: options.map((d: any) => d.optionValue) }));
+          }
           const options = selectedData[key].value;
           return {
             field: key,
@@ -384,6 +492,12 @@ const Report = () => {
         const fields = Object.keys(betweenDate);
         fields.forEach((field) => {
           if (betweenDate[field]) {
+            if (field === "from_date") {
+              setShowPricefilter((prevState) => ({ ...prevState, fromDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+            }
+            if (field === "to_date") {
+              setShowPricefilter((prevState) => ({ ...prevState, toDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+            }
             deepFilter.push({
               field,
               term: moment(betweenDate[field]).format('MM/DD/YYYY')
@@ -393,7 +507,7 @@ const Report = () => {
       }
 
       if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${JSON.stringify(deepFilter)}&`;
+        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
       }
     }
     if (!isObjectEmpty(filters)) {
@@ -404,7 +518,7 @@ const Report = () => {
           term: filters[field].filter
         });
       });
-      filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
+      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&`;
     }
 
     if (statusPeriod && statusPeriodDate) {
@@ -426,18 +540,24 @@ const Report = () => {
       message: 'Please wait exporting data',
       type: 'info'
     });
+    let columns = [];
+    if (gridApi) {
+      console.log(gridApi)
+      columns = gridApi.columnController.displayedColumns;
+      columns = columns.map((col) => col.colId);
+    }
     setExporting(true);
-    let filterQuery = getFilter();
+    let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? '/product-inventory/report/purchase-order-product-wise-report/export'
-            : 'product-inventory/report/purchase-order-price/export'
-        }${filterQuery}`
-      ,{
-        responseType: 'arraybuffer'
-      })
+        `${resourceCamelCase === 'purchaseOrderProduct'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
+          : `${productInventory.api}/report/purchase-order-price/export`
+        }${filterQuery}&exportColumn=${JSON.stringify(columns)}`,
+        {
+          responseType: 'arraybuffer'
+        }
+      )
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
         downloadExcel(res.data, fileName);
@@ -458,7 +578,7 @@ const Report = () => {
     <MuiPickersUtilsProvider utils={MomentUtils}>
       <div>
         <Grid container className="headerbox">
-          <Grid item md={4} sm={11} xs={10}>
+          <Grid item xs={10}>
             <CustomBreadCrumbs
               routes={[
                 { title: 'Reports', path: '/reports' },
@@ -466,8 +586,7 @@ const Report = () => {
               ]}
             />
           </Grid>
-
-          <Grid item md={8} sm={1} xs={2}>
+          <Grid item xs={2}>
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
                 <Grid container justifyContent="flex-end">
@@ -479,7 +598,7 @@ const Report = () => {
                         className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
                         style={{ color: theme.palette.info.light }}
                       >
-                        Export All ({dataRows?.length || 0})
+                        Export All
                       </span>
                     </div>
                   )}
@@ -503,6 +622,7 @@ const Report = () => {
                           disableElevation
                           onClick={() => {
                             setShowGrid(false);
+                            dispatch({ type: 'onlyFilter', filters: {} });
                           }}
                           startIcon={<MdChevronLeft />}
                         >
@@ -522,7 +642,7 @@ const Report = () => {
                 resourceColumns={resourceColumns}
                 betweenDate={betweenDate}
                 setBetweenDate={setBetweenDate}
-                resource={`Purchase Order ${resourceStartCase}`}
+                resource={'Purchase Order Type'}
                 setSelectedData={setSelectedData}
                 loading={loading}
                 fetchReportData={fetchResourceData}
@@ -550,59 +670,26 @@ const Report = () => {
             ) : (
               <div>
                 {Object.keys(frameWorkComponent).length > 0 && columns ? (
-                  isSmall ? (
-                    <CustomSwipableList
-                      allowSelection={false}
-                      allowSwipe={false}
-                      permissions={permissions[resourceCamelCase]}
-                      primaryField={columns?.find((d) => d.primaryField)}
-                      onClick={(data) => {
-                        history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
-                      }}
-                      selectedRecords={[]}
-                      dataRows={dataRows}
-                      dispatch={dispatch}
-                      onEdit={() => {}}
-                      extraParamsToCheckDelete={false}
-                      rowCount={rowCount}
-                      page={page}
-                      loading={loading}
-                      chips={columns
-                        .filter((col) => col.hasOwnProperty('cellRendererParams'))
-                        .map((col) => ({
-                          field: col.field,
-                          label: col.headerName
-                        }))}
-                      additionalDetails={[]}
-                      owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
-                      onCreate={false}
-                      showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
-                      renderedFrom={routes.transferAsset?.title}
-                    />
-                  ) : (
-                    <CustomAgGrid
-                      setSelectedReportView={setSelectedReportView}
-                      selectedReportView={selectedReportView}
-                      columns={columns}
-                      dataRows={dataRows}
-                      frameworkComponents={frameWorkComponent}
-                      setGridApi={setGridApi}
-                      dispatch={dispatch}
-                      rowCount={rowCount}
-                      limit={limit}
-                      pageSizes={pageSizes}
-                      page={page}
-                      actionWidth={100}
-                      loading={loading}
-                      renderedFrom={renderedFrom}
-                      allowSelection={false}
-                      allowAction={false}
-                      refreshGrid={fetchResourceData}
-                      showOnlyShowFilteredRecordSwitch={false}
-                    />
-                  )
+                  <CustomAgGrid
+                    setSelectedReportView={setSelectedReportView}
+                    selectedReportView={selectedReportView}
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameWorkComponent}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={100}
+                    loading={loading}
+                    renderedFrom={renderedFrom}
+                    allowSelection={false}
+                    allowAction={resourceCamelCase === 'productAverageCost'}
+                    refreshGrid={fetchResourceData}
+                    showOnlyShowFilteredRecordSwitch={false}
+                  />
                 ) : (
                   <Loader text={'Loading Data...'} style={{ marginTop: '15vh' }} />
                 )}
@@ -611,6 +698,15 @@ const Report = () => {
           </>
         </CustomContainer>
       </div>
+      {showPriceHistory.open &&
+        <AverageCostHistory
+          product={showPriceHistory.product}
+          productName={showPriceHistory.productName}
+          handleClose={() => {
+            setShowPriceHistory({ open: false, product: '', productName: '' });
+          }}
+          showPricefilter={showPricefilter}
+        />}
     </MuiPickersUtilsProvider>
   );
 };

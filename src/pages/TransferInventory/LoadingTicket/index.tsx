@@ -40,20 +40,39 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
   const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
   const [downloadingFile, setDownlodingFile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [columns, setColumns] = useState(null)
+
+  useEffect(() => {
+    fetchFields();
+  }, []);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  const columns = [
-    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'assetNumber', primaryField: true, headerName: 'Asset Number', show: true, disabled: true, cellRenderer: 'inventoryRenderer' },
-    { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
-    { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
-  ];
+  const fetchFields = async () => {
+    const column = [];
+    const productResult = await axiosInstance().get('/field?resource=Product&view=true')
+    const productFields = productResult?.data?.data?.filter((e) => ["productName", "productNumber", "serializedProduct"].includes(e?.fieldData?.fieldName));
+    productFields?.forEach((e) => {
+      if (e?.fieldData?.fieldName === "productName") {
+        column.push({ field: "productName", primaryField: true, headerName: e?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: "productNameRenderer" })
+      }
+      if (e?.fieldData?.fieldName === "productNumber") {
+        column.push({ field: "productNumber", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      }
+      if (e?.fieldData?.fieldName === "serializedProduct") {
+        column.push({ field: "serializedProductShow", headerName: e?.fieldData?.fieldLabel, show: true, cellRenderer: "commonRenderer" })
+      }
+    })
+    const extracolumns = [
+      { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+      { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'serialNumberRenderer' },
+      { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
+      { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
+    ];
+    setColumns([...column, ...extracolumns])
+  }
 
   const TicketRenderer = (params) =>
     params?.value ? (
@@ -106,7 +125,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.transferInventory}&refrenceId=${transferInventoryData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
       );
 
-      const { assets, products } = productsData;
+      const { assets, products, serialNumber } = productsData;
       let rows = [];
 
       assets?.forEach((asset) => {
@@ -123,19 +142,21 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         obj['isChecked'] = false;
         rows.push(obj);
       });
-      products
-        ?.filter((p) => p.productDetail.serializedProduct === false)
-        ?.forEach((product) => {
-          let obj = { ...product };
-          obj['assetNumber'] = product.productDetail.productName;
-          obj['_id'] = product.product;
-          obj['qty'] = product.qty;
-          obj['type'] = 'Product';
-          obj['productName'] = product?.productDetail?.productName;
-          obj['productId'] = product?.product;
-          obj['isChecked'] = false;
-          rows.push(obj);
-        });
+
+      products?.forEach((product) => {
+        let obj = { ...product };
+        obj['productId'] = product?.product;
+        obj['_id'] = product.product;
+        obj['productName'] = product.productDetail.productName;
+        obj['productNumber'] = product.productDetail.productNumber;
+        obj['serializedProduct'] = product.productDetail.serializedProduct;
+        obj['serializedProductShow'] = product.productDetail.serializedProduct ? "Yes" : "No";
+        obj['qty'] = product.qty;
+        obj['type'] = 'Product';
+        obj['isChecked'] = false;
+        obj['serialNumber'] = serialNumber?.filter((e) => e.product === product?.product);
+        rows.push(obj);
+      });
 
       deliveryTicketList?.map((obj) => {
         rows.map((d, index) => {
@@ -170,7 +191,14 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
     }
   };
 
+  const SerialNumberRenderer = (params) => (
+    params?.data?.serialNumber?.length ?
+      params?.data?.serialNumber?.map((e) => e.serialNumber)?.toString() :
+      <NoDataCell />
+  );
+
   const frameworkComponents = {
+    serialNumberRenderer: SerialNumberRenderer,
     ticketRenderer: TicketRenderer,
     productNameRenderer: ProductNameRenderer,
     inventoryRenderer: InventoryRenderer,
@@ -387,6 +415,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
           products={selectedRecords?.filter((e) => e.type === 'Product')}
+          serialNumber={selectedRecords?.filter((e) => e.type === 'Product')?.map((e) => e?.serialNumber?.map((e) => e._id))?.flat()}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchProducts();

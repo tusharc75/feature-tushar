@@ -94,6 +94,7 @@ export default function NewCreateQuotePdfTemplate() {
 
   const typeOptions = [
     RESOURCE_LABEL.quoteBuilder,
+    RESOURCE_LABEL.quotation,
     RESOURCE_LABEL.rentalManagement,
     RESOURCE_LABEL.repairJob,
     RESOURCE_LABEL.purchaseOrder,

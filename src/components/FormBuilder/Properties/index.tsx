@@ -31,6 +31,8 @@ import FormTypes from '../../Helpers/FormTypes';
 import { camelCase } from 'lodash';
 import { checkFormula } from '../../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
+import { ResourceDropdown } from './resourceDropdown';
+
 import styles from '../Form.module.scss';
 
 const FieldSchema = object().shape({
@@ -234,6 +236,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.addAdditionalOption = values.addAdditionalOption;
             ele.lookup = values.lookup || false;
             ele.lookupResource = values.lookup ? values.lookupResource : '';
+            ele.entityWiseLookup = values.entityWiseLookup || false;
+
             ele.isDropdown = values.isDropdown || false;
 
             if (values.hasOwnProperty('isWarningTooltip')) {
@@ -992,23 +996,20 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Unique"
                       />
                     )}
-                    {initialValues.hasOwnProperty('primaryField') && (
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            name="primaryField"
-                            checked={values['primaryField']}
-                            onChange={(e) => {
-                              setFieldValue('primaryField', e.target.checked);
-                              handleValuesChange({ primaryField: e.target.checked });
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Primary Field"
-                      />
-                    )}
-
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="primaryField"
+                          checked={values['primaryField']}
+                          onChange={(e) => {
+                            setFieldValue('primaryField', e.target.checked);
+                            handleValuesChange({ primaryField: e.target.checked });
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Primary Field"
+                    />
                     {fieldData.type === 'imageUpload' && values['isDefaultValue'] ? (
                       <FormTypes
                         values={{ defaultValue: values['defaultValue'] }}
@@ -1037,32 +1038,39 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           {values['defaultValue']}
                         </Box>
                       </Box>
-                    ) : values['isDefaultValue'] ? (
-                      <Box display="block">
-                        <TextField
-                          inputRef={inputRef}
-                          variant="outlined"
-                          type="text"
-                          label="Default Value"
-                          required={true}
-                          multiline={fieldData.type === 'multiLine'}
-                          name="defaultValue"
-                          rows={4}
-                          fullWidth
-                          margin="dense"
-                          value={values['defaultValue']}
-                          error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
-                          helperText={touched['defaultValue'] && errors['defaultValue']}
-                          onChange={(e) => {
-                            setFieldValue('defaultValue', e.target.value.trimStart());
-                            handleValuesChange({ defaultValue: e.target.value.trimStart() });
-                          }}
-                          onKeyPress={(event) => {
-                            event.stopPropagation();
-                          }}
-                        />
-                      </Box>
-                    ) : null}
+                    ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['isDefaultValue'] && values['lookup'] ?
+                      <ResourceDropdown
+                        type={fieldData.type}
+                        lookupResource={values['lookupResource']}
+                        value={values['defaultValue']}
+                        setFieldValue={setFieldValue}
+                      />
+                      : values['isDefaultValue'] ? (
+                        <Box display="block">
+                          <TextField
+                            inputRef={inputRef}
+                            variant="outlined"
+                            type="text"
+                            label="Default Value"
+                            required={true}
+                            multiline={fieldData.type === 'multiLine'}
+                            name="defaultValue"
+                            rows={4}
+                            fullWidth
+                            margin="dense"
+                            value={values['defaultValue']}
+                            error={touched['defaultValue'] && Boolean(errors['defaultValue'])}
+                            helperText={touched['defaultValue'] && errors['defaultValue']}
+                            onChange={(e) => {
+                              setFieldValue('defaultValue', e.target.value.trimStart());
+                              handleValuesChange({ defaultValue: e.target.value.trimStart() });
+                            }}
+                            onKeyPress={(event) => {
+                              event.stopPropagation();
+                            }}
+                          />
+                        </Box>
+                      ) : null}
                     {module !== 'price-template' && module !== 'product-template' ? (
                       <FormControlLabel
                         disabled={values['required']}
@@ -1099,6 +1107,18 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         label="Add Additional Option"
                       />
                     )}
+                    {values["lookup"] &&
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="entityWiseLookup"
+                            checked={values["entityWiseLookup"]}
+                            onChange={(e) => setFieldValue("entityWiseLookup", e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label="Entity Wise Lookup"
+                      />}
                     {fieldData.type === 'dropDown' && (
                       <FormControlLabel
                         control={

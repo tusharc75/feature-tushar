@@ -19,6 +19,7 @@ import { getFrameworkComponents, genrateColoum } from "src/constants/columns"
 import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import { fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
+import SendEmail from './../SendEmail';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, seIsShowIssue }) => {
 
@@ -38,9 +39,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, seIsShowIssue }
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
 
     useEffect(() => {
-        if ([PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status)) {
-            setNextStep(false)
-        }
         seIsShowIssue(true)
         fetchPurchaseOrderService();
     }, [purchaseOrderData]);
@@ -181,6 +179,9 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, seIsShowIssue }
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
+                    <SendEmail
+                        purchaseOrderData={purchaseOrderData}
+                    />
                     <HtmlTooltip title="Please select some product">
                         <span>
                             <Button

@@ -72,6 +72,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
 
   const [showConformationConsume, setShowConformationConsume] = useState(false);
+  const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
+
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
 
@@ -131,7 +133,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
       setNextStep(false)
       dispatch({ type: "loading", loading: true });
       if (gridApi) {
-        gridApi.deselectAll();
+        gridApi.setRowData([]);
       }
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
       var productAssets: any = [];
@@ -450,8 +452,8 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
-    columns.forEach((item) => {
-      columnState.forEach((d) => {
+    columns?.forEach((item) => {
+      columnState?.forEach((d) => {
         if (d.colId === item.field) {
           item.show = !d.hide;
         }
@@ -604,19 +606,47 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
 
   const handleConsumProduct = (data) => {
     const products = []
-    selectedRecords?.forEach((e) => {
-      products.push({ product: e.materialId, qty: parseInt(data.qty) })
-    })
+    if (data) {
+      selectedRecords?.forEach((e) => {
+        products.push({ product: e.materialId, qty: parseInt(data.qty) })
+      })
+    }
+    else {
+      selectedRecords?.forEach((e) => {
+        products.push({ product: e.materialId, qty: parseInt(e.qty) })
+      })
+    }
     setOkBtnLoading(true);
     axiosInstance().post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { "products": products })
       .then(({ data }) => {
         setOkBtnLoading(false);
         setShowConformationConsume(false);
+        setShowConformationConsumeMultiple(false);
         fetchRecords();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       })
+  }
+
+  const handleChangeStatus = () => {
+    setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
+    axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
+      comment: statusToUpdate.message,
+      assets: selectedRecords.map(m => m?._id ?? m?.id),
+      status: statusToUpdate.status,
+      reference: {
+        _id: rentalManagementData._id,
+        type: "Rental"
+      }
+    }).then(({ data }) => {
+      setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
+      fetchRecords();
+      toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
+    }).catch((error) => {
+      setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
+      toastConfig.setToastConfig(error)
+    })
   }
 
   useEffect(() => {
@@ -741,11 +771,16 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
               }}>{INVENTORY_STATUS.needRecert}</MenuItem>
             </Fragment>
           }
-          {(selectedRecords?.length === 1 && selectedRecords?.filter((f) => f.type === "Product"
-            && f.hasOwnProperty("loadingTicketId") && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length) &&
+          {(selectedRecords?.filter((f) => f.type === "Product" && f.hasOwnProperty("loadingTicketId")
+            && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length) &&
             <MenuItem onClick={() => {
               setAnchorEl(null)
-              setShowConformationConsume(true)
+              if (selectedRecords?.length === 1) {
+                setShowConformationConsume(true)
+              }
+              else {
+                setShowConformationConsumeMultiple(true)
+              }
             }}>{RENTAL_INTERNAL_ASSET_STATUS.consumed}</MenuItem>
           }
         </Menu>
@@ -776,7 +811,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             disabled={(selectedRecords.length === 0) ||
               (selectedRecords.some(f => f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
                 || !f.hasOwnProperty("loadingTicketId")
-                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(f.status)))}
             onClick={() => { handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant) }}>
             Create Receiving Ticket</MenuItem>
 
@@ -790,7 +825,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
             disabled={(selectedRecords.length === 0)
               || (selectedRecords.some(f =>
                 !f.hasOwnProperty("loadingTicketId") || f.hasOwnProperty("receivingTicketId") || f.hasOwnProperty("returnTicketId")
-                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap].includes(f.status)))}
+                || [INVENTORY_STATUS.lost].includes(f.status) || ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(f.status)))}
           >
             Create Return Ticket</MenuItem>
 
@@ -1069,25 +1104,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
           </Button>
           <Button
             size="small"
-            onClick={() => {
-              setStatusToUpdate(prevState => ({ ...prevState, isUpdating: true }));
-              axiosInstance().put(`${productInventoryHelperObject.api}/update-status`, {
-                comment: statusToUpdate.message,
-                assets: selectedRecords.map(m => m?._id ?? m?.id),
-                status: statusToUpdate.status,
-                reference: {
-                  _id: rentalManagementData._id,
-                  type: "Rental"
-                }
-              }).then(({ data }) => {
-                toastConfig.setToastConfig({ open: true, type: "success", message: data.message })
-                setStatusToUpdate({ open: false, isUpdating: false, status: "", message: "" });
-                fetchRecords();
-              }).catch((error) => {
-                setStatusToUpdate(prevState => ({ ...prevState, isUpdating: false }));
-                toastConfig.setToastConfig(error)
-              })
-            }}
+            onClick={handleChangeStatus}
             disabled={statusToUpdate.isUpdating}
             variant="contained"
             color="primary"
@@ -1166,6 +1183,19 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
         onClose={() => setShowNonSerializeAsset({ open: false, data: {} })}
       />
     }
+    {showConformationConsumeMultiple && (
+      <ConfirmationDialog
+        open={showConformationConsumeMultiple}
+        message={`Are you sure you want to consumed selected products?`}
+        onClose={() => {
+          setShowConformationConsumeMultiple(false);
+        }}
+        onOk={() => {
+          handleConsumProduct(null)
+        }}
+        okBtnLoading={okBtnLoading}
+      />
+    )}
   </>
   );
 };

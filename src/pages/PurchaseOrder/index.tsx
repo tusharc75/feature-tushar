@@ -24,7 +24,7 @@ import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
 import useColumns, { getStaticFields, getFrameworkComponents } from "src/constants/useColumns"
 import { prepareDataForGrid } from "src/constants/helpers"
 import ManagePurchaseOrder from "./ManagePurchaseOrder";
-import { AiFillCrown, MdAdd, MdSort, MdFilterList } from "react-icons/all";
+import { AiFillCrown, MdAdd, MdSort, MdFilterList, MdAccountCircle } from "react-icons/all";
 import CustomSwipableList from "src/components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from "react-router-dom";
@@ -118,13 +118,9 @@ const PurchaseOrder = () => {
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        let dataToProcess, count;
-        axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data }) => {
-            dataToProcess = data?.data;
-            count = data?.count;
-
-            let rows = dataToProcess.map((u) => {
-                const { owner, collaborator, createdBy, updatedBy, subMarketSegment, staticData, marketSegment, ...restProperties } = u;
+        axiosInstance().get(`${purchaseOrder.api}${queryString}`).then(({ data: { data, count } }) => {
+            let rows = data?.map((u) => {
+                const { owner, collaborator, ...restProperties } = u;
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = selectedRecords?.some(s => s._id === u._id);
                 finalObject["allowedToEdit"] = (
@@ -132,14 +128,6 @@ const PurchaseOrder = () => {
                         (d) => d?.optionValue === user?.user?._id
                     )
                 );
-                finalObject["owerCollaboratorInitialsOrImages"] = [];
-                if (finalObject["owner"])
-                    finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
-                finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
-                    if (f.initials) {
-                        f.initials = f.initials.split(" ").map((i) => i[0]).join("");
-                    }
-                })
                 let res = {
                     ...finalObject,
                 };
@@ -148,15 +136,15 @@ const PurchaseOrder = () => {
             if (appendRows) {
                 dispatch({
                     type: "initialize", data: [...dataRows, ...rows],
-                    count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+                    count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
                 });
             } else {
                 dispatch({
-                    type: "initialize", data: rows, count: data.count,
+                    type: "initialize", data: rows, count: count,
                     selectedRecords: rows.filter(f => f.isChecked === true)
                 });
             }
-            dispatch({ type: "initialize", data: rows, count: data.count });
+            dispatch({ type: "initialize", data: rows, count: count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
@@ -167,8 +155,11 @@ const PurchaseOrder = () => {
         });
     };
 
-    const getQueryString = () => {
+    const getQueryString = (isExport = false) => {
         let deepFilter = `?page=${page}&limit=${limit}&filterPurchaseOrders=${selectedType}`;
+        if (isExport) {
+            deepFilter = `filterPurchaseOrders=${selectedType}`;
+        }
         let filterById = [];
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
@@ -187,13 +178,13 @@ const PurchaseOrder = () => {
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`
         }
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
         if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
+            deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
         }
         if (showFilteredRecordsOnly) {
             const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -327,6 +318,7 @@ const PurchaseOrder = () => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchPurchaseOrder()
                     }}
+                    additionalParams={getQueryString(true)}
                 />
             </Grid>
         </Grid>
@@ -512,11 +504,20 @@ const PurchaseOrder = () => {
                             loading={loading}
                             additionalDetails={[
                                 {
-                                    icon: <FaSuitcase size={18} />,
+                                    icon: <MdAccountCircle size={18} />,
                                     field: 'supplierAccount'
                                 }
                             ]}
                             chips={[
+                                {
+                                    label: "Purchase Order Date:  ",
+                                    fieldType: "date",
+                                    field: "purchaseOrderDate",
+                                },
+                                {
+                                    label: "Plant:  ",
+                                    field: "warehouse",
+                                },
                                 {
                                     label: "Delivery Date: ",
                                     field: "deliveryDate",
@@ -527,10 +528,7 @@ const PurchaseOrder = () => {
                                     label: "Status: ",
                                     field: "status",
                                 },
-                                {
-                                    label: "SupplierContact:  ",
-                                    field: "supplierContact",
-                                },
+
                             ]}
                             onCreate={false}
                             showClone={true}

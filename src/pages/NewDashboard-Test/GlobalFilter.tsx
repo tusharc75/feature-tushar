@@ -5,8 +5,6 @@ import moment from 'moment';
 
 import FormTypes from '../../components/Helpers/FormTypes';
 import { dateFormatForInputControl } from '../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
-import seed from './seed';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -37,16 +35,12 @@ interface Props {
   globalFilters: GlobalFiltersType;
   setGlobalFilters: any;
   dashboardList: any[];
+  disabled: boolean;
 }
 
-const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList }: Props) => {
+const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled }: Props) => {
   const classes = useStyles();
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
-  // const dashboards = seed.map((s) => s.name);
+
   const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
 
   React.useEffect(() => {
@@ -96,6 +90,12 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList }: Props)
     }
   }, [timeFrame]);
 
+  const handleSelectDashboard = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedDashboard = e.target.value.toString();
+    localStorage.setItem('selectedDashboard', selectedDashboard);
+    setGlobalFilters((prevState: GlobalFiltersType) => ({ ...prevState, dashboardType: selectedDashboard }));
+  };
+
   return (
     <AppBar className={classes.appBar} position="sticky" elevation={0} color="default">
       <Box p={1} pt={2}>
@@ -103,14 +103,9 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList }: Props)
           <Grid item xs={12} sm={6}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small" variant="outlined">
+                <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
                   <InputLabel id="dashboard-type">Dashboard</InputLabel>
-                  <Select
-                    labelId="dashboard-type"
-                    id="type"
-                    value={globalFilters.dashboardType}
-                    onChange={(e) => setGlobalFilters((prevState: GlobalFiltersType) => ({ ...prevState, dashboardType: e.target.value.toString() }))}
-                  >
+                  <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard}>
                     {dashboardList.map((d: { name: string; id: string }) => (
                       <MenuItem key={d.id} value={d.name}>
                         {d.name}
@@ -121,6 +116,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList }: Props)
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormTypes
+                  disabled={disabled}
                   fullWidth
                   values={{ currency: globalFilters.currency }}
                   type="currency"
@@ -143,7 +139,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList }: Props)
           <Grid item xs={12} sm={12} md={6}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={4}>
-                <FormControl fullWidth size="small" variant="outlined">
+                <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
                   <InputLabel id="duration">Select Duration</InputLabel>
                   <Select labelId="duration" id="time-duration" value={timeFrame} onChange={(e) => setTimeFrame(e.target.value)}>
                     <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
@@ -156,7 +152,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList }: Props)
               </Grid>
               <Grid item xs={6} sm={4}>
                 <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
+                  disabled={timeFrame !== 'custom' || disabled}
                   inputVariant="outlined"
                   variant="inline"
                   fullWidth
@@ -175,7 +171,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList }: Props)
               </Grid>
               <Grid item xs={6} sm={4}>
                 <KeyboardDatePicker
-                  disabled={timeFrame !== 'custom'}
+                  disabled={timeFrame !== 'custom' || disabled}
                   inputVariant="outlined"
                   variant="inline"
                   fullWidth

@@ -94,7 +94,6 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
     newCols = newCols.filter((item) => item);
     setSortedColumns(newCols);
-    setColumns(newCols);
     setOldDate(JSON.stringify(newCols));
     setNewData(JSON.stringify(newCols));
   }, []);

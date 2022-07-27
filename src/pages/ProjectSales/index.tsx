@@ -322,8 +322,11 @@ const ProjectSales: FC = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterProjects=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterProjects=${selectedType}`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
@@ -332,7 +335,7 @@ const ProjectSales: FC = () => {
     if (referenceDetails.referenceId) {
       if (referenceDetails.resource === sidebarResource.opportunity) {
         deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          { field: "opportunity", term: referenceDetails.referenceId }
+          { field: "staticData.opportunity", term: referenceDetails.referenceId }
         ])}`;
       }
       else if (referenceDetails.resource === customerAccount.accountResource) {
@@ -356,9 +359,7 @@ const ProjectSales: FC = () => {
           term: filters[field].filter,
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(
-        updatedFilters
-      )}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -368,7 +369,7 @@ const ProjectSales: FC = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
 
     return deepFilter;
@@ -542,6 +543,7 @@ const ProjectSales: FC = () => {
                 if (gridApi) gridApi.deselectAll()
                 else fetchProjects()
               }}
+              additionalParams={getQueryString(true)}
             />
           </Grid>
         </Grid>

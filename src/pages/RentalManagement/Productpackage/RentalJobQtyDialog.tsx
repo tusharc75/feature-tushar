@@ -62,7 +62,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   }, []);
 
   const fetchData = async () => {
-    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     setAllFields(JSON.parse(JSON.stringify(data)))
     if (isBulkedit) {
       let unitArray: any = []
@@ -119,6 +119,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         }
         if (element.fieldName === "pricingMethod") {
           element.option = pricingMethodOptions;
+        }
+        if (element.fieldName === "qty" && rowData?.serializedProduct === false && rowData?.hideSelection) {
+          element.isUneditable = true;
         }
       });
       if (rowData.actualStartDate === "" || rowData.actualStartDate === "") {

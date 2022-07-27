@@ -16,7 +16,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { getLocalStorageArrayData, gridLoadingTimeout, gridPageSizes, isObjectEmpty } from '../../constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, gridPageSizes, isObjectEmpty, removeLocalStorage } from '../../constants/helpers';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
@@ -256,8 +256,8 @@ const ProductCategory = () => {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -271,7 +271,7 @@ const ProductCategory = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -279,7 +279,7 @@ const ProductCategory = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -297,6 +297,7 @@ const ProductCategory = () => {
     });
     return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
   }
+
   function contrast(rgb1, rgb2) {
     var lum1 = luminance(rgb1[0], rgb1[1], rgb1[2]);
     var lum2 = luminance(rgb2[0], rgb2[1], rgb2[2]);
@@ -332,7 +333,6 @@ const ProductCategory = () => {
       }
     }
     catch (e) {
-      console.log(e)
     }
   }
 
@@ -410,6 +410,7 @@ const ProductCategory = () => {
     axiosInstance()
       .put(`/product-category/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords)
         fetchProductCategory();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -449,8 +450,6 @@ const ProductCategory = () => {
   };
 
 
-
-
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -477,6 +476,7 @@ const ProductCategory = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchProductCategory();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
@@ -598,12 +598,10 @@ const ProductCategory = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!(productCategoryPermissions?.isDelete && !selectedRecords?.some((record) => record.createdById !== user?.user?._id))}
+                      disabled={!productCategoryPermissions?.isDelete}
                       onClick={() => {
                         closeActions();
-                        {
-                          selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                        }
+                        { selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]); }
                         setShowDeleteConfirmBox(true);
                       }}
                     >
@@ -615,7 +613,6 @@ const ProductCategory = () => {
             </Grid>
           </Grid>
         </div>
-
         {Object.keys(frameWorkComponent).length > 0 ? (
           isMobile && !isTablet ? (
             <CustomSwipableList

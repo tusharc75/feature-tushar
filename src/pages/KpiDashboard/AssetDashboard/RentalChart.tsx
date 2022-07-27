@@ -38,11 +38,6 @@ const RentalChart = () => {
   };
 
   React.useEffect(() => {
-    //  axiosInstance().get('dashboard/rental-receiving')
-    //  .then(({data: {data}}) => {
-    //    console.log(data)
-    //  })
-
     setLoading(true);
     axiosInstance()
       .get('dashboard/customer-in-resource')

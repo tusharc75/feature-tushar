@@ -14,6 +14,7 @@ import { IFormDataType, baseURL } from './builderHelpers';
 import DashboardView from './DashboardView';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const useClasses = makeStyles(() => ({
   root: {
@@ -22,11 +23,15 @@ const useClasses = makeStyles(() => ({
 }));
 
 const DashboardBuilder = () => {
+
   const classes = useClasses();
   const history = useHistory();
   const { type }: any = queryString.parse(history.location.search);
 
   const { id } = useParams();
+  const {
+    state: { permissions }
+  } = useData();
   const isNew = id && id === 'new';
   const { setToastConfig } = React.useContext(CustomToastContext);
   const [formData, setFormData] = React.useState<IFormDataType[]>([]);
@@ -233,19 +238,21 @@ const DashboardBuilder = () => {
               label="Dashboard Name"
             />
           </Box>
-          <Box py={'6px'}>
-            <Button
-              color="primary"
-              variant="contained"
-              size="small"
-              disableRipple
-              disabled={!Boolean(name) || formData.length === 0 || isSubmitting || (!isNew && compareData.oldData === compareData.newData)}
-              onClick={handleClickSave}
-              startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
-            >
-              Save
-            </Button>
-          </Box>
+          {permissions?.dashboardMaster?.isUpdate && (
+            <Box py={'6px'}>
+              <Button
+                color="primary"
+                variant="contained"
+                size="small"
+                disableRipple
+                disabled={!Boolean(name) || formData.length === 0 || isSubmitting || (!isNew && compareData.oldData === compareData.newData)}
+                onClick={handleClickSave}
+                startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+              >
+                Save
+              </Button>
+            </Box>
+          )}
         </Box>
 
         <Box bgcolor="#f5f5f5" p={1}>

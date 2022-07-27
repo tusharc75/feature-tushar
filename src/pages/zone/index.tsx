@@ -154,7 +154,7 @@ const Zone = () => {
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
       </Tooltip>
-      {permissions?.zone?.isDelete && params?.data?.createdById == user?.user?._id ? (
+      {permissions?.zone?.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -189,8 +189,8 @@ const Zone = () => {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -204,7 +204,7 @@ const Zone = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -212,7 +212,7 @@ const Zone = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -355,6 +355,7 @@ const Zone = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchZone();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>
@@ -474,7 +475,7 @@ const Zone = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!(permissions?.zone.isDelete && !selectedRecords?.some((record) => record.createdById !== user?.user?._id))}
+                      disabled={!permissions?.zone.isDelete}
                       onClick={() => {
                         closeActions();
                         setShowDeleteConfirmBox(true);

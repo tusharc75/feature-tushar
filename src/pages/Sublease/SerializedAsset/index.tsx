@@ -100,6 +100,7 @@ const SerializedAsset = ({ subleaseData, fetchData, setNextStep, currentStep, re
       let res = {
         ...prepareDataForGrid(u, user)
       };
+      res["isChecked"] = false;
       return res;
     });
     setIsCompleteEnable(isComplate);

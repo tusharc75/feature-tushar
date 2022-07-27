@@ -25,7 +25,15 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { purchaseOrder, getObjKeysWithValues, supplierAccount, customerAccount, purchaseOrderSteps, PURCHASE_ORDER_STATUS, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import {
+  purchaseOrder,
+  getObjKeysWithValues,
+  supplierAccount,
+  customerAccount,
+  purchaseOrderSteps,
+  PURCHASE_ORDER_STATUS,
+  ACTIVITY_RESOURCE
+} from '../../constants/helpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -42,21 +50,26 @@ import IssuePo from './IssuePo';
 import Activity from '../../components/Activity';
 import { defaultActivityShow } from '../../constants/helpers';
 import ReceivingAsset from './ReceivingAsset';
-import { GrStatusGood, GrStatusInfo } from 'react-icons/all';
+import { GrStatusGood, GrStatusInfo, RiFlowChart } from 'react-icons/all';
 import accountClass from '../Account/account.module.scss';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
+import PurchaseOrderViews from './RoadMapViews';
+import HtmlTooltip from '../../components/CustomTooltipTitle';
+
 
 const PurchaseOrderDetailsPage = () => {
-  const renderedFrom = camelCase(routes?.purchaseOrder.title)
+  const renderedFrom = camelCase(routes?.purchaseOrder.title);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { openEdit } = parsed;
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const [loadingPurchaseOrder, setLoadingPurchaseOrder] = useState(false);
   const [purchaseOrderData, setPurchaseOrderData] = useState(null);
@@ -77,7 +90,6 @@ const PurchaseOrderDetailsPage = () => {
   const [nextStep, setNextStep] = useState(true);
   const [isShowIssue, seIsShowIssue] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-
 
   function a11yProps(index: any) {
     return {
@@ -113,7 +125,9 @@ const PurchaseOrderDetailsPage = () => {
   const fetchPurchaseOrderData = async () => {
     setLoadingPurchaseOrder(true);
     try {
-      const { data: { data } } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
+      const {
+        data: { data }
+      } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
       setPurchaseOrderData(data);
@@ -132,12 +146,11 @@ const PurchaseOrderDetailsPage = () => {
 
   useEffect(() => {
     if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true)
+      setActivityShow(true);
+    } else {
+      setActivityShow(false);
     }
-    else {
-      setActivityShow(false)
-    }
-  }, [isSmallScreen, tabValue])
+  }, [isSmallScreen, tabValue]);
 
   const getPurchaseOrderFields = () => {
     axiosInstance()
@@ -184,28 +197,23 @@ const PurchaseOrderDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    updateStatus(o.optionValue)
+    updateStatus(o.optionValue);
   };
 
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
       .then(({ data }) => { })
-      .catch((error) => {
-      });
+      .catch((error) => { });
   };
 
   const updateStatus = (status) => {
     axiosInstance()
       .patch(`${purchaseOrder.api}/status/${id}`, { status: status })
       .then(({ data: { data } }) => {
-        if ([PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(status)) {
-          updateProcessStatus(purchaseOrderSteps[2]);
-          setCurrentStep(2);
-        }
-        if ([PURCHASE_ORDER_STATUS.issued].includes(status)) {
-          updateProcessStatus(purchaseOrderSteps[2]);
-          setCurrentStep(2);
+        if ([PURCHASE_ORDER_STATUS.closed].includes(status)) {
+          updateProcessStatus(purchaseOrderSteps[1]);
+          setCurrentStep(1);
         }
         fetchPurchaseOrderData();
         toastConfig.setToastConfig({
@@ -219,70 +227,32 @@ const PurchaseOrderDetailsPage = () => {
       });
   };
 
-  const handleViewPdf = (download) => {
-    axiosInstance()
-      .get(`${purchaseOrder.api}/${id}/pdf`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            if (download) {
-              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', `PurchaseOrder-${purchaseOrderData.purchaseOrderNumber}.pdf`);
-              document.body.appendChild(link);
-              link.click();
-            } else {
-              const file = new Blob([data], { type: 'application/pdf' });
-              const fileURL = URL.createObjectURL(file);
-              const pdfWindow = window.open();
-              pdfWindow.location.href = fileURL;
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            }
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
   };
 
-  const handleAttachments = () => {
-    let request;
-    request = {
-      name: 'Purchase Order',
-      fileUrl: '',
-      relatedTo: [
-        {
-          type: purchaseOrder.resource,
-          referenceId: purchaseOrderData?._id,
-          access: true
-        },
-        {
-          type: purchaseOrderData?.customerAccountName ? customerAccount?.accountResource : supplierAccount?.accountResource,
-          referenceId: purchaseOrderData?.customerAccountName
-            ? purchaseOrderData?.customerAccountName?.optionValue
-            : purchaseOrderData?.supplierAccountName?.optionValue,
-          access: false
-        }
-      ]
-    };
+  const checkReceivedProduct = (products) => {
+    if (products?.length && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.closed) {
+      var isCompleteReceived = false;
+      var isPartialReceived = products?.some((e) => e?.actualReceived);
+      if (products?.filter((e) => e?.qty - ((e?.actualReceived || 0) + (e?.scrapQuantity || 0)) > 0).length > 0) {
+        isCompleteReceived = false;
+      } else {
+        isCompleteReceived = true;
+      }
+      if (isPartialReceived && !isCompleteReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.partialReceived) {
+        updateStatus(PURCHASE_ORDER_STATUS.partialReceived);
+      }
+      if (isCompleteReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.received) {
+        updateStatus(PURCHASE_ORDER_STATUS.received);
+      }
+    }
   };
 
   return (
     <>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.purchaseOrder, { title: `${purchaseOrderData?.purchaseOrderNumber}` }]}
-        />
+        <CustomBreadCrumbs routes={[routes.purchaseOrder, { title: `${purchaseOrderData?.purchaseOrderNumber}` }]} />
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
         <div>
@@ -299,66 +269,64 @@ const PurchaseOrderDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={purchaseOrderData?.purchaseOrderNumber} mainPoints={null} showHeading={true}>
-                  {permissions?.purchaseOrder?.isUpdate &&
-                    ![PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)
-                    && (
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        onClick={handleOpenUpdateDialog}
-                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                        style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                      >
-                        {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                      </Button>
-                    )}
-                  {permissions?.purchaseOrder?.isUpdate &&
-                    (isShowIssue && [PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status)
-                      || [PURCHASE_ORDER_STATUS.readyToInvoice, PURCHASE_ORDER_STATUS.invoiced].includes(purchaseOrderData?.status))
-                    && (
-                      <>
+                  {![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) && (
+                    <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`}>
+                      <span>
                         <Button
-                          variant={'outlined'}
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
                           color="primary"
                           size="small"
-                          onClick={openActions}
-                          aria-controls="action-menu"
-                          endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                          onClick={handleOpenUpdateDialog}
+                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                          style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                          disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
                         >
-                          {isMobile && !isTablet ? <GrStatusGood size={18} style={{ color: 'var(--warning-darken)' }} /> : 'Change Status'}
+                          {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                         </Button>
-                        <Menu
-                          anchorEl={anchorEl}
-                          keepMounted
-                          getContentAnchorEl={null}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
-                          }}
-                          id="action-menu"
-                          open={Boolean(anchorEl)}
-                          onClose={closeActions}
-                        >
-                          {statusOptions.map((o, index) => {
-                            return (
-                              <MenuItem
-                                disabled={[PURCHASE_ORDER_STATUS.new, PURCHASE_ORDER_STATUS.inProgress].includes(purchaseOrderData?.status) ?
-                                  o?.optionLabel === PURCHASE_ORDER_STATUS.issued ? false : true :
-                                  index <= statusOptions.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
-                                onClick={() => {
-                                  closeActions();
-                                  handleStatusChange(o);
-                                }}
-                                value={o}
-                              >
-                                {o?.optionLabel}
-                              </MenuItem>
-                            );
-                          })}
-                        </Menu>
-                      </>
-                    )}
+                      </span>
+                    </HtmlTooltip>
+                  )}
+                  {permissions?.purchaseOrder?.isUpdate && allowedToEdit && [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
+                    <>
+                      <Button
+                        variant={'outlined'}
+                        color="primary"
+                        size="small"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        endIcon={<ExpandMore />}
+                      >
+                        {'Change Status'}
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        {statusOptions.map((o, index) => {
+                          return (
+                            <MenuItem
+                              disabled={index <= statusOptions.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
+                              onClick={() => {
+                                closeActions();
+                                handleStatusChange(o);
+                              }}
+                              value={o}
+                            >
+                              {o?.optionLabel}
+                            </MenuItem>
+                          );
+                        })}
+                      </Menu>
+                    </>
+                  )}
                 </DetailsPageHeader>
               )}
               <Fragment>
@@ -390,7 +358,7 @@ const PurchaseOrderDetailsPage = () => {
                     className={'tabLayout'}
                     style={{
                       background: tabValue === 2 ? 'white' : '',
-                      color: tabValue === 2 ? 'blue' : '#163340'
+                      color: '#163340'
                     }}
                     label={
                       <div className="d-flex align-items-center tab-font">
@@ -399,6 +367,21 @@ const PurchaseOrderDetailsPage = () => {
                     }
                     {...a11yProps(1)}
                   />
+                  {
+                    <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 3 ? 'white' : '',
+                        color: tabValue === 3 ? 'blue' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                        </div>
+                      }
+                      {...a11yProps(2)}
+                    />
+                  }
                   <div className={'uio'}> </div>
                 </Tabs>
                 <TabPanel value={tabValue} index={0}>
@@ -427,10 +410,10 @@ const PurchaseOrderDetailsPage = () => {
                             steps={purchaseOrderSteps}
                             currentStep={currentStep}
                             setCurrentStep={setCurrentStep}
-                            isStepEnded={[PURCHASE_ORDER_STATUS.invoiced, PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
+                            isStepEnded={[PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
                             setStepFullScreen={() => setStepFullScreen(true)}
                           />
-                          <ContentFullScreen title={purchaseOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                          <ContentFullScreen title={purchaseOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                             {currentStep === 0 && (
                               <Product
                                 purchaseOrderData={purchaseOrderData}
@@ -440,15 +423,16 @@ const PurchaseOrderDetailsPage = () => {
                                 allowedToEdit={allowedToEdit}
                                 seIsShowIssue={seIsShowIssue}
                                 updateStatus={updateStatus}
+                                checkReceivedProduct={checkReceivedProduct}
                               />
                             )}
-                            {currentStep === 1 &&
+                            {/* {currentStep === 1 &&
                               <Service
                                 purchaseOrderData={purchaseOrderData}
                                 renderedFrom={`${renderedFrom}_grid-2`}
                                 setNextStep={setNextStep}
                                 seIsShowIssue={seIsShowIssue}
-                              />}
+                              />} */}
                             {/* {currentStep === 2 && (
                             <IssuePo
                               purchaseOrderData={purchaseOrderData}
@@ -456,30 +440,35 @@ const PurchaseOrderDetailsPage = () => {
                               updateStatus={updateStatus}
                               setCurrentStep={setCurrentStep}
                               currentStep={currentStep}
-                              handleAttachments={handleAttachments}
                               statusOptions={statusOptions}
                               renderedFrom={`${renderedFrom}_grid-3`}
                             />
                           )} */}
-                            {(currentStep === 2) && (
+                            {currentStep === 1 && (
                               <ReceivingAsset
                                 purchaseOrderData={purchaseOrderData}
                                 setCurrentStep={setCurrentStep}
                                 updateStatus={updateStatus}
                                 statusOptions={statusOptions}
-                                handleViewPdf={handleViewPdf}
-                                handleAttachments={handleAttachments}
                                 renderedFrom={`${renderedFrom}_grid-4`}
                                 isSmallScreen={isSmallScreen}
                                 isTabletScreen={isTabletScreen}
                                 stepFullScreen={stepFullScreen}
                                 showActivity={showActivity}
+                                allowedToEdit={allowedToEdit}
+                                checkReceivedProduct={checkReceivedProduct}
                               />
-                            )}</ContentFullScreen>
+                            )}
+                          </ContentFullScreen>
                         </Paper>
                       </Grid>
                     )}
                   </Grid>
+                </TabPanel>
+                <TabPanel value={tabValue} index={2}>
+                  <Box>
+                    <PurchaseOrderViews pName={purchaseOrderData?.purchaseOrderNumber} pId={id} pStatus={purchaseOrderData?.status} />
+                  </Box>
                 </TabPanel>
               </Fragment>
             </Paper>
@@ -503,7 +492,9 @@ const PurchaseOrderDetailsPage = () => {
                           resourceId={purchaseOrderData._id}
                           resource={ACTIVITY_RESOURCE.purchaseOrder}
                           restrictedAddActivities={
-                            permissions && permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`] && permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`].isUpdate
+                            permissions &&
+                              permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`] &&
+                              permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }

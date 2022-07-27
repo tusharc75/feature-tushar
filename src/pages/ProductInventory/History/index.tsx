@@ -36,15 +36,27 @@ const History = ({ product, warehouse }) => {
         let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
             finalObject.type = capitalize(u.type)
+            finalObject.serialNumber = u?.serialNumber?.map((e) => e.serialNumber)?.toString()
             return finalObject;
+        });
+
+        var qty = 0;
+        rows?.slice().reverse().forEach(function (item) {
+            if (item.type === "Credit") {
+                qty = qty + item?.qty
+            }
+            else {
+                qty = qty - item?.qty
+            }
+            item.finalInventory = qty;
         });
         dispatch({ type: "initialize", data: rows, count: rows.length });
         setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
     };
 
     const columns = [
-        { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer" },
-        { field: "referenceType", headerName: "ReferenceType Type", show: true, cellRenderer: "commonRenderer" },
+        { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer", filter: false, sortable: false },
+        { field: "referenceType", headerName: "Reference Type", show: true, cellRenderer: "commonRenderer" },
         { field: "reference", headerName: "Reference", show: true, cellRenderer: "referenceRenderer" },
         { field: "type", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
         {
@@ -52,6 +64,7 @@ const History = ({ product, warehouse }) => {
             headerName: "Credit/Debit",
             show: true,
             cellRenderer: "commonRenderer",
+            filter: false, sortable: false,
             cellStyle: params => {
                 if (params?.data?.type === "Credit") {
                     return { backgroundColor: "#90ee90" }
@@ -61,7 +74,10 @@ const History = ({ product, warehouse }) => {
                 };
             }
         },
+        { field: "finalInventory", headerName: "Final Inventory", show: true, cellRenderer: "commonRenderer", filter: false, sortable: false, },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
+        { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "user", headerName: "Transacted By", show: true, cellRenderer: "commonRenderer" },
     ];
 

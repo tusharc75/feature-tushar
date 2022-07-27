@@ -269,8 +269,11 @@ const PackageList = () => {
         }
     };
 
-    const getQueryString = () => {
+    const getQueryString = (isExport = false) => {
         let deepFilter = `?page=${page}&limit=${limit}&filterpackagess=${selectedType}`;
+        if (isExport) {
+            deepFilter = `filterpackagess=${selectedType}`;
+        }
         if (accountDetails.accountId) {
             if (accountDetails.resource === customerAccount.accountResource) {
                 deepFilter = `${deepFilter}&filterById=${JSON.stringify([
@@ -301,7 +304,7 @@ const PackageList = () => {
                     term: filters[field].filter
                 });
             });
-            deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+            deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
         }
 
         if (sorting.length > 0) {
@@ -309,7 +312,7 @@ const PackageList = () => {
         }
 
         if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
+            deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
         }
 
         return deepFilter;
@@ -473,6 +476,7 @@ const PackageList = () => {
                                             if (gridApi) gridApi.deselectAll()
                                             else fetchPackages()
                                         }}
+                                        additionalParams={getQueryString(true)}
                                     />
                                 </Grid>
                             </Grid>

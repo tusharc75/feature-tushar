@@ -58,8 +58,10 @@ export const termsAndConditionDocumentUploadMaxSize = {
 
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 //export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
-export const salesOrderProcessSteps = ['Add Products', 'Ready To Invoice'];
-export const purchaseOrderSteps = ['Add Products', 'Services and Consumables', 'Receive Products'];
+export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Ready To Invoice'];
+export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
+//export const purchaseOrderSteps = ['Add Products', 'Services and Consumables', 'Receive Products'];
+export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
   'Services and Consumables',
@@ -196,7 +198,16 @@ export const sidebarResource = {
   report: 'Report',
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
-  productAuction: 'Product Auction'
+  productAuction: 'Product Auction',
+  inventoryToAsset: 'Inventory to Asset',
+  inventoryCycle: 'Inventory Cycle',
+  dashboardMaster: 'Dashboard Master',
+  scheduleReport: 'Schedule Report',
+  cycleCountDetermination: 'Cycle Count Determination',
+  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
+  quotation: 'Quotation',
+  serviceMaster: 'Service Master',
+  leadTimeMaster: 'Lead Time Master'
 };
 
 export const resourceNames = {
@@ -258,9 +269,11 @@ export const resourceNames = {
   bulkAssetCreation: 'Bulk Asset Creation',
   pos: 'Pos',
   report: 'Report',
+  scheduleReport: 'Schedule Report',
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
-  productAuction: 'Product Auction'
+  productAuction: 'Product Auction',
+  quotation: 'Quotation'
 };
 
 export const primaryFields = {
@@ -331,9 +344,18 @@ export const RESOURCE_LABEL = {
   pos: 'eRECS',
   repairType: 'Repair Types',
   report: 'Report',
+  scheduleReport: 'Schedule Report',
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
-  productAuction: 'Product Auction'
+  productAuction: 'Product Auction',
+  inventoryToAsset: 'Inventory to Asset',
+  importExport: 'Import-Export',
+  inventoryCycle: 'Inventory Cycle',
+  cycleCountDetermination: 'Cycle Count Determination',
+  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
+  quotation: 'Quotation',
+  serviceMaster: 'Service Master',
+  leadTimeMaster: 'Lead Time Master'
 };
 
 export const CHILD_RESOURCE = {
@@ -344,7 +366,10 @@ export const CHILD_RESOURCE = {
   repairJobAsset: 'Repair Job Asset',
   salesOrderProduct: 'Sales Order Product',
   salesOrderCost: 'Sales Order Cost',
-  subleaseProduct: 'Sublease Product'
+  subleaseProduct: 'Sublease Product',
+  quotationProduct: 'Quotation Product',
+  quotationCost: 'Quotation Cost',
+  quotationService: 'Quotation Service'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -406,6 +431,11 @@ export const repairJob = {
 export const salesOrder = {
   api: '/sales-order',
   resource: 'sales-order'
+};
+
+export const quotation = {
+  api: '/quotation',
+  resource: 'quotation'
 };
 
 export const packages = {
@@ -495,13 +525,19 @@ export const serializedAsset = {
   resource: 'Serialized Asset'
 };
 
+export const convertInventory = {
+  api: '/convert-inventory-to-asset',
+  route: '/inventory-to-asset',
+  permission: 'inventoryToAsset',
+  resource: 'Inventory to Asset'
+};
+
 export const productInventory = {
   api: '/product-inventory',
   route: '/product-inventory',
   permission: 'productInventory',
   resource: 'product-inventory'
 };
-
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
@@ -585,6 +621,26 @@ export const productAuction = {
   resource: 'Product Auction'
 };
 
+export const cycleCountPhysicalInventory = {
+  api: '/inventory-cycle/physical-inventory',
+  route: '/cycle-count-physical-inventory',
+  permission: 'Cycle Count Physical Inventory',
+  resource: 'Cycle Count Physical Inventory'
+};
+
+export const serviceMaster = {
+  api: '/service-master',
+  route: '/service-master',
+  permission: 'Service Master',
+  resource: 'Service Master'
+};
+export const leadTimeMaster = {
+  api: '/lead-time-master',
+  route: '/lead-time-master',
+  permission: 'Lead Time Master',
+  resource: 'Lead Time Master'
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -592,6 +648,9 @@ export const profileMenuItems = {
   users: 4,
   securityPrivacy: 5
 };
+
+export const SCHEDULE_FREQUENCY = ['Daily', 'Weekly', 'Monthly'];
+export const FREQUENCY_WEEKS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
   //let selectedEntity = localStorage.getItem("selectedEntity")
@@ -873,6 +932,10 @@ export const yyyyMMDD = (dateToBeFormatted) => {
 
 export const displayDate = (date) => {
   return date ? moment(date).format(dateFormat) : date;
+};
+
+export const displayDateTime = (date) => {
+  return date ? moment(date).format(dateTimeFormat) : date;
 };
 
 export const displayCardDate = (date) => {
@@ -1680,12 +1743,14 @@ export const SUBLEASE_STATUS = {
 };
 
 export const PURCHASE_ORDER_STATUS = {
-  new: 'New',
-  inProgress: 'In-Progress',
-  issued: 'Issued',
+  //new: 'New',
+  //inProgress: 'In-Progress',
+  //issued: 'Issued',
+  open: 'Open',
+  partialReceived: 'Partial Received',
   received: 'Received',
-  readyToInvoice: 'Ready to Invoice',
-  invoiced: 'Invoiced',
+  //readyToInvoice: 'Ready to Invoice',
+  //invoiced: 'Invoiced',
   closed: 'Closed'
 } as const;
 
@@ -1732,7 +1797,9 @@ export const ACTIVITY_RESOURCE = {
   sublease: 'sublease',
   salesOrder: 'salesOrder',
   bulkAssetCreation: 'bulkAssetCreation',
-  serializedAsset: 'serializedAsset'
+  serializedAsset: 'serializedAsset',
+  transferInventory: 'transferInventory',
+  quotation: 'quotation'
 };
 
 export const REPORT_LIST = [
@@ -1743,8 +1810,9 @@ export const REPORT_LIST = [
   { title: sidebarResource.opportunity, permission: 'opportunity', key: 'opportunity', type: 'dynamic' },
   { title: sidebarResource.quoteBuilder, permission: 'quoteBuilder', key: 'quoteBuilder', type: 'dynamic' },
   { title: sidebarResource.projectSales, permission: 'projectSales', key: 'projectSales', type: 'dynamic' },
-  { title: 'Purchase Order Product', permission: 'purchaseOrder', key: 'purchaseOrderProduct', type: 'purchaseOrderProduct' },
-  { title: 'Product Average Costing', permission: 'purchaseOrder', key: 'productAverageCost', type: 'productAverageCost' }
+  { title: sidebarResource.purchaseOrder, permission: 'purchaseOrder', key: 'purchaseOrder', type: 'dynamic' },
+  { title: 'Purchase Order Product', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'purchaseOrderProduct' },
+  { title: 'Product Average Costing', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'productAverageCost' }
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -1850,6 +1918,16 @@ export const getData = (resource: string, data: any) => {
     case 'bulk-asset-creation':
       return {
         name: `${data.baNumber}`,
+        id: data._id
+      };
+    case 'transfer-inventory':
+      return {
+        name: `${data.transferNumber}`,
+        id: data._id
+      };
+    case 'quotation':
+      return {
+        name: `${data.quotationNumber}`,
         id: data._id
       };
     default:

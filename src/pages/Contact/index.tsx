@@ -17,7 +17,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import { MdContacts } from 'react-icons/md';
 import axiosInstance from '../../axios/axiosInstance';
-import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, prepareDataForGrid, userType, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { Chip } from '@material-ui/core';
@@ -318,7 +318,7 @@ export default function Contact(props) {
         var str = [];
         for (var p in obj)
           if (obj.hasOwnProperty(p)) {
-            str.push('{colName=' + encodeURIComponent(p) + ',' + 'colValue=' + encodeURIComponent(obj[p].filter) + '}');
+            str.push('{colName=' + encodeURI(p) + ',' + 'colValue=' + encodeURI(obj[p].filter) + '}');
           }
         return str.join(',');
       };
@@ -531,9 +531,11 @@ export default function Contact(props) {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterContacts=${queryType === 'My Accounts' ? 2 : selectedType}`;
-
+    if (isExport) {
+      deepFilter = `filterContacts=${queryType === 'My Accounts' ? 2 : selectedType}`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -551,7 +553,7 @@ export default function Contact(props) {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -559,7 +561,7 @@ export default function Contact(props) {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -655,6 +657,7 @@ export default function Contact(props) {
           type: 'success',
           message: data.message
         });
+        removeLocalStorage(`${localStorageSelectedRecords}`)
         getContacts();
       })
       .catch((error) => {
@@ -692,6 +695,7 @@ export default function Contact(props) {
             type: 'success',
             message: data.message
           });
+          removeLocalStorage(`${localStorageSelectedRecords}`)
           getContacts();
         })
         .catch((error) => {
@@ -761,6 +765,7 @@ export default function Contact(props) {
               if (gridApi) gridApi.deselectAll();
               else getContacts();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

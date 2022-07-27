@@ -17,6 +17,8 @@ import SalesOrderQtyDialog from './SalesOrderQtyDialog'
 import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
 import InfoIcon from "@material-ui/icons/Info";
 import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { isMobile } from "react-device-detect";
 
 const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActivity, renderedFrom }) => {
 
@@ -99,6 +101,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
                 coloum.push({
                     accessor: element.fieldName,
                     Header: element.fieldLabel,
+                    disableFilters: true,
                     Cell: ({ row }) => (
                         row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
                     )
@@ -160,6 +163,30 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
                 })
             }
         });
+        {
+            isMobile ? <Box display={"none"} /> : coloum.push({
+                accessor: 'action',
+                Header: '',
+                minWidth: 50,
+                width: 50,
+                sticky: 'right',
+                disableFilters: true,
+                canDrag: false,
+                Cell: ({ row }) =>
+                    !row.original.hideSelection && (
+                        <IconButton
+                            size="small"
+                            aria-label="Details"
+                            onClick={() => {
+                                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                                setDeleteData(obj);
+                            }}
+                        >
+                            <DeleteIcon fontSize="small" color="error" />
+                        </IconButton>
+                    )
+            });
+        }
         coloum.forEach(element => {
             if (element.accessor.includes("detail")) {
                 element["Footer"] = () => {
@@ -193,7 +220,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
         inventory = data.inventory;
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
-            parent.detail = `${(i + 1)} - ${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
+            parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
             parent.qtyDisplay = parent.qty;
             parent.isValid = parent["finalPrice_" + salesOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -201,7 +228,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
             if (parent.type === "package") {
                 const subRows: any = data.material.filter((e) => e.parentId === parent._id);
                 subRows.forEach((_subRow, j) => {
-                    _subRow.detail = (i + 1) + "." + (j + 1) + " - " + _subRow.productDetail?.productName
+                    _subRow.detail = _subRow.productDetail?.productName
                     _subRow.qtyDisplay = `${parent.qty} x ${_subRow.qty} = ${parent.qty * _subRow.qty}`
                     _subRow.isValid = _subRow["finalPrice_" + salesOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
                     _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
@@ -230,19 +257,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
             const element: any = {};
             element.materialId = d._id;
             element.type = addExistingProductDialog.type;
-            element.unit = d.unit && d.unit.length ? d.unit[0] : "";
-            element.pricingMethod = d.pricingMethod && d.pricingMethod.length ? d.pricingMethod[0] : "";
+            element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : "";
             element.qty = d.qty ? parseFloat(d.qty) : 1;
-            element.estimateStartDate = salesOrderData ? salesOrderData?.estimateStartDate : new Date();
-            element.estimateEndDate = salesOrderData ? salesOrderData?.estimateEndDate : new Date();
-            element.actualStartDate = salesOrderData ? salesOrderData?.actualStartDate : new Date();
-            element.actualEndDate = salesOrderData ? salesOrderData?.actualEndDate : new Date();
             element.parentId = addExistingProductDialog.parentId;
-            const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields)
-            element.tenure = 1;
-            if (calValues && calValues["tenure"]) {
-                element.tenure = calValues["tenure"];
-            }
             material.push(element);
         });
 
@@ -464,9 +481,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
                 isAddingProducts={isAddingProducts}
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}
-                productInventory={[]}
                 type={addExistingProductDialog.type}
                 salesOrderData={salesOrderData}
+                ignoreIds={rowsData?.map((e) => e?.materialId)}
             />
         }
     </Fragment>

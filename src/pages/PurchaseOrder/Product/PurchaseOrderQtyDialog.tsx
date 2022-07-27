@@ -63,6 +63,10 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
       poFields.forEach((element) => {
         if (element.fieldName === "unit") {
           element.option = unitOptions;
+          if (unitOptions?.length) {
+            element.isDefaultValue = true;
+            element.defaultValue = unitOptions[0]?.optionValue;
+          }
         }
         element.required = false;
         element.isFormula = false;
@@ -89,6 +93,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
       if (!tempObjKeysWithValues["expectedDelivery"] && purchaseOrderData["deliveryDate"]) {
         tempObjKeysWithValues["expectedDelivery"] = purchaseOrderData["deliveryDate"]
       }
+      tempObjKeysWithValues["scrapQuantity"] = productData["scrapQuantity"]
       setInitialData({
         fields: poFields,
         values: tempObjKeysWithValues,
@@ -117,7 +122,7 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
       }
       productData.forEach(element => {
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-        returnData.push({ ...element, ...calValues })
+        returnData.push({ _id: element._id, productId: element.productId, ...calValues })
       })
     }
     else {
@@ -128,8 +133,8 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
 
   function validate(values) {
     const errors = {};
-    if (values?.qty < values?.actualReceived) {
-      errors['qty'] = 'Quantity should be greater than Actual Received';
+    if (values?.qty < (values?.actualReceived + (values?.scrapQuantity || 0))) {
+      errors['qty'] = 'Quantity should be greater than Actual Received and Scrap Quantity';
     }
     return errors;
   }

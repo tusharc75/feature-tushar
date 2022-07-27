@@ -18,7 +18,7 @@ import { useData } from "../../../StateProvider/Provider";
 
 let searchTimeout;
 
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, renderedFrom, refrenceType }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, renderedFrom, refrenceType, ignoreIds }) => {
 
     const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
@@ -84,6 +84,11 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
 
     const getQueryString = () => {
         let deepFilter = `?page=${page}&limit=${limit}`;
+
+        if (ignoreIds?.length) {
+            deepFilter = deepFilter + `&ignoreIds=${JSON.stringify(ignoreIds)}`
+        }
+
         if (showFilteredRecordsOnly) {
             const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
             deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
@@ -173,7 +178,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                             <SearchBox
                                 onSearch={handleSearch}
                                 searchbox="terms_header_search_bar"
-                                width="300px"
+                                width="250px"
                                 value={search}
                             />
                             <Box ml={1}>

@@ -106,11 +106,8 @@ const WellMaster = () => {
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        let dataToProcess, count;
-        axiosInstance().get(`${wellMaster.api}${queryString}`).then(({ data }) => {
-            dataToProcess = data?.data;
-            count = data?.count;
-            let rows = dataToProcess.map((u) => {
+        axiosInstance().get(`${wellMaster.api}${queryString}`).then(({ data: { data, count } }) => {
+            let rows = data?.map((u) => {
                 let finalObject = prepareDataForGrid(u, user);
                 finalObject["isChecked"] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some(s => s._id === u._id);
                 return finalObject;
@@ -118,27 +115,25 @@ const WellMaster = () => {
             if (appendRows) {
                 dispatch({
                     type: "initialize", data: [...dataRows, ...rows],
-                    count: data.count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+                    count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
                 });
             } else {
                 dispatch({
-                    type: "initialize", data: rows, count: data.count,
+                    type: "initialize", data: rows, count: count,
                     selectedRecords: rows.filter(f => f.isChecked === true)
                 });
             }
-            dispatch({ type: "initialize", data: rows, count: data.count });
             setTimeout(() => {
                 dispatch({ type: "loading", loading: false });
             }, gridLoadingTimeout);
-
         }).catch((error) => {
             toastConfig.setToastConfig(error);
             dispatch({ type: "loading", loading: false });
         });
     };
 
-    const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}`;
+    const getQueryString = (isExport = false) => {
+        let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
         let filterById = [];
 
@@ -159,14 +154,14 @@ const WellMaster = () => {
                     term: filters[field].filter,
                 });
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+            deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
         }
 
         if (sorting.length > 0) {
             deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
         }
         if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
+            deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
         }
         return deepFilter;
     };
@@ -283,6 +278,7 @@ const WellMaster = () => {
                         if (gridApi) gridApi.deselectAll()
                         else fetchData()
                     }}
+                    additionalParams={getQueryString(true)}
                 />
             </Grid>
         </Grid>

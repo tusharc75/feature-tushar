@@ -18,14 +18,14 @@ import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { product, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from '../../constants/helpers';
+import { product, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import { RiBillLine } from 'react-icons/ri';
 import { Autocomplete } from '@material-ui/lab';
 import TextField from '@material-ui/core/TextField';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
 import { prepareDataForGrid } from '../../constants/helpers';
 import Tooltip from '@material-ui/core/Tooltip';
 import { MdAdd, MdSort, MdFilterList } from 'react-icons/all';
@@ -146,26 +146,11 @@ const Product = () => {
         let rendererNames = [];
         data.forEach((o) => {
           if (!ignoreField.includes(o?.fieldData.fieldName)) {
-            if (o?.fieldData?.fieldName === 'productName') {
-              columns = [
-                ...columns,
-                {
-                  pivotIndex: 0,
-                  field: o?.fieldData?.fieldName,
-                  headerName: o?.fieldData?.fieldLabel,
-                  show: true,
-                  disabled: true,
-                  cellRenderer: 'productNameRenderer',
-                  primaryField: true
-                }
-              ];
-            } else {
-              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.product.path, true);
-              if (currentColumn !== null) {
-                columns = [...columns, currentColumn?.columnData];
-                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                  rendererNames.push(currentColumn?.rendererName);
-                }
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData];
+              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                rendererNames.push(currentColumn?.rendererName);
               }
             }
           }
@@ -242,7 +227,6 @@ const Product = () => {
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           commonRenderer: CommonRenderer,
-          productNameRenderer: ProductNameRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -351,7 +335,7 @@ const Product = () => {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     const filterById = [];
     if (productCategory && productCategory !== '') {
@@ -367,7 +351,7 @@ const Product = () => {
       deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
     }
 
-    if (updatedFilters.length > 0) return `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (updatedFilters.length > 0) return `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
 
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -386,6 +370,7 @@ const Product = () => {
     axiosInstance()
       .put(`/product/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords)
         fetchProduct();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -395,12 +380,6 @@ const Product = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
-  const ProductNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params?.data?.productDescription} to={`${routes.productDetail.path}/${params.data._id}`}>
-      {params?.data?.productDescription ?? params?.data?.productName}
-    </Link>
-  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -424,7 +403,7 @@ const Product = () => {
           </IconButton>
         </Tooltip>
       )}
-      {productPermissions.isDelete && params?.data?.createdById == user?.user?._id ? (
+      {productPermissions.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             size="small"

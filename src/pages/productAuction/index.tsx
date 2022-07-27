@@ -15,7 +15,7 @@ import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
 import routes from '../../components/Helpers/Routes';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, productAuction } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, productAuction, removeLocalStorage } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -33,6 +33,7 @@ import { camelCase } from 'lodash';
 import ManageProductAuction from './ManageProductAuction';
 
 const ProductAuction = () => {
+
   let renderedFrom = camelCase(routes.productAuction?.title);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -48,8 +49,7 @@ const ProductAuction = () => {
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
 
   const [isOpenDialog, setisOpenDialog] = useState(false);
 
@@ -98,13 +98,10 @@ const ProductAuction = () => {
       gridApi.setRowData([]);
     }
     const queryString = getQueryString();
-    let dataToProcess, count;
     axiosInstance()
       .get(`${productAuction.api}${queryString}`)
-      .then(({ data }) => {
-        dataToProcess = data?.data;
-        count = data?.count;
-        let rows = dataToProcess.map((u) => {
+      .then(({ data: { data, count } }) => {
+        let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.productAuction?.isUpdate;
@@ -118,14 +115,14 @@ const ProductAuction = () => {
           dispatch({
             type: 'initialize',
             data: [...dataRows, ...rows],
-            count: data.count,
+            count: count,
             selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
             type: 'initialize',
             data: rows,
-            count: data.count,
+            count: count,
             selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
@@ -139,8 +136,8 @@ const ProductAuction = () => {
       });
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     let filterById = [];
     if (filterById.length > 0) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
@@ -153,13 +150,13 @@ const ProductAuction = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -178,6 +175,7 @@ const ProductAuction = () => {
     axiosInstance()
       .put(`${productAuction.api}/remove`, { ids: ids })
       .then(() => {
+        removeLocalStorage(localStorageSelectedRecords)
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -285,6 +283,7 @@ const ProductAuction = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchData();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

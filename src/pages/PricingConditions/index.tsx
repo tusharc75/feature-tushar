@@ -182,8 +182,8 @@ const PricingConditions = () => {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     const updatedFilters = [];
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
@@ -192,13 +192,13 @@ const PricingConditions = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -261,6 +261,7 @@ const PricingConditions = () => {
               if (gridApi) gridApi.deselectAll();
               else fetchPriceConditionList();
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

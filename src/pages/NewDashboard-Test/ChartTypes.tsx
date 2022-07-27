@@ -125,7 +125,6 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
       .then(async ({ data: { data } }) => {
         if (chart.kpi?.custom) {
           const cardData = await getStaticData(chartData, data, globalFilters.currency, currency);
-          console.log(cardData)
           setChartData(cardData);
         } else {
           setChartData(data);
@@ -241,7 +240,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   data={chartData}
                   options={{
                     maintainAspectRatio: false,
-                    indexAxis: chart.axis
+                    indexAxis: chart?.axis
                   }}
                 />
               )
@@ -266,7 +265,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           filters={chart.filters}
           values={filterValues}
           setValues={setFilterValues}
-          isAssetDashboard={globalFilters.dashboardType?.includes('Asset')}
+          isCRM={globalFilters.dashboardType?.includes('CRM')}
           filterOptions={{
             ...filterData,
             status: chart.statusOptions
@@ -280,6 +279,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
           currency={globalFilters.currency || currency}
           tableData={chartData ? chartData?.tableData : []}
           chart={chart}
+          isTableView={chartData?.graphType !== 'Table' && tableView}
           chartData={chartData?.tableData}
         />
       )}

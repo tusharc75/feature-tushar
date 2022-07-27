@@ -163,7 +163,6 @@ function RentalManagementHeader({
               >
                 Sort
               </Button>
-
               <MobileSortDialog
                 isOpen={open}
                 handleClose={handleClickClose}
@@ -270,14 +269,15 @@ function RentalManagementHeader({
                       open={Boolean(anchorEl)}
                       onClose={closeActions}
                     >
-                      {/* <MenuItem
-                        onClick={() => {
-                          closeActions();
-                          showConfirmBox(null);
-                        }}
-                      >
-                        Delete
-                      </MenuItem> */}
+                      {((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e.canDelete === true)?.length) === selectedRecords?.length) ?
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            showConfirmBox(null);
+                          }}
+                        >
+                          Delete
+                        </MenuItem> : null}
                       {/* {
                         RentalManagementPermissions.isUpdate && <MenuItem
                           disabled={!selectedRecords.length || selectedRecords.find((d) => d.canDelete === false)}

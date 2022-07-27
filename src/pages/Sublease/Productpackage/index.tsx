@@ -127,6 +127,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 coloum.push({
                     accessor: element.fieldName,
                     Header: element.fieldLabel,
+                    disableFilters: true,
                     Cell: ({ row }) => (
                         row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
                     )
@@ -579,6 +580,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                 type={addExistingProductDialog.type}
                 refrenceType="sublease"
                 renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
+                ignoreIds={[]}
             />
         }
     </Fragment >

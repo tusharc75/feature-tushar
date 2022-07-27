@@ -10,7 +10,7 @@ import './Sidebar.scss';
 import { ChevronRight, ExpandMore, ExpandLess } from '@material-ui/icons';
 import { kebabCase, lowerCase, sortBy } from 'lodash';
 
-import { FaRegUserCircle, FaRegRegistered } from 'react-icons/fa';
+import { FaRegUserCircle, FaReact, FaRegRegistered } from 'react-icons/fa';
 import { MdOutlineDashboard, MdOutlineLocalActivity } from 'react-icons/md';
 import { RiFolderSettingsLine, RiAccountPinCircleFill, RiShieldUserLine } from 'react-icons/ri';
 import { SiCivicrm } from 'react-icons/si';
@@ -25,73 +25,8 @@ import { AiOutlineDatabase, AiOutlineFileText } from 'react-icons/ai';
 import { FaRegUser } from 'react-icons/fa';
 
 import { AccountCircle } from '@material-ui/icons';
+import useStyles from './style';
 import routes from '../Helpers/Routes';
-const drawerWidth = 240;
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex'
-  },
-
-  hide: { display: 'none' },
-
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1
-  },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-    whiteSpace: 'nowrap'
-  },
-  drawerOpen: {
-    overflowY: 'auto',
-
-    width: drawerWidth,
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen
-    })
-  },
-  drawerClose: {
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen
-    }),
-    width: '48px',
-    [theme.breakpoints.down('sm')]: {
-      width: 0,
-      borderRight: 'none !important'
-    }
-  },
-  toolbar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: theme.spacing(0),
-    borderBottom: '2px solid #f5f8f9'
-  },
-  menuIcon: {
-    width: 22
-  },
-  drawerIcon: {
-    width: 18
-  },
-  heading: {
-    fontWeight: 'normal',
-    marginLeft: theme.spacing(2)
-  },
-  nested: {
-    paddingLeft: theme.spacing(4)
-  },
-  sidebarUser: {
-    padding: '1.5rem 1rem 1rem',
-    background: '#fff',
-    color: '#153d77',
-    textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'column',
-    height: '8rem'
-  }
-}));
 
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
@@ -107,6 +42,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
+
   const iconMapping = [
     {
       key: 'Brand Admin',
@@ -137,8 +73,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       icon: <SiCivicrm size={15} className="sidebar-icon" />
     },
     {
-      key: 'CRM+',
-      icon: <SiCivicrm size={15} className="sidebar-icon" />
+      key: 'ROM',
+      icon: <FaRegRegistered size={15} className="sidebar-icon" />
     }
   ];
 
@@ -188,10 +124,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           }
         });
       }
-      let levalOrderBy = ['CRM+', 'CRM +', 'ROM', 'Accounts', 'Product Setup', 'Dynamic Forms', 'Activities', 'Admin Portal'];
-      sections = sortBy(sections, function (item: any) {
-        return levalOrderBy?.indexOf(item);
-      });
 
       return sections.map((section) => {
         const lists = user.role.sideBar.filter((list) => list.sectionName === section);
@@ -283,6 +215,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   history.push('/');
                 }}
                 primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
+              // className={`wordWrap`}
               />
             </ListItem>
             {permissions?.dashboard?.isRead && !isOffline && (
@@ -298,7 +231,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     <ListItemIcon>
                       <MdOutlineDashboard size={15} className="sidebar-icon" />
                     </ListItemIcon>
-                    <ListItemText primary="Dashboards" />
+                    <ListItemText primary="Dashboards" className={`wordWrap`} />
                   </ListItem>
                 </Tooltip>
               </Link>
@@ -316,7 +249,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                     <ListItemIcon>
                       <AiOutlineFileText size={16} className="sidebar-icon" />
                     </ListItemIcon>
-                    <ListItemText primary="Reports" />
+                    <ListItemText primary="Reports" className={`wordWrap`} />
                   </ListItem>
                 </Tooltip>
               </Link>
@@ -339,9 +272,9 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                       <ListItemIcon>
                         {iconMapping.find((mapping) => {
                           return mapping.key === listItem.section;
-                        })?.icon || <FaRegRegistered size={16} className="sidebar-icon" /> || <AiOutlineSetting size={18} className="sidebar-icon" />}
+                        })?.icon || <FaReact size={16} className="sidebar-icon" />}
                       </ListItemIcon>
-                      <ListItemText primary={listItem.section} />
+                      <ListItemText primary={listItem.section} className={`wordWrap`} />
                       {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
                   </Tooltip>

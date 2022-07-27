@@ -127,7 +127,7 @@ export const intialState = {
 };
 
 export default function CustomAgGridEditable({
-  columns:cols,
+  columns: cols,
   dataRows,
   frameworkComponents,
   dispatch,
@@ -171,9 +171,9 @@ export default function CustomAgGridEditable({
   const [currentGridApi, setCurrentGridApi] = useState(null);
   const enableRowDrag = cols.some((d) => d.rowDrag);
 
-  useEffect(( ) => {
+  useEffect(() => {
     setColumns(cols)
-  },[cols])
+  }, [cols])
 
   useEffect(() => {
     if (currentGridApi && selectedRecords.length) {

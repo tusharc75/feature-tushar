@@ -12,7 +12,8 @@ import {
   salesOrder,
   sidebarResource,
   prepareDataForGrid,
-  getLocalStorageArrayData
+  getLocalStorageArrayData,
+  removeLocalStorage
 } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
@@ -229,8 +230,11 @@ const SalesOrder = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterSalesOrder=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterSalesOrder=${selectedType}`;
+    }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
@@ -262,7 +266,7 @@ const SalesOrder = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -270,7 +274,7 @@ const SalesOrder = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
 
     return deepFilter;
@@ -355,6 +359,7 @@ const SalesOrder = () => {
             type: 'success',
             message: data.message
           });
+          removeLocalStorage(localStorageSelectedRecords)
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -395,6 +400,7 @@ const SalesOrder = () => {
                     if (gridApi) gridApi.deselectAll();
                     else fetchSalesOrder();
                   }}
+                  additionalParams={getQueryString(true)}
                 />
               </Grid>
             </Grid>

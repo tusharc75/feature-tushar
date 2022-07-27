@@ -1,56 +1,52 @@
-import { useState, FC, useEffect, useContext, useReducer, Fragment } from "react";
-import { Tooltip, IconButton, Grid } from "@material-ui/core";
-import { Delete as DeleteIcon } from "@material-ui/icons";
-import { Link } from "react-router-dom";
-import axiosInstance from "../../axios/axiosInstance";
-import routes from "./../../components/Helpers/Routes";
-import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
-import CustomContainer from "../../components/CustomContainer";
-import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
-import MessageDialog from "../../components/Helpers/MessageDialog";
-import { useData } from "../../StateProvider/Provider";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CreateRole from "./CreateRole";
-import { PERMISSION } from "../../constants/Roles";
-import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from "../../constants/helpers";
-import RoleHeader from "./RoleHeader";
-import CustomAgGrid, {
-  reducer,
-  intialState,
-} from "../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
-import AssignUserDialog from "../../components/AssignRolesDialog/AssignUserDialog";
-import AssignRegionalRolesUserDialog from "../../components/AssignRolesDialog/AssignRegionalRolesUserDialog";
+import { useState, FC, useEffect, useContext, useReducer, Fragment } from 'react';
+import { Tooltip, IconButton, Grid } from '@material-ui/core';
+import { Delete as DeleteIcon } from '@material-ui/icons';
+import { Link } from 'react-router-dom';
+import axiosInstance from '../../axios/axiosInstance';
+import routes from './../../components/Helpers/Routes';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import CustomContainer from '../../components/CustomContainer';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import MessageDialog from '../../components/Helpers/MessageDialog';
+import { useData } from '../../StateProvider/Provider';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import CreateRole from './CreateRole';
+import { PERMISSION } from '../../constants/Roles';
+import { localStorageKeys, roleTypes, gridPageSizes, isObjectEmpty, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import RoleHeader from './RoleHeader';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
+import AssignUserDialog from '../../components/AssignRolesDialog/AssignUserDialog';
+import AssignRegionalRolesUserDialog from '../../components/AssignRolesDialog/AssignRegionalRolesUserDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaSuitcase, MdDescription, IoCreateSharp } from "react-icons/all";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { camelCase } from "lodash";
+import { FaSuitcase, MdDescription, IoCreateSharp } from 'react-icons/all';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { camelCase } from 'lodash';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 let roleTimeout;
 
 const Roles: FC = () => {
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory()
+  const history = useHistory();
   const {
-    state: { permissions, selectedEntity },
+    state: { permissions, selectedEntity }
   }: any = useData();
-  const [selectedType, setSelectedType] = useState(localStorage.getItem(localStorageKeys.currentSelectedRoleType) ?
-    roleTypes.find((d) => d.key === localStorage.getItem(localStorageKeys.currentSelectedRoleType)).value :
-    roleTypes.find((d) => d.key === "Global")?.value);
+  const [selectedType, setSelectedType] = useState(
+    localStorage.getItem(localStorageKeys.currentSelectedRoleType)
+      ? roleTypes.find((d) => d.key === localStorage.getItem(localStorageKeys.currentSelectedRoleType)).value
+      : roleTypes.find((d) => d.key === 'Global')?.value
+  );
   const [isOpen, setIsOpen] = useState({ open: false, isClone: false, idToClone: null });
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [
-    showDeleteWarningConfirmBox,
-    setShowDeleteWarningConfirmBox,
-  ] = useState(false);
+  const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
-  const renderedFrom = camelCase(routes.role.title)
+  const renderedFrom = camelCase(routes.role.title);
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -58,10 +54,10 @@ const Roles: FC = () => {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
-    { field: "name", headerName: "Name", show: true, disabled: true, cellRenderer: "nameRenderer" },
-    { field: "description", headerName: "Description", show: true, cellRenderer: "commonRenderer" },
-    { field: "createdBy", headerName: "Created By", show: true, cellRenderer: "createdByRenderer" },
-    { field: "updatedBy", headerName: "Updated By", show: true, cellRenderer: "updatedByRenderer" },
+    { field: 'name', headerName: 'Name', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'description', headerName: 'Description', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+    { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
   ];
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
@@ -94,60 +90,56 @@ const Roles: FC = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting]);
 
-  const NameRenderer = params => <Link
-    title={params.value}
-    className="text-truncate link"
-    to={`${routes.roleDetail.path}/${params.data.id}`}
-  >
-    {params.value}
-  </Link>
+  const NameRenderer = (params) => (
+    <Link title={params.value} className="text-truncate link" to={`${routes.roleDetail.path}/${params.data.id}`}>
+      {params.value}
+    </Link>
+  );
 
-  const ActionsRenderer = params => <>
-    <Tooltip
-      className={permissions.role.isCreate ? "" : "cursor-stop"}
-      title={permissions.role.isCreate ? "Clone" : "You do not have permission to clone/create"} >
-      <IconButton
-        size="small"
-        aria-label="Clone"
-        onClick={() => {
-          setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
-        }}
+  const ActionsRenderer = (params) => (
+    <>
+      <Tooltip
+        className={permissions.role.isCreate ? '' : 'cursor-stop'}
+        title={permissions.role.isCreate ? 'Clone' : 'You do not have permission to clone/create'}
       >
-        <FileCopyIcon fontSize="small" color="primary" />
-      </IconButton>
-    </Tooltip>
-    {permissions.role.isDelete ? (
-      <span title="Delete Role">
-        {
-          rolePermissionArray.indexOf(params.data.permission) >= 0 ? (
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            setIsOpen({ open: true, isClone: true, idToClone: params.data._id });
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>
+      {permissions.role.isDelete ? (
+        <span title="Delete Role">
+          {rolePermissionArray.indexOf(params.data.permission) >= 0 ? (
             <Tooltip
               className="cursor-stop"
-              title={params.data.type === "Global Role" ? "Global brand admin role can not be deleted" : "Regional brand admin role can not be deleted"}
+              title={
+                params.data.type === 'Global Role' ? 'Global brand admin role can not be deleted' : 'Regional brand admin role can not be deleted'
+              }
             >
               <IconButton size="small" aria-label="Delete">
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
-          ) : (<IconButton
-            size="small"
-            aria-label="Delete"
-            onClick={() => showConfirmBox(params.data)}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>)
-        }
-      </span>
-    ) : (
-      <Tooltip
-        className="cursor-stop"
-        title="You do not have permission to delete role"
-      >
-        <IconButton aria-label="Delete">
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    )}
-  </>
+          ) : (
+            <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
+              <DeleteIcon color="error" />
+            </IconButton>
+          )}
+        </span>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to delete role">
+          <IconButton aria-label="Delete">
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+    </>
+  );
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
@@ -159,16 +151,16 @@ const Roles: FC = () => {
 
   const replaceFieldName = (field) => {
     switch (field) {
-      case "createdBy":
-        return "createdBy.user.concatedName";
+      case 'createdBy':
+        return 'createdBy.user.concatedName';
 
-      case "updatedBy":
-        return "updatedBy.user.concatedName";
+      case 'updatedBy':
+        return 'updatedBy.user.concatedName';
 
       default:
         return field;
     }
-  }
+  };
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&type=2`;
@@ -176,21 +168,21 @@ const Roles: FC = () => {
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
-      Object.keys(filters).forEach(field => {
+      Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
-        })
+        });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldName(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
 
     return deepFilter;
@@ -198,7 +190,7 @@ const Roles: FC = () => {
 
   const fetchRoles = async () => {
     const queryString = getQueryString();
-    dispatch({ type: "loading", loading: true });
+    dispatch({ type: 'loading', loading: true });
 
     if (gridApi) {
       gridApi.setRowData([]);
@@ -207,31 +199,28 @@ const Roles: FC = () => {
     axiosInstance()
       .get(`/role/${queryString}`)
       .then(({ data: { data, count } }) => {
-
         let rows = data.map((u) => {
-
           let finalObject = prepareDataForGrid(u);
-          finalObject["canDelete"] = permissions.role.isDelete;
-          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-          finalObject["allowedToEdit"] = permissions.role.isUpdate;
+          finalObject['canDelete'] = permissions.role.isDelete;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = permissions.role.isUpdate;
           return {
             ...finalObject,
-            type: `${u.type === roleTypes.find((d) => d.key === "Global")?.value ? "Global" : "Regional"} Role`,
+            type: `${u.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'Global' : 'Regional'} Role`
           };
         });
 
-
-        dispatch({ type: "initialize", data: rows, count: count });
+        dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
-          dispatch({ type: "loading", loading: false });
+          dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        dispatch({ type: "loading", loading: false });
+        dispatch({ type: 'loading', loading: false });
       });
     // eslint-disable-next-line
-  }
+  };
 
   const showConfirmBox = (row) => {
     if (row) {
@@ -265,8 +254,8 @@ const Roles: FC = () => {
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: data.message
           });
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
@@ -282,7 +271,7 @@ const Roles: FC = () => {
   };
 
   const handleSearch = (e) => {
-    dispatch({ type: "search", search: e.target.value });
+    dispatch({ type: 'search', search: e.target.value });
   };
 
   const handleCreate = () => {
@@ -304,9 +293,7 @@ const Roles: FC = () => {
     setShowAssignUserDialog(false);
   };
 
-  const disableDelete = selectedRecords.some(
-    (o) => rolePermissionArray.indexOf(o?.permission) >= 0
-  );
+  const disableDelete = selectedRecords.some((o) => rolePermissionArray.indexOf(o?.permission) >= 0);
 
   return (
     <>
@@ -317,13 +304,13 @@ const Roles: FC = () => {
           fetchData={fetchRoles}
           roleType={2}
           setToastConfig={toastConfig.setToastConfig}
-          selectedEntity={selectedEntity}
+          selectedEntity={selectedEntity || ''}
           roleId={isOpen?.idToClone}
           isClone={isOpen?.isClone}
         />
       )}
-      {showAssignUserDialog && (
-        selectedType === roleTypes.find((d) => d.key === "Global")?.value ?
+      {showAssignUserDialog &&
+        (selectedType === roleTypes.find((d) => d.key === 'Global')?.value ? (
           <AssignUserDialog
             usersDialogOpen={showAssignUserDialog}
             handleCloseDialog={userDialogClose}
@@ -332,8 +319,9 @@ const Roles: FC = () => {
             onSuccess={() => {
               userDialogClose();
             }}
+            selectedEntity={selectedEntity || ''}
           />
-          :
+        ) : (
           <AssignRegionalRolesUserDialog
             entitiesDialogOpen={showAssignUserDialog}
             handleCloseDialog={userDialogClose}
@@ -343,10 +331,8 @@ const Roles: FC = () => {
               userDialogClose();
             }}
           />
-
-      )}
+        ))}
       <Fragment>
-
         <Grid container className="headerbox">
           <Grid item md={12} sm={12} xs={12}>
             <CustomBreadCrumbs routes={[routes.role]} />
@@ -372,57 +358,68 @@ const Roles: FC = () => {
             />
           </div>
 
-          {isMobile && !isTablet ? <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions.role}
-            primaryField={columns?.find(d => d.field === "name")}
-            onClick={(d) => {
-              history.push(`${routes.roleDetail.path}/${d._id}`)
-            }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(d) => {
-              history.push(`${routes.roleDetail.path}/${d._id}`)
-            }}
-            extraParamsToCheckDelete={true}
-            onDelete={(d) => {
-
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[
-              {
-                icon: <FaSuitcase size={18} />,
-                field: "type"
-              }
-            ]}
-            chips={[
-              {
-                icon: <MdDescription />,
-                label: "Description: ",
-                field: "description"
-              },
-              {
-                icon: <IoCreateSharp />,
-                label: "Created By: ",
-                field: "createdBy"
-              }
-            ]}
-            owerCollaboratorInitialsOrImages=""
-            onCreate={false}
-            showClone={false}
-            onClone={() => { }}
-            renderedFrom={"role"} /> : <CustomAgGrid columns={columns} dataRows={dataRows} frameworkComponents={frameworkComponents} setGridApi={setGridApi}
-              dispatch={dispatch} rowCount={rowCount} limit={limit} pageSizes={pageSizes} page={page} actionWidth={100}
+          {isMobile && !isTablet ? (
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.role}
+              primaryField={columns?.find((d) => d.field === 'name')}
+              onClick={(d) => {
+                history.push(`${routes.roleDetail.path}/${d._id}`);
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(d) => {
+                history.push(`${routes.roleDetail.path}/${d._id}`);
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(d) => {}}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[
+                {
+                  icon: <FaSuitcase size={18} />,
+                  field: 'type'
+                }
+              ]}
+              chips={[
+                {
+                  icon: <MdDescription />,
+                  label: 'Description: ',
+                  field: 'description'
+                },
+                {
+                  icon: <IoCreateSharp />,
+                  label: 'Created By: ',
+                  field: 'createdBy'
+                }
+              ]}
+              owerCollaboratorInitialsOrImages=""
+              onCreate={false}
+              showClone={false}
+              onClone={() => {}}
+              renderedFrom={'role'}
+            />
+          ) : (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={100}
               loading={loading}
               isClientSideGrid={true}
               refreshGrid={fetchRoles}
               renderedFrom={renderedFrom}
-          />}
-
+            />
+          )}
         </CustomContainer>
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
@@ -434,7 +431,7 @@ const Roles: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete role ${deleteRecord?.name || ""}?`}
+            message={`Are you sure you want to delete role ${deleteRecord?.name || ''}?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

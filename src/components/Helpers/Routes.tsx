@@ -262,6 +262,14 @@ const routes = {
     title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes/detail'
   },
+  quotes: {
+    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
+    path: '/quotes'
+  },
+  quotesDetail: {
+    title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
+    path: '/quotes/detail'
+  },
   quote: {
     title: storedRoutes && storedRoutes.quoteBuilder && storedRoutes.quoteBuilder ? storedRoutes.quoteBuilder?.title : RESOURCE_LABEL.quoteBuilder,
     path: '/quotes'
@@ -444,6 +452,13 @@ const routes = {
     title: storedRoutes && storedRoutes.reports && storedRoutes.reports.title ? storedRoutes.reports?.title : 'Reports',
     path: '/reports'
   },
+  scheduleReport: {
+    title:
+      storedRoutes && storedRoutes.scheduleReport && storedRoutes.scheduleReport.title
+        ? storedRoutes.scheduleReport?.title
+        : RESOURCE_LABEL.scheduleReport,
+    path: '/schedule-report'
+  },
   resourceCalendar: {
     title:
       storedRoutes && storedRoutes.resourceCalendar && storedRoutes.resourceCalendar.title
@@ -522,6 +537,84 @@ const routes = {
         ? storedRoutes.productAuction?.title
         : RESOURCE_LABEL.productAuction,
     path: '/product-auction/detail'
+  },
+  inventoryToAsset: {
+    title:
+      storedRoutes && storedRoutes.InventoryToAsset && storedRoutes.InventoryToAsset.title
+        ? storedRoutes.InventoryToAsset?.title
+        : RESOURCE_LABEL.inventoryToAsset,
+    path: '/inventory-to-asset'
+  },
+  importExport: {
+    title:
+      storedRoutes && storedRoutes.InventoryToAsset && storedRoutes.InventoryToAsset.title
+        ? storedRoutes.InventoryToAsset?.title
+        : RESOURCE_LABEL.importExport,
+    path: '/import-export'
+  },
+  inventoryCycle: {
+    title:
+      storedRoutes && storedRoutes?.inventoryCycle && storedRoutes?.inventoryCycle.title
+        ? storedRoutes?.inventoryCycle?.title
+        : RESOURCE_LABEL.inventoryCycle,
+    path: '/inventory-cycle'
+  },
+  inventoryCycleDetail: {
+    title:
+      storedRoutes && storedRoutes?.inventoryCycle && storedRoutes?.inventoryCycle?.title
+        ? storedRoutes?.inventoryCycle?.title
+        : RESOURCE_LABEL.inventoryCycle,
+    path: '/inventory-cycle/detail'
+  },
+  cycleCountDetermination: {
+    title:
+      storedRoutes && storedRoutes?.cycleCountDetermination && storedRoutes?.cycleCountDetermination?.title
+        ? storedRoutes?.cycleCountDetermination?.title
+        : RESOURCE_LABEL.cycleCountDetermination,
+    path: '/cycle-count-determination'
+  },
+  cycleCountPhysicalInventory: {
+    title:
+      storedRoutes && storedRoutes?.cycleCountPhysicalInventory && storedRoutes?.cycleCountPhysicalInventory?.title
+        ? storedRoutes?.cycleCountPhysicalInventory?.title
+        : RESOURCE_LABEL.cycleCountPhysicalInventory,
+    path: '/cycle-count-physical-inventory'
+  },
+  quotation: {
+    title: storedRoutes && storedRoutes.quotation && storedRoutes.quotation.title ? storedRoutes.quotation?.title : RESOURCE_LABEL.quotation,
+    path: '/quotation'
+  },
+  quotationDetail: {
+    title: storedRoutes && storedRoutes.quotation && storedRoutes.quotation.title ? storedRoutes.quotation?.title : RESOURCE_LABEL.quotation,
+    path: '/quotation/detail'
+  },
+  serviceMaster: {
+    title:
+      storedRoutes && storedRoutes.serviceMaster && storedRoutes.serviceMaster.title
+        ? storedRoutes.serviceMaster?.title
+        : RESOURCE_LABEL.serviceMaster,
+    path: '/service-master'
+  },
+  serviceMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.serviceMaster && storedRoutes.serviceMaster.title
+        ? storedRoutes.serviceMaster?.title
+        : RESOURCE_LABEL.serviceMaster,
+    path: '/service-master/detail'
+  },
+  leadTimeMaster: {
+    title:
+      storedRoutes && storedRoutes.leadTimeMaster && storedRoutes.leadTimeMaster.title
+        ? storedRoutes.leadTimeMaster?.title
+        : RESOURCE_LABEL.leadTimeMaster,
+    path: '/lead-time-master'
+  },
+  leadTimeMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.leadTimeMaster && storedRoutes.leadTimeMaster.title
+        ? storedRoutes.leadTimeMaster?.title
+        : RESOURCE_LABEL.leadTimeMaster,
+    path: '/lead-time-master/detail'
   }
 };
 

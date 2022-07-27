@@ -238,7 +238,7 @@ const AddressResource = () => {
           </IconButton>
         </span>
       </Tooltip>
-      {warehousePermissions.isDelete && params?.data?.createdById === user?.user?._id ? (
+      {warehousePermissions.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -303,8 +303,8 @@ const AddressResource = () => {
     }
   };
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+  const getQueryString = (isExport = false) => {
+    let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
@@ -315,7 +315,7 @@ const AddressResource = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -323,7 +323,7 @@ const AddressResource = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -410,6 +410,7 @@ const AddressResource = () => {
               if (gridApi) gridApi.deselectAll()
               else fetchWarehouses()
             }}
+            additionalParams={getQueryString(true)}
           />
         </Grid>
       </Grid>

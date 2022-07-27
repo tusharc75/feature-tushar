@@ -73,16 +73,22 @@
       right: 5px;
       bottom: 5px;
       background: transparent;
+      -webkit-transition: background 0.4s, -webkit-box-shadow 0.4s;
+      transition: background 0.4s, -webkit-box-shadow 0.4s;
+      -o-transition: background 0.4s, box-shadow 0.4s;
       transition: background 0.4s, box-shadow 0.4s;
+      transition: background 0.4s, box-shadow 0.4s, -webkit-box-shadow 0.4s;
       border-radius: 8px;
       z-index: -1;
     }
     &.active_element::before {
       background-color: #41aeaa;
+      -webkit-box-shadow: 0px 4px 4px rgba(65, 174, 170, 0.25);
       box-shadow: 0px 4px 4px rgba(65, 174, 170, 0.25);
     }
     &.Mui-selected::before {
       background-color: #41aeaa;
+      -webkit-box-shadow: 0px 4px 4px rgba(65, 174, 170, 0.25);
       box-shadow: 0px 4px 4px rgba(65, 174, 170, 0.25);
     }
 
@@ -106,6 +112,8 @@
 
     .sub-list {
       position: relative;
+      display: block;
+
       .MuiListItem-root {
         padding: 2px 0px 0 50px;
         background: #f2f2f2;
@@ -122,43 +130,49 @@
       }
       & > div.MuiButtonBase-root {
         position: relative;
-      }
-      & > div.MuiButtonBase-root::before {
-        content: '';
-        position: absolute;
-        left: 32px;
-        width: 15px;
-        height: 1px;
-        top: 50%;
-        background-color: #41aeaa;
-      }
-    }
-    .sub-list::before {
-      background-color: #f2f2f2;
-      bottom: auto;
-      content: '';
-      height: 8px;
-      left: 24px;
-      top: 50%;
-      transform: translateY(-50%);
-      position: absolute;
-      right: auto;
-      width: 8px;
-      z-index: 1;
-      border-radius: 50%;
-      border: 2px solid #41aeaa;
-    }
 
-    .sub-list::after {
-      border-left: 2px solid #41aeaa;
-      bottom: 0;
-      content: '';
-      left: 27px;
-      position: absolute;
-      top: 0;
+        &::before {
+          content: '';
+          position: absolute;
+          left: 32px;
+          width: 15px;
+          height: 1px;
+          top: 50%;
+          background-color: #41aeaa;
+        }
+      }
+
+      &::before {
+        background-color: #f2f2f2;
+        bottom: auto;
+        content: '';
+        height: 8px;
+        left: 24px;
+        top: 50%;
+        -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        transform: translateY(-50%);
+        position: absolute;
+        right: auto;
+        width: 8px;
+        z-index: 1;
+        border-radius: 50%;
+        border: 2px solid #41aeaa;
+      }
+      &::after {
+        background-color: #41aeaa;
+        bottom: 0;
+        content: '';
+        width: 2px;
+        left: 27px;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+      }
     }
   }
 }
+
 .open_sidebar {
   margin-left: -3px;
 }
