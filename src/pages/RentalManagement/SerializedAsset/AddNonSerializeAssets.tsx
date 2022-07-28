@@ -21,8 +21,8 @@ import { makeStyles, createStyles, withStyles } from '@material-ui/styles';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { CircularProgress } from "@material-ui/core";
-import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { CircularProgress } from '@material-ui/core';
+import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { addAssetsInRental } from '../rentalOfflineHelper';
 
 interface DialogProps {
@@ -50,12 +50,11 @@ const useClasses = makeStyles(() => ({
     display: 'none'
   },
   tableContainer: {
-    maxHeight: "calc(100vh - 200px)"
+    maxHeight: 'calc(100vh - 200px)'
   }
 }));
 
 const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }: DialogProps) => {
-
   const classes = useClasses();
   const { setToastConfig } = useContext(CustomToastContext);
   const [productData, setProductData] = useState<TableContent[]>([]);
@@ -85,7 +84,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
   }, [products]);
 
   useEffect(() => {
-    setDataWithNumber(tableData.filter(t => t['Asset Number']))
+    setDataWithNumber(tableData.filter((t) => t['Asset Number']));
   }, [tableData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,23 +131,33 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
       const parsedData = utils.sheet_to_json(ws, { header: 1 });
 
       if (parsedData.length > 1) {
-
         let tableContent = parsedData.slice(1, parsedData.length);
 
-        tableContent = tableContent.map((item) => {
-          const foundProduct: TableContent = productData.find((p) => p['Name'] === item[1]);
-          let tableObj: TableContent = {
-            id: `${item[0]}_${foundProduct?._id}`,
-            _id: foundProduct?._id,
-            product: foundProduct?.product,
-            serializedProduct: foundProduct?.serializedProduct,
-            ['srno']: item[0],
-            ['Name']: item[1],
-            ["Asset Number"]: item[2]?.toString()
-          };
-          return tableObj;
-        });
-        setTableData(tableContent as TableContent[]);
+        // tableContent = tableContent.map((item) => {
+        //   const foundProduct: TableContent = productData.find((p) => p['Name'] === item[1]);
+        //   let tableObj: TableContent = {
+        //     id: `${item[0]}_${foundProduct?._id}`,
+        //     _id: foundProduct?._id,
+        //     product: foundProduct?.product,
+        //     serializedProduct: foundProduct?.serializedProduct,
+        //     ['srno']: item[0],
+        //     ['Name']: item[1],
+        //     ['Asset Number']: item[2]?.toString()
+        //   };
+        //   return tableObj;
+        // });
+        setTableData((state) =>
+          state.map((s) => {
+            const foundRow = tableContent.find((p) => p[1] === s['Name']);
+            if (foundRow) {
+              return {
+                ...s,
+                ['Asset Number']: foundRow[2]
+              };
+            }
+            return s;
+          })
+        );
       }
     };
     reader.readAsBinaryString(f);
@@ -161,19 +170,20 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
     if (duplicates.length) {
       setToastConfig({
         open: true,
-        message: "One or more asset numbers are same!",
+        message: 'One or more asset numbers are same!',
         type: 'error'
-      })
+      });
       return false;
-    }
-    else {
+    } else {
       if (isOffline) {
         setSubmitting(true);
-        await addAssetsInRental(referenceId, dataWithNumber.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct })))
+        await addAssetsInRental(
+          referenceId,
+          dataWithNumber.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct }))
+        );
         setSubmitting(false);
         closeDialog();
-      }
-      else {
+      } else {
         setSubmitting(true);
         const dataToSubmit = {
           warehouse: warehouse,
@@ -234,7 +244,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
                 <TableRow>
                   <TableCell>Sr.No.</TableCell>
                   <TableCell align="left">Product</TableCell>
-                  <TableCell align="left">{isOffline ? "Asset Number" : "Serial Number"}</TableCell>
+                  <TableCell align="left">{isOffline ? 'Asset Number' : 'Serial Number'}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -248,7 +258,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
                       <TextField
                         size="small"
                         variant="outlined"
-                        placeholder={isOffline ? "Asset Number" : "Serial Number"}
+                        placeholder={isOffline ? 'Asset Number' : 'Serial Number'}
                         value={data['Asset Number']}
                         autoComplete="off"
                         name={data.id}
