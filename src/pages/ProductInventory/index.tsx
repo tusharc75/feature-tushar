@@ -275,35 +275,37 @@ const InventoryProduct = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {(permissions?.productInventory?.isUpdate && params?.data?.plantId !== "All") &&
+      {(params?.data?.plantId !== "All") &&
         <Fragment>
-          <Box>
-            <Tooltip title="Add">
-              <IconButton
-                size="small"
-                aria-label="Clone"
-                onClick={() => {
-                  setInventory({ open: true, product: [params?.data], type: 'add' })
-                }}
-              >
-                <AddCircleOutlineIcon fontSize="small" color="secondary" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-          <Box pl={1}>
-            <Tooltip title="Remove">
-              <IconButton
-                size="small"
-                aria-label="Clone"
-                disabled={params?.data?.availableInventory ? false : true}
-                onClick={() => {
-                  setInventory({ open: true, product: [params?.data], type: 'remove' })
-                }}
-              >
-                <RemoveCircleOutlineIcon fontSize="small" color={params?.data?.availableInventory ? "error" : "disabled"} />
-              </IconButton>
-            </Tooltip>
-          </Box>
+          {permissions?.productInventory?.isCreate ?
+            <Box>
+              <Tooltip title="Add">
+                <IconButton
+                  size="small"
+                  aria-label="Clone"
+                  onClick={() => {
+                    setInventory({ open: true, product: [params?.data], type: 'add' })
+                  }}
+                >
+                  <AddCircleOutlineIcon fontSize="small" color="secondary" />
+                </IconButton>
+              </Tooltip>
+            </Box> : null}
+          {permissions?.productInventory?.isUpdate ?
+            <Box pl={1}>
+              <Tooltip title="Remove">
+                <IconButton
+                  size="small"
+                  aria-label="Clone"
+                  disabled={params?.data?.availableInventory ? false : true}
+                  onClick={() => {
+                    setInventory({ open: true, product: [params?.data], type: 'remove' })
+                  }}
+                >
+                  <RemoveCircleOutlineIcon fontSize="small" color={params?.data?.availableInventory ? "error" : "disabled"} />
+                </IconButton>
+              </Tooltip>
+            </Box> : null}
         </Fragment>
       }
       <Box pl={1}>
@@ -474,6 +476,7 @@ const InventoryProduct = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
+                      disabled={permissions?.productInventory?.isCreate ? false : true}
                       onClick={() => {
                         closeActions()
                         setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: "add" })
@@ -482,6 +485,7 @@ const InventoryProduct = () => {
                       Add
                     </MenuItem>
                     <MenuItem
+                      disabled={permissions?.productInventory?.isUpdate ? false : true}
                       onClick={() => {
                         closeActions()
                         setInventory({ open: true, product: getLocalStorageArrayData(`${localStorageSelectedRecords}`), type: "remove" })

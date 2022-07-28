@@ -231,7 +231,7 @@ const Report = () => {
         columns = [
           ...columns,
           {
-            field: 'totalQty',
+            field: 'availableQty',
             headerName: 'Quantity',
             show: true,
             disabled: false,
@@ -241,7 +241,7 @@ const Report = () => {
           },
           {
             field: 'averagePrice',
-            headerName: 'Average Unit Price',
+            headerName: 'Average Price',
             show: true,
             disabled: false,
             filter: false,
@@ -273,7 +273,7 @@ const Report = () => {
 
       columns?.forEach((e) => {
         if (["productName", "productDescription", "productCategory", "productCondition",
-          "totalQty", "averagePrice", "totalPrice", "margin"].includes(e.field)) {
+          "availableQty", "averagePrice", "totalPrice", "margin"].includes(e.field)) {
           e.show = true;
         }
         else {
