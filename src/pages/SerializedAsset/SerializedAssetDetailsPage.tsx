@@ -391,7 +391,7 @@ const SerializedAssetDetailsPage = () => {
       setActivityShow(true);
     }
   }, [isSmallScreen]);
-  
+
   return (
     <>
       <Fragment>
@@ -427,7 +427,8 @@ const SerializedAssetDetailsPage = () => {
                   >
                     {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
                       <>
-                        {permissions?.repairJob?.isCreate && ![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
+                        {permissions?.repairJob?.isCreate && !productInventoryData?.subleaseAsset &&
+                          ![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
                           <Button
                             variant="outlined"
                             color="default"
