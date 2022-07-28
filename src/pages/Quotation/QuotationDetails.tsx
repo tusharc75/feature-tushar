@@ -304,7 +304,7 @@ const QuotationDetails = () => {
                           {statusOptions?.map((o, index) => {
                             return (
                               <MenuItem
-                                // disabled={index <= statusOptions.findIndex((d) => d.optionLabel === quotationData?.status)}
+                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === quotationData?.status)}
                                 onClick={() => {
                                   closeActions();
                                   handleStatusChange(o);

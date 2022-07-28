@@ -59,10 +59,9 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
     setLoading(true);
     if (type === 'add') {
       data = {
-        products:
-          product.lenght > 1
-            ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumber: [] }))
-            : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumber: values['serialNumbers'] })),
+        products: product.lenght > 1
+          ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
+          : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: values['serialNumbers'] })),
         warehouse: warehouse,
         comment: values.comment
       };
@@ -126,6 +125,12 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
       }
     }
 
+    if (type === 'add') {
+      if (parseFloat(values.price) <= 0) {
+        errors['price'] = 'Please enter valid price';
+      }
+    }
+
     // find duplicates serial numbers
     const serialNumbersList = values['serialNumbers'];
     const duplicates = serialNumbersList.filter((item, index) => serialNumbersList.indexOf(item) != index);
@@ -135,6 +140,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
     } else if (duplicates.length > 0) {
       errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
     }
+
+
     return errors;
   }
 
@@ -202,7 +209,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
           <CircularProgress color="inherit" />
         </Box>
       ) : (
-        <Formik initialValues={{ qty: 1, comment: '', serialNumbers: [] }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+        <Formik initialValues={{ qty: 1, price: 0, comment: '', serialNumbers: [] }} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogHeader
@@ -239,6 +246,24 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                     />
                   </ListItem>
                 </List>
+                {type === 'add' ?
+                  <Box m={1}>
+                    <Field
+                      component={TextFieldFormik}
+                      margin="dense"
+                      type="number"
+                      label="Price"
+                      name="price"
+                      fullWidth
+                      variant="outlined"
+                      value={values['price']}
+                      error={touched['price'] && Boolean(errors['price'])}
+                      helperText={touched['price'] && errors['price']}
+                      onChange={(e) => {
+                        setFieldValue('price', e.target.value);
+                      }}
+                    />
+                  </Box> : null}
                 <Box m={1}>
                   <Field
                     component={TextFieldFormik}
@@ -331,8 +356,9 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
             </Form>
           )}
         </Formik>
-      )}
-    </Dialog>
+      )
+      }
+    </Dialog >
   );
 };
 
