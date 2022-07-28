@@ -63,7 +63,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
         { field: "qty", headerName: "Quantity", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
         { field: "soldQty", headerName: "Sold Quantity", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
         { field: "finalQty", headerName: "Final Quantity", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
-        { field: "price", headerName: "Unit Rate", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
+        { field: "price", headerName: "Price", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
         { field: "amount", headerName: "Amount", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer", },
     ];
