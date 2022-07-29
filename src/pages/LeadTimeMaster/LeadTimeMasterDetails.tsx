@@ -22,6 +22,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import accountClass from '../Account/account.module.scss';
 
 const LeadTimeMasterDetails = () => {
+  
   const renderedFrom = camelCase(routes?.leadTimeMasterDetail.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -193,10 +194,10 @@ const LeadTimeMasterDetails = () => {
               <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
                 <Grid container>
                   <Grid item xs={2}>
-                    <Typography variant="body1">Sr. No</Typography>
+                    <Typography variant="body1">#</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body1">Lead Time Status</Typography>
+                    <Typography variant="body1">Status</Typography>
                   </Grid>
                   <Grid item xs={4}>
                     <Typography variant="body1">Days</Typography>
@@ -215,7 +216,7 @@ const LeadTimeMasterDetails = () => {
                       <Typography variant="body2">{steps?.leadTimeStatus || ''}</Typography>
                     </Grid>
                     <Grid item xs={4}>
-                      <Typography variant="body2">{steps?.days || 0} Days</Typography>
+                      <Typography variant="body2">{steps?.days || 0}</Typography>
                     </Grid>
                   </Grid>
                 </Box>
@@ -237,11 +238,11 @@ const LeadTimeMasterDetails = () => {
                   </Grid>
                   <Grid item xs={6}>
                     <Typography variant="body2" style={{ fontWeight: 'bold' }}>
-                      Total Time
+                      Total
                     </Typography>
                   </Grid>
                   <Grid item xs={4}>
-                    <Typography variant="body2">{leadTimeMasterData?.leadTimeDays || 0} Days</Typography>
+                    <Typography variant="body2">{leadTimeMasterData?.leadTimeDays || 0}</Typography>
                   </Grid>
                 </Grid>
               </Box>
@@ -252,7 +253,7 @@ const LeadTimeMasterDetails = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this Lead TimeMaster: ${leadTimeMasterData?.leadTimeName} ?`}
+          message={`Are you sure you want to delete this  ${leadTimeMasterData?.leadTimeName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

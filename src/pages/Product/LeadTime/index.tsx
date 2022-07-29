@@ -68,10 +68,10 @@ const LeadTimeMaster = ({ product, productData }) => {
           <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
             <Grid container>
               <Grid item xs={2}>
-                <Typography variant="body1">Sr. No</Typography>
+                <Typography variant="body1">#</Typography>
               </Grid>
               <Grid item xs={6}>
-                <Typography variant="body1">Lead Time Status</Typography>
+                <Typography variant="body1">Status</Typography>
               </Grid>
               <Grid item xs={4}>
                 <Typography variant="body1">Days</Typography>
@@ -90,7 +90,7 @@ const LeadTimeMaster = ({ product, productData }) => {
                   <Typography variant="body2">{steps?.leadTimeStatus || ''}</Typography>
                 </Grid>
                 <Grid item xs={4}>
-                  <Typography variant="body2">{steps?.days || 0} Days</Typography>
+                  <Typography variant="body2">{steps?.days || 0}</Typography>
                 </Grid>
               </Grid>
             </Box>
@@ -120,11 +120,11 @@ const LeadTimeMaster = ({ product, productData }) => {
               </Grid>
               <Grid item xs={6}>
                 <Typography variant="body2" style={{ fontWeight: 'bold' }}>
-                  Total Time
+                  Total
                 </Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography variant="body2">{productLeadTime?.leadTimeDays || 0} Days</Typography>
+                <Typography variant="body2">{productLeadTime?.leadTimeDays || 0}</Typography>
               </Grid>
             </Grid>
           </Box>

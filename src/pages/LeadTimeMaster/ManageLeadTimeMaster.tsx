@@ -28,8 +28,10 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import { Autocomplete } from '@material-ui/lab';
 import React from 'react';
+import routes from 'src/components/Helpers/Routes';
 
-const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClose, onSuccess, refrenceType = null, refrenceData = null }) => {
+const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClose, onSuccess }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
 
@@ -61,9 +63,8 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
               setLeadTimeMasterSteps(data?.steps || []);
               setTotalDays(data?.steps?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
               if (isClone) {
-                const { _id, brand, createdBy, history, leadTimeMasterName, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${leadTimeMasterName}`);
-                rest.status = `New`;
+                const { _id, brand, createdBy, history, leadTimeName, updatedBy, ...rest } = data;
+                setTitle(`Clone - ${leadTimeName}`);
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
@@ -84,9 +85,8 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
               toastConfig.setToastConfig(error);
             });
         } else {
-          setTitle('Create Lead Time Master');
+          setTitle(`Create ${routes?.leadTimeMaster?.title}`);
           let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-
           setAllFields(fieldsDataForCreate);
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -101,13 +101,8 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
   }, [leadTimeMasterId]);
 
   const handleSubmit = (values) => {
-    handleUpdateLeadTimeMaster(values);
-  };
-
-  const handleUpdateLeadTimeMaster = (values) => {
     setSubmitting(true);
-    // values._id = leadTimeMasterId;
-    if (!leadTimeMasterId) {
+    if (!leadTimeMasterId || isClone === true) {
       values.steps = leadTimeMasterSteps;
       values.leadTimeDays = totalDays || 0;
       axiosInstance()
@@ -169,12 +164,14 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
     setLeadTimeMasterSteps(data);
     setTotalDays(data?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
   };
+  
   const handleOnDaysChangeValue = (index, value) => {
     const data = [...leadTimeMasterSteps];
     data[index].days = parseInt(value) ?? 0;
     setLeadTimeMasterSteps(data);
     setTotalDays(data?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
   };
+
   const handleOnLTMStatusChangeValue = (index, value) => {
     const data = [...leadTimeMasterSteps];
     data[index].leadTimeStatus = value;
