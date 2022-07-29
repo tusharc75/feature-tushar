@@ -178,7 +178,12 @@ const RentalManagementViews = (props) => {
         if (item.type !== 'package') {
           productColSystem[item._id] = productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition;
         }
-        if (!assetsInLoading[item?.materialId] && !assetsInReceiving[item?.materialId] && !assetsInReturn[item?.materialId])
+        if (
+          item?.productDetail?.serializedProduct &&
+          !assetsInLoading[item?.materialId] &&
+          !assetsInReceiving[item?.materialId] &&
+          !assetsInReturn[item?.materialId]
+        )
           flow.push({
             id: `${item._id}`,
             sourcePosition: 'right',
@@ -338,7 +343,7 @@ const RentalManagementViews = (props) => {
       product?.inventory?.map((item: any) => {
         productsWithStatus[item.inventory] = item?.inventoryDetail?.status;
         flow.push({
-          id: `${item.inventoryDetail.assetNumber}`,
+          id: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
           sourcePosition: 'right',
           targetPosition: 'left',
           type: 'default',
@@ -362,7 +367,7 @@ const RentalManagementViews = (props) => {
         beforeLoadingAssetIdx += 1;
 
         flowEdge.push({
-          id: `edge-assets-${item.inventoryDetail.assetNumber}`,
+          id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
           source: purchaseArr.includes(item.inventoryDetail.purchaseOrder)
             ? `${item.inventoryDetail.purchaseOrder}`
             : subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
@@ -373,13 +378,13 @@ const RentalManagementViews = (props) => {
             ? allAssets[item.inventoryDetail.assetNumber]
             : `${item._id}`,
           arrowHeadType: 'arrow',
-          target: `${item.inventoryDetail.assetNumber}`
+          target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
         });
       });
 
       var loadingProductData = [];
       product?.material
-        ?.filter((i) => !i?.productDetail?.serializedProduct && assetsInLoading[i?.materialId] && i.type !== 'package')
+        ?.filter((i) => !i?.productDetail?.serializedProduct && i.type !== 'package')
         ?.map((item) => {
           if (!loadingProductData.includes(`${item.materialId}`)) {
             loadingProductData.push(`${item.materialId}`);
