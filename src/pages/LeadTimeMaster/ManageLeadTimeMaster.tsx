@@ -59,6 +59,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
             .get(`${leadTimeMaster.api}/` + leadTimeMasterId)
             .then(({ data: { data } }) => {
               setLeadTimeMasterSteps(data?.steps || []);
+              setTotalDays(data?.steps?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
               if (isClone) {
                 const { _id, brand, createdBy, history, leadTimeMasterName, updatedBy, ...rest } = data;
                 setTitle(`Clone - ${leadTimeMasterName}`);
@@ -108,9 +109,11 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
     // values._id = leadTimeMasterId;
     if (!leadTimeMasterId) {
       values.steps = leadTimeMasterSteps;
+      values.leadTimeDays = totalDays || 0;
       axiosInstance()
         .post(`${leadTimeMaster.api}`, values)
         .then(({ data }) => {
+          onClose();
           setSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -126,6 +129,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
     } else {
       values._id = leadTimeMasterId;
       values.steps = leadTimeMasterSteps;
+      values.leadTimeDays = totalDays || 0;
       axiosInstance()
         .put(`${leadTimeMaster.api}`, values)
         .then(({ data }) => {
@@ -177,7 +181,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
     setLeadTimeMasterSteps(data);
   };
 
-  const dummyDropDown = "Hello World, This is only for testing purpose!! Don't offend ;)".split(' ');
+  const leadTimeStatusDropdown = ['Production', 'Supplier', 'Assemble', 'Freight', 'Customer'];
 
   return (
     <Dialog
@@ -279,7 +283,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                     })}
                   <div className={'detail-box-content'}>
                     <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Lead Time Master Steps</h2>
+                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Lead Time Steps</h2>
                   </div>
                   <Grid container>
                     <Grid item xs={12}>
@@ -320,7 +324,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                             <Grid container spacing={1}>
                               <Grid item xs={6}>
                                 <Autocomplete
-                                  options={dummyDropDown || []}
+                                  options={leadTimeStatusDropdown || []}
                                   getOptionLabel={(option) => option}
                                   value={steps?.leadTimeStatus || ''}
                                   onChange={(event: any, value) => {
@@ -399,10 +403,10 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                   startIcon={submitting && <CircularProgress size={20} color="inherit" />}
                   disabled={submitting}
                   onClick={(e) => {
+                    // onClose();
+                    e.preventDefault();
+                    handleScroll(errors);
                     submitForm();
-                    onClose();
-                    // e.preventDefault();
-                    // handleScroll(errors);
                     // handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
                   }}
                 >

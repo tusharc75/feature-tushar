@@ -185,25 +185,67 @@ const LeadTimeMasterDetails = () => {
             <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
               <Box display={'flex'}>
                 <Box>
-                  <Typography variant="subtitle2">Lead Time Master Steps</Typography>
+                  <Typography variant="subtitle2">Lead Time</Typography>
                 </Box>
               </Box>
             </Box>
-            {leadTimeMasterData?.steps?.map((steps, index) => (
-              <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+            {leadTimeMasterData?.steps?.length ? (
+              <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
                 <Grid container>
                   <Grid item xs={2}>
-                    <Typography variant="body2">{index}</Typography>
+                    <Typography variant="body1">Sr. No</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body2">{steps?.leadTimeStatus || ''}</Typography>
+                    <Typography variant="body1">Lead Time Status</Typography>
                   </Grid>
                   <Grid item xs={4}>
-                    <Typography variant="body2">{steps?.days || 0} Days</Typography>
+                    <Typography variant="body1">Days</Typography>
                   </Grid>
                 </Grid>
               </Box>
-            ))}
+            ) : null}
+            {leadTimeMasterData?.steps?.length ? (
+              leadTimeMasterData?.steps?.map((steps, index) => (
+                <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                  <Grid container>
+                    <Grid item xs={2}>
+                      <Typography variant="body2">{index + 1}</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography variant="body2">{steps?.leadTimeStatus || ''}</Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="body2">{steps?.days || 0} Days</Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              ))
+            ) : (
+              <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                <Grid container>
+                  <Grid item xs={6} justifyContent={'center'}>
+                    <Typography variant="body2">No Data Found</Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+            {leadTimeMasterData?.steps?.length ? (
+              <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
+                <Grid container>
+                  <Grid item xs={2}>
+                    <Typography variant="body2"></Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" style={{ fontWeight: 'bold' }}>
+                      Total Time
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant="body2">{leadTimeMasterData?.leadTimeDays || 0} Days</Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            ) : null}
           </Paper>
         </Grid>
       </Grid>
