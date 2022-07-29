@@ -365,21 +365,54 @@ const RentalManagementViews = (props) => {
               : customNodeStyles.productAssets
         });
         beforeLoadingAssetIdx += 1;
-
-        flowEdge.push({
-          id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
-          source: purchaseArr.includes(item.inventoryDetail.purchaseOrder)
-            ? `${item.inventoryDetail.purchaseOrder}`
-            : subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
-            ? `${item.inventoryDetail.supplierAccount}`
-            : bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)
-            ? `${item.inventoryDetail.bulkAssetCreation}`
-            : allAssets[item.inventoryDetail.assetNumber] !== undefined
-            ? allAssets[item.inventoryDetail.assetNumber]
-            : `${item._id}`,
-          arrowHeadType: 'arrow',
-          target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
-        });
+        // console.log(item.inventoryDetail.assetNumber);
+        // console.log(allAssets[item.inventoryDetail.assetNumber]);
+        if (purchaseArr.includes(item.inventoryDetail.purchaseOrder)) {
+          flowEdge.push({
+            id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
+            source: item.inventoryDetail.purchaseOrder,
+            arrowHeadType: 'arrow',
+            target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
+          });
+        }
+        if (subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset) {
+          flowEdge.push({
+            id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
+            source: item.inventoryDetail.supplierAccount,
+            arrowHeadType: 'arrow',
+            target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
+          });
+        }
+        if (bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)) {
+          flowEdge.push({
+            id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
+            source: item.inventoryDetail.bulkAssetCreation,
+            arrowHeadType: 'arrow',
+            target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
+          });
+        }
+        if (allAssets[item.inventoryDetail.assetNumber] !== undefined) {
+          flowEdge.push({
+            id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
+            source: allAssets[item.inventoryDetail.assetNumber],
+            arrowHeadType: 'arrow',
+            target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
+          });
+        }
+        if (
+          !purchaseArr.includes(item.inventoryDetail.purchaseOrder) &&
+          !subLeaseArr.includes(item.inventoryDetail.supplierAccount) &&
+          !item.inventoryDetail.subleaseAsset &&
+          !bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation) &&
+          !allAssets[item.inventoryDetail.assetNumber] !== undefined
+        ) {
+          flowEdge.push({
+            id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
+            source: item._id,
+            arrowHeadType: 'arrow',
+            target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
+          });
+        }
       });
 
       var loadingProductData = [];
@@ -487,7 +520,7 @@ const RentalManagementViews = (props) => {
           loadingAssets += 1;
           flowEdge.push({
             id: `edge-loading-${item._id}-${product.optionValue}`,
-            source: `${product.optionLabel}`,
+            source: `${product.optionLabel}-${product.optionValue}`,
             arrowHeadType: 'arrow',
             target: `${item._id}`
           });
