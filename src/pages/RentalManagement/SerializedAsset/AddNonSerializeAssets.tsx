@@ -129,16 +129,15 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
       const wsname = readedData.SheetNames[0];
       const ws = readedData.Sheets[wsname];
       const parsedData = utils.sheet_to_json(ws, { header: 1 });
-
       if (parsedData.length > 1) {
-        let tableContent = parsedData.slice(1, parsedData.length);
+        let tableContent = parsedData?.slice(1, parsedData.length);
         setTableData((state) =>
-          state.map((s, i) => {
-            const foundRows = tableContent.filter((p) => p[1] === s['Name']);
-            if (foundRows.length) {
+          state?.map((s, i) => {
+            const foundRows = tableContent?.filter((p) => p[1] === s['Name']);
+            if (foundRows?.length) {
               return {
                 ...s,
-                ['Asset Number']: foundRows[i][2] || ''
+                ['Asset Number']: foundRows[i][2]?.toString() || ''
               };
             }
             return s;
