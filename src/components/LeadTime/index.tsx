@@ -1,28 +1,25 @@
-import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Grid, IconButton, Paper, Typography } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import BoxWithBorder from '../../../components/BoxWithBorder';
-import { Skeleton } from '@material-ui/lab';
+import axiosInstance from '../../axios/axiosInstance';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import LeadTimeAddDialog from '../../../components/CustomLeadTimeDialog/CustomLeadTimeDialog';
-import { AnyObject } from 'yup/lib/types';
+import LeadTimeAddDialog from './CustomLeadTimeDialog';
 
-const LeadTimeMaster = ({ product, productData }) => {
+const LeadTimeMaster = ({ Id, type }) => {
   const [loadingPLT, setLoadingPLT] = useState(false);
-  const [productLeadTime, setProductLeadTime] = useState(null);
-  const [addLeadTime, setAddLeadTime] = useState({ open: false, productId: null });
+  const [leadTimeData, setLeadTimeData] = useState(null);
+  const [leadTimeDialogOpen, setLeadTimeDialogOpen] = useState(false);
   const [isAssigning, setAssigning] = useState(false);
 
   useEffect(() => {
     fetchLeadTimeData();
-  }, [product, productData]);
+  }, [Id]);
   const fetchLeadTimeData = async () => {
     setLoadingPLT(true);
     axiosInstance()
-      .get(`product/lead-time/${product}`)
-      .then(async ({ data: { data } }) => {
+      .get(`${type}/lead-time/${Id}`)
+      .then(({ data: { data } }) => {
         console.log(data);
-        setProductLeadTime(data);
+        setLeadTimeData(data);
         setLoadingPLT(false);
       })
       .catch((err) => {
@@ -33,19 +30,19 @@ const LeadTimeMaster = ({ product, productData }) => {
   const handleAddLeadTime = (leadTimeId) => {
     setAssigning(true);
     const value = {
-      product: product,
+      [type]: Id,
       leadTimeMaster: leadTimeId
     };
     axiosInstance()
-      .post(`product/lead-time`, value)
+      .post(`${type}/lead-time`, value)
       .then(() => {
         setAssigning(false);
         fetchLeadTimeData();
-        setAddLeadTime({ open: false, productId: null });
+        setLeadTimeDialogOpen(false);
       })
       .catch((err) => {
         setAssigning(false);
-        setAddLeadTime({ open: false, productId: null });
+        setLeadTimeDialogOpen(false);
       });
     console.log(leadTimeId);
   };
@@ -58,13 +55,13 @@ const LeadTimeMaster = ({ product, productData }) => {
           <IconButton
             size="small"
             onClick={() => {
-              setAddLeadTime({ open: true, productId: null });
+              setLeadTimeDialogOpen(true);
             }}
           >
             <AddCircleOutlineIcon fontSize="small" />
           </IconButton>
         </Box>
-        {productLeadTime?.steps?.length ? (
+        {leadTimeData?.steps?.length ? (
           <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
             <Grid container>
               <Grid item xs={2}>
@@ -79,8 +76,8 @@ const LeadTimeMaster = ({ product, productData }) => {
             </Grid>
           </Box>
         ) : null}
-        {productLeadTime?.steps?.length ? (
-          productLeadTime?.steps?.map((steps, index) => (
+        {leadTimeData?.steps?.length ? (
+          leadTimeData?.steps?.map((steps, index) => (
             <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
               <Grid container>
                 <Grid item xs={2}>
@@ -112,7 +109,7 @@ const LeadTimeMaster = ({ product, productData }) => {
             </Grid>
           </Box>
         )}
-        {productLeadTime?.steps?.length ? (
+        {leadTimeData?.steps?.length ? (
           <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
             <Grid container>
               <Grid item xs={2}>
@@ -124,20 +121,19 @@ const LeadTimeMaster = ({ product, productData }) => {
                 </Typography>
               </Grid>
               <Grid item xs={4}>
-                <Typography variant="body2">{productLeadTime?.leadTimeDays || 0}</Typography>
+                <Typography variant="body2">{leadTimeData?.leadTimeDays || 0}</Typography>
               </Grid>
             </Grid>
           </Box>
         ) : null}
       </Paper>
-      {addLeadTime.open && (
+      {leadTimeDialogOpen && (
         <LeadTimeAddDialog
           title={'Assign Lead Time'}
           onClose={() => {
-            setAddLeadTime({ open: false, productId: null });
+            setLeadTimeDialogOpen(false);
           }}
           handleAddLeadTime={handleAddLeadTime}
-          productId={addLeadTime.productId}
           isAssigning={isAssigning}
         />
       )}
