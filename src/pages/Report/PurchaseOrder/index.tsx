@@ -496,10 +496,9 @@ const Report = () => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(
-        `${resourceCamelCase === 'purchaseOrderProduct' ? `${productInventory.api}/report/purchase-order-product-wise-report` :
-          resourceCamelCase === 'productAverageCost' ? `${productInventory.api}/report/purchase-order-price`
-            : `${productInventory.api}/report/history-report`}${filterQuery} `,
+      .get(`${resourceCamelCase === 'purchaseOrderProduct' ? `${productInventory.api}/report/purchase-order-product-wise-report` :
+        resourceCamelCase === 'productAverageCost' ? `${productInventory.api}/report/purchase-order-price`
+          : `${productInventory.api}/report/history-report`}${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
         }
@@ -541,23 +540,17 @@ const Report = () => {
   };
 
   const getFilter = (isExport = false) => {
-
     setShowPricefilter({ warehouse: null, fromDate: null, toDate: null })
-
     let filterQuery = ``;
-
     if (!isExport) {
-      filterQuery = `page = ${page}& limit=${limit}& `;
+      filterQuery = `page=${page}&limit=${limit}&`;
     }
-
     if (sorting.length > 0) {
-      filterQuery = `${filterQuery} sortBy = ${sorting[0].colId}& orderBy=${sorting[0].sort}& `;
+      filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
-
     if (search) {
-      filterQuery = `${filterQuery} search = ${encodeURI(search)}& `;
+      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
-
     if (selectedResources.length > 0) {
       let deepFilter = [];
       if (selectedData) {
@@ -589,7 +582,7 @@ const Report = () => {
         });
 
         if (filterById.length > 0) {
-          filterQuery = `${filterQuery} filterById = ${JSON.stringify(filterById)}& `;
+          filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
         }
       }
 
@@ -612,7 +605,7 @@ const Report = () => {
       }
 
       if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery} deepFilter = ${encodeURI(JSON.stringify(deepFilter))}& `;
+        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
       }
     }
     if (!isObjectEmpty(filters)) {
@@ -623,7 +616,7 @@ const Report = () => {
           term: filters[field].filter
         });
       });
-      filterQuery = `${filterQuery} deepFilter = ${encodeURI(JSON.stringify(updatedFilters))}& `;
+      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&`;
     }
 
     if (statusPeriod && statusPeriodDate) {
@@ -635,7 +628,7 @@ const Report = () => {
       });
     }
 
-    return `? ${filterQuery} `;
+    return `?${filterQuery}`;
   };
 
   const exportData = () => {
@@ -653,11 +646,10 @@ const Report = () => {
     setExporting(true);
     let filterQuery = getFilter(true);
     axiosInstance()
-      .get(
-        `${resourceCamelCase === 'purchaseOrderProduct' ? `${productInventory.api}/report/purchase-order-product-wise-report/export` :
-          resourceCamelCase === 'productAverageCost' ? `${productInventory.api}/report/purchase-order-price/export` :
-            `${productInventory.api}/report/history-report/export`
-        }${filterQuery}& exportColumn=${JSON.stringify(columns)} `,
+      .get(`${resourceCamelCase === 'purchaseOrderProduct' ? `${productInventory.api}/report/purchase-order-product-wise-report/export` :
+        resourceCamelCase === 'productAverageCost' ? `${productInventory.api}/report/purchase-order-price/export` :
+          `${productInventory.api}/report/history-report/export`
+        }${filterQuery}&exportColumn=${JSON.stringify(columns)} `,
         {
           responseType: 'arraybuffer'
         }
