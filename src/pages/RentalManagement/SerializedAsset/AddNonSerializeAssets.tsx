@@ -132,27 +132,13 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
 
       if (parsedData.length > 1) {
         let tableContent = parsedData.slice(1, parsedData.length);
-
-        // tableContent = tableContent.map((item) => {
-        //   const foundProduct: TableContent = productData.find((p) => p['Name'] === item[1]);
-        //   let tableObj: TableContent = {
-        //     id: `${item[0]}_${foundProduct?._id}`,
-        //     _id: foundProduct?._id,
-        //     product: foundProduct?.product,
-        //     serializedProduct: foundProduct?.serializedProduct,
-        //     ['srno']: item[0],
-        //     ['Name']: item[1],
-        //     ['Asset Number']: item[2]?.toString()
-        //   };
-        //   return tableObj;
-        // });
         setTableData((state) =>
-          state.map((s) => {
-            const foundRow = tableContent.find((p) => p[1] === s['Name']);
-            if (foundRow) {
+          state.map((s, i) => {
+            const foundRows = tableContent.filter((p) => p[1] === s['Name']);
+            if (foundRows.length) {
               return {
                 ...s,
-                ['Asset Number']: foundRow[2]
+                ['Asset Number']: foundRows[i][2] || ''
               };
             }
             return s;
