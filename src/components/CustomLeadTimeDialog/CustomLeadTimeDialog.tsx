@@ -16,8 +16,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, leadTimeMaster, prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import { MdAdd } from 'react-icons/md';
-import { AddOutlined } from '@material-ui/icons';
 import styles from '../../pages/Leads/Header.module.scss';
 
 export default function CustomDialogComponent({ title, onClose, handleAddLeadTime, productId, isAssigning }) {
@@ -49,7 +47,7 @@ export default function CustomDialogComponent({ title, onClose, handleAddLeadTim
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.repairType?.title, o?.fieldData, routes.repairTypeDetail.path);
+          let currentColumn = getColumnData(routes?.leadTimeMaster?.title, o?.fieldData, routes?.leadTimeMasterDetail?.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -159,7 +157,6 @@ export default function CustomDialogComponent({ title, onClose, handleAddLeadTim
   return (
     <Dialog disableBackdropClick={true} maxWidth="md" open onClose={onClose} aria-labelledby="form-dialog-title" fullScreen={true} fullWidth>
       {title && <CustomDialogHeader title={title} onClose={onClose}></CustomDialogHeader>}
-
       <CustomDialogContent>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
@@ -201,7 +198,7 @@ export default function CustomDialogComponent({ title, onClose, handleAddLeadTim
               history.push(`${routes.repairTypeDetail.path}/${data._id}?openEdit=true`);
             }}
             extraParamsToCheckDelete={true}
-            onDelete={(data) => {}}
+            onDelete={(data) => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -209,7 +206,7 @@ export default function CustomDialogComponent({ title, onClose, handleAddLeadTim
             chips={[]}
             onCreate={false}
             showClone={false}
-            onClone={(data) => {}}
+            onClone={(data) => { }}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -232,7 +229,6 @@ export default function CustomDialogComponent({ title, onClose, handleAddLeadTim
           />
         ) : null}
       </CustomDialogContent>
-
       <CustomDialogFooter>
         <Button variant="outlined" color="primary" size="small" onClick={onClose}>
           Close
