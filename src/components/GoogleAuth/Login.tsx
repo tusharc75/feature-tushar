@@ -5,7 +5,6 @@ const Login = () => {
   const [loginData, setLoginData] = useState(localStorage.getItem('loginData') ? JSON.parse(localStorage.getItem('loginData')) : null);
 
   const handleLogin = async (googleData) => {
-    console.log(googleData);
     const res = await fetch('http://localhost:4000/user/api/google-login', {
       method: 'POST',
       body: JSON.stringify({
@@ -14,10 +13,8 @@ const Login = () => {
       headers: {
         'Content-Type': 'application/json'
       }
-    });
-    
+    }); 
     const data = await res.json();
-    console.log(data);
     setLoginData(data);
     localStorage.setItem('loginData', JSON.stringify(data));
   };

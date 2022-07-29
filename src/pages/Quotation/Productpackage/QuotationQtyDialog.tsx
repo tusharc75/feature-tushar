@@ -44,7 +44,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     isBulkedit
   }) => {
 
-  console.log(rowData)
 
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });

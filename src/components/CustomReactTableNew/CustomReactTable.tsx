@@ -399,7 +399,6 @@ function CustomReactTable({
       newBaseColumns[index] = item;
     });
 
-    // console.log(baseColumns ,newOrderedColumns.filter((item) => ![firstElement].includes(item)));
     setColumnOrder(newOrderedColumns);
     setBaseColumns(newBaseColumns);
   };
