@@ -21,7 +21,6 @@ const LeadTimeMaster = ({ product, productData }) => {
     axiosInstance()
       .get(`product/lead-time/${product}`)
       .then(async ({ data: { data } }) => {
-        console.log(data);
         setProductLeadTime(data);
         setLoadingPLT(false);
       })
@@ -47,7 +46,6 @@ const LeadTimeMaster = ({ product, productData }) => {
         setAssigning(false);
         setAddLeadTime({ open: false, productId: null });
       });
-    console.log(leadTimeId);
   };
 
   return (

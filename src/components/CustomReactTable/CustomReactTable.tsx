@@ -300,7 +300,6 @@ export default function CustomReactTable({
         try {
             const storedColumns = localStorage.getItem(renderedFrom)
             if (storedColumns) {
-                console.log(storedColumns)
                 setColumnOrder(JSON.parse(storedColumns).map(m => m.id));
                 setHiddenColumns(JSON.parse(storedColumns).filter(f => f.isVisible === false && !['expander', 'selection']?.includes(f.id)).map(m => m.id))
             }

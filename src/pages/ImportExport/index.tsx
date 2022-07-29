@@ -76,7 +76,6 @@ const BrandBackup = () => {
     axiosInstance()
       .get(`/import-export/all-export-data${selectResource ? `?resource=${selectResource}` : ''}`)
       .then((data) => {
-        console.log(data?.data?.data);
         setRowsExport(data?.data?.data);
         setLoading(false);
       })
@@ -94,7 +93,6 @@ const BrandBackup = () => {
     axiosInstance()
       .get(`/import-export/all-import-data${selectResource ? `?resource=${selectResource}` : ''}`)
       .then((data) => {
-        console.log(data?.data?.data);
         setRowsImport(data?.data?.data);
         setLoading(false);
       })
@@ -266,7 +264,6 @@ const BrandBackup = () => {
   ];
 
   const handleDownloadFile = (fileId) => {
-    console.log(fileId);
     setDownloading(true);
     axiosInstance()
       .get(`/import-export/download-file/${fileId}`, {
