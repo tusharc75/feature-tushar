@@ -1,12 +1,11 @@
 import React from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import { Grid, useTheme, useMediaQuery, Button, Box, Tooltip, IconButton } from '@material-ui/core';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, capitalize, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
 import styles from 'src/pages/Leads/Header.module.scss';
-
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomContainer from 'src/components/CustomContainer';
@@ -24,11 +23,13 @@ import ReportFilters from '../ReportFilters';
 import { DateRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import HistoryIcon from '@material-ui/icons/History';
 import AverageCostHistory from '../AverageCostHistory';
+import { CommonRenderer, DateTimeRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import NoDataCell from "../../../components/Helpers/NoDataCell";
 
 let cancelTokenSource = null;
 
 const Report = () => {
-  
+
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const initialRender = React.useRef(true);
@@ -189,7 +190,6 @@ const Report = () => {
           }
         ];
       }
-
       if (resourceCamelCase === 'productAverageCost') {
         let {
           data: { data: productFields }
@@ -269,21 +269,96 @@ const Report = () => {
             cellRenderer: 'numberRenderer'
           })
         }
+
+        columns?.forEach((e) => {
+          if (["productName", "productDescription", "productCategory", "productCondition",
+            "availableQty", "averagePrice", "totalPrice", "margin"].includes(e.field)) {
+            e.show = true;
+          }
+          else {
+            e.show = false;
+          }
+        })
+      }
+      if (resourceCamelCase === "productInventoryHistory") {
+
+        let {
+          data: { data: POFields }
+        } = await axiosInstance().get(`/field?resource=Purchase Order`);
+        let {
+          data: { data: productFields }
+        } = await axiosInstance().get(`/field?resource=Product`);
+        let {
+          data: { data: productOption }
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
+
+        POFields.filter((field) => ['purchaseOrderDate', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
+          if (field?.fieldData.fieldName === 'warehouse') {
+            resourceFieldData.push(field);
+          }
+          if (field?.fieldData.fieldName === 'purchaseOrderDate') {
+            resourceFieldData.push({
+              ...field,
+              fieldData: { ...field.fieldData, fieldLabel: 'Date', fieldName: 'date', type: 'date' }
+            });
+          }
+        });
+
+        productFields.filter((field) => ['productName'].includes(field?.fieldData.fieldName))
+          .forEach((field: any) => {
+            if (field?.fieldData.fieldName === 'productName') {
+              resourceFieldData.push({
+                ...field,
+                fieldData: { ...field.fieldData, fieldName: 'product', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+              });
+              columns.push({
+                field: 'product',
+                headerName: field?.fieldData?.fieldLabel,
+                show: true,
+                disabled: false,
+                cellRenderer: 'productRenderer'
+              });
+            }
+          });
+
+        columns = [...columns,
+        { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer", filter: false, sortable: false },
+        { field: "referenceType", headerName: "Reference Type", show: true, cellRenderer: "commonRenderer" },
+        { field: "reference", headerName: "Reference", show: true, cellRenderer: "referenceRenderer" },
+        { field: "type", headerName: "Type", show: true, cellRenderer: "creditDebitTypeRenderer" },
+        {
+          field: "qty",
+          headerName: "Credit/Debit",
+          show: true,
+          cellRenderer: "commonRenderer",
+          filter: false, sortable: false,
+          cellStyle: params => {
+            if (params?.data?.type === "credit") {
+              return { backgroundColor: "#90ee90" }
+            };
+            if (params?.data?.type === "debit") {
+              return { backgroundColor: "#FFCCCB" };
+            };
+          }
+        },
+        { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
+        { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "user", headerName: "Transacted By", show: true, cellRenderer: "commonRenderer" },
+        ];
+
+        setFrameWorkComponent({
+          productRenderer: ProductRenderer,
+          referenceRenderer: ReferenceRenderer,
+          creditDebitTypeRenderer: CreditDebitTypeRenderer,
+          commonRenderer: CommonRenderer,
+          dateTimeRenderer: DateTimeRenderer
+        });
       }
 
-      columns?.forEach((e) => {
-        if (["productName", "productDescription", "productCategory", "productCondition",
-          "availableQty", "averagePrice", "totalPrice", "margin"].includes(e.field)) {
-          e.show = true;
-        }
-        else {
-          e.show = false;
-        }
-      })
-
       setResourceColumns(resourceFieldData);
-      setLoadingColumns(false);
       setColumns(columns);
+      setLoadingColumns(false);
     } catch (error) {
       setLoadingColumns(false);
       toastConfig.setToastConfig(error);
@@ -321,6 +396,43 @@ const Report = () => {
       return prevState;
     });
   }, [selectedData, selectedResources]);
+
+  const ReferenceRenderer = (params) =>
+    params?.value ? (
+      params.data.referenceType === "Purchase Order" ?
+        <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
+          {params.value}
+        </Link> :
+        params.data.referenceType === "Transfer Inventory" ?
+          <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
+            {params.value}
+          </Link> :
+          params.data.referenceType === "Transfer Asset" ?
+            <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
+              {params.value}
+            </Link> :
+            params.data.referenceType === "Sales Order" ?
+              <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`}>
+                {params.value}
+              </Link> :
+              params.data.referenceType === "Bulk Asset Creation" ?
+                <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
+                  {params.value}
+                </Link> :
+                params.data.referenceType === "Serialized Asset" ?
+                  <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`}>
+                    {params.value}
+                  </Link>
+                  : params.value
+    ) : (
+      <NoDataCell />
+    );
+
+  const CreditDebitTypeRenderer = (params: any) => (
+    <span>
+      {capitalize(params?.value)}
+    </span>
+  );
 
   const PurchaseOrderRenderer = (params: any) => (
     <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.purchaseOrderId}`}>
@@ -372,10 +484,6 @@ const Report = () => {
     dateRenderer: DateRenderer
   };
 
-  /**
-   * Fetch resource data for selected filters,
-   * @returns none if no data selected
-   */
   const fetchResourceData = () => {
     setShowGrid(true);
     let filterQuery = getFilter();
@@ -387,13 +495,10 @@ const Report = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     axiosInstance()
-      .get(
-        `${resourceCamelCase === 'purchaseOrderProduct'
-          ? `${productInventory.api}/report/purchase-order-product-wise-report`
-          : `${productInventory.api}/report/purchase-order-price`
-        }${filterQuery}`,
+      .get(`${resourceCamelCase === 'purchaseOrderProduct' ? `${productInventory.api}/report/purchase-order-product-wise-report` :
+        resourceCamelCase === 'productAverageCost' ? `${productInventory.api}/report/purchase-order-price`
+          : `${productInventory.api}/report/history-report`}${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
         }
@@ -434,25 +539,18 @@ const Report = () => {
     }
   };
 
-  // Create and return query for filters
   const getFilter = (isExport = false) => {
-
     setShowPricefilter({ warehouse: null, fromDate: null, toDate: null })
-
     let filterQuery = ``;
-
     if (!isExport) {
       filterQuery = `page=${page}&limit=${limit}&`;
     }
-
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
     }
-
     if (search) {
       filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
-
     if (selectedResources.length > 0) {
       let deepFilter = [];
       if (selectedData) {
@@ -525,7 +623,7 @@ const Report = () => {
       const fields = Object.keys(statusPeriodDate);
       fields.forEach((field) => {
         if (statusPeriodDate[field]) {
-          filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}&`;
+          filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}& `;
         }
       });
     }
@@ -542,18 +640,16 @@ const Report = () => {
     });
     let columns = [];
     if (gridApi) {
-      console.log(gridApi)
       columns = gridApi.columnController.displayedColumns;
       columns = columns.map((col) => col.colId);
     }
     setExporting(true);
     let filterQuery = getFilter(true);
     axiosInstance()
-      .get(
-        `${resourceCamelCase === 'purchaseOrderProduct'
-          ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
-          : `${productInventory.api}/report/purchase-order-price/export`
-        }${filterQuery}&exportColumn=${JSON.stringify(columns)}`,
+      .get(`${resourceCamelCase === 'purchaseOrderProduct' ? `${productInventory.api}/report/purchase-order-product-wise-report/export` :
+        resourceCamelCase === 'productAverageCost' ? `${productInventory.api}/report/purchase-order-price/export` :
+          `${productInventory.api}/report/history-report/export`
+        }${filterQuery}&exportColumn=${JSON.stringify(columns)} `,
         {
           responseType: 'arraybuffer'
         }
@@ -595,7 +691,7 @@ const Report = () => {
                       <span
                         aria-disabled={isExporting}
                         onClick={exportData}
-                        className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
+                        className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr - 2 setLink`}
                         style={{ color: theme.palette.info.light }}
                       >
                         Export All
@@ -631,7 +727,7 @@ const Report = () => {
                       </Box>
                     )}
                     <MdDescription size={22} className="headerLogo" />
-                    <span className="listingHeader">{` ${selectedReportView?.name ?? 'Reports'}`}</span>
+                    <span className="listingHeader">{` ${selectedReportView?.name ?? 'Reports'} `}</span>
                   </Box>
                 </Grid>
               </Grid>

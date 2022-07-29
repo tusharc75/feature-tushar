@@ -44,7 +44,6 @@ const LeadTimeMaster = ({ Id, type }) => {
         setAssigning(false);
         setLeadTimeDialogOpen(false);
       });
-    console.log(leadTimeId);
   };
 
   return (
