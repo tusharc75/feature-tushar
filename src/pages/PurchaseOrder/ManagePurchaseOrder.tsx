@@ -66,6 +66,9 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                         const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data
                         //rest['purchaseOrderNumber'] = `PO_${generateUniqueIdOnly()}`
                         rest["status"] = PURCHASE_ORDER_STATUS.open
+                        if (fieldsDataForCreate?.filter((e) => e.fieldName === "purchaseOrderDate").length) {
+                            rest["purchaseOrderDate"] = new Date();
+                        }
                         setInitialData({
                             fields: fieldsDataForCreate,
                             values: getObjKeysWithValues(rest, fieldsDataForCreate),
