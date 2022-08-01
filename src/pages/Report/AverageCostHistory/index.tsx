@@ -95,7 +95,8 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
                                         {params.value}
                                     </Link>
                                     : params.value
-        ) : (
+        ) : (params.data.referenceType === "Product Inventory" ?
+            <p>Manual Entry</p> :
             <NoDataCell />
         );
 
