@@ -333,7 +333,7 @@ function OpportunitiesHeader(props) {
                 {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
               </Button>
             )}
-            {opportunityPermissions.isDelete && (
+            {(opportunityPermissions.isDelete || opportunityPermissions.isUpdate) && (
               <>
                 <Button
                   disabled={canDelete}

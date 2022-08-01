@@ -361,10 +361,9 @@ const QuoteBuilders = () => {
   </>
 
   const ActionsRenderer = (params) => (
-    <>
-      <Tooltip
-        className={quotePermissions?.isCreate ? "" : "cursor-stop"}
-        title={quotePermissions?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+    <>{quotePermissions?.isCreate ?
+      (<Tooltip
+        title={"Clone"} >
         <IconButton
           size="small"
           aria-label="Clone"
@@ -375,7 +374,14 @@ const QuoteBuilders = () => {
         >
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
-      </Tooltip>
+      </Tooltip>) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton aria-label="Clone" size="small">
+            <FileCopyIcon />
+          </IconButton>
+        </Tooltip>
+      )
+    }
 
       <GridDeleteIcon
         hasDeletePermission={quotePermissions.isDelete}

@@ -207,60 +207,62 @@ function QuoteHeader(props) {
                 {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
               </Button>
             )}
-            <>
-              <Button
-                disabled={canDelete}
-                variant={isMobile && !isTablet ? "text" : "contained"}
-                color="default"
-                size="small"
-                onClick={openActions}
-                fullWidth={true}
-                className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
-                aria-controls="action-menu"
-              >
-                {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    showConfirmBox(null);
-                  }}
-                  disabled={!permissions?.quoteBuilder?.isDelete}
+            {(QuotePermissions.isCreate || QuotePermissions.isUpdate) && (
+              <>
+                <Button
+                  disabled={canDelete}
+                  variant={isMobile && !isTablet ? "text" : "contained"}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  fullWidth={true}
+                  className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                  aria-controls="action-menu"
                 >
-                  Delete
-                </MenuItem>
-                {
-                  QuotePermissions.isUpdate && <MenuItem
-                    disabled={selectedRecords.find((d) => d.canDelete === false)}
+                  {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
                     onClick={() => {
                       closeActions();
-                      showTransferEntityDialog();
+                      showConfirmBox(null);
                     }}
-                  >Transfer Entity</MenuItem>
-                }
-                <MenuItem
-                  disabled={selectedRecords.length !== 1}
-                  onClick={() => {
-                    closeActions();
-                    showCloneQuoteDialog()
-                  }}
-                >
-                  Clone
-                </MenuItem>
-              </Menu>
-            </>
+                    disabled={!permissions?.quoteBuilder?.isDelete}
+                  >
+                    Delete
+                  </MenuItem>
+                  {
+                    QuotePermissions.isUpdate && <MenuItem
+                      disabled={selectedRecords.find((d) => d.canDelete === false)}
+                      onClick={() => {
+                        closeActions();
+                        showTransferEntityDialog();
+                      }}
+                    >Transfer Entity</MenuItem>
+                  }
+                  <MenuItem
+                    disabled={selectedRecords.length !== 1}
+                    onClick={() => {
+                      closeActions();
+                      showCloneQuoteDialog()
+                    }}
+                  >
+                    Clone
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
           </Grid>
 
         </Box>
