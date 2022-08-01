@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Grid, MenuItem, Button, Menu } from '@material-ui/core';
 import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import Chip from '@material-ui/core/Chip';
@@ -52,11 +52,11 @@ const ProjectStrategyHeader = (props) => {
     setisOpenDialog(false);
   };
 
-  
+
   const handleFilter = (event, newFilter) => {
     if (newFilter !== null) {
       handleFilterChange(newFilter);
-  
+
     }
   };
 
@@ -81,9 +81,9 @@ const ProjectStrategyHeader = (props) => {
   return (
     <Grid container className={styles.filter_side_container}>
       <Grid item xs={12} md={6} sm={6} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
-      <div className="d-flex align-items-center">
-        <BiNetworkChart className="headerLogo" />       
-        <span className="listingHeader">{routes.projectSales.title}</span>
+        <div className="d-flex align-items-center">
+          <BiNetworkChart className="headerLogo" />
+          <span className="listingHeader">{routes.projectSales.title}</span>
         </div>
         {isMobile ? (
           <div className="d-flex ">
@@ -168,75 +168,76 @@ const ProjectStrategyHeader = (props) => {
                 {isMobile ? <MdAdd size={23} /> : 'Add'}
               </Button>
             )}
+            {(permissions?.isDelete || permissions?.isUpdate) && (
+              <>
+                <Button
+                  variant={isMobile ? 'text' : 'contained'}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  className={isMobile ? 'mobile_button' : styles.action_submit_btn}
+                >
+                  {isMobile ? '' : 'Actions'} <ExpandMore />
+                </Button>
 
-            <>
-              <Button
-                variant={isMobile ? 'text' : 'contained'}
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                className={isMobile ? 'mobile_button' : styles.action_submit_btn}
-              >
-                {isMobile ? '' : 'Actions'} <ExpandMore />
-              </Button>
-
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                {permissions?.isDelete && (
-                  <MenuItem
-                    disabled={canDelete}
-                    onClick={() => {
-                      showConfirmBox(null);
-                      closeActions();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                )}
-                {permissions?.isUpdate && (
-                  <MenuItem
-                    disabled={selectedRecords.length === 0}
-                    onClick={() => {
-                      if (selectedRecords.some((d) => d.isUpdate === false)) {
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {permissions?.isDelete && (
+                    <MenuItem
+                      disabled={canDelete}
+                      onClick={() => {
+                        showConfirmBox(null);
                         closeActions();
-                        setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                      } else {
-                        closeActions();
-                        if (selectedRecords.length) {
-                          let entities = [];
-                          selectedRecords.map((current) => {
-                            if (current?.entity) {
-                              if (current?.entityId) {
-                                entities.push(current?.entityId);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                  )}
+                  {permissions?.isUpdate && (
+                    <MenuItem
+                      disabled={selectedRecords.length === 0}
+                      onClick={() => {
+                        if (selectedRecords.some((d) => d.isUpdate === false)) {
+                          closeActions();
+                          setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                        } else {
+                          closeActions();
+                          if (selectedRecords.length) {
+                            let entities = [];
+                            selectedRecords.map((current) => {
+                              if (current?.entity) {
+                                if (current?.entityId) {
+                                  entities.push(current?.entityId);
+                                }
+                                if (current?.restentity) {
+                                  let restEntities = current?.restentity.map((o) => o.optionValue);
+                                  entities = [...entities, ...restEntities];
+                                }
                               }
-                              if (current?.restentity) {
-                                let restEntities = current?.restentity.map((o) => o.optionValue);
-                                entities = [...entities, ...restEntities];
-                              }
-                            }
-                          });
-                          setEntities([...entities]);
+                            });
+                            setEntities([...entities]);
+                          }
+                          setShowEntityDialog(true);
                         }
-                        setShowEntityDialog(true);
-                      }
-                    }}
-                  >
-                    Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
-                  </MenuItem>
-                )}
-              </Menu>
-            </>
+                      }}
+                    >
+                      Assign Entity &nbsp; <Chip size="small" label={selectedRecords.length} />
+                    </MenuItem>
+                  )}
+                </Menu>
+              </>
+            )}
           </Grid>
         </Box>
       </Grid>

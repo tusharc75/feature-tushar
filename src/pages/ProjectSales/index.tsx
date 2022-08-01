@@ -235,19 +235,26 @@ const ProjectSales: FC = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip
-        className={permissions?.projectSales?.isCreate ? "" : "cursor-stop"}
-        title={permissions?.projectSales?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
+      {permissions?.projectSales?.isCreate ?
+        (<Tooltip
+          title={"Clone"} >
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>) : (
+          <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+            <IconButton aria-label="Clone" size="small">
+              <FileCopyIcon />
+            </IconButton>
+          </Tooltip>
+        )
+      }
       <GridDeleteIcon
         hasDeletePermission={permissions?.projectSales?.isDelete}
         ownerId={params.data.projectManagerId}

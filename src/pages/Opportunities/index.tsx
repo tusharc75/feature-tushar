@@ -33,6 +33,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { FaSuitcase } from 'react-icons/fa';
 import useColumns from '../../constants/useColumns';
 import { classNames } from 'react-easy-crop/helpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 
 
@@ -233,19 +234,32 @@ const Opportunities = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip
-        className={opportunityPermissions?.isCreate ? "" : "cursor-stop"}
-        title={opportunityPermissions?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: params.data._id })
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
+      {opportunityPermissions?.isCreate ? (
+        <HtmlTooltip
+          className={opportunityPermissions?.isCreate ? "" : "cursor-stop"}
+          title={opportunityPermissions?.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowCreateOpportunityDialog({ open: true, isClone: true, idToClone: params.data._id })
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>) : (
+        <HtmlTooltip
+          className={"cursor-stop"}
+          title={"You do not have permission to clone/create"} >
+          <IconButton
+            size="small"
+            aria-label="Clone"
+          >
+            <FileCopyIcon fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
+
 
       <GridDeleteIcon
         hasDeletePermission={opportunityPermissions.isDelete}

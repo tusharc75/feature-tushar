@@ -34,6 +34,7 @@ import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField }
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { camelCase } from 'lodash'
 import ManageQuotationDialog from './ManageQuotationDialog';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 let quotationTimeout;
 const QuotationType = [
@@ -181,20 +182,27 @@ const Quotation = () => {
           </IconButton>
         </Tooltip>
       )}
-
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.quotation?.isDelete}
-        ownerId={user?.user?._id}
-        userId={user?.user?._id}
-        onDelete={() =>
-          setSingleQuotationDelete({
-            show: true,
-            id: params.data._id,
-            quotationName: `${params.data.quotationNo}`
-          })
-        }
-        entity="quotation"
-      />
+      {permissions?.quotation?.isDelete ? (
+        <GridDeleteIcon
+          hasDeletePermission={permissions?.quotation?.isDelete}
+          ownerId={user?.user?._id}
+          userId={user?.user?._id}
+          onDelete={() =>
+            setSingleQuotationDelete({
+              show: true,
+              id: params.data._id,
+              quotationName: `${params.data.quotationNo}`
+            })
+          }
+          entity="quotation"
+        />
+      ) : ( 
+        <Tooltip className="cursor-stop" title="You do not have permission to delete">
+          <IconButton aria-label="Clone" size="small">
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
     </>
   );
 
