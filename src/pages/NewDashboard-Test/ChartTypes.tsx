@@ -22,7 +22,7 @@ import getStaticData from './getStaticData';
 import StaticCards from './StaticCards';
 
 export interface ChartDataType extends IFormDataType {
-  axis?: string;
+  horizontalChart?: string;
   numberOfCards?: number;
 }
 interface Props {
@@ -240,7 +240,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   data={chartData}
                   options={{
                     maintainAspectRatio: false,
-                    indexAxis: chart?.axis
+                    indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x'
                   }}
                 />
               )

@@ -55,7 +55,7 @@ const DashbaordNew = () => {
       try {
         const {
           data: { data }
-        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User`);
+        } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User,Warehouse`);
         if (!data) return;
 
         Object.keys(data).forEach((_d) => {
@@ -68,6 +68,7 @@ const DashbaordNew = () => {
             salesRep: data['User'].filter((u: any) => u?.entities?.findIndex((d: any) => d.entity === selectedEntity) !== -1),
             marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
             subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
+            warehouse: data['warehouse'],
             countryBillTo: countriesData,
             countrySellTo: countriesData,
             country: countriesData

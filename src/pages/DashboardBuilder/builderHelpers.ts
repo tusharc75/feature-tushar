@@ -34,6 +34,7 @@ export const FILTERS_OPTIONS = [
   { title: 'Market Segment', key: 'marketSegment' },
   { title: 'Sub Market Segment', key: 'subMarketSegment' },
   { title: 'Sales Reps', key: 'salesReps' },
+  { title: 'Plant', key: 'warehouse' },
   { title: 'Product Category', key: 'productCategory' },
   { title: 'Country Bill To', key: 'countryBillTo' },
   { title: 'Country Sell To', key: 'countrySellTo' },
@@ -57,6 +58,7 @@ export type KPIListType = {
   kpi: string;
   resource: string;
   custom?: boolean;
+  horizontalBar?: false
   currencyConverter?: boolean;
   filters: IFilterType[]
 };
@@ -108,34 +110,34 @@ export const statuses = {
 //     name: "Customer in rental",
 //     kpi: "asset/customer-in-rental"
 //   },
-  // {
-  //   name: "Total Booked GM vs Total Offered GM vs Budget",
-  //   kpi: "sales"
-  // },
-  // {
-  //   name: 'Quotes Status',
-  //   kpi: 'open-quote',
-  // },
-  // {
-  //   name: 'Quotes by Customer Account',
-  //   kpi: 'quote/customer-account'
-  // },
-  // {
-  //   name: 'Quotes by Sales Rep',
-  //   kpi: 'quote/sales-rep'
-  // },
-  // {
-  //   name: 'Top sellling product categories',
-  //   kpi: 'products'
-  // },
-  // {
-  //   name: 'Opportunity Trends',
-  //   kpi: 'trend/opportunities'
-  // },
-  // {
-  //   name: 'Created Leads',
-  //   kpi: 'created/leads'
-  // }
+// {
+//   name: "Total Booked GM vs Total Offered GM vs Budget",
+//   kpi: "sales"
+// },
+// {
+//   name: 'Quotes Status',
+//   kpi: 'open-quote',
+// },
+// {
+//   name: 'Quotes by Customer Account',
+//   kpi: 'quote/customer-account'
+// },
+// {
+//   name: 'Quotes by Sales Rep',
+//   kpi: 'quote/sales-rep'
+// },
+// {
+//   name: 'Top sellling product categories',
+//   kpi: 'products'
+// },
+// {
+//   name: 'Opportunity Trends',
+//   kpi: 'trend/opportunities'
+// },
+// {
+//   name: 'Created Leads',
+//   kpi: 'created/leads'
+// }
 // ]
 
 export interface IFormDataType {
@@ -160,7 +162,6 @@ export const defaultFormConfigs: IFormDataType = {
   chartTitle: '',
   kpi: { name: "", kpi: "", resource: "", id: 0, graphType: [], chartType: [], filters: [] },
   hasFilters: false,
-  axis: 'y',
   hasTableView: false,
   hasExport: false,
   statusOptions: [],
