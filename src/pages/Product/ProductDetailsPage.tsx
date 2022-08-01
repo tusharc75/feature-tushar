@@ -38,7 +38,7 @@ import { BiEdit } from 'react-icons/bi';
 import InventoryHistory from './InventoryHistory';
 import CostDetails from './CostDetails';
 import ServiceMaster from './ServiceMaster';
-import LeadTimeMaster from './LeadTime';
+import LeadTimeMaster from '../../components/LeadTime';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
@@ -701,7 +701,7 @@ const ProductDetailsPage = () => {
               )}
               {permissions?.leadTimeMaster?.isRead && (
                 <Box mb={2}>
-                  <LeadTimeMaster product={id} productData={productData} />
+                  <LeadTimeMaster Id={id} type={'product'} />
                 </Box>
               )}
             </Grid>

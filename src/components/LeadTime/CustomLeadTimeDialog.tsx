@@ -11,14 +11,14 @@ import { useData } from '../../StateProvider/Provider';
 import CustomAgGrid from '../AgGridComponents/CustomAgGrid';
 import { useState } from 'react';
 import useColumns, { checkStaticField, getFrameworkComponents, getStaticFields } from '../../constants/useColumns';
-import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import { reducer, intialState } from '../AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
 import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, leadTimeMaster, prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
 import styles from '../../pages/Leads/Header.module.scss';
 
-export default function CustomDialogComponent({ title, onClose, handleAddLeadTime, productId, isAssigning }) {
+export default function CustomDialogComponent({ title, onClose, handleAddLeadTime, isAssigning }) {
   const history = useHistory();
   const {
     state: { permissions }
@@ -198,7 +198,7 @@ export default function CustomDialogComponent({ title, onClose, handleAddLeadTim
               history.push(`${routes.repairTypeDetail.path}/${data._id}?openEdit=true`);
             }}
             extraParamsToCheckDelete={true}
-            onDelete={(data) => { }}
+            onDelete={(data) => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -206,7 +206,7 @@ export default function CustomDialogComponent({ title, onClose, handleAddLeadTim
             chips={[]}
             onCreate={false}
             showClone={false}
-            onClone={(data) => { }}
+            onClone={(data) => {}}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
