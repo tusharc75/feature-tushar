@@ -29,6 +29,7 @@ import { FcProcess } from "react-icons/fc";
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import { isMobile, isTablet } from 'react-device-detect';
 import { BsBuilding, AiFillMail } from "react-icons/all";
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const LeadTypes = [
   {
@@ -211,9 +212,8 @@ const Leads = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip
-        className={leadsPermissions.isCreate ? "" : "cursor-stop"}
-        title={leadsPermissions.isCreate ? "Clone" : "You do not have permission to clone/create"} >
+      {leadsPermissions.isCreate ? (<HtmlTooltip
+        title={"Clone"} >
         <IconButton
           size="small"
           aria-label="Clone"
@@ -222,7 +222,18 @@ const Leads = () => {
           }}>
           <FileCopyIcon fontSize="small" color="primary" />
         </IconButton>
-      </Tooltip>
+      </HtmlTooltip>) : (
+        <HtmlTooltip
+          className={"cursor-stop"}
+          title={"You do not have permission to clone/create"} >
+          <IconButton
+            size="small"
+            aria-label="Clone"
+          >
+            <FileCopyIcon fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
       {hasPermissionToConvertInOpportunity && generateLeadToOpportunityButton(params.data)}
 
       <GridDeleteIcon

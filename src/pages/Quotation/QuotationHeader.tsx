@@ -184,7 +184,7 @@ function QuotationHeader(props) {
 
 
           <Grid style={{ display: "flex", gap: "5px" }}>
-            {QuotationPermissions?.isCreate && QuotationPermissions?.isUpdate && (
+            {QuotationPermissions?.isCreate && (
               <Button
                 variant={isMobile ? "text" : "contained"}
                 color="primary"
@@ -196,7 +196,7 @@ function QuotationHeader(props) {
                 {isMobile ? <MdAdd size={23} /> : "Add"}
               </Button>
             )}
-            {QuotationPermissions?.isDelete && (
+            {(QuotationPermissions?.isDelete || QuotationPermissions?.isUpdate) && (
               <>
                 <Button
                   disabled={canDelete}

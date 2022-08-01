@@ -903,96 +903,99 @@ export default function Contact(props) {
                     </>
                   )}
 
-                  <>
-                    <Button
-                      disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                      aria-controls="action-menu"
-                    >
-                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {contactPermissions.isDelete && (
-                        <MenuItem
-                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
-                          onClick={() => {
-                            if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.canDelete === false)) {
-                              closeActions();
-                              setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
-                            } else {
-                              closeActions();
-                              setShowDeleteConfirmBox(true);
-                            }
-                          }}
-                        >
-                          Delete
-                        </MenuItem>
-                      )}
-                      {user.user?.userType === userType.brandAdmin && (
-                        <MenuItem
-                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 || getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((record) => record?.isUserExist)}
-                          onClick={handleAccessToPortal}
-                        >
-                          Give Access to Portal
-                        </MenuItem>
-                      )}
-                      {(contactPermissions.isUpdate && contactResource === 'customerContact' && permissions?.productInventory) && (
-                        <MenuItem
-                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 || [...new Set(getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d.accountNameId))].length > 1}
-                          onClick={() => {
-                            setOpenAddPlantsDialog(true)
-                            closeActions();
-                          }}
-                        >
-                          Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
-                        </MenuItem>
-                      )}
-                      {contactPermissions.isUpdate && (
-                        <MenuItem
-                          disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
-                          onClick={() => {
-                            if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.isUpdate === false)) {
-                              closeActions();
-                              setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
-                            } else {
-                              closeActions();
-                              if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length) {
-                                let entities = [];
-                                getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((current) => {
-                                  if (current?.entityId) {
-                                    entities = [...entities, current?.entityId];
-                                  }
-                                  if (current?.restentity) {
-                                    let restEntities = current?.restentity.map((o) => o?.optionValue);
-                                    entities = [...entities, ...restEntities];
-                                  }
-                                });
-                                setEntities([...entities]);
+
+                  {(contactPermissions.isDelete || contactPermissions.isUpdate) && (
+                    <>
+                      <Button
+                        disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                        aria-controls="action-menu"
+                      >
+                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        {contactPermissions.isDelete && (
+                          <MenuItem
+                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
+                            onClick={() => {
+                              if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.canDelete === false)) {
+                                closeActions();
+                                setShowDeleteWarningConfirmBox({ show: true, isDelete: true });
+                              } else {
+                                closeActions();
+                                setShowDeleteConfirmBox(true);
                               }
-                              setShowEntityDialog(true);
-                            }
-                          }}
-                        >
-                          Assign Entity &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
-                        </MenuItem>
-                      )}
-                    </Menu>
-                  </>
+                            }}
+                          >
+                            Delete
+                          </MenuItem>
+                        )}
+                        {user.user?.userType === userType.brandAdmin && (
+                          <MenuItem
+                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 || getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((record) => record?.isUserExist)}
+                            onClick={handleAccessToPortal}
+                          >
+                            Give Access to Portal
+                          </MenuItem>
+                        )}
+                        {(contactPermissions.isUpdate && contactResource === 'customerContact' && permissions?.productInventory) && (
+                          <MenuItem
+                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0 || [...new Set(getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((d) => d.accountNameId))].length > 1}
+                            onClick={() => {
+                              setOpenAddPlantsDialog(true)
+                              closeActions();
+                            }}
+                          >
+                            Assign {routes.warehouse.title} &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
+                          </MenuItem>
+                        )}
+                        {contactPermissions.isUpdate && (
+                          <MenuItem
+                            disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length === 0}
+                            onClick={() => {
+                              if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.some((d) => d.isUpdate === false)) {
+                                closeActions();
+                                setShowDeleteWarningConfirmBox({ show: true, isDelete: false });
+                              } else {
+                                closeActions();
+                                if (getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length) {
+                                  let entities = [];
+                                  getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((current) => {
+                                    if (current?.entityId) {
+                                      entities = [...entities, current?.entityId];
+                                    }
+                                    if (current?.restentity) {
+                                      let restEntities = current?.restentity.map((o) => o?.optionValue);
+                                      entities = [...entities, ...restEntities];
+                                    }
+                                  });
+                                  setEntities([...entities]);
+                                }
+                                setShowEntityDialog(true);
+                              }
+                            }}
+                          >
+                            Assign Entity &nbsp; <Chip size="small" label={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length} />
+                          </MenuItem>
+                        )}
+                      </Menu>
+                    </>
+                  )}
                 </Grid>
               </Box>
             </Grid>

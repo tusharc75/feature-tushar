@@ -6,7 +6,7 @@ import axiosInstance from "../../../axios/axiosInstance";
 import { Box, CircularProgress, TextField } from "@material-ui/core";
 import SearchBox from '../../../components/Helpers/SearchBox'
 import { reducer, intialState } from "../../../components/AgGridComponents/CustomAgGrid";
-import { gridLoadingTimeout, CustomDialogTransition, packages, product, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData } from '../../../constants/helpers';
+import { gridLoadingTimeout, CustomDialogTransition, packages, product, isObjectEmpty, prepareDataForGrid, getLocalStorageArrayData, serviceMaster } from '../../../constants/helpers';
 import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import Dialog from "@material-ui/core/Dialog/Dialog";
 import CustomDialogHeader from "../../../components/CustomDialog/CustomDialogHeader";
@@ -55,7 +55,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? product.api + queryString : packages.packageApi + queryString}`).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${type === "product" ? product.api + queryString : type === "service" ? serviceMaster.api + queryString : packages.packageApi + queryString}`).then(({ data: { data, count } }) => {
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = false;
@@ -124,7 +124,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
 
     const fetchGridColumns = () => {
         axiosInstance()
-            .get(type === "product" ? "/field?resource=Product&view=true" : `/field?resource=Packages&entity=${selectedEntity}&view=true`)
+            .get(type === "product" ? "/field?resource=Product&view=true" : type === "service" ? `/field?resource=${serviceMaster.resource}&view=true` : `/field?resource=Packages&entity=${selectedEntity}&view=true`)
             .then(({ data: { data } }) => {
                 let columns = []
                 let rendererNames = []

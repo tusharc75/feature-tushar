@@ -89,6 +89,16 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                             </HtmlTooltip>
                         </Box>
                     }
+                    {row.original?.parentId === null &&
+                        <Box ml={1} className="d-flex align-items-center">
+                            {/* <span title={`There are ${row.original?.subRows?.length} service(s) in this productpackage`}>({row.original?.subRows?.length})</span> */}
+                            <HtmlTooltip title="Add Services">
+                                <IconButton onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })} size="small" color="primary">
+                                    <Add color='disabled' fontSize="small" />
+                                </IconButton>
+                            </HtmlTooltip>
+                        </Box>
+                    }
                     <Chip
                         className="ml-1"
                         label={`${capitalize(row.original.type)}`}
@@ -607,7 +617,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         }
         {addExistingProductDialog.open &&
             <AddExistingProductInventory
-                renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
+                renderedFrom={addExistingProductDialog.type === 'product' ? `${renderedFrom}-product` : addExistingProductDialog.type === 'service' ? `${renderedFrom}-service` : `${renderedFrom}-package`}
                 isAddingProducts={isAddingProducts}
                 addProductInventory={handleAdd}
                 handleProductInventoryClose={() => { setAddExistingProductDialog({ open: false, type: "", parentId: null }) }}

@@ -197,10 +197,24 @@ const Report = () => {
         let {
           data: { data: POFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order`);
+        // let {
+        //   data: { data: productOption }
+        // } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        POFields.filter((field) => ['purchaseOrderDate', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
+
+        POFields.filter((field) => ['purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
           if (field?.fieldData.fieldName === 'warehouse') {
             resourceFieldData.push(field);
+          }
+          if (field?.fieldData.fieldName === 'supplierAccount') {
+            resourceFieldData.push(field);
+            // columns.push({
+            //   field: 'supplierAccount',
+            //   headerName: field?.fieldData?.fieldLabel,
+            //   show: true,
+            //   disabled: false,
+            //   cellRenderer: 'supplierRenderer'
+            // });
           }
           if (field?.fieldData.fieldName === 'purchaseOrderDate') {
             resourceFieldData.push({
@@ -214,6 +228,12 @@ const Report = () => {
           if (o?.fieldData.fieldName === 'productCategory') {
             resourceFieldData.push(o);
           }
+          // if (o?.fieldData.fieldName === 'productName') {
+          //   resourceFieldData.push({
+          //     ...o,
+          //     fieldData: { ...o.fieldData, fieldName: 'product', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+          //   });
+          // }
           let currentColumn = getColumnData('Product', o?.fieldData, routes['productDetail'].path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
@@ -258,6 +278,7 @@ const Report = () => {
             cellRenderer: 'numberRenderer'
           }
         ];
+
         if (productFields?.filter((e) => e.fieldData.fieldName === "listPrice")?.length) {
           columns.push({
             field: 'margin',
@@ -343,7 +364,7 @@ const Report = () => {
         },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
         { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
-        { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
+        { field: "serialNumber", headerName: "Serial Number", filter: false, show: true, cellRenderer: "serialNumberRenderer" },
         { field: "user", headerName: "Transacted By", show: true, cellRenderer: "commonRenderer" },
         ];
 
@@ -352,6 +373,7 @@ const Report = () => {
           referenceRenderer: ReferenceRenderer,
           creditDebitTypeRenderer: CreditDebitTypeRenderer,
           commonRenderer: CommonRenderer,
+          serialNumberRenderer: SerialNumberRenderer,
           dateTimeRenderer: DateTimeRenderer
         });
       }
@@ -397,6 +419,12 @@ const Report = () => {
     });
   }, [selectedData, selectedResources]);
 
+  const SerialNumberRenderer = (params: any) => (
+    <span>
+      {params?.value?.length ? params?.value?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}
+    </span>
+  );
+
   const ReferenceRenderer = (params) =>
     params?.value ? (
       params.data.referenceType === "Purchase Order" ?
@@ -424,7 +452,8 @@ const Report = () => {
                     {params.value}
                   </Link>
                   : params.value
-    ) : (
+    ) : (params.data.referenceType === "Product Inventory" ?
+      <p>Manual Entry</p> :
       <NoDataCell />
     );
 
