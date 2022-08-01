@@ -13,10 +13,22 @@ const LeadTimeMaster = ({ Id, type }) => {
   useEffect(() => {
     fetchLeadTimeData();
   }, [Id]);
+
+  const apiMain = (type) => {
+    switch (type) {
+      case 'product':
+        return 'product';
+      case 'service':
+        return 'service-master';
+      case 'package':
+        return 'packages';
+    }
+  };
   const fetchLeadTimeData = async () => {
     setLoadingPLT(true);
+
     axiosInstance()
-      .get(`${type}/lead-time/${Id}`)
+      .get(`${apiMain(type)}/lead-time/${Id}`)
       .then(({ data: { data } }) => {
         console.log(data);
         setLeadTimeData(data);
@@ -29,12 +41,13 @@ const LeadTimeMaster = ({ Id, type }) => {
 
   const handleAddLeadTime = (leadTimeId) => {
     setAssigning(true);
+    const valueType = type === 'package' ? 'packageId' : type;
     const value = {
-      [type]: Id,
+      [valueType]: Id,
       leadTimeMaster: leadTimeId
     };
     axiosInstance()
-      .post(`${type}/lead-time`, value)
+      .post(`${apiMain(type)}/lead-time`, value)
       .then(() => {
         setAssigning(false);
         fetchLeadTimeData();
