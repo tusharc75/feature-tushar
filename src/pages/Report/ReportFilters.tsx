@@ -287,7 +287,6 @@ const ReportFilters = (props: FiltersProps) => {
     }
   };
 
-  console.log(filterOptions)
   return (
     <Container maxWidth="sm">
       <Box height={'100%'} my={2}>
