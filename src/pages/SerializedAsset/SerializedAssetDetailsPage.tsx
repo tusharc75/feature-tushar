@@ -428,7 +428,7 @@ const SerializedAssetDetailsPage = () => {
                     {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
                       <>
                         {permissions?.repairJob?.isCreate && !productInventoryData?.subleaseAsset &&
-                          ![INVENTORY_STATUS.lost, INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.repair].includes(productInventoryData.status) &&
+                          [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(productInventoryData.status) &&
                           <Button
                             variant="outlined"
                             color="default"
