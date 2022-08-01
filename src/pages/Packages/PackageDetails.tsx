@@ -19,6 +19,7 @@ import { packages } from 'src/constants/helpers';
 import ManagePackageDialog from './ManagePackageDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Products from './Products';
+import LeadTimeMaster from '../../components/LeadTime';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -128,7 +129,7 @@ const PackageDetails = () => {
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
       <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={12} lg={12}>
+        <Grid item xs={12} sm={12} md={permissions?.leadTimeMaster?.isRead ? 8 : 12} lg={permissions?.leadTimeMaster?.isRead ? 8 : 12}>
           <Paper>
             {!packageData ? (
               <div>
@@ -208,6 +209,13 @@ const PackageDetails = () => {
               )}
             </Box>
           </Paper>
+        </Grid>
+        <Grid item xs={12} sm={12} md={4} lg={4}>
+          {permissions?.leadTimeMaster?.isRead && (
+            <Box mb={2}>
+              <LeadTimeMaster Id={id} type={'package'} />
+            </Box>
+          )}
         </Grid>
       </Grid>
       {showConfirmBox && (

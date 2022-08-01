@@ -128,16 +128,26 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
       let readedData = read(data, { type: 'binary' });
       const wsname = readedData.SheetNames[0];
       const ws = readedData.Sheets[wsname];
-      const parsedData = utils.sheet_to_json(ws, { header: 1 });
-      if (parsedData.length > 1) {
-        let tableContent = parsedData?.slice(1, parsedData.length);
+      const dataParse = utils.sheet_to_json(ws, { header: 1 });
+      if (dataParse.length > 1) {
+        dataParse.splice(0, 1);
+        let option = [];
+        dataParse?.forEach((row) => {
+          let rowInsert = {};
+          if (row[0] && row[1] && row[2]) {
+            rowInsert["srno"] = row[0]?.toString();
+            rowInsert["product"] = row[1]?.toString();
+            rowInsert["assetNumber"] = row[2]?.toString();
+            option.push(rowInsert);
+          }
+        });
         setTableData((state) =>
           state?.map((s, i) => {
-            const foundRows = tableContent?.filter((p) => p[1] === s['Name']);
-            if (foundRows?.length) {
+            const foundRows = option?.find((p) => p["srno"] === s['srno']);
+            if (foundRows) {
               return {
                 ...s,
-                ['Asset Number']: foundRows[i][2]?.toString() || ''
+                ['Asset Number']: foundRows?.assetNumber
               };
             }
             return s;

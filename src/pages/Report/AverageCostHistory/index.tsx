@@ -49,7 +49,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
         let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
             finalObject.finalQty = finalObject.qty - (finalObject.soldQty || 0);
-            finalObject.amount = finalObject.finalQty * finalObject.price;
+            finalObject.amount = parseFloat((finalObject.qty * finalObject.price)?.toFixed(2));
             return finalObject;
         });
         dispatch({ type: "initialize", data: rows, count: rows.length });
@@ -95,7 +95,8 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
                                         {params.value}
                                     </Link>
                                     : params.value
-        ) : (
+        ) : (params.data.referenceType === "Product Inventory" ?
+            <p>Manual Entry</p> :
             <NoDataCell />
         );
 
