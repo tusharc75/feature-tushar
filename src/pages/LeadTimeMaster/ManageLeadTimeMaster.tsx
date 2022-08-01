@@ -28,8 +28,10 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import { Autocomplete } from '@material-ui/lab';
 import React from 'react';
+import routes from 'src/components/Helpers/Routes';
 
-const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClose, onSuccess, refrenceType = null, refrenceData = null }) => {
+const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClose, onSuccess }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
 
@@ -59,10 +61,10 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
             .get(`${leadTimeMaster.api}/` + leadTimeMasterId)
             .then(({ data: { data } }) => {
               setLeadTimeMasterSteps(data?.steps || []);
+              setTotalDays(data?.steps?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
               if (isClone) {
-                const { _id, brand, createdBy, history, leadTimeMasterName, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${leadTimeMasterName}`);
-                rest.status = `New`;
+                const { _id, brand, createdBy, history, leadTimeName, updatedBy, ...rest } = data;
+                setTitle(`Clone - ${leadTimeName}`);
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
@@ -83,9 +85,8 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
               toastConfig.setToastConfig(error);
             });
         } else {
-          setTitle('Create Lead Time Master');
+          setTitle(`Create ${routes?.leadTimeMaster?.title}`);
           let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-
           setAllFields(fieldsDataForCreate);
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -100,17 +101,14 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
   }, [leadTimeMasterId]);
 
   const handleSubmit = (values) => {
-    handleUpdateLeadTimeMaster(values);
-  };
-
-  const handleUpdateLeadTimeMaster = (values) => {
     setSubmitting(true);
-    // values._id = leadTimeMasterId;
-    if (!leadTimeMasterId) {
+    if (!leadTimeMasterId || isClone === true) {
       values.steps = leadTimeMasterSteps;
+      values.leadTimeDays = totalDays || 0;
       axiosInstance()
         .post(`${leadTimeMaster.api}`, values)
         .then(({ data }) => {
+          onClose();
           setSubmitting(false);
           onSuccess();
           toastConfig.setToastConfig({
@@ -126,6 +124,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
     } else {
       values._id = leadTimeMasterId;
       values.steps = leadTimeMasterSteps;
+      values.leadTimeDays = totalDays || 0;
       axiosInstance()
         .put(`${leadTimeMaster.api}`, values)
         .then(({ data }) => {
@@ -165,19 +164,21 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
     setLeadTimeMasterSteps(data);
     setTotalDays(data?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
   };
+  
   const handleOnDaysChangeValue = (index, value) => {
     const data = [...leadTimeMasterSteps];
     data[index].days = parseInt(value) ?? 0;
     setLeadTimeMasterSteps(data);
     setTotalDays(data?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
   };
+
   const handleOnLTMStatusChangeValue = (index, value) => {
     const data = [...leadTimeMasterSteps];
     data[index].leadTimeStatus = value;
     setLeadTimeMasterSteps(data);
   };
 
-  const dummyDropDown = "Hello World, This is only for testing purpose!! Don't offend ;)".split(' ');
+  const leadTimeStatusDropdown = ['Production', 'Supplier', 'Assemble', 'Freight', 'Customer'];
 
   return (
     <Dialog
@@ -279,7 +280,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                     })}
                   <div className={'detail-box-content'}>
                     <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Lead Time Master Steps</h2>
+                    <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Lead Time Steps</h2>
                   </div>
                   <Grid container>
                     <Grid item xs={12}>
@@ -320,7 +321,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                             <Grid container spacing={1}>
                               <Grid item xs={6}>
                                 <Autocomplete
-                                  options={dummyDropDown || []}
+                                  options={leadTimeStatusDropdown || []}
                                   getOptionLabel={(option) => option}
                                   value={steps?.leadTimeStatus || ''}
                                   onChange={(event: any, value) => {
@@ -399,10 +400,10 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                   startIcon={submitting && <CircularProgress size={20} color="inherit" />}
                   disabled={submitting}
                   onClick={(e) => {
+                    // onClose();
+                    e.preventDefault();
+                    handleScroll(errors);
                     submitForm();
-                    onClose();
-                    // e.preventDefault();
-                    // handleScroll(errors);
                     // handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
                   }}
                 >
