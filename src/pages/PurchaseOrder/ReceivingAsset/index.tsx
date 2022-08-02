@@ -50,7 +50,7 @@ const ReceivingAsset = ({
   useEffect(() => {
     fetchColumns();
     fetchProduct();
-  }, []);
+  }, [purchaseOrderData]);
 
   const fetchColumns = async () => {
     const column = [];
@@ -231,17 +231,6 @@ const ReceivingAsset = ({
       }
     });
     column.push({
-      accessor: 'scrapQuantity',
-      Header: 'Reject Quantity',
-      width: 300,
-      Cell: ({ row }) => (row.original['scrapQuantity'] ? <p>{row.original['scrapQuantity']}</p> : <NoDataCell />),
-      Footer: (info) => {
-        return info?.rows
-          ?.filter((f) => f.values.hasOwnProperty('scrapQuantity') && !isNaN(f.values['scrapQuantity']))
-          .reduce((sum, row) => row.values['scrapQuantity'] + sum, 0);
-      }
-    });
-    column.push({
       accessor: 'rejectQuantity',
       Header: 'Reject/Replacement Quantity',
       width: 300,
@@ -399,6 +388,7 @@ const ReceivingAsset = ({
           onClose={() => setShowCreateAssetDialog(false)}
           onSuccess={() => {
             setShowCreateAssetDialog(false);
+            fetchColumns()
             fetchProduct();
           }}
           title="Receiving"
@@ -412,6 +402,7 @@ const ReceivingAsset = ({
           handleClose={() => setRejectProductDialog(null)}
           handleSuccess={() => {
             setRejectProductDialog(null);
+            fetchColumns()
             fetchProduct();
           }}
           POId={purchaseOrderData?._id}
