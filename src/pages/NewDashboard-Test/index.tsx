@@ -15,6 +15,7 @@ import placeholder_img from 'src/assets/PerformanceTuning.png';
 import { useData } from 'src/StateProvider/Provider';
 import { ChartDataType } from './ChartTypes';
 import AssetStats from '../KpiDashboard/AssetDashboard/AssetStats';
+import FullScreenChart from './FullScreenChart';
 
 const DashbaordNew = () => {
   const {
@@ -25,11 +26,12 @@ const DashbaordNew = () => {
     }
   } = useData();
   const { setToastConfig } = React.useContext(CustomToastContext);
-  const [commonSalesData, setCommonSalesData] = React.useState(null);
   const [filtersOptions, setFilterOptions] = React.useState(null);
   const [dashboardLoading, setDashboardLoading] = React.useState(false);
   const [dashboardList, setDashboardList] = React.useState([]);
   const [charts, setCharts] = React.useState([]);
+  const [openFullScreenChart, setOpenFullScreenChart] = React.useState(false);
+  const [selectedChart, setSelectedChart] = React.useState(null);
   const [globalFilters, setGlobalFilters] = React.useState(() => {
     const selectedDashboard = localStorage.getItem('selectedDashboard') ? localStorage.getItem('selectedDashboard') : '';
 
@@ -68,7 +70,7 @@ const DashbaordNew = () => {
             salesRep: data['User'].filter((u: any) => u?.entities?.findIndex((d: any) => d.entity === selectedEntity) !== -1),
             marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
             subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
-            warehouse: data['warehouse'],
+            warehouse: data['Warehouse'],
             countryBillTo: countriesData,
             countrySellTo: countriesData,
             country: countriesData
@@ -148,8 +150,10 @@ const DashbaordNew = () => {
                       key={chart.chartType + ' ' + index + 1}
                       chart={chart}
                       filterData={{ ...filtersOptions }}
-                      commonSalesData={commonSalesData}
-                      setCommonSalesData={setCommonSalesData}
+                      setSelectedChart={(currentChart: ChartDataType) => {
+                        setSelectedChart(currentChart);
+                        setOpenFullScreenChart(true);
+                      }}
                     />
                   ))}
                   {globalFilters.dashboardType?.includes('Asset') && (
@@ -165,6 +169,17 @@ const DashbaordNew = () => {
           <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
         )}
       </div>
+      {openFullScreenChart && (
+        <FullScreenChart
+          chart={selectedChart}
+          globalFilters={globalFilters}
+          filterData={{ ...filtersOptions }}
+          close={() => {
+            setOpenFullScreenChart(false);
+            setSelectedChart(null);
+          }}
+        />
+      )}
     </MuiPickersUtilsProvider>
   );
 };
