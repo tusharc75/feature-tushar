@@ -21,9 +21,7 @@ import TransformIcon from '@material-ui/icons/Transform';
 
 const ReceivingAsset = ({
   purchaseOrderData,
-  setCurrentStep,
   updateStatus,
-  statusOptions,
   stepFullScreen,
   isSmallScreen,
   isTabletScreen,
@@ -48,6 +46,9 @@ const ReceivingAsset = ({
   const [selectedRecords, setSelectedRecords] = useState([]);
 
   useEffect(() => {
+    if (purchaseOrderData?.status === PURCHASE_ORDER_STATUS.closed) {
+      setColumns(null)
+    }
     fetchColumns();
     fetchProduct();
   }, [purchaseOrderData]);
@@ -388,7 +389,6 @@ const ReceivingAsset = ({
           onClose={() => setShowCreateAssetDialog(false)}
           onSuccess={() => {
             setShowCreateAssetDialog(false);
-            fetchColumns()
             fetchProduct();
           }}
           title="Receiving"
@@ -402,7 +402,7 @@ const ReceivingAsset = ({
           handleClose={() => setRejectProductDialog(null)}
           handleSuccess={() => {
             setRejectProductDialog(null);
-            fetchColumns()
+            setDisableCreateAsset(false)
             fetchProduct();
           }}
           POId={purchaseOrderData?._id}
