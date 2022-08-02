@@ -1,8 +1,9 @@
 import React from 'react';
 import Chart from 'react-chartjs-2';
-import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge } from '@material-ui/core';
-import { ImportExport, TableChart, Timeline } from '@material-ui/icons';
+import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge, IconButton } from '@material-ui/core';
+import { ImportExport, TableChart, Timeline, Maximize } from '@material-ui/icons';
 import { BsFilter } from 'react-icons/bs';
+import { FiMaximize2 } from 'react-icons/fi';
 import { Skeleton } from '@material-ui/lab';
 
 import styles from '../KpiDashboard/dashboard.module.scss';
@@ -26,14 +27,14 @@ export interface ChartDataType extends IFormDataType {
   numberOfCards?: number;
 }
 interface Props {
-  commonSalesData?: any;
-  setCommonSalesData?: any;
   chart: ChartDataType;
+  fullScreen?: boolean;
   filterData: any;
   globalFilters: GlobalFiltersType;
+  setSelectedChart?: (Chart: ChartDataType) => void;
 }
 
-const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
+const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen }: Props) => {
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
   const { setToastConfig } = React.useContext(CustomToastContext);
@@ -140,7 +141,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
   const idsWithAdditionStatus = ['openQuotesByCustomer', 'openQuoteByRep'];
 
   return (
-    <Grid item xs={12} md={chart.column}>
+    <Grid item xs={12} md={fullScreen ? 12 : chart.column}>
       {chart.graphType === 'Custom' ? (
         <Grid container spacing={1}>
           {loading ? (
@@ -193,6 +194,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   <Button
                     disabled={loading}
                     color="primary"
+                    style={{ marginRight: setSelectedChart ? 16 : 0 }}
                     onClick={() => {
                       setTableView(!tableView);
                     }}
@@ -201,6 +203,11 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
                   >
                     {!tableView ? 'Table' : 'Chart'} View
                   </Button>
+                )}
+                {setSelectedChart && (
+                  <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
+                    <FiMaximize2 fontSize="16px" />
+                  </IconButton>
                 )}
               </Box>
             </Box>
@@ -216,7 +223,7 @@ const ChartTypes = ({ chart, filterData, globalFilters }: Props) => {
             )}
           </Box>
 
-          <Box minHeight={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500}>
+          <Box minHeight={fullScreen ? window.innerHeight - 150 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500}>
             {loading ? (
               <Loader noLoader={false} text="" style={{ minHeight: '100%' }} />
             ) : !chartData || chartData.length === 0 ? (

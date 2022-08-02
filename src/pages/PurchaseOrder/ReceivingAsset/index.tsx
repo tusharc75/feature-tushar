@@ -21,9 +21,7 @@ import TransformIcon from '@material-ui/icons/Transform';
 
 const ReceivingAsset = ({
   purchaseOrderData,
-  setCurrentStep,
   updateStatus,
-  statusOptions,
   stepFullScreen,
   isSmallScreen,
   isTabletScreen,
@@ -48,9 +46,12 @@ const ReceivingAsset = ({
   const [selectedRecords, setSelectedRecords] = useState([]);
 
   useEffect(() => {
+    if (purchaseOrderData?.status === PURCHASE_ORDER_STATUS.closed) {
+      setColumns(null)
+    }
     fetchColumns();
     fetchProduct();
-  }, []);
+  }, [purchaseOrderData]);
 
   const fetchColumns = async () => {
     const column = [];
@@ -231,17 +232,6 @@ const ReceivingAsset = ({
       }
     });
     column.push({
-      accessor: 'scrapQuantity',
-      Header: 'Reject Quantity',
-      width: 300,
-      Cell: ({ row }) => (row.original['scrapQuantity'] ? <p>{row.original['scrapQuantity']}</p> : <NoDataCell />),
-      Footer: (info) => {
-        return info?.rows
-          ?.filter((f) => f.values.hasOwnProperty('scrapQuantity') && !isNaN(f.values['scrapQuantity']))
-          .reduce((sum, row) => row.values['scrapQuantity'] + sum, 0);
-      }
-    });
-    column.push({
       accessor: 'rejectQuantity',
       Header: 'Reject/Replacement Quantity',
       width: 300,
@@ -412,6 +402,7 @@ const ReceivingAsset = ({
           handleClose={() => setRejectProductDialog(null)}
           handleSuccess={() => {
             setRejectProductDialog(null);
+            setDisableCreateAsset(false)
             fetchProduct();
           }}
           POId={purchaseOrderData?._id}

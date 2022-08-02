@@ -447,9 +447,7 @@ const PurchaseOrderDetailsPage = () => {
                             {currentStep === 1 && (
                               <ReceivingAsset
                                 purchaseOrderData={purchaseOrderData}
-                                setCurrentStep={setCurrentStep}
                                 updateStatus={updateStatus}
-                                statusOptions={statusOptions}
                                 renderedFrom={`${renderedFrom}_grid-4`}
                                 isSmallScreen={isSmallScreen}
                                 isTabletScreen={isTabletScreen}
