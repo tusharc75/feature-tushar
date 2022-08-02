@@ -306,7 +306,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                                 />
                                                                                             </Grid>
                                                                                         }
-                                                                                        <Grid item xs={12} md={4}>
+                                                                                        {/* <Grid item xs={12} md={4}>
                                                                                             <Field
                                                                                                 fullWidth
                                                                                                 label='Reject Quantity'
@@ -327,7 +327,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                                 error={validate([data])?.scrapQuantity}
                                                                                                 helperText={validate([data]).scrapQuantity ? "Quantity is more than actual quantity" : ""}
                                                                                             />
-                                                                                        </Grid>
+                                                                                        </Grid> */}
                                                                                     </Grid>
                                                                                 </Box>
                                                                                 {data?.serializedProduct &&

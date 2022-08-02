@@ -28,7 +28,9 @@ import { FaWpforms } from 'react-icons/fa';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import Steps from 'src/pages/RentalManagement/Steps'
+import Steps from 'src/pages/RentalManagement/Steps';
+import { RiFlowChart } from 'react-icons/ri';
+import TransferAssetViews from './RoadMapViews';
 
 const transferSteps = ['Add Assets', 'Loading Ticket'];
 const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
@@ -184,13 +186,17 @@ const TransferAssetDetailPage = () => {
         }
 
         const userEntity = user?.entity?.map((e) => e._id) ?? [];
-        const warehouseEntity = data?.transferType === 'Internal' ? data?.transfertoPlant?.entity : data?.transferType === 'External Customer' ? data?.transfertoCustomer?.entity : data?.transfertoSupplier?.entity;
+        const warehouseEntity =
+          data?.transferType === 'Internal'
+            ? data?.transfertoPlant?.entity
+            : data?.transferType === 'External Customer'
+            ? data?.transfertoCustomer?.entity
+            : data?.transfertoSupplier?.entity;
 
         if (warehouseEntity?.length) {
           const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
           setCanReceive(isReceiveable);
-        }
-        else {
+        } else {
           setCanReceive(true);
         }
 
@@ -400,7 +406,7 @@ const TransferAssetDetailPage = () => {
                 <Tab
                   className={'tabLayout'}
                   style={{
-                    background: tabValue === 1 ? 'white' : '',
+                    background: '',
                     color: tabValue === 1 ? '#163340' : '#163340'
                   }}
                   label={
@@ -413,8 +419,8 @@ const TransferAssetDetailPage = () => {
                 <Tab
                   className={'tabLayout'}
                   style={{
-                    background: tabValue === 2 ? 'white' : '',
-                    color: tabValue === 2 ? 'blue' : '#163340'
+                    background: '',
+                    color: '#163340'
                   }}
                   label={
                     <div className="d-flex align-items-center tab-font">
@@ -422,6 +428,19 @@ const TransferAssetDetailPage = () => {
                     </div>
                   }
                   {...a11yProps(1)}
+                />
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: '',
+                    color: tabValue === 2 ? 'blue' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                    </div>
+                  }
+                  {...a11yProps(2)}
                 />
                 <div className={'uio'}> </div>
               </Tabs>
@@ -525,6 +544,11 @@ const TransferAssetDetailPage = () => {
                   </ContentFullScreen>
                 </Box>
               </TabPanel>
+              <TabPanel value={tabValue} index={2}>
+                <Box>
+                  <TransferAssetViews tANumber={transferAssetData?.transferAssetNumber} tAId={id} />
+                </Box>
+              </TabPanel>
             </Paper>
           </div>
           <Box my={1} />
@@ -559,7 +583,7 @@ const TransferAssetDetailPage = () => {
                               type: ACTIVITY_RESOURCE.transferAsset
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>
