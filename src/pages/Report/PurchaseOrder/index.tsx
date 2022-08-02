@@ -418,8 +418,6 @@ const Report = () => {
             headerName: 'Product',
             show: true,
             disabled: false,
-            filter: false,
-            sortable: false,
             cellRenderer: 'productRenderer'
           },
           {
@@ -427,18 +425,7 @@ const Report = () => {
             headerName: 'Supplier Account',
             show: true,
             disabled: false,
-            filter: false,
-            sortable: false,
-            cellRenderer: 'commonRenderer'
-          },
-          {
-            field: 'warehouse',
-            headerName: 'Plant',
-            show: true,
-            disabled: false,
-            filter: false,
-            sortable: false,
-            cellRenderer: 'commonRenderer'
+            cellRenderer: 'supplierRenderer'
           },
           {
             field: 'totalQty',
@@ -471,10 +458,10 @@ const Report = () => {
 
         setFrameWorkComponent({
           productRenderer: ProductRenderer,
+          supplierRenderer: SupplierRenderer,
           commonRenderer: CommonRenderer,
           numberRenderer: NumberRenderer,
         });
-
       }
 
       setResourceColumns(resourceFieldData);
