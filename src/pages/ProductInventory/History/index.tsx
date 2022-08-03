@@ -63,7 +63,7 @@ const History = ({ product, warehouse }) => {
             field: "qty",
             headerName: "Credit/Debit",
             show: true,
-            cellRenderer: "commonRenderer",
+            cellRenderer: "creditDebitRenderer",
             filter: false, sortable: false,
             cellStyle: params => {
                 if (params?.data?.type === "Credit") {
@@ -75,11 +75,19 @@ const History = ({ product, warehouse }) => {
             }
         },
         { field: "finalInventory", headerName: "Final Inventory", show: true, cellRenderer: "commonRenderer", filter: false, sortable: false, },
+        { field: "price", headerName: "Price", show: true, filter: false, cellRenderer: "commonRenderer" },
+        { field: "totalPrice", headerName: "Amount", show: true, filter: false, cellRenderer: "commonRenderer" },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
         { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
         { field: "serialNumber", headerName: "Serial Number", show: true, cellRenderer: "commonRenderer" },
         { field: "user", headerName: "Transacted By", show: true, cellRenderer: "commonRenderer" },
     ];
+
+    const CreditDebitRenderer = (params: any) => (
+        <span>
+            {params?.value ? params?.data?.type === "Debit" ? `-${params?.value}` : params?.value : <NoDataCell />}
+        </span>
+    );
 
     const ReferenceRenderer = (params) =>
         params?.value ? (
@@ -115,6 +123,7 @@ const History = ({ product, warehouse }) => {
 
     const frameworkComponents = {
         referenceRenderer: ReferenceRenderer,
+        creditDebitRenderer: CreditDebitRenderer,
         commonRenderer: CommonRenderer,
         dateTimeRenderer: DateTimeRenderer
     };

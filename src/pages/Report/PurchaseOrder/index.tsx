@@ -351,7 +351,7 @@ const Report = () => {
           field: "qty",
           headerName: "Credit/Debit",
           show: true,
-          cellRenderer: "commonRenderer",
+          cellRenderer: "creditDebitRenderer",
           filter: false, sortable: false,
           cellStyle: params => {
             if (params?.data?.type === "credit") {
@@ -362,6 +362,8 @@ const Report = () => {
             };
           }
         },
+        { field: "price", headerName: "Price", show: true, filter: false, cellRenderer: "commonRenderer" },
+        { field: "totalPrice", headerName: "Amount", show: true, filter: false, cellRenderer: "commonRenderer" },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
         { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
         { field: "serialNumber", headerName: "Serial Number", filter: false, show: true, cellRenderer: "serialNumberRenderer" },
@@ -372,6 +374,7 @@ const Report = () => {
           productRenderer: ProductRenderer,
           referenceRenderer: ReferenceRenderer,
           creditDebitTypeRenderer: CreditDebitTypeRenderer,
+          creditDebitRenderer: CreditDebitRenderer,
           commonRenderer: CommonRenderer,
           serialNumberRenderer: SerialNumberRenderer,
           dateTimeRenderer: DateTimeRenderer
@@ -508,6 +511,12 @@ const Report = () => {
   const SerialNumberRenderer = (params: any) => (
     <span>
       {params?.value?.length ? params?.value?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}
+    </span>
+  );
+
+  const CreditDebitRenderer = (params: any) => (
+    <span>
+      {params?.value ? params?.data?.type === "debit" ? `-${params?.value}`:params?.value : <NoDataCell />}
     </span>
   );
 
