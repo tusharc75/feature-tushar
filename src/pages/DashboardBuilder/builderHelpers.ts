@@ -24,6 +24,11 @@ const quotesStatus = [
   { optionLabel: 'Offered', optionValue: 'offered' }
 ]
 
+export const periodOption = [
+  { optionLabel: "Monthly", optionValue: "monthly" },
+  { optionLabel: "Quarterly", optionValue: "quaterly" },
+]
+
 export const GRAPH_TYPES = ['Chart', 'Table', 'Map', "Custom"];
 
 export const CHART_TYPES = ['Line', 'Bar', 'Pie', 'Doughnut'];
@@ -40,6 +45,7 @@ export const FILTERS_OPTIONS = [
   { title: 'Country Sell To', key: 'countrySellTo' },
   { title: 'Country', key: 'country' },
   { title: 'Status', key: 'status' },
+  { title: 'Period', key: 'period' },
 ];
 
 export const baseURL = '/dashboard-master';
