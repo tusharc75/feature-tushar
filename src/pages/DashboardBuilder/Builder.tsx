@@ -253,7 +253,7 @@ const Builder = (props: Props) => {
               multiple
               size="small"
               disableCloseOnSelect
-              options={formValues?.kpi?.filters || []}
+              options={formValues?.kpi?.filters || formValues?.filters || []}
               disabled={!formValues.kpi?.name}
               value={formValues.filters}
               onChange={(_, val) => handleChange('filters', val)}

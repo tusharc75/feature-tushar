@@ -16,6 +16,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { ChartDataType } from './ChartTypes';
 import AssetStats from '../KpiDashboard/AssetDashboard/AssetStats';
 import FullScreenChart from './FullScreenChart';
+import { periodOption } from '../DashboardBuilder/builderHelpers';
 
 const DashbaordNew = () => {
   const {
@@ -73,7 +74,8 @@ const DashbaordNew = () => {
             warehouse: data['Warehouse'],
             countryBillTo: countriesData,
             countrySellTo: countriesData,
-            country: countriesData
+            country: countriesData,
+            period: periodOption
           });
         });
       } catch (error) {
