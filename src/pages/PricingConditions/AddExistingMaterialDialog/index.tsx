@@ -8,7 +8,7 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer, DateRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import { prepareDataForGrid } from "../../../constants/helpers";
+import { prepareDataForGrid, serviceMaster } from "../../../constants/helpers";
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import Dialog from '@material-ui/core/Dialog'
 import { CustomDialogTransition } from "../../../constants/helpers";
@@ -28,7 +28,7 @@ const AddExistingMaterialDialog = ({ type, handleAdd, handleClose, ignoreIds }) 
     const [columns, setColumns] = useState(null);
     const [frameWorkComponent, setFrameWorkComponent] = useState(null)
 
-    const [resource, setResource] = useState(type === "product" ? "Product" : "Packages");
+    const [resource, setResource] = useState(type === "product" ? "Product" : type === "service" ? serviceMaster.resource : "Packages");
 
     const { getColumnData } = useColumns();
 
@@ -66,7 +66,7 @@ const AddExistingMaterialDialog = ({ type, handleAdd, handleClose, ignoreIds }) 
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? product.api : packages.packageApi}${queryString}`).then(({ data }) => {
+        axiosInstance().get(`${type === "product" ? product.api : type === "service" ? serviceMaster.api : packages.packageApi}${queryString}`).then(({ data }) => {
             let rows = data.data.map((item) => {
                 let res = {
                     ...prepareDataForGrid(item),
