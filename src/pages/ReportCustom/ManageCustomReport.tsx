@@ -14,7 +14,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
 
 type ValueTypes = {
-  customName: string;
+  customReportName: string;
   filters: any[];
   resource: any;
   column: any[];
@@ -50,7 +50,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
           resource = { title: resource.title, key: resource.key };
           await fetchGridColumns(resource);
           let newData: any = {
-            scheduleName: data?.customName,
+            customReportName: data?.customReportName,
             resource,
             filters: data?.filters,
             column: data?.column
@@ -62,7 +62,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       })();
     } else {
       setFormData({
-        customName: '',
+        customReportName: '',
         resource: null,
         filters: [],
         column: []
@@ -309,8 +309,8 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
   const validate = (values: ValueTypes) => {
     let errors = {};
-    if (!values.customName || values.customName === '') {
-      errors['customName'] = 'Custom report name is required';
+    if (!values.customReportName || values.customReportName === '') {
+      errors['customReportName'] = 'Custom report name is required';
     }
     if (!values.resource) {
       errors['resource'] = 'Resource is required';
@@ -441,16 +441,16 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
                         <TextField
-                          value={values.customName}
+                          value={values.customReportName}
                           required
-                          onChange={(e) => setFieldValue('customName', e.target.value)}
+                          onChange={(e) => setFieldValue('customReportName', e.target.value)}
                           fullWidth
-                          name="customName"
+                          name="customReportName"
                           size="small"
                           label="Custom Report Name"
                           variant="outlined"
-                          error={touched['customName'] && Boolean(errors['customName'])}
-                          helperText={touched['customName'] && errors['customName']}
+                          error={touched['customReportName'] && Boolean(errors['customReportName'])}
+                          helperText={touched['customReportName'] && errors['customReportName']}
                         />
                       </Grid>
                       <Grid item xs={12} sm={6}>
