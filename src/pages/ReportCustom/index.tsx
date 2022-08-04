@@ -40,7 +40,7 @@ const CustomReport = () => {
   // Grid Configs
   const [columns] = useState([
     {
-      field: 'customName',
+      field: 'customReportName',
       headerName: 'Custom Report Name',
       show: true,
       disabled: false,
@@ -88,20 +88,13 @@ const CustomReport = () => {
       gridApi.setRowData([]);
     }
     try {
-      let {
-        data: { data, count }
-      } = await axiosInstance().get(`custom-report`);
-
+      let { data: { data, count } } = await axiosInstance().get(`custom-report`);
       data = data.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.column = finalObject.column
-          .split(',')
-          .map((s: string) => startCase(s))
-          .join(', ');
-        finalObject.filters = finalObject.filters.length > 0 ? finalObject.filters.map((item) => startCase(item.term)) : [];
+        finalObject.column = finalObject.column?.split(',')?.map((s: string) => startCase(s))?.join(', ');
+        finalObject.filters = finalObject.filters.length > 0 ? finalObject?.filters?.map((item) => startCase(item.term)) : [];
         return finalObject;
       });
-
       dispatch({ type: 'initialize', data: data, count: count });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -127,21 +120,16 @@ const CustomReport = () => {
           <FileCopy color="primary" />
         </IconButton>
       </HtmlTooltip> */}
-      <HtmlTooltip title={permissions?.customReport?.isDelete ? 'Delete' : "You don't have permission"}>
-        <span>
-          <IconButton
-            disabled={!permissions?.customReport?.isDelete}
-            size="small"
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            <Delete color={permissions?.customReport?.isDelete ? 'error' : 'disabled'} />
-          </IconButton>
-        </span>
-      </HtmlTooltip>
+      <IconButton
+        size="small"
+        aria-label="Delete"
+        onClick={() => {
+          setDeleteRecord(params.data);
+          setShowDeleteConfirmBox(true);
+        }}
+      >
+        <Delete color={'error'} />
+      </IconButton>
     </>
   );
 
@@ -149,9 +137,7 @@ const CustomReport = () => {
     return (
       <span
         onClick={() => {
-          if (permissions?.customReport?.isUpdate) {
-            setShowManageDialog({ open: true, id: params.data._id });
-          }
+          setShowManageDialog({ open: true, id: params.data._id });
         }}
         className="cursor-pointer link"
       >
@@ -231,7 +217,6 @@ const CustomReport = () => {
                 <Box display="flex" alignItems="center" justifyContent="flex-end">
                   <Box mr={1}>
                     <Button
-                      // disabled={!permissions?.customReport?.isCreate}
                       onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))}
                       variant="contained"
                       size="small"
@@ -265,7 +250,6 @@ const CustomReport = () => {
                       onClose={closeActions}
                     >
                       <MenuItem
-                        disabled={!permissions?.report?.isDelete}
                         onClick={() => {
                           closeActions();
                           setShowDeleteConfirmBox(true);
@@ -293,7 +277,7 @@ const CustomReport = () => {
                   selectedRecords={[]}
                   dataRows={dataRows}
                   dispatch={dispatch}
-                  onEdit={() => {}}
+                  onEdit={() => { }}
                   extraParamsToCheckDelete={false}
                   rowCount={rowCount}
                   page={page}
@@ -308,8 +292,8 @@ const CustomReport = () => {
                   owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                   onCreate={false}
                   showClone={false}
-                  onDelete={(data) => {}}
-                  onClone={(data) => {}}
+                  onDelete={(data) => { }}
+                  onClone={(data) => { }}
                   renderedFrom={routes.transferAsset?.title}
                 />
               ) : (
@@ -354,7 +338,7 @@ const CustomReport = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete the Custom Report ${deleteRecord?._id ? deleteRecord?.scheduleName : ''} ? `}
+            message={`Are you sure you want to delete the Custom Report ${deleteRecord?._id ? deleteRecord?.customReportName : ''} ? `}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
