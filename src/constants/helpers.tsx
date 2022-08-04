@@ -2023,3 +2023,5 @@ export const COLOUR_MASTER = {
     borderColor: '#FFFF99'
   }
 };
+
+export const leadTimeStatusDropdown = ['Production', 'Supplier', 'Assemble', 'Freight', 'Customer'];
