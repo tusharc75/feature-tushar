@@ -55,6 +55,7 @@ interface FiltersProps {
   statusTimeFrame?: any;
   setStatusTimeFrame?: any;
   selectedData?: any;
+  customReportData?: any;
 }
 
 const ReportFilters = (props: FiltersProps) => {
@@ -85,12 +86,68 @@ const ReportFilters = (props: FiltersProps) => {
     statusTimeFrame,
     setStatusTimeFrame,
     setStatusPeriodDate,
-    selectedData
+    selectedData,
+    customReportData
   } = props;
   const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
   const [isDeleting, setDeleting] = React.useState(false);
   const [isStatusPeriod, setIsStatusPeriod] = React.useState(false);
   const [errors, setErrors] = React.useState({});
+  const [dataLoading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!customReportData) return;
+    setLoading(true);
+
+    const initializeData = () => {
+      let newData: any = { ...customReportData };
+
+      if (newData?.filters.length > 0) {
+        const filters = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term === filter.fieldName) > -1);
+
+        const dateFields = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term.split('_')[1] === filter.fieldName) > -1);
+
+        const filterData = newData.filters.reduce(
+          (acc, val) => ({
+            ...acc,
+            [val.term]: val.value
+          }),
+          {}
+        );
+
+        const selectedFiltersData = filters.reduce(
+          (acc, val) => ({
+            ...acc,
+            [val.fieldName]: {
+              type: val.type,
+              lookup: val.lookup,
+              value: val.option.filter((option) => filterData[val.fieldName].includes(option.optionValue))
+            }
+          }),
+          {}
+        );
+
+        setSelectedData(selectedFiltersData);
+        const dateFilterData = {};
+        newData.filters
+          .filter((item) => item.term.includes('from_') || item.term.includes('to_'))
+          .forEach(({ term, value }) => {
+            dateFilterData[term] = value;
+          });
+
+        newData.filters = [...filters, ...dateFields];
+        setBetweenDate(dateFilterData);
+        setFormValues(filterData);
+      }
+      if (newData?.column.length > 0) {
+        const column = resourceColumns.filter((filter) => newData.column.includes(filter.fieldData.fieldName));
+        newData.column = column.map(({ fieldData }) => fieldData);
+      }
+      setSelectedResources(newData.filters);
+      setLoading(false);
+    };
+    initializeData();
+  }, [customReportData, filterOptions, resourceColumns]);
 
   React.useEffect(() => {
     if (!resourceColumns && resourceColumns.length === 0) return;
@@ -175,9 +232,9 @@ const ReportFilters = (props: FiltersProps) => {
     });
     setIsStatusPeriod(
       resource?.includes('Serialized Asset') &&
-      Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
-      formValues?.hasOwnProperty('status') &&
-      formValues.status.length > 0
+        Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
+        formValues?.hasOwnProperty('status') &&
+        formValues.status.length > 0
     );
   }, [selectedResources, formValues]);
 
@@ -226,60 +283,60 @@ const ReportFilters = (props: FiltersProps) => {
         setStatusTimeFrame('1-month');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-            ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
-            [`to_statusPeriod`]: new Date()
-          }))
+              ...prevState,
+              [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
+              [`to_statusPeriod`]: new Date()
+            }))
           : setBetweenDate((prevState) => ({
-            ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
-            [`to_${field.fieldName}`]: new Date()
-          }));
+              ...prevState,
+              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+              [`to_${field.fieldName}`]: new Date()
+            }));
 
         break;
       case '3-months':
         setStatusTimeFrame('3-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-            ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
-            [`to_statusPeriod`]: new Date()
-          }))
+              ...prevState,
+              [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
+              [`to_statusPeriod`]: new Date()
+            }))
           : setBetweenDate((prevState) => ({
-            ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
-            [`to_${field.fieldName}`]: new Date()
-          }));
+              ...prevState,
+              [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+              [`to_${field.fieldName}`]: new Date()
+            }));
         break;
 
       case '6-months':
         setStatusTimeFrame('6-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-            ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
-            [`to_statusPeriod`]: new Date()
-          }))
+              ...prevState,
+              [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
+              [`to_statusPeriod`]: new Date()
+            }))
           : setBetweenDate((prevState) => ({
-            ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
-            [`to_${field.fieldName}`]: new Date()
-          }));
+              ...prevState,
+              [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+              [`to_${field.fieldName}`]: new Date()
+            }));
         break;
 
       case '1-year':
         setStatusTimeFrame('1-year');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-            ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
-            [`to_statusPeriod`]: new Date()
-          }))
+              ...prevState,
+              [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
+              [`to_statusPeriod`]: new Date()
+            }))
           : setBetweenDate((prevState) => ({
-            ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
-            [`to_${field.fieldName}`]: new Date()
-          }));
+              ...prevState,
+              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+              [`to_${field.fieldName}`]: new Date()
+            }));
         break;
 
       default:
@@ -294,7 +351,7 @@ const ReportFilters = (props: FiltersProps) => {
           {Object.keys(errors).length > 0 && Object.keys(errors).map((key) => <Typography color="error">{errors[key]}</Typography>)}
         </Box>
         <Autocomplete
-          loading={loadingColumns}
+          loading={loadingColumns || dataLoading}
           loadingText="Please wait..."
           options={filterOptions}
           limitTags={4}
@@ -519,41 +576,42 @@ const ReportFilters = (props: FiltersProps) => {
           </Grid>
         </Box>
         <Box mt={2}>
-          {!resource?.includes('Purchase Order Type') && (
-            <Box height={'100%'} mb={2}>
-              <Autocomplete
-                options={reportList}
-                value={selectedReportView}
-                noOptionsText="No views were found"
-                onChange={(_, val) => {
-                  setSelectedReportView(val);
-                }}
-                fullWidth
-                renderOption={(option) => (
-                  <React.Fragment>
-                    <Box display={'flex'} width="100%" justifyContent="space-between">
-                      {option.name}
-                      {isDeleting ? (
-                        <CircularProgress size={18} color="inherit" />
-                      ) : (
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowConfirmDialog({ open: true, id: option._id, name: option.name });
-                          }}
-                        >
-                          <Delete color="error" />
-                        </IconButton>
-                      )}
-                    </Box>
-                  </React.Fragment>
-                )}
-                getOptionLabel={(option) => option.name}
-                renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
-              />
-            </Box>
-          )}
+          {!resource?.includes('Purchase Order Type') ||
+            (!customReportData && (
+              <Box height={'100%'} mb={2}>
+                <Autocomplete
+                  options={reportList}
+                  value={selectedReportView}
+                  noOptionsText="No views were found"
+                  onChange={(_, val) => {
+                    setSelectedReportView(val);
+                  }}
+                  fullWidth
+                  renderOption={(option) => (
+                    <React.Fragment>
+                      <Box display={'flex'} width="100%" justifyContent="space-between">
+                        {option.name}
+                        {isDeleting ? (
+                          <CircularProgress size={18} color="inherit" />
+                        ) : (
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowConfirmDialog({ open: true, id: option._id, name: option.name });
+                            }}
+                          >
+                            <Delete color="error" />
+                          </IconButton>
+                        )}
+                      </Box>
+                    </React.Fragment>
+                  )}
+                  getOptionLabel={(option) => option.name}
+                  renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
+                />
+              </Box>
+            ))}
           <Button
             onClick={fetchReportData}
             startIcon={loading ? <CircularProgress color="inherit" size={18} /> : <List />}

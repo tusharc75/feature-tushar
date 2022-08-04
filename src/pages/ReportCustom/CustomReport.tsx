@@ -20,7 +20,7 @@ import Loader from '../../components/Loader';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import ReportFilters from './ReportFilters';
+import ReportFilters from '../Report/ReportFilters';
 
 let cancelTokenSource = null;
 
@@ -32,12 +32,8 @@ const Report = () => {
   const {
     state: { permissions, selectedEntity }
   } = useData();
-  let { resource } = useParams();
-
-  let resourceCamelCase = camelCase(resource);
-  let resourceStartCase = startCase(resource);
-  const renderedFrom = `${resource}_report`;
-
+  let { id } = useParams();
+  const [resource, setResource] = React.useState('');
   const [showGrid, setShowGrid] = React.useState(false);
   const [selectedData, setSelectedData] = React.useState(null);
   const [betweenDate, setBetweenDate] = React.useState(null);
@@ -52,6 +48,7 @@ const Report = () => {
   const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [reportList, setReportList] = React.useState([]);
   const [selectedReportView, setSelectedReportView] = React.useState(null);
+  const [customReportData, setCustomReportData] = React.useState(null);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
 
   // Grid Configs
@@ -62,12 +59,12 @@ const Report = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
-  const fetchGridColumns = async () => {
+  const fetchGridColumns = async (res) => {
     setLoadingColumns(true);
     const {
       data: { data }
-    }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`);
-    if (resourceStartCase === 'Serialized Asset') {
+    }: any = await axiosInstance().get(`/field?resource=${startCase(res)}`);
+    if (startCase(res) === 'Serialized Asset') {
       const {
         data: { data: lookupResource }
       } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
@@ -84,13 +81,13 @@ const Report = () => {
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
-      if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]) {
+      if (o?.fieldData?.fieldName === primaryFields[camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)]) {
         o.fieldData.primaryField = true;
       }
       let currentColumn = getColumnData(
-        routes[resourceCamelCase]?.title,
+        routes[camelCase(res)]?.title,
         o?.fieldData,
-        routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
+        routes[`${camelCase(res) === 'quotes' ? 'quoteBuilder' : camelCase(res)}Detail`].path
       );
       if (currentColumn !== null) {
         columns = [...columns, currentColumn?.columnData];
@@ -105,7 +102,7 @@ const Report = () => {
     };
     setFrameWorkComponent({ ...tempFrameworkComponent });
     columns = [...columns, ...getStaticFields()];
-    if (resourceStartCase === 'Purchase Order') {
+    if (startCase(res) === 'Purchase Order') {
       columns.splice(1, 0, {
         field: 'poAmount',
         headerName: 'Purchase Order Amount',
@@ -119,11 +116,17 @@ const Report = () => {
   };
 
   React.useEffect(() => {
-    if (initialRender.current) {
-      fetchGridColumns();
-      initialRender.current = false;
+    if (id) {
+      (async () => {
+        let {
+          data: { data }
+        } = await axiosInstance().get(`custom-report/${id}`);
+        setCustomReportData(data);
+        setResource(data.resource);
+        fetchGridColumns(data.resource);
+      })();
     }
-  }, []);
+  }, [id]);
 
   React.useEffect(() => {
     axiosInstance()
@@ -136,10 +139,10 @@ const Report = () => {
       });
   }, [showGrid]);
   React.useEffect(() => {
-    if (showGrid) {
+    if (showGrid && resource) {
       fetchResourceData();
     }
-  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
+  }, [resource, page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   React.useEffect(() => {
     // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
@@ -179,7 +182,7 @@ const Report = () => {
     }
 
     axiosInstance()
-      .get(`${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report${filterQuery}`, {
+      .get(`${camelCase(resource) !== 'quotes' ? routes[camelCase(resource)].path : 'quote-builder'}/report${filterQuery}`, {
         cancelToken: cancelTokenSource.token
       })
       .then(({ data: { data, count } }) => {
@@ -315,7 +318,7 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${resourceCamelCase !== 'quotes' ? routes[resourceCamelCase].path : 'quote-builder'}/report/export?exportColumn=${JSON.stringify(
+        `${camelCase(resource) !== 'quotes' ? routes[camelCase(resource)].path : 'quote-builder'}/report/export?exportColumn=${JSON.stringify(
           columns
         )}&export=1&${filterQuery}`,
         {
@@ -346,7 +349,7 @@ const Report = () => {
             <CustomBreadCrumbs
               routes={[
                 { title: 'Reports', path: '/reports' },
-                { title: routes[resourceCamelCase]?.title, path: '' }
+                { title: routes[camelCase(resource)]?.title, path: '' }
               ]}
             />
           </Grid>
@@ -404,10 +407,11 @@ const Report = () => {
             <hr />
             {!showGrid ? (
               <ReportFilters
+                customReportData={customReportData}
                 resourceColumns={resourceColumns}
                 betweenDate={betweenDate}
                 setBetweenDate={setBetweenDate}
-                resource={sidebarResource[resourceCamelCase]}
+                resource={sidebarResource[camelCase(resource)]}
                 setSelectedData={setSelectedData}
                 loading={loading}
                 fetchReportData={fetchResourceData}
@@ -439,10 +443,10 @@ const Report = () => {
                     <CustomSwipableList
                       allowSelection={false}
                       allowSwipe={false}
-                      permissions={permissions[resourceCamelCase]}
+                      permissions={permissions[camelCase(resource)]}
                       primaryField={columns?.find((d) => d.primaryField)}
                       onClick={(data) => {
-                        // history.push(`${routes[resourceCamelCase].path}/detail/${data._id}`);
+                        // history.push(`${routes[camelCase(resource)].path}/detail/${data._id}`);
                       }}
                       selectedRecords={[]}
                       dataRows={dataRows}
@@ -471,7 +475,7 @@ const Report = () => {
                       setSelectedReportView={setSelectedReportView}
                       selectedReportView={selectedReportView}
                       reportSave={true}
-                      columns={columns}
+                      columns={customReportData?.column ? columns.filter((col) => customReportData?.column.includes(col.field)) : columns}
                       dataRows={dataRows}
                       frameworkComponents={frameWorkComponent}
                       setGridApi={setGridApi}
@@ -482,7 +486,7 @@ const Report = () => {
                       page={page}
                       actionWidth={100}
                       loading={loading}
-                      renderedFrom={renderedFrom}
+                      renderedFrom={`custom-report_${resource}`}
                       allowSelection={false}
                       allowAction={false}
                       refreshGrid={fetchResourceData}
