@@ -147,6 +147,8 @@ import ServiceMaster from './pages/ServiceMaster';
 import ServiceMasterDetailsPage from './pages/ServiceMaster/ServiceMasterDetailsPage';
 import LeadTimeMaster from './pages/LeadTimeMaster';
 import LeadTimeMasterDetails from './pages/LeadTimeMaster/LeadTimeMasterDetails';
+import CustomReport from './pages/ReportCustom';
+import CustomReports from './pages/ReportCustom/CustomReport';
 
 var notificationInterval: any = null;
 
@@ -689,6 +691,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`/schedule-report`}>
               <ScheduleReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`/custom-report`}>
+              <CustomReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.reports.path}/custom-report/:id`}>
+              <CustomReports />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.resourceCalendar.path}`}>
               <ResourceCalendar />

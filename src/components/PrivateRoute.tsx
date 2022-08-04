@@ -74,6 +74,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'serialized-asset-new',
         'import-export',
         'schedule-report',
+        'custom-report',
         'inventory-cycle',
         'cycle-count-determination',
         'quotation'
