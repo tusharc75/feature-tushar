@@ -11,7 +11,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { serializedAsset, getObjKeysWithValues, INVENTORY_STATUS, repairJob } from "../../constants/helpers";
+import { serializedAsset, getObjKeysWithValues, INVENTORY_STATUS, repairJob, INVENTORY_OWNER_TYPE } from "../../constants/helpers";
 import ManageSerializedAsset from "./ManageSerializedAsset";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -427,7 +427,7 @@ const SerializedAssetDetailsPage = () => {
                   >
                     {permissions?.serializedAsset?.isUpdate && productInventoryData.active && (
                       <>
-                        {permissions?.repairJob?.isCreate && !productInventoryData?.subleaseAsset &&
+                        {permissions?.repairJob?.isCreate && productInventoryData?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
                           [INVENTORY_STATUS.underReview, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(productInventoryData.status) &&
                           <Button
                             variant="outlined"
