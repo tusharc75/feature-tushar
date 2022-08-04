@@ -14,7 +14,8 @@ import {
   getObjKeysWithValues,
   setFieldsInAscendingOrder,
   yupSchema,
-  leadTimeMaster
+  leadTimeMaster,
+  leadTimeStatusDropdown
 } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -31,7 +32,6 @@ import React from 'react';
 import routes from 'src/components/Helpers/Routes';
 
 const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClose, onSuccess }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
 
@@ -164,7 +164,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
     setLeadTimeMasterSteps(data);
     setTotalDays(data?.reduce((acc, curr) => acc + parseInt(curr.days), 0));
   };
-  
+
   const handleOnDaysChangeValue = (index, value) => {
     const data = [...leadTimeMasterSteps];
     data[index].days = parseInt(value) ?? 0;
@@ -177,8 +177,6 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
     data[index].leadTimeStatus = value;
     setLeadTimeMasterSteps(data);
   };
-
-  const leadTimeStatusDropdown = ['Production', 'Supplier', 'Assemble', 'Freight', 'Customer'];
 
   return (
     <Dialog

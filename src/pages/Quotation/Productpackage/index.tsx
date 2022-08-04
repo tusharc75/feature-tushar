@@ -316,6 +316,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.leadTimeData = parent.leadTime;
       parent.leadTime = `${
         parent.type === 'product'
           ? parent?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0
@@ -329,6 +330,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       const subRows: any = data.material.filter((e) => e.parentId === parent._id);
       subRows.forEach((_subRow, j) => {
         _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`;
+        _subRow.leadTimeData = _subRow.leadTime;
         _subRow.leadTime = `${
           _subRow.type === 'product'
             ? _subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0
@@ -767,7 +769,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       )}
       {ppLeadTimeOpen.open && (
         <ManagePPLeadTime
-          data={''}
+          quotationId={quotationData._id}
+          data={ppLeadTimeOpen?.data}
           onClose={() => {
             setPpLeadTimeOpen({ open: false, data: null });
           }}
