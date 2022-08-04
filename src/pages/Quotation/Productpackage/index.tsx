@@ -41,8 +41,8 @@ import PriceRequestDialog from './PriceRequestDialog';
 import { ExpandMore } from '@material-ui/icons';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import { capitalize } from 'lodash';
-import UpdateIcon from '@material-ui/icons/Update';
 import ManagePPLeadTime from './ManagePPLeadTime';
+import DateRangeIcon from '@material-ui/icons/DateRange';
 
 const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, setQuotationSummary }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -137,10 +137,9 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
               color="primary"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'package'
+                  `${row.original.type === 'product'
+                    ? routes.productDetail.path
+                    : row.original.type === 'package'
                       ? routes.packagesDetail.path
                       : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
@@ -153,7 +152,12 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       {
         accessor: 'leadTime',
         Header: 'Lead Time (Days)',
-        Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)
+        Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+        Footer: (info) => {
+          const total = info.rows.filter((f) => f.values.hasOwnProperty("leadTime") && !isNaN(f.values["leadTime"]))
+            .reduce((sum, row) => parseInt(row.values["leadTime"]) + sum, 0);
+          return <>{total}</>;
+        }
       }
     ];
     data.forEach((element) => {
@@ -230,7 +234,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />),
         });
       }
     });
@@ -258,7 +262,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                     // setDeleteData(obj);
                   }}
                 >
-                  <UpdateIcon fontSize="small" color="primary" />
+                  <DateRangeIcon fontSize="small" color="primary" />
                 </IconButton>
                 <Box ml={1} />
                 <IconButton
@@ -317,11 +321,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     rows.forEach((parent, i) => {
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
       parent.leadTimeData = parent.leadTime;
-      parent.leadTime = `${
-        parent.type === 'product'
-          ? parent?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0
-          : parent?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0
-      }`;
+      parent.leadTime = `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -331,11 +331,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       subRows.forEach((_subRow, j) => {
         _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`;
         _subRow.leadTimeData = _subRow.leadTime;
-        _subRow.leadTime = `${
-          _subRow.type === 'product'
-            ? _subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0
-            : _subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0
-        }`;
+        _subRow.leadTime = `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}`;
         _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
         _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
         _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
@@ -734,8 +730,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
             addExistingProductDialog.type === 'product'
               ? `${renderedFrom}-product`
               : addExistingProductDialog.type === 'service'
-              ? `${renderedFrom}-service`
-              : `${renderedFrom}-package`
+                ? `${renderedFrom}-service`
+                : `${renderedFrom}-package`
           }
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAdd}

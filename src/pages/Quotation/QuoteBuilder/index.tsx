@@ -65,7 +65,12 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             Header: "Lead Time (Days)",
             Cell: ({ row }) => (
                 row.original["leadTime"] ? <p>{row.original["leadTime"]}</p> : 0
-            )
+            ),
+            Footer: (info) => {
+                const total = info.rows.filter((f) => f.values.hasOwnProperty("leadTime") && !isNaN(f.values["leadTime"]))
+                    .reduce((sum, row) => parseInt(row.values["leadTime"]) + sum, 0);
+                return <>{total}</>;
+            }
         }]
         data.forEach(element => {
             if (element.fieldName === "price" && element.required) {
@@ -179,7 +184,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
             parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
-            parent.leadTime = `${parent.type === "product" ? parent.productDetail?.leadTimeinDays || 0 : parent.packageDetail?.leadTimeinDays || 0}`
+            parent.leadTime = `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}`;
             parent.qtyDisplay = parent.qty;
             parent.isValid = parent["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -188,7 +193,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             const subRows: any = data.material.filter((e) => e.parentId === parent._id);
             subRows.forEach((_subRow, j) => {
                 _subRow.detail = `${_subRow.type === "product" ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`
-                _subRow.leadTime = `${_subRow.type === "product" ? _subRow.productDetail?.leadTimeinDays || 0 : _subRow?.serviceDetail?.leadTimeinDays || 0}`
+                _subRow.leadTime = `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}`;
                 _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`
                 _subRow.isValid = _subRow["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
                 _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
@@ -205,16 +210,10 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
         } else {
             setNextStep(true)
         }
-        const totalFinalPrice = rows.filter(f => f?.parentId === null && f?.hasOwnProperty("finalPrice_" + quotationData?.currency?.toLowerCase()) && !isNaN(f["finalPrice_" + quotationData?.currency?.toLowerCase()])).reduce((sum, row) => row["finalPrice_" + quotationData?.currency?.toLowerCase()] + sum, 0)
-        const totalSupplierPrice = rows.filter(f => f?.parentId === null && f?.hasOwnProperty("supplierPrice_" + quotationData?.currency?.toLowerCase()) && !isNaN(f["supplierPrice_" + quotationData?.currency?.toLowerCase()])).reduce((sum, row) => row["supplierPrice_" + quotationData?.currency?.toLowerCase()] + sum, 0)
-        setQuotationSummary({
-            totalProfit: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice - totalSupplierPrice),
-            totalcost: formatAmountWithCurrency(quotationData?.currency, totalSupplierPrice),
-            totalsale: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice)
-        });
 
         const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}`)
-        let serviceRows = serviceResponse?.data?.data?.map((item) => {
+        let serviceRows = []
+        serviceRows = serviceResponse?.data?.data?.map((item) => {
             let finalObject = prepareDataForGrid(item);
             finalObject["detail"] = item?.serviceName;
             finalObject["qtyDisplay"] = item?.qty;
@@ -229,6 +228,15 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             return res;
         })
         setRowsData([...rows, ...serviceRows]);
+
+        const totalFinalPrice = rows.filter(f => f?.parentId === null && f?.hasOwnProperty("finalPrice_" + quotationData?.currency?.toLowerCase()) && !isNaN(f["finalPrice_" + quotationData?.currency?.toLowerCase()])).reduce((sum, row) => row["finalPrice_" + quotationData?.currency?.toLowerCase()] + sum, 0)
+        const totalSupplierPrice = rows.filter(f => f?.parentId === null && f?.hasOwnProperty("supplierPrice_" + quotationData?.currency?.toLowerCase()) && !isNaN(f["supplierPrice_" + quotationData?.currency?.toLowerCase()])).reduce((sum, row) => row["supplierPrice_" + quotationData?.currency?.toLowerCase()] + sum, 0)
+
+        setQuotationSummary({
+            totalProfit: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice - totalSupplierPrice),
+            totalcost: formatAmountWithCurrency(quotationData?.currency, totalSupplierPrice),
+            totalsale: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice)
+        });
     };
 
     return (<Fragment>
