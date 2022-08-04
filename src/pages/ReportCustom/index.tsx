@@ -231,7 +231,7 @@ const CustomReport = () => {
                 <Box display="flex" alignItems="center" justifyContent="flex-end">
                   <Box mr={1}>
                     <Button
-                      disabled={!permissions?.customReport?.isCreate}
+                      // disabled={!permissions?.customReport?.isCreate}
                       onClick={() => setShowManageDialog((prev) => ({ ...prev, open: true }))}
                       variant="contained"
                       size="small"
@@ -248,7 +248,7 @@ const CustomReport = () => {
                       endIcon={<ExpandMore />}
                       onClick={openActions}
                       aria-controls="action-menu"
-                      disabled={selectedRecords.length === 0 || !permissions?.customReport?.isDelete}
+                      disabled={selectedRecords.length === 0}
                     >
                       Actions
                     </Button>
