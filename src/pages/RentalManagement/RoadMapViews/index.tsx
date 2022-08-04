@@ -365,9 +365,9 @@ const RentalManagementViews = (props) => {
               : customNodeStyles.productAssets
         });
         beforeLoadingAssetIdx += 1;
-        // console.log(item.inventoryDetail.assetNumber);
-        // console.log(allAssets[item.inventoryDetail.assetNumber]);
+        var edgePlaced = false;
         if (purchaseArr.includes(item.inventoryDetail.purchaseOrder)) {
+          edgePlaced = true;
           flowEdge.push({
             id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
             source: item.inventoryDetail.purchaseOrder,
@@ -376,21 +376,26 @@ const RentalManagementViews = (props) => {
           });
         }
         if (subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset) {
+          console.log(subLeaseArr.includes(item.inventoryDetail.supplierAccount), item.inventoryDetail.subleaseAsset);
+          edgePlaced = true;
           flowEdge.push({
             id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
             source: item.inventoryDetail.supplierAccount,
             arrowHeadType: 'arrow',
             target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
           });
-        } else {
-          flowEdge.push({
-            id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
-            source: item._id,
-            arrowHeadType: 'arrow',
-            target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
-          });
         }
+        // else if (!subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.supplierAccount) {
+        //   // edgePlaced = true;
+        //   flowEdge.push({
+        //     id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
+        //     source: item._id,
+        //     arrowHeadType: 'arrow',
+        //     target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
+        //   });
+        // }
         if (bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)) {
+          edgePlaced = true;
           flowEdge.push({
             id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
             source: item.inventoryDetail.bulkAssetCreation,
@@ -399,6 +404,7 @@ const RentalManagementViews = (props) => {
           });
         }
         if (allAssets[item.inventoryDetail.assetNumber]) {
+          edgePlaced = true;
           flowEdge.push({
             id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
             source: allAssets[item.inventoryDetail.assetNumber],
@@ -406,16 +412,19 @@ const RentalManagementViews = (props) => {
             target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
           });
         }
-        if (
-          !purchaseArr.includes(item.inventoryDetail.purchaseOrder) &&
-          !subLeaseArr.includes(item.inventoryDetail.supplierAccount) &&
-          !item.inventoryDetail.subleaseAsset &&
-          !bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation) &&
-          !allAssets[item.inventoryDetail.assetNumber] !== undefined
-        ) {
+        if (!edgePlaced) {
+          console.log('edge not placed');
           flowEdge.push({
-            id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
-            source: item._id,
+            id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}-${_.random(0, 1000)}`,
+            source: purchaseArr.includes(item.inventoryDetail.purchaseOrder)
+              ? `${item.inventoryDetail.purchaseOrder}`
+              : subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
+              ? `${item.inventoryDetail.supplierAccount}`
+              : bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)
+              ? `${item.inventoryDetail.bulkAssetCreation}`
+              : allAssets[item.inventoryDetail.assetNumber] !== undefined
+              ? allAssets[item.inventoryDetail.assetNumber]
+              : `${item._id}`,
             arrowHeadType: 'arrow',
             target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
           });

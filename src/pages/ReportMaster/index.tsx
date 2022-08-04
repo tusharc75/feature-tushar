@@ -84,24 +84,26 @@ const ReportMaster = () => {
                 );
               })}
             </Grid>
-            <Box mt={2}>
-              <Typography variant="h5">Custom Reports</Typography>
-              <Divider style={{ marginTop: 8, marginBottom: 8 }} orientation="horizontal" />
-              <Grid container spacing={2}>
-                {customReports.map((item, index) => (
-                  <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                    <Link to={`/reports/custom-report/${item._id}`}>
-                      <Box border={1} borderColor="grey.300" bgcolor="grey.100" borderRadius={1} p={2}>
-                        <Typography variant="h6">
-                          <MdDescription size={25} className="headerLogo mr-2 pt-1" />
-                          {item.customName} - {item.resource}
-                        </Typography>
-                      </Box>
-                    </Link>
+            {customReports?.length ?
+              <Box mt={3}>
+                <Typography variant="h6">Custom Reports</Typography>
+                <Box mt={2}>
+                  <Grid container spacing={2}>
+                    {customReports?.map((item, index) => (
+                      <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
+                        <Link to={`/reports/custom-report/${item._id}`}>
+                          <Box border={1} borderColor="grey.300" bgcolor="grey.100" borderRadius={1} p={2}>
+                            <Typography variant="h6">
+                              <MdDescription size={25} className="headerLogo mr-2 pt-1" />
+                              {item.customReportName}
+                            </Typography>
+                          </Box>
+                        </Link>
+                      </Grid>
+                    ))}
                   </Grid>
-                ))}
-              </Grid>
-            </Box>
+                </Box>
+              </Box> : null}
           </Box>
         </Container>
       </div>
