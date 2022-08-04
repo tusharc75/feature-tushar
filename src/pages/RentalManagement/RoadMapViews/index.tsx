@@ -382,6 +382,13 @@ const RentalManagementViews = (props) => {
             arrowHeadType: 'arrow',
             target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
           });
+        } else {
+          flowEdge.push({
+            id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
+            source: item._id,
+            arrowHeadType: 'arrow',
+            target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
+          });
         }
         if (bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)) {
           flowEdge.push({
@@ -391,7 +398,7 @@ const RentalManagementViews = (props) => {
             target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
           });
         }
-        if (allAssets[item.inventoryDetail.assetNumber] !== undefined) {
+        if (allAssets[item.inventoryDetail.assetNumber]) {
           flowEdge.push({
             id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
             source: allAssets[item.inventoryDetail.assetNumber],
