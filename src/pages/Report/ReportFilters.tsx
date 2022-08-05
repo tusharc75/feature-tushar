@@ -207,7 +207,7 @@ const ReportFilters = (props: FiltersProps) => {
       })
       .then(() => {
         setDeleting(false);
-        if (selectedReportView._id === showConfirmDialog.id) {
+        if (selectedReportView?._id === showConfirmDialog.id) {
           setSelectedReportView(null);
         }
         setShowConfirmDialog({ open: false, id: null, name: '' });

@@ -47,9 +47,8 @@ const Report = () => {
   const [loadingColumns, setLoadingColumns] = React.useState(false);
   const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [reportList, setReportList] = React.useState([]);
-  const [selectedReportView, setSelectedReportView] = React.useState(null);
-  const [customReportData, setCustomReportData] = React.useState(null);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
+  const [customReportData, setCustomReportData] = React.useState(null);
 
   // Grid Configs
   const [frameWorkComponent, setFrameWorkComponent] = React.useState({});
@@ -399,7 +398,7 @@ const Report = () => {
                       </Box>
                     )}
                     <MdDescription size={22} className="headerLogo" />
-                    <span className="listingHeader">{`${showGrid ? selectedReportView?.name ?? 'Reports' : 'Reports'}`}</span>
+                    <span className="listingHeader">{`${showGrid ? customReportData?.customReportName ?? 'Reports' : 'Reports'}`}</span>
                   </Box>
                 </Grid>
               </Grid>
@@ -424,8 +423,8 @@ const Report = () => {
                 formValues={formValues}
                 setFormValues={setFormValues}
                 loadingColumns={loadingColumns}
-                setSelectedReportView={setSelectedReportView}
-                selectedReportView={selectedReportView}
+                setSelectedReportView={null}
+                selectedReportView={null}
                 reportList={reportList}
                 setReportList={setReportList}
                 statusPeriod={statusPeriod}
@@ -472,10 +471,11 @@ const Report = () => {
                     />
                   ) : (
                     <CustomAgGrid
-                      setSelectedReportView={setSelectedReportView}
-                      selectedReportView={selectedReportView}
-                      reportSave={true}
-                      columns={customReportData?.column ? columns.filter((col) => customReportData?.column.includes(col.field)) : columns}
+                      columns={
+                        customReportData?.column && customReportData?.column.length > 0
+                          ? columns.filter((col) => customReportData?.column.includes(col.field))
+                          : columns
+                      }
                       dataRows={dataRows}
                       frameworkComponents={frameWorkComponent}
                       setGridApi={setGridApi}
