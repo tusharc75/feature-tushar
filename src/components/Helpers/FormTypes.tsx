@@ -1181,7 +1181,7 @@ const FormTypes = (props) => {
                               _unit,
                               e.target.value === ''
                                 ? 0
-                                : e.target.value.slice(-1) === '.'
+                                : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === ".0"
                                   ? e.target.value.replace(/,/g, '')
                                   : parseFloat(e.target.value.replace(/,/g, ''))
                             );
@@ -1310,7 +1310,7 @@ const FormTypes = (props) => {
                               _currency,
                               e.target.value === ''
                                 ? 0
-                                : e.target.value.slice(-1) === '.'
+                                : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === ".0"
                                   ? e.target.value.replace(/,/g, '')
                                   : parseFloat(e.target.value.replace(/,/g, ''))
                             );
@@ -1319,7 +1319,7 @@ const FormTypes = (props) => {
                               name + '_' + _currency.toLowerCase(),
                               e.target.value === ''
                                 ? 0
-                                : e.target.value.slice(-1) === '.'
+                                : e?.target?.value?.slice(-1) === '.' || e?.target?.value?.slice(-2) === ".0"
                                   ? e.target.value.replace(/,/g, '')
                                   : parseFloat(e.target.value.replace(/,/g, ''))
                             );
