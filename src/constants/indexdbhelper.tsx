@@ -7,7 +7,8 @@ export const objectStore = {
   resource: 'resource',
   repairJob: 'Repair Job',
   offlineDataSync: 'offlineDataSync',
-  leadTimeMaster: 'Lead Time Master'
+  leadTimeMaster: 'Lead Time Master',
+  repairOrder: 'Repair Order',
 };
 
 export const setUpindexDB = () => {
