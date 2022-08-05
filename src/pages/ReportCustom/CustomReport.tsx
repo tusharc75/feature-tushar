@@ -407,6 +407,7 @@ const Report = () => {
             {!showGrid ? (
               <ReportFilters
                 customReportData={customReportData}
+                isCustomReport={true}
                 resourceColumns={resourceColumns}
                 betweenDate={betweenDate}
                 setBetweenDate={setBetweenDate}
