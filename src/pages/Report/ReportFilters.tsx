@@ -56,6 +56,7 @@ interface FiltersProps {
   setStatusTimeFrame?: any;
   selectedData?: any;
   customReportData?: any;
+  isCustomReport?: boolean;
 }
 
 const ReportFilters = (props: FiltersProps) => {
@@ -87,7 +88,8 @@ const ReportFilters = (props: FiltersProps) => {
     setStatusTimeFrame,
     setStatusPeriodDate,
     selectedData,
-    customReportData
+    customReportData,
+    isCustomReport
   } = props;
   const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
   const [isDeleting, setDeleting] = React.useState(false);
@@ -576,42 +578,41 @@ const ReportFilters = (props: FiltersProps) => {
           </Grid>
         </Box>
         <Box mt={2}>
-          {!resource?.includes('Purchase Order Type') ||
-            (!customReportData && (
-              <Box height={'100%'} mb={2}>
-                <Autocomplete
-                  options={reportList}
-                  value={selectedReportView}
-                  noOptionsText="No views were found"
-                  onChange={(_, val) => {
-                    setSelectedReportView(val);
-                  }}
-                  fullWidth
-                  renderOption={(option) => (
-                    <React.Fragment>
-                      <Box display={'flex'} width="100%" justifyContent="space-between">
-                        {option.name}
-                        {isDeleting ? (
-                          <CircularProgress size={18} color="inherit" />
-                        ) : (
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowConfirmDialog({ open: true, id: option._id, name: option.name });
-                            }}
-                          >
-                            <Delete color="error" />
-                          </IconButton>
-                        )}
-                      </Box>
-                    </React.Fragment>
-                  )}
-                  getOptionLabel={(option) => option.name}
-                  renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
-                />
-              </Box>
-            ))}
+          {!resource?.includes('Purchase Order Type') && !isCustomReport && (
+            <Box height={'100%'} mb={2}>
+              <Autocomplete
+                options={reportList}
+                value={selectedReportView}
+                noOptionsText="No views were found"
+                onChange={(_, val) => {
+                  setSelectedReportView(val);
+                }}
+                fullWidth
+                renderOption={(option) => (
+                  <React.Fragment>
+                    <Box display={'flex'} width="100%" justifyContent="space-between">
+                      {option.name}
+                      {isDeleting ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowConfirmDialog({ open: true, id: option._id, name: option.name });
+                          }}
+                        >
+                          <Delete color="error" />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </React.Fragment>
+                )}
+                getOptionLabel={(option) => option.name}
+                renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
+              />
+            </Box>
+          )}
           <Button
             onClick={fetchReportData}
             startIcon={loading ? <CircularProgress color="inherit" size={18} /> : <List />}
