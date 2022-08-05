@@ -207,7 +207,8 @@ export const sidebarResource = {
   cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
   quotation: 'Quotation',
   serviceMaster: 'Service Master',
-  leadTimeMaster: 'Lead Time Master'
+  leadTimeMaster: 'Lead Time Master',
+  repairOrder: 'Repair Order',
 };
 
 export const resourceNames = {
@@ -273,7 +274,8 @@ export const resourceNames = {
   resourceCalendar: 'Resource Calendar',
   cageManagement: 'Cage Management',
   productAuction: 'Product Auction',
-  quotation: 'Quotation'
+  quotation: 'Quotation',
+  repairOrder: 'Repair Order',
 };
 
 export const primaryFields = {
@@ -355,7 +357,8 @@ export const RESOURCE_LABEL = {
   cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
   quotation: 'Quotation',
   serviceMaster: 'Service Master',
-  leadTimeMaster: 'Lead Time Master'
+  leadTimeMaster: 'Lead Time Master',
+  repairOrder: 'Repair Order',
 };
 
 export const CHILD_RESOURCE = {
@@ -426,6 +429,11 @@ export const deliveryTicket = {
 export const repairJob = {
   resource: 'repairJob',
   api: '/repair-job'
+};
+
+export const repairOrder = {
+  resource: 'repairOrder',
+  api: '/repair-order'
 };
 
 export const salesOrder = {
@@ -1799,7 +1807,8 @@ export const ACTIVITY_RESOURCE = {
   bulkAssetCreation: 'bulkAssetCreation',
   serializedAsset: 'serializedAsset',
   transferInventory: 'transferInventory',
-  quotation: 'quotation'
+  quotation: 'quotation',
+  repairOrder: 'repairOrder',
 };
 
 export const REPORT_LIST = [

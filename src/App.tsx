@@ -149,6 +149,8 @@ import LeadTimeMaster from './pages/LeadTimeMaster';
 import LeadTimeMasterDetails from './pages/LeadTimeMaster/LeadTimeMasterDetails';
 import CustomReport from './pages/ReportCustom';
 import CustomReports from './pages/ReportCustom/CustomReport';
+import RepairOrder from './pages/RepairOrder';
+import RepairOrderDetails from './pages/RepairOrder/RepairOrderDetails';
 
 var notificationInterval: any = null;
 
@@ -784,6 +786,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.leadTimeMasterDetail.path}/:id`}>
               <LeadTimeMasterDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.repairOrder.path}>
+              <RepairOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.repairOrderDetail.path}/:id`}>
+              <RepairOrderDetails />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
