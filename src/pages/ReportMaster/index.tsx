@@ -1,4 +1,4 @@
-import { Grid, Typography, Box, Container, Button } from '@material-ui/core';
+import { Grid, Typography, Box, Container, Button, Divider } from '@material-ui/core';
 import routes from './../../components/Helpers/Routes';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { REPORT_LIST } from './../../constants/helpers';
@@ -7,11 +7,23 @@ import { Link } from 'react-router-dom';
 import { kebabCase } from 'lodash';
 import { useData } from '../../StateProvider/Provider';
 import { AiFillCalendar } from 'react-icons/ai';
+import { useEffect, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
 
 const ReportMaster = () => {
   const {
     state: { permissions }
   } = useData();
+  const [customReports, setCustomReports] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      let {
+        data: { data }
+      } = await axiosInstance().get(`custom-report`);
+      setCustomReports(data);
+    })();
+  }, []);
 
   return (
     <div>
@@ -31,6 +43,13 @@ const ReportMaster = () => {
             </Grid>
             <Grid item xs={8} sm={6}>
               <Box display="flex" alignItems="center" justifyContent="flex-end">
+                <Box mr={1}>
+                  <Link to="/custom-report">
+                    <Button variant="outlined" size="small" endIcon={<AiFillCalendar />} color="primary">
+                      Custom Report
+                    </Button>
+                  </Link>
+                </Box>
                 {permissions?.scheduleReport?.isRead && (
                   <Link to={`/schedule-report`}>
                     <Button variant="outlined" size="small" endIcon={<AiFillCalendar />} color="primary">
@@ -65,6 +84,26 @@ const ReportMaster = () => {
                 );
               })}
             </Grid>
+            {customReports?.length ?
+              <Box mt={3}>
+                <Typography variant="h6">Custom Reports</Typography>
+                <Box mt={2}>
+                  <Grid container spacing={2}>
+                    {customReports?.map((item, index) => (
+                      <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
+                        <Link to={`/reports/custom-report/${item._id}`}>
+                          <Box border={1} borderColor="grey.300" bgcolor="grey.100" borderRadius={1} p={2}>
+                            <Typography variant="h6">
+                              <MdDescription size={25} className="headerLogo mr-2 pt-1" />
+                              {item.customReportName}
+                            </Typography>
+                          </Box>
+                        </Link>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              </Box> : null}
           </Box>
         </Container>
       </div>
