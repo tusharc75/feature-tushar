@@ -90,7 +90,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      <Formik initialValues={{ qty: 1, comment: '' }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+      <Formik initialValues={{ qty: 1, comment: 'Rejected' }} onSubmit={handleSubmit} validateOnMount validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogHeader
