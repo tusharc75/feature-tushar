@@ -220,7 +220,6 @@ const RentalManagementViews = (props) => {
 
       var purchaseAndSubLeaseIdx = 0;
       if (
-        purchaseOrder?.length ||
         subLease?.length ||
         transferAsset?.length ||
         bulkAsset?.length ||
@@ -229,10 +228,6 @@ const RentalManagementViews = (props) => {
         (transferAsset?.length && purchaseOrder?.length && subLease?.length)
       )
         xPosition += 300;
-      const purchaseArr = purchaseOrder?.map((item) => item._id);
-      const purchaseOrderInAssets = product?.inventory
-        ?.filter((item) => item.inventoryDetail.purchaseOrder)
-        .map((item) => item.inventoryDetail.purchaseOrder);
       const bulkAssetArr = bulkAsset?.map((item) => item._id);
       const bulkAssetInAssets = product?.inventory
         ?.filter((item) => item.inventoryDetail.bulkAssetCreation)
@@ -366,15 +361,6 @@ const RentalManagementViews = (props) => {
         });
         beforeLoadingAssetIdx += 1;
         var edgePlaced = false;
-        if (purchaseArr.includes(item.inventoryDetail.purchaseOrder)) {
-          edgePlaced = true;
-          flowEdge.push({
-            id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
-            source: item.inventoryDetail.purchaseOrder,
-            arrowHeadType: 'arrow',
-            target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
-          });
-        }
         if (subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset) {
           console.log(subLeaseArr.includes(item.inventoryDetail.supplierAccount), item.inventoryDetail.subleaseAsset);
           edgePlaced = true;
@@ -385,15 +371,6 @@ const RentalManagementViews = (props) => {
             target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
           });
         }
-        // else if (!subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.supplierAccount) {
-        //   // edgePlaced = true;
-        //   flowEdge.push({
-        //     id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
-        //     source: item._id,
-        //     arrowHeadType: 'arrow',
-        //     target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
-        //   });
-        // }
         if (bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)) {
           edgePlaced = true;
           flowEdge.push({
@@ -416,15 +393,14 @@ const RentalManagementViews = (props) => {
           console.log('edge not placed');
           flowEdge.push({
             id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}-${_.random(0, 1000)}`,
-            source: purchaseArr.includes(item.inventoryDetail.purchaseOrder)
-              ? `${item.inventoryDetail.purchaseOrder}`
-              : subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
-              ? `${item.inventoryDetail.supplierAccount}`
-              : bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)
-              ? `${item.inventoryDetail.bulkAssetCreation}`
-              : allAssets[item.inventoryDetail.assetNumber] !== undefined
-              ? allAssets[item.inventoryDetail.assetNumber]
-              : `${item._id}`,
+            source:
+              subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset
+                ? `${item.inventoryDetail.supplierAccount}`
+                : bulkAssetArr.includes(item.inventoryDetail.bulkAssetCreation)
+                ? `${item.inventoryDetail.bulkAssetCreation}`
+                : allAssets[item.inventoryDetail.assetNumber]
+                ? allAssets[item.inventoryDetail.assetNumber]
+                : `${item._id}`,
             arrowHeadType: 'arrow',
             target: `${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`
           });
