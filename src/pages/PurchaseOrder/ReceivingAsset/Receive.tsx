@@ -13,17 +13,15 @@ import { isMobile, isTablet } from "react-device-detect";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { read, utils, writeFile } from 'xlsx';
 
-const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, productList, updateStatus, purchaseOrderData }) => {
+const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
 
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-    const [constProductList, setConstProductList] = useState(productList);
+    const { state: { selectedEntity } }: any = useData();
 
     const [wareHouseList, setwareHouseList] = useState(null);
     const [defaultWareHouse, setDefaultWareHouse] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const toastConfig = useContext(CustomToastContext);
-    const { state: { selectedEntity } }: any = useData();
 
     useEffect(() => {
         axiosInstance().get(`/warehouse`)
@@ -42,30 +40,16 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             warehouse: u.warehouse?._id,
             inventoryQuantity: parseInt(u?.inventoryQuantity),
             assetQuantity: parseInt(u?.assetQuantity),
-            scrapQuantity: parseInt(u?.scrapQuantity),
             serialNumber: u?.serialNumber,
         }))
-
-        axiosInstance().post(`${purchaseOrder.api}/asset-po/${purchaseOrderID}`, data).then(({ data }) => {
+        axiosInstance().post(`${purchaseOrder.api}/receive-inventory/${purchaseOrderID}`, data).then(({ data }) => {
             setIsSubmitting(false);
             toastConfig.setToastConfig({
                 open: true,
                 type: 'success',
                 message: data.message
             });
-            let tempProductArray = values.map(d => {
-                let res = {};
-                res["_id"] = d?._id
-                res["actualReceived"] = parseInt(d.inventoryQuantity || 0) + parseInt(d.assetQuantity || 0) + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.actualReceived || 0)
-                res["scrapQuantity"] = parseInt(d.scrapQuantity || 0) + + parseInt(constProductList.find(u => u?._id === d?.row?._id)?.scrapQuantity || 0)
-                return res
-            })
-            axiosInstance().put(`${purchaseOrder.api}/product/${purchaseOrderID}/update`, { products: tempProductArray })
-                .then(() => {
-                    onSuccess()
-                }).catch((error) => {
-                    toastConfig.setToastConfig(error)
-                });
+            onSuccess()
         }).catch((error) => {
             toastConfig.setToastConfig(error)
             setIsSubmitting(false);
@@ -77,20 +61,16 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
         if (values.length > 0) {
             values.map(d => {
                 let tempProduct = productList.find(u => u._id === d._id)
-                let qty = tempProduct.qty - (tempProduct.actualReceived || 0) - (tempProduct.scrapQuantity || 0);
+                let qty = tempProduct.qty - (tempProduct.actualReceived || 0);
                 if (tempProduct && d.inventoryQuantity > qty) {
                     errors.inventoryQuantity = "should be greater"
                 }
                 if (tempProduct && d.assetQuantity > qty) {
                     errors.assetQuantity = "should be greater"
                 }
-                if (tempProduct && d.scrapQuantity > qty) {
-                    errors.scrapQuantity = "should be greater"
-                }
-                if (tempProduct && (parseInt(d.inventoryQuantity) + parseInt(d.assetQuantity) + parseInt(d.scrapQuantity)) > qty) {
+                if (tempProduct && (parseInt(d.inventoryQuantity) + parseInt(d.assetQuantity)) > qty) {
                     errors.inventoryQuantity = "should be greater"
                     errors.assetQuantity = "should be greater"
-                    errors.scrapQuantity = "should be greater"
                 }
                 if (tempProduct && (parseInt(d.inventoryQuantity) < d.serialNumber?.length)) {
                     errors.serialNumber = "should be greater"
@@ -156,7 +136,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
             }}
         >
             <CustomDialogHeader
-                title={title}
+                title={"Receiving"}
                 onClose={onClose}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -171,9 +151,8 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                         "product": d.productName,
                         "productId": d.productId,
                         "warehouse": defaultWareHouse || "",
-                        "inventoryQuantity": d.qty - (d.actualReceived || 0) - (d.scrapQuantity || 0),
+                        "inventoryQuantity": d.qty - (d.actualReceived || 0),
                         "assetQuantity": 0,
-                        "scrapQuantity": 0,
                         "serializedProduct": d.serializedProduct || false,
                         "serialNumber": [],
                         "row": d
@@ -255,7 +234,7 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                     <Grid item xs={12} md={4}>
                                                                                         <span><b>Quantity: </b>{data?.row?.qty
                                                                                             - (data?.row?.actualReceived || 0)
-                                                                                            - (data?.row?.scrapQuantity || 0)}</span>
+                                                                                        }</span>
                                                                                     </Grid>
                                                                                 </Grid>
                                                                                 <Box mt={1}>
@@ -306,28 +285,6 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                                                                                 />
                                                                                             </Grid>
                                                                                         }
-                                                                                        {/* <Grid item xs={12} md={4}>
-                                                                                            <Field
-                                                                                                fullWidth
-                                                                                                label='Reject Quantity'
-                                                                                                variant="outlined"
-                                                                                                type="number"
-                                                                                                size="small"
-                                                                                                component={TextField}
-                                                                                                name="scrapQuantity"
-                                                                                                placeholder="Reject Quantity"
-                                                                                                value={data.scrapQuantity}
-                                                                                                onChange={(e) => {
-                                                                                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                                                                                    arrayHelpers.replace(index, {
-                                                                                                        ...values.seriaizedAsset[index],
-                                                                                                        ["scrapQuantity"]: value,
-                                                                                                    })
-                                                                                                }}
-                                                                                                error={validate([data])?.scrapQuantity}
-                                                                                                helperText={validate([data]).scrapQuantity ? "Quantity is more than actual quantity" : ""}
-                                                                                            />
-                                                                                        </Grid> */}
                                                                                     </Grid>
                                                                                 </Box>
                                                                                 {data?.serializedProduct &&
@@ -416,7 +373,6 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
                                     if (!validate(values.seriaizedAsset).inventoryQuantity
                                         && !validate(values.seriaizedAsset).warehouse
                                         && !validate(values.seriaizedAsset).assetQuantity
-                                        && !validate(values.seriaizedAsset).scrapQuantity
                                         && !validate(values.seriaizedAsset).serialNumber)
                                         handleCreateSerializedAsset(values.seriaizedAsset)
                                 }}
@@ -434,4 +390,4 @@ const CreateSerializedAsset = ({ purchaseOrderID, onClose, onSuccess, title, pro
     );
 };
 
-export default CreateSerializedAsset;
+export default Receive;

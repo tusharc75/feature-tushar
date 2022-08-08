@@ -6,7 +6,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { dateFormat, purchaseOrder, PURCHASE_ORDER_STATUS, prepareDataForGrid, formatAmountWithCurrency } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import CreateSerializedAsset from './CreateSerializedAsset';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
@@ -18,6 +17,8 @@ import SendEmail from './../SendEmail';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RejectProduct from './RejectProduct';
 import TransformIcon from '@material-ui/icons/Transform';
+import Receive from './Receive';
+import Reject from './Reject';
 
 const ReceivingAsset = ({
   purchaseOrderData,
@@ -37,7 +38,8 @@ const ReceivingAsset = ({
   const theme = useTheme();
   const isMobileScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
-  const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false);
+  const [receiveDialog, setReceiveDialog] = useState(false);
+  const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);
   const [disableCreateAsset, setDisableCreateAsset] = useState(false);
 
@@ -128,7 +130,7 @@ const ReceivingAsset = ({
           accessor: element.fieldName,
           Header: element.fieldLabel,
           disableFilters: true,
-          width: 300,
+          width: 150,
           Cell: ({ row }) =>
             row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
         });
@@ -140,7 +142,7 @@ const ReceivingAsset = ({
             column.push({
               accessor: fieldName,
               Header: fieldLabel,
-              width: 300,
+              width: 150,
               Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
             });
           });
@@ -152,7 +154,7 @@ const ReceivingAsset = ({
               column.push({
                 accessor: fieldName,
                 Header: fieldLabel,
-                width: 300,
+                width: 150,
                 Cell: ({ row }) =>
                   row.original[fieldName] ? (
                     <p>{formatAmountWithCurrency(purchaseOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
@@ -169,7 +171,7 @@ const ReceivingAsset = ({
             column.push({
               accessor: fieldName,
               Header: fieldLabel,
-              width: 300,
+              width: 150,
               Cell: ({ row }) =>
                 row.original[fieldName] ? (
                   <p>{formatAmountWithCurrency(purchaseOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
@@ -186,11 +188,11 @@ const ReceivingAsset = ({
           });
         }
       } else {
-        if (element.fieldName === 'qty' || element.fieldName === 'actualReceived') {
+        if (element.fieldName === 'qty' || element.fieldName === 'actualReceived' || element.fieldName === 'rejectQuantity') {
           column.push({
             accessor: element.fieldName,
             Header: element.fieldLabel,
-            width: 300,
+            width: 150,
             Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />),
             Footer: (info) => {
               return info?.rows
@@ -202,7 +204,7 @@ const ReceivingAsset = ({
           column.push({
             accessor: element.fieldName,
             Header: element.fieldLabel,
-            width: 300,
+            width: 200,
             Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
           });
         }
@@ -212,7 +214,7 @@ const ReceivingAsset = ({
     column.push({
       accessor: 'assetQty',
       Header: 'Asset Received',
-      width: 300,
+      width: 150,
       Cell: ({ row }) => (row.original['assetQty'] ? <p>{row.original['assetQty']}</p> : <NoDataCell />),
       Footer: (info) => {
         return info?.rows
@@ -223,7 +225,7 @@ const ReceivingAsset = ({
     column.push({
       accessor: 'inventoryQty',
       Header: 'Inventory Received',
-      width: 300,
+      width: 150,
       Cell: ({ row }) => (row.original['inventoryQty'] ? <p>{row.original['inventoryQty']}</p> : <NoDataCell />),
       Footer: (info) => {
         return info?.rows
@@ -231,18 +233,6 @@ const ReceivingAsset = ({
           .reduce((sum, row) => row.values['inventoryQty'] + sum, 0);
       }
     });
-    column.push({
-      accessor: 'rejectQuantity',
-      Header: 'Reject/Replacement Quantity',
-      width: 300,
-      Cell: ({ row }) => (row.original['rejectQuantity'] ? <p>{row.original['rejectQuantity']}</p> : <NoDataCell />),
-      Footer: (info) => {
-        return info?.rows
-          ?.filter((f) => f.values.hasOwnProperty('rejectQuantity') && !isNaN(f.values['rejectQuantity']))
-          .reduce((sum, row) => row.values['rejectQuantity'] + sum, 0);
-      }
-    });
-
     setColumns([
       ...column,
       ...[
@@ -256,8 +246,8 @@ const ReceivingAsset = ({
           canDrag: false,
           Cell: ({ row }) => (
             <>
-              {(permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.inventoryQty) ? (
-                <HtmlTooltip title="Reject/Replacement">
+              {(permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0)) ? (
+                <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
                       size="small"
@@ -300,9 +290,9 @@ const ReceivingAsset = ({
           productCategory: item.productDetail?.productCategory?.optionLabel,
           productId: item?.productDetail?._id
         };
-        if (item.qty === item.actualReceived + (item?.scrapQuantity || 0)) {
-          res['hideSelection'] = true;
-        }
+        // if (item.qty === item.actualReceived) {
+        //   res['hideSelection'] = true;
+        // }
         res.subRows = [];
         const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.productId);
         if (subRows?.length) {
@@ -330,7 +320,7 @@ const ReceivingAsset = ({
         res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - subRows?.length : 0;
         return res;
       });
-      if (rows.every((d) => d.qty === (d.actualReceived + (d.scrapQuantity || 0)))) {
+      if (rows.every((d) => d.qty === d.actualReceived)) {
         setDisableCreateAsset(true);
       }
       checkReceivedProduct(result?.data?.data);
@@ -350,12 +340,27 @@ const ReceivingAsset = ({
             color="primary"
             size="small"
             style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
-            disabled={selectedRecords.length === 0 || disableCreateAsset}
+            disabled={selectedRecords.length === 0 ||
+              (selectedRecords?.filter((e: any) => e.type === "Product" && e.qty - (e?.actualReceived || 0) > 0).length > 0 ? false : true)}
             onClick={() => {
-              setShowCreateAssetDialog(true);
+              setReceiveDialog(true);
             }}
           >
-            {`Receive`}
+            Receive
+          </Button>}
+          {permissions?.purchaseOrder?.isUpdate && allowedToEdit && <Button
+            variant={'contained'}
+            color="primary"
+            size="small"
+            className='ml-2'
+            style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
+            disabled={selectedRecords.length === 0 ||
+              (selectedRecords?.filter((e: any) => e.type === "Product" && e.qty !== (e?.rejectQuantity || 0)).length > 0 ? false : true)}
+            onClick={() => {
+              setRejectDialog(true);
+            }}
+          >
+            Reject
           </Button>}
         </Box>
         <div className="d-flex gap-2">
@@ -383,18 +388,28 @@ const ReceivingAsset = ({
           </Box>
         )}
       </Grid>
-      {showCreateAssetDialog && (
-        <CreateSerializedAsset
+      {receiveDialog && (
+        <Receive
           purchaseOrderID={purchaseOrderData._id}
-          onClose={() => setShowCreateAssetDialog(false)}
+          onClose={() => setReceiveDialog(false)}
           onSuccess={() => {
-            setShowCreateAssetDialog(false);
+            setReceiveDialog(false);
             fetchProduct();
           }}
-          title="Receiving"
-          productList={selectedRecords.filter((d) => d.type === "Product" && d.qty !== (d.actualReceived + (d.scrapQuantity || 0)))}
+          productList={selectedRecords.filter((d) => d.type === "Product" && d.qty !== d.actualReceived)}
           purchaseOrderData={purchaseOrderData}
-          updateStatus={updateStatus}
+        />
+      )}
+      {rejectDialog && (
+        <Reject
+          purchaseOrderID={purchaseOrderData._id}
+          onClose={() => setRejectDialog(false)}
+          onSuccess={() => {
+            setRejectDialog(false);
+            fetchProduct();
+          }}
+          productList={selectedRecords.filter((d) => d.type === "Product" && d.qty !== (d?.rejectQuantity || 0))}
+          purchaseOrderData={purchaseOrderData}
         />
       )}
       {rejectProductDialog && (

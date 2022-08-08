@@ -235,7 +235,7 @@ const PurchaseOrderDetailsPage = () => {
     if (products?.length && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.closed) {
       var isCompleteReceived = false;
       var isPartialReceived = products?.some((e) => e?.actualReceived);
-      if (products?.filter((e) => e?.qty - ((e?.actualReceived || 0) + (e?.scrapQuantity || 0)) > 0).length > 0) {
+      if (products?.filter((e) => e?.qty - ((e?.actualReceived || 0)) > 0).length > 0) {
         isCompleteReceived = false;
       } else {
         isCompleteReceived = true;
