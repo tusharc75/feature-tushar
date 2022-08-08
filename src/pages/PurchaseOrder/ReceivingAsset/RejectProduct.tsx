@@ -41,20 +41,18 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
 
   const handleSubmit = (values) => {
     const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
-    const data = {
+    const data = [{
       _id: product._id,
-      comment: values.comment,
+      comment: values?.comment === "" ? "Rejected" : values?.comment,
       product: product.productId,
       qty: parseInt(values.qty),
       serialNumber: serialNumberIds.map((item) => item?._id),
-    };
+    }];
     setLoading(true);
-    axiosInstance()
-      .put(`/purchase-order/reject-inventory/${POId}`, data)
-      .then(() => {
-        setLoading(false);
-        handleSuccess();
-      })
+    axiosInstance().post(`/purchase-order/reject-inventory/${POId}`, data).then(() => {
+      setLoading(false);
+      handleSuccess();
+    })
       .catch((error) => {
         setLoading(false);
         toastConfig.setToastConfig(error);
@@ -66,9 +64,9 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
-    const validateQty = product?.inventoryQty;
+    const validateQty = product?.qty - (product?.rejectQuantity || 0);
     if (parseInt(values?.qty) > validateQty) {
-      errors['qty'] = 'Qty cannot be more than received quantity';
+      errors['qty'] = 'Qty cannot be more than quantity';
     }
     const serialNumbersList = values['serialNumbers'];
     if (serialNumbersList?.length > parseInt(values?.qty)) {
@@ -90,11 +88,11 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      <Formik initialValues={{ qty: 1, comment: 'Rejected' }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+      <Formik initialValues={{ qty: 1, comment: '' }} onSubmit={handleSubmit} validateOnMount validate={validate}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogHeader
-              title={`Reject/Replacement Product`}
+              title={`Reject Product`}
               showRequiredLabel={true}
               onClose={handleClose}
               isMinimized={!fullScreen}
@@ -106,7 +104,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
             <CustomDialogContent>
               <List style={{ padding: 0 }}>
                 <ListItem key={product.productId}>
-                  <ListItemText primary={product?.productName} secondary={`Received Quantity - ${product?.inventoryQty || 0}`} />
+                  <ListItemText primary={product?.productName} secondary={`Quantity - ${product?.qty - (product?.rejectQuantity || 0)}`} />
                   <Field
                     component={TextFieldFormik}
                     margin="dense"
