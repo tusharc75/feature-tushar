@@ -17,8 +17,10 @@ import SendEmail from './../SendEmail';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RejectProduct from './RejectProduct';
 import TransformIcon from '@material-ui/icons/Transform';
+import HistoryIcon from '@material-ui/icons/History';
 import Receive from './Receive';
 import Reject from './Reject';
+import History from './History';
 
 const ReceivingAsset = ({
   purchaseOrderData,
@@ -41,7 +43,9 @@ const ReceivingAsset = ({
   const [receiveDialog, setReceiveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
   const [rejectProductDialog, setRejectProductDialog] = useState(null);
-  const [disableCreateAsset, setDisableCreateAsset] = useState(false);
+  const [historyDialog, setHistoryDialog] = useState({ open: false, product: "", productName: "" });
+  const [inventoryHistory, setInventoryHistory] = useState([]);
+
 
   const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -245,23 +249,37 @@ const ReceivingAsset = ({
           disableFilters: true,
           canDrag: false,
           Cell: ({ row }) => (
-            <>
-              {(permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0)) ? (
-                <HtmlTooltip title="Reject">
+            row?.original?.type === "Product" ?
+              <>
+                {(permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0)) ? (
+                  <HtmlTooltip title="Reject">
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="reject"
+                        onClick={() => {
+                          setRejectProductDialog(row.original);
+                        }}
+                      >
+                        <TransformIcon fontSize="small" color={'primary'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                ) : null}
+                <HtmlTooltip title="History">
                   <span>
                     <IconButton
                       size="small"
-                      aria-label="reject"
+                      aria-label="History"
                       onClick={() => {
-                        setRejectProductDialog(row.original);
+                        setHistoryDialog({ open: true, product: row?.original?.productId, productName: row?.original?.productName });
                       }}
                     >
-                      <TransformIcon fontSize="small" color={'primary'} />
+                      <HistoryIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </span>
                 </HtmlTooltip>
-              ) : null}
-            </>
+              </> : <></>
           )
         }
       ]
@@ -274,6 +292,8 @@ const ReceivingAsset = ({
       const assets: any = await axiosInstance().get(`${purchaseOrder.api}/${purchaseOrderData._id}/assets`);
       const serializedAsset = assets?.data?.data?.serializedAsset;
       const productSerialNumber = assets?.data?.data?.productSerialNumber;
+
+      setInventoryHistory(assets?.data?.data?.inventoryHistory)
 
       let rows = result?.data?.data?.map((item) => {
         let finalObject = prepareDataForGrid(item);
@@ -320,9 +340,6 @@ const ReceivingAsset = ({
         res['inventoryQty'] = item?.actualReceived ? (item?.actualReceived || 0) - subRows?.length : 0;
         return res;
       });
-      if (rows.every((d) => d.qty === d.actualReceived)) {
-        setDisableCreateAsset(true);
-      }
       checkReceivedProduct(result?.data?.data);
       setRowsData(rows);
       setSelectedRecords([]);
@@ -417,12 +434,18 @@ const ReceivingAsset = ({
           handleClose={() => setRejectProductDialog(null)}
           handleSuccess={() => {
             setRejectProductDialog(null);
-            setDisableCreateAsset(false)
             fetchProduct();
           }}
           POId={purchaseOrderData?._id}
           product={rejectProductDialog}
           warehouse={purchaseOrderData?.warehouse.optionValue}
+        />
+      )}
+      {historyDialog.open && (
+        <History
+          handleClose={() => setHistoryDialog({ open: false, product: "", productName: "" })}
+          productName={historyDialog.productName}
+          inventoryHistory={inventoryHistory?.filter((e) => e.product === historyDialog.product)}
         />
       )}
     </>
