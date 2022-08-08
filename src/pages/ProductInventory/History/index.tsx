@@ -57,7 +57,7 @@ const History = ({ product, warehouse }) => {
     const columns = [
         { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer", filter: false, sortable: false },
         { field: "referenceType", headerName: "Reference Type", show: true, cellRenderer: "commonRenderer" },
-        { field: "reference", headerName: "Reference", show: true, cellRenderer: "referenceRenderer" },
+        { field: "reference", headerName: "Reference", show: true, filter: false, sortable: false, cellRenderer: "referenceRenderer" },
         { field: "type", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
         {
             field: "qty",
