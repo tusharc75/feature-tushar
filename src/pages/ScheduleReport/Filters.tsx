@@ -123,7 +123,8 @@ const Filters = ({
       const to = new Date(allDateData[`to_${key}`]).getTime();
 
       if (from >= to || to <= from) {
-        err[key] = `From ${startCase(key)} should be less then To ${startCase(key)}`;
+        //err[key] = `From ${startCase(key)} should be less then To ${startCase(key)}`;
+        err[key] = `Please select valid date range`;
       } else {
         if (errors[key]) {
           setErrors((prev) => {
@@ -226,6 +227,7 @@ const Filters = ({
                   InputLabelProps={{
                     shrink: true
                   }}
+                  minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
                 />
               </Grid>
             )}
