@@ -615,7 +615,15 @@ const routes = {
         ? storedRoutes.leadTimeMaster?.title
         : RESOURCE_LABEL.leadTimeMaster,
     path: '/lead-time-master/detail'
-  }
+  },
+  repairOrder: {
+    title: storedRoutes && storedRoutes.repairOrder && storedRoutes.repairOrder.title ? storedRoutes.repairOrder?.title : RESOURCE_LABEL.repairOrder,
+    path: '/repair-order'
+  },
+  repairOrderDetail: {
+    title: storedRoutes && storedRoutes.repairOrder && storedRoutes.repairOrder.title ? storedRoutes.repairOrder?.title : RESOURCE_LABEL.repairOrder,
+    path: '/repair-order/detail'
+  },
 };
 
 export default routes;

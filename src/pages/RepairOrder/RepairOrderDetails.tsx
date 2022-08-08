@@ -1,0 +1,287 @@
+import { useState, useEffect, useContext } from 'react';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import { Skeleton } from '@material-ui/lab';
+import { useParams, useHistory } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import DetailsPageHeader from 'src/components/DetailsPageHeader';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import { useData } from 'src/StateProvider/Provider';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { repairOrder, sidebarResource, ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import Activity from 'src/components/Activity';
+import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
+import ManageRepairOrder from './ManageRepairOrder';
+import queryString from 'query-string';
+import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { FaWpforms } from 'react-icons/fa';
+import TabPanel from 'src/components/TabPanel';
+import HideWhenOffline from 'src/components/HideWhenOffline';
+import { defaultActivityShow } from 'src/constants/helpers';
+import Steps from '../RentalManagement/Steps';
+import { GiAbstract055 } from 'react-icons/gi';
+import { camelCase } from 'lodash';
+import { RiFlowChart } from 'react-icons/ri';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import { isMobile, isTablet } from 'react-device-detect';
+import accountClass from '../Account/account.module.scss';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+
+function a11yProps(index: any) {
+  return {
+    id: `main-tab-${index}`,
+    'aria-controls': `main-tabpanel-${index}`
+  };
+}
+
+const RepairOrderDetails = () => {
+  const renderedFrom = camelCase(routes?.repairOrder.title);
+  const toastConfig = useContext(CustomToastContext);
+
+  const { id } = useParams();
+  const history = useHistory();
+
+  const parsed = queryString.parse(history.location.search);
+  const { openEdit, tab }: any = parsed;
+  const {
+    state: { user, permissions }
+  }: any = useData();
+
+  const [repairOrderData, setRepairOrderData] = useState(null);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [repairOrderFields, setRepairOrderFields] = useState([]);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const [showActivity, setActivityShow] = useState(defaultActivityShow);
+  const [locationKeys, setLocationKeys] = useState([]);
+
+  useEffect(() => {
+    return history.listen((location) => {
+      const { tab }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key]);
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys);
+          // Handle forward event
+          setTabValue(tab ? parseInt(tab) : 1);
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys]);
+          // Handle back event
+          setTabValue(tab ? parseInt(tab) : 1);
+        }
+      }
+    });
+  }, [locationKeys]);
+
+  useEffect(() => {
+    if (id) {
+      fetchRepairOrderData();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    getResourceFields();
+  }, []);
+
+  const getResourceFields = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.repairOrder}`)
+      .then(({ data: { data } }) => {
+        setRepairOrderFields(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchRepairOrderData = () => {
+    axiosInstance()
+      .get(`${routes.repairOrder.path}/${id}`)
+      .then(({ data: { data } }) => {
+        setRepairOrderData({ ...data });
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        setAllowedToEdit(isAllowedToEdit);
+        if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
+          setOpenUpdateDialog(true);
+          const params = new URLSearchParams();
+          params.delete('openEdit');
+          history.push({ search: params.toString() });
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleDelete = () => {
+    axiosInstance()
+      .put(`${repairOrder.api}/remove`, { ids: [id] })
+      .then(() => {
+        setShowConfirmBox(false);
+        history.goBack();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowConfirmBox(false);
+      });
+  };
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+    history.push(`?tab=${newValue}`);
+    if (newValue === 0) {
+      fetchRepairOrderData();
+    }
+  };
+
+  useEffect(() => {
+    if (isSmallScreen && tabValue === 0) {
+      setActivityShow(true)
+    }
+    else {
+      setActivityShow(false)
+    }
+  }, [isSmallScreen, tabValue])
+
+
+  return (
+    <>
+      <Grid container className="headerbox">
+        <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
+      </Grid>
+      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+        <div>
+          <div>
+            <Paper>
+              {repairOrderData ? (
+                <DetailsPageHeader heading={repairOrderData?.repairOrderNumber} mainPoints={null} showHeading={true}>
+                  {permissions?.repairOrder?.isUpdate && (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      color="primary"
+                      size="small"
+                      onClick={() => setOpenUpdateDialog(true)}
+                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    >
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    </Button>
+                  )}
+                  {permissions?.repairOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                </DetailsPageHeader>
+              ) : (
+                <Skeleton variant="text" width="150px" height="40px" />
+              )}
+              <Tabs
+                className="quote-tab"
+                value={tabValue}
+                onChange={handleMainTabChange}
+                textColor="primary"
+                TabIndicatorProps={{
+                  style: {
+                    display: 'none'
+                  }
+                }}
+              >
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 1 ? 'white' : '',
+                    color: tabValue === 1 ? '#163340' : '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                    </div>
+                  }
+                  {...a11yProps(0)}
+                />
+              </Tabs>
+              <TabPanel value={tabValue} index={0}>
+                <Box>
+                  {repairOrderData && repairOrderFields.length ? (
+                    <DetailsPage data={repairOrderData} fields={repairOrderFields} />
+                  ) : (
+                    <Grid container spacing={2} style={{ padding: '8px' }}>
+                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                    </Grid>
+                  )}
+                </Box>
+              </TabPanel>
+            </Paper>
+          </div>
+          <Box my={1} />
+        </div>
+        <div className="position-relative">
+          <HideWhenOffline>
+            <Paper>
+              {!isSmallScreen && (
+                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={() => setActivityShow(!showActivity)}>
+                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+                </span>
+              )}
+              <div style={{ display: showActivity ? 'block' : 'none' }}>
+                <Grid container>
+                  <Grid item xs={12}>
+                    {repairOrderData && (
+                      <div>
+                        <Activity
+                          resourceId={repairOrderData._id}
+                          resource={ACTIVITY_RESOURCE.repairOrder}
+                          restrictedAddActivities={
+                            permissions && permissions[`${ACTIVITY_RESOURCE.repairOrder}`] && permissions[`${ACTIVITY_RESOURCE.repairOrder}`].isUpdate ? [] : ['Attachment', 'Case']
+                          }
+                          relatedTo={[
+                            {
+                              type: ACTIVITY_RESOURCE.repairOrder,
+                              referenceId: repairOrderData._id,
+                              access: true
+                            }
+                          ]}
+                          handleActivityRefresh={() => { }}
+                          emails={[]}
+                        />
+                      </div>
+                    )}
+                  </Grid>
+                </Grid>
+              </div>
+            </Paper>
+          </HideWhenOffline>
+        </div>
+      </div>
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this repair order: ${repairOrderData?.repairOrderNumber} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      {openUpdateDialog && (
+        <ManageRepairOrder
+          isClone={false}
+          repairOrderId={id}
+          onClose={() => {
+            setOpenUpdateDialog(false);
+          }}
+          onSuccess={() => {
+            fetchRepairOrderData();
+            setOpenUpdateDialog(false);
+          }}
+        />
+      )}
+    </>
+  );
+};
+
+export default RepairOrderDetails;
