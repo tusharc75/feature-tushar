@@ -378,7 +378,7 @@ const InventoryProduct = () => {
             afterImportCompleted={() => {
               fetchProductInventory();
             }}
-            isDownloadExcel={false}
+            isDownloadExcel={true}
             isExportAllOrSomeFeature={true}
             total={rowCount}
             recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}

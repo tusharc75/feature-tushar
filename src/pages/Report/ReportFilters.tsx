@@ -137,13 +137,9 @@ const ReportFilters = (props: FiltersProps) => {
             dateFilterData[term] = value;
           });
 
-        newData.filters = [...filters, ...dateFields];
         setBetweenDate(dateFilterData);
+        newData.filters = [...filters, ...dateFields];
         setFormValues(filterData);
-      }
-      if (newData?.column.length > 0) {
-        const column = resourceColumns.filter((filter) => newData.column.includes(filter.fieldData.fieldName));
-        newData.column = column.map(({ fieldData }) => fieldData);
       }
       setSelectedResources(newData.filters);
       setLoading(false);
