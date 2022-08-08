@@ -246,6 +246,9 @@ const PurchaseOrderDetailsPage = () => {
       if (isCompleteReceived && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.received) {
         updateStatus(PURCHASE_ORDER_STATUS.received);
       }
+      if (isCompleteReceived === false && isPartialReceived === false && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.open) {
+        updateStatus(PURCHASE_ORDER_STATUS.open);
+      }
     }
   };
 
