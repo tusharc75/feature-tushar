@@ -251,7 +251,7 @@ const ReceivingAsset = ({
           Cell: ({ row }) => (
             row?.original?.type === "Product" ?
               <>
-                {(permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0)) ? (
+                {(permissions?.purchaseOrder?.isUpdate && allowedToEdit && row?.original?.qty - (row?.original?.rejectQuantity || 0) - (row?.original?.assetQty || 0)) ? (
                   <HtmlTooltip title="Reject">
                     <span>
                       <IconButton
@@ -310,9 +310,7 @@ const ReceivingAsset = ({
           productCategory: item.productDetail?.productCategory?.optionLabel,
           productId: item?.productDetail?._id
         };
-        // if (item.qty === item.actualReceived) {
-        //   res['hideSelection'] = true;
-        // }
+
         res.subRows = [];
         const subRows = serializedAsset?.filter((e) => e?.product?.optionValue === res?.productId);
         if (subRows?.length) {
@@ -425,7 +423,7 @@ const ReceivingAsset = ({
             setRejectDialog(false);
             fetchProduct();
           }}
-          productList={selectedRecords.filter((d) => d.type === "Product" && d.qty !== (d?.rejectQuantity || 0))}
+          productList={selectedRecords.filter((d) => d.type === "Product" && d.qty !== (d?.rejectQuantity || 0 + d?.assetQty || 0))}
           purchaseOrderData={purchaseOrderData}
         />
       )}

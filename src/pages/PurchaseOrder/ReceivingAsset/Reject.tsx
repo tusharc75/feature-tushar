@@ -57,7 +57,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
         if (values.length > 0) {
             values.map(d => {
                 let tempProduct = productList.find(u => u._id === d._id)
-                if (tempProduct && d.rejectQuantity > (tempProduct.qty - (tempProduct.rejectQuantity || 0))) {
+                if (tempProduct && d.rejectQuantity > (tempProduct.qty - (tempProduct.rejectQuantity || 0) - (tempProduct.assetQty || 0))) {
                     errors.rejectQuantity = "should be greater"
                 }
             })
@@ -148,7 +148,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                                                                         />
                                                                                     </Grid>
                                                                                     <Grid item xs={12} md={4}>
-                                                                                        <span><b>Quantity: </b>{data?.row?.qty - (data?.row?.rejectQuantity || 0)}</span>
+                                                                                        <span><b>Quantity: </b>{data?.row?.qty - (data?.row?.rejectQuantity || 0) - (data?.row?.assetQty || 0)}</span>
                                                                                     </Grid>
                                                                                 </Grid>
                                                                                 <Box mt={1}>

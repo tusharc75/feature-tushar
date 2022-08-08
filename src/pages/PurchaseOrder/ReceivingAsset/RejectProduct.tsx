@@ -40,13 +40,13 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
   };
 
   const handleSubmit = (values) => {
-    const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
+    const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers']?.indexOf(item?.serialNumber) > -1);
     const data = [{
       _id: product._id,
       comment: values?.comment === "" ? "Rejected" : values?.comment,
       product: product.productId,
       qty: parseInt(values.qty),
-      serialNumber: serialNumberIds.map((item) => item?._id),
+      serialNumber: serialNumberIds?.map((item) => item?._id),
     }];
     setLoading(true);
     axiosInstance().post(`/purchase-order/reject-inventory/${POId}`, data).then(() => {
@@ -64,7 +64,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
     if (values.qty <= 0) {
       errors['qty'] = 'Please enter valid qty';
     }
-    const validateQty = product?.qty - (product?.rejectQuantity || 0);
+    const validateQty = product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0);
     if (parseInt(values?.qty) > validateQty) {
       errors['qty'] = 'Qty cannot be more than quantity';
     }
@@ -104,7 +104,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
             <CustomDialogContent>
               <List style={{ padding: 0 }}>
                 <ListItem key={product.productId}>
-                  <ListItemText primary={product?.productName} secondary={`Quantity - ${product?.qty - (product?.rejectQuantity || 0)}`} />
+                  <ListItemText primary={product?.productName} secondary={`Quantity - ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`} />
                   <Field
                     component={TextFieldFormik}
                     margin="dense"
