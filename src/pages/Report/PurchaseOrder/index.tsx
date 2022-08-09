@@ -206,16 +206,16 @@ const Report = () => {
           if (field?.fieldData.fieldName === 'warehouse') {
             resourceFieldData.push(field);
           }
-          if (field?.fieldData.fieldName === 'supplierAccount') {
-            resourceFieldData.push(field);
-            // columns.push({
-            //   field: 'supplierAccount',
-            //   headerName: field?.fieldData?.fieldLabel,
-            //   show: true,
-            //   disabled: false,
-            //   cellRenderer: 'supplierRenderer'
-            // });
-          }
+          // if (field?.fieldData.fieldName === 'supplierAccount') {
+          //   resourceFieldData.push(field);
+          //   // columns.push({
+          //   //   field: 'supplierAccount',
+          //   //   headerName: field?.fieldData?.fieldLabel,
+          //   //   show: true,
+          //   //   disabled: false,
+          //   //   cellRenderer: 'supplierRenderer'
+          //   // });
+          // }
           if (field?.fieldData.fieldName === 'purchaseOrderDate') {
             resourceFieldData.push({
               ...field,

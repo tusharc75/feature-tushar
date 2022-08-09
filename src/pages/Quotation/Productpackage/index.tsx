@@ -318,8 +318,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
-      parent.leadTimeData = parent.leadTime ? parent.leadTime : [];
-      parent.leadTime = parent?.leadTime ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
+      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -328,8 +328,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       const subRows: any = data.material.filter((e) => e.parentId === parent._id);
       subRows.forEach((_subRow, j) => {
         _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`;
-        _subRow.leadTimeData = _subRow.leadTime ? _subRow.leadTime : [];
-        _subRow.leadTime = _subRow?.leadTime ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+        _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+        _subRow.leadTime = Array.isArray(_subRow?.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
         _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
         _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
         _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
@@ -435,6 +435,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       delete element.packageDetail;
       delete element.serviceDetail;
       delete element.subRows;
+      delete element.leadTime;
+      delete element.leadTimeData;
     });
     setUpdating(true);
     axiosInstance()
