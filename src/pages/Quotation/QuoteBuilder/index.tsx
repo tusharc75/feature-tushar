@@ -184,7 +184,7 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
             parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
-            parent.leadTime = `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}`;
+            parent.leadTime = parent?.leadTime ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
             parent.qtyDisplay = parent.qty;
             parent.isValid = parent["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -193,15 +193,12 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             const subRows: any = data.material.filter((e) => e.parentId === parent._id);
             subRows.forEach((_subRow, j) => {
                 _subRow.detail = `${_subRow.type === "product" ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`
-                _subRow.leadTime = `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}`;
+                _subRow.leadTime = _subRow?.leadTime ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
                 _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`
                 _subRow.isValid = _subRow["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
                 _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
                 _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
             })
-            // if (subRows.length === 0) {
-            //     parent.isValid = false
-            // }
             parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
             parent.subRows = subRows
         });
