@@ -11,7 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { repairOrder, sidebarResource, ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { repairOrder, sidebarResource, ACTIVITY_RESOURCE, repairOrderSteps, REPAIR_ORDER_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairOrder from './ManageRepairOrder';
@@ -29,6 +29,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
 import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
+import Productpackage from './Productpackage';
 
 function a11yProps(index: any) {
   return {
@@ -40,7 +41,8 @@ function a11yProps(index: any) {
 const RepairOrderDetails = () => {
   const renderedFrom = camelCase(routes?.repairOrder.title);
   const toastConfig = useContext(CustomToastContext);
-
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const { id } = useParams();
   const history = useHistory();
 
@@ -54,11 +56,14 @@ const RepairOrderDetails = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [repairOrderFields, setRepairOrderFields] = useState([]);
+  const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
+  const [currentStep, setCurrentStep] = useState(null);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -106,6 +111,7 @@ const RepairOrderDetails = () => {
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         setRepairOrderData({ ...data });
+        setCurrentStep(repairOrderSteps.indexOf(data?.processStatus) !== -1 ? repairOrderSteps.indexOf(data?.processStatus) : 0);
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
         if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
@@ -203,6 +209,19 @@ const RepairOrderDetails = () => {
                   }
                   {...a11yProps(0)}
                 />
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 2 ? 'white' : '',
+                    color: '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                    </div>
+                  }
+                  {...a11yProps(1)}
+                />
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
@@ -214,6 +233,35 @@ const RepairOrderDetails = () => {
                     </Grid>
                   )}
                 </Box>
+              </TabPanel>
+              <TabPanel value={tabValue} index={1}>
+                <Paper>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={repairOrderSteps}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                    isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
+                    setStepFullScreen={() => setStepFullScreen(true)}
+                  />
+                  <ContentFullScreen title={repairOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                    {currentStep === 0 && repairOrderData && (
+                      <Productpackage
+                        repairOrderData={repairOrderData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={true}
+                      // allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                  </ContentFullScreen>
+                </Paper>
               </TabPanel>
             </Paper>
           </div>
