@@ -10,10 +10,8 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 const Steps = ({ Id }) => {
   const toastConfig = useContext(CustomToastContext);
   const [loadingSteps, setLoadingSteps] = useState(false);
-  const [steps, setSteps] = useState([]);
   const [assignStepsDialog, setAssignStepsDialog] = useState(false);
   const [isAssigning, setAssigning] = useState(false);
-
   const [options, setOptions] = useState([]);
 
   useEffect(() => {

@@ -14,6 +14,7 @@ import update from 'immutability-helper';
 import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { FaDiceOne } from 'react-icons/fa';
 
 export default function ManageServiceSteps({ title, onClose, handleUpdateSteps, isAssigning, options, setOptions }) {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -35,8 +36,6 @@ export default function ManageServiceSteps({ title, onClose, handleUpdateSteps, 
           ]
         })
       ]);
-      setUpdate(!isUpdate);
-      console.log('drag');
     },
     [options]
   );
@@ -106,6 +105,10 @@ export default function ManageServiceSteps({ title, onClose, handleUpdateSteps, 
           showManimizeMaximize={true}
         ></CustomDialogHeader>
         <CustomDialogContent>
+          <div className={'detail-box-content'}>
+            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Steps</h2>
+          </div>
           <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
             <Box border={1} mt={1} bgcolor="grey.100" borderColor="grey.300">
               <FixedSizeList height={300} width={'100%'} itemSize={60} itemData={options && options} itemCount={options && options.length}>
