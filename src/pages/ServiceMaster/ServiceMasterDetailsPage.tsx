@@ -116,15 +116,14 @@ const ServiceMasterDetailsPage = () => {
           <Box mb={2}>
             <Steps serviceId={id} />
           </Box>
+          <Box mb={2}>
+            <Configuration id={id} />
+          </Box>
           {permissions?.leadTimeMaster?.isRead && (
             <Box mb={2}>
               <LeadTimeMaster Id={id} type={'service'} />
             </Box>
           )}
-
-          <Box mb={2}>
-            <Configuration id={id} type={'service'} />
-          </Box>
         </Grid>
       </Grid>
       {showConfirmBox && (

@@ -2,13 +2,13 @@ import React from 'react';
 import { Grid, Box, Paper } from '@material-ui/core';
 import { useDrop } from 'react-dnd';
 import update from 'immutability-helper';
-
 import DragField from './DragField';
 import DropField from './DropField';
-import { FIELDS } from './ConfigureFields';
+import { FIELDS } from './FieldList';
 import ConfigureProperties from './ConfigureProperties';
 
 const Configurator = ({ fields, setFields }) => {
+
   const fieldsData = Object.keys(FIELDS).map((field, index) => ({
     fieldLabel: FIELDS[field].label,
     type: FIELDS[field].label,
@@ -62,7 +62,7 @@ const Configurator = ({ fields, setFields }) => {
     <>
       <Grid container spacing={2}>
         <Grid item xs={4}>
-          <Box border={'1px solid lightgray'} padding={1} height="100%">
+          <Box border={'1px solid lightgray'} padding={1} height={window.innerHeight - 150}>
             <Grid container spacing={1}>
               {fieldsData.map((field, index) => (
                 <DragField key={index} id={field.id} text={field.fieldLabel} />
@@ -71,7 +71,7 @@ const Configurator = ({ fields, setFields }) => {
           </Box>
         </Grid>
         <Grid item xs={8}>
-          <Box border={'1px solid lightgray'} padding={1} height="100%">
+          <Box border={'1px solid lightgray'} padding={1} height={window.innerHeight - 150}>
             <div style={{ width: '100%', height: '100%' }} ref={drop}>
               <Grid container spacing={2}>
                 {fields.map((field, index) => (
@@ -93,7 +93,10 @@ const Configurator = ({ fields, setFields }) => {
         </Grid>
       </Grid>
       {openProperties.isOpen && (
-        <ConfigureProperties setFields={setFields} field={openProperties?.data} close={() => setOpenProperties({ isOpen: false, data: null })} />
+        <ConfigureProperties
+          setFields={setFields}
+          field={openProperties?.data}
+          close={() => setOpenProperties({ isOpen: false, data: null })} />
       )}
     </>
   );
