@@ -140,6 +140,24 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
             row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
         });
       }
+      if (element.type === 'date') {
+        coloum.push({
+          accessor: element.fieldName,
+          Header: element.fieldLabel,
+          disableFilters: true,
+          Cell: ({ row }) =>
+            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+        });
+      }
+      else if (element.fieldName === "serviceMaster") {
+        coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) => (
+                row.original[element.fieldName] ? <p className="text-truncate">{row.original[element.fieldName].map(d => d?.optionLabel).toString()}</p> : <NoDataCell />
+            )
+        })
+    }
       else {
         if (element.fieldName === 'qty') {
           element.fieldName = 'qtyDisplay';
