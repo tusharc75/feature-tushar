@@ -86,6 +86,8 @@ export const leadImportErrorFileName = 'Leads-Errors.xlsx';
 export const opportunityTemplateFileName = 'Opportunities-Template.xlsx';
 export const opportunityImportErrorFileName = 'Opportunities-Errors.xlsx';
 
+export const repairOrderSteps = ['Add Products'];
+
 export const quoteStepColors = {
   'accepted by customer': { backgroundColor: '#008000', color: '#fff' },
   'not booked by customer': { backgroundColor: '#ba181b', color: '#fff' },
@@ -372,7 +374,8 @@ export const CHILD_RESOURCE = {
   subleaseProduct: 'Sublease Product',
   quotationProduct: 'Quotation Product',
   quotationCost: 'Quotation Cost',
-  quotationService: 'Quotation Service'
+  quotationService: 'Quotation Service',
+  repairOrderProduct: 'Repair Order Product',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -1747,6 +1750,12 @@ export const SUBLEASE_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   issued: 'Issued',
+  completed: 'Completed'
+};
+
+export const REPAIR_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
   completed: 'Completed'
 };
 

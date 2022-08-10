@@ -14,7 +14,8 @@ import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-function ManagePPLeadTime({ quotationId, data, onClose }) {
+function LeadTimeDialog({ quotationId, data, onClose, handleSucess }) {
+
   const toastConfig = useContext(CustomToastContext);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -28,11 +29,12 @@ function ManagePPLeadTime({ quotationId, data, onClose }) {
       leadTime: leadTimeMasterSteps,
       _id: data?._id
     };
+
     axiosInstance()
       .put(`${quotation.api}/productpackage/${quotationId}/lead-time`, value)
       .then((res) => {
         setLoading(false);
-        onClose();
+        handleSucess();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -43,45 +45,6 @@ function ManagePPLeadTime({ quotationId, data, onClose }) {
         setLoading(false);
         toastConfig.setToastConfig(err);
       });
-    // if (!leadTimeMasterId || isClone === true) {
-    //   values.steps = leadTimeMasterSteps;
-    //   values.leadTimeDays = totalDays || 0;
-    //   axiosInstance()
-    //     .post(`${leadTimeMaster.api}`, values)
-    //     .then(({ data }) => {
-    //       onClose();
-    //       setSubmitting(false);
-    //       onSuccess();
-    //       toastConfig.setToastConfig({
-    //         open: true,
-    //         type: 'success',
-    //         message: data.message
-    //       });
-    //     })
-    //     .catch((error) => {
-    //       setSubmitting(false);
-    //       toastConfig.setToastConfig(error);
-    //     });
-    // } else {
-    //   values._id = leadTimeMasterId;
-    //   values.steps = leadTimeMasterSteps;
-    //   values.leadTimeDays = totalDays || 0;
-    //   axiosInstance()
-    //     .put(`${leadTimeMaster.api}`, values)
-    //     .then(({ data }) => {
-    //       setSubmitting(false);
-    //       onSuccess();
-    //       toastConfig.setToastConfig({
-    //         open: true,
-    //         type: 'success',
-    //         message: data.message
-    //       });
-    //     })
-    //     .catch((error) => {
-    //       setSubmitting(false);
-    //       toastConfig.setToastConfig(error);
-    //     });
-    // }
   };
 
   const handleAddLTMSteps = () => {
@@ -134,10 +97,6 @@ function ManagePPLeadTime({ quotationId, data, onClose }) {
           showManimizeMaximize={true}
         />
         <CustomDialogContent>
-          <div className={'detail-box-content'}>
-            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Lead Time Steps</h2>
-          </div>
           <Grid container>
             <Grid item xs={12}>
               <Box style={{ maxHeight: '350px', overflow: 'auto' }} bgcolor="white" border={1} mt={2} mb={1} borderColor="grey.300" width={'100%'}>
@@ -235,7 +194,6 @@ function ManagePPLeadTime({ quotationId, data, onClose }) {
             loading={loading}
             variant="contained"
             color="primary"
-            // startIcon={loading && <CircularProgress size={20} color="inherit" />}
             disabled={loading}
             onClick={(e) => {
               e.preventDefault();
@@ -248,7 +206,7 @@ function ManagePPLeadTime({ quotationId, data, onClose }) {
         {showConfirmDialog ? (
           <ConfirmCancelDialog
             open={showConfirmDialog}
-            onSave={() => {}}
+            onSave={() => { }}
             onClose={() => {
               setShowConfirmDialog(false);
               onClose();
@@ -260,4 +218,4 @@ function ManagePPLeadTime({ quotationId, data, onClose }) {
   );
 }
 
-export default ManagePPLeadTime;
+export default LeadTimeDialog;

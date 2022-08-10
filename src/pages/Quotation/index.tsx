@@ -66,7 +66,7 @@ const Quotation = () => {
   const [singleQuotationDelete, setSingleQuotationDelete] = useState({
     id: null,
     show: false,
-    quotationName: ''
+    quotationNumber: ''
   });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
@@ -153,7 +153,7 @@ const Quotation = () => {
         });
         fetchQuotation();
         dispatch({ type: 'loading', loading: false });
-        setSingleQuotationDelete({ id: null, show: false, quotationName: '' });
+        setSingleQuotationDelete({ id: null, show: false, quotationNumber: '' });
       })
       .catch((error) => {
         dispatch({ type: 'loading', loading: false });
@@ -191,12 +191,12 @@ const Quotation = () => {
             setSingleQuotationDelete({
               show: true,
               id: params.data._id,
-              quotationName: `${params.data.quotationNo}`
+              quotationNumber: `${params.data.quotationNumber}`
             })
           }
           entity="quotation"
         />
-      ) : ( 
+      ) : (
         <Tooltip className="cursor-stop" title="You do not have permission to delete">
           <IconButton aria-label="Clone" size="small">
             <DeleteIcon fontSize="small" />
@@ -459,7 +459,7 @@ const Quotation = () => {
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions?.quotation}
-              primaryField={columns?.find(d => d.field === "quotationNo")}
+              primaryField={columns?.find(d => d.field === "quotationNumber")}
               onClick={(data) => {
                 history.push(`${routes.quotationDetail.path}/${data._id}`)
               }}
@@ -474,7 +474,7 @@ const Quotation = () => {
                 setSingleQuotationDelete({
                   show: true,
                   id: data._id,
-                  quotationName: `${data.quotationNo}`
+                  quotationNumber: `${data.quotationNumber}`
                 })
               }}
               rowCount={rowCount}
@@ -536,18 +536,18 @@ const Quotation = () => {
               refreshGrid={fetchQuotation}
               showOnlyShowFilteredRecordSwitch={true}
             />
-          ) : null}
-        {showDeleteWarningConfirmBox ? (
+          ) : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+        {showDeleteWarningConfirmBox &&
           <MessageDialog
             open={showDeleteWarningConfirmBox}
             message={`You are trying to delete records which you do not have permission to delete, Please remove those records from selection and try again.`}
             onClose={() => setShowDeleteWarningConfirmBox(false)}
           />
-        ) : null}
-        {isConfirmDialogVisible ? (
+        }
+        {isConfirmDialogVisible &&
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${routes?.quotation?.title?.toLowerCase()} ${deleteRecord?.quotationName || ''} ?`}
+            message={`Are you sure you want to delete ${routes?.quotation?.title?.toLowerCase()} ${deleteRecord?.quotationNumber || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
@@ -555,21 +555,21 @@ const Quotation = () => {
             okBtnLoading={deleteLoading}
             onOk={handleDeleteQuotation}
           />
-        ) : null}
-        {singleQuotationDelete.show ? (
+        }
+        {singleQuotationDelete.show && (
           <ConfirmationDialog
             open={singleQuotationDelete.show}
-            message={`Are you sure you want to delete quotation: ${singleQuotationDelete.quotationName}?`}
+            message={`Are you sure you want to delete quotation: ${singleQuotationDelete.quotationNumber}?`}
             onClose={() =>
               setSingleQuotationDelete({
                 id: null,
                 show: false,
-                quotationName: ''
+                quotationNumber: ''
               })
             }
             onOk={handleSingleDeleteQuotation}
           />
-        ) : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
+        )}
       </CustomContainer>
       {showManageQuotationDialog.open && (
         <ManageQuotationDialog

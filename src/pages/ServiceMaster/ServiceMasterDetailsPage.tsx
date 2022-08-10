@@ -18,6 +18,7 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import LeadTimeMaster from '../../components/LeadTime';
 import Configuration from './Configuration/index';
+import Steps from './Steps';
 
 const ServiceMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -81,7 +82,7 @@ const ServiceMasterDetailsPage = () => {
         <CustomBreadCrumbs routes={[routes.serviceMaster, { title: `${serviceMasterDetailData?.serviceName || ''}` }]} />
       </Grid>
       <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={permissions?.leadTimeMaster?.isRead ? 8 : 12} lg={permissions?.leadTimeMaster?.isRead ? 8 : 12}>
+        <Grid item xs={12} sm={12} md={8} lg={8}>
           <Paper style={{ height: '650px' }}>
             <DetailsPageHeader heading={serviceMasterDetailData?.serviceName || ''} mainPoints={null} showHeading={true}>
               {permissions?.product?.isUpdate && (
@@ -112,6 +113,9 @@ const ServiceMasterDetailsPage = () => {
           </Paper>
         </Grid>
         <Grid item xs={12} sm={12} md={4} lg={4}>
+          <Box mb={2}>
+            <Steps serviceId={id} />
+          </Box>
           {permissions?.leadTimeMaster?.isRead && (
             <Box mb={2}>
               <LeadTimeMaster Id={id} type={'service'} />

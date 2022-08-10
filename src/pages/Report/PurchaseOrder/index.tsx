@@ -206,16 +206,16 @@ const Report = () => {
           if (field?.fieldData.fieldName === 'warehouse') {
             resourceFieldData.push(field);
           }
-          if (field?.fieldData.fieldName === 'supplierAccount') {
-            resourceFieldData.push(field);
-            // columns.push({
-            //   field: 'supplierAccount',
-            //   headerName: field?.fieldData?.fieldLabel,
-            //   show: true,
-            //   disabled: false,
-            //   cellRenderer: 'supplierRenderer'
-            // });
-          }
+          // if (field?.fieldData.fieldName === 'supplierAccount') {
+          //   resourceFieldData.push(field);
+          //   // columns.push({
+          //   //   field: 'supplierAccount',
+          //   //   headerName: field?.fieldData?.fieldLabel,
+          //   //   show: true,
+          //   //   disabled: false,
+          //   //   cellRenderer: 'supplierRenderer'
+          //   // });
+          // }
           if (field?.fieldData.fieldName === 'purchaseOrderDate') {
             resourceFieldData.push({
               ...field,
@@ -345,7 +345,7 @@ const Report = () => {
         columns = [...columns,
         { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer", filter: false, sortable: false },
         { field: "referenceType", headerName: "Reference Type", show: true, cellRenderer: "commonRenderer" },
-        { field: "reference", headerName: "Reference", show: true, cellRenderer: "referenceRenderer" },
+        { field: "reference", headerName: "Reference", filter: false, sortable: false, show: true, cellRenderer: "referenceRenderer" },
         { field: "type", headerName: "Type", show: true, cellRenderer: "creditDebitTypeRenderer" },
         {
           field: "qty",
@@ -516,7 +516,7 @@ const Report = () => {
 
   const CreditDebitRenderer = (params: any) => (
     <span>
-      {params?.value ? params?.data?.type === "debit" ? `-${params?.value}`:params?.value : <NoDataCell />}
+      {params?.value ? params?.data?.type === "debit" ? `-${params?.value}` : params?.value : <NoDataCell />}
     </span>
   );
 
