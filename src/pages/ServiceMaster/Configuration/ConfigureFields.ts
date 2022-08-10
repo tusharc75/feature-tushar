@@ -30,7 +30,7 @@ export const FIELDS = {
         icon: "far fa-calendar-check",
     },
     PASSFAIL: {
-        label: "Pss Fail",
+        label: "Pass Fail",
         type: "passFail",
         icon: "",
     },
