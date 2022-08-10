@@ -112,14 +112,14 @@ const ServiceMasterDetailsPage = () => {
           </Paper>
         </Grid>
         <Grid item xs={12} sm={12} md={4} lg={4}>
+          <Box mb={2}>
+            <Steps serviceId={id} />
+          </Box>
           {permissions?.leadTimeMaster?.isRead && (
             <Box mb={2}>
               <LeadTimeMaster Id={id} type={'service'} />
             </Box>
           )}
-          <Box mb={2}>
-            <Steps Id={id} />
-          </Box>
         </Grid>
       </Grid>
       {showConfirmBox && (

@@ -1,61 +1,26 @@
 import { useState, useEffect, useContext } from 'react';
 import { Box, Grid, IconButton, Paper, Typography } from '@material-ui/core';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import LeadTimeAddDialog from './ManageServiceSteps';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageServiceSteps from './ManageServiceSteps';
 import { serviceMaster } from 'src/constants/helpers';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const Steps = ({ Id }) => {
-  const toastConfig = useContext(CustomToastContext);
-  const [loadingSteps, setLoadingSteps] = useState(false);
-  const [assignStepsDialog, setAssignStepsDialog] = useState(false);
-  const [isAssigning, setAssigning] = useState(false);
-  const [options, setOptions] = useState([]);
+const Steps = ({ serviceId }) => {
+
+  const [stepDialog, setStepDialog] = useState(false);
+  const [stepOptions, setStepOptions] = useState(null);
 
   useEffect(() => {
     fetchStepsData();
-  }, [Id]);
+  }, [serviceId]);
 
   const fetchStepsData = async () => {
-    setLoadingSteps(true);
-
     axiosInstance()
-      .get(`${serviceMaster.api}/steps/${Id}`)
+      .get(`${serviceMaster.api}/steps/${serviceId}`)
       .then(({ data: { data } }) => {
-        console.log(data);
-        setOptions(data);
-        setLoadingSteps(false);
+        setStepOptions(data);
       })
       .catch((err) => {
-        setLoadingSteps(false);
-      });
-  };
-
-  const handleUpdateSteps = () => {
-    setAssigning(true);
-    console.log(options);
-    const value = {
-      serviceId: Id,
-      steps: options
-    };
-    axiosInstance()
-      .post(`${serviceMaster.api}/steps`, value)
-      .then(() => {
-        setAssigning(false);
-        fetchStepsData();
-        setAssignStepsDialog(false);
-        toastConfig.setToastConfig({
-          open: true,
-          message: 'Steps updated successfully',
-          severity: 'success'
-        });
-      })
-      .catch((err) => {
-        setAssigning(false);
-        setAssignStepsDialog(false);
-        toastConfig.setToastConfig(err);
       });
   };
 
@@ -63,21 +28,21 @@ const Steps = ({ Id }) => {
     <>
       <Paper style={{ overflow: 'hidden' }}>
         <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="subtitle2">Steps</Typography>
+          <Typography variant="subtitle2">Service Steps</Typography>
           <IconButton
             size="small"
             onClick={() => {
-              setAssignStepsDialog(true);
+              setStepDialog(true);
             }}
           >
             <AddCircleOutlineIcon fontSize="small" />
           </IconButton>
         </Box>
-        {options?.length ? (
+        {(stepOptions && stepOptions?.length) ? (
           <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
             <Grid container>
               <Grid item xs={3} justifyContent={'center'}>
-                <Typography variant="body1">Sr. No</Typography>
+                <Typography variant="body1">#</Typography>
               </Grid>
               <Grid item xs={9} justifyContent={'center'}>
                 <Typography variant="body1">Step</Typography>
@@ -85,8 +50,8 @@ const Steps = ({ Id }) => {
             </Grid>
           </Box>
         ) : null}
-        {options?.length ? (
-          options?.map((steps, index) => (
+        {stepOptions?.length ? (
+          stepOptions?.map((steps, index) => (
             <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
               <Grid container>
                 <Grid item xs={3} justifyContent={'center'}>
@@ -98,7 +63,7 @@ const Steps = ({ Id }) => {
               </Grid>
             </Box>
           ))
-        ) : loadingSteps ? (
+        ) : !stepOptions ? (
           <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
             <Grid container>
               <Grid item xs={6} justifyContent={'center'}>
@@ -110,22 +75,23 @@ const Steps = ({ Id }) => {
           <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
             <Grid container>
               <Grid item xs={6} justifyContent={'center'}>
-                <Typography variant="body2">No Data Found</Typography>
+                <Typography variant="body2">No Steps Found</Typography>
               </Grid>
             </Grid>
           </Box>
         )}
       </Paper>
-      {assignStepsDialog && (
+      {stepDialog && (
         <ManageServiceSteps
-          title={'Assign Steps'}
-          onClose={() => {
-            setAssignStepsDialog(false);
+          handleClose={() => {
+            setStepDialog(false);
           }}
-          handleUpdateSteps={handleUpdateSteps}
-          isAssigning={isAssigning}
-          options={options}
-          setOptions={setOptions}
+          handleSucess={() => {
+            setStepDialog(false);
+            fetchStepsData()
+          }}
+          serviceId={serviceId}
+          stepOptions={stepOptions}
         />
       )}
     </>

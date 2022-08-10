@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect } from 'react';
+import { Fragment, useCallback, useContext, useEffect } from 'react';
 import { Box, Button, Dialog } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useState } from 'react';
@@ -14,16 +14,54 @@ import update from 'immutability-helper';
 import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { FaDiceOne } from 'react-icons/fa';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { serviceMaster } from 'src/constants/helpers';
 
-export default function ManageServiceSteps({ title, onClose, handleUpdateSteps, isAssigning, options, setOptions }) {
+export default function ManageServiceSteps({ handleClose, handleSucess, serviceId, stepOptions }) {
+
+  const toastConfig = useContext(CustomToastContext);
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isUpdate, setUpdate] = useState(false);
+  const [isUpatingSteps, setIsUpatingSteps] = useState(false);
+
   const defaultOption = [{ step: 'Step 1' }];
+  const [options, setOptions] = useState(stepOptions.length === 0 ? defaultOption : stepOptions);
+
+  const handleUpdateSteps = () => {
+    const value = {
+      serviceId: serviceId,
+      steps: options
+    };
+    setIsUpatingSteps(true)
+    axiosInstance()
+      .post(`${serviceMaster.api}/steps`, value)
+      .then(() => {
+        handleSucess()
+        toastConfig.setToastConfig({
+          open: true,
+          message: 'Steps updated successfully',
+          severity: 'success'
+        });
+        setIsUpatingSteps(false)
+
+      })
+      .catch((err) => {
+        setIsUpatingSteps(false)
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   useEffect(() => {
-    options.length === 0 && setOptions([...defaultOption]);
-  }, [title]);
+    setUpdate(!isUpdate);
+  }, [options]);
+
+  const onChangeValue = (index, value) => {
+    let data = [...options];
+    data[index].step = value;
+    setOptions([...data]);
+  };
 
   const moveCard = useCallback(
     (dragIndex: number, hoverIndex: number) => {
@@ -36,15 +74,8 @@ export default function ManageServiceSteps({ title, onClose, handleUpdateSteps, 
           ]
         })
       ]);
-    },
-    [options]
-  );
+    }, [options]);
 
-  const onChangeValue = (index, value) => {
-    let data = [...options];
-    data[index].step = value;
-    setOptions([...data]);
-  };
   const AddRemoveValue = (type, index) => {
     let data = options;
     if (type === 'add') {
@@ -63,7 +94,7 @@ export default function ManageServiceSteps({ title, onClose, handleUpdateSteps, 
   const Row = React.useMemo(() => {
     return React.forwardRef((props2: any, ref2: any) => (
       <div style={props2.style} ref={ref2}>
-        {options && (
+        {options && options[props2.index] && (
           <Card
             key={props2.index}
             index={props2.index}
@@ -76,7 +107,7 @@ export default function ManageServiceSteps({ title, onClose, handleUpdateSteps, 
         )}
       </div>
     ));
-  }, [isUpdate, options]);
+  }, [isUpdate]);
 
   return (
     <Dialog
@@ -87,31 +118,33 @@ export default function ManageServiceSteps({ title, onClose, handleUpdateSteps, 
       open={true}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          onClose();
+          handleClose();
         }
       }}
       fullWidth
     >
       <Fragment>
         <CustomDialogHeader
-          title={title || 'Assign Steps'}
+          title={'Add/Update Steps'}
           onClose={() => {
-            onClose();
+            handleClose();
           }}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
             setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
+          showRequiredLabel={false}
         ></CustomDialogHeader>
         <CustomDialogContent>
-          <div className={'detail-box-content'}>
-            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Steps</h2>
-          </div>
           <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
             <Box border={1} mt={1} bgcolor="grey.100" borderColor="grey.300">
-              <FixedSizeList height={300} width={'100%'} itemSize={60} itemData={options && options} itemCount={options && options.length}>
+              <FixedSizeList
+                height={300}
+                width={'100%'}
+                itemSize={60}
+                itemData={options && options}
+                itemCount={options && options.length}>
                 {Row}
               </FixedSizeList>
             </Box>
@@ -122,13 +155,13 @@ export default function ManageServiceSteps({ title, onClose, handleUpdateSteps, 
             size="small"
             color="primary"
             onClick={() => {
-              onClose();
+              handleClose();
             }}
           >
             Cancel
           </Button>
           <CustomButton
-            loading={isAssigning}
+            loading={isUpatingSteps}
             variant="contained"
             color="primary"
             type="submit"
@@ -136,10 +169,8 @@ export default function ManageServiceSteps({ title, onClose, handleUpdateSteps, 
               e.preventDefault();
               handleUpdateSteps();
             }}
-            disabled={isAssigning}
-          >
-            {' '}
-            Save
+            disabled={isUpatingSteps}
+          >Save
           </CustomButton>
         </CustomDialogFooter>
       </Fragment>
