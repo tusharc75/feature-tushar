@@ -11,10 +11,9 @@ import Configurator from './Configurator';
 import { serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const ConfiguratorDialog = (props: any) => {
-  const { close, id, configuration, fetchConfiguration } = props;
-  const { api } = serviceMaster;
-  const { setToastConfig } = React.useContext(CustomToastContext);
+const ConfiguratorDialog = ({ handleClose, handleSucess, id, configuration }) => {
+
+  const toastConfig = React.useContext(CustomToastContext);
   const [fields, setFields] = React.useState<any>([]);
   const [isSubmitting, setSubmitting] = React.useState(false);
 
@@ -23,39 +22,38 @@ const ConfiguratorDialog = (props: any) => {
   }, [configuration]);
 
   const handleSave = async () => {
-    if (!id) return;
-
-    try {
-      setSubmitting(true);
-      const { data } = await axiosInstance().post(`${api}/configure-fields`, {
-        serviceId: id,
-        configureFields: fields
-      });
-
-      if (data) {
-        setSubmitting(false);
-        close();
-        setToastConfig({
-          message: 'Successfully created',
-          type: 'success',
-          open: true
+    axiosInstance().post(`${serviceMaster.api}/configure-fields`, {
+      serviceId: id,
+      configureFields: fields
+    })
+      .then(({ data }) => {
+        handleSucess()
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
         });
-        fetchConfiguration();
-      }
-    } catch (error) {
-      setSubmitting(false);
-      setToastConfig(error);
-    }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
+
   return (
-    <Dialog open onClose={close} fullScreen>
-      <CustomDialogHeader title="Configurator" onClose={close} />
+    <Dialog open onClose={handleClose} fullScreen>
+      <CustomDialogHeader
+        showRequiredLabel={false}
+        title="Fields Configuration"
+        onClose={handleClose} />
       <CustomDialogContent>
         <DndProvider backend={HTML5Backend}>
           <Configurator fields={fields} setFields={setFields} />
         </DndProvider>
       </CustomDialogContent>
       <CustomDialogFooter>
+        <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
+          Close
+        </Button>
         <Button
           variant="contained"
           size="small"
@@ -65,9 +63,6 @@ const ConfiguratorDialog = (props: any) => {
           endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
         >
           Save
-        </Button>
-        <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={close}>
-          Close
         </Button>
       </CustomDialogFooter>
     </Dialog>

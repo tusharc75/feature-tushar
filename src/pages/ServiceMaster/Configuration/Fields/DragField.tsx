@@ -1,8 +1,8 @@
-import React from 'react';
 import { Box, Grid } from '@material-ui/core';
 import { useDrag } from 'react-dnd';
 
 const DragField = ({ id, text }: any) => {
+  
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: 'field',
@@ -12,14 +12,14 @@ const DragField = ({ id, text }: any) => {
       }),
       end: (item, monitor) => {
         const dropResult = monitor.getDropResult();
-        // console.log(item);
       }
     }),
     [id]
   );
+
   return (
-    <Grid item xs={12} sm={6}>
-      <div ref={drag} style={{ opacity: isDragging ? 0.2 : 1 }}>
+    <Grid item xs={12} sm={12}>
+      <div ref={drag} style={{ cursor: "pointer", opacity: isDragging ? 0.2 : 1 }}>
         <Box border={'1px solid lightgray'} padding={1}>
           {text}
         </Box>
