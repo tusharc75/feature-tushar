@@ -10,10 +10,13 @@ interface DragItem {
   id: string;
   type: string;
 }
+
 export const Card = (props) => {
+  
   const { index, id, data, moveCard, onChangeValue, AddRemoveValue } = props;
-  // console.log(index, id, data);
+  
   const ref = useRef<HTMLDivElement>(null);
+  
   const [{ handlerId }, drop] = useDrop({
     accept: 'card',
     collect(monitor) {
@@ -44,6 +47,7 @@ export const Card = (props) => {
       item.index = hoverIndex;
     }
   });
+
   const [{ isDragging }, drag] = useDrag({
     type: 'card',
     item: () => {
@@ -53,9 +57,10 @@ export const Card = (props) => {
       isDragging: monitor.isDragging()
     })
   });
+
   const opacity = isDragging ? 0.4 : 1;
   drag(drop(ref));
-  // console.log(data.optionLabel);
+
   return (
     <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
       <Box bgcolor="white" border={1} mb={1} p={1} borderColor="grey.300">
@@ -76,7 +81,6 @@ export const Card = (props) => {
               onChange={(e) => onChangeValue(index, e.target.value)}
             />
           </Grid>
-
           <Grid item xs={2}>
             <IconButton aria-label="setting" onClick={() => AddRemoveValue('add', index)}>
               <AddCircleOutlineIcon fontSize="small" />
