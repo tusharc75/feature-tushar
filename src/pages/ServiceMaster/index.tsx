@@ -7,7 +7,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { AddOutlined } from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { Box, Menu, MenuItem } from '@material-ui/core';
 import SearchBox from '../../components/Helpers/SearchBox';
 import styles from '../Leads/Header.module.scss';
@@ -372,6 +372,16 @@ const ServiceMaster = () => {
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
                   )}
+                  <Button
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                  >
+                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                  </Button>
                   <Menu
                     anchorEl={anchorEl}
                     keepMounted
@@ -386,12 +396,15 @@ const ServiceMaster = () => {
                   >
                     {permissions?.serviceMaster?.isDelete && (
                       <MenuItem
+                        disabled={[...getLocalStorageArrayData(localStorageSelectedRecords)].length ? false : true}
                         onClick={() => {
                           closeActions();
                           setShowDeleteConfirmBox(true);
                         }}
                       >
-                        Delete
+                        {[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length
+                          ? `Delete (${[...getLocalStorageArrayData(localStorageSelectedRecords)]?.length})`
+                          : 'Delete'}
                       </MenuItem>
                     )}
                   </Menu>
