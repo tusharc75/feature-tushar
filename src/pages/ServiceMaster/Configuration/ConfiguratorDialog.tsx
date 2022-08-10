@@ -12,7 +12,7 @@ import { serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const ConfiguratorDialog = (props: any) => {
-  const { close, id, configuration } = props;
+  const { close, id, configuration, fetchConfiguration } = props;
   const { api } = serviceMaster;
   const { setToastConfig } = React.useContext(CustomToastContext);
   const [fields, setFields] = React.useState<any>([]);
@@ -40,6 +40,7 @@ const ConfiguratorDialog = (props: any) => {
           type: 'success',
           open: true
         });
+        fetchConfiguration();
       }
     } catch (error) {
       setSubmitting(false);
