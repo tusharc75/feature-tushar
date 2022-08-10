@@ -17,6 +17,7 @@ import accountClass from '../Account/account.module.scss';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import LeadTimeMaster from '../../components/LeadTime';
+import Configuration from './Configuration/index';
 import Steps from './Steps';
 
 const ServiceMasterDetailsPage = () => {
@@ -120,6 +121,10 @@ const ServiceMasterDetailsPage = () => {
               <LeadTimeMaster Id={id} type={'service'} />
             </Box>
           )}
+
+          <Box mb={2}>
+            <Configuration id={id} type={'service'} />
+          </Box>
         </Grid>
       </Grid>
       {showConfirmBox && (
