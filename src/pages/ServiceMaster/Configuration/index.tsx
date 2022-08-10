@@ -8,7 +8,7 @@ import { serviceMaster } from 'src/constants/helpers';
 
 const Configuration = ({ id, type }) => {
   const [loadingPLT, setLoadingPLT] = useState(false);
-  const [configuration, setConfiguration] = useState(null);
+  const [configuration, setConfiguration] = useState([]);
   const [configurationDialog, setConfigurationDialog] = useState(false);
   const [isAssigning, setAssigning] = useState(false);
   const { api } = serviceMaster;
