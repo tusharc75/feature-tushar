@@ -20,7 +20,7 @@ const ConfiguratorDialog = (props: any) => {
 
   React.useEffect(() => {
     setFields(configuration);
-  }, [fields]);
+  }, [configuration]);
 
   const handleSave = async () => {
     if (!id) return;
