@@ -41,7 +41,7 @@ import PriceRequestDialog from './PriceRequestDialog';
 import { ExpandMore } from '@material-ui/icons';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import { capitalize } from 'lodash';
-import ManagePPLeadTime from './ManagePPLeadTime';
+import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 
 const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, setQuotationSummary }) => {
@@ -74,7 +74,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
   const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
   const [supplierContactData, setSupplierContactData] = useState([]);
   const [selectedType, setSelectedType] = useState(null);
-  const [ppLeadTimeOpen, setPpLeadTimeOpen] = useState({ open: false, data: null });
+  const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     fetchFields();
@@ -257,9 +257,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                   size="small"
                   aria-label="Details"
                   onClick={() => {
-                    setPpLeadTimeOpen({ open: true, data: row.original });
-                    // const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    // setDeleteData(obj);
+                    setLeadTimeDialog({ open: true, data: row.original });
                   }}
                 >
                   <DateRangeIcon fontSize="small" color="primary" />
@@ -320,8 +318,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
-      parent.leadTimeData = parent.leadTime;
-      parent.leadTime = `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}`;
+      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
+      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -330,8 +328,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       const subRows: any = data.material.filter((e) => e.parentId === parent._id);
       subRows.forEach((_subRow, j) => {
         _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`;
-        _subRow.leadTimeData = _subRow.leadTime;
-        _subRow.leadTime = `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}`;
+        _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+        _subRow.leadTime = Array.isArray(_subRow?.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
         _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
         _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
         _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
@@ -437,6 +435,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       delete element.packageDetail;
       delete element.serviceDetail;
       delete element.subRows;
+      delete element.leadTime;
+      delete element.leadTimeData;
     });
     setUpdating(true);
     axiosInstance()
@@ -763,12 +763,16 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
           fields={allFields}
         />
       )}
-      {ppLeadTimeOpen.open && (
-        <ManagePPLeadTime
+      {leadTimeDialog.open && (
+        <LeadTimeDialog
           quotationId={quotationData._id}
-          data={ppLeadTimeOpen?.data}
+          data={leadTimeDialog?.data}
           onClose={() => {
-            setPpLeadTimeOpen({ open: false, data: null });
+            setLeadTimeDialog({ open: false, data: null });
+          }}
+          handleSucess={() => {
+            setLeadTimeDialog({ open: false, data: null });
+            fetchProductInventory()
           }}
         />
       )}

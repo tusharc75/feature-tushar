@@ -23,10 +23,10 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
-    const [viewDownloadLoading, setViewDownloadLoading] = useState(false);
+
     const [isRateRequired, setIsRateRequired] = useState(false);
     const [columns, setColumns] = useState(null);
-    const [rowsData, setRowsData] = useState([]);
+    const [rowsData, setRowsData] = useState(null);
     const isSmallScreen = useMediaQuery('(max-width:1300px)');
     const isTabletScreen = useMediaQuery('(max-width:960px)');
 
@@ -179,12 +179,14 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
         var data: any = []
         var inventory: any = []
         const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}`)
+        const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}`)
+
         data = response?.data?.data
         inventory = data?.inventory ? data?.inventory : [];
         const rows = data.material.filter((e) => e.parentId === null)
         rows.forEach((parent, i) => {
             parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
-            parent.leadTime = `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}`;
+            parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
             parent.qtyDisplay = parent.qty;
             parent.isValid = parent["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
             parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -193,15 +195,12 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             const subRows: any = data.material.filter((e) => e.parentId === parent._id);
             subRows.forEach((_subRow, j) => {
                 _subRow.detail = `${_subRow.type === "product" ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`
-                _subRow.leadTime = `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}`;
+                _subRow.leadTime = Array.isArray(_subRow?.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
                 _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`
                 _subRow.isValid = _subRow["finalPrice_" + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
                 _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
                 _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
             })
-            // if (subRows.length === 0) {
-            //     parent.isValid = false
-            // }
             parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
             parent.subRows = subRows
         });
@@ -211,22 +210,23 @@ const QuoteBuilder = ({ quotationData, setNextStep, currencySymbol, showActivity
             setNextStep(true)
         }
 
-        const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}`)
         let serviceRows = []
-        serviceRows = serviceResponse?.data?.data?.map((item) => {
-            let finalObject = prepareDataForGrid(item);
-            finalObject["detail"] = item?.serviceName;
-            finalObject["qtyDisplay"] = item?.qty;
-            finalObject["parentId"] = null;
-            finalObject["isValid"] = true;
-            finalObject["hideSelection"] = false;
-            finalObject["assetQty"] = 0;
-            finalObject["type"] = "Service";
-            let res: any = {
-                ...finalObject,
-            };
-            return res;
-        })
+        if (serviceResponse?.data?.data?.length) {
+            serviceRows = serviceResponse?.data?.data?.map((item) => {
+                let finalObject = prepareDataForGrid(item);
+                finalObject["detail"] = item?.serviceName;
+                finalObject["qtyDisplay"] = item?.qty;
+                finalObject["parentId"] = null;
+                finalObject["isValid"] = true;
+                finalObject["hideSelection"] = false;
+                finalObject["assetQty"] = 0;
+                finalObject["type"] = "Service";
+                let res: any = {
+                    ...finalObject,
+                };
+                return res;
+            })
+        }
         setRowsData([...rows, ...serviceRows]);
 
         const totalFinalPrice = rows.filter(f => f?.parentId === null && f?.hasOwnProperty("finalPrice_" + quotationData?.currency?.toLowerCase()) && !isNaN(f["finalPrice_" + quotationData?.currency?.toLowerCase()])).reduce((sum, row) => row["finalPrice_" + quotationData?.currency?.toLowerCase()] + sum, 0)
