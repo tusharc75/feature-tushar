@@ -13,17 +13,16 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import moment from 'moment';
-import { repairOrder, dateFormat, pricingCondition, formatAmountWithCurrency } from '../../../constants/helpers';
+import { repairOrder, dateFormat } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
-import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
+import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
 
 const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
 
@@ -45,7 +44,6 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -59,8 +57,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
   }, [columns]);
 
   const fetchFields = async () => {
-    var { fields: data, allFields } = await fetch_rental_product_fields(repairOrderData?.currency, isOffline);
-    setAllFields(JSON.parse(JSON.stringify(allFields)));
+    var data = await fetch_repair_order_product_fields(repairOrderData?.currency);
     const coloum: any = [
       {
         accessor: 'srno',
@@ -142,61 +139,17 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
           Cell: ({ row }) =>
             row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
         });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(repairOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(repairOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              Footer: (info) => {
-                const total = info?.rows
-                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                return (
-                  <>
-                    {currencySymbol} {formatAmountWithCurrency(repairOrderData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                  </>
-                );
-              }
-            });
-          });
-        }
-      } else {
+      }
+      else if (element.fieldName === "serviceMaster") {
+        coloum.push({
+          accessor: element.fieldName,
+          Header: element.fieldLabel,
+          Cell: ({ row }) => (
+            row.original[element.fieldName] ? <p className="text-truncate">{row.original[element.fieldName].map(d => d?.optionLabel).toString()}</p> : <NoDataCell />
+          )
+        })
+      }
+      else {
         if (element.fieldName === 'qty') {
           element.fieldName = 'qtyDisplay';
         }
@@ -267,7 +220,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + repairOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      parent.isValid = true;
       parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
@@ -290,7 +243,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
       _subRow.detail = _subRow?.productDetail?.productName;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
-      _subRow.isValid = _subRow['finalPrice_' + repairOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      _subRow.isValid = true;
       _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
@@ -323,35 +276,8 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.estimateStartDate = repairOrderData ? repairOrderData?.estimateStartDate : new Date();
-      element.estimateEndDate = repairOrderData ? repairOrderData?.estimateEndDate : new Date();
-      element.actualStartDate = "";
-      element.actualEndDate = "";
-      element.actualJobDuration = "";
       element.parentId = addExistingProductDialog.parentId;
-      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      element.estimateJobDuration = 1;
-      if (calValues && calValues['estimateJobDuration']) {
-        element.estimateJobDuration = calValues['estimateJobDuration'];
-      }
       material.push(element);
-    });
-
-    const priceData: any = await calculatePrice(material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${repairOrderData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-        Object.assign(element, calValues);
-      }
     });
 
     axiosInstance()
@@ -416,35 +342,6 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
     setRecordToUpdate(rowData);
   };
 
-  const calculatePrice = (arr: any[]) => {
-    //materialType can be =["product","packages","productCategory"]
-    //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
-    if (repairOrderData) {
-      const data: any = {};
-      data.conditionType = ['Rent'];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: repairOrderData?.currency
-      }));
-      data.supplier = [];
-      data.customer = [repairOrderData?.customerAccount?.optionValue];
-      data.warehouse = [repairOrderData?.warehouse?.optionValue];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
-  };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -619,7 +516,6 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
       )}
       {isProductEdit.open && (
         <RepairOrderQtyDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);
