@@ -88,6 +88,7 @@ const Configuration = ({ id, type }) => {
       </Paper>
       {configurationDialog && (
         <ConfiguratorDialog
+          fetchConfiguration={fetchConfiguration}
           id={id}
           configuration={configuration}
           close={() => {
