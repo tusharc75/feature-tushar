@@ -160,7 +160,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType 
             axiosInstance().post(`${workOrder.api}`, updatedValues).then(({ data }) => {
                 setLoading(false);
                 onSuccess(data?.data)
-                history.push(`${routes.workOrderDetail.path}/${data._id}`);
+                history.push(`${routes.workOrderDetail.path}/${data?.data?._id}`);
                 setSubmitting(false);
                 toastConfig.setToastConfig({
                     open: true,
@@ -177,11 +177,6 @@ const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType 
 
     function validate(values) {
         const errors = {};
-        let startDate = moment(values?.pickUpDate);
-        let endDate = moment(values?.deliveryDate);
-        if (endDate.diff(startDate, 'days') < 0) {
-            errors['pickUpDate'] = 'Please enter valid pick-Up  date';
-        }
         return errors;
     }
 
