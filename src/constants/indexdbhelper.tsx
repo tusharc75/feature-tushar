@@ -9,6 +9,7 @@ export const objectStore = {
   offlineDataSync: 'offlineDataSync',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
+  workOrder:'workOrder'
 };
 
 export const setUpindexDB = () => {

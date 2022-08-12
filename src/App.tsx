@@ -151,6 +151,8 @@ import CustomReport from './pages/ReportCustom';
 import CustomReports from './pages/ReportCustom/CustomReport';
 import RepairOrder from './pages/RepairOrder';
 import RepairOrderDetails from './pages/RepairOrder/RepairOrderDetails';
+import WorkOrder from './pages/WorkOrder';
+import WorkOrderDetails from './pages/WorkOrder/WorkOrderDetails';
 
 var notificationInterval: any = null;
 
@@ -792,6 +794,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.repairOrderDetail.path}/:id`}>
               <RepairOrderDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.workOrder.path}>
+              <WorkOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workOrderDetail.path}/:id`}>
+              <WorkOrderDetails />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

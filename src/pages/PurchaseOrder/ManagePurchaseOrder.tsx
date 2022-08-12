@@ -69,6 +69,9 @@ const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose,
                         if (fieldsDataForCreate?.filter((e) => e.fieldName === "purchaseOrderDate").length) {
                             rest["purchaseOrderDate"] = new Date();
                         }
+                        if (fieldsDataForCreate?.filter((e) => e.fieldName === "deliveryDate").length) {
+                            rest["deliveryDate"] = new Date();
+                        }
                         setInitialData({
                             fields: fieldsDataForCreate,
                             values: getObjKeysWithValues(rest, fieldsDataForCreate),
