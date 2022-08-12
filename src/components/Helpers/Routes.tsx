@@ -624,6 +624,20 @@ const routes = {
     title: storedRoutes && storedRoutes.repairOrder && storedRoutes.repairOrder.title ? storedRoutes.repairOrder?.title : RESOURCE_LABEL.repairOrder,
     path: '/repair-order/detail'
   },
+  workOrder: {
+    title:
+      storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title
+        ? storedRoutes.workOrder?.title
+        : RESOURCE_LABEL.workOrder,
+    path: '/work-order'
+  },
+  workOrderDetail: {
+    title:
+      storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title
+        ? storedRoutes.workOrder?.title
+        : RESOURCE_LABEL.workOrder,
+    path: '/work-order/detail'
+  },
 };
 
 export default routes;

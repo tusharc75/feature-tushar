@@ -211,6 +211,7 @@ export const sidebarResource = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
+  workOrder: 'Work Order'
 };
 
 export const resourceNames = {
@@ -278,6 +279,7 @@ export const resourceNames = {
   productAuction: 'Product Auction',
   quotation: 'Quotation',
   repairOrder: 'Repair Order',
+  workOrder: 'Work Order'
 };
 
 export const primaryFields = {
@@ -361,6 +363,7 @@ export const RESOURCE_LABEL = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
+  workOrder: 'Work Order'
 };
 
 export const CHILD_RESOURCE = {
@@ -652,6 +655,11 @@ export const leadTimeMaster = {
   resource: 'Lead Time Master'
 };
 
+export const workOrder = {
+  resource: 'Work Order',
+  api: '/work-order'
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -809,21 +817,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1818,6 +1826,7 @@ export const ACTIVITY_RESOURCE = {
   transferInventory: 'transferInventory',
   quotation: 'quotation',
   repairOrder: 'repairOrder',
+  workOrder: 'workOrder'
 };
 
 export const REPORT_LIST = [
@@ -1858,9 +1867,8 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
-          data?.lastName ? data?.lastName : ''
-        }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
+          }`,
         id: data._id
       };
     case 'supplier-account':
@@ -1870,9 +1878,8 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
-          data?.lastName ? data?.lastName : ''
-        }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
+          }`,
         id: data._id
       };
     case 'lead':
