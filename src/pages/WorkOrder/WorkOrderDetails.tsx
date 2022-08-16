@@ -29,6 +29,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ManageWorkOrder from './ManageWorkOrder';
+import Service from './Service';
 
 function a11yProps(index: any) {
   return {
@@ -60,10 +61,9 @@ const WorkOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
-  const [currentStep, setCurrentStep] = useState(null);
-  const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
-
+  const [currentStep, setCurrentStep] = useState(0);
+  const [workOrderServiceData, setWorkOrderServiceData] = useState([]);
+  const [workOrderServiceSteps, setWorkOrderServiceSteps] = useState([]);
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -87,6 +87,7 @@ const WorkOrderDetails = () => {
   useEffect(() => {
     if (id) {
       fetchWorkOrderData();
+      fetchWorkOrderService();
     }
   }, [id]);
 
@@ -118,6 +119,18 @@ const WorkOrderDetails = () => {
           params.delete('openEdit');
           history.push({ search: params.toString() });
         }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchWorkOrderService = () => {
+    axiosInstance()
+      .get(`${routes.workOrder.path}/service-detail/${id}`)
+      .then(({ data: { data } }) => {
+        setWorkOrderServiceData(data);
+        setWorkOrderServiceSteps(data.map(d => d?.serviceName))
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -207,6 +220,19 @@ const WorkOrderDetails = () => {
                   }
                   {...a11yProps(0)}
                 />
+                <Tab
+                  className={'tabLayout'}
+                  style={{
+                    background: tabValue === 2 ? 'white' : '',
+                    color: '#163340'
+                  }}
+                  label={
+                    <div className="d-flex align-items-center tab-font">
+                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                    </div>
+                  }
+                  {...a11yProps(1)}
+                />
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
@@ -218,6 +244,29 @@ const WorkOrderDetails = () => {
                     </Grid>
                   )}
                 </Box>
+              </TabPanel>
+              <TabPanel value={tabValue} index={1}>
+                <Paper>
+                  {workOrderServiceData ?
+                    <>
+                      <Steps
+                        isNextStep={false}
+                        nextStep={nextStep}
+                        steps={workOrderServiceSteps}
+                        currentStep={currentStep}
+                        setCurrentStep={setCurrentStep}
+                        isStepEnded={false}
+                      />
+                      {workOrderServiceData[currentStep] && (
+                        <Service data={workOrderServiceData[currentStep]} />
+                      )}
+                    </>
+                    : (
+                      <Grid container spacing={2} style={{ padding: '8px' }}>
+                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                      </Grid>
+                    )}
+                </Paper>
               </TabPanel>
             </Paper>
           </div>

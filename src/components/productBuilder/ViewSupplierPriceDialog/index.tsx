@@ -107,7 +107,7 @@ const ViewSupplierPriceDialog = (props) => {
         aria-labelledby="customized-dialog-title"
         open={true}
     >
-        <CustomDialogHeader title={"View Supplier Price"} onClose={handleClose} showRequiredLabel={false} ></CustomDialogHeader>
+        <CustomDialogHeader title={"View Supplier Quote"} onClose={handleClose} showRequiredLabel={false} ></CustomDialogHeader>
         {productDataList && productDataList.length !== 0 ?
             productDataList.map((data, index) => (
 
@@ -148,7 +148,7 @@ const ViewSupplierPriceDialog = (props) => {
             ))
             :
             <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
-                No supplier price
+                No supplier quote
             </h1>}
         {
             askSupplierPriceDialog &&
