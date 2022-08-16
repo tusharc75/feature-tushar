@@ -26,8 +26,9 @@ import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "src/components/Helpers/Routes";
 import { useHistory } from 'react-router-dom';
 
+const disabledFieldArray = ['workOrderNumber', "type", "product", "serviceMaster", "repairOrder", "status"]
 const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType = null, refrenceData = null,
-    products = null }) => {
+    products = null, serviceMaster = null }) => {
 
     const { state: { user } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
@@ -85,7 +86,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType 
                 let data;
                 const response = await axiosInstance().get(`${workOrder.api}/${workOrderId}`)
                 data = response?.data?.data
-                setWorkOrderData(data)
+                    setWorkOrderData(data)
                 setDisableOwnerSelection(workOrderId && user.user._id !== data?.owner?.optionValue);
                 setInitialData({
                     fields: fieldsDataForUpdate,
@@ -96,13 +97,13 @@ const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType 
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
                 if (products && refrenceType && refrenceData) {
 
-                    tempInitialData["workOrderNumber"] = `${refrenceData?.workOrderNumber}_${generateUniqueIdOnly()}`
+                    tempInitialData["workOrderNumber"] = `${refrenceData?.repairOrderNumber}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
-                    tempInitialData["products"] = []
-                    products?.forEach((ele) => {
-                        tempInitialData["products"].push({ product: ele._id, qty: ele.qty })
-                    })
-
+                    tempInitialData["product"] = products
+                    tempInitialData["serviceMaster"] = serviceMaster
+                    if (refrenceType === "Repair Order") {
+                        tempInitialData["repairOrder"] = refrenceData?._id;
+                    }
                     if (refrenceData.status) {
                         tempInitialData["status"] = refrenceData.status;
                     }
@@ -159,8 +160,12 @@ const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType 
             let updatedValues = { ...values }
             axiosInstance().post(`${workOrder.api}`, updatedValues).then(({ data }) => {
                 setLoading(false);
-                onSuccess(data?.data)
-                history.push(`${routes.workOrderDetail.path}/${data?.data?._id}`);
+                if (products && refrenceType && refrenceData) {
+                    onSuccess(data?.data)
+                }
+                else {
+                    history.push(`${routes.workOrderDetail.path}/${data?.data?._id}`);
+                }
                 setSubmitting(false);
                 toastConfig.setToastConfig({
                     open: true,
@@ -227,7 +232,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType 
                                 }
                             }}
                             title={`${workOrderId ? `Update ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ""}`
-                                : `Create Transaction Ticket`}`}
+                                : `Create Work Order`}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
                                 setFullScreen(prevState => !prevState)
@@ -335,6 +340,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType 
                                                                     {...field}
                                                                     fieldData={field}
                                                                     isNew={!Boolean(workOrderId)}
+                                                                    disabled={products && refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)}
                                                                     values={values}
                                                                     errors={errors}
                                                                     touched={touched}
