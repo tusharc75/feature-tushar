@@ -45,7 +45,6 @@ export default function ManageServiceSteps({ handleClose, handleSucess, serviceI
           severity: 'success'
         });
         setIsUpatingSteps(false)
-
       })
       .catch((err) => {
         setIsUpatingSteps(false)

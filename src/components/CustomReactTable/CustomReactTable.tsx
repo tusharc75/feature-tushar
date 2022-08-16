@@ -32,7 +32,7 @@ const IndeterminateCheckbox = React.forwardRef(
                 {...rest}
                 defaultChecked={false}
                 color="primary"
-                style={from === "Header" ? { padding: "0px", color: 'white' } : { padding: "0px" }}
+                style={from === "Header" ? { padding: "0px" } : { padding: "0px" }}
                 inputProps={{ 'aria-label': 'secondary checkbox' }}
             />
             // <>
