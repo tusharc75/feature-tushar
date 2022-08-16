@@ -679,7 +679,7 @@ const ProductBuilder = (props) => {
               }}
               disabled={checkUniqTemplate()}
               aria-controls="action-menu">
-              {isMobile && !isTablet ? "Supplier" : "Ask Price to Supplier"}
+              Ask Supplier to Quote
             </Button>
           )}
           {stage === "cost" && permissions.isUpdate && (
@@ -730,7 +730,7 @@ const ProductBuilder = (props) => {
                 closeActions()
                 setShowViewSupplierPrice(true)
               }}>
-                View Supplier Price
+                View Supplier Quote
               </MenuItem>)
             }
           </Menu>
