@@ -23,13 +23,12 @@ import ReportFilters from '../ReportFilters';
 import { DateRenderer, NumberRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import HistoryIcon from '@material-ui/icons/History';
 import AverageCostHistory from '../AverageCostHistory';
-import { CommonRenderer, DateTimeRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import NoDataCell from "../../../components/Helpers/NoDataCell";
+import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
 
 let cancelTokenSource = null;
 
 const Report = () => {
-
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
   const initialRender = React.useRef(true);
@@ -68,7 +67,7 @@ const Report = () => {
   const [state, dispatch] = React.useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, sorting, search, limit, filters, pageSizes } = state;
 
-  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: "", productName: "" });
+  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
   const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
 
   const fetchGridColumns = async () => {
@@ -201,7 +200,6 @@ const Report = () => {
         //   data: { data: productOption }
         // } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-
         POFields.filter((field) => ['purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field) => {
           if (field?.fieldData.fieldName === 'warehouse') {
             resourceFieldData.push(field);
@@ -279,7 +277,7 @@ const Report = () => {
           }
         ];
 
-        if (productFields?.filter((e) => e.fieldData.fieldName === "listPrice")?.length) {
+        if (productFields?.filter((e) => e.fieldData.fieldName === 'listPrice')?.length) {
           columns.push({
             field: 'margin',
             headerName: 'Margin',
@@ -288,21 +286,29 @@ const Report = () => {
             filter: false,
             sortable: false,
             cellRenderer: 'numberRenderer'
-          })
+          });
         }
 
         columns?.forEach((e) => {
-          if (["productName", "productDescription", "productCategory", "productCondition",
-            "availableQty", "averagePrice", "totalPrice", "margin"].includes(e.field)) {
+          if (
+            [
+              'productName',
+              'productDescription',
+              'productCategory',
+              'productCondition',
+              'availableQty',
+              'averagePrice',
+              'totalPrice',
+              'margin'
+            ].includes(e.field)
+          ) {
             e.show = true;
-          }
-          else {
+          } else {
             e.show = false;
           }
-        })
+        });
       }
-      if (resourceCamelCase === "productInventoryHistory") {
-
+      if (resourceCamelCase === 'productInventoryHistory') {
         let {
           data: { data: POFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order`);
@@ -325,7 +331,8 @@ const Report = () => {
           }
         });
 
-        productFields.filter((field) => ['productName'].includes(field?.fieldData.fieldName))
+        productFields
+          .filter((field) => ['productName'].includes(field?.fieldData.fieldName))
           .forEach((field: any) => {
             if (field?.fieldData.fieldName === 'productName') {
               resourceFieldData.push({
@@ -342,32 +349,34 @@ const Report = () => {
             }
           });
 
-        columns = [...columns,
-        { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer", filter: false, sortable: false },
-        { field: "referenceType", headerName: "Reference Type", show: true, cellRenderer: "commonRenderer" },
-        { field: "reference", headerName: "Reference", filter: false, sortable: false, show: true, cellRenderer: "referenceRenderer" },
-        { field: "type", headerName: "Type", show: true, cellRenderer: "creditDebitTypeRenderer" },
-        {
-          field: "qty",
-          headerName: "Credit/Debit",
-          show: true,
-          cellRenderer: "creditDebitRenderer",
-          filter: false, sortable: false,
-          cellStyle: params => {
-            if (params?.data?.type === "credit") {
-              return { backgroundColor: "#90ee90" }
-            };
-            if (params?.data?.type === "debit") {
-              return { backgroundColor: "#FFCCCB" };
-            };
-          }
-        },
-        { field: "price", headerName: "Price", show: true, filter: false, cellRenderer: "commonRenderer" },
-        { field: "totalPrice", headerName: "Amount", show: true, filter: false, cellRenderer: "commonRenderer" },
-        { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer" },
-        { field: "comment", headerName: "Comment", show: true, cellRenderer: "commonRenderer" },
-        { field: "serialNumber", headerName: "Serial Number", filter: false, show: true, cellRenderer: "serialNumberRenderer" },
-        { field: "user", headerName: "Transacted By", show: true, cellRenderer: "commonRenderer" },
+        columns = [
+          ...columns,
+          { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer', filter: false, sortable: false },
+          { field: 'referenceType', headerName: 'Reference Type', show: true, cellRenderer: 'commonRenderer' },
+          { field: 'reference', headerName: 'Reference', filter: false, sortable: false, show: true, cellRenderer: 'referenceRenderer' },
+          { field: 'type', headerName: 'Type', show: true, cellRenderer: 'creditDebitTypeRenderer' },
+          {
+            field: 'qty',
+            headerName: 'Credit/Debit',
+            show: true,
+            cellRenderer: 'creditDebitRenderer',
+            filter: false,
+            sortable: false,
+            cellStyle: (params) => {
+              if (params?.data?.type === 'credit') {
+                return { backgroundColor: '#90ee90' };
+              }
+              if (params?.data?.type === 'debit') {
+                return { backgroundColor: '#FFCCCB' };
+              }
+            }
+          },
+          { field: 'price', headerName: 'Price', show: true, filter: false, cellRenderer: 'commonRenderer' },
+          { field: 'totalPrice', headerName: 'Amount', show: true, filter: false, cellRenderer: 'commonRenderer' },
+          { field: 'warehouse', headerName: 'Plant', show: true, cellRenderer: 'commonRenderer' },
+          { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
+          { field: 'serialNumber', headerName: 'Serial Number', filter: false, show: true, cellRenderer: 'serialNumberRenderer' },
+          { field: 'user', headerName: 'Transacted By', show: true, cellRenderer: 'commonRenderer' }
         ];
 
         setFrameWorkComponent({
@@ -463,7 +472,7 @@ const Report = () => {
           productRenderer: ProductRenderer,
           supplierRenderer: SupplierRenderer,
           commonRenderer: CommonRenderer,
-          numberRenderer: NumberRenderer,
+          numberRenderer: NumberRenderer
         });
       }
 
@@ -482,6 +491,17 @@ const Report = () => {
       initialRender.current = false;
     }
   }, []);
+
+  React.useEffect(() => {
+    axiosInstance()
+      .get(`/report-colum-setting?resource=${type}`)
+      .then(({ data: { data } }) => {
+        setReportList(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, [showGrid]);
 
   React.useEffect(() => {
     if (showGrid) {
@@ -509,54 +529,49 @@ const Report = () => {
   }, [selectedData, selectedResources]);
 
   const SerialNumberRenderer = (params: any) => (
-    <span>
-      {params?.value?.length ? params?.value?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}
-    </span>
+    <span>{params?.value?.length ? params?.value?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}</span>
   );
 
   const CreditDebitRenderer = (params: any) => (
-    <span>
-      {params?.value ? params?.data?.type === "debit" ? `-${params?.value}` : params?.value : <NoDataCell />}
-    </span>
+    <span>{params?.value ? params?.data?.type === 'debit' ? `-${params?.value}` : params?.value : <NoDataCell />}</span>
   );
 
   const ReferenceRenderer = (params) =>
     params?.value ? (
-      params.data.referenceType === "Purchase Order" ?
+      params.data.referenceType === 'Purchase Order' ? (
         <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.referenceId}`}>
           {params.value}
-        </Link> :
-        params.data.referenceType === "Transfer Inventory" ?
-          <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
-            {params.value}
-          </Link> :
-          params.data.referenceType === "Transfer Asset" ?
-            <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
-              {params.value}
-            </Link> :
-            params.data.referenceType === "Sales Order" ?
-              <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`}>
-                {params.value}
-              </Link> :
-              params.data.referenceType === "Bulk Asset Creation" ?
-                <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
-                  {params.value}
-                </Link> :
-                params.data.referenceType === "Serialized Asset" ?
-                  <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`}>
-                    {params.value}
-                  </Link>
-                  : params.value
-    ) : (params.data.referenceType === "Product Inventory" ?
-      <p>Manual Entry</p> :
+        </Link>
+      ) : params.data.referenceType === 'Transfer Inventory' ? (
+        <Link className="link" title={params.value} to={`${routes.transferInventoryDetail.path}/${params.data.referenceId}`}>
+          {params.value}
+        </Link>
+      ) : params.data.referenceType === 'Transfer Asset' ? (
+        <Link className="link" title={params.value} to={`${routes.transferAssetDetail.path}/${params.data.referenceId}`}>
+          {params.value}
+        </Link>
+      ) : params.data.referenceType === 'Sales Order' ? (
+        <Link className="link" title={params.value} to={`${routes.salesOrderDetail.path}/${params.data.referenceId}`}>
+          {params.value}
+        </Link>
+      ) : params.data.referenceType === 'Bulk Asset Creation' ? (
+        <Link className="link" title={params.value} to={`${routes.bulkAssetCreationDetail.path}/${params.data.referenceId}`}>
+          {params.value}
+        </Link>
+      ) : params.data.referenceType === 'Serialized Asset' ? (
+        <Link className="link" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data.referenceId}`}>
+          {params.value}
+        </Link>
+      ) : (
+        params.value
+      )
+    ) : params.data.referenceType === 'Product Inventory' ? (
+      <p>Manual Entry</p>
+    ) : (
       <NoDataCell />
     );
 
-  const CreditDebitTypeRenderer = (params: any) => (
-    <span>
-      {capitalize(params?.value)}
-    </span>
-  );
+  const CreditDebitTypeRenderer = (params: any) => <span>{capitalize(params?.value)}</span>;
 
   const PurchaseOrderRenderer = (params: any) => (
     <Link className="link" title={params.value} to={`${routes.purchaseOrderDetail.path}/${params.data.purchaseOrderId}`}>
@@ -620,10 +635,16 @@ const Report = () => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${resourceCamelCase === 'purchaseOrderProduct' ? `${productInventory.api}/report/purchase-order-product-wise-report` :
-        resourceCamelCase === 'productAverageCost' ? `${productInventory.api}/report/purchase-order-price` :
-          resourceCamelCase === 'productInventoryHistory' ? `${productInventory.api}/report/history-report`
-            : `${productInventory.api}/report/supplier-product-price`}${filterQuery}`,
+      .get(
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? `${productInventory.api}/report/purchase-order-product-wise-report`
+            : resourceCamelCase === 'productAverageCost'
+            ? `${productInventory.api}/report/purchase-order-price`
+            : resourceCamelCase === 'productInventoryHistory'
+            ? `${productInventory.api}/report/history-report`
+            : `${productInventory.api}/report/supplier-product-price`
+        }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
         }
@@ -632,7 +653,7 @@ const Report = () => {
         data = data.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
           if (finalObject?.listPrice) {
-            finalObject.margin = ((finalObject?.listPrice + (finalObject?.averagePrice || 0)) / finalObject?.listPrice)?.toFixed(2)
+            finalObject.margin = ((finalObject?.listPrice + (finalObject?.averagePrice || 0)) / finalObject?.listPrice)?.toFixed(2);
           }
           return finalObject;
         });
@@ -665,7 +686,7 @@ const Report = () => {
   };
 
   const getFilter = (isExport = false) => {
-    setShowPricefilter({ warehouse: null, fromDate: null, toDate: null })
+    setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
     let filterQuery = ``;
     if (!isExport) {
       filterQuery = `page=${page}&limit=${limit}&`;
@@ -684,7 +705,7 @@ const Report = () => {
         const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
 
         let filterById = idFilter.map((key) => {
-          if (key === "warehouse") {
+          if (key === 'warehouse') {
             setShowPricefilter((prevState) => ({ ...prevState, warehouse: options.map((d: any) => d.optionValue) }));
           }
           const options = selectedData[key].value;
@@ -715,10 +736,10 @@ const Report = () => {
         const fields = Object.keys(betweenDate);
         fields.forEach((field) => {
           if (betweenDate[field]) {
-            if (field === "from_date") {
+            if (field === 'from_date') {
               setShowPricefilter((prevState) => ({ ...prevState, fromDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
             }
-            if (field === "to_date") {
+            if (field === 'to_date') {
               setShowPricefilter((prevState) => ({ ...prevState, toDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
             }
             deepFilter.push({
@@ -771,10 +792,15 @@ const Report = () => {
     setExporting(true);
     let filterQuery = getFilter(true);
     axiosInstance()
-      .get(`${resourceCamelCase === 'purchaseOrderProduct' ? `${productInventory.api}/report/purchase-order-product-wise-report/export` :
-        resourceCamelCase === 'productAverageCost' ? `${productInventory.api}/report/purchase-order-price/export` :
-          resourceCamelCase === 'productInventoryHistory' ? `${productInventory.api}/report/history-report/export` :
-            `${productInventory.api}/report/supplier-product-price/export`
+      .get(
+        `${
+          resourceCamelCase === 'purchaseOrderProduct'
+            ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
+            : resourceCamelCase === 'productAverageCost'
+            ? `${productInventory.api}/report/purchase-order-price/export`
+            : resourceCamelCase === 'productInventoryHistory'
+            ? `${productInventory.api}/report/history-report/export`
+            : `${productInventory.api}/report/supplier-product-price/export`
         }${filterQuery}&exportColumn=${JSON.stringify(columns)} `,
         {
           responseType: 'arraybuffer'
@@ -895,6 +921,7 @@ const Report = () => {
                   <CustomAgGrid
                     setSelectedReportView={setSelectedReportView}
                     selectedReportView={selectedReportView}
+                    reportSave={true}
                     columns={columns}
                     dataRows={dataRows}
                     frameworkComponents={frameWorkComponent}
@@ -920,7 +947,7 @@ const Report = () => {
           </>
         </CustomContainer>
       </div>
-      {showPriceHistory.open &&
+      {showPriceHistory.open && (
         <AverageCostHistory
           product={showPriceHistory.product}
           productName={showPriceHistory.productName}
@@ -928,7 +955,8 @@ const Report = () => {
             setShowPriceHistory({ open: false, product: '', productName: '' });
           }}
           showPricefilter={showPricefilter}
-        />}
+        />
+      )}
     </MuiPickersUtilsProvider>
   );
 };
