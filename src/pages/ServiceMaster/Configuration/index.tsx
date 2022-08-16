@@ -6,7 +6,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { serviceMaster } from 'src/constants/helpers';
 
 const Configuration = ({ id }) => {
-
   const [configuration, setConfiguration] = useState([]);
   const [configurationDialog, setConfigurationDialog] = useState(false);
 
@@ -20,8 +19,7 @@ const Configuration = ({ id }) => {
       .then(({ data: { data } }) => {
         setConfiguration(data);
       })
-      .catch((err) => {
-      });
+      .catch((err) => {});
   };
 
   return (
@@ -84,7 +82,7 @@ const Configuration = ({ id }) => {
           }}
           handleSucess={() => {
             setConfigurationDialog(false);
-            fetchConfiguration()
+            fetchConfiguration();
           }}
         />
       )}
