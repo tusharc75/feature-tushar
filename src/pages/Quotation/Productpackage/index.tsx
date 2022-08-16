@@ -648,7 +648,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                   closeActions();
                 }}
               >
-                Ask Price to Supplier
+                Ask Supplier to Quote
               </MenuItem>
               <MenuItem
                 onClick={() => {
@@ -657,9 +657,9 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                   closeActions();
                 }}
               >
-                View Supplier Price
+                View Supplier Quote
               </MenuItem>
-              <MenuItem
+              {/* <MenuItem
                 onClick={() => {
                   setSelectedType('Customer');
                   setRequestDialog(true);
@@ -667,7 +667,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                 }}
               >
                 View Customer Price
-              </MenuItem>
+              </MenuItem> */}
             </Menu>
           </div>
         </Box>
