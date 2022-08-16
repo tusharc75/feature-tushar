@@ -119,7 +119,7 @@ const RoleDetailsPage = () => {
     },
     {
       resource: 'Quote Builder',
-      fieldLabel: 'Ask Supplier Price',
+      fieldLabel: 'Ask Supplier Quote',
       fieldName: 'isQuoteAskSupplierPrice'
     }
   ];

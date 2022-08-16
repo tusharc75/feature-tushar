@@ -191,7 +191,7 @@ const AskSupplierPriceDialog = (props) => {
                 open={askSupplierPriceDialog}
                 disableBackdropClick={true}
             >
-                <CustomDialogHeader title={from != "SupplierAskPrice" ? "Ask Supplier Price" : "Reject Supplier Price"} onClose={() => {
+                <CustomDialogHeader title={from != "SupplierAskPrice" ? "Ask Supplier to Quote" : "Reject Supplier Quote"} onClose={() => {
                     setAskSupplierPriceDialog(false)
                 }}
                     isMinimized={!fullScreen}
