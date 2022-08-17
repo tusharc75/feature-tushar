@@ -239,7 +239,7 @@ const RepairJobDetails = () => {
             <Paper>
               {repairJobData ? (
                 <DetailsPageHeader heading={repairJobData?.repairJobName} mainPoints={null} showHeading={true}>
-                  {permissions?.repairJob?.isUpdate && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
+                  {permissions?.repairJob?.isUpdate && allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
