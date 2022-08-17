@@ -7,7 +7,7 @@ import {
   Box,
 } from '@material-ui/core';
 import moment from 'moment';
-import { arrayToDropwdownOption } from '../../../constants/helpers';
+import { arrayToDropwdownOption, CHILD_RESOURCE } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -20,8 +20,8 @@ import CustomButton from '../../../components/Helpers/CustomButton'
 import { FaDiceOne } from "react-icons/fa";
 import FormTypes from "../../../components/Helpers/FormTypes";
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { autoCalculateSpecificFields } from "../../../constants/formulaUtility";
-import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
+import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
+import axiosInstance from "src/axios/axiosInstance";
 
 interface BulkAssetCreationQtyDialogProps {
   onClose: VoidFunction | any;
@@ -45,8 +45,10 @@ const BulkAssetCreationQtyDialog: FC<BulkAssetCreationQtyDialogProps> = ({ onClo
   }, []);
 
   const fetchField = async () => {
-    var poFields = await fetch_po_product_fields(bulkAssetCreationData?.currency);
-    setAllFields(JSON.parse(JSON.stringify(poFields)))
+    const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.bulkAssetCreationProduct}`);
+    var fields = response?.data?.data;
+    fields = CURReplaceByCurrencySingle(fields, bulkAssetCreationData?.currency ? bulkAssetCreationData?.currency : "USD");
+    setAllFields(JSON.parse(JSON.stringify(fields)))
     if (bulkEdit) {
       let unitArray: any = []
       productData?.forEach(element => {
@@ -60,7 +62,7 @@ const BulkAssetCreationQtyDialog: FC<BulkAssetCreationQtyDialogProps> = ({ onClo
         });
       });
       const unitOptions: any = arrayToDropwdownOption(unit)
-      poFields.forEach((element) => {
+      fields.forEach((element) => {
         if (element.fieldName === "unit") {
           element.option = unitOptions;
         }
@@ -68,21 +70,21 @@ const BulkAssetCreationQtyDialog: FC<BulkAssetCreationQtyDialogProps> = ({ onClo
         element.isFormula = false;
         element.isMulitFormula = false;
       })
-      poFields = poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
+      fields = fields.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
       setInitialData({
-        fields: poFields,
-        values: { ...getObjKeys("", poFields), expectedDelivery: "" },
+        fields: fields,
+        values: { ...getObjKeys("", fields), expectedDelivery: "" },
       });
     }
     else {
-      poFields.filter((_f) => {
+      fields.filter((_f) => {
         if (["unit"].includes(_f.fieldName.toLowerCase())) {
           if (productData?.productDetail?.unit) {
             _f.option = arrayToDropwdownOption(productData?.productDetail?.unit)
           }
         }
       })
-      let tempObjKeysWithValues = getObjKeysWithValues(productData, poFields)
+      let tempObjKeysWithValues = getObjKeysWithValues(productData, fields)
       if (!tempObjKeysWithValues["taxSchedule"] && bulkAssetCreationData["taxSchedule"]) {
         tempObjKeysWithValues["taxSchedule"] = bulkAssetCreationData["taxSchedule"]
       }
@@ -90,11 +92,11 @@ const BulkAssetCreationQtyDialog: FC<BulkAssetCreationQtyDialogProps> = ({ onClo
         tempObjKeysWithValues["expectedDelivery"] = bulkAssetCreationData["deliveryDate"]
       }
       setInitialData({
-        fields: poFields,
+        fields: fields,
         values: tempObjKeysWithValues,
       });
     }
-    EvaluteproductFields(poFields);
+    EvaluteproductFields(fields);
   }
 
   const EvaluteproductFields = (fields) => {
