@@ -109,17 +109,6 @@ const CustomReport = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {/* <HtmlTooltip title="Clone">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setShowManageDialog({ open: true, isClone: true, idToClone: params.data._id });
-          }}
-        >
-          <FileCopy color="primary" />
-        </IconButton>
-      </HtmlTooltip> */}
       <IconButton
         size="small"
         aria-label="Delete"

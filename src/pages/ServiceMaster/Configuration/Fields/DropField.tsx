@@ -2,6 +2,7 @@ import React, { CSSProperties } from 'react';
 import { Grid, Box, TextField, Typography, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { useDrag, useDrop, XYCoord } from 'react-dnd';
 import { MoreHoriz } from '@material-ui/icons';
+import FieldList from './FieldList';
 
 const style: CSSProperties = {
   padding: '0.3rem',
@@ -10,19 +11,20 @@ const style: CSSProperties = {
   cursor: 'move'
 };
 
-const DropField = ({ id, index, data, moveField, handleLabelChange, removeField, openProperties, cloneField }: any) => {
+const DropField = ({ _id, index, data, moveField, handleLabelChange, removeField, openProperties, cloneField }: any) => {
+
   const ref = React.useRef(null);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: 'fieldmove',
-      item: { id, index, sorting: true },
+      item: { _id, index, sorting: true },
       collect: (monitor) => ({
         isDragging: monitor.isDragging()
       })
     }),
-    [id]
+    [_id]
   );
 
   const [, drop] = useDrop({
@@ -62,12 +64,12 @@ const DropField = ({ id, index, data, moveField, handleLabelChange, removeField,
           <Grid item xs={5}>
             {data ? (
               <TextField
-                id={data.id}
+                id={data._id}
                 variant="outlined"
                 margin="dense"
                 style={{ margin: 2 }}
                 value={data.fieldLabel}
-                onChange={(event) => handleLabelChange(data.id, event.target.value)}
+                onChange={(event) => handleLabelChange(data._id, event.target.value)}
               />
             ) : (
               ''
@@ -75,7 +77,7 @@ const DropField = ({ id, index, data, moveField, handleLabelChange, removeField,
           </Grid>
           <Grid item xs={5}>
             <Box pt={1} color="text.secondary">
-              <Typography variant="body2">{data.type}</Typography>
+              <Typography variant="body2">{FieldList[data.type.toUpperCase()]?.label}</Typography>
             </Box>
           </Grid>
           <Grid item xs={2} container justify="flex-end">
@@ -106,7 +108,7 @@ const DropField = ({ id, index, data, moveField, handleLabelChange, removeField,
               <MenuItem onClick={() => cloneField(data)}>Clone</MenuItem>
               <MenuItem
                 onClick={() => {
-                  removeField(id);
+                  removeField(_id);
                   setAnchorEl(null);
                 }}
               >

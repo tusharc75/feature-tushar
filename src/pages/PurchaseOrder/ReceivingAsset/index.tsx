@@ -370,7 +370,7 @@ const ReceivingAsset = ({
             className='ml-2'
             style={isMobile && !isTablet ? { color: 'var(--secondary)' } : {}}
             disabled={selectedRecords.length === 0 ||
-              (selectedRecords?.filter((e: any) => e.type === "Product" && e.qty !== (e?.rejectQuantity || 0)).length > 0 ? false : true)}
+              (selectedRecords?.filter((e: any) => e.type === "Product" && e.qty !== (e?.rejectQuantity || 0 + e?.assetQty || 0)).length > 0 ? false : true)}
             onClick={() => {
               setRejectDialog(true);
             }}

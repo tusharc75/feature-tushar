@@ -12,10 +12,11 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Autocomplete } from '@material-ui/lab';
 
 export default function Options({ field, setFields }) {
+
   const [isUpdate, setUpdate] = useState(false);
-  const stepOptions = [];
+  
   const defaultOption = [{ optionLabel: 'Option 1', optionValue: 'Option 1' }];
-  const [options, setOptions] = useState(field?.options?.length === 0 ? defaultOption : field?.options);
+  const [options, setOptions] = useState(field?.options && field?.options?.length > 0 ? field?.options : defaultOption);
 
   useEffect(() => {
     setUpdate(!isUpdate);

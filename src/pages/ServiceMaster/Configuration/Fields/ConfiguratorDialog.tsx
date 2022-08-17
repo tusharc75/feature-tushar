@@ -2,7 +2,6 @@ import React from 'react';
 import { Dialog, Button, CircularProgress } from '@material-ui/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -10,6 +9,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import Configurator from './Configurator';
 import { serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { camelCase } from 'lodash';
 
 const ConfiguratorDialog = ({ handleClose, handleSucess, id, configuration }) => {
 
@@ -22,9 +22,15 @@ const ConfiguratorDialog = ({ handleClose, handleSucess, id, configuration }) =>
   }, [configuration]);
 
   const handleSave = async () => {
+    const configureFields = fields;
+    configureFields?.forEach((_field: any) => {
+      if (!isNaN(_field._id)) {
+        _field.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
+      }
+    })
     axiosInstance().post(`${serviceMaster.api}/configure-fields`, {
       serviceId: id,
-      configureFields: fields
+      configureFields: configureFields
     })
       .then(({ data }) => {
         handleSucess()
