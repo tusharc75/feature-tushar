@@ -26,7 +26,7 @@ import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "src/components/Helpers/Routes";
 import { useHistory } from 'react-router-dom';
 
-const disabledFieldArray = ['workOrderNumber', "type", "product", "serviceMaster", "repairOrder", "status"]
+const disabledFieldArray = ['workOrderNumber', "type", "product", "repairOrder", "status"]
 const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType = null, refrenceData = null,
     products = null, serviceMaster = null }) => {
 
@@ -86,7 +86,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType 
                 let data;
                 const response = await axiosInstance().get(`${workOrder.api}/${workOrderId}`)
                 data = response?.data?.data
-                    setWorkOrderData(data)
+                setWorkOrderData(data)
                 setDisableOwnerSelection(workOrderId && user.user._id !== data?.owner?.optionValue);
                 setInitialData({
                     fields: fieldsDataForUpdate,
