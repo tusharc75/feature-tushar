@@ -1,49 +1,50 @@
-import React from 'react';
-import { Dialog, Button, Box, TextField, FormControlLabel, Checkbox } from '@material-ui/core';
-
+import React, { useCallback } from 'react';
+import { Dialog, Button, Box, TextField, FormControlLabel, Checkbox, Grid } from '@material-ui/core';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import Options from '../AddField/option';
 
 const ConfigureProperties = ({ close, field, setFields }: any) => {
-  const [values, setValues] = React.useState(field);
 
-  //   React.useEffect(() => {
-  //     setValues(field);
-  //   }, [field]);
+  const [values, setValues] = React.useState(field);
 
   const onSave = () => {
     setFields((prevState) =>
-      prevState.map((f) => {
-        if (f.id === field.if) {
+      prevState?.map((f) => {
+        if (f._id === field._id) {
           return values;
         }
-
         return f;
       })
     );
-    close()
+    close();
   };
 
   return (
     <Dialog open onClose={close} fullWidth maxWidth="md">
       <CustomDialogHeader title="Properties" onClose={close} />
       <CustomDialogContent>
-        <TextField
-          fullWidth
-          size="small"
-          label="Field Label"
-          variant="outlined"
-          value={values.fieldLabel}
-          onChange={(e) => setValues((prevState) => ({ ...prevState, fieldLabel: e.target.value }))}
-        />
-
+        <Box mt={2}>
+          <TextField
+            fullWidth
+            size="small"
+            label="Field Label"
+            variant="outlined"
+            value={values.fieldLabel}
+            onChange={(e) => setValues((prevState) => ({ ...prevState, fieldLabel: e.target.value }))}
+          />
+        </Box>
+        {field['type'] === 'dropDown' &&
+          <Options
+            field={values}
+            setFields={setValues}
+          />}
         <Box mt={2}>
           <FormControlLabel
             control={
               <Checkbox
                 name="required"
-                //disabled={values['required'] ? true : false}
                 checked={values?.required}
                 onChange={(e) => {
                   setValues((prevState) => ({
@@ -59,11 +60,11 @@ const ConfigureProperties = ({ close, field, setFields }: any) => {
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" size="small" color="primary" onClick={onSave}>
-          Save
-        </Button>
         <Button variant="outlined" size="small" color="primary" onClick={close}>
           Close
+        </Button>
+        <Button variant="contained" size="small" color="primary" onClick={onSave}>
+          Save
         </Button>
       </CustomDialogFooter>
     </Dialog>
