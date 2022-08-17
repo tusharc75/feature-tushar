@@ -19,10 +19,11 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
-import { RiEditCircleLine } from 'react-icons/ri';
+import { RiEditCircleLine, RiAddCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
+import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
 
 const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
 
@@ -44,7 +45,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [isRateRequired, setIsRateRequired] = useState(false);
+  const [workOrderDialog, setWorkOrderDialog] = useState({ open: false, _id: null, product: null, serviceMaster: null });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -125,12 +126,19 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
         Footer: () => {
           return <>Total</>;
         }
+      },
+      {
+        accessor: 'workOrder',
+        Header: 'Work Order',
+        Cell: ({ row }) => (
+          row.original['workOrder'] ?
+            <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder'].optionValue}`} target="_blank">{row.original['workOrder'].optionLabel}</a>
+            : <NoDataCell />
+        )
       }
     ];
     data.forEach((element) => {
-      if (element.fieldName === "price" && element.required) {
-        setIsRateRequired(true);
-      }
+
       if (element.type === 'date') {
         coloum.push({
           accessor: element.fieldName,
@@ -164,24 +172,44 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
       isMobile ? <Box display={"none"} /> : coloum.push({
         accessor: 'action',
         Header: '',
-        minWidth: 50,
-        width: 50,
+        minWidth: 100,
+        width: 100,
         sticky: 'right',
         disableFilters: true,
         canDrag: false,
         Cell: ({ row }) =>
-          !row.original.hideSelection && allowedToEdit && (
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [row.original._id];
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          )
+          <>
+
+            {<HtmlTooltip title={Boolean(row?.original?.workOrder) ? "Work Order already exist" : "Create Work Order"}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="History"
+                  disabled={Boolean(row?.original?.workOrder)}
+                  onClick={() => {
+                    setWorkOrderDialog({ open: true, _id: row?.original?._id, product: row?.original?.productDetail?._id, serviceMaster: row?.original?.serviceMaster.map(d => d.optionValue) });
+                  }}
+                >
+                  <RiAddCircleLine />
+                </IconButton>
+              </span>
+            </HtmlTooltip>}
+            {!row.original.hideSelection && allowedToEdit && (
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [row.original._id];
+                  setDeleteData(obj);
+                }}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            )
+            }
+          </>
+
+
       });
     }
     coloum.forEach((element) => {
@@ -540,6 +568,37 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
           productInventory={[]}
           type={addExistingProductDialog.type}
           repairOrderData={repairOrderData}
+        />
+      )}
+      {workOrderDialog.open && (
+        <ManageWorkOrder
+          onClose={() => setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null })}
+          onSuccess={(data) => {
+            if (data._id) {
+              axiosInstance()
+                .put(`${repairOrder.api}/${repairOrderData._id}/product-package/add-work-order`, {
+                  "_id": workOrderDialog?._id,
+                  "workOrder": data?._id
+                }
+                )
+                .then(() => {
+                  setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null });
+                  fetchProductInventory();
+                })
+                .catch((error) => {
+                  setAddExistingProductDialog({ open: false, type: '', parentId: null });
+                  toastConfig.setToastConfig(error);
+                });
+            }
+            else {
+              fetchProductInventory();
+              setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null });
+            }
+          }}
+          refrenceType={"Repair Order"}
+          refrenceData={repairOrderData}
+          products={workOrderDialog.product}
+          serviceMaster={workOrderDialog.serviceMaster}
         />
       )}
     </Fragment>

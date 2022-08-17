@@ -1,4 +1,4 @@
-export const FIELDS = {
+const FieldList = {
     SINGLELINE: {
         label: "Single Line",
         type: "singleLine",
@@ -35,3 +35,4 @@ export const FIELDS = {
         icon: "",
     },
 }
+export default FieldList;

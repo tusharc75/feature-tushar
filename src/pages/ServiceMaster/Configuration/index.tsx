@@ -4,9 +4,9 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import ConfiguratorDialog from './Fields/ConfiguratorDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { serviceMaster } from 'src/constants/helpers';
+import FieldList from './Fields/FieldList';
 
 const Configuration = ({ id }) => {
-
   const [configuration, setConfiguration] = useState([]);
   const [configurationDialog, setConfigurationDialog] = useState(false);
 
@@ -20,8 +20,7 @@ const Configuration = ({ id }) => {
       .then(({ data: { data } }) => {
         setConfiguration(data);
       })
-      .catch((err) => {
-      });
+      .catch((err) => { });
   };
 
   return (
@@ -60,7 +59,7 @@ const Configuration = ({ id }) => {
                   <Typography variant="body1">{field.fieldLabel}</Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography variant="body1">{field.type}</Typography>
+                  <Typography variant="body1">{FieldList[field.type.toUpperCase()]?.label}</Typography>
                 </Grid>
               </Grid>
             </Box>
@@ -84,7 +83,7 @@ const Configuration = ({ id }) => {
           }}
           handleSucess={() => {
             setConfigurationDialog(false);
-            fetchConfiguration()
+            fetchConfiguration();
           }}
         />
       )}
