@@ -4,15 +4,15 @@ import { useDrop } from 'react-dnd';
 import update from 'immutability-helper';
 import DragField from './DragField';
 import DropField from './DropField';
-import { FIELDS } from './FieldList';
+import FieldList from './FieldList';
 import ConfigureProperties from './ConfigureProperties';
 
 const Configurator = ({ fields, setFields }) => {
 
-  const fieldsData = Object.keys(FIELDS).map((field, index) => ({
-    fieldLabel: FIELDS[field].label,
-    type: FIELDS[field].label,
-    id: index
+  const fieldsData = Object.keys(FieldList).map((field, index) => ({
+    fieldLabel: FieldList[field].label,
+    type: FieldList[field].type,
+    _id: index
   }));
 
   const [openProperties, setOpenProperties] = React.useState({ isOpen: false, data: null });
@@ -31,18 +31,18 @@ const Configurator = ({ fields, setFields }) => {
   const [, drop] = useDrop(() => ({
     accept: 'field',
     drop: (item: any) => {
-      const field = fieldsData.find((field) => field.id === item.id);
+      const field = fieldsData.find((field) => field._id === item._id);
       if (!field || item?.sorting) return;
       setFields((prevState: any) => {
-        return [...prevState, { ...field, id: prevState.length }];
+        return [...prevState, { ...field, _id: parseInt((Math.random() * 100000).toString()) }];
       });
     }
   }));
 
-  const handleLabelChange = (id: number, value: string) => {
+  const handleLabelChange = (_id: any, value: string) => {
     setFields((prevState) =>
       prevState.map((field) => {
-        if (field.id === id) {
+        if (field._id === _id) {
           return { ...field, fieldLabel: value };
         }
         return field;
@@ -50,12 +50,12 @@ const Configurator = ({ fields, setFields }) => {
     );
   };
 
-  const removeField = (id: number) => {
-    setFields((prevState) => prevState.filter((field) => field.id !== id));
+  const removeField = (_id: any) => {
+    setFields((prevState) => prevState.filter((field) => field._id !== _id));
   };
 
   const cloneField = (data: any) => {
-    setFields((prevState) => [...prevState, { ...data, id: prevState.length }]);
+    setFields((prevState) => [...prevState, { ...data, _id: parseInt((Math.random() * 100000).toString()) }]);
   };
 
   return (
@@ -65,7 +65,7 @@ const Configurator = ({ fields, setFields }) => {
           <Box border={'1px solid lightgray'} padding={1} height={window.innerHeight - 150}>
             <Grid container spacing={1}>
               {fieldsData.map((field, index) => (
-                <DragField key={index} id={field.id} text={field.fieldLabel} />
+                <DragField key={index} _id={field._id} text={field.fieldLabel} />
               ))}
             </Grid>
           </Box>
@@ -76,11 +76,11 @@ const Configurator = ({ fields, setFields }) => {
               <Grid container spacing={2}>
                 {fields.map((field, index) => (
                   <DropField
-                    id={field?.id}
+                    _id={field?._id}
                     index={index}
                     removeField={removeField}
                     handleLabelChange={handleLabelChange}
-                    key={field?.id}
+                    key={field?._id}
                     data={field}
                     moveField={moveField}
                     cloneField={cloneField}

@@ -343,41 +343,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           </Button>
         </Box>
         <Box display="flex">
-          {/* <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length > 1) ? 'Bulk edit selected records' : 'Select records to edit'}>
-            <span>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                disabled={!Boolean(selectedRecords && selectedRecords.length > 1)}
-                onClick={() => {
-                  setShowDialog({ open: true, isBulkedit: true });
-                  setConditionData(condition.filter((data) => selectedRecords.some((rec) => rec._id === data._id)));
-                }}
-              >
-                Bulk Edit
-              </Button>
-            </span>
-          </HtmlTooltip>
-          <Box mx={1} />
-          <HtmlTooltip title={Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              disabled={!Boolean(selectedRecords && selectedRecords.length)}
-              onClick={() => {
-                const dataToDelete =
-                  selectedRecords &&
-                  selectedRecords.map((rec: any) => {
-                    return rec._id;
-                  });
-                handleDelete(dataToDelete);
-              }}
-            >
-              Delete
-            </Button>
-          </HtmlTooltip> */}
           <Button
             variant={isMobile && !isTablet ? 'text' : 'outlined'}
             color="default"
@@ -448,6 +413,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             page={page}
             allowAction={true}
             loading={loading}
+            isClientSideGrid={true}
             selectedRecords={selectedRecords}
             renderedFrom={renderFrom}
             refreshGrid={fetchCondition}
