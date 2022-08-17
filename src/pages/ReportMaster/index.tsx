@@ -11,19 +11,17 @@ import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 
 const ReportMaster = () => {
-  const {
-    state: { permissions }
-  } = useData();
+
+  const { state: { permissions } } = useData();
   const [customReports, setCustomReports] = useState([]);
 
   useEffect(() => {
     (async () => {
-      let {
-        data: { data }
-      } = await axiosInstance().get(`custom-report`);
+      let { data: { data } } = await axiosInstance().get(`custom-report`);
       setCustomReports(data);
     })();
   }, []);
+
 
   return (
     <div>
@@ -69,13 +67,11 @@ const ReportMaster = () => {
                 return (
                   permissions[report.permission]?.isRead && (
                     <Grid key={index} item xs={12} sm={12} md={6} lg={4}>
-                      <Link
-                        to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`}
-                      >
+                      <Link to={`/reports${report.type !== 'dynamic' ? `/${kebabCase(report.key)}/` + kebabCase(report.type) : routes[report.key]?.path}`}  >
                         <Box border={1} borderColor="grey.300" bgcolor="grey.100" borderRadius={1} p={2}>
                           <Typography variant="h6">
                             <MdDescription size={25} className="headerLogo mr-2 pt-1" />
-                            {report.title}
+                            {report.type === 'dynamic' ? routes[report.key]?.title : report.title}
                           </Typography>
                         </Box>
                       </Link>
