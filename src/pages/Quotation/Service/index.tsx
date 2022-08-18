@@ -67,23 +67,29 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) =
   const leadTimeColumn = {
     field: 'leadTime',
     headerName: 'Lead Time (Days)',
-    // cellRenderer: 'commonRenderer',
-    Cell: ({ row }) => (row.data['leadTime'] ? <p>ddddd</p> : <p>0</p>)
+    cellRenderer: 'leadTimeRenderer'
   };
+
   const fetchFields = async () => {
+    columns.push(leadTimeColumn);
     const fields = await fetch_quotation_service_fields(quotationData?.currency);
     let rendererNames = [];
     genrateColoum(fields, columns, rendererNames, false, renderedFrom);
     let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       commonRenderer: CommonRenderer,
+      leadTimeRenderer: LeadTimeRenderer,
       actionsRenderer: ActionsRenderer,
       ...tempFrameworkComponent
     };
     setFrameWorkComponent({ ...tempFrameworkComponent });
     setColumns([...columns]);
   };
-  console.log(columns);
+
+  const LeadTimeRenderer = (params) => (
+    <>{Array.isArray(params?.data?.leadTime) ? `${params?.data?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0}</>
+  );
+
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   if (columnState) {
     columns.forEach((item) => {

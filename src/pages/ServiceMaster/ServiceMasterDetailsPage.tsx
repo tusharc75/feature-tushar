@@ -17,7 +17,6 @@ import accountClass from '../Account/account.module.scss';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import LeadTimeMaster from '../../components/LeadTime';
-import Configuration from './Configuration/index';
 import Steps from './Steps';
 
 const ServiceMasterDetailsPage = () => {
@@ -115,9 +114,6 @@ const ServiceMasterDetailsPage = () => {
         <Grid item xs={12} sm={12} md={4} lg={4}>
           <Box mb={2}>
             <Steps serviceId={id} />
-          </Box>
-          <Box mb={2}>
-            <Configuration id={id} />
           </Box>
           {permissions?.leadTimeMaster?.isRead && (
             <Box mb={2}>
