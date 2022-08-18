@@ -9,7 +9,6 @@ const Steps = ({ serviceId }) => {
 
   const [stepDialog, setStepDialog] = useState(false);
   const [stepOptions, setStepOptions] = useState(null);
-  const [stepFieldsDialog, setStepFieldsDialog] = useState(false);
 
   useEffect(() => {
     fetchStepsData();

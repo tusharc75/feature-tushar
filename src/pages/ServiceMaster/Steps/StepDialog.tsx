@@ -16,11 +16,12 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 export default function StepDialog({ handleClose, handleSucess, serviceId, stepData }) {
 
   const toastConfig = useContext(CustomToastContext);
-  const [stepDetails, setStepDetails] = useState(stepData ? { stepName: stepData.stepName } : { stepName: "" });
+  const [stepDetails, setStepDetails] = useState(stepData ? { stepName: stepData?.stepName, leadDay: stepData?.leadDay } : { stepName: "", leadDay: 0 });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = (values) => {
+    values.leadDay = parseInt(values.leadDay)
     setLoading(true)
     if (stepData) {
       axiosInstance().put(`${serviceMaster.api}/steps/${serviceId}/${stepData?._id}`, values).then(({ data }) => {
@@ -54,6 +55,19 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepD
     }
   }
 
+
+  function validate(values) {
+    const errors = {};
+    if (values.stepName === "") {
+      errors['stepName'] = 'Please enter step name';
+    }
+    if (values.leadDay === "" || parseInt(values.leadDay) < 0) {
+      errors['leadDay'] = 'Please enter valid lead day';
+    }
+    return errors;
+  }
+
+
   return (
     <Dialog
       maxWidth="sm"
@@ -81,7 +95,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepD
           showManimizeMaximize={true}
           showRequiredLabel={false}
         ></CustomDialogHeader>
-        <Formik initialValues={stepDetails} onSubmit={handleSubmit} validateOnMount >
+        <Formik initialValues={stepDetails} onSubmit={handleSubmit} validateOnMount validate={validate} >
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogContent>
@@ -92,12 +106,28 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepD
                   label="Step Name"
                   name="stepName"
                   variant="outlined"
+                  required
                   fullWidth
                   value={values['stepName']}
                   error={touched['stepName'] && Boolean(errors['stepName'])}
                   helperText={touched['stepName'] && errors['stepName']}
                   onChange={(e) => {
                     setFieldValue('stepName', e.target.value);
+                  }}
+                />
+                <Field
+                  component={TextFieldFormik}
+                  margin="dense"
+                  type="number"
+                  label="Lead Day"
+                  name="leadDay"
+                  variant="outlined"
+                  fullWidth
+                  value={values['leadDay']}
+                  error={touched['leadDay'] && Boolean(errors['leadDay'])}
+                  helperText={touched['leadDay'] && errors['leadDay']}
+                  onChange={(e) => {
+                    setFieldValue('leadDay', e.target.value);
                   }}
                 />
               </CustomDialogContent>

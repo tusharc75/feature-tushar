@@ -13,6 +13,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import ConfiguratorDialog from '../Configuration/Fields/ConfiguratorDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 export default function ManageServiceSteps({ handleClose, handleSucess, serviceId }) {
 
@@ -95,33 +96,39 @@ export default function ManageServiceSteps({ handleClose, handleSucess, serviceI
                     <Typography variant="body2">{st?.stepName}</Typography>
                   </Grid>
                   <Grid item xs={6} container justify="flex-end" >
-                    <IconButton
-                      aria-label="setting"
-                      onClick={(e) => {
-                        setStepDialog({ open: true, data: st });
-                      }}
-                      size="small"
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      aria-label="setting"
-                      onClick={(e) => {
-                        setStepFieldsDialog({ open: true, stepId: st._id });
-                      }}
-                      size="small"
-                    >
-                      <AddCircleOutlineIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      aria-label="setting"
-                      onClick={(e) => {
-                        handleDelete(st._id)
-                      }}
-                      size="small"
-                    >
-                      <DeleteIcon color="error" fontSize="small" />
-                    </IconButton>
+                    <HtmlTooltip title="Edit">
+                      <IconButton
+                        aria-label="setting"
+                        onClick={(e) => {
+                          setStepDialog({ open: true, data: st });
+                        }}
+                        size="small"
+                      >
+                        <EditIcon color="primary" fontSize="small" />
+                      </IconButton>
+                    </HtmlTooltip>
+                    <HtmlTooltip title="Add Fields">
+                      <IconButton
+                        aria-label="setting"
+                        onClick={(e) => {
+                          setStepFieldsDialog({ open: true, stepId: st._id });
+                        }}
+                        size="small"
+                      >
+                        <AddCircleOutlineIcon color="primary" fontSize="small" />
+                      </IconButton>
+                    </HtmlTooltip>
+                    <HtmlTooltip title="Delete">
+                      <IconButton
+                        aria-label="setting"
+                        onClick={(e) => {
+                          handleDelete(st._id)
+                        }}
+                        size="small"
+                      >
+                        <DeleteIcon color="error" fontSize="small" />
+                      </IconButton>
+                    </HtmlTooltip>
                   </Grid>
                 </Grid>
               </Box>
