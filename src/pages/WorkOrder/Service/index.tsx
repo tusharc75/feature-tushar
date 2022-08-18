@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
@@ -35,8 +35,16 @@ const Service = ({ data }) => {
     const classes = useStyles();
     const [activeStep, setActiveStep] = useState(0);
     const ref = useRef(null);
-    const [initialData, setInitialData] = useState<any>({ fields: data?.configureFields ? data?.configureFields : [], values: {} });
+    const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [stepConstant] = useState(data?.steps?.map(d => d.stepName));
+
+    useEffect(() => {
+        if (activeStep > -1) {
+            setInitialData({ fields: data?.steps[activeStep].fields ? data?.steps[activeStep].fields : [], values: {} });
+        }
+    }, [activeStep]);
+
 
 
     const handleNext = () => {
@@ -63,14 +71,14 @@ const Service = ({ data }) => {
     return (
         <div className={classes.root}>
             <Stepper activeStep={activeStep} alternativeLabel>
-                {data?.steps?.map((label) => (
-                    <Step key={label?.step}>
-                        <StepLabel>{label?.step}</StepLabel>
+                {stepConstant?.map((label) => (
+                    <Step key={label}>
+                        <StepLabel>{label}</StepLabel>
                     </Step>
                 ))}
             </Stepper>
             <div>
-                {activeStep === data?.steps?.length ? (
+                {activeStep === stepConstant?.length ? (
                     <div>
                         <Typography className={classes.instructions}>All steps completed</Typography>
                         <Button onClick={handleReset}>Reset</Button>
@@ -93,7 +101,7 @@ const Service = ({ data }) => {
                                                     <Box marginY={2}>
                                                         <Grid spacing={3} container>
                                                             {
-                                                                data?.configureFields?.map((field, index) => (
+                                                                initialData.fields?.map((field, index) => (
                                                                     <Grid key={index} item xs={12} sm={6} md={6}>
                                                                         <FormTypes
                                                                             {...field}

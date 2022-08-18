@@ -3,7 +3,7 @@ import { Dialog, Button, Box, TextField, FormControlLabel, Checkbox, Grid } from
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import Options from '../AddField/option';
+import Options from '../Option/option';
 
 const ConfigureProperties = ({ close, field, setFields }: any) => {
 
