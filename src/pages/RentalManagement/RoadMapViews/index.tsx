@@ -144,6 +144,7 @@ const RentalManagementViews = (props) => {
 
       xPosition += 300;
       const allPackages = product?.material?.filter((item) => item.type === 'package').map((item) => item._id);
+      console.log(allPackages);
       const allPackagesAndProductIds = product?.material?.map((item) => item._id);
       const assetsInLoading = {};
       loadingTicket?.map((item) => {
@@ -179,7 +180,7 @@ const RentalManagementViews = (props) => {
           productColSystem[item._id] = productColSystem[item.parentId] ? productColSystem[item.parentId] + 300 : xPosition;
         }
         if (
-          item?.productDetail?.serializedProduct &&
+          (item?.productDetail?.serializedProduct || allPackages.includes(item?._id)) &&
           !assetsInLoading[item?.materialId] &&
           !assetsInReceiving[item?.materialId] &&
           !assetsInReturn[item?.materialId]
