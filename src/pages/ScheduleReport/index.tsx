@@ -1,6 +1,6 @@
 import React, { useState, useReducer, useContext, useEffect, Fragment } from 'react';
 import { Grid, useTheme, useMediaQuery, Button, Box, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { MdDescription } from 'react-icons/md';
 import styles from 'src/pages/Leads/Header.module.scss';
 import MomentUtils from '@date-io/moment';
@@ -55,22 +55,22 @@ const ScheduleReport = () => {
       cellRenderer: 'commonRenderer',
       primaryField: false
     },
-    {
-      field: 'filters',
-      headerName: 'Filters',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer',
-      primaryField: false
-    },
-    {
-      field: 'column',
-      headerName: 'Columns',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer',
-      primaryField: false
-    },
+    // {
+    //   field: 'filters',
+    //   headerName: 'Filters',
+    //   show: true,
+    //   disabled: false,
+    //   cellRenderer: 'commonRenderer',
+    //   primaryField: false
+    // },
+    // {
+    //   field: 'column',
+    //   headerName: 'Columns',
+    //   show: true,
+    //   disabled: false,
+    //   cellRenderer: 'commonRenderer',
+    //   primaryField: false
+    // },
     {
       field: 'subscribeUsers',
       headerName: 'Subscribe Users',
@@ -120,21 +120,15 @@ const ScheduleReport = () => {
       gridApi.setRowData([]);
     }
     try {
-      let {
-        data: { data, count }
-      } = await axiosInstance().get(`schedule-report`);
+      let { data: { data, count } } = await axiosInstance().get(`schedule-report`);
 
       data = data.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.subscribeUsers = finalObject.subscribeUsers.length
-          ? finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ')
-          : [];
+        finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource
+        finalObject.subscribeUsers = finalObject.subscribeUsers.length ? finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ') : [];
         finalObject.date = new Date(finalObject.date).toDateString();
         finalObject.time = new Date(finalObject.time).toLocaleTimeString();
-        finalObject.column = finalObject.column
-          .split(',')
-          .map((s: string) => startCase(s))
-          .join(', ');
+        finalObject.column = finalObject.column.split(',').map((s: string) => startCase(s)).join(', ');
         finalObject.filters = finalObject.filters.length > 0 ? finalObject.filters.map((item) => startCase(item.term)) : [];
         return finalObject;
       });
@@ -330,7 +324,7 @@ const ScheduleReport = () => {
                   selectedRecords={[]}
                   dataRows={dataRows}
                   dispatch={dispatch}
-                  onEdit={() => {}}
+                  onEdit={() => { }}
                   extraParamsToCheckDelete={false}
                   rowCount={rowCount}
                   page={page}
@@ -345,8 +339,8 @@ const ScheduleReport = () => {
                   owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                   onCreate={false}
                   showClone={false}
-                  onDelete={(data) => {}}
-                  onClone={(data) => {}}
+                  onDelete={(data) => { }}
+                  onClone={(data) => { }}
                   renderedFrom={routes.transferAsset?.title}
                 />
               ) : (
