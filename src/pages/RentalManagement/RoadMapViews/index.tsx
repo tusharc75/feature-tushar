@@ -144,7 +144,6 @@ const RentalManagementViews = (props) => {
 
       xPosition += 300;
       const allPackages = product?.material?.filter((item) => item.type === 'package').map((item) => item._id);
-      console.log(allPackages);
       const allPackagesAndProductIds = product?.material?.map((item) => item._id);
       const assetsInLoading = {};
       loadingTicket?.map((item) => {
@@ -363,7 +362,6 @@ const RentalManagementViews = (props) => {
         beforeLoadingAssetIdx += 1;
         var edgePlaced = false;
         if (subLeaseArr.includes(item.inventoryDetail.supplierAccount) && item.inventoryDetail.subleaseAsset) {
-          console.log(subLeaseArr.includes(item.inventoryDetail.supplierAccount), item.inventoryDetail.subleaseAsset);
           edgePlaced = true;
           flowEdge.push({
             id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}`,
@@ -391,7 +389,6 @@ const RentalManagementViews = (props) => {
           });
         }
         if (!edgePlaced) {
-          console.log('edge not placed');
           flowEdge.push({
             id: `edge-assets-${item.inventoryDetail.assetNumber}-${item.inventoryDetail._id}-${_.random(0, 1000)}`,
             source:
