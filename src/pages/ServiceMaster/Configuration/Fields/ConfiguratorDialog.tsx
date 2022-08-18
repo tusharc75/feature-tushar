@@ -11,15 +11,20 @@ import { serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
 
-const ConfiguratorDialog = ({ handleClose, handleSucess, id, configuration }) => {
+const ConfiguratorDialog = ({ handleClose, handleSucess, serviceId, stepId }) => {
 
   const toastConfig = React.useContext(CustomToastContext);
   const [fields, setFields] = React.useState<any>([]);
   const [isSubmitting, setSubmitting] = React.useState(false);
 
   React.useEffect(() => {
-    setFields(configuration);
-  }, [configuration]);
+    axiosInstance().get(`${serviceMaster.api}/fields/${serviceId}/${stepId}`).then(({ data: { data } }) => {
+      setFields(data);
+    })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }, []);
 
   const handleSave = async () => {
     const configureFields = fields;
@@ -28,18 +33,16 @@ const ConfiguratorDialog = ({ handleClose, handleSucess, id, configuration }) =>
         _field.fieldName = camelCase(_field.fieldLabel.replace(/[^a-zA-Z0-9]/g, ''));
       }
     })
-    axiosInstance().post(`${serviceMaster.api}/configure-fields`, {
-      serviceId: id,
-      configureFields: configureFields
+    axiosInstance().post(`${serviceMaster.api}/fields/${serviceId}/${stepId}`, {
+      fields: configureFields
+    }).then(({ data }) => {
+      handleSucess()
+      toastConfig.setToastConfig({
+        open: true,
+        message: data.message,
+        severity: 'success'
+      });
     })
-      .then(({ data }) => {
-        handleSucess()
-        toastConfig.setToastConfig({
-          open: true,
-          message: data.message,
-          severity: 'success'
-        });
-      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });

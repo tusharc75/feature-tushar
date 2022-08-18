@@ -9,6 +9,7 @@ const Steps = ({ serviceId }) => {
 
   const [stepDialog, setStepDialog] = useState(false);
   const [stepOptions, setStepOptions] = useState(null);
+  const [stepFieldsDialog, setStepFieldsDialog] = useState(false);
 
   useEffect(() => {
     fetchStepsData();
@@ -58,7 +59,7 @@ const Steps = ({ serviceId }) => {
                   <Typography variant="body2">{index + 1}</Typography>
                 </Grid>
                 <Grid item xs={9} justifyContent={'center'}>
-                  <Typography variant="body2">{steps?.step || ''}</Typography>
+                  <Typography variant="body2">{steps?.stepName}</Typography>
                 </Grid>
               </Grid>
             </Box>
@@ -91,7 +92,6 @@ const Steps = ({ serviceId }) => {
             fetchStepsData()
           }}
           serviceId={serviceId}
-          stepOptions={stepOptions}
         />
       )}
     </>
