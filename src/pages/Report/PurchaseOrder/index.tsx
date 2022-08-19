@@ -189,7 +189,7 @@ const Report = () => {
           }
         ];
       }
-      if (resourceCamelCase === 'productAverageCost') {
+      if (resourceCamelCase === 'productAveragePrice') {
         let {
           data: { data: productFields }
         } = await axiosInstance().get(`/field?resource=Product`);
@@ -389,7 +389,7 @@ const Report = () => {
           dateTimeRenderer: DateTimeRenderer
         });
       }
-      if (resourceCamelCase === 'supplierWiseProductPrice') {
+      if (resourceCamelCase === 'supplierWiseAveragePrice') {
         let {
           data: { data: productFields }
         } = await axiosInstance().get(`/field?resource=Product`);
@@ -639,7 +639,7 @@ const Report = () => {
         `${
           resourceCamelCase === 'purchaseOrderProduct'
             ? `${productInventory.api}/report/purchase-order-product-wise-report`
-            : resourceCamelCase === 'productAverageCost'
+            : resourceCamelCase === 'productAveragePrice'
             ? `${productInventory.api}/report/purchase-order-price`
             : resourceCamelCase === 'productInventoryHistory'
             ? `${productInventory.api}/report/history-report`
@@ -796,7 +796,7 @@ const Report = () => {
         `${
           resourceCamelCase === 'purchaseOrderProduct'
             ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
-            : resourceCamelCase === 'productAverageCost'
+            : resourceCamelCase === 'productAveragePrice'
             ? `${productInventory.api}/report/purchase-order-price/export`
             : resourceCamelCase === 'productInventoryHistory'
             ? `${productInventory.api}/report/history-report/export`
@@ -935,7 +935,7 @@ const Report = () => {
                     loading={loading}
                     renderedFrom={renderedFrom}
                     allowSelection={false}
-                    allowAction={resourceCamelCase === 'productAverageCost'}
+                    allowAction={resourceCamelCase === 'productAveragePrice'}
                     refreshGrid={fetchResourceData}
                     showOnlyShowFilteredRecordSwitch={false}
                   />
