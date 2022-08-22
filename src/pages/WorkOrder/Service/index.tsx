@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import { Formik, Form } from "formik";
 import { getObjKeys, getObjKeysWithValues, workOrder, yupSchema } from 'src/constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import FormTypes from 'src/components/ServiceMaster/FormTypes';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
@@ -16,7 +16,9 @@ import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import Steps from 'src/pages/RentalManagement/Steps';
+import { TiArrowBack } from 'react-icons/ti';
+import { RiShareForwardFill } from 'react-icons/ri';
+import { isMobile } from 'react-device-detect';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -25,6 +27,29 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         backButton: {
             marginRight: theme.spacing(1),
+        },
+        BlackSvg: {
+            userSelect: 'none',
+            '& svg': {
+                fill: '#000',
+                transition: 'fill .4s, opacity .4s'
+            },
+            '&:hover svg': {
+                fill: 'var(--primary)'
+            },
+            '&.Mui-disabled': {
+                PointerEvents: 'none',
+                '& svg': {
+                    opacity: '0.3'
+                }
+            }
+        },
+        pbStepper: {
+            overflow: 'none',
+            justifyContent: 'space-evenly',
+            [theme.breakpoints.down('xs')]: {
+                overflow: 'auto'
+            }
         },
         instructions: {
             marginTop: theme.spacing(1),
@@ -105,7 +130,7 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
         return errors;
     }
 
-        const handleScroll = (errors) => {
+    const handleScroll = (errors) => {
         const err = Object.keys(errors);
         if (err.length) {
             const input = document.querySelector(
@@ -121,21 +146,46 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
 
     return (
         <div className={classes.root}>
-            <Steps
+            {/* <Steps
                 isNextStep={false}
                 nextStep={nextStep}
                 steps={stepConstant}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}
                 isStepEnded={false}
-            />
-            {/* <Stepper activeStep={currentStep} alternativeLabel>
-                {stepConstant?.map((label) => (
-                    <Step key={label}>
-                        <StepLabel>{label}</StepLabel>
-                    </Step>
-                ))}
-            </Stepper> */}
+            /> */}
+            <div className="position-relative">
+                <Grid container >
+                    <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2">
+                        <IconButton
+                            disabled={currentStep === stepConstant.length || currentStep === 0}
+                            onClick={handleBack}
+                            className={`stepperButton ${classes.BlackSvg}`}
+                        >
+                            <TiArrowBack size={30} />
+                        </IconButton>
+                    </Grid>
+                    <Grid key={"stepper"} item xs={12} sm={10} md={10}>
+                        <Stepper className={`${classes.pbStepper} stepper-responsive mt-2`} activeStep={currentStep} alternativeLabel>
+                            {stepConstant?.map((label) => (
+                                <Step key={label}>
+                                    <StepLabel>{label}</StepLabel>
+                                </Step>
+                            ))}
+                        </Stepper>
+                    </Grid>
+                    <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2 ">
+                        <IconButton
+                            onClick={handleNext}
+                            disabled={currentStep === stepConstant.length - 1}
+                            className={`stepperButtonNext ${classes.BlackSvg}`}
+                        >
+                            <RiShareForwardFill />
+                        </IconButton>
+                    </Grid>
+                </Grid>
+            </div>
+
             <div>
                 {
                     // currentStep === stepConstant?.length ? (
