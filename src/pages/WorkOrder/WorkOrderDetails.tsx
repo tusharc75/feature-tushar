@@ -257,8 +257,13 @@ const WorkOrderDetails = () => {
                         setCurrentStep={setCurrentStep}
                         isStepEnded={false}
                       />
-                      {workOrderServiceData[currentStep] && (
-                        <Service data={workOrderServiceData[currentStep]} />
+                      {workOrderServiceData[currentStep] && workOrderData && (
+                        <Service
+                          serviceDataFields={workOrderServiceData[currentStep]}
+                          workOrderId={id}
+                          serviceData={workOrderData?.serviceData ? workOrderData?.serviceData : []}
+                          fetchWorkOrderData={fetchWorkOrderData}
+                          />
                       )}
                     </>
                     : (
