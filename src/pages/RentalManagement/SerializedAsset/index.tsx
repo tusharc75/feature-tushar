@@ -144,7 +144,9 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             }
             {row.original?.type === "asset" &&
               <span className="d-flex align-items-center gap-2">
-                {(row.original.status === INVENTORY_STATUS.reserved && row.original?.manualStatus !== INVENTORY_STATUS.reserved && allowedToEdit) &&
+                {/* && row.original?.manualStatus !== INVENTORY_STATUS.reserved */}
+                {((row.original.status === INVENTORY_STATUS.reserved || [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(row.original.status))
+                  && !row?.original?.rentalAssetStatus && allowedToEdit) &&
                   <HtmlTooltip title={`Remove`}>
                     <IconButton size="small" onClick={() => {
                       setShowConfirmBox(true)
@@ -367,6 +369,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         type: "asset",
         isNonSerializeAsset: false,
         status: _inventory?.status ? _inventory?.status : _inventory.inventoryDetail?.status,
+        rentalAssetStatus: _inventory?.status,
         manualStatus: _inventory.inventoryDetail?.manualStatus,
         warehouse: _inventory.inventoryDetail?.warehouse,
         _id: _inventory.inventory,
