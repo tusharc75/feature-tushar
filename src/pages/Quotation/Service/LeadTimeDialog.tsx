@@ -21,7 +21,7 @@ function LeadTimeDialog({ quotationId, data, onClose, handleSucess }) {
   const [loading, setLoading] = useState(false);
   const [leadTimeMasterSteps, setLeadTimeMasterSteps] = useState(data?.leadTime || []);
   const [totalDays, setTotalDays] = useState(0);
-  console.log(data);
+
   const handleSubmit = () => {
     setLoading(true);
     const value = {
