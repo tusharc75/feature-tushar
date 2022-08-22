@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tabs, Tab } from '@material-ui/core';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
@@ -18,6 +18,7 @@ import DeleteButton from '../../components/Helpers/DeleteButton';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import LeadTimeMaster from '../../components/LeadTime';
 import Steps from './Steps';
+import Product from './Product';
 
 const ServiceMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -32,6 +33,8 @@ const ServiceMasterDetailsPage = () => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+  const [activeTable, setActiveTable] = useState('packages');
 
   useEffect(() => {
     fetchFields();
@@ -74,6 +77,14 @@ const ServiceMasterDetailsPage = () => {
         setShowConfirmBox(false);
       });
   };
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+    // if (newValue === 1) {
+    //   setActiveTable('packages');
+    // } else if (newValue === 2) {
+    //   setActiveTable('parent');
+    // }
+  };
 
   return (
     <Fragment>
@@ -100,15 +111,36 @@ const ServiceMasterDetailsPage = () => {
               )}
               {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </DetailsPageHeader>
-            <Box>
-              {loading || (!fields.length && serviceMasterDetailData != null) ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              ) : (
-                <DetailsPage data={serviceMasterDetailData} fields={fields} />
-              )}
-            </Box>
+            <Tabs
+              variant="scrollable"
+              scrollButtons="auto"
+              className="oms-tab"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              indicatorColor="primary"
+              textColor="primary"
+              aria-label="Product Details Tab"
+              TabIndicatorProps={{
+                style: {
+                  height: 0
+                }
+              }}
+            >
+              <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              {permissions?.serializedAsset && <Tab label="Product" value={1} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
+            </Tabs>
+            {tabValue === 0 && (
+              <Box>
+                {loading || (!fields.length && serviceMasterDetailData != null) ? (
+                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                ) : (
+                  <DetailsPage data={serviceMasterDetailData} fields={fields} />
+                )}
+              </Box>
+            )}
+            {tabValue === 1 && <Product id={id} />}
           </Paper>
         </Grid>
         <Grid item xs={12} sm={12} md={4} lg={4}>
