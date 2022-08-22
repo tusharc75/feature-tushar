@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import { Box, Grid, Button } from '@material-ui/core';
 import { Link, useParams, useLocation } from 'react-router-dom';
-import { product, isObjectEmpty, prepareDataForGrid } from '../../../constants/helpers';
+import { product, isObjectEmpty, prepareDataForGrid, serviceMaster } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { Delete } from '@material-ui/icons';
@@ -57,12 +57,12 @@ function Product({ id }) {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`/product/${id}/bom`)
+      .get(`${serviceMaster.api}/product/${id}`)
       .then(({ data: { data } }) => {
         data = data.map((o: any) => {
           let finalObject = {
             ...o,
-            ...o?.childProductDetail
+            ...o?.productDetail
           };
           return prepareDataForGrid(finalObject);
         });
@@ -137,7 +137,7 @@ function Product({ id }) {
     if (data.length > 1) {
       data.forEach((p: any) => {
         axiosInstance()
-          .put(`${product.api}/${p.product}/bom/remove`, {
+          .put(`${serviceMaster.api}/product/${id}/remove`, {
             ids: [p.id]
           })
           .then(() => {
@@ -153,7 +153,7 @@ function Product({ id }) {
     } else {
       let d = data[0];
       axiosInstance()
-        .put(`${product.api}/${d.product}/bom/remove`, {
+        .put(`${serviceMaster.api}/product/${id}/remove`, {
           ids: [d.id]
         })
         .then(() => {
@@ -257,7 +257,8 @@ function Product({ id }) {
           productsDialogOpen={openAssignProductDialog}
           productId={id}
           handleCloseDialog={() => setOpenAssignProductDialog(false)}
-          assignedProducts={[...parts?.map((p) => p.childProduct), id]}
+          assignedProducts={[...parts?.map((p) => p.product), id]}
+          reference={'serviceMaster'}
           renderedFrom={`${renderedFrom}_grid-sub-1`}
           onSuccess={() => {
             if (permissions?.serializedAsset) {
