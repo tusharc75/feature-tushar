@@ -105,6 +105,20 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
         return errors;
     }
 
+        const handleScroll = (errors) => {
+        const err = Object.keys(errors);
+        if (err.length) {
+            const input = document.querySelector(
+                `input[name=${err[0]}]`,
+            );
+            input.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'start',
+            });
+        }
+    }
+
     return (
         <div className={classes.root}>
             <Steps
@@ -157,6 +171,7 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
                                                                                 label={field.fieldLabel}
                                                                                 name={field.fieldName}
                                                                                 type={field.type}
+                                                                                required={field.required}
                                                                                 options={field.option ? field.option : []}
                                                                                 setFieldValue={(name, value) => {
                                                                                     setFieldValue(name, value)
@@ -189,6 +204,7 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
                                                     disabled={currentStep === serviceDataFields?.steps.length}
                                                     onClick={(e) => {
                                                         e.preventDefault();
+                                                        handleScroll(errors)
                                                         submitForm();
                                                     }}
                                                 > Save</CustomButton>

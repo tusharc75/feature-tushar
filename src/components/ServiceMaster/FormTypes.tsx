@@ -1,24 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import {
-  Box,
   Checkbox,
   FormControlLabel,
-  Grid,
   TextField,
-  Typography,
 
 } from '@material-ui/core';
 import DateUtils from '@date-io/date-fns';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import InfoIcon from '@material-ui/icons/Info';
 import { handleAutoCalculation, optionConverter } from '../../constants/formulaUtility';
 import NumberFormat from 'react-number-format';
 import {
-  documentUploadMaxSize,
   dateFormatForInputControl,
   formatAmountWithCurrency
 } from '../../constants/helpers';
-import HtmlTooltip from '../CustomTooltipTitle';
 import { Autocomplete } from '@material-ui/lab';
 
 
@@ -46,42 +40,6 @@ const CustomFormat = (props: NumberFormatCustomProps | any) => {
   }
 };
 
-const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, warningMessage, warningTooltip }) =>
-  isTooltip && info ? (
-    <Grid container spacing={1} alignItems="center">
-      <Grid item xs={11} sm={11} md={11}>
-        {children}
-        {warningTooltip && <Box ml={1}>
-          <Typography variant="caption" color="secondary">{warningMessage}</Typography>
-        </Box>}
-      </Grid>
-      <Grid item xs={1} sm={1} md={1}>
-        <HtmlTooltip title={<Typography>{info}</Typography>}>
-          <InfoIcon color="disabled" />
-        </HtmlTooltip>
-      </Grid>
-    </Grid>
-  ) : doNotShowInfoTooltip ? (
-    <>
-      {children}
-      {warningTooltip && <Box ml={1}>
-        <Typography variant="caption" color="secondary">{warningMessage}</Typography>
-      </Box>}
-    </>
-  ) : (
-    <Grid container spacing={1} alignItems="center">
-      <Grid item xs={12} sm={12} md={12}>
-        {children}
-        {warningTooltip && <Box ml={1}>
-          <Typography variant="caption" color="secondary">{warningMessage}</Typography>
-        </Box>}
-      </Grid>
-      {/* <Grid item xs={1} sm={1} md={1}>
-        <InfoIcon style={{ opacity: 0 }} color="disabled" />
-      </Grid> */}
-    </Grid>
-  );
-
 const FormTypes = (props) => {
   const {
     type,
@@ -94,6 +52,7 @@ const FormTypes = (props) => {
     fields,
     fieldData,
     setValues,
+    required,
     ...rest
   } = props;
 
@@ -124,6 +83,7 @@ const FormTypes = (props) => {
       label={getLabel(label)}
       name={name}
       value={values[name]}
+      required={required}
       onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
     />
   ) : type === 'multiLine' ? (
@@ -136,6 +96,7 @@ const FormTypes = (props) => {
       name={name}
       rows={3}
       value={values[name]}
+      required={required}
       onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trimStart())}
     />
   ) : type === 'number' ? (
@@ -146,6 +107,7 @@ const FormTypes = (props) => {
       name={name}
       value={values[name]}
       ref={inputNumberRef}
+      required={required}
       onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
       InputProps={{
         inputComponent: CustomFormat as any,
@@ -180,6 +142,7 @@ const FormTypes = (props) => {
             {...params}
             name={name}
             label={getLabel(label)}
+            required={required}
             variant="outlined"
             style={{ outline: "1px solid white" }}
           />
@@ -193,6 +156,7 @@ const FormTypes = (props) => {
               {...rest}
               name={name}
               checked={values[name]}
+              required={required}
               onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)}
               color="secondary"
             />
@@ -211,6 +175,7 @@ const FormTypes = (props) => {
             value={values[name]}
             name={name}
             label={getLabel(label)}
+            required={required}
             onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
             // onChange={(date) => setFieldValue(name, date ? date : "")}
             format={dateFormatForInputControl}
