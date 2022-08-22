@@ -6,7 +6,6 @@ import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdChevronLeft } from 'react-icons/md';
 import styles from '../Leads/Header.module.scss';
-
 import routes from './../../components/Helpers/Routes';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
@@ -350,7 +349,6 @@ const Report = () => {
               ]}
             />
           </Grid>
-
           <Grid item xs={2}>
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>

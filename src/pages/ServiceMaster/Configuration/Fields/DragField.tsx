@@ -1,12 +1,12 @@
 import { Box, Grid } from '@material-ui/core';
 import { useDrag } from 'react-dnd';
 
-const DragField = ({ id, text }: any) => {
-  
+const DragField = ({ _id, text }: any) => {
+
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: 'field',
-      item: { id, text },
+      item: { _id, text },
       collect: (monitor) => ({
         isDragging: monitor.isDragging()
       }),
@@ -14,7 +14,7 @@ const DragField = ({ id, text }: any) => {
         const dropResult = monitor.getDropResult();
       }
     }),
-    [id]
+    [_id]
   );
 
   return (

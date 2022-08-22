@@ -7,7 +7,7 @@ import routes from "src/components/Helpers/Routes";
 import { useData } from "src/StateProvider/Provider";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { bulkAssetCreation } from "src/constants/helpers";
+import { bulkAssetCreation, CHILD_RESOURCE } from "src/constants/helpers";
 import EditIcon from "@material-ui/icons/Edit";
 import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
 import { CommonRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
@@ -24,9 +24,9 @@ import { ExpandMore } from "@material-ui/icons";
 import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import CustomRenderCell from "src/components/Helpers/CustomRenderCell";
 import InfoIcon from "@material-ui/icons/Info";
-import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import BulkAssetCreationQtyDialog from "./BulkAssetCreationQtyDialog";
 import styles from "../../Leads/Header.module.scss";
+import { CURReplaceByCurrencySingle } from "src/constants/formulaUtility";
 
 const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProduct, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
 
@@ -51,7 +51,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     const [loadingButton, setLoadingButton] = useState(false);
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
     const [deleteBulkAssetCreationProduct, setDeleteBulkAssetCreationProduct] = useState([]);
-    const [isRateRequired, setIsRateRequired] = useState(false);
 
     useEffect(() => {
         fetchFields()
@@ -62,12 +61,9 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
     }, [columns]);
 
     const fetchFields = async () => {
-        const fields = await fetch_po_product_fields(bulkAssetCreationData?.currency);
-        fields.forEach(element => {
-            if (element.fieldName === "price" && element.required) {
-                setIsRateRequired(true);
-            }
-        });
+        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.bulkAssetCreationProduct}`);
+        var fields = response?.data?.data;
+        fields = CURReplaceByCurrencySingle(fields, bulkAssetCreationData?.currency ? bulkAssetCreationData?.currency : "USD");
         let rendererNames = [];
         genrateColoum(fields, columns, rendererNames, false, renderedFrom);
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
@@ -103,14 +99,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                 res.actualReceived = item.createdQty || 0
                 if (item?.qty === 0) {
                     res.isValid = false;
-                }
-                else if (isRateRequired) {
-                    if (item["finalPrice_" + bulkAssetCreationData?.currency?.toLowerCase()]) {
-                        res.isValid = true;
-                    }
-                    else {
-                        res.isValid = false;
-                    }
                 }
                 else {
                     res.isValid = true
@@ -276,75 +264,78 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
 
     return (
         <Fragment>
-            {allowedToEdit && <Box display="flex" justifyContent="space-between" m={1}>
-                <Box display="flex" alignItems="center">
-                    <Button
-                        variant={"contained"}
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                            setAddProductDialog(true);
-                        }}
-                    >
-                        {`Add  ${routes.product.title}`}
-                    </Button>
-                </Box>
-                <div className="d-flex gap-2">
-                    <Box display={"flex"} justifyContent="flex-end">
+            {(allowedToEdit && permissions?.bulkAssetCreation?.isUpdate) &&
+                <Box display="flex" justifyContent="space-between" m={1}>
+                    <Box display="flex" alignItems="center">
                         <Button
-                            // disabled={Boolean(!selectedBrand)}
-                            variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                            color="default"
+                            variant={"contained"}
+                            color="primary"
                             size="small"
-                            onClick={openActions}
-                            className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                            aria-controls="action-menu"
-                        >
-                            {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                        </Button>
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "left",
+                            onClick={() => {
+                                setAddProductDialog(true);
                             }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}
                         >
-                            <MenuItem
-                                color="primary"
-                                disabled={selectedRecords.length === 0}
-                                onClick={() => {
-                                    setIsBulkEdit(true)
-                                    setShowProductDialog(true)
-                                }}
-                            >
-                                Bulk Edit
-                            </MenuItem>
-                            {permissions?.bulkAssetCreation?.isDelete && <MenuItem
-                                color="primary"
-                                disabled={selectedRecords.length === 0 || loadingButton}
-                                onClick={() => {
-                                    setShowDeleteConfirmBox(true)
-                                    setDeleteBulkAssetCreationProduct(selectedRecords.map(d => d._id))
-                                }}>
-                                Delete
-                            </MenuItem>}
-                            {permissions?.bulkAssetCreation?.isUpdate && <MenuItem
-                                color="primary"
-                                disabled={selectedRecords.length === 0 || loadingButton}
-                                onClick={() => {
-                                    createAsset()
-                                }}>
-                                {`Create ${routes.serializedAsset.title}`}
-                            </MenuItem>}
-                        </Menu>
+                            {`Add  ${routes.product.title}`}
+                        </Button>
                     </Box>
-                </div>
-            </Box>}
+                    <div className="d-flex gap-2">
+                        <Box display={"flex"} justifyContent="flex-end">
+                            <Button
+                                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                                color="default"
+                                size="small"
+                                onClick={openActions}
+                                className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                                aria-controls="action-menu"
+                            >
+                                {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                            </Button>
+                            <Menu
+                                anchorEl={anchorEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: "bottom",
+                                    horizontal: "left",
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorEl)}
+                                onClose={closeActions}
+                            >
+                                <MenuItem
+                                    color="primary"
+                                    disabled={selectedRecords.length === 0}
+                                    onClick={() => {
+                                        setIsBulkEdit(true)
+                                        setShowProductDialog(true)
+                                        closeActions()
+                                    }}
+                                >
+                                    Bulk Edit
+                                </MenuItem>
+                                <MenuItem
+                                    color="primary"
+                                    disabled={selectedRecords.length === 0 || loadingButton}
+                                    onClick={() => {
+                                        setShowDeleteConfirmBox(true)
+                                        setDeleteBulkAssetCreationProduct(selectedRecords.map(d => d._id))
+                                        closeActions()
+                                    }}>
+                                    Delete
+                                </MenuItem>
+                                <MenuItem
+                                    color="primary"
+                                    disabled={selectedRecords.length === 0 || loadingButton}
+                                    onClick={() => {
+                                        createAsset()
+                                        closeActions()
+                                    }}>
+                                    {`Create ${routes.serializedAsset.title}`}
+                                </MenuItem>
+                            </Menu>
+                        </Box>
+                    </div>
+                </Box>}
             {columns && frameWorkComponent ? isMobile && !isTablet ?
                 <CustomSwipableList
                     allowSelection={allowedToEdit}
@@ -450,8 +441,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                     bulkAssetCreationData={bulkAssetCreationData}
                 />
             }
-            {
-                showDeleteConfirmBox &&
+            {showDeleteConfirmBox &&
                 <ConfirmationDialog
                     open={showDeleteConfirmBox}
                     message={`Are you sure you want to delete  ? `}

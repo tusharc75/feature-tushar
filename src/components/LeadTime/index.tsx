@@ -30,7 +30,6 @@ const LeadTimeMaster = ({ Id, type }) => {
     axiosInstance()
       .get(`${apiMain(type)}/lead-time/${Id}`)
       .then(({ data: { data } }) => {
-        console.log(data);
         setLeadTimeData(data);
         setLoadingPLT(false);
       })

@@ -1,6 +1,6 @@
 import React, { useState, useReducer, useContext, useEffect, Fragment } from 'react';
 import { Grid, useTheme, useMediaQuery, Button, Box, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { MdDescription } from 'react-icons/md';
 import styles from 'src/pages/Leads/Header.module.scss';
 import MomentUtils from '@date-io/moment';
@@ -55,22 +55,22 @@ const CustomReport = () => {
       cellRenderer: 'commonRenderer',
       primaryField: false
     },
-    {
-      field: 'filters',
-      headerName: 'Filters',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer',
-      primaryField: false
-    },
-    {
-      field: 'column',
-      headerName: 'Columns',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer',
-      primaryField: false
-    },
+    // {
+    //   field: 'filters',
+    //   headerName: 'Filters',
+    //   show: true,
+    //   disabled: false,
+    //   cellRenderer: 'commonRenderer',
+    //   primaryField: false
+    // },
+    // {
+    //   field: 'column',
+    //   headerName: 'Columns',
+    //   show: true,
+    //   disabled: false,
+    //   cellRenderer: 'commonRenderer',
+    //   primaryField: false
+    // },
     ...getStaticFields()
   ]);
 
@@ -91,6 +91,7 @@ const CustomReport = () => {
       let { data: { data, count } } = await axiosInstance().get(`custom-report`);
       data = data.map((u: any) => {
         let finalObject: any = prepareDataForGrid(u);
+        finalObject.resource = routes[camelCase(finalObject.resource)] ? routes[camelCase(finalObject.resource)]?.title : finalObject.resource
         finalObject.column = finalObject.column?.split(',')?.map((s: string) => startCase(s))?.join(', ');
         finalObject.filters = finalObject.filters.length > 0 ? finalObject?.filters?.map((item) => startCase(item.term)) : [];
         return finalObject;
@@ -109,17 +110,6 @@ const CustomReport = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {/* <HtmlTooltip title="Clone">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setShowManageDialog({ open: true, isClone: true, idToClone: params.data._id });
-          }}
-        >
-          <FileCopy color="primary" />
-        </IconButton>
-      </HtmlTooltip> */}
       <IconButton
         size="small"
         aria-label="Delete"

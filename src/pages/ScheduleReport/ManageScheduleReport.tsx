@@ -13,6 +13,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
+import routes from './../../components/Helpers/Routes';
 
 type ValueTypes = {
   scheduleName: string;
@@ -27,7 +28,7 @@ type ValueTypes = {
 };
 
 const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
-  
+
   const formikRef = useRef<FormikProps<ValueTypes>>(null);
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -51,11 +52,11 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     if (id) {
       (async () => {
         try {
-          let {
-            data: { data }
-          } = await axiosInstance().get(`/schedule-report/${id}`);
+          let { data: { data } } = await axiosInstance().get(`/schedule-report/${id}`);
+
           let resource: any = REPORT_LIST.find((item) => item.title === data.resource);
-          resource = { title: resource.title, key: resource.key };
+          resource = { title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title, value: resource.title, key: resource.key };
+
           await fetchGridColumns(resource);
           let newData: any = {
             scheduleName: data?.scheduleName,
@@ -190,7 +191,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const fetchGridColumns = async (resource: any) => {
     if (resource.key === 'purchaseOrderType') {
       let resourceFieldData = [];
-      if (resource.title === 'Purchase Order Product') {
+      if (resource.value === 'Purchase Order Product') {
         let {
           data: { data: POFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order`);
@@ -240,7 +241,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             type: 'text'
           }
         });
-      } else if (resource.title === 'Product Average Costing') {
+      } else if (resource.value === 'Product Average Costing') {
         let {
           data: { data: productFields }
         } = await axiosInstance().get(`/field?resource=Product`);
@@ -297,16 +298,11 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           });
         }
       }
-
       setResourceColumns(resourceFieldData);
     } else {
-      const {
-        data: { data }
-      }: any = await axiosInstance().get(`/field?resource=${resource.title}`);
-      if (resource.title === 'Serialized Asset') {
-        const {
-          data: { data: lookupResource }
-        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+      const { data: { data } }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
+      if (resource.value === 'Serialized Asset') {
+        const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
         if (lookupResource) {
           data?.forEach((e) => {
             if (e?.fieldData?.fieldName === 'currentOwner') {
@@ -403,7 +399,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     const newValues = {
       ...values,
       filters,
-      resource: values.resource?.title,
+      resource: values.resource?.value,
       column: values.column.length > 0 ? values.column.map((field) => field.fieldName) : [],
       time: new Date(values.time),
       subscribeUsers: values.subscribeUsers.map((user) => user.userId)
@@ -511,8 +507,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                       <Grid item xs={12} sm={6}>
                         <Autocomplete
                           options={REPORT_LIST.map((item) => {
-                            let obj: { title: string; key: string } = {
-                              title: item.title,
+                            let obj: { title: string; value: string; key: string } = {
+                              title: item.type === 'dynamic' ? routes[item.key]?.title : item.title,
+                              value: item.title,
                               key: item.key
                             };
                             return obj;
@@ -520,7 +517,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option.title}
-                          getOptionSelected={(option, value) => option.title === value.title}
+                          getOptionSelected={(option, value) => option.value === value.value}
                           value={values.resource}
                           onChange={(_, newVal) => {
                             const result = { resource: newVal, filters: [], column: [] }

@@ -12,11 +12,10 @@ interface DragItem {
 }
 
 export const Card = (props) => {
-  
   const { index, id, data, moveCard, onChangeValue, AddRemoveValue } = props;
-  
+
   const ref = useRef<HTMLDivElement>(null);
-  
+
   const [{ handlerId }, drop] = useDrop({
     accept: 'card',
     collect(monitor) {
@@ -77,7 +76,7 @@ export const Card = (props) => {
               margin="dense"
               fullWidth
               style={{ margin: 0 }}
-              value={data?.step || ''}
+              value={data?.optionLabel || ''}
               onChange={(e) => onChangeValue(index, e.target.value)}
             />
           </Grid>
