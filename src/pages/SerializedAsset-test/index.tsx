@@ -256,6 +256,7 @@ const SerializedAssetTest = () => {
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['isEditing'] = false;
           finalObject['allowedToEdit'] = permissions?.serializedAsset.isUpdate;
           return {
             ...finalObject
