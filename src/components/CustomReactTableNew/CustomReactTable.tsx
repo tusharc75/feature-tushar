@@ -541,6 +541,11 @@ function CustomReactTable({
                         <TableCell
                           onDoubleClick={() => {
                             setRowState(row.id, { ...row, original: { ...row.original, isEditing: true } });
+                            Object.keys(rowState).forEach((k) => {
+                              if (row.id !== k) {
+                                setRowState(k, { ...rowState[k], original: { ...rowState[k].original, isEditing: false } });
+                              }
+                            });
                           }}
                           key={index2}
                           {...cell.getCellProps()}
@@ -548,8 +553,11 @@ function CustomReactTable({
                                                     ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} 
                                                     ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
                         >
-                          {cell?.value && rowState && rowState.hasOwnProperty(row.id) && rowState[row.id].original.isEditing ? (
-                            <input value={cell.value} style={{width: cell.column.width - 40}} />
+                          {!['selection', 'action'].includes(cell?.column.id) &&
+                          rowState &&
+                          rowState.hasOwnProperty(row.id) &&
+                          rowState[row.id].original.isEditing ? (
+                            <input value={cell.value} style={{ width: cell.column.width - 40 }} />
                           ) : (
                             cell.render('Cell')
                           )}
