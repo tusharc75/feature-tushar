@@ -1850,6 +1850,23 @@ export const RESOURCE_CALENDAR = [
   { title: sidebarResource.quoteBuilder, key: 'quoteBuilder' }
 ];
 
+
+export const PDF_RESOURCE_LIST = [
+  { title: sidebarResource.quoteBuilder, value: resourceNames.quoteBuilder, key: 'quoteBuilder' },
+  { title: sidebarResource.quotation, value: resourceNames.quotation, key: 'quotation' },
+  { title: sidebarResource.rentalManagement, value: resourceNames.rentalManagement, key: 'rentalManagement' },
+  { title: sidebarResource.repairJob, value: resourceNames.repairJob, key: 'repairJob' },
+  { title: sidebarResource.purchaseOrder, value: resourceNames.purchaseOrder, key: 'purchaseOrder' },
+  { title: sidebarResource.deliveryTicket, value: resourceNames.deliveryTicket, key: 'deliveryTicket' },
+  { title: sidebarResource.transferAsset, value: resourceNames.transferAsset, key: 'transferAsset' },
+  { title: sidebarResource.sublease, value: resourceNames.sublease, key: 'sublease' },
+  { title: sidebarResource.bulkAssetCreation, value: resourceNames.bulkAssetCreation, key: 'bulkAssetCreation' },
+  { title: sidebarResource.transferInventory, value: resourceNames.transferInventory, key: 'transferInventory' },
+  { title: sidebarResource.salesOrder, value: resourceNames.salesOrder, key: 'salesOrder' },
+  { title: sidebarResource.repairOrder, value: resourceNames.repairOrder, key: 'repairOrder' },
+  { title: sidebarResource.workOrder, value: resourceNames.workOrder, key: 'workOrder' },
+];
+
 export const getApi = (resource: string) => {
   switch (kebabCase(resource)) {
     case 'quote':

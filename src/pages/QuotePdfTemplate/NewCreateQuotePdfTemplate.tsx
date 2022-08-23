@@ -19,7 +19,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder, RESOURCE_LABEL } from '../../constants/helpers';
+import { quoteBuilder, RESOURCE_LABEL, resourceNames, PDF_RESOURCE_LIST } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomTable from './customTable/customTable';
 import { useLocation } from 'react-router-dom';
@@ -81,7 +81,7 @@ export default function NewCreateQuotePdfTemplate() {
   const [quoteData, setQuoteData] = useState(null);
   const [version, setVersion] = useState(null);
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, permissions }
   }: any = useData();
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
@@ -92,22 +92,11 @@ export default function NewCreateQuotePdfTemplate() {
   const [isPreview, setIsPreview] = useState(false);
   const [table, setTable] = useState([]);
 
-  const typeOptions = [
-    RESOURCE_LABEL.quoteBuilder,
-    RESOURCE_LABEL.quotation,
-    RESOURCE_LABEL.rentalManagement,
-    RESOURCE_LABEL.repairJob,
-    RESOURCE_LABEL.purchaseOrder,
-    RESOURCE_LABEL.deliveryTicket,
-    RESOURCE_LABEL.transferAsset,
-    RESOURCE_LABEL.sublease,
-    RESOURCE_LABEL.bulkAssetCreation,
-    RESOURCE_LABEL.transferInventory,
-    RESOURCE_LABEL.salesOrder
-  ].filter((d) => d);
-
   const [variables, setVariables] = useState([]);
   const [formValues, setFormValues] = useState(null);
+
+  const [pdfResourceOption, setpdfResourceOption] = useState(null);
+
   const onBackButtonEvent = (e) => {
     if (hasPermissionToUpdate) {
       e.preventDefault();
@@ -125,22 +114,29 @@ export default function NewCreateQuotePdfTemplate() {
   }, []);
 
   useEffect(() => {
+    const options = []
+    PDF_RESOURCE_LIST?.forEach((item) => {
+      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
+        options.push({ title: routes[item.key] ? routes[item.key]?.title : item.title, value: item.value, })
+      }
+    })
+    setpdfResourceOption(options)
+  }, []);
+
+  useEffect(() => {
     if (formValues && formValues.type) {
-      let type: any = formValues.type;
-      type = type.split('');
-
-      if (type[type.length - 1] === 's' && type.join('') !== 'Quotes') {
-        type.pop();
-      }
-
-      type = type.join('');
-      let resource: string = '';
-      if (type === 'Rental Job') {
-        resource = 'Rental Management';
-      } else {
-        resource = type;
-      }
-
+      // let type: any = formValues.type;
+      // type = type.split('');
+      // if (type[type.length - 1] === 's' && type.join('') !== 'Quotes') {
+      //   type.pop();
+      // }
+      // type = type.join('');
+      // if (type === 'Rental Job') {
+      //   resource = 'Rental Management';
+      // } else {
+      //   resource = type;
+      // }
+      let resource: string = formValues.type;
       if (resource) {
         axiosInstance()
           .get(`/field?resource=${resource}`)
@@ -271,7 +267,7 @@ export default function NewCreateQuotePdfTemplate() {
         aboveTable: '',
         belowTable: '',
         entity: selectedEntity ? [selectedEntity] : [],
-        type: typeOptions.find((d) => d !== '' && d !== undefined && d !== null),
+        type: '',
         owner: user.user._id,
         collaborator: []
       });
@@ -444,7 +440,7 @@ export default function NewCreateQuotePdfTemplate() {
       </Grid>
       <div className={`main-container ${classes.mainContainer}`}>
         <Paper className={classes.paper}>
-          {initialValues ? (
+          {(initialValues && pdfResourceOption) ? (
             <Formik
               innerRef={(ref) => ref && setFormValues(ref.values)}
               initialValues={initialValues}
@@ -661,11 +657,12 @@ export default function NewCreateQuotePdfTemplate() {
                         {
                           <Autocomplete
                             disabled={!isClone && !hasPermissionToUpdate}
-                            getOptionLabel={(option: any) => (option ? option : '')}
-                            value={typeOptions.find((data) => data === values['type']) ? typeOptions.find((data) => data === values['type']) : ''}
-                            options={typeOptions}
-                            onChange={(e, val) => {
-                              setFieldValue('type', val ? val : '');
+                            getOptionLabel={(option) => option.title}
+                            getOptionSelected={(option, value) => option.value === value.value}
+                            value={pdfResourceOption.find((data) => data.value === values['type']) ? pdfResourceOption.find((data) => data.value === values['type']) : ''}
+                            options={pdfResourceOption}
+                            onChange={(e, val: any) => {
+                              setFieldValue('type', val ? val.value : '');
                             }}
                             renderInput={(params) => (
                               <TextField
@@ -773,7 +770,6 @@ export default function NewCreateQuotePdfTemplate() {
               />
             </Box>
           </Grid>
-
           <Grid item xs={12} className="mt-4">
             <Box className={classes.tinyMCEContainer}>
               <Typography className={classes.headingLabel} variant="h5" component="h5">
@@ -820,7 +816,6 @@ export default function NewCreateQuotePdfTemplate() {
               />
             </Box>
           </Grid>
-
           <Grid item xs={12} className="mt-4">
             <Box className={classes.tinyMCEContainer}>
               <Typography className={classes.headingLabel} variant="h5" component="h5">

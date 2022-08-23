@@ -16,13 +16,12 @@ import useColumns, { getStaticFields, getFrameworkComponents } from '../../../co
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function Product({ id }) {
+
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  const {
-    state: { permissions, user, selectedEntity }
-  }: any = useData();
-  const hasPermissions = permissions && permissions[product.permission]?.isUpdate;
+  const { state: { permissions, user, selectedEntity } }: any = useData();
+
   const { setToastConfig } = useContext(CustomToastContext);
 
   const [parts, setParts] = useState([]);
@@ -33,7 +32,7 @@ function Product({ id }) {
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
 
@@ -169,7 +168,7 @@ function Product({ id }) {
   };
 
   const ActionsRenderer = (params) =>
-    hasPermissions && (
+    permissions?.serviceMaster?.isUpdate && (
       <Tooltip title="Delete">
         <IconButton
           size="small"
@@ -184,7 +183,7 @@ function Product({ id }) {
 
   return (
     <div>
-      {hasPermissions && (
+      {permissions?.serviceMaster?.isUpdate && (
         <Box p={1}>
           <Grid container>
             <Grid item xs={6} md={6} sm={6}>
@@ -217,10 +216,10 @@ function Product({ id }) {
           </Grid>
         </Box>
       )}
-      {frameWorkComponent ? (
+      {columns && frameWorkComponent ? (
         <CustomAgGrid
-          allowSelection={hasPermissions}
-          allowAction={hasPermissions}
+          allowSelection={permissions?.serviceMaster?.isUpdate}
+          allowAction={permissions?.serviceMaster?.isUpdate}
           columns={columns}
           dataRows={dataRows}
           isClientSideGrid={true}
@@ -261,9 +260,7 @@ function Product({ id }) {
           reference={'serviceMaster'}
           renderedFrom={`${renderedFrom}_grid-sub-1`}
           onSuccess={() => {
-            if (permissions?.serializedAsset) {
-              fetchBOMData();
-            }
+            fetchBOMData();
             setOpenAssignProductDialog(false);
           }}
         />
