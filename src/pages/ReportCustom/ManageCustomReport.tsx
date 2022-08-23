@@ -13,6 +13,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
 import routes from 'src/components/Helpers/Routes';
+import { useData } from '../../StateProvider/Provider';
 
 type ValueTypes = {
   customReportName: string;
@@ -39,6 +40,18 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
   const [statusPeriodDate, setStatusPeriodDate] = useState(null);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const { state: { user, selectedEntity, permissions } }: any = useData();
+  const [resourceOption, setResourceOption] = useState(null);
+
+  useEffect(() => {
+    const options = []
+    REPORT_LIST?.forEach((item) => {
+      if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
+        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key })
+      }
+    })
+    setResourceOption(options)
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -46,7 +59,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
         try {
           let { data: { data } } = await axiosInstance().get(`/custom-report/${id}`);
 
-          let resource: any = REPORT_LIST.find((item) => item.title === data.resource);
+          let resource: any = REPORT_LIST?.find((item) => item.title === data.resource);
           resource = { title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title, value: resource.title, key: resource.key };
 
           await fetchGridColumns(resource);
@@ -414,7 +427,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
           <Loader minHeight={350} />
         </CustomDialogContent>
       )}
-      {formData && (
+      {(formData && resourceOption) && (
         <Formik
           innerRef={(ref) => {
             if (ref) {
@@ -452,14 +465,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Autocomplete
-                          options={REPORT_LIST.map((item) => {
-                            let obj: { title: string; value: string; key: string } = {
-                              title: item.type === 'dynamic' ? routes[item.key]?.title : item.title,
-                              value: item.title,
-                              key: item.key
-                            };
-                            return obj;
-                          })}
+                          options={resourceOption}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option.title}

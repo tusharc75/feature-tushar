@@ -81,7 +81,7 @@ export default function NewCreateQuotePdfTemplate() {
   const [quoteData, setQuoteData] = useState(null);
   const [version, setVersion] = useState(null);
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, permissions }
   }: any = useData();
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
@@ -116,7 +116,9 @@ export default function NewCreateQuotePdfTemplate() {
   useEffect(() => {
     const options = []
     PDF_RESOURCE_LIST?.forEach((item) => {
-      options.push({ title: routes[item.key] ? routes[item.key]?.title : item.title, value: item.value, })
+      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
+        options.push({ title: routes[item.key] ? routes[item.key]?.title : item.title, value: item.value, })
+      }
     })
     setpdfResourceOption(options)
   }, []);

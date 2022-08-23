@@ -14,6 +14,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import Loader from 'src/components/Loader';
 import routes from './../../components/Helpers/Routes';
+import { useData } from '../../StateProvider/Provider';
 
 type ValueTypes = {
   scheduleName: string;
@@ -47,6 +48,18 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const [statusPeriodDate, setStatusPeriodDate] = useState(null);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const { state: { user, selectedEntity, permissions } }: any = useData();
+  const [resourceOption, setResourceOption] = useState(null);
+
+  useEffect(() => {
+    const options = []
+    REPORT_LIST?.forEach((item) => {
+      if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
+        options.push({ title: item.type === 'dynamic' ? routes[item.key]?.title : item.title, value: item.title, key: item.key })
+      }
+    })
+    setResourceOption(options)
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -506,14 +519,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Autocomplete
-                          options={REPORT_LIST.map((item) => {
-                            let obj: { title: string; value: string; key: string } = {
-                              title: item.type === 'dynamic' ? routes[item.key]?.title : item.title,
-                              value: item.title,
-                              key: item.key
-                            };
-                            return obj;
-                          })}
+                          options={resourceOption}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option.title}
