@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import MaUTable from '@material-ui/core/Table';
-import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField, TablePagination, Box, CircularProgress } from '@material-ui/core';
+import {
+  TableBody,
+  IconButton,
+  TableCell,
+  TableHead,
+  TableFooter,
+  TableRow,
+  TextField,
+  TablePagination,
+  Box,
+  CircularProgress
+} from '@material-ui/core';
+import { Check } from '@material-ui/icons';
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers';
 import { generateUniqueId, gridPageSizes, treeToFlatArray } from '../../constants/helpers';
@@ -14,7 +26,8 @@ import {
   useResizeColumns,
   useFilters,
   useColumnOrder,
-  usePagination
+  usePagination,
+  useRowState
 } from 'react-table';
 import { useSticky } from 'react-table-sticky';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
@@ -27,6 +40,7 @@ import { DndProvider, DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 import { XYCoord } from 'dnd-core';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, ...rest }: any, ref) => {
   const defaultRef = React.useRef();
@@ -74,6 +88,25 @@ function DefaultColumnFilter({
   );
 }
 
+const EditableCell = ({ value: initialValue, row: { index }, column: { id }, updateData }) => {
+  const [value, setValue] = React.useState(initialValue);
+  const onChange = (e) => {
+    setValue(e.target.value);
+  };
+
+  // We'll only update the external data when the input is blurred
+  const onBlur = () => {
+    updateData(index, id, value);
+  };
+
+  // If the initialValue is changed external, sync it up with our state
+  React.useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
+  return <input value={value} onChange={onChange} onBlur={onBlur} />;
+};
+
 function CustomReactTable({
   columns,
   data,
@@ -96,16 +129,14 @@ function CustomReactTable({
   loading
   // customPageSize = 20,
 }) {
-  const defaultColumn = React.useMemo(
-    () => ({
-      // When using the useFlexLayout:
-      minWidth: 80, // minWidth is only used as a limit for resizing
-      width: 150, // width is used for both the flex-basis and flex-grow
-      // maxWidth: 250, // maxWidth is only used as a limit for resizing
-      Filter: DefaultColumnFilter
-    }),
-    []
-  );
+  const defaultColumn = {
+    Cell: EditableCell,
+    // When using the useFlexLayout:
+    minWidth: 80, // minWidth is only used as a limit for resizing
+    width: 150, // width is used for both the flex-basis and flex-grow
+    // maxWidth: 250, // maxWidth is only used as a limit for resizing
+    Filter: DefaultColumnFilter
+  };
 
   const [baseColumns, setBaseColumns] = React.useState([]);
 
@@ -198,6 +229,8 @@ function CustomReactTable({
     []
   );
 
+  const updateData = () => {};
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -223,7 +256,10 @@ function CustomReactTable({
     toggleRowExpanded,
     toggleAllRowsExpanded,
     setColumnOrder,
+    setRowState,
+    setCellState,
     state: {
+      rowState,
       pageIndex,
       filters,
       sortBy,
@@ -275,7 +311,8 @@ function CustomReactTable({
           //     });
           // }
         }
-      }
+      },
+      updateData
     },
     useFlexLayout,
     useColumnOrder,
@@ -285,7 +322,8 @@ function CustomReactTable({
     useExpanded, // Use the useExpanded plugin hook
     usePagination,
     useRowSelect,
-    useSticky
+    useSticky,
+    useRowState
   );
 
   useEffect(() => {
@@ -514,13 +552,42 @@ function CustomReactTable({
                     {row.cells.map((cell, index2) => {
                       return (
                         <TableCell
+                          onDoubleClick={() => {
+                            setRowState(row.id, { ...row, original: { ...row.original, isEditing: true } });
+                            Object.keys(rowState).forEach((k) => {
+                              if (row.id !== k) {
+                                setRowState(k, { ...rowState[k], original: { ...rowState[k].original, isEditing: false } });
+                              }
+                            });
+                          }}
                           key={index2}
                           {...cell.getCellProps()}
                           className={`td 
                                                     ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} 
                                                     ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
                         >
-                          {cell.render('Cell')}
+                          {!['selection'].includes(cell?.column.id) &&
+                          rowState &&
+                          rowState.hasOwnProperty(row.id) &&
+                          rowState[row.id].original.isEditing ? (
+                            cell?.column.id === 'action' ? (
+                              <HtmlTooltip title="Save">
+                                <IconButton
+                                  size="small"
+                                  aria-label="Save"
+                                  onClick={() => {
+                                    setRowState(row.id, { ...row, original: { ...row.original, isEditing: false } });
+                                  }}
+                                >
+                                  <Check color="primary" />
+                                </IconButton>
+                              </HtmlTooltip>
+                            ) : (
+                              <input value={cell.value} style={{ width: cell.column.width - 40 }} />
+                            )
+                          ) : (
+                            cell.render('Cell')
+                          )}
                         </TableCell>
                       );
                     })}
