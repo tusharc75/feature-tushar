@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import MaUTable from '@material-ui/core/Table';
-import { TableBody, TableCell, TableHead, TableFooter, TableRow, TextField, TablePagination, Box, CircularProgress } from '@material-ui/core';
+import {
+  TableBody,
+  IconButton,
+  TableCell,
+  TableHead,
+  TableFooter,
+  TableRow,
+  TextField,
+  TablePagination,
+  Box,
+  CircularProgress
+} from '@material-ui/core';
+import { Check } from '@material-ui/icons';
 import { FaAngleRight, FaAngleDown } from 'react-icons/fa';
 import { columnFilter } from './ReactTableHelpers';
 import { generateUniqueId, gridPageSizes, treeToFlatArray } from '../../constants/helpers';
@@ -28,6 +40,7 @@ import { DndProvider, DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend, getEmptyImage } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 import { XYCoord } from 'dnd-core';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, ...rest }: any, ref) => {
   const defaultRef = React.useRef();
@@ -553,11 +566,25 @@ function CustomReactTable({
                                                     ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} 
                                                     ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
                         >
-                          {!['selection', 'action'].includes(cell?.column.id) &&
+                          {!['selection'].includes(cell?.column.id) &&
                           rowState &&
                           rowState.hasOwnProperty(row.id) &&
                           rowState[row.id].original.isEditing ? (
-                            <input value={cell.value} style={{ width: cell.column.width - 40 }} />
+                            cell?.column.id === 'action' ? (
+                              <HtmlTooltip title="Save">
+                                <IconButton
+                                  size="small"
+                                  aria-label="Save"
+                                  onClick={() => {
+                                    setRowState(row.id, { ...row, original: { ...row.original, isEditing: false } });
+                                  }}
+                                >
+                                  <Check color="primary" />
+                                </IconButton>
+                              </HtmlTooltip>
+                            ) : (
+                              <input value={cell.value} style={{ width: cell.column.width - 40 }} />
+                            )
                           ) : (
                             cell.render('Cell')
                           )}
