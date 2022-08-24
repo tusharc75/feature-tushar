@@ -30,6 +30,7 @@ import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
+import { workerData } from 'worker_threads';
 
 function a11yProps(index: any) {
   return {
@@ -56,7 +57,7 @@ const WorkOrderDetails = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [workOrderFields, setWorkOrderFields] = useState([]);
-  const [nextStep, setNextStep] = useState(true);
+  const [nextStep, setNextStep] = useState(false);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
@@ -90,10 +91,33 @@ const WorkOrderDetails = () => {
       fetchWorkOrderService();
     }
   }, [id]);
+  
+  useEffect(() => {
+    if (workOrderData?.processStatus && workOrderServiceData.length !== 0) {
+      let tempIndex = workOrderServiceData.findIndex(d => d?._id === workOrderData?.processStatus)
+      setCurrentStep(tempIndex > -1 ? tempIndex : 0)
+    }
+  }, [workOrderData, workOrderServiceData]);
 
   useEffect(() => {
     getResourceFields();
   }, []);
+
+  useEffect(() => {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
+      updateProcessStatus(workOrderServiceData[currentStep]);
+      setNextStep(false)
+    }
+  }, [currentStep]);
+
+  const updateProcessStatus = (currentStepData) => {
+    axiosInstance()
+      .put(`${workOrder.api}/update-process `, { "_id": id, "processStatus": currentStepData?._id, "subProcessStatus": "" })
+      .then(({ data }) => { })
+      .catch((error) => {
+      });
+
+  };
 
   const getResourceFields = () => {
     axiosInstance()
@@ -131,6 +155,7 @@ const WorkOrderDetails = () => {
       .then(({ data: { data } }) => {
         setWorkOrderServiceData(data);
         setWorkOrderServiceSteps(data.map(d => d?.serviceName))
+
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -263,7 +288,8 @@ const WorkOrderDetails = () => {
                           workOrderId={id}
                           serviceData={workOrderData?.serviceData ? workOrderData?.serviceData : []}
                           fetchWorkOrderData={fetchWorkOrderData}
-                          />
+                          setNextStep={setNextStep}
+                        />
                       )}
                     </>
                     : (
