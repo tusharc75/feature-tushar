@@ -46,7 +46,8 @@ const QuoteBuilder = ({
   sendToCustomer = false,
   stepFullScreen,
   fetchQuotationData,
-  setQuotationSummary
+  setQuotationSummary,
+  version
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -58,10 +59,12 @@ const QuoteBuilder = ({
   const [rowsData, setRowsData] = useState(null);
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
+  const versionId = quotationData?.versions[version]?._id || null;
 
   useEffect(() => {
     fetchFields();
-  }, []);
+    version && fetchProductInventory();
+  }, [version]);
 
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
@@ -203,15 +206,14 @@ const QuoteBuilder = ({
       }
     });
     setColumns(coloum);
-    fetchProductInventory();
   };
 
   const fetchProductInventory = async () => {
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}`);
-    const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}`);
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
+    const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${versionId}`);
 
     data = response?.data?.data;
     inventory = data?.inventory ? data?.inventory : [];

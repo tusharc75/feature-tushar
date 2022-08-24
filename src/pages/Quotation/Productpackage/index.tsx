@@ -44,7 +44,7 @@ import { capitalize } from 'lodash';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 
-const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, setQuotationSummary }) => {
+const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, setQuotationSummary, version }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -78,8 +78,9 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
 
   useEffect(() => {
     fetchFields();
-  }, []);
-
+  }, [version]);
+  const versionId = quotationData?.versions[version]?._id || null;
+  console.log(versionId);
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
@@ -137,9 +138,10 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'product'
-                    ? routes.productDetail.path
-                    : row.original.type === 'package'
+                  `${
+                    row.original.type === 'product'
+                      ? routes.productDetail.path
+                      : row.original.type === 'package'
                       ? routes.packagesDetail.path
                       : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
@@ -154,8 +156,9 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         Header: 'Lead Time (Days)',
         Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
         Footer: (info) => {
-          const total = info.rows.filter((f) => f.values.hasOwnProperty("leadTime") && !isNaN(f.values["leadTime"]))
-            .reduce((sum, row) => parseInt(row.values["leadTime"]) + sum, 0);
+          const total = info.rows
+            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
           return <>{total}</>;
         }
       }
@@ -234,7 +237,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />),
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
         });
       }
     });
@@ -311,7 +314,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}`);
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
@@ -410,7 +413,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     });
 
     axiosInstance()
-      .post(`${quotation.api}/productpackage/${quotationData._id}`, { material })
+      .post(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
@@ -440,7 +443,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData._id}`, { material: rows })
+      .put(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
@@ -455,7 +458,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/delete`, { ids: rows })
+      .put(`${quotation.api}/productpackage/${quotationData?._id}/${versionId}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
@@ -730,8 +733,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
             addExistingProductDialog.type === 'product'
               ? `${renderedFrom}-product`
               : addExistingProductDialog.type === 'service'
-                ? `${renderedFrom}-service`
-                : `${renderedFrom}-package`
+              ? `${renderedFrom}-service`
+              : `${renderedFrom}-package`
           }
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAdd}
@@ -767,12 +770,13 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         <LeadTimeDialog
           quotationId={quotationData._id}
           data={leadTimeDialog?.data}
+          versionId={versionId}
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });
           }}
           handleSucess={() => {
             setLeadTimeDialog({ open: false, data: null });
-            fetchProductInventory()
+            fetchProductInventory();
           }}
         />
       )}

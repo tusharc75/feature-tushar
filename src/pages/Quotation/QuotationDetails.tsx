@@ -11,19 +11,27 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { quotation, defaultActivityShow, getUniqueCurrencies, ACTIVITY_RESOURCE, quotationProcessSteps, CustomDialogTransition, currencyCodeToSymbol } from '../../constants/helpers';
+import {
+  quotation,
+  defaultActivityShow,
+  getUniqueCurrencies,
+  ACTIVITY_RESOURCE,
+  quotationProcessSteps,
+  CustomDialogTransition,
+  currencyCodeToSymbol
+} from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
+import { BiEdit, BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
 import Steps from '../RentalManagement/Steps';
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GiReceiveMoney, GrStatusInfo, RiFlowChart } from 'react-icons/all';
+import { GiReceiveMoney, GrStatusInfo, HiPencil, IoArrowDownCircleSharp, MdDelete, MdDeleteSweep, RiFlowChart, VscVersions } from 'react-icons/all';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
@@ -34,6 +42,9 @@ import RoadmapViews from './RoadMapViews';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import contactClass from '../Contact/contact.module.scss';
+import { CircularProgress } from '@material-ui/core';
+import AllVersionStatus from './AllVersionStatus';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -65,6 +76,7 @@ const QuotationDetails = () => {
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElAction, setAnchorElAction] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
@@ -74,6 +86,10 @@ const QuotationDetails = () => {
     totalcost: null,
     totalsale: null
   });
+  const [currentVersion, setCurrentVersion] = useState(0);
+  const [isCloning, setCloning] = useState(false);
+  const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
+  const [currVersionId, setCurrVersionId] = useState(null);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -95,11 +111,17 @@ const QuotationDetails = () => {
     return result;
   }, [quotationData]);
 
-  // useEffect(() => {
-  //   if (id) {
-  //   }
-  //   // eslint-disable-next-line
-  // }, [id]);
+  const handleChangeVersionFromAllVersion = (versionNumber) => {
+    setCurrentVersion(versionNumber);
+    setShowAllVersionStatus(false);
+  };
+
+  const handleCloneQuotationWithVersionFromAllVersion = (versionNumber) => {
+    // setCloneQuoteWithVersionNumber(versionNumber);
+    setOpenUpdateDialog(true);
+    // setIsQuoteClone(true);
+    setShowAllVersionStatus(false);
+  };
 
   const handleActivityHideShow = () => {
     setActivityShow(!showActivity);
@@ -127,6 +149,12 @@ const QuotationDetails = () => {
     setAnchorEl(null);
   };
 
+  const openActionsAction = (event) => {
+    setAnchorElAction(event.currentTarget);
+  };
+  const closeActionsAction = () => {
+    setAnchorElAction(null);
+  };
   useEffect(() => {
     if (id) {
       getRessourceFields();
@@ -143,7 +171,7 @@ const QuotationDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${quotation.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -164,7 +192,7 @@ const QuotationDetails = () => {
     }
   };
 
-  const fetchQuotationData = async () => {
+  const fetchQuotationData = async (version: any = 0) => {
     setLoading(true);
 
     try {
@@ -176,7 +204,14 @@ const QuotationDetails = () => {
       setHeadingLabel(data.quotationNumber);
       setCustomizedRoutes([routes.quotation, { title: `${data.quotationNumber}` }]);
       setQuotationData(data);
-
+      let keys = Object.keys(data.versions);
+      if (version == 0) {
+        setCurrentVersion(parseInt(keys[keys.length - 1]));
+        setCurrVersionId(data.versions[parseInt(keys[keys.length - 1])]?._id);
+      } else {
+        setCurrentVersion(version);
+        setCurrVersionId(data.versions[currentVersion]?._id);
+      }
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
 
@@ -193,6 +228,31 @@ const QuotationDetails = () => {
       setLoading(false);
       toastConfig.setToastConfig(error);
     }
+  };
+
+  const cloneVersion = () => {
+    setCloning(true);
+    axiosInstance()
+      .post(`/quotation/clone-version/${quotationData._id}/${currentVersion}`)
+      .then(() => {
+        fetchQuotationData();
+        setCloning(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setCloning(false);
+      });
+  };
+
+  const deleteVersion = () => {
+    axiosInstance()
+      .delete(`/quotation/${quotationData._id}/${currentVersion}`)
+      .then(() => {
+        fetchQuotationData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const handleOpenUpdateDialog = () => {
@@ -233,10 +293,10 @@ const QuotationDetails = () => {
   };
 
   const findProfitPercentage = (CP, Profit) => {
-    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, "") ?? 0)
-    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, "") ?? 0)
-    return (profit * 100 / parsedCP).toFixed(2);
-  }
+    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
+    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
+    return ((profit * 100) / parsedCP).toFixed(2);
+  };
 
   return (
     <>
@@ -260,7 +320,7 @@ const QuotationDetails = () => {
                   </div>
                 ) : (
                   <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
-                    {(
+                    {
                       <Tooltip title="Quote Summary">
                         <Button
                           onClick={() => {
@@ -275,7 +335,7 @@ const QuotationDetails = () => {
                           {isMobile && !isTablet ? '' : 'Quotation Summary'}
                         </Button>
                       </Tooltip>
-                    )}
+                    }
                     {/* {permissions?.quotation?.isUpdate && ['In-Progress'].includes(quotationData?.status) && ( */}
                     {permissions?.quotation?.isUpdate && (
                       <>
@@ -318,16 +378,102 @@ const QuotationDetails = () => {
                         </Menu>
                       </>
                     )}
-                    {permissions?.quotation?.isUpdate && allowedToEdit && (
-                      <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                        Edit
+                    <Tooltip title={`Version : ${currentVersion}`}>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                        color="primary"
+                        size="small"
+                        className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+                        onClick={() => {
+                          setShowAllVersionStatus(true);
+                        }}
+                        style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                        startIcon={isMobile && !isTablet ? null : <VscVersions />}
+                      >
+                        {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
                       </Button>
-                    )}
-                    {/* {permissions?.quotation?.isDelete && ['In-Progress', 'Closed'].indexOf(quotationData?.status) === -1 && ( */}
-                    {permissions?.quotation?.isDelete && (
-                      <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                    )}
+                    </Tooltip>
+                    <>
+                      <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        onClick={openActionsAction}
+                        aria-controls="action"
+                        endIcon={isMobile && !isTablet ? null : <ExpandMore />}
+                      >
+                        {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Action'}
+                      </Button>
+                      <Menu
+                        anchorEl={anchorElAction}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action"
+                        open={Boolean(anchorElAction)}
+                        onClose={closeActionsAction}
+                      >
+                        {permissions?.quotation?.isDelete && (
+                          <MenuItem>
+                            <Button
+                              variant="text"
+                              size="small"
+                              startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
+                              onClick={() => setShowConfirmBox(true)}
+                            >
+                              Delete Quote
+                            </Button>
+                          </MenuItem>
+                        )}
+                        {currentVersion !== 1 && permissions?.quotation?.isDelete && (
+                          <MenuItem>
+                            <Button
+                              variant="text"
+                              size="small"
+                              disabled={!allowedToEdit || loading}
+                              startIcon={<MdDeleteSweep className={isMobile ? 'mr-1' : ''} />}
+                              onClick={deleteVersion}
+                            >
+                              Delete Version-{currentVersion}
+                            </Button>
+                          </MenuItem>
+                        )}
+                        <MenuItem>
+                          <Button
+                            disabled={!allowedToEdit || isCloning || loading}
+                            variant="text"
+                            type="button"
+                            size="small"
+                            startIcon={
+                              isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />
+                            }
+                            onClick={() => {
+                              cloneVersion();
+                            }}
+                          >
+                            {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
+                          </Button>
+                        </MenuItem>
+                        {permissions?.quotation?.isUpdate && allowedToEdit && (
+                          <MenuItem>
+                            <Button
+                              variant="text"
+                              color="primary"
+                              size="small"
+                              startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
+                              onClick={handleOpenUpdateDialog}
+                            >
+                              Edit Quote
+                            </Button>
+                          </MenuItem>
+                        )}
+                      </Menu>
+                    </>
 
+                    {/* {permissions?.quotation?.isDelete && ['In-Progress', 'Closed'].indexOf(quotationData?.status) === -1 && ( */}
                   </DetailsPageHeader>
                 )}
                 <Tabs
@@ -406,7 +552,7 @@ const QuotationDetails = () => {
                       isStepEnded={['Invoiced', 'Closed'].includes(quotationData?.status)}
                       setStepFullScreen={() => setStepFullScreen(true)}
                     />
-                    <ContentFullScreen title={quotationProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                    <ContentFullScreen title={quotationProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                       {currentStep === 0 && quotationData && (
                         <Productpackage
                           quotationData={quotationData}
@@ -416,6 +562,7 @@ const QuotationDetails = () => {
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
                           setQuotationSummary={setQuotationSummary}
+                          version={currentVersion}
                         />
                       )}
                       {currentStep === 1 && quotationData && (
@@ -423,7 +570,9 @@ const QuotationDetails = () => {
                           quotationData={quotationData}
                           renderedFrom={`${renderedFrom}_grid-2`}
                           setNextStep={setNextStep}
-                          stepFullScreen={stepFullScreen} />
+                          stepFullScreen={stepFullScreen}
+                          version={currentVersion}
+                        />
                       )}
                       {currentStep === 2 && quotationData && (
                         <QuoteBuilder
@@ -434,6 +583,7 @@ const QuotationDetails = () => {
                           stepFullScreen={stepFullScreen}
                           fetchQuotationData={fetchQuotationData}
                           setQuotationSummary={setQuotationSummary}
+                          version={currentVersion}
                         />
                       )}
                       {currentStep === 3 && quotationData && (
@@ -446,6 +596,7 @@ const QuotationDetails = () => {
                           stepFullScreen={stepFullScreen}
                           fetchQuotationData={fetchQuotationData}
                           setQuotationSummary={setQuotationSummary}
+                          version={currentVersion}
                         />
                       )}
                       {currentStep === 4 && quotationData && (
@@ -457,6 +608,7 @@ const QuotationDetails = () => {
                           stepFullScreen={stepFullScreen}
                           fetchQuotationData={fetchQuotationData}
                           setQuotationSummary={setQuotationSummary}
+                          version={currentVersion}
                         />
                       )}
                     </ContentFullScreen>
@@ -499,7 +651,7 @@ const QuotationDetails = () => {
                                 access: true
                               }
                             ]}
-                            handleActivityRefresh={() => { }}
+                            handleActivityRefresh={() => {}}
                             emails={[]}
                           />
                         </div>
@@ -565,7 +717,10 @@ const QuotationDetails = () => {
             <Grid item className="quoteHeader">
               <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
                 <span className="quoteAmount" title={quotationSummary?.totalProfit?.fullFormatAmount}>
-                  {quotationSummary?.totalProfit?.fullFormatAmount ? quotationSummary?.totalProfit?.fullFormatAmount : defaultTotalValue} {quotationSummary?.totalcost?.fullFormatAmount ? `(${findProfitPercentage(quotationSummary?.totalcost, quotationSummary?.totalProfit)} %)` : ''}
+                  {quotationSummary?.totalProfit?.fullFormatAmount ? quotationSummary?.totalProfit?.fullFormatAmount : defaultTotalValue}{' '}
+                  {quotationSummary?.totalcost?.fullFormatAmount
+                    ? `(${findProfitPercentage(quotationSummary?.totalcost, quotationSummary?.totalProfit)} %)`
+                    : ''}
                 </span>
                 <div className={'quoteBoxContent'}>
                   <span className={'quoteDetailHeading'}>Total Profit </span>
@@ -603,10 +758,20 @@ const QuotationDetails = () => {
           </CustomDialogContent>
         </Dialog>
       )}
+      {quotationData && showAllVersionStatus && (
+        <AllVersionStatus
+          open={showAllVersionStatus}
+          onClose={() => setShowAllVersionStatus(false)}
+          quotationId={id}
+          quotationData={quotationData}
+          quotationPermissions={permissions?.quotation}
+          fetchQuotationData={fetchQuotationData}
+          handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
+          handleCloneQuoteWithVersionFromAllVersion={handleCloneQuotationWithVersionFromAllVersion}
+        />
+      )}
     </>
   );
 };
 
 export default QuotationDetails;
-
-
