@@ -4,7 +4,7 @@ import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
 import queryString from 'query-string';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairOrder, prepareDataForGrid, getLocalStorageArrayData } from '../../constants/helpers';
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairOrder, prepareDataForGrid, getLocalStorageArrayData, removeLocalStorage } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -267,8 +267,7 @@ const RepairOrder = () => {
             deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
         }
         if (showFilteredRecordsOnly) {
-            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
         }
         return deepFilter;
     };
@@ -324,7 +323,7 @@ const RepairOrder = () => {
                 setDeleteRecord(row);
             }
         } else {
-            if (selectedRecords.find((d) => d.canDelete === false)) {
+            if (getLocalStorageArrayData(localStorageSelectedRecords)?.find((d) => d.canDelete === false)) {
                 setShowDeleteWarningConfirmBox(true);
             } else {
                 setIsConformDialogVisible(true);
@@ -342,7 +341,7 @@ const RepairOrder = () => {
         if (deleteRecord?._id) {
             recordsToDelete.push(deleteRecord?._id);
         } else {
-            recordsToDelete = selectedRecords.map((o) => o._id);
+            recordsToDelete = getLocalStorageArrayData(localStorageSelectedRecords)?.map((o) => o._id);
         }
         if (recordsToDelete.length > 0) {
             axiosInstance()
@@ -355,6 +354,7 @@ const RepairOrder = () => {
                         type: 'success',
                         message: data.message
                     });
+                    removeLocalStorage(localStorageSelectedRecords)
                     setIsConformDialogVisible(false);
                     setDeleteLoading(false);
                     if (deleteRecord) setDeleteRecord({});
@@ -385,10 +385,10 @@ const RepairOrder = () => {
                                     afterImportCompleted={() => { fetchRepairOrders() }}
                                     isExportAllOrSomeFeature={true}
                                     total={rowCount}
-                                    recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                                    recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords)?.length}
                                     ids={
-                                        getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-                                            ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                                        getLocalStorageArrayData(localStorageSelectedRecords)?.length
+                                            ? getLocalStorageArrayData(localStorageSelectedRecords)?.map((obj) => obj._id)
                                             : []
                                     }
                                     onExportToExcelSuccess={() => {
@@ -406,7 +406,7 @@ const RepairOrder = () => {
                 <div className="header-panel">
                     <RepairOrderHeader
                         selectedType={selectedType}
-                        selectedRecords={selectedRecords}
+                        selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
                         onTypeChange={handleRepairOrderTypeSel}
                         options={RepairOrderType}
                         onSearch={handleSearch}
@@ -416,7 +416,7 @@ const RepairOrder = () => {
                         RepairOrderPermissions={permissions?.repairOrder}
                         onCreate={clickCreateNew}
                         showConfirmBox={showConfirmBox}
-                        canDelete={selectedRecords.length === 0}
+                        canDelete={getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0}
                         icon={<FaRegistered className="headerLogo" />}
                         heading={routes.repairOrder.title}
                         showTransferEntityDialog={handleTransferEntityDialog}
@@ -439,7 +439,7 @@ const RepairOrder = () => {
                                     history.push(`${routes.repairOrderDetail.path}/${data._id}`)
                                 }}
                                 dataRows={dataRows}
-                                selectedRecords={selectedRecords}
+                                selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
                                 dispatch={dispatch}
                                 onEdit={(data) => {
                                     history.push(`${routes.repairOrderDetail.path}/${data._id}?openEdit=true`)

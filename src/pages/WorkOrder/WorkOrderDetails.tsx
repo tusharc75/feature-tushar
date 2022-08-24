@@ -277,7 +277,7 @@ const WorkOrderDetails = () => {
             </Box>
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
-            {workOrderServiceData ?
+            {(workOrderServiceData && workOrderSteps?.length) ?
               <>
                 <Steps
                   isNextStep={false}
