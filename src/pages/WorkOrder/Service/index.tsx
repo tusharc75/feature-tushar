@@ -8,7 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import { Formik, Form } from "formik";
 import { dateTimeFormat, getObjKeys, getObjKeysWithValues, workOrder, yupSchema } from 'src/constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, Divider, Grid, IconButton, Paper } from '@material-ui/core';
 import FormTypes from 'src/components/ServiceMaster/FormTypes';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
@@ -42,11 +42,14 @@ const useStyles = makeStyles((theme: Theme) =>
             marginTop: theme.spacing(1),
             marginBottom: theme.spacing(1),
         },
+        stepContent: {
+            margin: theme.spacing(1),
+        }
     }),
 );
 
 
-const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderData, setNextStep }) => {
+const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderData, setNextStep, setServiceCurrentStep, serviceSteps, currentServiceStep }) => {
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const [currentStep, setCurrentStep] = useState(0);
@@ -57,8 +60,14 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
 
     useEffect(() => {
         setInitialDataFields();
-        setCurrentStep(0);
         setStepConstant(serviceDataFields?.steps?.map(d => d.stepName));
+        let tempLastId = serviceDataFields?.steps?.findIndex(obj => obj._id === serviceData.find(d => d.startDate !== undefined && d.serviceId === serviceDataFields?._id)?.stepId)
+        if (tempLastId > -1) {
+            setCurrentStep(tempLastId)
+        }
+        else {
+            setCurrentStep(0);
+        }
 
     }, [serviceDataFields]);
 
@@ -88,7 +97,12 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
     };
 
     const handleNext = () => {
-        if (currentStep < stepConstant.length - 1) setCurrentStep((prevActiveStep) => prevActiveStep + 1);
+        if (currentStep < stepConstant.length - 1) {
+            setCurrentStep((prevActiveStep) => prevActiveStep + 1);
+        }
+        else if(currentServiceStep < serviceSteps.length - 1){
+            setServiceCurrentStep((prevActiveStep) => prevActiveStep + 1);
+        }
     };
 
     const handleBack = () => {
@@ -149,189 +163,225 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
                         </Step>
                     ))}
                 </Stepper>
-
+                <Box marginY={2} p={2}>
+                    <Typography style={{ fontWeight: "bold", fontSize: '1rem' }} color="primary" className="d-flex align-items-center">
+                        {`Service Step  - ${stepConstant[currentStep]}`}
+                    </Typography>
+                    <Typography style={{ fontWeight: "light", fontSize: '0.8rem' }} color="primary" className="d-flex align-items-center">
+                        {`Step  ${currentStep + 1} of ${stepConstant.length}`}
+                    </Typography>
+                </Box>
             </div>
-
-            <div>
-                {
-                    (
+            <div className={classes.stepContent}>
+                <Paper elevation={isMobile ? 0 : 4} style={{ marginBottom: 20 }} >
+                    {
                         <Box marginY={2} p={2}>
-                            {initialData.fields.length ? (
-                                <Formik
-                                    initialValues={initialData.values}
-                                    validationSchema={yupSchema(initialData.fields)}
-                                    onSubmit={handleSubmit}
-                                    validate={validate}
-                                    enableReinitialize
-                                >
-                                    {({ values, errors, setFieldValue, touched, submitForm }) => (
-                                        <Fragment>
-                                            <Form autoComplete="off" autoCorrect="off" noValidate >
-                                                {
-                                                    <div key="display_stepper_content">
-                                                        <Box marginY={2}>
-                                                            <Grid spacing={3} container>
-                                                                {
-                                                                    initialData.fields?.map((field, index) => (
-                                                                        <Grid key={index} item xs={12} sm={6} md={6}>
-                                                                            <FormTypes
-                                                                                {...field}
-                                                                                fieldData={field}
-                                                                                values={values}
-                                                                                label={field.fieldLabel}
-                                                                                name={field.fieldName}
-                                                                                type={field.type}
-                                                                                required={field.required}
-                                                                                options={field.option ? field.option : []}
-                                                                                setFieldValue={(name, value) => {
-                                                                                    setFieldValue(name, value)
-                                                                                }}
-                                                                                fullWidth
-                                                                                size="small"
-                                                                            />
-                                                                        </Grid>
-                                                                    ))
+                            <>
+
+                                {initialData.fields.length ? (
+                                    <Formik
+                                        initialValues={initialData.values}
+                                        validationSchema={yupSchema(initialData.fields)}
+                                        onSubmit={handleSubmit}
+                                        validate={validate}
+                                        enableReinitialize
+                                    >
+                                        {({ values, errors, setFieldValue, touched, submitForm }) => (
+                                            <Fragment>
+                                                <Form autoComplete="off" autoCorrect="off" noValidate >
+                                                    {
+                                                        <div key="display_stepper_content">
+                                                            <Box marginY={2}>
+                                                                <Grid spacing={3} container>
+                                                                    {
+                                                                        initialData.fields?.map((field, index) => (
+                                                                            <Grid key={index} item xs={12} sm={6} md={6}>
+                                                                                <FormTypes
+                                                                                    {...field}
+                                                                                    fieldData={field}
+                                                                                    values={values}
+                                                                                    label={field.fieldLabel}
+                                                                                    name={field.fieldName}
+                                                                                    type={field.type}
+                                                                                    required={field.required}
+                                                                                    options={field.option ? field.option : []}
+                                                                                    setFieldValue={(name, value) => {
+                                                                                        setFieldValue(name, value)
+                                                                                    }}
+                                                                                    fullWidth
+                                                                                    size="small"
+                                                                                />
+                                                                            </Grid>
+                                                                        ))
+                                                                    }
+                                                                </Grid>
+                                                            </Box>
+                                                        </div>
+                                                    }
+                                                </Form>
+                                                <Grid container spacing={2}>
+                                                    <Grid item xs={12} md={12} sm={12}>
+                                                        <Box display="flex" justifyContent="space-between" m={1}>
+                                                            <Box display="flex">
+                                                                {!(stepData?.startDate || stepData?.endDate) &&
+                                                                    <>
+                                                                        <Button
+                                                                            variant="outlined"
+                                                                            color="primary"
+                                                                            size="small"
+                                                                            disabled={stepData?.startDate || stepData?.endDate}
+                                                                            onClick={() => {
+                                                                                let tempData = {
+                                                                                    "serviceId": serviceDataFields?._id,
+                                                                                    "stepId": serviceDataFields?.steps[currentStep]?._id,
+                                                                                }
+                                                                                axiosInstance()
+                                                                                    .put(`${workOrder.api}/${workOrderId}/step/start `, tempData)
+                                                                                    .then(({ data }) => {
+                                                                                        toastConfig.setToastConfig({
+                                                                                            open: true,
+                                                                                            type: "success",
+                                                                                            message: data.message,
+                                                                                        });
+                                                                                        fetchWorkOrderData()
+                                                                                    })
+                                                                                    .catch((error) => {
+                                                                                        toastConfig.setToastConfig(error);
+                                                                                    });
+                                                                            }}
+                                                                        >
+                                                                            Start
+                                                                        </Button>
+                                                                        <Box mx={isMobile ? 0.5 : 1} />
+                                                                    </>
                                                                 }
-                                                            </Grid>
+                                                                {!(!stepData?.startDate || stepData?.endDate) &&
+                                                                    <>
+                                                                        <DeleteButton
+                                                                            text="End"
+                                                                            disabled={!stepData?.startDate || stepData?.endDate}
+                                                                            onClick={() => {
+                                                                                let tempData = {
+                                                                                    "serviceId": serviceDataFields?._id,
+                                                                                    "stepId": serviceDataFields?.steps[currentStep]?._id,
+                                                                                }
+                                                                                axiosInstance()
+                                                                                    .put(`${workOrder.api}/${workOrderId}/step/end `, tempData)
+                                                                                    .then(({ data }) => {
+                                                                                        toastConfig.setToastConfig({
+                                                                                            open: true,
+                                                                                            type: "success",
+                                                                                            message: data.message,
+                                                                                        });
+                                                                                        fetchWorkOrderData()
+                                                                                    })
+                                                                                    .catch((error) => {
+                                                                                        toastConfig.setToastConfig(error);
+                                                                                    });
+                                                                            }}
+                                                                        />
+                                                                        <Box mx={isMobile ? 0.5 : 1} />
+                                                                    </>
+                                                                }
+                                                                <CustomButton
+                                                                    variant="contained"
+                                                                    color="primary"
+                                                                    type="submit"
+                                                                    disabled={stepData?.endDate === undefined || stepData?.endDate === null}
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        handleScroll(errors)
+                                                                        submitForm();
+                                                                    }}
+                                                                > Save</CustomButton>
+                                                            </Box>
                                                         </Box>
-                                                    </div>
-                                                }
-                                            </Form>
-                                            <Grid container spacing={2}>
-                                                {stepData?.startDate && <Grid item xs={12} md={12} sm={12}>
-                                                    <Typography style={{ fontWeight: "bold" }}>{`${"Duration "}`}</Typography>
-                                                    <Typography display='inline'>
-                                                        &nbsp;&nbsp;Start Date &nbsp;&nbsp;
-                                                    </Typography>
-                                                    <Typography style={{ fontWeight: "bold", color: "#258C89" }} display='inline'>
-                                                        {`: ${moment(stepData?.startDate).format(dateTimeFormat)}`}
-                                                    </Typography>
-                                                    {stepData?.endDate && (
-                                                        <>
-                                                            <Typography display='inline'>
-                                                                &nbsp;&nbsp;End Date&nbsp;&nbsp;
-                                                            </Typography>
-                                                            <Typography style={{ fontWeight: "bold", color: "#258C89" }} display='inline'>
-                                                                {`: ${moment(stepData?.endDate).format(dateTimeFormat)}`}
-                                                            </Typography>
-                                                            <Typography display='inline'>
-                                                                &nbsp;&nbsp;Time Duration&nbsp;&nbsp;
-                                                            </Typography>
-                                                            <Typography style={{ fontWeight: "bold", color: "#258C89" }} display='inline'>
-                                                                {`: ${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}
-                                                            </Typography>
-                                                        </>
-                                                    )}
+                                                    </Grid>
 
-                                                </Grid>}
-
-                                                <Grid item xs={12} md={12} sm={12}>
-                                                    <Box display="flex" justifyContent="space-between" m={1}>
-                                                        <Box display="flex">
-                                                            <Button
-                                                                variant="outlined"
-                                                                color="primary"
-                                                                size="small"
-                                                                disabled={stepData?.startDate || stepData?.endDate}
-                                                                onClick={() => {
-                                                                    let tempData = {
-                                                                        "serviceId": serviceDataFields?._id,
-                                                                        "stepId": serviceDataFields?.steps[currentStep]?._id,
-                                                                    }
-                                                                    axiosInstance()
-                                                                        .put(`${workOrder.api}/${workOrderId}/step/start `, tempData)
-                                                                        .then(({ data }) => {
-                                                                            toastConfig.setToastConfig({
-                                                                                open: true,
-                                                                                type: "success",
-                                                                                message: data.message,
-                                                                            });
-                                                                            fetchWorkOrderData()
-                                                                        })
-                                                                        .catch((error) => {
-                                                                            toastConfig.setToastConfig(error);
-                                                                        });
-                                                                }}
-                                                            >
-                                                                Start
-                                                            </Button>
-                                                            <Box mx={isMobile ? 0.5 : 1} />
-                                                            <DeleteButton
-                                                                text="End"
-                                                                disabled={!stepData?.startDate || stepData?.endDate}
-                                                                onClick={() => {
-                                                                    let tempData = {
-                                                                        "serviceId": serviceDataFields?._id,
-                                                                        "stepId": serviceDataFields?.steps[currentStep]?._id,
-                                                                    }
-                                                                    axiosInstance()
-                                                                        .put(`${workOrder.api}/${workOrderId}/step/end `, tempData)
-                                                                        .then(({ data }) => {
-                                                                            toastConfig.setToastConfig({
-                                                                                open: true,
-                                                                                type: "success",
-                                                                                message: data.message,
-                                                                            });
-                                                                            fetchWorkOrderData()
-                                                                        })
-                                                                        .catch((error) => {
-                                                                            toastConfig.setToastConfig(error);
-                                                                        });
-                                                                }}
-                                                            />
+                                                    <Grid item xs={12} md={12} sm={12}>
+                                                        <Box display="flex" justifyContent="space-between" m={1}>
+                                                            <Box display="flex">
+                                                                {stepData?.startDate &&
+                                                                    <>
+                                                                        <Typography style={{ fontWeight: "bold", fontSize: '0.8rem' }} >
+                                                                            Start Date &nbsp;&nbsp;
+                                                                        </Typography>
+                                                                        <Typography style={{ fontWeight: "bold", fontSize: '0.9rem', color: "#258C89" }} >
+                                                                            {`: ${moment(stepData?.startDate).format(dateTimeFormat)}`}
+                                                                        </Typography>
+                                                                        {stepData?.endDate && (
+                                                                            <>
+                                                                                <Typography style={{ fontWeight: "bold", fontSize: '0.8rem' }} >
+                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;End Date&nbsp;&nbsp;
+                                                                                </Typography>
+                                                                                <Typography style={{ fontWeight: "bold", fontSize: '0.9rem', color: "#258C89" }} >
+                                                                                    {`: ${moment(stepData?.endDate).format(dateTimeFormat)}`}
+                                                                                </Typography>
+                                                                                <Typography style={{ fontWeight: "bold", fontSize: '0.8rem' }} >
+                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;Time Duration&nbsp;&nbsp;
+                                                                                </Typography>
+                                                                                <Typography style={{ fontWeight: "bold", fontSize: '0.9rem', color: "#258C89" }} >
+                                                                                    {`: ${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}
+                                                                                </Typography>
+                                                                            </>
+                                                                        )}
+                                                                    </>}
+                                                            </Box>
+                                                            <Box display="flex">
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                    size="small"
+                                                                    disabled={currentStep === 0}
+                                                                    onClick={handleBack}
+                                                                >
+                                                                    Back
+                                                                </Button>
+                                                                <Box mx={isMobile ? 0.5 : 1} />
+                                                                <CustomButton
+                                                                    variant="contained"
+                                                                    color="primary"
+                                                                    type="submit"
+                                                                    disabled={stepData?.endDate === undefined || stepData?.endDate === null}
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        handleScroll(errors)
+                                                                        handleNext();
+                                                                    }}
+                                                                > Next</CustomButton>
+                                                            </Box>
                                                         </Box>
-                                                        <Box display="flex">
-                                                            <Button
-                                                                variant="outlined"
-                                                                color="primary"
-                                                                size="small"
-                                                                disabled={currentStep === 0}
-                                                                onClick={handleBack}
-                                                            >
-                                                                Back
-                                                            </Button>
-                                                            <Box mx={isMobile ? 0.5 : 1} />
-                                                            <CustomButton
-                                                                variant="contained"
-                                                                color="primary"
-                                                                type="submit"
-                                                                disabled={stepData?.endDate === undefined || stepData?.endDate === null}
-                                                                onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    handleScroll(errors)
-                                                                    submitForm();
-                                                                }}
-                                                            > Save</CustomButton>
-                                                        </Box>
-                                                    </Box>
+                                                    </Grid>
                                                 </Grid>
-                                            </Grid>
 
 
-                                            {
-                                                showConfirmDialog ?
-                                                    <ConfirmCancelDialog
-                                                        close={() => setShowConfirmDialog(false)}
-                                                        open={showConfirmDialog}
-                                                        onSave={() => {
-                                                            setShowConfirmDialog(false)
-                                                            submitForm();
-                                                        }}
-                                                        onClose={() => {
-                                                            setShowConfirmDialog(false)
-                                                        }}
-                                                    /> : null
-                                            }
-                                        </Fragment>
-                                    )}
-                                </Formik>
-                            ) :
-                                <Box p={2} height={500} bgcolor="white">
-                                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                                </Box>
-                            }
+                                                {
+                                                    showConfirmDialog ?
+                                                        <ConfirmCancelDialog
+                                                            close={() => setShowConfirmDialog(false)}
+                                                            open={showConfirmDialog}
+                                                            onSave={() => {
+                                                                setShowConfirmDialog(false)
+                                                                submitForm();
+                                                            }}
+                                                            onClose={() => {
+                                                                setShowConfirmDialog(false)
+                                                            }}
+                                                        /> : null
+                                                }
+                                            </Fragment>
+                                        )}
+                                    </Formik>
+                                ) :
+                                    <Box p={2} height={500} bgcolor="white">
+                                        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                                    </Box>
+                                }
+                            </>
+
                         </Box>
-                    )}
+                    }
+                </Paper>
             </div>
         </div>
     );
