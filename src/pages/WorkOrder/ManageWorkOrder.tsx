@@ -27,7 +27,7 @@ import routes from "src/components/Helpers/Routes";
 import { useHistory } from 'react-router-dom';
 
 const disabledFieldArray = ['workOrderNumber', "type", "product", "repairOrder", "status"]
-const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType = null, refrenceData = null,
+const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null, refrenceType = null, refrenceData = null,
     products = null, serviceMaster = null }) => {
 
     const { state: { user } }: any = useData();
@@ -88,10 +88,23 @@ const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType 
                 data = response?.data?.data
                 setWorkOrderData(data)
                 setDisableOwnerSelection(workOrderId && user.user._id !== data?.owner?.optionValue);
-                setInitialData({
-                    fields: fieldsDataForUpdate,
-                    values: getObjKeysWithValues(data, fieldsDataForUpdate),
-                });
+                if (isClone) {
+                    const { _id, createdBy, updatedBy, workOrderNumber, status, ...rest } = data
+                    rest['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
+                    rest['status'] = "New";
+                    rest['estimateCompleteDate'] = new Date();
+                    rest['createDate'] = new Date();
+                    setInitialData({
+                        fields: fieldsDataForUpdate,
+                        values: getObjKeysWithValues(rest, fieldsDataForUpdate),
+                    });
+                }
+                else {
+                    setInitialData({
+                        fields: fieldsDataForUpdate,
+                        values: getObjKeysWithValues(data, fieldsDataForUpdate),
+                    });
+                }
             }
             else {
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
@@ -231,7 +244,10 @@ const ManageWorkOrder = ({ onClose, onSuccess, workOrderId = null, refrenceType 
                                     onClose()
                                 }
                             }}
-                            title={`${workOrderId ? `Update ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ""}`
+                            title={`${workOrderId ?
+                                isClone ?
+                                    `Clone ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ""}`
+                                    : `Update ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ""}`
                                 : `Create Work Order`}`}
                             isMinimized={!fullScreen}
                             onMinimizeMaximize={() => {
