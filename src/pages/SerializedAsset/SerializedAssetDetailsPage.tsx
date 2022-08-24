@@ -438,18 +438,29 @@ const SerializedAssetDetailsPage = () => {
                             {isMobile && !isTablet ? <GiAutoRepair size={20} /> : "Create Repair Job"}
                           </Button>
                         }
-                        {allowUpdateStatus &&
-                          <Button
-                            variant="outlined"
-                            color="default"
-                            size="small"
-                            onClick={openActions}
-                            disabled={updateLoading}
-                            aria-controls="action-menu"
-                            endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
-                          >
-                            {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
-                          </Button>
+                        {allowUpdateStatus ?
+                          productInventoryData.status === INVENTORY_STATUS.lost ?
+                            <Button
+                              variant="outlined"
+                              color="default"
+                              size="small"
+                              onClick={() => handleStatusUpdate({ status: INVENTORY_STATUS.available })}
+                              aria-controls="action-menu"
+                            >
+                              Asset Found
+                            </Button> :
+                            <Button
+                              variant="outlined"
+                              color="default"
+                              size="small"
+                              onClick={openActions}
+                              disabled={updateLoading}
+                              aria-controls="action-menu"
+                              endIcon={isMobile && !isTablet ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                            >
+                              {isMobile && !isTablet ? <GrStatusInfo size={20} /> : "Change Status"}
+                            </Button>
+                          : null
                         }
                         {![INVENTORY_STATUS.inUse].includes(productInventoryData.status) &&
                           <Button
