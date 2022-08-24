@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Divider } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -30,7 +30,6 @@ import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
-import { workerData } from 'worker_threads';
 
 function a11yProps(index: any) {
   return {
@@ -64,7 +63,10 @@ const WorkOrderDetails = () => {
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [workOrderServiceData, setWorkOrderServiceData] = useState([]);
-  const [workOrderServiceSteps, setWorkOrderServiceSteps] = useState([]);
+  const [workOrderSteps, setWorkOrderSteps] = useState([]);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [serviceData, setServiceData] = useState([]);
+
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -89,9 +91,10 @@ const WorkOrderDetails = () => {
     if (id) {
       fetchWorkOrderData();
       fetchWorkOrderService();
+      getServiceData();
     }
   }, [id]);
-  
+
   useEffect(() => {
     if (workOrderData?.processStatus && workOrderServiceData.length !== 0) {
       let tempIndex = workOrderServiceData.findIndex(d => d?._id === workOrderData?.processStatus)
@@ -112,11 +115,10 @@ const WorkOrderDetails = () => {
 
   const updateProcessStatus = (currentStepData) => {
     axiosInstance()
-      .put(`${workOrder.api}/update-process `, { "_id": id, "processStatus": currentStepData?._id, "subProcessStatus": "" })
+      .put(`${workOrder.api}/update-process`, { "_id": id, "processStatus": currentStepData?._id, "subProcessStatus": "" })
       .then(({ data }) => { })
       .catch((error) => {
       });
-
   };
 
   const getResourceFields = () => {
@@ -150,16 +152,12 @@ const WorkOrderDetails = () => {
   };
 
   const fetchWorkOrderService = () => {
-    axiosInstance()
-      .get(`${routes.workOrder.path}/service-detail/${id}`)
-      .then(({ data: { data } }) => {
-        setWorkOrderServiceData(data);
-        setWorkOrderServiceSteps(data.map(d => d?.serviceName))
-
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    axiosInstance().get(`${routes.workOrder.path}/service-detail/${id}`).then(({ data: { data } }) => {
+      setWorkOrderServiceData(data);
+      setWorkOrderSteps(data.map(d => d?.serviceName))
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
   const handleDelete = () => {
@@ -192,6 +190,16 @@ const WorkOrderDetails = () => {
     }
   }, [isSmallScreen, tabValue])
 
+  const getServiceData = () => {
+    axiosInstance()
+      .get(`${workOrder.api}/${id}/steps-data`)
+      .then(({ data: { data } }) => {
+        setServiceData(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
 
   return (
     <>
@@ -199,146 +207,144 @@ const WorkOrderDetails = () => {
         <CustomBreadCrumbs routes={[routes.workOrder, { title: workOrderData?.workOrderNumber }]} />
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <div>
-          <div>
-            <Paper>
-              {workOrderData ? (
-                <DetailsPageHeader heading={workOrderData?.workOrderNumber} mainPoints={null} showHeading={true}>
-                  {permissions?.workOrder?.isUpdate && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={() => setOpenUpdateDialog(true)}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  )}
-                  {permissions?.workOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                </DetailsPageHeader>
+        <Paper>
+          {workOrderData ? (
+            <DetailsPageHeader heading={workOrderData?.workOrderNumber} mainPoints={null} showHeading={true}>
+              {permissions?.workOrder?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  color="primary"
+                  size="small"
+                  onClick={() => setOpenUpdateDialog(true)}
+                  className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.workOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </DetailsPageHeader>
+          ) : (
+            <Skeleton variant="text" width="150px" height="40px" />
+          )}
+          <Tabs
+            className="quote-tab"
+            value={tabValue}
+            onChange={handleMainTabChange}
+            textColor="primary"
+            TabIndicatorProps={{
+              style: {
+                display: 'none'
+              }
+            }}
+          >
+            <Tab
+              className={'tabLayout'}
+              style={{
+                background: tabValue === 1 ? 'white' : '',
+                color: tabValue === 1 ? '#163340' : '#163340'
+              }}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                </div>
+              }
+              {...a11yProps(0)}
+            />
+            <Tab
+              className={'tabLayout'}
+              style={{
+                background: tabValue === 2 ? 'white' : '',
+                color: '#163340'
+              }}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                </div>
+              }
+              {...a11yProps(1)}
+            />
+          </Tabs>
+          <TabPanel value={tabValue} index={0}>
+            <Box>
+              {workOrderData && workOrderFields.length ? (
+                <DetailsPage data={workOrderData} fields={workOrderFields} />
               ) : (
-                <Skeleton variant="text" width="150px" height="40px" />
-              )}
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 1 ? 'white' : '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: tabValue === 2 ? 'white' : '',
-                    color: '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-              </Tabs>
-              <TabPanel value={tabValue} index={0}>
-                <Box>
-                  {workOrderData && workOrderFields.length ? (
-                    <DetailsPage data={workOrderData} fields={workOrderFields} />
-                  ) : (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  )}
-                </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={1}>
-                <Paper>
-                  {workOrderServiceData ?
-                    <>
-                      <Steps
-                        isNextStep={false}
-                        nextStep={nextStep}
-                        steps={workOrderServiceSteps}
-                        currentStep={currentStep}
-                        setCurrentStep={setCurrentStep}
-                        isStepEnded={false}
-                      />
-                      {workOrderServiceData[currentStep] && workOrderData && (
-                        <Service
-                          serviceDataFields={workOrderServiceData[currentStep]}
-                          workOrderId={id}
-                          serviceData={workOrderData?.serviceData ? workOrderData?.serviceData : []}
-                          fetchWorkOrderData={fetchWorkOrderData}
-                          setNextStep={setNextStep}
-                        />
-                      )}
-                    </>
-                    : (
-                      <Grid container spacing={2} style={{ padding: '8px' }}>
-                        <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                      </Grid>
-                    )}
-                </Paper>
-              </TabPanel>
-            </Paper>
-          </div>
-          <Box my={1} />
-        </div>
-        <div className="position-relative">
-          <HideWhenOffline>
-            <Paper>
-              {!isSmallScreen && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={() => setActivityShow(!showActivity)}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
-              )}
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    {workOrderData && (
-                      <div>
-                        <Activity
-                          resourceId={workOrderData._id}
-                          resource={ACTIVITY_RESOURCE.workOrder}
-                          restrictedAddActivities={
-                            permissions && permissions[`${ACTIVITY_RESOURCE.workOrder}`] && permissions[`${ACTIVITY_RESOURCE.workOrder}`].isUpdate ? [] : ['Attachment', 'Case']
-                          }
-                          relatedTo={[
-                            {
-                              type: ACTIVITY_RESOURCE.workOrder,
-                              referenceId: workOrderData._id,
-                              access: true
-                            }
-                          ]}
-                          handleActivityRefresh={() => { }}
-                          emails={[]}
-                        />
-                      </div>
-                    )}
-                  </Grid>
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
                 </Grid>
-              </div>
-            </Paper>
-          </HideWhenOffline>
+              )}
+            </Box>
+          </TabPanel>
+          <TabPanel value={tabValue} index={1}>
+            {(workOrderServiceData && workOrderSteps?.length) ?
+              <>
+                <Steps
+                  isNextStep={false}
+                  nextStep={nextStep}
+                  steps={workOrderSteps}
+                  currentStep={currentStep}
+                  setCurrentStep={setCurrentStep}
+                  isStepEnded={false}
+                  setStepFullScreen={() => setStepFullScreen(true)}
+                />
+                <ContentFullScreen title={workOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                  {workOrderServiceData[currentStep] && workOrderData ? (
+                    <Service
+                      serviceDataFields={workOrderServiceData[currentStep]}
+                      workOrderId={id}
+                      setNextStep={setNextStep}
+                      serviceData={serviceData}
+                      getServiceData={getServiceData}
+                      setServiceCurrentStep={setCurrentStep}
+                      serviceSteps={workOrderSteps}
+                      currentServiceStep={currentStep}
+                    />
+                  ) : null}
+                </ContentFullScreen>
+              </>
+              : (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              )}
+          </TabPanel>
+        </Paper>
+        <Box my={1} />
+        <div className="position-relative">
+          <Paper>
+            {!isSmallScreen && (
+              <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={() => setActivityShow(!showActivity)}>
+                {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
+              </span>
+            )}
+            <div style={{ display: showActivity ? 'block' : 'none' }}>
+              <Grid container>
+                <Grid item xs={12}>
+                  {workOrderData && (
+                    <div>
+                      <Activity
+                        resourceId={workOrderData._id}
+                        resource={ACTIVITY_RESOURCE.workOrder}
+                        restrictedAddActivities={
+                          permissions && permissions[`${ACTIVITY_RESOURCE.workOrder}`] && permissions[`${ACTIVITY_RESOURCE.workOrder}`].isUpdate ? [] : ['Attachment', 'Case']
+                        }
+                        relatedTo={[
+                          {
+                            type: ACTIVITY_RESOURCE.workOrder,
+                            referenceId: workOrderData._id,
+                            access: true
+                          }
+                        ]}
+                        handleActivityRefresh={() => { }}
+                        emails={[]}
+                      />
+                    </div>
+                  )}
+                </Grid>
+              </Grid>
+            </div>
+          </Paper>
         </div>
       </div>
       {showConfirmBox && (
