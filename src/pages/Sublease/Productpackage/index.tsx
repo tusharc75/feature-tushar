@@ -292,7 +292,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
             element.actualJobDuration = "";
             element.assetQty = 0;
             element.parentId = addExistingProductDialog.parentId;
-            const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields)
+            const calValues = autoCalculateSpecificFields({ estimateEndDate: element.estimateEndDate }, element, allFields)
             element.estimateJobDuration = 1;
             if (calValues && calValues['estimateJobDuration']) {
                 element.estimateJobDuration = calValues['estimateJobDuration'];
