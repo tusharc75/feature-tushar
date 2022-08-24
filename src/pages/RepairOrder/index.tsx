@@ -18,7 +18,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
-import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import { camelCase } from 'lodash'
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { FaSuitcase, SiStatuspage, FaWarehouse, GiAutoRepair, GrStatusInfo, BsFillPersonFill, GiCargoShip, FaShippingFast, RiSpaceShipFill } from "react-icons/all"
@@ -40,12 +39,13 @@ const RepairOrderType = [
 ];
 
 const RepairOrder = () => {
+
     const renderedFrom = camelCase(routes?.repairOrder.title)
+    const localStorageSelectedRecords = `${renderedFrom}_selected`
+
     const toastConfig = useContext(CustomToastContext);
     const history = useHistory();
-    const {
-        state: { user, permissions, selectedEntity }
-    }: any = useData();
+    const { state: { user, permissions, selectedEntity } }: any = useData();
     const { type }: any = queryString.parse(history.location.search);
     const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
     const [renderCount, setRenderCount] = useState(0);
@@ -60,23 +60,15 @@ const RepairOrder = () => {
         show: false,
         repairOrderNumber: ''
     });
-    const [accountDetails, setAccountDetails] = useState({
-        accountId: history.location?.state?.accountId,
-        accountName: history.location?.state?.accountName,
-        resource: history.location?.state?.resource
-    });
+
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
     const [frameworkComponents, setFrameworkComponents] = useState({});
     const { isOffline } = useContext(CustomOfflineContext);
     const [columns, setColumns] = useState([]);
-    const pageTitle = camelCase(`${routes.repairOrder.title}`)
-    const localStorageSelectedRecords = `${renderedFrom}_selected`
 
     const { getColumnData } = useColumns();
-
-    const [fromRental, setFromRental] = useState(history.location?.state?.rental);
 
     useEffect(() => {
         fetchGridColumns();
@@ -84,22 +76,12 @@ const RepairOrder = () => {
 
     const fetchGridColumns = async () => {
         let data
-        if (isOffline) {
-            data = await findOne(objectStore.resource, objectStore.repairOrder)
-        }
-        else {
-            const response = await axiosInstance().get(`/field?resource=Repair Order`)
-            data = response?.data?.data
-            try {
-                insertUpdate(objectStore.resource, objectStore.repairOrder, data);
-            } catch (ex) {
-                console.error(`Repair Order: Error while storing data for Offline context. Error: ${ex.message}`)
-            }
-        }
+        const response = await axiosInstance().get(`/field?resource=Repair Order`)
+        data = response?.data?.data
         let columns = []
         let rendererNames = []
         data.forEach(o => {
-            let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.repairOrderDetail.path)
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.repairOrderDetail.path)
             if (currentColumn !== null) {
                 if (isOffline) {
                     currentColumn.columnData["filter"] = false
@@ -120,7 +102,7 @@ const RepairOrder = () => {
         setFrameworkComponents({ ...tempFrameworkComponent })
         let staticFields = getStaticFields()
         staticFields.forEach(field => {
-            columns.push(checkStaticField(pageTitle, field))
+            columns.push(checkStaticField(renderedFrom, field))
         })
         setColumns([...columns])
     };
@@ -164,7 +146,7 @@ const RepairOrder = () => {
         if (renderCount > 0) {
             fetchRepairOrders();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, selectedType, filters, sorting, accountDetails, fromRental, selectedEntity, showFilteredRecordsOnly]);
+    }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
     const handleSingleDeleteRepairOrder = async () => {
         dispatch({ type: 'loading', loading: true });
@@ -190,7 +172,7 @@ const RepairOrder = () => {
 
     const ActionsRenderer = (params) => (
         <>
-            {permissions.repairOrder?.isCreate ? (
+            {permissions?.repairOrder?.isCreate ? (
                 <Tooltip title="Clone">
                     <IconButton
                         size="small"
@@ -210,7 +192,7 @@ const RepairOrder = () => {
                 </Tooltip>
             )}
             <GridDeleteIcon
-                hasDeletePermission={permissions.repairJob?.isDelete}
+                hasDeletePermission={permissions?.repairOrder?.isDelete}
                 ownerId={params.data.ownerId}
                 userId={user?.user?._id}
                 onDelete={() =>
@@ -299,15 +281,9 @@ const RepairOrder = () => {
         }
         try {
             let data: any = [], count;
-            if (!isOffline) {
-                const response: any = await axiosInstance().get(`${repairOrder.api}${queryString}`);
-                data = response?.data?.data;
-                count = response?.data?.count;
-            }
-            else {
-                data = await findAll(objectStore.repairOrder);
-                count = data?.length || 0;
-            }
+            const response: any = await axiosInstance().get(`${repairOrder.api}${queryString}`);
+            data = response?.data?.data;
+            count = response?.data?.count;
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u, user);
                 finalObject["isChecked"] = false;
@@ -403,7 +379,7 @@ const RepairOrder = () => {
                         <Grid item xs={12} sm={12}>
                             <Grid container justify="flex-end">
                                 <ImportExportLinks
-                                    permissions={permissions.repairOrder}
+                                    permissions={permissions?.repairOrder}
                                     module="repairOrder"
                                     api={repairOrder.api}
                                     afterImportCompleted={() => { fetchRepairOrders() }}
@@ -437,7 +413,7 @@ const RepairOrder = () => {
                         columns={columns}
                         dispatch={dispatch}
                         searchVal={search}
-                        RepairOrderPermissions={permissions.repairOrder}
+                        RepairOrderPermissions={permissions?.repairOrder}
                         onCreate={clickCreateNew}
                         showConfirmBox={showConfirmBox}
                         canDelete={selectedRecords.length === 0}
@@ -449,20 +425,6 @@ const RepairOrder = () => {
                     //   handleShowCloneRepairOrderDialog()
                     // }}
                     >
-                        {accountDetails.accountId && (
-                            <Chip
-                                className="ml-3"
-                                color="primary"
-                                label={`Account: ${accountDetails.accountName}`}
-                                onDelete={() => {
-                                    setAccountDetails({
-                                        accountId: null,
-                                        accountName: null,
-                                        resource: null
-                                    });
-                                }}
-                            />
-                        )}
                     </RepairOrderHeader>
                 </div>
                 {
@@ -471,7 +433,7 @@ const RepairOrder = () => {
                             <CustomSwipableList
                                 allowSelection={true}
                                 allowSwipe={true}
-                                permissions={permissions.repairOrder}
+                                permissions={permissions?.repairOrder}
                                 primaryField={columns?.find(d => d.primaryField)}
                                 onClick={(data) => {
                                     history.push(`${routes.repairOrderDetail.path}/${data._id}`)

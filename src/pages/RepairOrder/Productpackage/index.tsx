@@ -16,7 +16,6 @@ import moment from 'moment';
 import { repairOrder, dateFormat } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { RiEditCircleLine, RiAddCircleLine } from 'react-icons/ri';
@@ -208,8 +207,6 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
             )
             }
           </>
-
-
       });
     }
     coloum.forEach((element) => {
@@ -230,19 +227,12 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
-
-    if (isOffline) {
-      data = await findOne(objectStore.repairOrder, repairOrderData._id);
-      inventory = data.productInventory;
-    } else {
-      const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
-      data = response?.data?.data;
-      setMaterial(JSON.parse(JSON.stringify(data.material)));
-      inventory = data.inventory;
-      nonSerializeAsset = data.nonSerializeAsset;
-    }
+    const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
+    data = response?.data?.data;
+    setMaterial(JSON.parse(JSON.stringify(data.material)));
+    inventory = data.inventory;
+    nonSerializeAsset = data.nonSerializeAsset;
     const rows = data.material.filter((e) => e.parentId === null);
-
     rows.forEach((parent, i) => {
       parent.srno = (i + 1);
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
