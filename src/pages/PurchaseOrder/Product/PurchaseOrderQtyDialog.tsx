@@ -132,8 +132,8 @@ const PurchaseOrderQtyDialog: FC<PurchaseOrderQtyDialogProps> = ({ onClose, curr
 
   function validate(values) {
     const errors = {};
-    if (values?.qty < values?.actualReceived) {
-      errors['qty'] = 'Quantity should be greater than Actual Received';
+    if (values?.qty < values?.actualReceived + values?.rejectQuantity || 0) {
+      errors['qty'] = 'Quantity should be greater than Actual Received and Reject Quantity';
     }
     return errors;
   }
