@@ -6,7 +6,7 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { Formik, Form } from "formik";
-import { getObjKeys, getObjKeysWithValues, workOrder, yupSchema } from 'src/constants/helpers';
+import { dateTimeFormat, getObjKeys, getObjKeysWithValues, workOrder, yupSchema } from 'src/constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
 import { Box, Grid, IconButton } from '@material-ui/core';
 import FormTypes from 'src/components/ServiceMaster/FormTypes';
@@ -19,30 +19,17 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { TiArrowBack } from 'react-icons/ti';
 import { RiShareForwardFill } from 'react-icons/ri';
 import { isMobile } from 'react-device-detect';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
+import moment from 'moment';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         root: {
+            marginTop: theme.spacing(3),
             width: '100%',
         },
         backButton: {
             marginRight: theme.spacing(1),
-        },
-        BlackSvg: {
-            userSelect: 'none',
-            '& svg': {
-                fill: '#000',
-                transition: 'fill .4s, opacity .4s'
-            },
-            '&:hover svg': {
-                fill: 'var(--primary)'
-            },
-            '&.Mui-disabled': {
-                PointerEvents: 'none',
-                '& svg': {
-                    opacity: '0.3'
-                }
-            }
         },
         pbStepper: {
             overflow: 'none',
@@ -59,14 +46,14 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderData }) => {
+const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderData, setNextStep }) => {
     const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
     const [currentStep, setCurrentStep] = useState(0);
     const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [stepConstant, setStepConstant] = useState([])
-    const [nextStep, setNextStep] = useState(true);
+    const [stepData, setStepData] = useState(null);
 
     useEffect(() => {
         setInitialDataFields();
@@ -79,22 +66,29 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
         if (currentStep > -1) {
             setInitialDataFields();
         }
-    }, [currentStep]);
+    }, [currentStep, serviceData]);
 
     const setInitialDataFields = () => {
         setInitialData({ fields: [], values: {} });
         let fieldsDataForCreate = serviceDataFields?.steps[currentStep]?.fields ? serviceDataFields?.steps[currentStep]?.fields : []
         let tempServiceData = serviceData.find(d => d.serviceId === serviceDataFields?._id && d.stepId === serviceDataFields?.steps[currentStep]?._id)
         if (tempServiceData) {
+            setStepData(tempServiceData)
             setInitialData({ fields: fieldsDataForCreate, values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate) });
         }
         else {
+            setStepData(null)
             setInitialData({ fields: fieldsDataForCreate, values: getObjKeys("", fieldsDataForCreate) });
+        }
+        let tempServiceDataFieldsId = serviceDataFields?.steps?.map(d => d._id)
+        let tempServiceDataId = serviceData?.map(d => d.stepId)
+        if (tempServiceDataFieldsId.every(el => tempServiceDataId.includes(el))) {
+            setNextStep(true)
         }
     };
 
     const handleNext = () => {
-        setCurrentStep((prevActiveStep) => prevActiveStep + 1);
+        if (currentStep < stepConstant.length - 1) setCurrentStep((prevActiveStep) => prevActiveStep + 1);
     };
 
     const handleBack = () => {
@@ -146,54 +140,20 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
 
     return (
         <div className={classes.root}>
-            {/* <Steps
-                isNextStep={false}
-                nextStep={nextStep}
-                steps={stepConstant}
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-                isStepEnded={false}
-            /> */}
             <div className="position-relative">
-                <Grid container >
-                    <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2">
-                        <IconButton
-                            disabled={currentStep === stepConstant.length || currentStep === 0}
-                            onClick={handleBack}
-                            className={`stepperButton ${classes.BlackSvg}`}
-                        >
-                            <TiArrowBack size={30} />
-                        </IconButton>
-                    </Grid>
-                    <Grid key={"stepper"} item xs={12} sm={10} md={10}>
-                        <Stepper className={`${classes.pbStepper} stepper-responsive mt-2`} activeStep={currentStep} alternativeLabel>
-                            {stepConstant?.map((label) => (
-                                <Step key={label}>
-                                    <StepLabel>{label}</StepLabel>
-                                </Step>
-                            ))}
-                        </Stepper>
-                    </Grid>
-                    <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2 ">
-                        <IconButton
-                            onClick={handleNext}
-                            disabled={currentStep === stepConstant.length - 1}
-                            className={`stepperButtonNext ${classes.BlackSvg}`}
-                        >
-                            <RiShareForwardFill />
-                        </IconButton>
-                    </Grid>
-                </Grid>
+
+                <Stepper className={`${classes.pbStepper} stepper-responsive mt-2`} activeStep={currentStep} alternativeLabel>
+                    {stepConstant?.map((label) => (
+                        <Step key={label}>
+                            <StepLabel>{label}</StepLabel>
+                        </Step>
+                    ))}
+                </Stepper>
+
             </div>
 
             <div>
                 {
-                    // currentStep === stepConstant?.length ? (
-                    //     <div>
-                    //         <Typography className={classes.instructions}>All steps completed</Typography>
-                    //         <Button onClick={handleReset}>Reset</Button>
-                    //     </div>
-                    // ) : 
                     (
                         <Box marginY={2} p={2}>
                             {initialData.fields.length ? (
@@ -237,28 +197,117 @@ const Service = ({ serviceDataFields, serviceData, workOrderId, fetchWorkOrderDa
                                                     </div>
                                                 }
                                             </Form>
-                                            <CustomDialogFooter>
-                                                <Button
-                                                    variant="outlined"
-                                                    color="primary"
-                                                    size="small"
-                                                    disabled={currentStep === 0}
-                                                    onClick={handleBack}
-                                                >
-                                                    Back
-                                                </Button>
-                                                <CustomButton
-                                                    variant="contained"
-                                                    color="primary"
-                                                    type="submit"
-                                                    disabled={currentStep === serviceDataFields?.steps.length}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        handleScroll(errors)
-                                                        submitForm();
-                                                    }}
-                                                > Save</CustomButton>
-                                            </CustomDialogFooter>
+                                            <Grid container spacing={2}>
+                                                {stepData?.startDate && <Grid item xs={12} md={12} sm={12}>
+                                                    <Typography style={{ fontWeight: "bold" }}>{`${"Duration "}`}</Typography>
+                                                    <Typography display='inline'>
+                                                        &nbsp;&nbsp;Start Date &nbsp;&nbsp;
+                                                    </Typography>
+                                                    <Typography style={{ fontWeight: "bold", color: "#258C89" }} display='inline'>
+                                                        {`: ${moment(stepData?.startDate).format(dateTimeFormat)}`}
+                                                    </Typography>
+                                                    {stepData?.endDate && (
+                                                        <>
+                                                            <Typography display='inline'>
+                                                                &nbsp;&nbsp;End Date&nbsp;&nbsp;
+                                                            </Typography>
+                                                            <Typography style={{ fontWeight: "bold", color: "#258C89" }} display='inline'>
+                                                                {`: ${moment(stepData?.endDate).format(dateTimeFormat)}`}
+                                                            </Typography>
+                                                            <Typography display='inline'>
+                                                                &nbsp;&nbsp;Time Duration&nbsp;&nbsp;
+                                                            </Typography>
+                                                            <Typography style={{ fontWeight: "bold", color: "#258C89" }} display='inline'>
+                                                                {`: ${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}
+                                                            </Typography>
+                                                        </>
+                                                    )}
+
+                                                </Grid>}
+
+                                                <Grid item xs={12} md={12} sm={12}>
+                                                    <Box display="flex" justifyContent="space-between" m={1}>
+                                                        <Box display="flex">
+                                                            <Button
+                                                                variant="outlined"
+                                                                color="primary"
+                                                                size="small"
+                                                                disabled={stepData?.startDate || stepData?.endDate}
+                                                                onClick={() => {
+                                                                    let tempData = {
+                                                                        "serviceId": serviceDataFields?._id,
+                                                                        "stepId": serviceDataFields?.steps[currentStep]?._id,
+                                                                    }
+                                                                    axiosInstance()
+                                                                        .put(`${workOrder.api}/${workOrderId}/step/start `, tempData)
+                                                                        .then(({ data }) => {
+                                                                            toastConfig.setToastConfig({
+                                                                                open: true,
+                                                                                type: "success",
+                                                                                message: data.message,
+                                                                            });
+                                                                            fetchWorkOrderData()
+                                                                        })
+                                                                        .catch((error) => {
+                                                                            toastConfig.setToastConfig(error);
+                                                                        });
+                                                                }}
+                                                            >
+                                                                Start
+                                                            </Button>
+                                                            <Box mx={isMobile ? 0.5 : 1} />
+                                                            <DeleteButton
+                                                                text="End"
+                                                                disabled={!stepData?.startDate || stepData?.endDate}
+                                                                onClick={() => {
+                                                                    let tempData = {
+                                                                        "serviceId": serviceDataFields?._id,
+                                                                        "stepId": serviceDataFields?.steps[currentStep]?._id,
+                                                                    }
+                                                                    axiosInstance()
+                                                                        .put(`${workOrder.api}/${workOrderId}/step/end `, tempData)
+                                                                        .then(({ data }) => {
+                                                                            toastConfig.setToastConfig({
+                                                                                open: true,
+                                                                                type: "success",
+                                                                                message: data.message,
+                                                                            });
+                                                                            fetchWorkOrderData()
+                                                                        })
+                                                                        .catch((error) => {
+                                                                            toastConfig.setToastConfig(error);
+                                                                        });
+                                                                }}
+                                                            />
+                                                        </Box>
+                                                        <Box display="flex">
+                                                            <Button
+                                                                variant="outlined"
+                                                                color="primary"
+                                                                size="small"
+                                                                disabled={currentStep === 0}
+                                                                onClick={handleBack}
+                                                            >
+                                                                Back
+                                                            </Button>
+                                                            <Box mx={isMobile ? 0.5 : 1} />
+                                                            <CustomButton
+                                                                variant="contained"
+                                                                color="primary"
+                                                                type="submit"
+                                                                disabled={stepData?.endDate === undefined || stepData?.endDate === null}
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    handleScroll(errors)
+                                                                    submitForm();
+                                                                }}
+                                                            > Save</CustomButton>
+                                                        </Box>
+                                                    </Box>
+                                                </Grid>
+                                            </Grid>
+
+
                                             {
                                                 showConfirmDialog ?
                                                     <ConfirmCancelDialog

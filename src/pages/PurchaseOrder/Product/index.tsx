@@ -137,7 +137,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                 else {
                     res.isValid = true
                 }
-                res.hideSelection = item.actualReceived ? true : false
+                res.hideSelection = item.actualReceived || item.rejectQuantity ? true : false
                 return res;
             });
             if (rows.length === 0) {
