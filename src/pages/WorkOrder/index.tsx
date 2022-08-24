@@ -190,7 +190,7 @@ const WorkOrder = () => {
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip className="cursor-stop" title="You do not have permission to clone/create an account">
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create an work order">
           <IconButton aria-label="Clone" size="small">
             <FileCopyIcon fontSize="small" />
           </IconButton>
