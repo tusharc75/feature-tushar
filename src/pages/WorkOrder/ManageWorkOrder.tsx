@@ -27,6 +27,7 @@ import routes from "src/components/Helpers/Routes";
 import { useHistory } from 'react-router-dom';
 
 const disabledFieldArray = ['workOrderNumber', "type", "product", "repairOrder", "status"]
+
 const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null, refrenceType = null, refrenceData = null,
     products = null, serviceMaster = null }) => {
 
@@ -149,7 +150,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
     };
 
     const handleSubmit = async (values) => {
-        if (workOrderId) {
+        if (workOrderId && !isClone) {
             setSubmitting(true);
             values._id = workOrderId
             axiosInstance().put(`${workOrder.api}`, values).then(({ data }) => {
@@ -212,132 +213,159 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
         }
     }
 
-    return (<Dialog
-        maxWidth="md"
-        fullScreen={fullScreen || (isMobile || isTablet)}
-        TransitionComponent={CustomDialogTransition}
-        aria-labelledby="customized-dialog-title"
-        open={true}
-        fullWidth
-        onClose={(e, reason) => {
-            if (reason !== 'backdropClick') {
-                setShowConfirmDialog(true)
-            }
-        }}
-    >
-        {initialData.fields.length ? (
-            <Formik
-                initialValues={initialData.values}
-                validationSchema={yupSchema(initialData.fields)}
-                onSubmit={handleSubmit}
-                validate={validate}
-                innerRef={ref}
-            >
-                {({ values, errors, setFieldValue, touched, submitForm }) => (
-                    <Fragment>
-                        <CustomDialogHeader
-                            onClose={() => {
-                                if (!isEqual(ref.current.values, initialData.values)) {
-                                    setShowConfirmDialog(true)
-                                }
-                                else {
-                                    onClose()
-                                }
-                            }}
-                            title={`${workOrderId ?
-                                isClone ?
-                                    `Clone ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ""}`
-                                    : `Update ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ""}`
-                                : `Create Work Order`}`}
-                            isMinimized={!fullScreen}
-                            onMinimizeMaximize={() => {
-                                setFullScreen(prevState => !prevState)
-                            }}
-                            showManimizeMaximize={true}
-                        />
-                        <CustomDialogContent>
-                            <Form autoComplete="off" autoCorrect="off" noValidate >
-                                {formsData &&
-                                    formsData.map((form, index1) => {
-                                        return form.name ? (
-                                            <div key={index1}>
-                                                <div className="detail-box-content">
-                                                    <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                                                    <h2 className="form-label-style form-label-quotes">{form.name}</h2>
-                                                </div>
-                                                <Box marginY={2}>
-                                                    <Grid spacing={3} container>
-                                                        {form.sectionFields.map((field, index2) => (
-                                                            <Grid key={index2} item xs={12} sm={6} md={6}>
-                                                                {field.fieldName === "owner" ? (
-                                                                    <FormTypes
-                                                                        fieldData={field}
-                                                                        isNew={!workOrderId}
-                                                                        {...field}
-                                                                        values={values}
-                                                                        errors={errors}
-                                                                        touched={touched}
-                                                                        label={field.fieldLabel}
-                                                                        name={field.fieldName}
-                                                                        type={field.type}
-                                                                        options={ownerData}
-                                                                        onChange={(e, val) => {
-                                                                            setFieldValue(
-                                                                                field.fieldName,
-                                                                                val && val.optionValue
-                                                                                    ? val.optionValue
-                                                                                    : ""
-                                                                            );
+    return (
+        <Dialog
+            maxWidth="md"
+            fullScreen={fullScreen || (isMobile || isTablet)}
+            TransitionComponent={CustomDialogTransition}
+            aria-labelledby="customized-dialog-title"
+            open={true}
+            fullWidth
+            onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                    setShowConfirmDialog(true)
+                }
+            }}
+        >
+            {initialData.fields.length ? (
+                <Formik
+                    initialValues={initialData.values}
+                    validationSchema={yupSchema(initialData.fields)}
+                    onSubmit={handleSubmit}
+                    validate={validate}
+                    innerRef={ref}
+                >
+                    {({ values, errors, setFieldValue, touched, submitForm }) => (
+                        <Fragment>
+                            <CustomDialogHeader
+                                onClose={() => {
+                                    if (!isEqual(ref.current.values, initialData.values)) {
+                                        setShowConfirmDialog(true)
+                                    }
+                                    else {
+                                        onClose()
+                                    }
+                                }}
+                                title={`${workOrderId ?
+                                    isClone ?
+                                        `Clone ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ""}`
+                                        : `Update ${initialData.values?.workOrderNumber ? `(${initialData.values?.workOrderNumber})` : ""}`
+                                    : `Create Work Order`}`}
+                                isMinimized={!fullScreen}
+                                onMinimizeMaximize={() => {
+                                    setFullScreen(prevState => !prevState)
+                                }}
+                                showManimizeMaximize={true}
+                            />
+                            <CustomDialogContent>
+                                <Form autoComplete="off" autoCorrect="off" noValidate >
+                                    {formsData &&
+                                        formsData.map((form, index1) => {
+                                            return form.name ? (
+                                                <div key={index1}>
+                                                    <div className="detail-box-content">
+                                                        <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                        <h2 className="form-label-style form-label-quotes">{form.name}</h2>
+                                                    </div>
+                                                    <Box marginY={2}>
+                                                        <Grid spacing={3} container>
+                                                            {form.sectionFields.map((field, index2) => (
+                                                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                                                    {field.fieldName === "owner" ? (
+                                                                        <FormTypes
+                                                                            fieldData={field}
+                                                                            isNew={!workOrderId}
+                                                                            {...field}
+                                                                            values={values}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            options={ownerData}
+                                                                            onChange={(e, val) => {
+                                                                                setFieldValue(
+                                                                                    field.fieldName,
+                                                                                    val && val.optionValue
+                                                                                        ? val.optionValue
+                                                                                        : ""
+                                                                                );
 
-                                                                            if (
-                                                                                val &&
-                                                                                val.optionValue !== user?.user?._id
-                                                                            ) {
-                                                                                const checkOwnerAddedInCollaborator =
-                                                                                    values["collaborator"].find(
-                                                                                        (d) =>
-                                                                                            d?.optionValue ===
-                                                                                            user?.user?._id
-                                                                                    );
                                                                                 if (
-                                                                                    !checkOwnerAddedInCollaborator
+                                                                                    val &&
+                                                                                    val.optionValue !== user?.user?._id
                                                                                 ) {
-                                                                                    setFieldValue("collaborator", [
-                                                                                        ...values["collaborator"],
-                                                                                        collaboratorData.find(
+                                                                                    const checkOwnerAddedInCollaborator =
+                                                                                        values["collaborator"].find(
                                                                                             (d) =>
                                                                                                 d?.optionValue ===
                                                                                                 user?.user?._id
-                                                                                        ).optionValue,
-                                                                                    ]);
+                                                                                        );
+                                                                                    if (
+                                                                                        !checkOwnerAddedInCollaborator
+                                                                                    ) {
+                                                                                        setFieldValue("collaborator", [
+                                                                                            ...values["collaborator"],
+                                                                                            collaboratorData.find(
+                                                                                                (d) =>
+                                                                                                    d?.optionValue ===
+                                                                                                    user?.user?._id
+                                                                                            ).optionValue,
+                                                                                        ]);
+                                                                                    }
                                                                                 }
-                                                                            }
-                                                                        }}
-                                                                        required={field.required}
-                                                                        fullWidth
-                                                                        isTooltip={field?.isTooltip || false}
-                                                                        tooltipMessage={field?.tooltipMessage}
-                                                                        size="small"
-                                                                        disabled={disableOwnerSelection || (workOrderId && field.disableOnEdit)}
-                                                                        onOpen={() => {
-                                                                            onOwnerDropdownOpen(
-                                                                                values["collaborator"]
-                                                                            );
-                                                                        }}
-                                                                    />
-                                                                ) : field.fieldName === "collaborator" ? (
-                                                                    <FormTypes
-                                                                        fieldData={field}
-                                                                        isNew={!workOrderId}
+                                                                            }}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field?.isTooltip || false}
+                                                                            tooltipMessage={field?.tooltipMessage}
+                                                                            size="small"
+                                                                            disabled={disableOwnerSelection || (workOrderId && field.disableOnEdit)}
+                                                                            onOpen={() => {
+                                                                                onOwnerDropdownOpen(
+                                                                                    values["collaborator"]
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                    ) : field.fieldName === "collaborator" ? (
+                                                                        <FormTypes
+                                                                            fieldData={field}
+                                                                            isNew={!workOrderId}
+                                                                            {...field}
+                                                                            disabled={workOrderId && field.disableOnEdit}
+                                                                            values={values}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            options={collaboratorData}
+                                                                            setFieldValue={(name, value) => {
+                                                                                setFieldValue(name, value)
+                                                                            }}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field?.isTooltip || false}
+                                                                            tooltipMessage={field?.tooltipMessage}
+                                                                            size="small"
+                                                                            onOpen={() => {
+                                                                                onCollabOwnerMultiselectOpen(
+                                                                                    values["owner"]
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                    ) : <FormTypes
                                                                         {...field}
-                                                                        disabled={workOrderId && field.disableOnEdit}
+                                                                        fieldData={field}
+                                                                        isNew={!Boolean(workOrderId)}
+                                                                        disabled={products && refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)}
                                                                         values={values}
                                                                         errors={errors}
                                                                         touched={touched}
                                                                         label={field.fieldLabel}
                                                                         name={field.fieldName}
                                                                         type={field.type}
-                                                                        options={collaboratorData}
+                                                                        options={field.option}
                                                                         setFieldValue={(name, value) => {
                                                                             setFieldValue(name, value)
                                                                         }}
@@ -346,123 +374,97 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                         isTooltip={field?.isTooltip || false}
                                                                         tooltipMessage={field?.tooltipMessage}
                                                                         size="small"
-                                                                        onOpen={() => {
-                                                                            onCollabOwnerMultiselectOpen(
-                                                                                values["owner"]
-                                                                            );
-                                                                        }}
-                                                                    />
-                                                                ) : <FormTypes
-                                                                    {...field}
-                                                                    fieldData={field}
-                                                                    isNew={!Boolean(workOrderId)}
-                                                                    disabled={products && refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)}
-                                                                    values={values}
-                                                                    errors={errors}
-                                                                    touched={touched}
-                                                                    label={field.fieldLabel}
-                                                                    name={field.fieldName}
-                                                                    type={field.type}
-                                                                    options={field.option}
-                                                                    setFieldValue={(name, value) => {
-                                                                        setFieldValue(name, value)
-                                                                    }}
-                                                                    required={field.required}
-                                                                    fullWidth
-                                                                    isTooltip={field?.isTooltip || false}
-                                                                    tooltipMessage={field?.tooltipMessage}
-                                                                    size="small"
-                                                                    imageOrFileUploadCompletePercentage={null}
-                                                                />}
-                                                            </Grid>
-                                                        ))}
-                                                    </Grid>
-                                                </Box>
-                                            </div>
-                                        ) : (
-                                            form.sectionFields.map((field) => (
-                                                <FormTypes
-                                                    {...field}
-                                                    fieldData={field}
-                                                    disabled={Boolean(workOrderId) && field.disableOnEdit}
-                                                    isNew={Boolean(workOrderId)}
-                                                    values={values}
-                                                    errors={errors}
-                                                    touched={touched}
-                                                    label={field.fieldLabel}
-                                                    name={field.fieldName}
-                                                    type={field.type}
-                                                    options={field.option}
-                                                    setFieldValue={(name, value) => {
-                                                        setFieldValue(name, value)
-                                                    }}
-                                                    required={field.required}
-                                                    fullWidth
-                                                    isTooltip={field?.isTooltip || false}
-                                                    tooltipMessage={field?.tooltipMessage}
-                                                    size="small"
-                                                    style={{ visibility: "hidden" }}
-                                                />
-                                            ))
-                                        );
-                                    })}
-                            </Form>
-                        </CustomDialogContent>
-                        <CustomDialogFooter>
-                            <Button
-                                variant="outlined"
-                                color="primary"
-                                size="small"
-                                disabled={isSubmitting || loading}
-                                onClick={() => {
-                                    if (!isEqual(ref.current.values, initialData.values)) {
-                                        setShowConfirmDialog(true)
-                                    }
-                                    else {
-                                        onClose()
-                                    }
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                            <CustomButton
-                                disabled={isSubmitting || loading}
-                                loading={loading}
-                                variant="contained"
-                                color="primary"
-                                type="submit"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    handleScroll(errors)
-                                    submitForm();
-                                }}
-                            > Save</CustomButton>
-                        </CustomDialogFooter>
-                        {
-                            showConfirmDialog ?
-                                <ConfirmCancelDialog
-                                    close={() => setShowConfirmDialog(false)}
-                                    open={showConfirmDialog}
-                                    onSave={() => {
-                                        setShowConfirmDialog(false)
+                                                                        imageOrFileUploadCompletePercentage={null}
+                                                                    />}
+                                                                </Grid>
+                                                            ))}
+                                                        </Grid>
+                                                    </Box>
+                                                </div>
+                                            ) : (
+                                                form.sectionFields.map((field) => (
+                                                    <FormTypes
+                                                        {...field}
+                                                        fieldData={field}
+                                                        disabled={Boolean(workOrderId) && field.disableOnEdit}
+                                                        isNew={Boolean(workOrderId)}
+                                                        values={values}
+                                                        errors={errors}
+                                                        touched={touched}
+                                                        label={field.fieldLabel}
+                                                        name={field.fieldName}
+                                                        type={field.type}
+                                                        options={field.option}
+                                                        setFieldValue={(name, value) => {
+                                                            setFieldValue(name, value)
+                                                        }}
+                                                        required={field.required}
+                                                        fullWidth
+                                                        isTooltip={field?.isTooltip || false}
+                                                        tooltipMessage={field?.tooltipMessage}
+                                                        size="small"
+                                                        style={{ visibility: "hidden" }}
+                                                    />
+                                                ))
+                                            );
+                                        })}
+                                </Form>
+                            </CustomDialogContent>
+                            <CustomDialogFooter>
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    size="small"
+                                    disabled={isSubmitting || loading}
+                                    onClick={() => {
+                                        if (!isEqual(ref.current.values, initialData.values)) {
+                                            setShowConfirmDialog(true)
+                                        }
+                                        else {
+                                            onClose()
+                                        }
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <CustomButton
+                                    disabled={isSubmitting || loading}
+                                    loading={loading}
+                                    variant="contained"
+                                    color="primary"
+                                    type="submit"
+                                    onClick={(e) => {
+                                        e.preventDefault();
                                         handleScroll(errors)
                                         submitForm();
                                     }}
-                                    onClose={() => {
-                                        setShowConfirmDialog(false)
-                                        onClose()
-                                    }}
-                                /> : null
-                        }
-                    </Fragment>
-                )}
-            </Formik>
-        ) :
-            <Box p={2} height={500} bgcolor="white">
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-        }
-    </Dialog>
+                                > Save</CustomButton>
+                            </CustomDialogFooter>
+                            {
+                                showConfirmDialog ?
+                                    <ConfirmCancelDialog
+                                        close={() => setShowConfirmDialog(false)}
+                                        open={showConfirmDialog}
+                                        onSave={() => {
+                                            setShowConfirmDialog(false)
+                                            handleScroll(errors)
+                                            submitForm();
+                                        }}
+                                        onClose={() => {
+                                            setShowConfirmDialog(false)
+                                            onClose()
+                                        }}
+                                    /> : null
+                            }
+                        </Fragment>
+                    )}
+                </Formik>
+            ) :
+                <Box p={2} height={500} bgcolor="white">
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+            }
+        </Dialog>
     );
 }
 
