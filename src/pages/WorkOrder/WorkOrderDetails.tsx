@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Divider } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -91,7 +91,7 @@ const WorkOrderDetails = () => {
       fetchWorkOrderService();
     }
   }, [id]);
-  
+
   useEffect(() => {
     if (workOrderData?.processStatus && workOrderServiceData.length !== 0) {
       let tempIndex = workOrderServiceData.findIndex(d => d?._id === workOrderData?.processStatus)
@@ -282,6 +282,9 @@ const WorkOrderDetails = () => {
                         setCurrentStep={setCurrentStep}
                         isStepEnded={false}
                       />
+                      <Box pt={2} pb={2}>
+                        <Divider />
+                      </Box>
                       {workOrderServiceData[currentStep] && workOrderData && (
                         <Service
                           serviceDataFields={workOrderServiceData[currentStep]}
@@ -289,6 +292,9 @@ const WorkOrderDetails = () => {
                           serviceData={workOrderData?.serviceData ? workOrderData?.serviceData : []}
                           fetchWorkOrderData={fetchWorkOrderData}
                           setNextStep={setNextStep}
+                          setServiceCurrentStep={setCurrentStep}
+                          serviceSteps={workOrderServiceSteps}
+                          currentServiceStep={currentStep}
                         />
                       )}
                     </>
