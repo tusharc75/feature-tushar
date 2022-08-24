@@ -28,9 +28,10 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
-import { Button, Menu, MenuItem } from '@material-ui/core';
+import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import { AddOutlined } from '@material-ui/icons';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 let workOrderTimeout;
 
@@ -65,7 +66,7 @@ const WorkOrder = () => {
   });
 
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
-  const [showManageWorkOrder, setShowManageWorkOrder] = useState(false);
+  const [showManageWorkOrder, setShowManageWorkOrder] = useState({ open: false, isClone: false, idToClone: null });
   const [columns, setColumns] = useState([]);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
@@ -176,8 +177,27 @@ const WorkOrder = () => {
 
   const ActionsRenderer = (params) => (
     <>
+      {workOrderPermissions?.isCreate ? (
+        <Tooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setShowManageWorkOrder({ open: true, isClone: true, idToClone: params.data._id })
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create an account">
+          <IconButton aria-label="Clone" size="small">
+            <FileCopyIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
       <GridDeleteIcon
-        hasDeletePermission={workOrderPermissions?.isDelete && params.data?.canDelete}
+        hasDeletePermission={workOrderPermissions?.isDelete }
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
         onDelete={() => {
@@ -380,7 +400,7 @@ const WorkOrder = () => {
                   </Grid>
                   {workOrderPermissions?.isCreate &&
                     <Button className={styles.add_submit_btn}
-                      onClick={() => setShowManageWorkOrder(true)}
+                      onClick={() => setShowManageWorkOrder({ open: true, isClone: false, idToClone: null })}
                       variant="contained" size="small" color="primary" startIcon={<AddOutlined />}>Add</Button>
                   }
                   {workOrderPermissions?.isDelete &&
@@ -464,7 +484,7 @@ const WorkOrder = () => {
               actionWidth={100}
               loading={loading}
               allowSelection={true}
-              allowAction={false}
+              allowAction={true}
               renderedFrom={renderedFrom}
               refreshGrid={fetchWorkOrder}
               showOnlyShowFilteredRecordSwitch={true}
@@ -491,12 +511,14 @@ const WorkOrder = () => {
             />
           ) : null}
 
-          {showManageWorkOrder ? (
+          {showManageWorkOrder.open ? (
             <ManageWorkOrder
-              onClose={() => setShowManageWorkOrder(false)}
+              isClone={showManageWorkOrder.isClone}
+              workOrderId={showManageWorkOrder.idToClone}
+              onClose={() => setShowManageWorkOrder({ open: false, isClone: false, idToClone: null })}
               onSuccess={() => {
                 fetchWorkOrder();
-                setShowManageWorkOrder(false);
+                setShowManageWorkOrder({ open: false, isClone: false, idToClone: null });
               }}
             />
           ) : null}
