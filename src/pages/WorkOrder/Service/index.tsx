@@ -74,20 +74,22 @@ const Service = ({ serviceDataFields, workOrderId, serviceData, getServiceData, 
 
     const setInitialDataFields = () => {
         setInitialData({ fields: [], values: {} });
-        let fieldsDataForCreate = serviceDataFields?.steps[currentStep]?.fields ? serviceDataFields?.steps[currentStep]?.fields : []
-        let tempServiceData = serviceData.find(d => d.serviceId === serviceDataFields?._id && d.stepId === serviceDataFields?.steps[currentStep]?._id)
-        if (tempServiceData) {
-            setStepData(tempServiceData)
-            setInitialData({ fields: fieldsDataForCreate, values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate) });
-        }
-        else {
-            setStepData(null)
-            setInitialData({ fields: fieldsDataForCreate, values: getObjKeys("", fieldsDataForCreate) });
-        }
-        let tempServiceDataFieldsId = serviceDataFields?.steps?.map(d => d._id)
-        let tempServiceDataId = serviceData?.map(d => d.stepId)
-        if (tempServiceDataFieldsId.every(el => tempServiceDataId.includes(el))) {
-            setNextStep(true)
+        if (serviceDataFields?.steps?.length) {
+            let fieldsDataForCreate = serviceDataFields?.steps[currentStep]?.fields ? serviceDataFields?.steps[currentStep]?.fields : []
+            let tempServiceData = serviceData.find(d => d.serviceId === serviceDataFields?._id && d.stepId === serviceDataFields?.steps[currentStep]?._id)
+            if (tempServiceData) {
+                setStepData(tempServiceData)
+                setInitialData({ fields: fieldsDataForCreate, values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate) });
+            }
+            else {
+                setStepData(null)
+                setInitialData({ fields: fieldsDataForCreate, values: getObjKeys("", fieldsDataForCreate) });
+            }
+            let tempServiceDataFieldsId = serviceDataFields?.steps?.map(d => d._id)
+            let tempServiceDataId = serviceData?.map(d => d.stepId)
+            if (tempServiceDataFieldsId.every(el => tempServiceDataId.includes(el))) {
+                setNextStep(true)
+            }
         }
     };
 
@@ -163,8 +165,9 @@ const Service = ({ serviceDataFields, workOrderId, serviceData, getServiceData, 
             });
     }
 
-    return (
+    return (stepList?.length ?
         <div className={classes.root}>
+
             <div className="position-relative">
                 <Stepper className={`${classes.pbStepper} stepper-responsive mt-2`} activeStep={currentStep} alternativeLabel>
                     {stepList?.map((label) => (
@@ -323,7 +326,7 @@ const Service = ({ serviceDataFields, workOrderId, serviceData, getServiceData, 
                     </Box>
                 </Paper>
             </Box>
-        </div>
+        </div> : null
     );
 }
 export default Service;
