@@ -575,8 +575,8 @@ function CustomReactTable({
                           key={index2}
                           {...cell.getCellProps()}
                           className={`td 
-                                                    ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} 
-                                                    ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
+                          ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} 
+                          ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) : ''}`}
                         >
                           {!['selection'].includes(cell?.column.id) &&
                           rowState &&
@@ -593,8 +593,15 @@ function CustomReactTable({
                               //     });
                               //   });
                               // }}
+                              style={{
+                                borderLeft: '0',
+                                borderTop: '0',
+                                padding: '2px 4px',
+                                width: cell?.column.width - 20,
+                                background: 'transparent',
+                                outline: 'none'
+                              }}
                               value={cell.value}
-                              style={{ width: cell.column.width - 40 }}
                             />
                           ) : isCellEditing && currentRowEditing && currentRowEditing === row.id && cell?.column.id === 'action' ? (
                             <HtmlTooltip title="Save">
