@@ -164,6 +164,7 @@ export default function ManageServiceSteps({ handleClose, handleSucess, serviceI
         <ConfiguratorDialog
           serviceId={serviceId}
           stepId={stepFieldsDialog.stepId}
+          steps={steps}
           handleClose={() => {
             setStepFieldsDialog({ open: false, stepId: "" });
           }}

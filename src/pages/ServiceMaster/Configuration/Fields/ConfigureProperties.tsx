@@ -4,36 +4,21 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import Options from '../Option/option';
-import { formatAmountWithCurrency } from 'src/constants/helpers';
-import NumberFormat from 'react-number-format';
+import { Autocomplete } from '@material-ui/lab';
+import Chip from '@material-ui/core/Chip';
 
-interface NumberFormatCustomProps {
-  inputRef: (instance: NumberFormat | null) => void;
-  onChange: (event: { target: { name: string; value: string } }) => void;
-  name: string;
-}
-
-const CustomFormat = (props: NumberFormatCustomProps | any) => {
-  const { inputRef, onChange, selectedCurrencyCode, ...other } = props;
-
-  if (selectedCurrencyCode) {
-    const { amountWithouCurrencyCode } = formatAmountWithCurrency(selectedCurrencyCode, 123456789);
-
-    if (amountWithouCurrencyCode === '12,34,56,789') {
-      return <NumberFormat {...other} getInputRef={inputRef} isNumericString thousandSeparator thousandsGroupStyle="lakh" />;
-    } else if (amountWithouCurrencyCode === '1,2345,6789') {
-      return <NumberFormat {...other} getInputRef={inputRef} isNumericString thousandSeparator thousandsGroupStyle="wan" />;
-    } else {
-      return <NumberFormat {...other} getInputRef={inputRef} isNumericString thousandSeparator thousandsGroupStyle="thousand" />;
-    }
-  } else {
-    return <NumberFormat {...other} getInputRef={inputRef} isNumericString />;
-  }
-};
-
-const ConfigureProperties = ({ close, field, setFields }: any) => {
+const ConfigureProperties = ({ close, field, setFields, steps }: any) => {
 
   const [values, setValues] = React.useState(field);
+  const [stepOption, setStepOption] = React.useState([]);
+
+  React.useEffect(() => {
+    const option = []
+    steps?.forEach((e) => {
+      option.push({ optionLabel: e.stepName, optionValue: e._id })
+    })
+    setStepOption(option)
+  }, []);
 
   const onSave = () => {
     setFields((prevState) =>
@@ -66,9 +51,25 @@ const ConfigureProperties = ({ close, field, setFields }: any) => {
             field={values}
             setFields={setValues}
           />}
-        {field['type'] === 'number' && values?.rangeValidation &&
-          <>
-            <Box mt={2}>
+        {field['type'] === 'number' &&
+          <Box mt={2}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="rangeValidation"
+                  checked={values?.rangeValidation}
+                  onChange={(e) => {
+                    setValues((prevState) => ({
+                      ...prevState,
+                      rangeValidation: e.target.checked
+                    }));
+                  }}
+                  color="primary"
+                />
+              }
+              label="Range Validation"
+            />
+            {values?.rangeValidation && <Box mt={2}>
               <Grid spacing={3} container>
                 <Grid item xs={12} sm={6} md={6}>
                   <TextField
@@ -82,15 +83,7 @@ const ConfigureProperties = ({ close, field, setFields }: any) => {
                     InputLabelProps={{
                       shrink: values?.minValue ? true : false
                     }}
-                    InputProps={{
-                      inputComponent: CustomFormat as any,
-                      inputProps: {
-                        allowNegative: false,
-                        onValueChange: (values) => {
-                          setValues((prevState) => ({ ...prevState, minValue: values.value }));
-                        },
-                      },
-                    }}
+                    type="number"
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={6}>
@@ -105,20 +98,12 @@ const ConfigureProperties = ({ close, field, setFields }: any) => {
                     InputLabelProps={{
                       shrink: values?.maxValue ? true : false
                     }}
-                    InputProps={{
-                      inputComponent: CustomFormat as any,
-                      inputProps: {
-                        allowNegative: false,
-                        onValueChange: (values) => {
-                          setValues((prevState) => ({ ...prevState, maxValue: values.value }));
-                        },
-                      },
-                    }}
+                    type="number"
                   />
                 </Grid>
               </Grid>
-            </Box>
-          </>}
+            </Box>}
+          </Box>}
         <Box mt={2}>
           <FormControlLabel
             control={
@@ -136,25 +121,47 @@ const ConfigureProperties = ({ close, field, setFields }: any) => {
             }
             label="Required"
           />
-          {field['type'] === 'number' &&
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="rangeValidation"
-                  checked={values?.rangeValidation}
-                  onChange={(e) => {
-                    setValues((prevState) => ({
-                      ...prevState,
-                      rangeValidation: e.target.checked
-                    }));
-                  }}
-                  color="primary"
-                />
-              }
-              label="Range Validation"
-            />}
         </Box>
-
+        <Box mt={2}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isJumpStep"
+                checked={values?.isJumpStep}
+                onChange={(e) => {
+                  setValues((prevState) => ({
+                    ...prevState,
+                    isJumpStep: e.target.checked
+                  }));
+                }}
+                color="primary"
+              />
+            }
+            label="Jump Step (If value valid)"
+          />
+          {values?.isJumpStep && <Box mt={2}>
+            <Autocomplete
+              options={stepOption}
+              fullWidth
+              multiple
+              size="small"
+              value={values?.jumpSteps ? stepOption?.filter((data: any) => values?.jumpSteps?.includes(data.optionValue)) : []}
+              getOptionLabel={(option) => option.optionLabel}
+              getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+              onChange={(_, newVal: any) => {
+                setValues((prevState) => ({ ...prevState, jumpSteps: newVal?.map((val) => val.optionValue) }));
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Jump Steps"
+                  name="jumpSteps"
+                  variant="outlined"
+                />
+              )}
+            />
+          </Box>}
+        </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
         <Button variant="outlined" size="small" color="primary" onClick={close}>

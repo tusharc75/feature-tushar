@@ -57,11 +57,10 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
 
   const versionId = quotationData?.versions[version]?._id || null;
-
   useEffect(() => {
     fetchFields();
     versionId && fetchQuotationService();
-  }, [version]);
+  }, [versionId]);
 
   const leadTimeColumn = {
     field: 'leadTime',
