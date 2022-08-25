@@ -1,6 +1,5 @@
 
 import { CHILD_RESOURCE } from '../../constants/helpers';
-import { objectStore, findOne } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { CURReplaceByCurrencySingle } from '../../constants/formulaUtility';
 

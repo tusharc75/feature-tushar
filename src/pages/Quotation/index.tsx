@@ -245,8 +245,7 @@ const Quotation = () => {
       deepFilter = `filterQuotation=${selectedType}`;
     }
     if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id))}`;
     }
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
@@ -337,7 +336,7 @@ const Quotation = () => {
         setDeleteRecord(row);
       }
     } else {
-      if (selectedRecords.find((d) => d.canDelete === false)) {
+      if (getLocalStorageArrayData(localStorageSelectedRecords)?.find((d) => d.canDelete === false)) {
         setShowDeleteWarningConfirmBox(true);
       } else {
         setIsConformDialogVisible(true);
@@ -355,7 +354,7 @@ const Quotation = () => {
     if (deleteRecord?._id) {
       recordsToDelete.push(deleteRecord?._id);
     } else {
-      recordsToDelete = selectedRecords.map((o) => o._id);
+      recordsToDelete = getLocalStorageArrayData(localStorageSelectedRecords)?.map((o) => o._id);
     }
     if (recordsToDelete.length > 0) {
       axiosInstance()
@@ -420,7 +419,7 @@ const Quotation = () => {
         <div className="header-panel">
           {columns &&
             <QuotationHeader
-              selectedRecords={selectedRecords}
+              selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
               onTypeChange={handleQuotationTypeSel}
               options={QuotationType}
               onSearch={handleSearch}
@@ -428,7 +427,7 @@ const Quotation = () => {
               QuotationPermissions={permissions?.quotation}
               onCreate={clickCreateNew}
               showConfirmBox={showConfirmBox}
-              canDelete={selectedRecords.length === 0}
+              canDelete={getLocalStorageArrayData(localStorageSelectedRecords)?.length === 0}
               icon={<GiHiveMind className="headerLogo" />}
               heading={routes.quotation.title}
               showTransferEntityDialog={handleTransferEntityDialog}
@@ -464,7 +463,7 @@ const Quotation = () => {
                 history.push(`${routes.quotationDetail.path}/${data._id}`)
               }}
               dataRows={dataRows}
-              selectedRecords={selectedRecords}
+              selectedRecords={getLocalStorageArrayData(localStorageSelectedRecords)}
               dispatch={dispatch}
               onEdit={(data) => {
                 history.push(`${routes.quotationDetail.path}/${data._id}?openEdit=true`)

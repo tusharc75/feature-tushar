@@ -27,7 +27,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
-import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import { camelCase } from 'lodash';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { SiStatuspage, BiTimer } from 'react-icons/all';
@@ -91,17 +90,8 @@ const LeadTimeMaster = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.leadTimeMaster);
-    } else {
-      const response = await axiosInstance().get(`/field?resource=Lead Time Master`);
-      data = response?.data?.data;
-      try {
-        insertUpdate(objectStore.resource, objectStore.leadTimeMaster, data);
-      } catch (ex) {
-        console.error(`Lead Time Master: Error while storing data for Offline context. Error: ${ex.message}`);
-      }
-    }
+    const response = await axiosInstance().get(`/field?resource=Lead Time Master`);
+    data = response?.data?.data;
     let columns = [];
     let rendererNames = [];
     data.forEach((o) => {
@@ -327,16 +317,10 @@ const LeadTimeMaster = () => {
       gridApi.setRowData([]);
     }
     try {
-      let data: any = [],
-        count;
-      if (!isOffline) {
-        const response: any = await axiosInstance().get(`${leadTimeMaster.api}${queryString}`);
-        data = response?.data?.data;
-        count = response?.data?.count;
-      } else {
-        data = await findAll(objectStore.leadTimeMaster);
-        count = data?.length || 0;
-      }
+      let data: any = [], count;
+      const response: any = await axiosInstance().get(`${leadTimeMaster.api}${queryString}`);
+      data = response?.data?.data;
+      count = response?.data?.count;
       let rows = data.map((u) => {
         let finalObject = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
@@ -581,9 +565,8 @@ const LeadTimeMaster = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.leadTimeMasterName ? 'Lead Time Master' : 'Lead Time Masters'}   ${
-              deleteRecord.leadTimeMasterName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.leadTimeMasterName ? 'Lead Time Master' : 'Lead Time Masters'}   ${deleteRecord.leadTimeMasterName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);
