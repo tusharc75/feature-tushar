@@ -11,7 +11,7 @@ import { serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
 
-const ConfiguratorDialog = ({ handleClose, handleSucess, serviceId, stepId }) => {
+const ConfiguratorDialog = ({ handleClose, handleSucess, serviceId, steps, stepId }) => {
 
   const toastConfig = React.useContext(CustomToastContext);
   const [fields, setFields] = React.useState<any>([]);
@@ -56,7 +56,7 @@ const ConfiguratorDialog = ({ handleClose, handleSucess, serviceId, stepId }) =>
         onClose={handleClose} />
       <CustomDialogContent>
         <DndProvider backend={HTML5Backend}>
-          <Configurator fields={fields} setFields={setFields} />
+          <Configurator fields={fields} setFields={setFields} steps={steps} />
         </DndProvider>
       </CustomDialogContent>
       <CustomDialogFooter>

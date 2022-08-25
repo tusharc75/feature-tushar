@@ -4,10 +4,21 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import Options from '../Option/option';
+import { Autocomplete } from '@material-ui/lab';
+import Chip from '@material-ui/core/Chip';
 
-const ConfigureProperties = ({ close, field, setFields }: any) => {
+const ConfigureProperties = ({ close, field, setFields, steps }: any) => {
 
   const [values, setValues] = React.useState(field);
+  const [stepOption, setStepOption] = React.useState([]);
+
+  React.useEffect(() => {
+    const option = []
+    steps?.forEach((e) => {
+      option.push({ optionLabel: e.stepName, optionValue: e._id })
+    })
+    setStepOption(option)
+  }, []);
 
   const onSave = () => {
     setFields((prevState) =>
@@ -108,6 +119,46 @@ const ConfigureProperties = ({ close, field, setFields }: any) => {
             }
             label="Required"
           />
+        </Box>
+        <Box mt={2}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isJumpStep"
+                checked={values?.isJumpStep}
+                onChange={(e) => {
+                  setValues((prevState) => ({
+                    ...prevState,
+                    isJumpStep: e.target.checked
+                  }));
+                }}
+                color="primary"
+              />
+            }
+            label="Jump Step (If value valid)"
+          />
+          {values?.isJumpStep && <Box mt={2}>
+            <Autocomplete
+              options={stepOption}
+              fullWidth
+              multiple
+              size="small"
+              value={values?.jumpSteps ? stepOption?.filter((data: any) => values?.jumpSteps?.includes(data.optionValue)) : []}
+              getOptionLabel={(option) => option.optionLabel}
+              getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+              onChange={(_, newVal: any) => {
+                setValues((prevState) => ({ ...prevState, jumpSteps: newVal?.map((val) => val.optionValue) }));
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Jump Steps"
+                  name="jumpSteps"
+                  variant="outlined"
+                />
+              )}
+            />
+          </Box>}
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
