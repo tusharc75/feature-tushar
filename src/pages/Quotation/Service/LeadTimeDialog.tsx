@@ -85,7 +85,7 @@ function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess })
         }}
       >
         <CustomDialogHeader
-          title={data?.productDetail?.productName || data?.serviceDetail?.serviceName || data?.packageDetail?.packageName || 'mother'}
+          title={data?.serviceName}
           onClose={(e, reason) => {
             onClose();
           }}
@@ -205,7 +205,7 @@ function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess })
         {showConfirmDialog ? (
           <ConfirmCancelDialog
             open={showConfirmDialog}
-            onSave={() => {}}
+            onSave={() => { }}
             onClose={() => {
               setShowConfirmDialog(false);
               onClose();
