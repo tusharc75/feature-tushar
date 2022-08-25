@@ -53,6 +53,8 @@ const FormTypes = (props) => {
     fieldData,
     setValues,
     required,
+    errors,
+    touched,
     ...rest
   } = props;
 
@@ -85,6 +87,8 @@ const FormTypes = (props) => {
       value={values[name]}
       required={required}
       onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
+      error={touched[name] && Boolean(errors[name])}
+      helperText={touched[name] && errors[name]}
     />
   ) : type === 'multiLine' ? (
     <TextField
@@ -98,6 +102,8 @@ const FormTypes = (props) => {
       value={values[name]}
       required={required}
       onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trimStart())}
+      error={touched[name] && Boolean(errors[name])}
+      helperText={touched[name] && errors[name]}
     />
   ) : type === 'number' ? (
     <TextField
@@ -118,6 +124,8 @@ const FormTypes = (props) => {
           },
         },
       }}
+      error={touched[name] && Boolean(errors[name])}
+      helperText={touched[name] && errors[name]}
     />
   )
     : type === "dropDown" ? (
@@ -184,7 +192,36 @@ const FormTypes = (props) => {
             }}
           />
         </MuiPickersUtilsProvider>
-      ) : null;
+      )
+        : type === "multiSelect" ? (
+          <Autocomplete
+            {...rest}
+            multiple
+            disableCloseOnSelect={true}
+            options={options}
+            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+            value={values[name] ? options.filter((data: any) => values[name].includes(data.optionValue)) : []}
+            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+            onChange={(e, value: any) => {
+              handleChange(name, value.filter((v) => v.optionValue).map((val) => val.optionValue));
+            }
+            }
+            forcePopupIcon={true}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label={getLabel(label)}
+                name={name}
+                error={touched[name] && Boolean(errors[name])}
+                helperText={touched[name] && errors[name]}
+                required={required}
+                style={{ whiteSpace: 'nowrap' }}
+              />
+            )}
+          />
+        )
+          : null;
 };
 
 export default FormTypes;
