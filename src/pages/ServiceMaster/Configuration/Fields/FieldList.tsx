@@ -34,5 +34,10 @@ const FieldList = {
         type: "passFail",
         icon: "",
     },
+    MULTISELECT: {
+        label: "Multi-Select",
+        type: "multiSelect",
+        icon: "far fa-calendar-check",
+    },
 }
 export default FieldList;
