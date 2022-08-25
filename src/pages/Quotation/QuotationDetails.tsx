@@ -47,6 +47,7 @@ import { CircularProgress } from '@material-ui/core';
 import AllVersionStatus from './AllVersionStatus';
 
 const QuotationDetails = () => {
+  
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.quotation.title);
   const { id } = useParams();
@@ -54,9 +55,7 @@ const QuotationDetails = () => {
   const parsed = queryString.parse(history.location.search);
   const { openEdit, tab }: any = parsed;
 
-  const {
-    state: { user, permissions }
-  }: any = useData();
+  const { state: { user, permissions } }: any = useData();
 
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
@@ -117,9 +116,7 @@ const QuotationDetails = () => {
   };
 
   const handleCloneQuotationWithVersionFromAllVersion = (versionNumber) => {
-    // setCloneQuoteWithVersionNumber(versionNumber);
     setOpenUpdateDialog(true);
-    // setIsQuoteClone(true);
     setShowAllVersionStatus(false);
   };
 
@@ -171,7 +168,7 @@ const QuotationDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${quotation.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -194,12 +191,10 @@ const QuotationDetails = () => {
 
   const fetchQuotationData = async (version: any = 0) => {
     setLoading(true);
-
     try {
       let data;
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
       data = response?.data?.data;
-
       setCurrentStep(quotationProcessSteps.indexOf(data?.processStatus) !== -1 ? quotationProcessSteps.indexOf(data?.processStatus) : 0);
       setHeadingLabel(data.quotationNumber);
       setCustomizedRoutes([routes.quotation, { title: `${data.quotationNumber}` }]);
@@ -273,7 +268,6 @@ const QuotationDetails = () => {
   };
 
   const updateJobStatus = (status) => {
-    // need to change the api
     axiosInstance()
       .patch(`${quotation.api}/status/${quotationData._id}`, { status: status })
       .then(({ data: { data } }) => {
@@ -304,7 +298,6 @@ const QuotationDetails = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-
         <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
           <div>
             <div>
@@ -320,24 +313,21 @@ const QuotationDetails = () => {
                   </div>
                 ) : (
                   <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
-                    {
-                      <Tooltip title="Quote Summary">
-                        <Button
-                          onClick={() => {
-                            setShowQuotationSummaryDialog(true);
-                          }}
-                          variant="outlined"
-                          size="small"
-                          className="mx-1"
-                          startIcon={<GiReceiveMoney />}
-                          color="primary"
-                        >
-                          {isMobile && !isTablet ? '' : 'Quotation Summary'}
-                        </Button>
-                      </Tooltip>
-                    }
-                    {/* {permissions?.quotation?.isUpdate && ['In-Progress'].includes(quotationData?.status) && ( */}
-                    {permissions?.quotation?.isUpdate && (
+                    <Tooltip title="Quote Summary">
+                      <Button
+                        onClick={() => {
+                          setShowQuotationSummaryDialog(true);
+                        }}
+                        variant="outlined"
+                        size="small"
+                        className="mx-1"
+                        startIcon={<GiReceiveMoney />}
+                        color="primary"
+                      >
+                        Summary
+                      </Button>
+                    </Tooltip>
+                    {/* {permissions?.quotation?.isUpdate && (
                       <>
                         <Button
                           variant="outlined"
@@ -377,7 +367,7 @@ const QuotationDetails = () => {
                           })}
                         </Menu>
                       </>
-                    )}
+                    )} */}
                     <Tooltip title={`Version : ${currentVersion}`}>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -393,87 +383,83 @@ const QuotationDetails = () => {
                         {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
                       </Button>
                     </Tooltip>
-                    <>
-                      <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={openActionsAction}
-                        aria-controls="action"
-                        endIcon={isMobile && !isTablet ? null : <ExpandMore />}
-                      >
-                        {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Action'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorElAction}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action"
-                        open={Boolean(anchorElAction)}
-                        onClose={closeActionsAction}
-                      >
-                        {permissions?.quotation?.isDelete && (
-                          <MenuItem>
-                            <Button
-                              variant="text"
-                              size="small"
-                              startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
-                              onClick={() => setShowConfirmBox(true)}
-                            >
-                              Delete Quote
-                            </Button>
-                          </MenuItem>
-                        )}
-                        {currentVersion !== 1 && permissions?.quotation?.isDelete && (
-                          <MenuItem>
-                            <Button
-                              variant="text"
-                              size="small"
-                              disabled={!allowedToEdit || loading}
-                              startIcon={<MdDeleteSweep className={isMobile ? 'mr-1' : ''} />}
-                              onClick={deleteVersion}
-                            >
-                              Delete Version-{currentVersion}
-                            </Button>
-                          </MenuItem>
-                        )}
+                    <Button
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      onClick={openActionsAction}
+                      aria-controls="action"
+                      endIcon={isMobile && !isTablet ? null : <ExpandMore />}
+                    >
+                      {isMobile && !isTablet ? <IoArrowDownCircleSharp size={20} /> : 'Action'}
+                    </Button>
+                    <Menu
+                      anchorEl={anchorElAction}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action"
+                      open={Boolean(anchorElAction)}
+                      onClose={closeActionsAction}
+                    >
+                      {permissions?.quotation?.isDelete && (
                         <MenuItem>
                           <Button
-                            disabled={!allowedToEdit || isCloning || loading}
                             variant="text"
-                            type="button"
                             size="small"
-                            startIcon={
-                              isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />
-                            }
-                            onClick={() => {
-                              cloneVersion();
-                            }}
+                            startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
+                            onClick={() => setShowConfirmBox(true)}
                           >
-                            {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
+                            Delete Quote
                           </Button>
                         </MenuItem>
-                        {permissions?.quotation?.isUpdate && allowedToEdit && (
-                          <MenuItem>
-                            <Button
-                              variant="text"
-                              color="primary"
-                              size="small"
-                              startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                              onClick={handleOpenUpdateDialog}
-                            >
-                              Edit Quote
-                            </Button>
-                          </MenuItem>
-                        )}
-                      </Menu>
-                    </>
-
-                    {/* {permissions?.quotation?.isDelete && ['In-Progress', 'Closed'].indexOf(quotationData?.status) === -1 && ( */}
+                      )}
+                      {currentVersion !== 1 && permissions?.quotation?.isDelete && (
+                        <MenuItem>
+                          <Button
+                            variant="text"
+                            size="small"
+                            disabled={!allowedToEdit || loading}
+                            startIcon={<MdDeleteSweep className={isMobile ? 'mr-1' : ''} />}
+                            onClick={deleteVersion}
+                          >
+                            Delete Version-{currentVersion}
+                          </Button>
+                        </MenuItem>
+                      )}
+                      <MenuItem>
+                        <Button
+                          disabled={!allowedToEdit || isCloning || loading}
+                          variant="text"
+                          type="button"
+                          size="small"
+                          startIcon={
+                            isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />
+                          }
+                          onClick={() => {
+                            cloneVersion();
+                          }}
+                        >
+                          {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
+                        </Button>
+                      </MenuItem>
+                      {permissions?.quotation?.isUpdate && allowedToEdit && (
+                        <MenuItem>
+                          <Button
+                            variant="text"
+                            color="primary"
+                            size="small"
+                            startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
+                            onClick={handleOpenUpdateDialog}
+                          >
+                            Edit Quote
+                          </Button>
+                        </MenuItem>
+                      )}
+                    </Menu>
                   </DetailsPageHeader>
                 )}
                 <Tabs
@@ -651,7 +637,7 @@ const QuotationDetails = () => {
                                 access: true
                               }
                             ]}
-                            handleActivityRefresh={() => {}}
+                            handleActivityRefresh={() => { }}
                             emails={[]}
                           />
                         </div>
