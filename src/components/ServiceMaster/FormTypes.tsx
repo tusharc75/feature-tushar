@@ -124,13 +124,13 @@ const FormTypes = (props) => {
       <Autocomplete
         {...rest}
         options={options}
-        getOptionLabel={(option: any) => (option ? option : '')}
-        getOptionSelected={(option: any, val) => option === val}
+        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+        getOptionSelected={(option: any, val) => option.optionValue === val}
         value={
-          options.filter((data) => data === values[name]).length ? options.filter((data) => data === values[name])[0] : ''
+          options.filter((data) => data.optionValue === values[name]).length ? options.filter((data) => data.optionValue === values[name])[0] : ''
         }
         onChange={(e, val) => {
-          handleChange(name, val && val ? val : '');
+          handleChange(name, val && val?.optionValue ? val.optionValue : '');
         }
         }
         selectOnFocus

@@ -267,7 +267,7 @@ const Service = ({ serviceDataFields, workOrderId, serviceData, getServiceData, 
                                                                     name={field.fieldName}
                                                                     type={field.type}
                                                                     required={field.required}
-                                                                    options={field.option ? field.option : []}
+                                                                    options={field.options ? field.options : []}
                                                                     setFieldValue={(name, value) => {
                                                                         setFieldValue(name, value)
                                                                     }}

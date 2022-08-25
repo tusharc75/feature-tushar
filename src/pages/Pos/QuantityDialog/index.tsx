@@ -69,7 +69,7 @@ const QuantityDialog = ({ handleCloseDialog, handleAddToCart, product, cartQty =
                                 </ListItemAvatar>
                                 <ListItemText
                                     primary={product?.productName}
-                                    secondary={`Inventory - ${product?.availableInventory}`}
+                                    secondary={`Inventory : ${product?.availableInventory}`}
                                 />
                                 {product?.availableInventory ?
                                     <Field

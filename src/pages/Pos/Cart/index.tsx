@@ -98,7 +98,7 @@ const AssignCartDialog = ({ handleCloseDialog, fetchCart, products, handleDelete
                             </ListItemAvatar>
                             <ListItemText
                                 primary={product?.product?.optionLabel}
-                                secondary={`Inventory - ${product?.inventory?.availableInventory}`} />
+                                secondary={`Inventory : ${product?.inventory?.availableInventory}`} />
                             <Box display="flex" flexDirection="row"  >
                                 <IconButton
                                     color="secondary"

@@ -120,7 +120,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse }) =>
               <List style={{ padding: 0 }}>
                 <ListItem key={product[0]?._id}>
                   {product?.length === 1 ? (
-                    <ListItemText primary={product[0]?.productName} secondary={`Inventory - ${product[0]?.availableInventory}`} />
+                    <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${product[0]?.availableInventory}`} />
                   ) : (
                     <ListItemText primary={`${product?.length} Products`} />
                   )}
