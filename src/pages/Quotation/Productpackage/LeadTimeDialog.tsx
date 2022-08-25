@@ -85,7 +85,7 @@ function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess })
         }}
       >
         <CustomDialogHeader
-          title={data?.productDetail?.productName || data?.serviceDetail?.serviceName || data?.packageDetail?.packageName || 'mother'}
+          title={data?.productDetail?.productName || data?.serviceDetail?.serviceName || data?.packageDetail?.packageName}
           onClose={(e, reason) => {
             onClose();
           }}

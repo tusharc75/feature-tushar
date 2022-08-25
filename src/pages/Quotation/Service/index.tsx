@@ -57,19 +57,19 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
 
   const versionId = quotationData?.versions[version]?._id || null;
+  
   useEffect(() => {
     fetchFields();
     versionId && fetchQuotationService();
   }, [versionId]);
 
-  const leadTimeColumn = {
+  const extraColoum = [{
     field: 'leadTime',
     headerName: 'Lead Time (Days)',
     cellRenderer: 'leadTimeRenderer'
-  };
+  }]
 
   const fetchFields = async () => {
-    columns.push(leadTimeColumn);
     const fields = await fetch_quotation_service_fields(quotationData?.currency);
     let rendererNames = [];
     genrateColoum(fields, columns, rendererNames, false, renderedFrom);
@@ -81,7 +81,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
       ...tempFrameworkComponent
     };
     setFrameWorkComponent({ ...tempFrameworkComponent });
-    setColumns([...columns]);
+    setColumns([...columns, ...extraColoum]);
   };
 
   const LeadTimeRenderer = (params) => (
@@ -304,7 +304,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, ver
             showClone={false}
             fullHeight={true}
             renderedFrom={renderedFrom}
-            onClone={() => {}}
+            onClone={() => { }}
           />
         ) : (
           <CustomAgGridEditable
