@@ -14,6 +14,11 @@ const FieldList = {
         type: "dropDown",
         icon: "far fa-calendar-check",
     },
+    MULTISELECT: {
+        label: "Multi-Select",
+        type: "multiSelect",
+        icon: "far fa-calendar-check",
+    },
     DATE: {
         label: "Date",
         type: "date",
@@ -33,11 +38,6 @@ const FieldList = {
         label: "Pass Fail",
         type: "passFail",
         icon: "",
-    },
-    MULTISELECT: {
-        label: "Multi-Select",
-        type: "multiSelect",
-        icon: "far fa-calendar-check",
-    },
+    }
 }
 export default FieldList;
