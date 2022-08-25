@@ -47,7 +47,6 @@ import { CircularProgress } from '@material-ui/core';
 import AllVersionStatus from './AllVersionStatus';
 
 const QuotationDetails = () => {
-  
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.quotation.title);
   const { id } = useParams();
@@ -55,7 +54,9 @@ const QuotationDetails = () => {
   const parsed = queryString.parse(history.location.search);
   const { openEdit, tab }: any = parsed;
 
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
@@ -111,6 +112,7 @@ const QuotationDetails = () => {
   }, [quotationData]);
 
   const handleChangeVersionFromAllVersion = (versionNumber) => {
+    fetchQuotationData(versionNumber);
     setCurrentVersion(versionNumber);
     setShowAllVersionStatus(false);
   };
@@ -160,15 +162,15 @@ const QuotationDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(quotationProcessSteps[currentStep]);
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 5 && currVersionId) {
+      updateProcessStatus(quotationProcessSteps[currentStep], currVersionId);
     }
-  }, [currentStep]);
+  }, [currentStep, currVersionId]);
 
-  const updateProcessStatus = (processStatus) => {
+  const updateProcessStatus = (processStatus, versionId) => {
     axiosInstance()
-      .put(`${quotation.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .put(`${quotation.api}/${id}/process-status/${versionId}`, { processStatus: processStatus })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -195,17 +197,27 @@ const QuotationDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
       data = response?.data?.data;
-      setCurrentStep(quotationProcessSteps.indexOf(data?.processStatus) !== -1 ? quotationProcessSteps.indexOf(data?.processStatus) : 0);
+
       setHeadingLabel(data.quotationNumber);
       setCustomizedRoutes([routes.quotation, { title: `${data.quotationNumber}` }]);
       setQuotationData(data);
       let keys = Object.keys(data.versions);
       if (version == 0) {
         setCurrentVersion(parseInt(keys[keys.length - 1]));
-        setCurrVersionId(data.versions[parseInt(keys[keys.length - 1])]?._id);
+        setCurrVersionId(data.versions[currentVersion]?._id);
+        setCurrentStep(
+          quotationProcessSteps.indexOf(data.versions[currentVersion]?.processStatus) !== -1
+            ? quotationProcessSteps.indexOf(data.versions[currentVersion]?.processStatus)
+            : 0
+        );
       } else {
         setCurrentVersion(version);
         setCurrVersionId(data.versions[currentVersion]?._id);
+        setCurrentStep(
+          quotationProcessSteps.indexOf(data.versions[currentVersion]?.processStatus) !== -1
+            ? quotationProcessSteps.indexOf(data.versions[currentVersion]?.processStatus)
+            : 0
+        );
       }
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -227,8 +239,9 @@ const QuotationDetails = () => {
 
   const cloneVersion = () => {
     setCloning(true);
+    const versionId = quotationData?.versions[currentVersion]?._id;
     axiosInstance()
-      .post(`/quotation/clone-version/${quotationData._id}/${currentVersion}`)
+      .post(`/quotation/clone-version/${quotationData._id}/${versionId}`)
       .then(() => {
         fetchQuotationData();
         setCloning(false);
@@ -327,47 +340,7 @@ const QuotationDetails = () => {
                         Summary
                       </Button>
                     </Tooltip>
-                    {/* {permissions?.quotation?.isUpdate && (
-                      <>
-                        <Button
-                          variant="outlined"
-                          color="default"
-                          size="small"
-                          onClick={openActions}
-                          aria-controls="action-menu"
-                          endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                        >
-                          {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
-                        </Button>
-                        <Menu
-                          anchorEl={anchorEl}
-                          keepMounted
-                          getContentAnchorEl={null}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
-                          }}
-                          id="action-menu"
-                          open={Boolean(anchorEl)}
-                          onClose={closeActions}
-                        >
-                          {statusOptions?.map((o, index) => {
-                            return (
-                              <MenuItem
-                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === quotationData?.status)}
-                                onClick={() => {
-                                  closeActions();
-                                  handleStatusChange(o);
-                                }}
-                                value={o}
-                              >
-                                {o?.optionLabel}
-                              </MenuItem>
-                            );
-                          })}
-                        </Menu>
-                      </>
-                    )} */}
+
                     <Tooltip title={`Version : ${currentVersion}`}>
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -436,9 +409,7 @@ const QuotationDetails = () => {
                           variant="text"
                           type="button"
                           size="small"
-                          startIcon={
-                            isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />
-                          }
+                          startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
                           onClick={() => {
                             cloneVersion();
                           }}
@@ -602,7 +573,7 @@ const QuotationDetails = () => {
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
                   <Box>
-                    <RoadmapViews quoteName={headingLabel} quoteId={id} status={'New'} />
+                    <RoadmapViews quoteName={headingLabel} quoteId={id} versionId={currVersionId} status={'New'} />
                   </Box>
                 </TabPanel>
               </Paper>
@@ -637,7 +608,7 @@ const QuotationDetails = () => {
                                 access: true
                               }
                             ]}
-                            handleActivityRefresh={() => { }}
+                            handleActivityRefresh={() => {}}
                             emails={[]}
                           />
                         </div>

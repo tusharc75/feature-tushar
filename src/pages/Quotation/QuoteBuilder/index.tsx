@@ -59,12 +59,12 @@ const QuoteBuilder = ({
   const [rowsData, setRowsData] = useState(null);
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
-  const versionId = quotationData?.versions[version]?._id || null;
 
+  const versionId = quotationData?.versions[version]?._id || null;
   useEffect(() => {
     fetchFields();
-    version && fetchProductInventory();
-  }, [version]);
+    versionId && fetchProductInventory();
+  }, [versionId]);
 
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);

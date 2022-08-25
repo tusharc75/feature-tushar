@@ -37,7 +37,6 @@ export default function AllVersionStatus({
     <span
       className="link"
       onClick={() => {
-        fetchQuotationData(params.data.version);
         handleChangeVersionFromAllVersion(params.data.version);
       }}
     >

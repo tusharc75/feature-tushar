@@ -76,11 +76,12 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
   const [selectedType, setSelectedType] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
 
+  const versionId = quotationData?.versions[version]?._id || null;
   useEffect(() => {
     fetchFields();
+    version && fetchProductInventory();
   }, [version]);
-  const versionId = quotationData?.versions[version]?._id || null;
-  console.log(versionId);
+
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
@@ -307,7 +308,6 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       }
     });
     setColumns(coloum);
-    fetchProductInventory();
   };
 
   const fetchProductInventory = async () => {
