@@ -7,7 +7,7 @@ import DropField from './DropField';
 import FieldList from './FieldList';
 import ConfigureProperties from './ConfigureProperties';
 
-const Configurator = ({ fields, setFields }) => {
+const Configurator = ({ fields, setFields, steps }) => {
 
   const fieldsData = Object.keys(FieldList).map((field, index) => ({
     fieldLabel: FieldList[field].label,
@@ -96,6 +96,7 @@ const Configurator = ({ fields, setFields }) => {
         <ConfigureProperties
           setFields={setFields}
           field={openProperties?.data}
+          steps={steps}
           close={() => setOpenProperties({ isOpen: false, data: null })} />
       )}
     </>
