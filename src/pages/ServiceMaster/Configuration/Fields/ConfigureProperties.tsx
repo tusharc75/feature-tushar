@@ -46,7 +46,7 @@ const ConfigureProperties = ({ close, field, setFields, steps }: any) => {
             onChange={(e) => setValues((prevState) => ({ ...prevState, fieldLabel: e.target.value }))}
           />
         </Box>
-        {(field['type'] === 'dropDown' || field['type'] === 'multiSelect') &&
+        {(field['type'] === 'dropDown' || field['type'] === "multiSelect") &&
           <Options
             field={values}
             setFields={setValues}
@@ -78,6 +78,7 @@ const ConfigureProperties = ({ close, field, setFields, steps }: any) => {
                     label="Minimum Value"
                     variant="outlined"
                     value={values?.minValue}
+                    required
                     onChange={(e) => setValues((prevState) => ({ ...prevState, minValue: e.target.value }))}
                     InputLabelProps={{
                       shrink: values?.minValue ? true : false
@@ -92,6 +93,7 @@ const ConfigureProperties = ({ close, field, setFields, steps }: any) => {
                     label="Maximum Value"
                     variant="outlined"
                     value={values?.maxValue}
+                    required
                     onChange={(e) => setValues((prevState) => ({ ...prevState, maxValue: e.target.value }))}
                     InputLabelProps={{
                       shrink: values?.maxValue ? true : false

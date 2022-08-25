@@ -6,7 +6,7 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { Formik, Form } from "formik";
-import { dateTimeFormat, getObjKeys, getObjKeysWithValues, workOrder, yupSchema } from 'src/constants/helpers';
+import { dateTimeFormat, getObjKeys, getObjKeysWithValues, workOrder } from 'src/constants/helpers';
 import { Box, Divider, Grid, IconButton, Paper } from '@material-ui/core';
 import FormTypes from 'src/components/ServiceMaster/FormTypes';
 import CustomButton from 'src/components/Helpers/CustomButton';
@@ -14,6 +14,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import { isMobile } from 'react-device-detect';
 import moment from 'moment';
+import { yupSchemaServiceMaster } from 'src/components/ServiceMaster/Helpers';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -247,7 +248,7 @@ const Service = ({ serviceDataFields, workOrderId, serviceData, getServiceData, 
                             <Box p={2}>
                                 <Formik
                                     initialValues={initialData.values}
-                                    validationSchema={yupSchema(initialData.fields)}
+                                    validationSchema={yupSchemaServiceMaster(initialData.fields)}
                                     onSubmit={handleSubmit}
                                     validate={validate}
                                     enableReinitialize
@@ -271,6 +272,8 @@ const Service = ({ serviceDataFields, workOrderId, serviceData, getServiceData, 
                                                                     setFieldValue={(name, value) => {
                                                                         setFieldValue(name, value)
                                                                     }}
+                                                                    errors={errors}
+                                                                    touched={touched}
                                                                     fullWidth
                                                                     size="small"
                                                                 />
