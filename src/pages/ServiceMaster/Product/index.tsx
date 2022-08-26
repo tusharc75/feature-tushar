@@ -17,8 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function Product({ id }) {
 
-  const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const renderedFrom = `${camelCase(routes?.product.title)}_product`;
 
   const { state: { permissions, user, selectedEntity } }: any = useData();
 
@@ -79,20 +78,6 @@ function Product({ id }) {
             count: data.length,
             selectedRecords: data.filter((f) => f.isChecked === true)
           });
-        }
-        if (gridApi) {
-          try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
-              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
-              : [];
-            if (oldSelectedRecords.length > 0) {
-              gridApi.forEachNode(function (node) {
-                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
-              });
-            }
-          } catch (ex) {
-            console.error('Error in getting selected records from local storage');
-          }
         }
         setParts([...data]);
         dispatch({ type: 'loading', loading: false });
@@ -230,7 +215,6 @@ function Product({ id }) {
           limit={limit}
           pageSizes={pageSizes}
           page={page}
-          actionWidth={150}
           loading={gridLoading}
           renderedFrom={renderedFrom}
           refreshGrid={fetchBOMData}

@@ -127,7 +127,8 @@ const ServiceMasterDetailsPage = () => {
               }}
             >
               <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-              {permissions?.serializedAsset && <Tab label="Product" value={1} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
+              <Tab label="Steps" value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+              <Tab label="Product" value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
             </Tabs>
             {tabValue === 0 && (
               <Box>
@@ -140,13 +141,13 @@ const ServiceMasterDetailsPage = () => {
                 )}
               </Box>
             )}
-            {tabValue === 1 && <Product id={id} />}
+            {tabValue === 1 &&
+              <Steps serviceId={id} />}
+            {tabValue === 2 &&
+              <Product id={id} />}
           </Paper>
         </Grid>
         <Grid item xs={12} sm={12} md={4} lg={4}>
-          <Box mb={2}>
-            <Steps serviceId={id} />
-          </Box>
           {permissions?.leadTimeMaster?.isRead && (
             <Box mb={2}>
               <LeadTimeMaster Id={id} type={'service'} />
