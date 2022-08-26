@@ -1,14 +1,43 @@
-import { useState, useEffect, useContext } from 'react';
-import { Box, Grid, IconButton, Paper, Typography } from '@material-ui/core';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
+import { Box, Grid, IconButton, Paper, Typography, Button, Tooltip } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
-import ManageServiceSteps from './ManageServiceSteps';
+import StepDialog from './StepDialog';
 import { serviceMaster } from 'src/constants/helpers';
+import { camelCase } from 'lodash';
+import routes from 'src/components/Helpers/Routes';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from '../../../StateProvider/Provider';
+import { gridLoadingTimeout } from 'src/constants/helpers';
+import { CommonRenderer } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
+import DeleteIcon from '@material-ui/icons/Delete';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import EditIcon from '@material-ui/icons/Edit';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import ConfiguratorDialog from '../Configuration/Fields/ConfiguratorDialog';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import { Link } from 'react-router-dom'
+import NoDataCell from "../../../components/Helpers/NoDataCell";
 
 const Steps = ({ serviceId }) => {
 
-  const [stepDialog, setStepDialog] = useState(false);
-  const [stepOptions, setStepOptions] = useState(null);
+  const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_stps`;
+
+  const [stepDialog, setStepDialog] = useState({ open: false, stepId: "" });
+  const [stepFieldsDialog, setStepFieldsDialog] = useState({ open: false, stepId: "" });
+  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
+
+  const { state: { permissions, user, selectedEntity } }: any = useData();
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
+  const toastConfig = useContext(CustomToastContext);
+
+  const columns = [
+    { field: 'stepName', headerName: 'Step Name', show: true, cellRenderer: 'stepNameRenderer' },
+    { field: 'leadDay', headerName: 'Lead Day', show: true, cellRenderer: 'commonRenderer' }
+  ];
 
   useEffect(() => {
     fetchStepsData();
@@ -18,79 +47,179 @@ const Steps = ({ serviceId }) => {
     axiosInstance()
       .get(`${serviceMaster.api}/steps/${serviceId}`)
       .then(({ data: { data } }) => {
-        setStepOptions(data);
+        dispatch({
+          type: 'initialize',
+          data: data,
+          count: data.length
+        });
+        setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
       })
       .catch((err) => {
       });
   };
 
-  return (
-    <>
-      <Paper style={{ overflow: 'hidden' }}>
-        <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="subtitle2">Service Steps</Typography>
+  const handleDelete = () => {
+    axiosInstance().put(`${serviceMaster.api}/steps/${serviceId}/remove`, { ids: showConfirmBox.ids })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
+        fetchStepsData();
+        setShowConfirmBox({ open: false, ids: null });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const ActionsRenderer = (params) => (
+    <> {permissions?.serviceMaster?.isUpdate &&
+      <>
+        <HtmlTooltip title="Edit">
+          <IconButton
+            aria-label="setting"
+            onClick={(e) => {
+              setStepDialog({ open: true, stepId: params?.data?._id });
+            }}
+            size="small"
+          >
+            <EditIcon color="primary" fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title="Add Fields">
+          <IconButton
+            aria-label="setting"
+            onClick={(e) => {
+              setStepFieldsDialog({ open: true, stepId: params?.data?._id });
+            }}
+            size="small"
+          >
+            <AddCircleOutlineIcon color="primary" fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title="Delete">
           <IconButton
             size="small"
+            aria-label="Clone"
             onClick={() => {
-              setStepDialog(true);
+              setShowConfirmBox({ open: true, ids: [params?.data?._id] })
             }}
           >
-            <AddCircleOutlineIcon fontSize="small" />
+            <DeleteIcon color="error" fontSize="small" />
           </IconButton>
+        </HtmlTooltip>
+      </>}
+    </>
+  );
+
+  const StepNameRenderer = (params) =>
+    params?.value ?
+      <p onClick={() => { setStepDialog({ open: true, stepId: params?.data?._id }); }} className="link text-truncate"  >
+        {params.value}
+      </p>
+      : <NoDataCell />;
+
+  const frameworkComponents = {
+    stepNameRenderer: StepNameRenderer,
+    actionsRenderer: ActionsRenderer,
+    commonRenderer: CommonRenderer,
+  };
+
+  return (
+    <>
+      {permissions?.serviceMaster?.isUpdate &&
+        <Box p={1}>
+          <Grid container>
+            <Grid item xs={6} md={6} sm={6}>
+              <Button
+                size="small"
+                variant='contained'
+                color="primary"
+                onClick={() => {
+                  setStepDialog({ open: true, stepId: "" });
+                }}
+              >
+                Add Step
+              </Button>
+            </Grid>
+            <Grid item xs={6} md={6} sm={6}>
+              <Box display={'flex'} justifyContent={'flex-end'}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  disabled={selectedRecords?.length === 0}
+                  onClick={() => {
+                    setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
+                  }}
+                >
+                  Delete
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>}
+      {columns && frameworkComponents ? (
+        <CustomAgGrid
+          allowSelection={permissions?.serviceMaster?.isUpdate}
+          allowAction={permissions?.serviceMaster?.isUpdate}
+          columns={columns}
+          dataRows={dataRows}
+          isClientSideGrid={true}
+          frameworkComponents={frameworkComponents}
+          setGridApi={setGridApi}
+          dispatch={dispatch}
+          rowCount={rowCount}
+          limit={limit}
+          pageSizes={pageSizes}
+          page={page}
+          actionWidth={150}
+          loading={gridLoading}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchStepsData}
+        />
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-        {(stepOptions && stepOptions?.length) ? (
-          <Box p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-            <Grid container>
-              <Grid item xs={3} justifyContent={'center'}>
-                <Typography variant="body1">#</Typography>
-              </Grid>
-              <Grid item xs={9} justifyContent={'center'}>
-                <Typography variant="body1">Step</Typography>
-              </Grid>
-            </Grid>
-          </Box>
-        ) : null}
-        {stepOptions?.length ? (
-          stepOptions?.map((steps, index) => (
-            <Box key={index} bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-              <Grid container>
-                <Grid item xs={3} justifyContent={'center'}>
-                  <Typography variant="body2">{index + 1}</Typography>
-                </Grid>
-                <Grid item xs={9} justifyContent={'center'}>
-                  <Typography variant="body2">{steps?.stepName}</Typography>
-                </Grid>
-              </Grid>
-            </Box>
-          ))
-        ) : !stepOptions ? (
-          <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-            <Grid container>
-              <Grid item xs={6} justifyContent={'center'}>
-                <Typography variant="body2">Loading ...</Typography>
-              </Grid>
-            </Grid>
-          </Box>
-        ) : (
-          <Box bgcolor="white" p={1} borderTop={1} borderColor="grey.300" width={'100%'}>
-            <Grid container>
-              <Grid item xs={6} justifyContent={'center'}>
-                <Typography variant="body2">No Steps Found</Typography>
-              </Grid>
-            </Grid>
-          </Box>
-        )}
-      </Paper>
-      {stepDialog && (
-        <ManageServiceSteps
+      )}
+      {showConfirmBox.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to delete this step(s)?`}
+          okBtnLoading={false}
+          onClose={() => {
+            setShowConfirmBox({ open: false, ids: null });
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      {stepDialog.open && (
+        <StepDialog
           handleClose={() => {
-            setStepDialog(false);
+            setStepDialog({ open: false, stepId: "" });
           }}
           handleSucess={() => {
-            setStepDialog(false);
+            setStepDialog({ open: false, stepId: "" });
             fetchStepsData()
           }}
           serviceId={serviceId}
+          stepId={stepDialog.stepId}
+        />
+      )}
+      {stepFieldsDialog.open && (
+        <ConfiguratorDialog
+          serviceId={serviceId}
+          stepId={stepFieldsDialog.stepId}
+          steps={[]}
+          handleClose={() => {
+            setStepFieldsDialog({ open: false, stepId: "" });
+          }}
+          handleSucess={() => {
+            setStepFieldsDialog({ open: false, stepId: "" });
+          }}
         />
       )}
     </>
