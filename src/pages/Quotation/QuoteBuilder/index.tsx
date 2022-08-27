@@ -307,15 +307,16 @@ const QuoteBuilder = ({
           </Typography>
         </Box>
         <Box display="flex">
-          {sendToCustomer && !['Waiting for Your Acceptance', 'Price Approved by Customer']?.includes(quotationData?.subStatus) ? (
+          {!sendToCustomer && (
             <HtmlTooltip title={'Send to customer'}>
               <Button
                 variant="contained"
                 color="primary"
                 size="small"
+                disabled={sendToCustomer}
                 onClick={() => {
                   axiosInstance()
-                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer `)
+                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionId}`)
                     .then(({ data }) => {
                       fetchQuotationData();
                       toastConfig.setToastConfig({
@@ -332,7 +333,7 @@ const QuoteBuilder = ({
                 Send to Customer
               </Button>
             </HtmlTooltip>
-          ) : null}
+          )}
           <Box p={1} />
         </Box>
       </Box>
