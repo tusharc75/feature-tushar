@@ -8,13 +8,11 @@ import Typography from '@material-ui/core/Typography';
 import { Formik, Form } from "formik";
 import { dateTimeFormat, getObjKeys, getObjKeysWithValues, workOrder } from 'src/constants/helpers';
 import { Box, Divider, Grid, IconButton, Paper } from '@material-ui/core';
-import FormTypes from 'src/components/ServiceMaster/FormTypes';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { isMobile } from 'react-device-detect';
 import moment from 'moment';
-import { yupSchemaServiceMaster } from 'src/components/ServiceMaster/Helpers';
 import routes from 'src/components/Helpers/Routes';
 import Steps from './Steps';
 
