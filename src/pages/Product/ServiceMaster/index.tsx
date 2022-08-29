@@ -20,6 +20,7 @@ import AddServiceMaster from './AddServiceMaster';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { FcApproval } from 'react-icons/fc';
 import { GrDrag } from 'react-icons/gr';
+import ArrangeService from './ArrangeService';
 
 interface Props {
   renderedFrom: string;
@@ -41,6 +42,9 @@ const ServiceMaster = (props: Props) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
+  const [assignService, setAssignService] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
 
@@ -245,6 +249,12 @@ const ServiceMaster = (props: Props) => {
       });
   };
 
+  const handleArrangeUpdate = (data: any) => {
+    setIsAssigning(true);
+    console.log('Doing bitch');
+    setIsAssigning(false);
+  };
+
   const handleSubmit = (ids: string[]) => {
     setSubmitting(true);
     axiosInstance()
@@ -274,7 +284,7 @@ const ServiceMaster = (props: Props) => {
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           {permissions?.product.isUpdate && (
-            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
+            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={() => setAssignService(true)}>
               <GrDrag fontSize="small" color="primary" />
               Arrange Service
             </Button>
@@ -356,6 +366,15 @@ const ServiceMaster = (props: Props) => {
           renderedFrom={`${renderedFrom}_sub-grid-1`}
           close={() => setOpenAddDialog(false)}
           exisitingIds={[]}
+        />
+      )}
+      {assignService && (
+        <ArrangeService
+          data={[]}
+          title={'Arrange Service'}
+          onClose={() => setAssignService(false)}
+          onSubmit={handleArrangeUpdate}
+          isSubmitting={isAssigning}
         />
       )}
     </Fragment>
