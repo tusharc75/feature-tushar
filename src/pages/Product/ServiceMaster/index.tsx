@@ -19,6 +19,7 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import AddServiceMaster from './AddServiceMaster';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { FcApproval } from 'react-icons/fc';
+import { GrDrag } from 'react-icons/gr';
 
 interface Props {
   renderedFrom: string;
@@ -235,7 +236,7 @@ const ServiceMaster = (props: Props) => {
 
   const handleUpdate = (data: any) => {
     axiosInstance()
-      .put(`${routes.product.path}/${id}/service-master`, data)
+      .put(`${routes.product.path}/${id}/service-master/update-default`, data)
       .then(() => {
         fetchData();
       })
@@ -271,7 +272,15 @@ const ServiceMaster = (props: Props) => {
             </Button>
           )}
         </div>
-        <div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          {permissions?.product.isUpdate && (
+            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
+              <GrDrag fontSize="small" color="primary" />
+              Arrange Service
+            </Button>
+            // <DeleteButton disabled={selectedRecords.length === 0 || loading} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+          )}
+          <Box ml={1} />
           {permissions?.product.isUpdate && (
             <DeleteButton disabled={selectedRecords.length === 0 || loading} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
           )}
