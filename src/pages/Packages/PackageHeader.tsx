@@ -261,14 +261,14 @@ function PackageHeader(props) {
                                     >
                                         Delete
                                     </MenuItem>}
-                                    {packagePermissions.isUpdate && <MenuItem
+                                    {/* {packagePermissions.isUpdate && <MenuItem
                                         onClick={() => {
                                             openAssingToProduct()
                                             closeActions();
                                         }}
                                     >
                                         Assign Products
-                                    </MenuItem>}
+                                    </MenuItem>} */}
                                 </Menu>
                             </>
 

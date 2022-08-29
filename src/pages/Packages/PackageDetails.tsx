@@ -201,9 +201,11 @@ const PackageDetails = () => {
                   <TabPanel value={tabValue} index={0}>
                     <DetailsPage data={packageData} fields={packageFields} />
                   </TabPanel>
-
                   <TabPanel value={tabValue} index={1}>
-                    {tabValue === 1 && <Products renderedFrom={`${renderedFrom}_grid-1`} packageId={id} />}
+                    {tabValue === 1 &&
+                      <Products
+                        packageData={packageData}
+                        packageId={id} />}
                   </TabPanel>
                 </>
               )}
