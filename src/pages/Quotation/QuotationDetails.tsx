@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment, useMemo } from 'react';
-import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery, Menu, MenuItem, Dialog, Tooltip } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tabs, Tab, useMediaQuery, Menu, MenuItem, Dialog, Tooltip, Typography } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -18,7 +18,8 @@ import {
   ACTIVITY_RESOURCE,
   quotationProcessSteps,
   CustomDialogTransition,
-  currencyCodeToSymbol
+  currencyCodeToSymbol,
+  QUOTATION_STATUS
 } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
@@ -26,12 +27,22 @@ import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
-import Steps from '../RentalManagement/Steps';
+import Steps from './Steps';
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
 import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GiReceiveMoney, GrStatusInfo, HiPencil, IoArrowDownCircleSharp, MdDelete, MdDeleteSweep, RiFlowChart, VscVersions } from 'react-icons/all';
+import {
+  FcClock,
+  GiReceiveMoney,
+  GrStatusInfo,
+  HiPencil,
+  IoArrowDownCircleSharp,
+  MdDelete,
+  MdDeleteSweep,
+  RiFlowChart,
+  VscVersions
+} from 'react-icons/all';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
@@ -90,6 +101,8 @@ const QuotationDetails = () => {
   const [isCloning, setCloning] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [currVersionId, setCurrVersionId] = useState(null);
+  const [sentToCustomer, setSentToCustomer] = useState(false);
+  const [versionStatus, setVersionStatus] = useState(QUOTATION_STATUS.acceptByCustomer);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -161,21 +174,6 @@ const QuotationDetails = () => {
     }
   }, [id]);
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5 && currVersionId) {
-      updateProcessStatus(quotationProcessSteps[currentStep], currVersionId);
-    }
-  }, [currentStep, currVersionId]);
-
-  const updateProcessStatus = (processStatus, versionId) => {
-    axiosInstance()
-      .put(`${quotation.api}/${id}/process-status/${versionId}`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const getRessourceFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Quotation');
@@ -204,20 +202,24 @@ const QuotationDetails = () => {
       let keys = Object.keys(data.versions);
       if (version == 0) {
         setCurrentVersion(parseInt(keys[keys.length - 1]));
-        setCurrVersionId(data.versions[currentVersion]?._id);
+        setCurrVersionId(data.versions[keys[keys.length - 1]]?._id);
         setCurrentStep(
-          quotationProcessSteps.indexOf(data.versions[currentVersion]?.processStatus) !== -1
-            ? quotationProcessSteps.indexOf(data.versions[currentVersion]?.processStatus)
+          quotationProcessSteps.includes(data.versions[keys[keys.length - 1]]?.processStatus)
+            ? quotationProcessSteps.indexOf(data.versions[keys[keys.length - 1]]?.processStatus)
             : 0
         );
+        setSentToCustomer(data.versions[keys[keys.length - 1]]?.status === QUOTATION_STATUS.sentToCustomer);
+        setVersionStatus(data.versions[keys[keys.length - 1]]?.status);
       } else {
         setCurrentVersion(version);
-        setCurrVersionId(data.versions[currentVersion]?._id);
+        setCurrVersionId(data.versions[version]?._id);
         setCurrentStep(
-          quotationProcessSteps.indexOf(data.versions[currentVersion]?.processStatus) !== -1
-            ? quotationProcessSteps.indexOf(data.versions[currentVersion]?.processStatus)
+          quotationProcessSteps.includes(data.versions[version]?.processStatus)
+            ? quotationProcessSteps.indexOf(data.versions[version]?.processStatus)
             : 0
         );
+        setVersionStatus(data.versions[version]?.status);
+        setSentToCustomer(data.versions[version]?.status === QUOTATION_STATUS.sentToCustomer);
       }
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
@@ -235,6 +237,15 @@ const QuotationDetails = () => {
       setLoading(false);
       toastConfig.setToastConfig(error);
     }
+  };
+
+  const updateProcessStatus = (currStep) => {
+    axiosInstance()
+      .put(`${quotation.api}/${id}/process-status/${currVersionId}`, { processStatus: quotationProcessSteps[currStep] })
+      .then(({ data }) => {})
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const cloneVersion = () => {
@@ -433,58 +444,72 @@ const QuotationDetails = () => {
                     </Menu>
                   </DetailsPageHeader>
                 )}
-                <Tabs
-                  className="quote-tab"
-                  value={tabValue}
-                  onChange={handleMainTabChange}
-                  textColor="primary"
-                  TabIndicatorProps={{
-                    style: {
-                      display: 'none'
-                    }
-                  }}
-                >
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 1 ? 'white' : '',
-                      color: tabValue === 1 ? '#163340' : '#163340'
+                {loading ? (
+                  <Box padding={2}>
+                    <Grid container spacing={2}>
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                        <Grid item sm={6} md={6} key={i}>
+                          <Skeleton variant="text" width="100px" height="16px" />
+                          <Box marginY={1} />
+                          <Skeleton width="100%" height="50px" />
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                ) : (
+                  <Tabs
+                    className="quote-tab"
+                    value={tabValue}
+                    onChange={handleMainTabChange}
+                    textColor="primary"
+                    TabIndicatorProps={{
+                      style: {
+                        display: 'none'
+                      }
                     }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                      </div>
-                    }
-                    {...a11yProps(0)}
-                  />
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 2 ? 'white' : '',
-                      color: '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                      </div>
-                    }
-                    {...a11yProps(1)}
-                  />
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 2 ? 'white' : '',
-                      color: tabValue === 2 ? 'blue' : '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                      </div>
-                    }
-                    {...a11yProps(2)}
-                  />
-                  <div className={'uio'}> </div>
-                </Tabs>
+                  >
+                    <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 1 ? 'white' : '',
+                        color: tabValue === 1 ? '#163340' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <FaWpforms className="mr-1" fontSize="inherit" /> Header
+                        </div>
+                      }
+                      {...a11yProps(0)}
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 2 ? 'white' : '',
+                        color: '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                        </div>
+                      }
+                      {...a11yProps(1)}
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 2 ? 'white' : '',
+                        color: tabValue === 2 ? 'blue' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                        </div>
+                      }
+                      {...a11yProps(2)}
+                    />
+                    <div className={'uio'}> </div>
+                  </Tabs>
+                )}
                 <TabPanel value={tabValue} index={0}>
                   <Box>
                     {loading || !quotationFields.length ? (
@@ -499,77 +524,90 @@ const QuotationDetails = () => {
                   </Box>
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  <Paper>
-                    <Steps
-                      isNextStep={false}
-                      nextStep={nextStep}
-                      steps={quotationProcessSteps}
-                      currentStep={currentStep}
-                      setCurrentStep={setCurrentStep}
-                      isStepEnded={['Invoiced', 'Closed'].includes(quotationData?.status)}
-                      setStepFullScreen={() => setStepFullScreen(true)}
-                    />
-                    <ContentFullScreen title={quotationProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                      {currentStep === 0 && quotationData && (
-                        <Productpackage
-                          quotationData={quotationData}
-                          setNextStep={setNextStep}
-                          currencySymbol={currencySymbol}
-                          renderedFrom={`${renderedFrom}_grid-1`}
-                          showActivity={showActivity}
-                          stepFullScreen={stepFullScreen}
-                          setQuotationSummary={setQuotationSummary}
-                          version={currentVersion}
-                        />
-                      )}
-                      {currentStep === 1 && quotationData && (
-                        <Service
-                          quotationData={quotationData}
-                          renderedFrom={`${renderedFrom}_grid-2`}
-                          setNextStep={setNextStep}
-                          stepFullScreen={stepFullScreen}
-                          version={currentVersion}
-                        />
-                      )}
-                      {currentStep === 2 && quotationData && (
-                        <QuoteBuilder
-                          quotationData={quotationData}
-                          setNextStep={setNextStep}
-                          currencySymbol={currencySymbol}
-                          showActivity={showActivity}
-                          stepFullScreen={stepFullScreen}
-                          fetchQuotationData={fetchQuotationData}
-                          setQuotationSummary={setQuotationSummary}
-                          version={currentVersion}
-                        />
-                      )}
-                      {currentStep === 3 && quotationData && (
-                        <QuoteBuilder
-                          quotationData={quotationData}
-                          setNextStep={setNextStep}
-                          currencySymbol={currencySymbol}
-                          sendToCustomer={true}
-                          showActivity={showActivity}
-                          stepFullScreen={stepFullScreen}
-                          fetchQuotationData={fetchQuotationData}
-                          setQuotationSummary={setQuotationSummary}
-                          version={currentVersion}
-                        />
-                      )}
-                      {currentStep === 4 && quotationData && (
-                        <QuoteBuilder
-                          quotationData={quotationData}
-                          setNextStep={setNextStep}
-                          currencySymbol={currencySymbol}
-                          showActivity={showActivity}
-                          stepFullScreen={stepFullScreen}
-                          fetchQuotationData={fetchQuotationData}
-                          setQuotationSummary={setQuotationSummary}
-                          version={currentVersion}
-                        />
-                      )}
-                    </ContentFullScreen>
-                  </Paper>
+                  {sentToCustomer && (
+                    <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                      <FcClock size={30} />
+                      <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+                    </div>
+                  )}
+                  <div>
+                    <Paper>
+                      <Steps
+                        isNextStep={false}
+                        nextStep={sentToCustomer || currentStep !== 3}
+                        steps={quotationProcessSteps}
+                        currentStep={currentStep}
+                        setCurrentStep={setCurrentStep}
+                        isStepEnded={quotationProcessSteps[currentStep] === 'End'}
+                        setStepFullScreen={() => setStepFullScreen(true)}
+                        isPrevStep={!sentToCustomer}
+                        updateStatus={updateProcessStatus}
+                        quotationId={id}
+                        versionId={currVersionId}
+                        status={versionStatus}
+                      />
+                      <ContentFullScreen title={quotationProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                        {currentStep === 0 && quotationData && (
+                          <Productpackage
+                            quotationData={quotationData}
+                            setNextStep={setNextStep}
+                            currencySymbol={currencySymbol}
+                            renderedFrom={`${renderedFrom}_grid-1`}
+                            showActivity={showActivity}
+                            stepFullScreen={stepFullScreen}
+                            setQuotationSummary={setQuotationSummary}
+                            version={currentVersion}
+                          />
+                        )}
+                        {currentStep === 1 && quotationData && (
+                          <Service
+                            quotationData={quotationData}
+                            renderedFrom={`${renderedFrom}_grid-2`}
+                            setNextStep={setNextStep}
+                            stepFullScreen={stepFullScreen}
+                            version={currentVersion}
+                          />
+                        )}
+                        {currentStep === 2 && quotationData && (
+                          <QuoteBuilder
+                            quotationData={quotationData}
+                            setNextStep={setNextStep}
+                            currencySymbol={currencySymbol}
+                            showActivity={showActivity}
+                            stepFullScreen={stepFullScreen}
+                            fetchQuotationData={fetchQuotationData}
+                            setQuotationSummary={setQuotationSummary}
+                            version={currentVersion}
+                          />
+                        )}
+                        {currentStep === 3 && quotationData && (
+                          <QuoteBuilder
+                            quotationData={quotationData}
+                            setNextStep={setNextStep}
+                            currencySymbol={currencySymbol}
+                            sendToCustomer={sentToCustomer}
+                            showActivity={showActivity}
+                            stepFullScreen={stepFullScreen}
+                            fetchQuotationData={fetchQuotationData}
+                            setQuotationSummary={setQuotationSummary}
+                            version={currentVersion}
+                          />
+                        )}
+                        {currentStep === 4 && quotationData && (
+                          <QuoteBuilder
+                            quotationData={quotationData}
+                            setNextStep={setNextStep}
+                            currencySymbol={currencySymbol}
+                            showActivity={showActivity}
+                            stepFullScreen={stepFullScreen}
+                            fetchQuotationData={fetchQuotationData}
+                            setQuotationSummary={setQuotationSummary}
+                            version={currentVersion}
+                          />
+                        )}
+                      </ContentFullScreen>
+                    </Paper>
+                  </div>
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
                   <Box>
