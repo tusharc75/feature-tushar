@@ -149,6 +149,11 @@ const FieldList = {
     type: "richTextEditor",
     icon: "far fa-calendar-check",
   },
+  SIGNATURE: {
+    label: "Signature",
+    type: "signature",
+    icon: "far fa-calendar-check",
+  },
 };
 
 export default FieldList;

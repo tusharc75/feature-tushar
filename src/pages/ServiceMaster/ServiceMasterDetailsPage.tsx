@@ -128,7 +128,7 @@ const ServiceMasterDetailsPage = () => {
             >
               <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
               <Tab label="Steps" value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
-              <Tab label="Product" value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
+              <Tab label="BOM" value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
             </Tabs>
             {tabValue === 0 && (
               <Box>

@@ -15,7 +15,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import EditIcon from '@material-ui/icons/Edit';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import ConfiguratorDialog from '../Configuration/Fields/ConfiguratorDialog';
+import FieldDialog from './FieldDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { Link } from 'react-router-dom'
 import NoDataCell from "../../../components/Helpers/NoDataCell";
@@ -210,7 +210,7 @@ const Steps = ({ serviceId }) => {
         />
       )}
       {stepFieldsDialog.open && (
-        <ConfiguratorDialog
+        <FieldDialog
           serviceId={serviceId}
           stepId={stepFieldsDialog.stepId}
           steps={[]}
