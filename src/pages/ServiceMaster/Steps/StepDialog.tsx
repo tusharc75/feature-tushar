@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useContext, useEffect } from 'react';
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Button, Dialog, FormControlLabel, TextField } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useState } from 'react';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -12,29 +12,51 @@ import { serviceMaster } from 'src/constants/helpers';
 import { Formik, Form, Field } from 'formik';
 import { TextField as TextFieldFormik, Select } from 'formik-material-ui';
 import CustomButton from 'src/components/Helpers/CustomButton';
+import Checkbox from '@material-ui/core/Checkbox';
+import { Autocomplete } from '@material-ui/lab';
+import Grid from '@material-ui/core/Grid';
 
-export default function StepDialog({ handleClose, handleSucess, serviceId, stepId }) {
+export default function StepDialog({ handleClose, handleSucess, serviceId, stepId, steps }) {
 
   const toastConfig = useContext(CustomToastContext);
   const [stepDetails, setStepDetails] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+  const [services, setServices] = useState([]);
+  const [stepOption, setStepOption] = useState([]);
+
+  useEffect(() => {
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Service Master`).then(({ data: { data } }) => {
+      setServices(data["Service Master"])
+    })
+    const options = []
+    steps?.forEach((e: any) => {
+      options.push({ optionValue: e._id, optionLabel: e.stepName })
+    })
+    setStepOption(options)
+  }, []);
 
   useEffect(() => {
     if (stepId != "") {
       axiosInstance()
         .get(`${serviceMaster.api}/steps/${serviceId}/${stepId}`)
         .then(({ data: { data } }) => {
-          setStepDetails({ stepName: data?.stepName, leadDay: data?.leadDay })
+          setStepDetails({
+            stepName: data?.stepName, leadDay: data?.leadDay, isPassFail: data?.isPassFail,
+            isFailAddon: data?.isFailAddon, failAddon: data?.failAddon, ispassAddon: data?.ispassAddon, passAddon: data?.passAddon,
+            isJumpStep: data?.isJumpStep, jumpSteps: data?.jumpSteps
+          })
         })
         .catch((err) => {
         });
     }
     else {
-      setStepDetails({ stepName: "", leadDay: 0 })
+      setStepDetails({
+        stepName: "", leadDay: 0, isPassFail: false, isFailAddon: false, failAddon: [], ispassAddon: false, passAddon: [],
+        isJumpStep: false, jumpSteps: []
+      })
     }
   }, []);
-
 
   const handleSubmit = (values) => {
     values.leadDay = parseInt(values.leadDay)
@@ -71,7 +93,6 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
     }
   }
 
-
   function validate(values) {
     const errors = {};
     if (values.stepName === "") {
@@ -82,7 +103,6 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
     }
     return errors;
   }
-
 
   return (
     <Dialog
@@ -147,6 +167,150 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                       setFieldValue('leadDay', e.target.value);
                     }}
                   />
+                  <Box pt={2}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isPassFail"
+                          checked={values['isPassFail']}
+                          onChange={(e) => {
+                            setFieldValue('isPassFail', e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Pass Fail"
+                    />
+                  </Box>
+                  {values['isPassFail'] &&
+                    <Box>
+                      <Box pt={2}>
+                        <Grid container >
+                          <Grid item xs={6}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  name="ispassAddon"
+                                  checked={values['ispassAddon']}
+                                  onChange={(e) => {
+                                    setFieldValue('ispassAddon', e.target.checked);
+                                  }}
+                                  color="primary"
+                                />
+                              }
+                              label="Addon Service on Pass"
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            {values['ispassAddon'] &&
+                              <Autocomplete
+                                options={services}
+                                fullWidth
+                                multiple
+                                size="small"
+                                value={values?.passAddon ? services?.filter((data: any) => values?.passAddon?.includes(data.optionValue)) : []}
+                                getOptionLabel={(option) => option.optionLabel}
+                                getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                onChange={(_, newVal: any) => {
+                                  setFieldValue('passAddon', newVal?.map((val) => val.optionValue));
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Pass Addon Services"
+                                    name="passAddon"
+                                    variant="outlined"
+                                  />
+                                )}
+                              />}
+                          </Grid>
+                        </Grid>
+                      </Box>
+                      <Box pt={2}>
+                        <Grid container >
+                          <Grid item xs={6}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  name="isFailAddon"
+                                  checked={values['isFailAddon']}
+                                  onChange={(e) => {
+                                    setFieldValue('isFailAddon', e.target.checked);
+                                  }}
+                                  color="primary"
+                                />
+                              }
+                              label="Addon Service on Fail"
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            {values['isFailAddon'] &&
+                              <Autocomplete
+                                options={services}
+                                fullWidth
+                                multiple
+                                size="small"
+                                value={values?.failAddon ? services?.filter((data: any) => values?.failAddon?.includes(data.optionValue)) : []}
+                                getOptionLabel={(option) => option.optionLabel}
+                                getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                onChange={(_, newVal: any) => {
+                                  setFieldValue('failAddon', newVal?.map((val) => val.optionValue));
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Fail Addon Services"
+                                    name="failAddon"
+                                    variant="outlined"
+                                  />
+                                )}
+                              />}
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    </Box>}
+                  <Box pt={2}>
+                    <Grid container >
+                      <Grid item xs={6}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              name="isJumpStep"
+                              checked={values?.isJumpStep}
+                              onChange={(e) => {
+                                setFieldValue('isJumpStep', e.target.checked);
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Jump Step (If step pass)"
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        {values['isJumpStep'] &&
+                          <Autocomplete
+                            options={stepOption}
+                            fullWidth
+                            multiple
+                            size="small"
+                            value={values?.jumpSteps ? stepOption?.filter((data: any) => values?.jumpSteps?.includes(data.optionValue)) : []}
+                            getOptionLabel={(option) => option.optionLabel}
+                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                            onChange={(_, newVal: any) => {
+                              setFieldValue('jumpSteps', newVal?.map((val) => val.optionValue));
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Jump Steps"
+                                name="jumpSteps"
+                                variant="outlined"
+                              />
+                            )}
+                          />}
+                      </Grid>
+                    </Grid>
+                  </Box>
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <Button
