@@ -17,6 +17,8 @@ import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import AddServiceMaster from './AddServiceMaster';
+import { HiBadgeCheck } from 'react-icons/hi';
+import { FcApproval } from 'react-icons/fc';
 
 interface Props {
   renderedFrom: string;
@@ -55,6 +57,7 @@ const ServiceMaster = (props: Props) => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
+    setColumns(null);
     axiosInstance()
       .get(`/field?resource=${serviceMaster.resource}`)
       .then(({ data: { data } }) => {
@@ -103,6 +106,7 @@ const ServiceMaster = (props: Props) => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
+        fetchGridColumns();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -152,7 +156,39 @@ const ServiceMaster = (props: Props) => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions?.product?.isUpdate && (
+      {permissions?.product?.isUpdate &&
+        (params?.data?.default ? (
+          <HtmlTooltip title={'Default'}>
+            <IconButton
+              aria-label={'Default'}
+              size="small"
+              onClick={() => {
+                handleUpdate({
+                  ids: [params?.data?._id],
+                  default: !params?.data?.default
+                });
+              }}
+            >
+              <HiBadgeCheck />
+            </IconButton>
+          </HtmlTooltip>
+        ) : (
+          <HtmlTooltip title={'Default'}>
+            <IconButton
+              aria-label={'Default'}
+              size="small"
+              onClick={() => {
+                handleUpdate({
+                  ids: [params?.data?._id],
+                  default: !params?.data?.default
+                });
+              }}
+            >
+              <FcApproval />
+            </IconButton>
+          </HtmlTooltip>
+        ))}
+      {permissions?.product?.isDelete && (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -194,6 +230,17 @@ const ServiceMaster = (props: Props) => {
       .catch((error) => {
         setDeleting(false);
         toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleUpdate = (data: any) => {
+    axiosInstance()
+      .put(`${routes.product.path}/${id}/service-master`, data)
+      .then(() => {
+        fetchData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
       });
   };
 
