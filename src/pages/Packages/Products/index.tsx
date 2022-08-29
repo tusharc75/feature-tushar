@@ -147,7 +147,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           <ImportExportLinks
             permissions={permissions?.packages}
             module="packages-products"
-            api={`${packages.packageApi}/package-products`}
+            api={`${packages.packageApi}/material`}
             afterImportCompleted={() => {
               fetchData();
             }}
