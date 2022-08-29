@@ -206,6 +206,7 @@ const Steps = ({ serviceId }) => {
             fetchStepsData()
           }}
           serviceId={serviceId}
+          steps={dataRows}
           stepId={stepDialog.stepId}
         />
       )}
