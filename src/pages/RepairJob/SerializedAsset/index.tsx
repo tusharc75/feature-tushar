@@ -196,21 +196,6 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
         closeActions()
     };
 
-    const checkUniqWarehouseAndOwner = () => {
-        if (selectedRecords.length === 0) {
-            return true;
-        } else if (uniq(map(selectedRecords, "warehouseId")).length === 1) {
-            if (uniq(map(selectedRecords, "currentOwnerType"))[0] === INVENTORY_OWNER_TYPE.brand) {
-                return false;
-            }
-            else {
-                return true;
-            }
-        } else {
-            return true;
-        }
-    };
-
     const checkUniqcurrentOwnerType = () => {
         if (selectedRecords.length === 0) {
             return true;
@@ -328,7 +313,7 @@ const SerializedAsset = ({ repairJobData, fetchRepairJobData, repairedAssetStatu
                             variant="contained"
                             color="primary"
                             size="small"
-                            disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.repaired === true || s.repairTypeId) || checkUniqcurrentOwnerType()}
+                            disabled={selectedRecords.length === 0 || selectedRecords.some(s => s.repaired === true || s.repairTypeId || [INVENTORY_STATUS.scrap].includes(s.status)) || checkUniqcurrentOwnerType()}
                             onClick={() => {
                                 setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map(m => m._id)] })
                             }}
