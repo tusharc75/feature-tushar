@@ -6,16 +6,15 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { Formik, Form } from "formik";
-import { dateTimeFormat, getObjKeys, getObjKeysWithValues, serviceMaster, workOrder } from 'src/constants/helpers';
+import { dateTimeFormat, getObjKeys, getObjKeysWithValues, serviceMaster, workOrder, yupSchema } from 'src/constants/helpers';
 import { Box, Divider, Grid, IconButton, Paper } from '@material-ui/core';
-import FormTypes from 'src/components/ServiceMaster/FormTypes';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import moment from 'moment';
-import { yupSchemaServiceMaster } from 'src/components/ServiceMaster/Helpers';
 import { RiShareForwardFill } from 'react-icons/ri';
 import { TiArrowBack } from 'react-icons/ti';
+import FormTypes from 'src/components/Helpers/FormTypes';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -236,7 +235,7 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
                     <Box p={2}>
                         <Formik
                             initialValues={initialData.values}
-                            validationSchema={yupSchemaServiceMaster(initialData.fields)}
+                            validationSchema={yupSchema(initialData.fields)}
                             onSubmit={handleSubmit}
                             validate={validate}
                             enableReinitialize
