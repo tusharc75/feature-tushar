@@ -11,7 +11,7 @@ import { Delete, Edit } from '@material-ui/icons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteButton from '../../../components/Helpers/DeleteButton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import {useData} from 'src/StateProvider/Provider'
+import { useData } from 'src/StateProvider/Provider'
 
 interface ConfigProps {
   productFields: any[];
@@ -23,9 +23,8 @@ interface ConfigProps {
 const ProductConfiguration = (props: ConfigProps) => {
   const initialRender = React.useRef(true);
   const { state: { permissions } }: any = useData();
-  const hasPermissions = permissions && permissions[product.permission]?.isUpdate
   const { productData, id, renderedFrom } = props;
-  const {setToastConfig} = React.useContext(CustomToastContext)
+  const { setToastConfig } = React.useContext(CustomToastContext)
   const [specFields, setSpecFields] = React.useState([]);
   const [configData, setConfigData] = React.useState([]);
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -176,32 +175,34 @@ const ProductConfiguration = (props: ConfigProps) => {
 
   return (
     <Box>
-      {hasPermissions && <Box p={2} display="flex" justifyContent="space-between">
-        <Box display="flex">
-          <Box mr={2} component={'div'}>
-            <DeleteButton
-              onClick={() => {
-                setShowConfirmBox({
-                  open: true,
-                  ids: selectedRecords.map((s) => s.id)
-                });
-              }}
-              size="small"
-              disabled={selectedRecords.length === 0}
-              disableElevation
-              text={'Delete'}
-            />
-          </Box>
-          <Button onClick={() => setOpenDialog(true)} size="small" variant="contained" color="primary" disableElevation>
+      {permissions?.product?.isUpdate &&
+        <Box p={1} pt={2} pb={2} display="flex" justifyContent="space-between">
+          <Button
+            onClick={() => setOpenDialog(true)}
+            size="small"
+            variant="contained"
+            color="primary" disableElevation>
             Add Images
           </Button>
+          <DeleteButton
+            onClick={() => {
+              setShowConfirmBox({
+                open: true,
+                ids: selectedRecords.map((s) => s.id)
+              });
+            }}
+            size="small"
+            disabled={selectedRecords.length === 0}
+            disableElevation
+            text={'Delete'}
+          />
         </Box>
-      </Box>}
+      }
       <Box>
         {Object.keys(frameWorkComponent).length > 0 && (
           <CustomAgGrid
-            allowSelection={hasPermissions}
-            allowAction={hasPermissions}
+            allowSelection={permissions?.product?.isUpdate}
+            allowAction={permissions?.product}
             columns={columns}
             dataRows={dataRows}
             frameworkComponents={frameWorkComponent}

@@ -162,7 +162,7 @@ function Parts({ id }) {
   }
 
   const ActionsRenderer = (params) => (
-   hasPermissions && <Tooltip title="Delete">
+    hasPermissions && <Tooltip title="Delete">
       <IconButton
         size="small"
         onClick={() => {
@@ -176,7 +176,7 @@ function Parts({ id }) {
 
   return (
     <div>
-     {hasPermissions && <Box p={1}>
+      {hasPermissions && <Box p={1} pt={2} pb={2} >
         <Grid container>
           <Grid item xs={6} md={6} sm={6}>
             <Button
