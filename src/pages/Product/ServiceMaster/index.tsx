@@ -42,7 +42,7 @@ const ServiceMaster = (props: Props) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
-  const [assignService, setAssignService] = useState(false);
+  const [assignServiceDialog, setAssignServiceDialog] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
 
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
@@ -249,10 +249,23 @@ const ServiceMaster = (props: Props) => {
       });
   };
 
-  const handleArrangeUpdate = (data: any) => {
+  const handleArrangeUpdate = (dIds: string[]) => {
     setIsAssigning(true);
-    console.log('Doing bitch');
-    setIsAssigning(false);
+    axiosInstance()
+      .put(`${routes.product.path}/${id}/service-master/update-order`, {
+        ids: dIds || []
+      })
+      .then(() => {
+        fetchData();
+        setIsAssigning(false);
+        setOpenAddDialog(false);
+        setAssignServiceDialog(false);
+      })
+      .catch((err) => {
+        setIsAssigning(false);
+        setAssignServiceDialog(false);
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const handleSubmit = (ids: string[]) => {
@@ -277,26 +290,21 @@ const ServiceMaster = (props: Props) => {
       <Box display="flex" justifyContent="space-between" p={1}>
         <div>
           {permissions?.product.isUpdate && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => setOpenAddDialog(true)}>
+            <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
               Add Service Master
             </Button>
           )}
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           {permissions?.product.isUpdate && (
-            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={() => setAssignService(true)}>
-              <GrDrag fontSize="small" color="primary" />
-              Arrange Service
-            </Button>
-            // <DeleteButton disabled={selectedRecords.length === 0 || loading} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+            <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
           )}
           <Box ml={1} />
           {permissions?.product.isUpdate && (
-            <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={() => setAssignServiceDialog(true)}>
+              <GrDrag fontSize="small" color="primary" />
+              Arrange
+            </Button>
           )}
         </div>
       </Box>
@@ -313,9 +321,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -323,7 +331,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -372,11 +380,15 @@ const ServiceMaster = (props: Props) => {
           exisitingIds={[]}
         />
       )}
-      {assignService && (
+      {assignServiceDialog && (
         <ArrangeService
-          data={[]}
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.serviceName, order: d?.order };
+            }) || []
+          }
           title={'Arrange Service'}
-          onClose={() => setAssignService(false)}
+          onClose={() => setAssignServiceDialog(false)}
           onSubmit={handleArrangeUpdate}
           isSubmitting={isAssigning}
         />
