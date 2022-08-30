@@ -19,6 +19,8 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import AddServiceMaster from './AddServiceMaster';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { FcApproval } from 'react-icons/fc';
+import { GrDrag } from 'react-icons/gr';
+import ArrangeService from './ArrangeService';
 
 interface Props {
   renderedFrom: string;
@@ -40,6 +42,9 @@ const ServiceMaster = (props: Props) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
+  const [assignServiceDialog, setAssignServiceDialog] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
 
@@ -235,11 +240,30 @@ const ServiceMaster = (props: Props) => {
 
   const handleUpdate = (data: any) => {
     axiosInstance()
-      .put(`${routes.product.path}/${id}/service-master`, data)
+      .put(`${routes.product.path}/${id}/service-master/update-default`, data)
       .then(() => {
         fetchData();
       })
       .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleArrangeUpdate = (dIds: string[]) => {
+    setIsAssigning(true);
+    axiosInstance()
+      .put(`${routes.product.path}/${id}/service-master/update-order`, {
+        ids: dIds || []
+      })
+      .then(() => {
+        fetchData();
+        setIsAssigning(false);
+        setOpenAddDialog(false);
+        setAssignServiceDialog(false);
+      })
+      .catch((err) => {
+        setIsAssigning(false);
+        setAssignServiceDialog(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -263,21 +287,46 @@ const ServiceMaster = (props: Props) => {
 
   return (
     <Fragment>
-      {permissions?.product?.isUpdate &&
+      {/* <Box display="flex" justifyContent="space-between" p={1}>
+        <div>
+          {permissions?.product.isUpdate && (
+            <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
+              Add Service Master
+            </Button>
+          )}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          {permissions?.product.isUpdate && (
+            <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+          )}
+          <Box ml={1} />
+          {permissions?.product.isUpdate && (
+            <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={() => setAssignServiceDialog(true)}>
+              <GrDrag fontSize="small" color="primary" />
+              Arrange
+            </Button>
+          )}
+        </div>
+      </Box> */}
+      {permissions?.product?.isUpdate && (
         <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => setOpenAddDialog(true)}>
+          <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
             Add Services
           </Button>
-          <DeleteButton
-            disabled={selectedRecords.length === 0}
-            text={'Delete'}
-            onClick={() => setShowDeleteConfirmBox(true)} />
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            {permissions?.product.isUpdate && (
+              <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+            )}
+            <Box ml={1} />
+            {permissions?.product.isUpdate && (
+              <Button disabled={loading} variant="outlined" color="primary" size="small" onClick={() => setAssignServiceDialog(true)}>
+                <GrDrag fontSize="small" color="primary" />
+                Arrange
+              </Button>
+            )}
+          </div>
         </Box>
-      }
+      )}
       {columns && Object.keys(frameWorkComponent).length > 0 ? (
         isMobile && !isTablet ? (
           <CustomSwipableList
@@ -291,9 +340,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -301,7 +350,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -348,6 +397,19 @@ const ServiceMaster = (props: Props) => {
           renderedFrom={`${renderedFrom}_sub-grid-1`}
           close={() => setOpenAddDialog(false)}
           exisitingIds={[]}
+        />
+      )}
+      {assignServiceDialog && (
+        <ArrangeService
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.serviceName, order: d?.order };
+            }) || []
+          }
+          title={'Arrange Service'}
+          onClose={() => setAssignServiceDialog(false)}
+          onSubmit={handleArrangeUpdate}
+          isSubmitting={isAssigning}
         />
       )}
     </Fragment>
