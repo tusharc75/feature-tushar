@@ -39,20 +39,12 @@ import InventoryHistory from './InventoryHistory';
 import CostDetails from './CostDetails';
 import ServiceMaster from './ServiceMaster';
 import LeadTimeMaster from '../../components/LeadTime';
+import Package from './Package';
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: any;
   value: any;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-      {children}
-    </div>
-  );
 }
 
 const ProductDetailsPage = () => {
@@ -68,54 +60,38 @@ const ProductDetailsPage = () => {
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingWarehouse, setLoadingWarehouse] = useState(false);
-  const [loadingBOMData, setLoadingBOMData] = useState(false);
   const [productData, setProductData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [productFields, setProductFields] = useState([]);
   const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
-  const [frequentlyBoughtProduct, setFrequentlyBoughtProduct] = useState([]);
   const [inventoriesData, setInventoriesData] = useState([]);
   const [inventoriesWarehouse, setWarehouseInventories] = useState([]);
   const [inventoriesWarehouseLoading, setWarehouseInventoriesLoading] = useState(false);
-  const [BOMData, setBOMData] = useState([]);
-  const [activeTable, setActiveTable] = useState('packages');
   const [productWarehouseData, setProductWarehouseData] = useState([]);
   const [tabValue, setTabValue] = useState(0);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [openProductInventoryDialog, setOpenProductInventoryDialog] = useState(false);
-  const [columns, setColumns] = useState([]);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading: gridLoading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+
   const ignoreField = ['priceTemplate', 'brand'];
 
   const [showConfirmBoxConvert, setShowConfirmBoxConvert] = useState(false);
-
   const [productInventoryData, setProductInventoryData] = useState([]);
 
   useEffect(() => {
     if (id) {
       getProductFieldsAndData();
-      //getFrequentlyBoughtProduct();
     }
   }, [id]);
 
   useEffect(() => {
     if (permissions?.serializedAsset) {
-      getProductTree();
       if (productData) {
         getWarehouses();
       }
     }
   }, [productData]);
-
-  useEffect(() => {
-    if (productData) {
-      getColumns();
-    }
-  }, [activeTable, productData]);
 
   useEffect(() => {
     if (selectedWarehouse) {
@@ -137,18 +113,11 @@ const ProductDetailsPage = () => {
   const handleMainPoints = (data) => {
     let mainPoint = {};
     mainPoint['Quantity'] = data?.qty || '';
-    // mainPoint['MRP'] = data?.mrp || '';
-    // mainPoint['Serialized Product'] = data?.serializedProduct ? "Yes" : 'No';
     setMainPoints(mainPoint);
   };
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
-    if (newValue === 1) {
-      setActiveTable('packages');
-    } else if (newValue === 2) {
-      setActiveTable('parent');
-    }
   };
 
   const getProductFieldsAndData = () => {
@@ -214,26 +183,6 @@ const ProductDetailsPage = () => {
       });
   };
 
-  const getProductTree = () => {
-    setLoadingBOMData(true);
-    axiosInstance()
-      .get(`/product/${id}/bom`)
-      .then(({ data: { data } }) => {
-        data = data.map((o) => {
-          return {
-            ...o,
-            productName: o.childProductDetail.productName,
-            productId: o.childProductDetail._id
-          };
-        });
-        setBOMData([...data]);
-        setLoadingBOMData(false);
-      })
-      .catch((err) => {
-        setLoadingBOMData(false);
-      });
-  };
-
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -277,69 +226,6 @@ const ProductDetailsPage = () => {
           toastConfig.setToastConfig(err);
         });
     }
-  };
-
-  const getColumns = () => {
-    if (productData === null) return;
-    const { parent, packages } = productData;
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
-    dispatch({ type: 'loading', loading: true });
-    let newColumns = [];
-    let rowsData = [];
-    if (activeTable === 'packages') {
-      rowsData = packages
-        ? packages.map((p) => ({
-            ...p,
-            createdBy: p?.createdBy?.user?.concatedName,
-            createdByDate: p?.createdBy?.date,
-            updatedBy: p?.updatedBy?.user?.concatedName,
-            updatedByDate: p?.updatedBy?.date
-          }))
-        : [];
-      newColumns = [
-        { field: 'packageName', headerName: 'Package Name', show: true, cellRenderer: 'packageNameRenderer' },
-        { field: 'packageDescription', headerName: 'Package Description', show: true, disabled: false, cellRenderer: 'commonRenderer' },
-        { field: 'createdBy', headerName: 'Created By', show: true, disabled: false, cellRenderer: 'createdByRenderer' },
-        { field: 'updatedBy', headerName: 'Updated By', show: true, disabled: false, cellRenderer: 'updatedByRenderer' }
-      ];
-    }
-    setColumns(newColumns);
-    dispatch({ type: 'initialize', data: rowsData, count: rowsData.length });
-    dispatch({ type: 'loading', loading: false });
-  };
-
-  const ProductNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.productDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const PackageNameRenderer = (params) => (
-    <Link className="link" title={params.value} to={`${routes.packagesDetail.path}/${params.data._id}`}>
-      {params.value}
-    </Link>
-  );
-
-  const ProductCategoryRenderer = (params) =>
-    params.data.productCategory ? (
-      <Chip
-        className="ml-3"
-        style={{ backgroundColor: `${params.data.productCategory.chipColor}` }}
-        label={`${params.data.productCategory.optionLabel}`}
-      />
-    ) : (
-      <NoDataCell />
-    );
-
-  const frameworkComponents = {
-    productNameRenderer: ProductNameRenderer,
-    packageNameRenderer: PackageNameRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    productCategoryRenderer: ProductCategoryRenderer,
-    commonRenderer: CommonRenderer
   };
 
   const handleConvertSerialized = () => {
@@ -412,14 +298,14 @@ const ProductDetailsPage = () => {
                 }}
               >
                 <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-                {permissions?.packages && <Tab label="Packages" value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />}
-                {permissions?.serializedAsset && <Tab label="Parent Product" value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
-                {permissions?.serializedAsset && <Tab label="Child Product" value={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
+                {permissions?.serializedAsset && <Tab label="Child Product" value={1} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
+                {permissions?.serviceMaster && <Tab label="Service Master" value={2} aria-controls="a11y-tabpanel-6" id="a11y-tab-6" />}
+                {permissions?.repairType && <Tab label="Repair Types" value={3} aria-controls="a11y-tabpanel-5" id="a11y-tab-5" />}
                 {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && (
                   <Tab value={4} label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />
                 )}
-                {permissions?.repairType && <Tab label="Repair Types" value={5} aria-controls="a11y-tabpanel-5" id="a11y-tab-5" />}
-                {permissions?.serviceMaster && <Tab label="Service Master" value={6} aria-controls="a11y-tabpanel-6" id="a11y-tab-6" />}
+                {permissions?.packages && <Tab label="Packages" value={5} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />}
+                {permissions?.serializedAsset && <Tab label="Parent Product" value={6} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
                 {permissions?.productInventory?.isRead && <Tab label="History" value={7} aria-controls="a11y-tabpanel-7" id="a11y-tab-7" />}
               </Tabs>
               {tabValue === 0 && (
@@ -435,44 +321,24 @@ const ProductDetailsPage = () => {
                   )}
                 </Box>
               )}
-              {tabValue === 1 && (
-                <CustomAgGrid
-                  allowSelection={false}
-                  allowAction={false}
-                  columns={columns}
-                  dataRows={dataRows}
-                  frameworkComponents={frameworkComponents}
-                  setGridApi={setGridApi}
-                  dispatch={dispatch}
-                  rowCount={rowCount}
-                  limit={limit}
-                  pageSizes={pageSizes}
-                  page={page}
-                  actionWidth={150}
-                  loading={gridLoading}
-                  isClientSideGrid={true}
-                  renderedFrom={`${renderedFrom}_grid-1`}
-                  refreshGrid={getColumns}
-                />
-              )}
-              {tabValue === 2 && <ParentProduct renderedFrom={`${renderedFrom}_grid-2`} productId={id} />}
-              {tabValue === 3 && <Parts id={id} />}
+              {tabValue === 1 && <Parts id={id} />}
+              {tabValue === 2 && <ServiceMaster id={id} renderedFrom={`${renderedFrom}_grid-2`} />}
+              {tabValue === 3 && <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-3`} />}
               {tabValue === 4 && (
                 <ProductConfiguration
                   productFields={productFields.map((_f: any) => _f.fieldData)}
                   productData={productData}
                   id={id}
-                  renderedFrom={`${renderedFrom}_grid-3`}
+                  renderedFrom={`${renderedFrom}_grid-4`}
                 />
               )}
-              {tabValue === 5 && <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-4`} />}
-              {tabValue === 6 && <ServiceMaster id={id} renderedFrom={`${renderedFrom}_grid-5`} />}
-
+              {tabValue === 5 && <Package renderedFrom={`${renderedFrom}_grid-5`} productId={id} />}
+              {tabValue === 6 && <ParentProduct renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
               {tabValue === 7 && <InventoryHistory id={id} />}
             </Paper>
           </Grid>
           {(permissions?.serializedAsset && permissions?.serializedAsset?.isRead) ||
-          (permissions?.productInventory && permissions?.productInventory?.isRead) ? (
+            (permissions?.productInventory && permissions?.productInventory?.isRead) ? (
             <Grid item xs={12} sm={12} md={4} lg={4}>
               {permissions?.productInventory?.isRead && (
                 <Box mb={2}>
