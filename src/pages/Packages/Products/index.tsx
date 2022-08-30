@@ -2,14 +2,13 @@ import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { Box, Button } from '@material-ui/core';
-
 import CustomAgGrid from 'src/components/AgGridComponents/CustomAgGridEditable';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, packages } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
+import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -96,7 +95,6 @@ const ProductsTable = ({ packageId, packageData }) => {
         ...tempFrameworkComponent,
         actionsRenderer: ActionsRenderer
       });
-      columns = [...columns, ...getStaticFields()];
       setColumns([...columns]);
     });
   };
