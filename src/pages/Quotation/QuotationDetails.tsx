@@ -34,6 +34,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import {
   FcClock,
+  FcOk,
+  FcCancel,
   GiReceiveMoney,
   GrStatusInfo,
   HiPencil,
@@ -189,8 +191,8 @@ const QuotationDetails = () => {
     }
   };
 
-  const fetchQuotationData = async (version: any = 0) => {
-    setLoading(true);
+  const fetchQuotationData = async (version: any = 0, loading = true) => {
+    setLoading(loading);
     try {
       let data;
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
@@ -242,7 +244,9 @@ const QuotationDetails = () => {
   const updateProcessStatus = (currStep) => {
     axiosInstance()
       .put(`${quotation.api}/${id}/process-status/${currVersionId}`, { processStatus: quotationProcessSteps[currStep] })
-      .then(({ data }) => {})
+      .then(() => {
+        fetchQuotationData(currentVersion, false);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -524,17 +528,27 @@ const QuotationDetails = () => {
                   </Box>
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  {sentToCustomer && (
+                  {sentToCustomer ? (
                     <div className="d-flex align-items-center justify-content-center flex-column m-3">
                       <FcClock size={30} />
                       <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
                     </div>
-                  )}
+                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+                    <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                      <FcOk size={30} />
+                      <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+                    </div>
+                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+                    <div className="d-flex align-items-center justify-content-center flex-column m-3">
+                      <FcCancel size={30} />
+                      <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+                    </div>
+                  ) : null}
                   <div>
                     <Paper>
                       <Steps
                         isNextStep={false}
-                        nextStep={sentToCustomer || currentStep !== 3}
+                        nextStep={nextStep}
                         steps={quotationProcessSteps}
                         currentStep={currentStep}
                         setCurrentStep={setCurrentStep}

@@ -33,7 +33,7 @@ import { utils } from 'xlsx';
 import { fetch_quotation_product_fields, handleViewPdf } from 'src/components/Quotation/helper';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation } from 'src/constants/helpers';
+import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation, QUOTATION_STATUS } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
@@ -307,7 +307,7 @@ const QuoteBuilder = ({
           </Typography>
         </Box>
         <Box display="flex">
-          {!sendToCustomer && (
+          {quotationData?.versions[version]?.processStatus === 'Send To Customer' && (
             <HtmlTooltip title={'Send to customer'}>
               <Button
                 variant="contained"
