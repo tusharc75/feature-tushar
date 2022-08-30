@@ -324,7 +324,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
 
@@ -334,7 +334,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
         _subRow.leadTime = Array.isArray(_subRow?.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
         _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
-        _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
+        _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
         _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
         _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
       });

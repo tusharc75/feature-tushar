@@ -189,7 +189,6 @@ const Steps = (props) => {
     versionId,
     status = QUOTATION_STATUS.acceptByCustomer
   } = props;
-  console.log(status);
   const classes = useStyles();
   let activeStep = currentStep;
   const toastConfig = useContext(CustomToastContext);
