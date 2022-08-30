@@ -529,18 +529,18 @@ const QuotationDetails = () => {
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
                   {sentToCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                      <FcClock size={30} />
+                    <div className="d-flex align-items-center justify-content-center flex-column m-1">
+                      <FcClock size={25} />
                       <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
                     </div>
                   ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                      <FcOk size={30} />
+                    <div className="d-flex align-items-center justify-content-center flex-column m-1">
+                      <FcOk size={25} />
                       <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
                     </div>
                   ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-column m-3">
-                      <FcCancel size={30} />
+                    <div className="d-flex align-items-center justify-content-center flex-column m-1">
+                      <FcCancel size={25} />
                       <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
                     </div>
                   ) : null}
