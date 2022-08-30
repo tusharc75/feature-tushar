@@ -58,6 +58,7 @@ import HtmlTooltip from '../CustomTooltipTitle';
 import ImageCropTool from '../ImageCropTool';
 import RichTextEditor from './FormTypes/RichTextEditor';
 import Dropdown from './FormTypes/Dropdown';
+import Signature from './FormTypes/Signature';
 
 
 const filter = createFilterOptions();
@@ -2054,7 +2055,18 @@ const FormTypes = (props) => {
       setFieldValue={setFieldValue}
       value={values[name]}
     />
-  ) : null;
+  ) : type === 'signature' ?
+    <Signature 
+      label={label} 
+      values={values} 
+      name={name} 
+      touched={touched} 
+      errors={errors} 
+      isTooltip={isTooltip} 
+      tooltipMessage={tooltipMessage} 
+      setFieldValue={setFieldValue}
+    />
+  : null;
 };
 
 export default FormTypes;

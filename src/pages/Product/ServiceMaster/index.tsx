@@ -163,22 +163,7 @@ const ServiceMaster = (props: Props) => {
     <>
       {permissions?.product?.isUpdate &&
         (params?.data?.default ? (
-          <HtmlTooltip title={'Default'}>
-            <IconButton
-              aria-label={'Default'}
-              size="small"
-              onClick={() => {
-                handleUpdate({
-                  ids: [params?.data?._id],
-                  default: !params?.data?.default
-                });
-              }}
-            >
-              <HiBadgeCheck />
-            </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip title={'Default'}>
+          <HtmlTooltip title={'Remove Default'}>
             <IconButton
               aria-label={'Default'}
               size="small"
@@ -192,8 +177,23 @@ const ServiceMaster = (props: Props) => {
               <FcApproval />
             </IconButton>
           </HtmlTooltip>
+        ) : (
+          <HtmlTooltip title={'Set Default'}>
+            <IconButton
+              aria-label={'Default'}
+              size="small"
+              onClick={() => {
+                handleUpdate({
+                  ids: [params?.data?._id],
+                  default: !params?.data?.default
+                });
+              }}
+            >
+              <HiBadgeCheck />
+            </IconButton>
+          </HtmlTooltip>
         ))}
-      {permissions?.product?.isDelete && (
+      {permissions?.product?.isUpdate && (
         <HtmlTooltip title="Delete">
           <IconButton
             size="small"
@@ -277,7 +277,11 @@ const ServiceMaster = (props: Props) => {
       <Box display="flex" justifyContent="space-between" p={1}>
         <div>
           {permissions?.product.isUpdate && (
-            <Button disabled={loading} variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() => setOpenAddDialog(true)}>
               Add Service Master
             </Button>
           )}
@@ -292,7 +296,7 @@ const ServiceMaster = (props: Props) => {
           )}
           <Box ml={1} />
           {permissions?.product.isUpdate && (
-            <DeleteButton disabled={selectedRecords.length === 0 || loading} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+            <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
           )}
         </div>
       </Box>
@@ -309,9 +313,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => {}}
+            onEdit={() => { }}
             extraParamsToCheckDelete={false}
-            onDelete={() => {}}
+            onDelete={() => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -319,7 +323,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (

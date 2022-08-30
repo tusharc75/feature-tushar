@@ -213,14 +213,14 @@ const ProductRepairType = (props: Props) => {
       <Box display="flex" justifyContent="space-between" p={1}>
         <div>
           {permissions?.product.isUpdate && (
-            <Button disabled={loading} variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
+            <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
               Add Repair Types
             </Button>
           )}
         </div>
         <div>
           {permissions?.product.isUpdate && (
-            <DeleteButton disabled={selectedRecords.length === 0 || loading} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+            <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
           )}
         </div>
       </Box>
