@@ -454,8 +454,8 @@ export const quotation = {
 };
 
 export const packages = {
-  packageResource: 'packages',
-  packageApi: '/packages',
+  resource: 'Packages',
+  api: '/packages',
   permissions: 'packages'
 };
 

@@ -77,7 +77,7 @@ const AddExistingProductInventory = ({
     const queryString = getQueryString();
     axiosInstance()
       .get(
-        `${type === 'product' ? product.api + queryString : type === 'service' ? serviceMaster.api + queryString : packages.packageApi + queryString}`
+        `${type === 'product' ? product.api + queryString : type === 'service' ? serviceMaster.api + queryString : packages.api + queryString}`
       )
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
