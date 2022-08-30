@@ -93,7 +93,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                     let data;
 
                     if (!isOffline) {
-                        const response: any = await axiosInstance().get(`${packages.packageApi}/` + packageId);
+                        const response: any = await axiosInstance().get(`${packages.api}/` + packageId);
                         data = response?.data?.data;
                     } else {
                         data = offlineGridData?.packages?.find(d => d._id === packageId)
@@ -161,7 +161,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
             values._id = packageId
 
             if (!isOffline) {
-                axiosInstance().put(`${packages.packageApi}`, values).then(({ data }) => {
+                axiosInstance().put(`${packages.api}`, values).then(({ data }) => {
                     setSubmitting(false);
                     onSuccess()
                     toastConfig.setToastConfig({
@@ -181,7 +181,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                 }
 
                 const dataToSave = {
-                    api: packages.packageApi,
+                    api: packages.api,
                     method: "put",
                     values: values
                 };
@@ -204,7 +204,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
         }
         else {
             if (!isOffline) {
-                axiosInstance().post(`${packages.packageApi}`, values).then(({ data: { data, message } }) => {
+                axiosInstance().post(`${packages.api}`, values).then(({ data: { data, message } }) => {
                     history.push(`${routes.packagesDetail.path}/${data._id}`)
                     setSubmitting(false);
                     onSuccess(data)
@@ -226,7 +226,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                 }
 
                 const dataToSave = {
-                    api: packages.packageApi,
+                    api: packages.api,
                     method: "post",
                     values: values
                 };

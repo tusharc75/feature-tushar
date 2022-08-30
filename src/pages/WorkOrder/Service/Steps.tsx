@@ -6,7 +6,7 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { Formik, Form } from "formik";
-import { dateTimeFormat, getObjKeys, getObjKeysWithValues, serviceMaster, workOrder, yupSchema } from 'src/constants/helpers';
+import { dateTimeFormat, getObjKeys, getObjKeysWithValues, serviceMaster, setFieldsInAscendingOrder, workOrder, yupSchema } from 'src/constants/helpers';
 import { Box, Divider, Grid, IconButton, Paper } from '@material-ui/core';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -15,6 +15,7 @@ import moment from 'moment';
 import { RiShareForwardFill } from 'react-icons/ri';
 import { TiArrowBack } from 'react-icons/ti';
 import FormTypes from 'src/components/Helpers/FormTypes';
+import { FaDiceOne } from 'react-icons/fa';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -88,11 +89,11 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
             let tempServiceData = serviceData.find(d => d.serviceId === serviceDetails?._id && d.stepId === serviceDetails?.steps[currentStep]?._id)
             if (tempServiceData) {
                 setStepData(tempServiceData)
-                setInitialData({ fields: fieldsDataForCreate, values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate) });
+                setInitialData({ fields: setFieldsInAscendingOrder(fieldsDataForCreate), values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate) });
             }
             else {
                 setStepData(null)
-                setInitialData({ fields: fieldsDataForCreate, values: getObjKeys("", fieldsDataForCreate) });
+                setInitialData({ fields: setFieldsInAscendingOrder(fieldsDataForCreate), values: getObjKeys("", fieldsDataForCreate) });
             }
             let tempServiceDataFieldsId = serviceDetails?.steps?.map(d => d._id)
             let tempServiceDataId = serviceData?.map(d => d.stepId)
@@ -243,31 +244,70 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
                             {({ values, errors, setFieldValue, touched, submitForm }) => (
                                 <Fragment>
                                     <Form autoComplete="off" autoCorrect="off" noValidate >
-                                        <Box marginY={2}>
-                                            <Grid spacing={3} container>
-                                                {initialData.fields?.map((field, index) => (
-                                                    <Grid key={index} item xs={12} sm={6} md={6}>
+                                        {initialData.fields.length > 0 &&
+                                            initialData.fields?.map((form, index1) => {
+                                                return form?.name ? (
+                                                    <div key={index1}>
+                                                        <div className="detail-box-content">
+                                                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                                            <h2 className="form-label-style form-label-quotes">{form?.name}</h2>
+                                                        </div>
+                                                        <Box marginY={2}>
+                                                            <Grid spacing={3} container>
+                                                                {form?.sectionFields?.map((field, index2) => (
+                                                                    <Grid key={index2} item xs={12} sm={6} md={6}>
+                                                                        {<FormTypes
+                                                                            {...field}
+                                                                            fieldData={field}
+                                                                            values={values}
+                                                                            errors={errors}
+                                                                            touched={touched}
+                                                                            label={field.fieldLabel}
+                                                                            name={field.fieldName}
+                                                                            type={field.type}
+                                                                            options={field.option}
+                                                                            setFieldValue={(name, value) => {
+                                                                                setFieldValue(name, value)
+                                                                            }}
+                                                                            required={field.required}
+                                                                            fullWidth
+                                                                            isTooltip={field?.isTooltip || false}
+                                                                            tooltipMessage={field?.tooltipMessage}
+                                                                            size="small"
+                                                                            imageOrFileUploadCompletePercentage={null}
+                                                                        />}
+                                                                    </Grid>
+                                                                ))}
+                                                            </Grid>
+                                                        </Box>
+                                                    </div>
+                                                ) : (
+                                                    form?.sectionFields.map((field) => (
                                                         <FormTypes
                                                             {...field}
                                                             fieldData={field}
+                                                            disabled={Boolean(workOrderId) && field.disableOnEdit}
+                                                            isNew={Boolean(workOrderId)}
                                                             values={values}
+                                                            errors={errors}
+                                                            touched={touched}
                                                             label={field.fieldLabel}
                                                             name={field.fieldName}
                                                             type={field.type}
-                                                            required={field.required}
-                                                            options={field.options ? field.options : []}
+                                                            options={field.option}
                                                             setFieldValue={(name, value) => {
                                                                 setFieldValue(name, value)
                                                             }}
-                                                            errors={errors}
-                                                            touched={touched}
+                                                            required={field.required}
                                                             fullWidth
+                                                            isTooltip={field?.isTooltip || false}
+                                                            tooltipMessage={field?.tooltipMessage}
                                                             size="small"
+                                                            style={{ visibility: "hidden" }}
                                                         />
-                                                    </Grid>
-                                                ))}
-                                            </Grid>
-                                        </Box>
+                                                    ))
+                                                );
+                                            })}
                                     </Form>
                                     <Box display="flex" justifyContent="flex-end" pt={2}>
                                         <CustomButton

@@ -7,7 +7,6 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
@@ -20,10 +19,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { RiEditCircleLine, RiAddCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
-import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
+import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
+import RepairOrderQtyDialog from '../Productpackage/RepairOrderQtyDialog';
+import AddExistingProductInventory from '../Productpackage/AddExistingProductInventory';
 
-const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -43,6 +44,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
+  const [workOrderDialog, setWorkOrderDialog] = useState({ open: false, _id: null, product: null, serviceMaster: null });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -167,7 +169,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
     });
     {
       isMobile ? <Box display={"none"} /> : coloum.push({
-        accessor: 'action',
+        accessor: 'actions',
         Header: '',
         minWidth: 70,
         width: 70,
@@ -176,6 +178,21 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
         canDrag: false,
         Cell: ({ row }) =>
           <>
+
+            {<HtmlTooltip title={Boolean(row?.original?.workOrder) ? "Work Order already exist" : "Create Work Order"}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="History"
+                  disabled={Boolean(row?.original?.workOrder)}
+                  onClick={() => {
+                    setWorkOrderDialog({ open: true, _id: row?.original?._id, product: row?.original?.productDetail?._id, serviceMaster: row?.original?.serviceMaster.map(d => d.optionValue) });
+                  }}
+                >
+                  <RiAddCircleLine />
+                </IconButton>
+              </span>
+            </HtmlTooltip>}
             {!row.original.hideSelection && allowedToEdit && (
               <IconButton
                 size="small"
@@ -495,7 +512,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
-                renderedFrom="repair_order_product_package"
+                renderedFrom="repair_order_workorder_product_package"
                 isClientSideGrid={true}
               />
             </Box>
@@ -543,8 +560,39 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
           repairOrderData={repairOrderData}
         />
       )}
+      {workOrderDialog.open && (
+        <ManageWorkOrder
+          onClose={() => setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null })}
+          onSuccess={(data) => {
+            if (data._id) {
+              axiosInstance()
+                .put(`${repairOrder.api}/${repairOrderData._id}/product-package/add-work-order`, {
+                  "_id": workOrderDialog?._id,
+                  "workOrder": data?._id
+                }
+                )
+                .then(() => {
+                  setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null });
+                  fetchProductInventory();
+                })
+                .catch((error) => {
+                  setAddExistingProductDialog({ open: false, type: '', parentId: null });
+                  toastConfig.setToastConfig(error);
+                });
+            }
+            else {
+              fetchProductInventory();
+              setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null });
+            }
+          }}
+          refrenceType={"Repair Order"}
+          refrenceData={repairOrderData}
+          products={workOrderDialog.product}
+          serviceMaster={workOrderDialog.serviceMaster}
+        />
+      )}
     </Fragment>
   );
 };
 
-export default Productpackage;
+export default WorkOrder;

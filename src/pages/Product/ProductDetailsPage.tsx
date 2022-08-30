@@ -40,6 +40,7 @@ import CostDetails from './CostDetails';
 import ServiceMaster from './ServiceMaster';
 import LeadTimeMaster from '../../components/LeadTime';
 import Package from './Package';
+import ServicePackage from './ServicePackage';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -299,7 +300,8 @@ const ProductDetailsPage = () => {
               >
                 <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
                 {permissions?.serializedAsset && <Tab label="Child Product" value={1} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
-                {permissions?.serviceMaster && <Tab label="Service Master" value={2} aria-controls="a11y-tabpanel-6" id="a11y-tab-6" />}
+                {permissions?.serviceMaster && <Tab label="Services" value={2} aria-controls="a11y-tabpanel-6" id="a11y-tab-6" />}
+                {permissions?.serviceMaster && <Tab label="Service Packages" value={8} aria-controls="a11y-tabpanel-6" id="a11y-tab-6" />}
                 {permissions?.repairType && <Tab label="Repair Types" value={3} aria-controls="a11y-tabpanel-5" id="a11y-tab-5" />}
                 {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && (
                   <Tab value={4} label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />
@@ -335,6 +337,7 @@ const ProductDetailsPage = () => {
               {tabValue === 5 && <Package renderedFrom={`${renderedFrom}_grid-5`} productId={id} />}
               {tabValue === 6 && <ParentProduct renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
               {tabValue === 7 && <InventoryHistory id={id} />}
+              {tabValue === 8 && <ServicePackage renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
             </Paper>
           </Grid>
           {(permissions?.serializedAsset && permissions?.serializedAsset?.isRead) ||
