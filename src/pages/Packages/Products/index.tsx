@@ -18,14 +18,17 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Loader from 'src/components/Loader';
 import { camelCase } from 'lodash';
+import { GrDrag } from 'react-icons/gr';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
 
 const ProductsTable = ({ packageId, packageData }) => {
-
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
   const history = useHistory();
-  const { state: { permissions } }: any = useData();
+  const {
+    state: { permissions }
+  }: any = useData();
 
   const [columns, setColumns] = useState([]);
   const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
@@ -35,6 +38,8 @@ const ProductsTable = ({ packageId, packageData }) => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const { getColumnData } = useColumns();
   const [state, dispatch] = useReducer(reducer, intialState);
+  const [arrangeView, setArrangeView] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   useEffect(() => {
@@ -74,36 +79,42 @@ const ProductsTable = ({ packageId, packageData }) => {
   };
 
   const fetchGridColumns = () => {
-    axiosInstance().get(`/field?resource=${packageData?.packageType === "Service" ? 'Service Master' : 'Product'}`).then(({ data: { data } }) => {
-      let columns = [];
-      let rendererNames = [];
-      data.forEach((o) => {
-        let currentColumn = getColumnData(packageData?.packageType === "Service" ? routes.serviceMaster.title : routes.product.title
-          , o?.fieldData, packageData?.packageType === "Service" ? routes.serviceMasterDetail.path : routes.productDetail.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
+    axiosInstance()
+      .get(`/field?resource=${packageData?.packageType === 'Service' ? 'Service Master' : 'Product'}`)
+      .then(({ data: { data } }) => {
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(
+            packageData?.packageType === 'Service' ? routes.serviceMaster.title : routes.product.title,
+            o?.fieldData,
+            packageData?.packageType === 'Service' ? routes.serviceMasterDetail.path : routes.productDetail.path
+          );
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
+            }
           }
-        }
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent
+        };
+        setFrameWorkComponent({
+          ...tempFrameworkComponent,
+          actionsRenderer: ActionsRenderer
+        });
+        setColumns([...columns]);
       });
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-      tempFrameworkComponent = {
-        ...tempFrameworkComponent
-      };
-      setFrameWorkComponent({
-        ...tempFrameworkComponent,
-        actionsRenderer: ActionsRenderer
-      });
-      setColumns([...columns]);
-    });
   };
 
   const handleUpdateQuantity = (row) => {
-    axiosInstance().put(`${packages.api}/material/${packageId}`, {
-      ids: [row.data._id],
-      qty: Number(row.data.qty)
-    })
+    axiosInstance()
+      .put(`${packages.api}/material/${packageId}`, {
+        ids: [row.data._id],
+        qty: Number(row.data.qty)
+      })
       .then(() => {
         fetchData();
       })
@@ -113,7 +124,8 @@ const ProductsTable = ({ packageId, packageData }) => {
   const removeProducts = () => {
     setRemovingProducts(true);
     const Ids = selectedRecords.map((d) => d._id);
-    axiosInstance().put(`${packages.api}/material/${packageId}/remove`, { ids: Ids })
+    axiosInstance()
+      .put(`${packages.api}/material/${packageId}/remove`, { ids: Ids })
       .then(() => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
@@ -126,20 +138,36 @@ const ProductsTable = ({ packageId, packageData }) => {
       });
   };
 
+  const handleArrangeUpdate = (dIds: string[]) => {
+    setIsAssigning(true);
+    axiosInstance()
+      .put(`${packages.api}/material/${packageId}/order`, {
+        packageType: packageData?.packageType,
+        ids: dIds || []
+      })
+      .then(() => {
+        fetchData();
+        setIsAssigning(false);
+        setArrangeView(false);
+      })
+      .catch((err) => {
+        setIsAssigning(false);
+        setArrangeView(false);
+        setToastConfig(err);
+      });
+  };
+
   const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
 
   return (
     <Box mt={2} className="bg-white">
-      <Box mb={1} p={1} display="flex" justifyContent="space-between" >
+      <Box mb={1} p={1} display="flex" justifyContent="space-between">
         <Box display="flex">
-          {permissions?.packages?.isUpdate &&
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => setShowProductAssignDialog(true)}>
-              {`Add ${packageData?.packageType === "Service" ? 'Services' : 'Products'}`}
-            </Button>}
+          {permissions?.packages?.isUpdate && (
+            <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
+              {`Add ${packageData?.packageType === 'Service' ? 'Services' : 'Products'}`}
+            </Button>
+          )}
         </Box>
         <Box display="flex">
           <ImportExportLinks
@@ -156,8 +184,8 @@ const ProductsTable = ({ packageId, packageData }) => {
             additionalParams={`refrenceId=${packageId}`}
             isBackgroundWhite={true}
           />
-          {permissions?.packages?.isUpdate &&
-            <Box ml={1}>
+          {permissions?.packages?.isUpdate && (
+            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <DeleteButton
                 disabled={selectedRecords.length === 0 || isRemovingProducts}
                 text={'Delete'}
@@ -165,7 +193,13 @@ const ProductsTable = ({ packageId, packageData }) => {
                   setShowProductConfirmBox(true);
                 }}
               />
-            </Box>}
+              <Box ml={1} />
+              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                Arrange
+              </Button>
+            </Box>
+          )}
         </Box>
       </Box>
       {isMobile && !isTablet ? (
@@ -180,9 +214,9 @@ const ProductsTable = ({ packageId, packageData }) => {
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => { }}
+          onEdit={(data) => {}}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => { }}
+          onDelete={(data) => {}}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -198,7 +232,7 @@ const ProductsTable = ({ packageId, packageData }) => {
             setShowProductAssignDialog(true);
           }}
           showClone={true}
-          onClone={(data) => { }}
+          onClone={(data) => {}}
           renderedFrom={renderedFrom}
         />
       ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -225,8 +259,8 @@ const ProductsTable = ({ packageId, packageData }) => {
       ) : (
         <Loader noLoader={false} minHeight={'400px'} text="Loading..." />
       )}
-      {showProductAssignDialog && (
-        packageData?.packageType === "Service" ?
+      {showProductAssignDialog &&
+        (packageData?.packageType === 'Service' ? (
           <AssignServiceDialog
             reference="package"
             referenceId={packageId}
@@ -236,7 +270,8 @@ const ProductsTable = ({ packageId, packageData }) => {
               fetchData();
               setShowProductAssignDialog(false);
             }}
-          /> :
+          />
+        ) : (
           <AssignProductDialog
             reference="package"
             productsDialogOpen={true}
@@ -249,7 +284,7 @@ const ProductsTable = ({ packageId, packageData }) => {
               setShowProductAssignDialog(false);
             }}
           />
-      )}
+        ))}
       {showProductConfirmBox && (
         <ConfirmationDialog
           open={showProductConfirmBox}
@@ -259,6 +294,19 @@ const ProductsTable = ({ packageId, packageData }) => {
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}
+        />
+      )}
+      {arrangeView && (
+        <ArrangeView
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.serviceName || d?.productName, order: d?.order };
+            }) || []
+          }
+          title={'Arrange'}
+          handleClose={() => setArrangeView(false)}
+          handleSubmit={handleArrangeUpdate}
+          loading={isAssigning}
         />
       )}
     </Box>
