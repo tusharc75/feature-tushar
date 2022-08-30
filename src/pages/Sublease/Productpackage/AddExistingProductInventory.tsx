@@ -55,7 +55,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? product.api + queryString : packages.packageApi + queryString}`).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${type === "product" ? product.api + queryString : packages.api + queryString}`).then(({ data: { data, count } }) => {
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
                 finalObject["isChecked"] = false;

@@ -15,9 +15,9 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let searchTimeout;
 
-const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, ids }) => {
+const AssignServiceDialog = ({ referenceType, onSuccess, handleClose, packageType, ids }) => {
 
-  const renderedFrom = `${routes.serviceMaster.title}_${reference}_selected`;
+  const renderedFrom = `${routes.packages.title}_${referenceType}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const { state: { permissions, selectedEntity } }: any = useData();
@@ -31,20 +31,12 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [columns, setColumns] = useState([]);
-
-  const defaultColumns = [
-    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
-  ];
   const { getColumnData } = useColumns();
 
   useEffect(() => {
     localStorage.removeItem(localStorageSelectedRecords);
     fetchGridColumns();
   }, []);
-
-  useEffect(() => {
-    setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)].some((d) => d.qty === 0));
-  }, [selectedRecords]);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -57,11 +49,11 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
-    axiosInstance().get('/field?resource=Service Master&view=true').then(({ data: { data } }) => {
+    axiosInstance().get('/field?resource=Packages&view=true').then(({ data: { data } }) => {
       let columns = [];
       let rendererNames = [];
       data.forEach((o) => {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packages.path);
+        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path);
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData];
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -75,7 +67,7 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
       };
       setFrameWorkComponent({ ...tempFrameworkComponent });
       columns = [...columns, ...getStaticFields()];
-      setColumns([...defaultColumns, ...columns]);
+      setColumns([...columns]);
     });
   };
 
@@ -85,16 +77,11 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
       gridApi.setRowData([]);
     }
     const queryString = getQueryString();
-    axiosInstance().get(`${serviceMaster.api}${queryString}`).then(({ data }) => {
+    axiosInstance().get(`${packages.api}${queryString}`).then(({ data }) => {
       let rows = data.data.map((u) => {
         let finalObject = prepareDataForGrid(u);
         finalObject['isChecked'] = false;
         finalObject['id'] = u._id;
-        finalObject['qty'] = 1;
-        const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id);
-        if (qtyAdded.length) {
-          finalObject['qty'] = qtyAdded[0].qty;
-        }
         return {
           ...finalObject
         };
@@ -125,6 +112,12 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     const updatedFilters = [];
+    if (packageType) {
+      updatedFilters.push({
+        field: "packageType",
+        term: packageType
+      });
+    }
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
@@ -143,25 +136,6 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
       deepFilter = `${deepFilter}&search=${search}`;
     }
     return deepFilter;
-  };
-
-  const handleSubmit = async () => {
-    setAssigning(true);
-    if (reference === 'package') {
-      axiosInstance()
-        .post(`${packages.api}/material`, {
-          ids: Array.isArray(referenceId) && referenceId.length ? referenceId : [referenceId],
-          services: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) }))
-        })
-        .then(() => {
-          setAssigning(false);
-          onSuccess();
-        })
-        .catch((err) => {
-          setAssigning(false);
-          toastConfig.setToastConfig(err);
-        });
-    }
   };
 
   const handleSearch = (e) => {
@@ -192,7 +166,7 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
       onClose={handleClose}
       aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader
-        title={`Assign ${routes.serviceMaster.title}`}
+        title={`Assign ${routes.packages.title}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
@@ -207,7 +181,7 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                  onClick={handleSubmit}
+                  onClick={() => { onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id)) }}
                   color="primary"
                   size="small"
                   variant="contained"

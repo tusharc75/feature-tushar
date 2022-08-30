@@ -235,7 +235,7 @@ const AssignProductDialog = ({
     }
     else if (reference === 'package') {
       axiosInstance()
-        .post(`${packages.packageApi}/material`, {
+        .post(`${packages.api}/material`, {
           ids: Array.isArray(productId) && productId.length ? productId : [productId],
           products: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
         })

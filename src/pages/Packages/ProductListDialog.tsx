@@ -17,7 +17,7 @@ const ProductListDialog = ({ id, onClose, toastConfig,renderedFrom }) => {
       if (id) {
         setLoadingProducts(true);
         axiosInstance()
-          .get(`${packages.packageApi}/get-products/${id}`)
+          .get(`${packages.api}/get-products/${id}`)
           .then(({ data: { data } }) => {
             setProducts(data);
             setLoadingProducts(false);

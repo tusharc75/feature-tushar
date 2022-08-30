@@ -48,7 +48,7 @@ const ProductsTable = ({ packageId, packageData }) => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${packages.packageApi}/material/${packageId}`)
+      .get(`${packages.api}/material/${packageId}`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
@@ -100,7 +100,7 @@ const ProductsTable = ({ packageId, packageData }) => {
   };
 
   const handleUpdateQuantity = (row) => {
-    axiosInstance().put(`${packages.packageApi}/material/${packageId}`, {
+    axiosInstance().put(`${packages.api}/material/${packageId}`, {
       ids: [row.data._id],
       qty: Number(row.data.qty)
     })
@@ -113,7 +113,7 @@ const ProductsTable = ({ packageId, packageData }) => {
   const removeProducts = () => {
     setRemovingProducts(true);
     const Ids = selectedRecords.map((d) => d._id);
-    axiosInstance().put(`${packages.packageApi}/material/${packageId}/remove`, { ids: Ids })
+    axiosInstance().put(`${packages.api}/material/${packageId}/remove`, { ids: Ids })
       .then(() => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
@@ -145,7 +145,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           <ImportExportLinks
             permissions={permissions?.packages}
             module="packages-products"
-            api={`${packages.packageApi}/material`}
+            api={`${packages.api}/material`}
             afterImportCompleted={() => {
               fetchData();
             }}

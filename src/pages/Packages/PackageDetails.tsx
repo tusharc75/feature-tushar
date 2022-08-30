@@ -93,7 +93,7 @@ const PackageDetails = () => {
   const fetchPackage = () => {
     setPackagesLoading(true);
     axiosInstance()
-      .get(`${packages.packageApi}/${id}`)
+      .get(`${packages.api}/${id}`)
       .then(({ data: { data } }) => {
         setPackageData(data);
         setHeadingLabel(data.packageName);
@@ -112,7 +112,7 @@ const PackageDetails = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${packages.packageApi}/remove`, { ids: [id] })
+      .put(`${packages.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
         history.goBack();

@@ -6,7 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomAgGrid, { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
-import { serviceMaster, isObjectEmpty, gridLoadingTimeout } from 'src/constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, product, packages } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
@@ -16,17 +16,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
-import AddServiceMaster from './AddServiceMaster';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { FcApproval } from 'react-icons/fc';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
-interface Props {
-  renderedFrom: string;
-  id: string;
-}
+const ServicePackage = ({ renderedFrom, productId }) => {
 
-const ServiceMaster = (props: Props) => {
-  const { renderedFrom, id } = props;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -59,12 +54,12 @@ const ServiceMaster = (props: Props) => {
   const fetchGridColumns = () => {
     setColumns(null);
     axiosInstance()
-      .get(`/field?resource=${serviceMaster.resource}`)
+      .get(`/field?resource=${packages.resource}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.serviceMaster?.title, o?.fieldData, routes.serviceMasterDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -89,7 +84,7 @@ const ServiceMaster = (props: Props) => {
     }
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes.product.path}/${id}/service-master${queryString}`)
+      .get(`${product.api}/${productId}/package${queryString}`)
       .then(({ data: { data } }) => {
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -215,7 +210,7 @@ const ServiceMaster = (props: Props) => {
     }
     setDeleting(true);
     axiosInstance()
-      .put(`${routes.product.path}/${id}/service-master/remove`, { ids: ids })
+      .put(`${product.api}/${productId}/package/remove`, { ids: ids })
       .then(() => {
         fetchData();
         setShowDeleteConfirmBox(false);
@@ -235,7 +230,7 @@ const ServiceMaster = (props: Props) => {
 
   const handleUpdate = (data: any) => {
     axiosInstance()
-      .put(`${routes.product.path}/${id}/service-master`, data)
+      .put(`${product.api}/${productId}/package`, data)
       .then(() => {
         fetchData();
       })
@@ -247,8 +242,8 @@ const ServiceMaster = (props: Props) => {
   const handleSubmit = (ids: string[]) => {
     setSubmitting(true);
     axiosInstance()
-      .post(`${routes.product.path}/${id}/service-master`, {
-        service: ids
+      .post(`${product.api}/${productId}/package`, {
+        package: ids
       })
       .then(() => {
         fetchData();
@@ -271,7 +266,7 @@ const ServiceMaster = (props: Props) => {
               color="primary"
               size="small"
               onClick={() => setOpenAddDialog(true)}>
-              Add Services
+              Add Service Packages
             </Button>
           )}
         </div>
@@ -289,7 +284,7 @@ const ServiceMaster = (props: Props) => {
             permissions={permissions?.product}
             primaryField={columns?.find((d) => d.primaryField)}
             onClick={(data) => {
-              history.push(`${routes.serviceMasterDetail.path}/${data._id}`);
+              history.push(`${routes.packagesDetail.path}/${data._id}`);
             }}
             dataRows={dataRows}
             selectedRecords={selectedRecords}
@@ -335,7 +330,7 @@ const ServiceMaster = (props: Props) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes.serviceMaster?.title} ? `}
+          message={`Are you sure you want to delete the ${routes.packages?.title} ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -345,16 +340,18 @@ const ServiceMaster = (props: Props) => {
         />
       )}
       {openAddDialog && (
-        <AddServiceMaster
-          handleSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          renderedFrom={`${renderedFrom}_sub-grid-1`}
-          close={() => setOpenAddDialog(false)}
-          exisitingIds={[]}
+        <AssignPackageDialog
+          referenceType="product"
+          handleClose={() => setOpenAddDialog(false)}
+          ids={[...dataRows?.map((e) => e._id)]}
+          onSuccess={(ids) => {
+            handleSubmit(ids)
+          }}
+          packageType={"Service"}
         />
       )}
     </Fragment>
   );
 };
 
-export default ServiceMaster;
+export default ServicePackage;
