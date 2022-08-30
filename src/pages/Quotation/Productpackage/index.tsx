@@ -139,10 +139,9 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
               color="primary"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'package'
+                  `${row.original.type === 'product'
+                    ? routes.productDetail.path
+                    : row.original.type === 'package'
                       ? routes.packagesDetail.path
                       : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
@@ -516,7 +515,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       protected: true,
       body: content ? content : '',
       supplierContact: contactId,
-      requiredFields: selectedFields
+      requiredFields: selectedFields,
+      versionId: versionId
     };
 
     axiosInstance()
@@ -733,8 +733,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
             addExistingProductDialog.type === 'product'
               ? `${renderedFrom}-product`
               : addExistingProductDialog.type === 'service'
-              ? `${renderedFrom}-service`
-              : `${renderedFrom}-package`
+                ? `${renderedFrom}-service`
+                : `${renderedFrom}-package`
           }
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAdd}
@@ -749,6 +749,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       {requestDialog && selectedType && (
         <PriceRequestDialog
           quoteData={quotationData}
+          versionId={versionId}
           type={selectedType}
           handleClose={() => setRequestDialog(false)}
           onSuccess={() => {
