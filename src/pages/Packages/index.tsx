@@ -60,7 +60,6 @@ const PackageList = () => {
         show: false,
         packageName: ''
     });
-    const { packageResource, packageApi } = packages;
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -131,7 +130,7 @@ const PackageList = () => {
     const handleSingleDeletePackage = async () => {
         dispatch({ type: 'loading', loading: true });
         axiosInstance()
-            .put(`${packageApi}/remove`, {
+            .put(`${packages.api}/remove`, {
                 ids: [singlePackageDelete.id]
             })
             .then(({ data }) => {
@@ -262,7 +261,7 @@ const PackageList = () => {
 
         try {
             let data, count;
-            const response: any = await axiosInstance().get(`${packageApi}${queryString}`);
+            const response: any = await axiosInstance().get(`${packages.api}${queryString}`);
             data = response?.data?.data;
             count = response?.data?.count;
             let rows = data.map((u) => {
@@ -325,7 +324,7 @@ const PackageList = () => {
         }
         if (recordsToDelete.length > 0) {
             axiosInstance()
-                .put(`${packageApi}/remove`, {
+                .put(`${packages.api}/remove`, {
                     ids: recordsToDelete
                 })
                 .then(({ data }) => {
@@ -350,7 +349,7 @@ const PackageList = () => {
     const openAssingToProduct = async () => {
         if (selectedRecords.length > 0) {
             await axiosInstance()
-                .post(`${packageApi}/material/alreadyAssigned`, {
+                .post(`${packages.api}/material/alreadyAssigned`, {
                     ids: selectedRecords.map(d => d._id)
                 })
                 .then(({ data }) => {
@@ -377,7 +376,7 @@ const PackageList = () => {
                                     <ImportExportLinks
                                         permissions={permissions?.packages}
                                         module="packagess"
-                                        api={packageApi}
+                                        api={packages.api}
                                         afterImportCompleted={() => {
                                             fetchPackages();
                                         }}

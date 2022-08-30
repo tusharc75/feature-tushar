@@ -70,7 +70,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? `/rental-management/product-with-inventory` : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${type === "product" ? `/rental-management/product-with-inventory` : packages.api}${queryString}`).then(({ data: { data, count } }) => {
             setMaterialList(JSON.parse(JSON.stringify(data)));
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u);
@@ -155,7 +155,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
 
     const fetchPackageProduct = (packageId) => {
         if (type === "package") {
-            axiosInstance().get(`${packages.packageApi}/get-products/${packageId}`).then(({ data: { data } }) => {
+            axiosInstance().get(`${packages.api}/get-products/${packageId}`).then(({ data: { data } }) => {
                 const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productName, qty: product.qty })) : [];
                 setPackageProductData(newArr);
             })

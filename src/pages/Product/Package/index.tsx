@@ -37,7 +37,7 @@ const Package = ({ renderedFrom, productId }) => {
                 gridApi.setRowData([]);
             }
             let data;
-            const response = await axiosInstance().get(`/product/${productId}/package`)
+            const response = await axiosInstance().get(`/product/${productId}/package/product-package`)
             data = response?.data?.data
             let rows = data.map((u) => {
                 let res = {
