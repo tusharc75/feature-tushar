@@ -592,6 +592,7 @@ const QuotationDetails = () => {
                             fetchQuotationData={fetchQuotationData}
                             setQuotationSummary={setQuotationSummary}
                             version={currentVersion}
+                            currentStep={currentStep}
                           />
                         )}
                         {currentStep === 3 && quotationData && (
@@ -599,12 +600,13 @@ const QuotationDetails = () => {
                             quotationData={quotationData}
                             setNextStep={setNextStep}
                             currencySymbol={currencySymbol}
-                            sendToCustomer={sentToCustomer}
+                            sentToCustomer={sentToCustomer}
                             showActivity={showActivity}
                             stepFullScreen={stepFullScreen}
                             fetchQuotationData={fetchQuotationData}
                             setQuotationSummary={setQuotationSummary}
                             version={currentVersion}
+                            currentStep={currentStep}
                           />
                         )}
                         {currentStep === 4 && quotationData && (
@@ -617,6 +619,7 @@ const QuotationDetails = () => {
                             fetchQuotationData={fetchQuotationData}
                             setQuotationSummary={setQuotationSummary}
                             version={currentVersion}
+                            currentStep={currentStep}
                           />
                         )}
                       </ContentFullScreen>
