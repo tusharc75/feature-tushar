@@ -324,7 +324,7 @@ const Steps = (props) => {
             <Grid item xs={12} sm={isMobile ? 12 : 1} md={1} className="d-flex align-items-center justify-content-center mt-2">
               {!isMobile && !isStepEnded && (
                 <IconButton
-                  disabled={currentStep === steps.length || currentStep === 0}
+                  disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
                   className={`stepperButton ${classes.BlackSvg}`}
                   onClick={goPrev}
                 >
@@ -335,7 +335,7 @@ const Steps = (props) => {
             <Grid item xs={12} sm={isMobile ? 12 : 10} md={10} style={isMobile ? { padding: '0 10px' } : {}}>
               <div className={classes.pStepper}>
                 <Grid container>
-                  <Grid item xs={6} className="d-flex align-items-center justify-content-start ">
+                  <Grid item xs={6} className="d-flex align-items-center justify-content-start">
                     {isMobile && (
                       <>
                         <div>
