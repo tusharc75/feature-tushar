@@ -27,7 +27,7 @@ import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
-import Steps from './Steps';
+// import Steps from './Steps';
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -55,9 +55,11 @@ import RoadmapViews from './RoadMapViews';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import Steps from 'src/pages/RentalManagement/Steps';
 import contactClass from '../Contact/contact.module.scss';
 import { CircularProgress } from '@material-ui/core';
 import AllVersionStatus from './AllVersionStatus';
+import ManualReponseDialog from './ManualRespondDialog';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -87,6 +89,7 @@ const QuotationDetails = () => {
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [statusOptions, setStatusOptions] = useState([]);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorElAction, setAnchorElAction] = useState(null);
@@ -94,6 +97,7 @@ const QuotationDetails = () => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [redCard, setRedCard] = useState(false);
+  const [customerAcceptable, setCustomerAcceptable] = useState(false);
   const [quotationSummary, setQuotationSummary] = useState({
     totalProfit: null,
     totalcost: null,
@@ -242,13 +246,16 @@ const QuotationDetails = () => {
   };
 
   const updateProcessStatus = (currStep) => {
+    setUpdatingStatus(true);
     axiosInstance()
       .put(`${quotation.api}/${id}/process-status/${currVersionId}`, { processStatus: quotationProcessSteps[currStep] })
       .then(() => {
         fetchQuotationData(currentVersion, false);
+        setUpdatingStatus(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setUpdatingStatus(false);
       });
   };
 
@@ -558,7 +565,7 @@ const QuotationDetails = () => {
                     <Paper>
                       <Steps
                         isNextStep={false}
-                        nextStep={nextStep}
+                        nextStep={!updatingStatus || nextStep}
                         steps={quotationProcessSteps}
                         currentStep={currentStep}
                         setCurrentStep={setCurrentStep}
@@ -566,9 +573,13 @@ const QuotationDetails = () => {
                         setStepFullScreen={() => setStepFullScreen(true)}
                         isPrevStep={!sentToCustomer}
                         updateStatus={updateProcessStatus}
-                        quotationId={id}
-                        versionId={currVersionId}
-                        status={versionStatus}
+                        handleNext={
+                          currentStep > 2
+                            ? () => {
+                                setCustomerAcceptable(true);
+                              }
+                            : null
+                        }
                       />
                       <ContentFullScreen title={quotationProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                         {currentStep === 0 && quotationData && (
@@ -793,6 +804,15 @@ const QuotationDetails = () => {
           fetchQuotationData={fetchQuotationData}
           handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
           handleCloneQuoteWithVersionFromAllVersion={handleCloneQuotationWithVersionFromAllVersion}
+        />
+      )}
+      {customerAcceptable && (
+        <ManualReponseDialog
+          versionId={currVersionId}
+          quotationId={quotationData?._id}
+          setCurrentStep={setCurrentStep}
+          updateStatus={updateProcessStatus}
+          setCustomerAcceptable={setCustomerAcceptable}
         />
       )}
     </>

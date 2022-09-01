@@ -158,12 +158,28 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Steps = (props) => {
-  const { nextStep, isNextStep, steps, currentStep, setCurrentStep, isStepEnded, setStepFullScreen = null, updateStatus = null } = props;
+  const {
+    nextStep,
+    isNextStep,
+    steps,
+    currentStep,
+    setCurrentStep,
+    isStepEnded,
+    setStepFullScreen = null,
+    updateStatus = null,
+    isPrevStep = true,
+    handleNext = null,
+    handlePrev = null
+  } = props;
 
   const classes = useStyles();
   let activeStep = currentStep;
 
   const goNext = () => {
+    if (handleNext) {
+      handleNext();
+      return;
+    }
     setCurrentStep((prevStep) => {
       const newStep = prevStep + 1;
       if (updateStatus) {
@@ -174,6 +190,10 @@ const Steps = (props) => {
   };
 
   const goPrev = () => {
+    if (handlePrev) {
+      handlePrev();
+      return;
+    }
     setCurrentStep((prevStep) => {
       const newStep = prevStep - 1;
       if (updateStatus) {
@@ -234,7 +254,7 @@ const Steps = (props) => {
               variant="text"
               color={'primary'}
               startIcon={<AiOutlineLeft />}
-              disabled={currentStep === steps.length || currentStep === 0 || isStepEnded}
+              disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
               className={`mr-1 MobileStep-next-back-button `}
               onClick={goPrev}
             >
@@ -265,7 +285,7 @@ const Steps = (props) => {
                         <div>
                           <IconButton
                             color="primary"
-                            disabled={currentStep === steps.length || currentStep === 0 || isStepEnded}
+                            disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
                             onClick={goPrev}
                             size="small"
                           >
