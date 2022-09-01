@@ -43,7 +43,6 @@ const Service = ({ workOrderId }) => {
     useEffect(() => {
         let tempService = serviceSteps.find(d => d._id === serviceId)
         if (tempService?.assignedUsers?.length > 0) {
-            let xxx = userList.filter(d => tempService?.assignedUsers.map(obj => obj?.optionValue).includes(d?.optionValue))
             setSelectedUserList(userList.filter(d => tempService?.assignedUsers.map(obj => obj?.optionValue).includes(d?.optionValue)))
         }
         else {
