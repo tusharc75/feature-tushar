@@ -22,6 +22,7 @@ import { Formula } from '../AddField/formula';
 import { Converter } from '../AddField/converter';
 import { Option } from '../AddField/option';
 import { Currency } from '../AddField/currency';
+import { SignatureUser } from '../AddField/signatureUser';
 import { DecimalPlaces } from '../AddField/decimalPlaces';
 import { MultipleFormula } from '../AddField/multipleformula';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -323,6 +324,16 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (ele.isDropdown) {
               ele.dropdownOnConverter = values.dropdownOnConverter;
             }
+
+            if (fieldData.type === 'signature') {
+              if (values?.signatureUsers && values?.signatureUsers?.length) {
+                ele.signatureUsers = values.signatureUsers;
+              }
+              else {
+                ele.signatureUsers = [];
+              }
+            }
+
             if (module === "form-builder-master") {
               ele.editAble = values.editAble || false;
               ele.deletAble = values.deletAble || false;
@@ -1173,7 +1184,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     )}
                   </Box>
-
+                  {fieldData.type === 'signature' && (
+                    <SignatureUser
+                      values={values}
+                      setFieldValue={setFieldValue}
+                    />
+                  )}
                   {module === "form-builder-master" &&
                     <Box>
                       <hr />
