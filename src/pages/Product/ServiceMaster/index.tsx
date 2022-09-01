@@ -61,6 +61,11 @@ const ServiceMaster = (props: Props) => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
+
+  const defaultColumns = [
+    { field: "order", headerName: "Order", show: true, cellRenderer: "commonRenderer" },
+  ]
+
   const fetchGridColumns = () => {
     setColumns(null);
     axiosInstance()
@@ -83,7 +88,7 @@ const ServiceMaster = (props: Props) => {
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
-        setColumns([...columns]);
+        setColumns([...defaultColumns, ...columns]);
       });
   };
 
@@ -249,10 +254,13 @@ const ServiceMaster = (props: Props) => {
       });
   };
 
-  const handleArrangeUpdate = (dIds: string[]) => {
+  const handleArrangeUpdate = (rows: string[]) => {
     setIsAssigning(true);
+    rows?.forEach((e: any) => {
+      delete e.name
+    })
     axiosInstance().put(`${routes.product.path}/${id}/service-master/update-order`, {
-      ids: dIds || []
+      data: rows || []
     }).then(() => {
       fetchData();
       setIsAssigning(false);
@@ -380,11 +388,7 @@ const ServiceMaster = (props: Props) => {
       )}
       {arrangeView && (
         <ArrangeView
-          data={
-            dataRows?.map((d) => {
-              return { _id: d?._id, name: d?.serviceName, order: d?.order };
-            }) || []
-          }
+          data={dataRows?.map((d) => { return { _id: d?._id, name: d?.serviceName, order: d?.order } }) || []}
           title={'Arrange'}
           handleClose={() => setArrangeView(false)}
           handleSubmit={handleArrangeUpdate}

@@ -43,11 +43,12 @@ const QuoteBuilder = ({
   setNextStep,
   currencySymbol,
   showActivity,
-  sendToCustomer = false,
+  sentToCustomer = false,
   stepFullScreen,
   fetchQuotationData,
   setQuotationSummary,
-  version
+  version,
+  currentStep
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -61,10 +62,24 @@ const QuoteBuilder = ({
   const isTabletScreen = useMediaQuery('(max-width:960px)');
 
   const versionId = quotationData?.versions[version]?._id || null;
+
   useEffect(() => {
     fetchFields();
-    versionId && fetchProductInventory();
-  }, [versionId]);
+  }, []);
+
+  useEffect(() => {
+    if (versionId) {
+      fetchProductInventory();
+    }
+  }, [versionId, quotationData]);
+
+  useEffect(() => {
+    if (currentStep === 3 && rowsData && !sentToCustomer) {
+      setNextStep(false);
+    } else {
+      setNextStep(true);
+    }
+  }, [currentStep, sentToCustomer, rowsData]);
 
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
@@ -313,16 +328,16 @@ const QuoteBuilder = ({
                 variant="contained"
                 color="primary"
                 size="small"
-                disabled={sendToCustomer}
+                disabled={sentToCustomer}
                 onClick={() => {
                   axiosInstance()
                     .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionId}`)
                     .then(({ data }) => {
-                      fetchQuotationData();
+                      fetchQuotationData(versionId, false);
                       toastConfig.setToastConfig({
                         open: true,
                         type: 'success',
-                        message: 'Send to customer Sucessfully'
+                        message: 'Sent to customer Sucessfully'
                       });
                     })
                     .catch((error) => {

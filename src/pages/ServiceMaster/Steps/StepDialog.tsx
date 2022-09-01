@@ -44,7 +44,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
           setStepDetails({
             stepName: data?.stepName, leadDay: data?.leadDay, isPassFail: data?.isPassFail,
             isFailAddon: data?.isFailAddon, failAddon: data?.failAddon, ispassAddon: data?.ispassAddon, passAddon: data?.passAddon,
-            isJumpStep: data?.isJumpStep, jumpSteps: data?.jumpSteps
+            isJumpStepPass: data?.isJumpStepPass, jumpStepsPass: data?.jumpStepsPass, isJumpStepFail: data?.isJumpStepFail, jumpStepsFail: data?.jumpStepsFail
           })
         })
         .catch((err) => {
@@ -53,7 +53,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
     else {
       setStepDetails({
         stepName: "", leadDay: 0, isPassFail: false, isFailAddon: false, failAddon: [], ispassAddon: false, passAddon: [],
-        isJumpStep: false, jumpSteps: []
+        isJumpStepPass: false, jumpStepsPass: [], isJumpStepFail: false, jumpStepsFail: []
       })
     }
   }, []);
@@ -268,49 +268,91 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                           </Grid>
                         </Grid>
                       </Box>
-                    </Box>}
-                  <Box pt={2}>
-                    <Grid container >
-                      <Grid item xs={6}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              name="isJumpStep"
-                              checked={values?.isJumpStep}
-                              onChange={(e) => {
-                                setFieldValue('isJumpStep', e.target.checked);
-                              }}
-                              color="primary"
+                      <Box pt={2}>
+                        <Grid container >
+                          <Grid item xs={6}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  name="isJumpStepPass"
+                                  checked={values?.isJumpStepPass}
+                                  onChange={(e) => {
+                                    setFieldValue('isJumpStepPass', e.target.checked);
+                                  }}
+                                  color="primary"
+                                />
+                              }
+                              label="Jump Step On Pass"
                             />
-                          }
-                          label="Jump Step (If step pass)"
-                        />
-                      </Grid>
-                      <Grid item xs={6}>
-                        {values['isJumpStep'] &&
-                          <Autocomplete
-                            options={stepOption}
-                            fullWidth
-                            multiple
-                            size="small"
-                            value={values?.jumpSteps ? stepOption?.filter((data: any) => values?.jumpSteps?.includes(data.optionValue)) : []}
-                            getOptionLabel={(option) => option.optionLabel}
-                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-                            onChange={(_, newVal: any) => {
-                              setFieldValue('jumpSteps', newVal?.map((val) => val.optionValue));
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label="Jump Steps"
-                                name="jumpSteps"
-                                variant="outlined"
-                              />
-                            )}
-                          />}
-                      </Grid>
-                    </Grid>
-                  </Box>
+                          </Grid>
+                          <Grid item xs={6}>
+                            {values['isJumpStepPass'] &&
+                              <Autocomplete
+                                options={stepOption}
+                                fullWidth
+                                multiple
+                                size="small"
+                                value={values?.jumpStepsPass ? stepOption?.filter((data: any) => values?.jumpStepsPass?.includes(data.optionValue)) : []}
+                                getOptionLabel={(option) => option.optionLabel}
+                                getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                onChange={(_, newVal: any) => {
+                                  setFieldValue('jumpStepsPass', newVal?.map((val) => val.optionValue));
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Jump Steps On Pass"
+                                    name="jumpStepsPass"
+                                    variant="outlined"
+                                  />
+                                )}
+                              />}
+                          </Grid>
+                        </Grid>
+                      </Box>
+                      <Box pt={2}>
+                        <Grid container >
+                          <Grid item xs={6}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  name="isJumpStepFail"
+                                  checked={values?.isJumpStepFail}
+                                  onChange={(e) => {
+                                    setFieldValue('isJumpStepFail', e.target.checked);
+                                  }}
+                                  color="primary"
+                                />
+                              }
+                              label="Jump Step On Fail"
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            {values['isJumpStepFail'] &&
+                              <Autocomplete
+                                options={stepOption}
+                                fullWidth
+                                multiple
+                                size="small"
+                                value={values?.jumpStepsFail ? stepOption?.filter((data: any) => values?.jumpStepsFail?.includes(data.optionValue)) : []}
+                                getOptionLabel={(option) => option.optionLabel}
+                                getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                onChange={(_, newVal: any) => {
+                                  setFieldValue('jumpStepsFail', newVal?.map((val) => val.optionValue));
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Jump Steps On Fail"
+                                    name="jumpStepsFail"
+                                    variant="outlined"
+                                  />
+                                )}
+                              />}
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    </Box>}
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <Button
