@@ -20,6 +20,8 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { ExpandMore } from '@material-ui/icons';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
+import { GrDrag } from 'react-icons/gr';
 
 const Steps = ({ serviceId }) => {
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_stps`;
@@ -36,6 +38,8 @@ const Steps = ({ serviceId }) => {
   const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
   const toastConfig = useContext(CustomToastContext);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
+  const [arrangeView, setArrangeView] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
 
   const columns = [
     { field: 'stepName', headerName: 'Step Name', show: true, cellRenderer: 'stepNameRenderer' },
@@ -80,6 +84,28 @@ const Steps = ({ serviceId }) => {
         setShowConfirmBox({ open: false, ids: null });
       })
       .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+  const handleArrangeUpdate = (rows: any[]) => {
+    setIsAssigning(true);
+    rows?.forEach((e: any) => {
+      delete e.name;
+    });
+    axiosInstance()
+      .put(`${serviceMaster.api}/steps/${serviceId}/order`, { data: rows || [] })
+      .then(({ data }) => {
+        fetchStepsData();
+        setIsAssigning(false);
+        setArrangeView(false);
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
+      })
+      .catch((err) => {
+        setIsAssigning(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -213,6 +239,13 @@ const Steps = ({ serviceId }) => {
                     Delete
                   </MenuItem>
                 </Menu>
+                <Box ml={1} />
+                {dataRows?.length ? (
+                  <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                    <GrDrag fontSize="small" color="primary" className="mr-1" />
+                    Arrange
+                  </Button>
+                ) : null}
               </Box>
             </Grid>
           </Grid>
@@ -279,6 +312,19 @@ const Steps = ({ serviceId }) => {
             setStepFieldsDialog({ open: false, stepIds: [] });
             fetchStepsData();
           }}
+        />
+      )}
+      {arrangeView && (
+        <ArrangeView
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.stepName || '', order: d?.order };
+            }) || []
+          }
+          title={'Arrange'}
+          handleClose={() => setArrangeView(false)}
+          handleSubmit={handleArrangeUpdate}
+          loading={isAssigning}
         />
       )}
     </>
