@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, Button, CircularProgress } from '@material-ui/core';
+import { Dialog, Button, Box, CircularProgress, Grid } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -10,7 +10,7 @@ import { camelCase } from 'lodash';
 import { FormBuilder } from '../../../components/FormBuilder';
 import { uniq, map } from 'lodash';
 
-const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepId }) => {
+const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds }) => {
 
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
@@ -19,21 +19,23 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepId }) =>
   const [deleteField, setDeleteField] = React.useState([]);
 
   React.useEffect(() => {
-    axiosInstance().get(`${serviceMaster.api}/fields/${serviceId}/${stepId}`).then(({ data: { data } }) => {
-      const _data = [];
-      const _section = uniq(map(data, 'sectionName'));
-      _section.forEach((element: any, index: number) => {
-        _data.push({
-          sectionId: index,
-          sectionName: element,
-          field: data?.filter((el: any) => el.sectionName === element)
+    if (stepIds?.length === 1) {
+      axiosInstance().get(`${serviceMaster.api}/fields/${serviceId}/${stepIds[0]}`).then(({ data: { data } }) => {
+        const _data = [];
+        const _section = uniq(map(data, 'sectionName'));
+        _section.forEach((element: any, index: number) => {
+          _data.push({
+            sectionId: index,
+            sectionName: element,
+            field: data?.filter((el: any) => el.sectionName === element)
+          });
         });
-      });
-      setSection(_data);
-    })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+        setSection(_data);
+      })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
   }, []);
 
   const handleSave = async () => {
@@ -54,7 +56,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepId }) =>
         data.push(_field_data);
       });
     });
-    axiosInstance().post(`${serviceMaster.api}/fields/${serviceId}/${stepId}`, { fields: data }).then(({ data }) => {
+    axiosInstance().post(`${serviceMaster.api}/fields/${serviceId}`, { stepIds: stepIds, fields: data }).then(({ data }) => {
       handleSucess()
       toastConfig.setToastConfig({
         open: true,
@@ -67,6 +69,26 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepId }) =>
       });
   };
 
+  const handleExportFields = () => {
+    var dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(section));
+    var dlAnchorElem = document.getElementById('downloadAnchorElem');
+    dlAnchorElem.setAttribute('href', dataStr);
+    dlAnchorElem.setAttribute('download', 'step_fields.json');
+    dlAnchorElem.click();
+  };
+
+  const handleImportFields = (e) => {
+    e.preventDefault();
+    var files = e.target.files,
+      f = files[0];
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var data: any = e.target.result;
+      setSection(JSON.parse(data));
+    };
+    reader.readAsBinaryString(f);
+  };
+
   return (
     <Dialog open onClose={handleClose} fullScreen>
       <CustomDialogHeader
@@ -74,6 +96,29 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepId }) =>
         title="Fields Configuration"
         onClose={handleClose} />
       <CustomDialogContent>
+        <Box mr={2}>
+          <Grid container justify="flex-end">
+            <label htmlFor="importField" className="cursor-pointer mr-3">
+              Import Fields
+              <input
+                onClick={(e: any) => (e.target.value = null)}
+                id="importField"
+                name="importField"
+                onChange={handleImportFields}
+                style={{
+                  opacity: '0',
+                  position: 'absolute',
+                  zIndex: -1
+                }}
+                type="file"
+              />
+            </label>
+            <label className="cursor-pointer" onClick={handleExportFields}>
+              Export Fields
+            </label>
+            <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
+          </Grid>
+        </Box>
         <FormBuilder
           section={section}
           setSection={setSection}

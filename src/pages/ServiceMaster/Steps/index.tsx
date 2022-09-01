@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, Fragment, useReducer } from 'react';
 import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
-import { Box, Grid, IconButton, Paper, Typography, Button, Tooltip } from '@material-ui/core';
+import { Box, Grid, IconButton, Menu, MenuItem, Paper, Typography, Button, Tooltip } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import StepDialog from './StepDialog';
 import { serviceMaster } from 'src/constants/helpers';
@@ -19,13 +19,14 @@ import FieldDialog from './FieldDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { Link } from 'react-router-dom'
 import NoDataCell from "../../../components/Helpers/NoDataCell";
+import { ExpandMore } from '@material-ui/icons';
 
 const Steps = ({ serviceId }) => {
 
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_stps`;
 
   const [stepDialog, setStepDialog] = useState({ open: false, stepId: "" });
-  const [stepFieldsDialog, setStepFieldsDialog] = useState({ open: false, stepId: "" });
+  const [stepFieldsDialog, setStepFieldsDialog] = useState({ open: false, stepIds: [] });
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
 
   const { state: { permissions, user, selectedEntity } }: any = useData();
@@ -33,10 +34,12 @@ const Steps = ({ serviceId }) => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
   const toastConfig = useContext(CustomToastContext);
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const columns = [
     { field: 'stepName', headerName: 'Step Name', show: true, cellRenderer: 'stepNameRenderer' },
-    { field: 'leadDay', headerName: 'Lead Day', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'leadDay', headerName: 'Lead Day', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'fieldCount', headerName: 'Fields', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   useEffect(() => {
@@ -47,6 +50,9 @@ const Steps = ({ serviceId }) => {
     axiosInstance()
       .get(`${serviceMaster.api}/steps/${serviceId}`)
       .then(({ data: { data } }) => {
+        data?.forEach((e: any) => {
+          e.fieldCount = e?.fields?.length
+        })
         dispatch({
           type: 'initialize',
           data: data,
@@ -92,7 +98,7 @@ const Steps = ({ serviceId }) => {
           <IconButton
             aria-label="setting"
             onClick={(e) => {
-              setStepFieldsDialog({ open: true, stepId: params?.data?._id });
+              setStepFieldsDialog({ open: true, stepIds: [params?.data?._id] });
             }}
             size="small"
           >
@@ -127,6 +133,14 @@ const Steps = ({ serviceId }) => {
     commonRenderer: CommonRenderer,
   };
 
+  const openActions = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorActionEl(null);
+  };
+
   return (
     <>
       {permissions?.serviceMaster?.isUpdate &&
@@ -147,16 +161,42 @@ const Steps = ({ serviceId }) => {
             <Grid item xs={6} md={6} sm={6}>
               <Box display={'flex'} justifyContent={'flex-end'}>
                 <Button
-                  variant="contained"
-                  color="primary"
+                  variant="outlined"
+                  color="default"
                   size="small"
-                  disabled={selectedRecords?.length === 0}
-                  onClick={() => {
-                    setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
-                  }}
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={(selectedRecords.length === 0)}
                 >
-                  Delete
+                  Actions <ExpandMore />
                 </Button>
+                <Menu
+                  anchorEl={anchorActionEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorActionEl)}
+                  onClose={closeActions}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      setStepFieldsDialog({ open: true, stepIds: selectedRecords?.map((e) => e._id) });
+                    }}>
+                    Add Bulk Fields
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
+                    }}>
+                    Delete
+                  </MenuItem>
+                </Menu>
               </Box>
             </Grid>
           </Grid>
@@ -213,13 +253,14 @@ const Steps = ({ serviceId }) => {
       {stepFieldsDialog.open && (
         <FieldDialog
           serviceId={serviceId}
-          stepId={stepFieldsDialog.stepId}
+          stepIds={stepFieldsDialog.stepIds}
           steps={[]}
           handleClose={() => {
-            setStepFieldsDialog({ open: false, stepId: "" });
+            setStepFieldsDialog({ open: false, stepIds: [] });
           }}
           handleSucess={() => {
-            setStepFieldsDialog({ open: false, stepId: "" });
+            setStepFieldsDialog({ open: false, stepIds: [] });
+            fetchStepsData()
           }}
         />
       )}
