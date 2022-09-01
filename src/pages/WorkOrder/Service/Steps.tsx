@@ -62,7 +62,7 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
                 const steps = data?.steps?.map(d => d.stepName);
                 setStepList(steps);
                 var curStep = 0;
-                const compltedSteps = serviceData?.filter((e) => e.serviceId === serviceDetails?._id && e.status === "end");
+                const compltedSteps = serviceData?.filter((e) => e.uniqueId === serviceDetails?._id && e.status === "end");
                 if (compltedSteps?.length < steps?.length) {
                     curStep = compltedSteps?.length;
                 }
@@ -86,7 +86,7 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
         setInitialData({ fields: [], values: {} });
         if (serviceDetails?.steps?.length) {
             let fieldsDataForCreate = serviceDetails?.steps[currentStep]?.fields ? serviceDetails?.steps[currentStep]?.fields : []
-            let tempServiceData = serviceData.find(d => d.serviceId === serviceDetails?._id && d.stepId === serviceDetails?.steps[currentStep]?._id)
+            let tempServiceData = serviceData.find(d => d.uniqueId === serviceDetails?._id && d.stepId === serviceDetails?.steps[currentStep]?._id)
             if (tempServiceData) {
                 setStepData(tempServiceData)
                 setInitialData({ fields: setFieldsInAscendingOrder(fieldsDataForCreate), values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate) });
@@ -154,7 +154,7 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
     const handleStartEnd = (type) => {
         axiosInstance()
             .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
-                "serviceId": serviceId,
+                "uniqueId": serviceId,
                 "stepId": serviceDetails?.steps[currentStep]?._id,
             })
             .then(({ data }) => {
