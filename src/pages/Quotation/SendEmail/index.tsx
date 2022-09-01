@@ -102,7 +102,7 @@ const SendEmail = ({ quotationData, versionData }) => {
       setLoading('view');
     }
     axiosInstance()
-      .get(`${quotation.api}/${quotationData?._id}/${versionData._id}/pdf`)
+      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
