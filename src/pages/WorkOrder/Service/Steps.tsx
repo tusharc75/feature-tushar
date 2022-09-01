@@ -84,7 +84,7 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
         const steps = data?.steps?.map((d) => d.stepName);
         setStepList(steps);
         var curStep = 0;
-        const compltedSteps = serviceData?.filter((e) => e.serviceId === serviceDetails?._id && e.status === 'end');
+        const compltedSteps = serviceData?.filter((e) => e.uniqueId === serviceDetails?._id && e.status === 'end');
         if (compltedSteps?.length < steps?.length) {
           curStep = compltedSteps?.length;
         } else if (compltedSteps?.length === steps?.length) {
@@ -107,7 +107,7 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
     setInitialData({ fields: [], values: {} });
     if (serviceDetails?.steps?.length) {
       let fieldsDataForCreate = serviceDetails?.steps[currentStep]?.fields ? serviceDetails?.steps[currentStep]?.fields : [];
-      let tempServiceData = serviceData.find((d) => d.serviceId === serviceDetails?._id && d.stepId === serviceDetails?.steps[currentStep]?._id);
+      let tempServiceData = serviceData.find((d) => d.uniqueId === serviceDetails?._id && d.stepId === serviceDetails?.steps[currentStep]?._id);
       if (tempServiceData) {
         setStepData(tempServiceData);
         setInitialData({
@@ -175,7 +175,7 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
   const handleStartEnd = (type) => {
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
-        serviceId: serviceId,
+        uniqueId: serviceId,
         stepId: serviceDetails?.steps[currentStep]?._id
       })
       .then(({ data }) => {
@@ -389,14 +389,16 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
             <Box display="flex">
               {stepData?.startDate ? (
                 <Box>
-                  <Typography variant="caption">Start Date Time</Typography>
-                  <Typography variant="body2"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
+                  <Typography variant="caption">Start By</Typography>
+                  <Typography variant="body2"> {stepData?.startedBy?.optionLabel}</Typography>
+                  <Typography variant="caption"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
                 </Box>
               ) : null}
               {stepData?.endDate ? (
                 <Box ml={2}>
-                  <Typography variant="caption">End Date Time</Typography>
-                  <Typography variant="body2"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
+                  <Typography variant="caption">End By</Typography>
+                  <Typography variant="body2"> {stepData?.endedBy?.optionLabel}</Typography>
+                  <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
                 </Box>
               ) : null}
               {stepData?.startDate && stepData?.endDate ? (

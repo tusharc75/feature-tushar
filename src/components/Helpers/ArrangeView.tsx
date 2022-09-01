@@ -1,6 +1,5 @@
 import { Button, createStyles, Dialog, Theme, makeStyles, Box, Grid, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider, DropTargetMonitor, useDrag, useDrop, XYCoord } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
@@ -12,27 +11,18 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import IconButton from '@material-ui/core/IconButton';
 import { DragIndicator } from '@material-ui/icons';
 import TextField from '@material-ui/core/TextField';
+import { isMobile, isTablet } from 'react-device-detect';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: '100%',
-      maxHeight: 400,
-      backgroundColor: theme.palette.background.paper
-    },
-    cursor: {
-      cursor: 'move'
-    }
-  })
-);
 
 const ItemTypes = {
   CARD: 'card'
 };
 
 const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
+
   const [rows, setRows] = React.useState([]);
   const [valid, setValid] = React.useState(false);
+  const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
 
   useEffect(() => {
     setRows(data?.sort((a, b) => a.order - b.order));
@@ -67,8 +57,26 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
   };
 
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
-      <CustomDialogHeader title={title} showRequiredLabel={false} onClose={handleClose} />
+    <Dialog
+      open
+      fullWidth
+      fullScreen={fullScreen || isMobile || isTablet}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          handleClose();
+        }
+      }}
+      maxWidth="sm"
+    >
+      <CustomDialogHeader
+        title={title}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen((prevState) => !prevState);
+        }}
+        showRequiredLabel={false}
+        showManimizeMaximize={true}
+        onClose={handleClose} />
       <CustomDialogContent>
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
           {rows?.length ? (
@@ -91,8 +99,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
-            console.log(valid);
-            // handleSubmit(rows);
+            handleSubmit(rows);
           }}
           disabled={loading || !valid}
         >
