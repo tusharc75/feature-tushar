@@ -78,6 +78,8 @@ const ProductsTable = ({ packageId, packageData }) => {
       });
   };
 
+  const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
+
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${packageData?.packageType === 'Service' ? 'Service Master' : 'Product'}`)
@@ -105,7 +107,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer
         });
-        setColumns([...columns]);
+        setColumns([...defaultColumns, ...columns]);
       });
   };
 
