@@ -269,7 +269,7 @@ const QuotationDetails = () => {
 
   const deleteVersion = () => {
     axiosInstance()
-      .delete(`/quotation/${quotationData._id}/${currentVersion}`)
+      .delete(`/quotation/${quotationData._id}/${currVersionId}`)
       .then(() => {
         fetchQuotationData();
       })
@@ -399,7 +399,10 @@ const QuotationDetails = () => {
                             variant="text"
                             size="small"
                             startIcon={<MdDelete className={isMobile ? 'mr-1' : ''} />}
-                            onClick={() => setShowConfirmBox(true)}
+                            onClick={() => {
+                              setShowConfirmBox(true);
+                              closeActionsAction();
+                            }}
                           >
                             Delete Quote
                           </Button>
@@ -412,7 +415,10 @@ const QuotationDetails = () => {
                             size="small"
                             disabled={!allowedToEdit || loading}
                             startIcon={<MdDeleteSweep className={isMobile ? 'mr-1' : ''} />}
-                            onClick={deleteVersion}
+                            onClick={() => {
+                              deleteVersion();
+                              closeActionsAction();
+                            }}
                           >
                             Delete Version-{currentVersion}
                           </Button>
@@ -427,6 +433,7 @@ const QuotationDetails = () => {
                           startIcon={isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus className={isMobile ? 'mr-1' : ''} />}
                           onClick={() => {
                             cloneVersion();
+                            closeActionsAction();
                           }}
                         >
                           {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
@@ -439,7 +446,10 @@ const QuotationDetails = () => {
                             color="primary"
                             size="small"
                             startIcon={<HiPencil className={isMobile ? 'mr-1' : ''} />}
-                            onClick={handleOpenUpdateDialog}
+                            onClick={() => {
+                              handleOpenUpdateDialog();
+                              closeActionsAction();
+                            }}
                           >
                             Edit Quote
                           </Button>
@@ -593,6 +603,7 @@ const QuotationDetails = () => {
                             setQuotationSummary={setQuotationSummary}
                             version={currentVersion}
                             currentStep={currentStep}
+                            versionData={quotationData.versions[currentVersion]}
                           />
                         )}
                         {currentStep === 3 && quotationData && (
@@ -607,6 +618,7 @@ const QuotationDetails = () => {
                             setQuotationSummary={setQuotationSummary}
                             version={currentVersion}
                             currentStep={currentStep}
+                            versionData={quotationData.versions[currentVersion]}
                           />
                         )}
                         {currentStep === 4 && quotationData && (
@@ -620,6 +632,7 @@ const QuotationDetails = () => {
                             setQuotationSummary={setQuotationSummary}
                             version={currentVersion}
                             currentStep={currentStep}
+                            versionData={quotationData.versions[currentVersion]}
                           />
                         )}
                       </ContentFullScreen>
