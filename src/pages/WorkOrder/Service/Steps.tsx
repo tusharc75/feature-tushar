@@ -389,14 +389,16 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
             <Box display="flex">
               {stepData?.startDate ? (
                 <Box>
-                  <Typography variant="caption">Start Date Time</Typography>
-                  <Typography variant="body2"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
+                  <Typography variant="caption">Start By</Typography>
+                  <Typography variant="body2"> {stepData?.startedBy?.optionLabel}</Typography>
+                  <Typography variant="caption"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
                 </Box>
               ) : null}
               {stepData?.endDate ? (
                 <Box ml={2}>
-                  <Typography variant="caption">End Date Time</Typography>
-                  <Typography variant="body2"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
+                  <Typography variant="caption">End By</Typography>
+                  <Typography variant="body2"> {stepData?.endedBy?.optionLabel}</Typography>
+                  <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
                 </Box>
               ) : null}
               {stepData?.startDate && stepData?.endDate ? (
