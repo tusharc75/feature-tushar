@@ -138,12 +138,16 @@ const ProductsTable = ({ packageId, packageData }) => {
       });
   };
 
-  const handleArrangeUpdate = (dIds: string[]) => {
+  const handleArrangeUpdate = (rows: any) => {
     setIsAssigning(true);
+    console.log(rows);
+    rows?.forEach((e: any) => {
+      delete e.name;
+    });
     axiosInstance()
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: packageData?.packageType,
-        ids: dIds || []
+        data: rows || []
       })
       .then(() => {
         fetchData();
