@@ -44,7 +44,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [workOrderDialog, setWorkOrderDialog] = useState({ open: false, _id: null, product: null, serviceMaster: null });
+  const [workOrderDialog, setWorkOrderDialog] = useState({ open: false, _id: null, product: null });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -186,7 +186,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
                   aria-label="History"
                   disabled={Boolean(row?.original?.workOrder)}
                   onClick={() => {
-                    setWorkOrderDialog({ open: true, _id: row?.original?._id, product: row?.original?.productDetail?._id, serviceMaster: row?.original?.serviceMaster.map(d => d.optionValue) });
+                    setWorkOrderDialog({ open: true, _id: row?.original?._id, product: row?.original?.productDetail?._id });
                   }}
                 >
                   <RiAddCircleLine />
@@ -562,7 +562,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       )}
       {workOrderDialog.open && (
         <ManageWorkOrder
-          onClose={() => setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null })}
+          onClose={() => setWorkOrderDialog({ open: false, _id: null, product: null })}
           onSuccess={(data) => {
             if (data._id) {
               axiosInstance()
@@ -572,7 +572,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
                 }
                 )
                 .then(() => {
-                  setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null });
+                  setWorkOrderDialog({ open: false, _id: null, product: null });
                   fetchProductInventory();
                 })
                 .catch((error) => {
@@ -582,13 +582,12 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
             }
             else {
               fetchProductInventory();
-              setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null });
+              setWorkOrderDialog({ open: false, _id: null, product: null });
             }
           }}
           refrenceType={"Repair Order"}
           refrenceData={repairOrderData}
           products={workOrderDialog.product}
-          serviceMaster={workOrderDialog.serviceMaster}
         />
       )}
     </Fragment>

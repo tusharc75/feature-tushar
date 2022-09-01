@@ -124,15 +124,6 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
           return <>Total</>;
         }
       },
-      {
-        accessor: 'workOrder',
-        Header: 'Work Order',
-        Cell: ({ row }) => (
-          row.original['workOrder'] ?
-            <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder'].optionValue}`} target="_blank">{row.original['workOrder'].optionLabel}</a>
-            : <NoDataCell />
-        )
-      }
     ];
     data.forEach((element) => {
 
