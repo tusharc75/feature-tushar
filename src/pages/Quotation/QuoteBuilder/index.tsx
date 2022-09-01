@@ -48,7 +48,8 @@ const QuoteBuilder = ({
   fetchQuotationData,
   setQuotationSummary,
   version,
-  currentStep
+  currentStep,
+  versionData
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -61,17 +62,15 @@ const QuoteBuilder = ({
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
 
-  const versionId = quotationData?.versions[version]?._id || null;
-
   useEffect(() => {
     fetchFields();
   }, []);
 
   useEffect(() => {
-    if (versionId) {
+    if (versionData) {
       fetchProductInventory();
     }
-  }, [versionId, quotationData]);
+  }, [versionData]);
 
   useEffect(() => {
     if (currentStep === 3 && rowsData && !sentToCustomer) {
@@ -227,8 +226,8 @@ const QuoteBuilder = ({
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
-    const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${versionId}`);
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionData._id}`);
+    const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${versionData._id}`);
 
     data = response?.data?.data;
     inventory = data?.inventory ? data?.inventory : [];
@@ -308,7 +307,7 @@ const QuoteBuilder = ({
     <Fragment>
       <Box pb={2} display="flex" justifyContent="space-between">
         <Box display="flex">
-          <SendEmail quotationData={quotationData} />
+          <SendEmail versionData={versionData} quotationData={quotationData} />
         </Box>
         <Box display="flex">
           <Typography variant="h6" color={quotationData?.subStatus === 'Reject by Customer Waiting for New Price' ? 'error' : 'secondary'}>
@@ -322,7 +321,7 @@ const QuoteBuilder = ({
           </Typography>
         </Box>
         <Box display="flex">
-          {quotationData?.versions[version]?.processStatus === 'Send To Customer' && (
+          {versionData?.processStatus === 'Send To Customer' && (
             <HtmlTooltip title={'Send to customer'}>
               <Button
                 variant="contained"
@@ -331,9 +330,9 @@ const QuoteBuilder = ({
                 disabled={sentToCustomer}
                 onClick={() => {
                   axiosInstance()
-                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionId}`)
-                    .then(({ data }) => {
-                      fetchQuotationData(versionId, false);
+                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}`)
+                    .then(() => {
+                      fetchQuotationData(version, false);
                       toastConfig.setToastConfig({
                         open: true,
                         type: 'success',
