@@ -277,7 +277,7 @@ export default function CustomGridHeaderOptions({
 
       {openColumnSelection && (
         <>
-          {renderedFrom.includes('report') && reportSave ? (
+          {renderedFrom?.includes('report') && reportSave ? (
             <ReportArrangeView
               columns={columns}
               onClose={() => setOpenColumnSelection(false)}
