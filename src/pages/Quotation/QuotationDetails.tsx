@@ -57,7 +57,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import contactClass from '../Contact/contact.module.scss';
 import { CircularProgress } from '@material-ui/core';
-import AllVersionStatus from './AllVersionStatus';
+import Versions from './Versions';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -126,7 +126,7 @@ const QuotationDetails = () => {
     return result;
   }, [quotationData]);
 
-  const handleChangeVersionFromAllVersion = (versionNumber) => {
+  const handleChangeVersion = (versionNumber) => {
     fetchQuotationData(versionNumber);
     setCurrentVersion(versionNumber);
     setShowAllVersionStatus(false);
@@ -676,7 +676,7 @@ const QuotationDetails = () => {
                                 access: true
                               }
                             ]}
-                            handleActivityRefresh={() => {}}
+                            handleActivityRefresh={() => { }}
                             emails={[]}
                           />
                         </div>
@@ -784,15 +784,10 @@ const QuotationDetails = () => {
         </Dialog>
       )}
       {quotationData && showAllVersionStatus && (
-        <AllVersionStatus
-          open={showAllVersionStatus}
+        <Versions
           onClose={() => setShowAllVersionStatus(false)}
           quotationId={id}
-          quotationData={quotationData}
-          quotationPermissions={permissions?.quotation}
-          fetchQuotationData={fetchQuotationData}
-          handleChangeVersionFromAllVersion={handleChangeVersionFromAllVersion}
-          handleCloneQuoteWithVersionFromAllVersion={handleCloneQuotationWithVersionFromAllVersion}
+          handleChangeVersion={handleChangeVersion}
         />
       )}
     </>
