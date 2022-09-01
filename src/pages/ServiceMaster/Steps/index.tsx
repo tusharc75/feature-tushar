@@ -67,16 +67,12 @@ const Steps = ({ serviceId }) => {
           data: data,
           count: data.length
         });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-          setColumns(staticGridColumns);
-        }, gridLoadingTimeout);
+        dispatch({ type: 'loading', loading: false });
+        setColumns(staticGridColumns);
       })
       .catch((err) => {
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-          setColumns(staticGridColumns);
-        }, gridLoadingTimeout);
+        dispatch({ type: 'loading', loading: false });
+        setColumns(staticGridColumns);
         toastConfig.setToastConfig(err);
       });
   };
