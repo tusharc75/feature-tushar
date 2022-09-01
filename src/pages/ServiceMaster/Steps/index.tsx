@@ -40,8 +40,9 @@ const Steps = ({ serviceId }) => {
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [columns, setColumns] = useState(null);
 
-  const columns = [
+  const staticGridColumns = [
     { field: 'stepName', headerName: 'Step Name', show: true, cellRenderer: 'stepNameRenderer' },
     { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' },
     { field: 'leadDay', headerName: 'Lead Day', show: true, cellRenderer: 'commonRenderer' },
@@ -53,6 +54,8 @@ const Steps = ({ serviceId }) => {
   }, [serviceId]);
 
   const fetchStepsData = async () => {
+    dispatch({ type: 'loading', loading: true });
+    setColumns(null);
     axiosInstance()
       .get(`${serviceMaster.api}/steps/${serviceId}`)
       .then(({ data: { data } }) => {
@@ -66,9 +69,16 @@ const Steps = ({ serviceId }) => {
         });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
+          setColumns(staticGridColumns);
         }, gridLoadingTimeout);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+          setColumns(staticGridColumns);
+        }, gridLoadingTimeout);
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const handleDelete = () => {
