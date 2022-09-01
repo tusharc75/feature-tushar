@@ -61,10 +61,7 @@ const ServiceMaster = (props: Props) => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-
-  const defaultColumns = [
-    { field: "order", headerName: "Order", show: true, cellRenderer: "commonRenderer" },
-  ]
+  const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
 
   const fetchGridColumns = () => {
     setColumns(null);
@@ -257,16 +254,18 @@ const ServiceMaster = (props: Props) => {
   const handleArrangeUpdate = (rows: string[]) => {
     setIsAssigning(true);
     rows?.forEach((e: any) => {
-      delete e.name
-    })
-    axiosInstance().put(`${routes.product.path}/${id}/service-master/update-order`, {
-      data: rows || []
-    }).then(() => {
-      fetchData();
-      setIsAssigning(false);
-      setOpenAddDialog(false);
-      setArrangeView(false);
-    })
+      delete e.name;
+    });
+    axiosInstance()
+      .put(`${routes.product.path}/${id}/service-master/update-order`, {
+        data: rows || []
+      })
+      .then(() => {
+        fetchData();
+        setIsAssigning(false);
+        setOpenAddDialog(false);
+        setArrangeView(false);
+      })
       .catch((err) => {
         setIsAssigning(false);
         setArrangeView(false);
@@ -301,16 +300,12 @@ const ServiceMaster = (props: Props) => {
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
             <Box ml={1} />
-            {dataRows?.length ?
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                onClick={() => setArrangeView(true)}>
-                <GrDrag fontSize="small" color="primary" className='mr-1' />
+            {dataRows?.length ? (
+              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                <GrDrag fontSize="small" color="primary" className="mr-1" />
                 Arrange
               </Button>
-              : null}
+            ) : null}
           </div>
         </Box>
       )}
@@ -327,9 +322,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -337,7 +332,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -388,7 +383,11 @@ const ServiceMaster = (props: Props) => {
       )}
       {arrangeView && (
         <ArrangeView
-          data={dataRows?.map((d) => { return { _id: d?._id, name: d?.serviceName, order: d?.order } }) || []}
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.serviceName, order: d?.order };
+            }) || []
+          }
           title={'Arrange'}
           handleClose={() => setArrangeView(false)}
           handleSubmit={handleArrangeUpdate}

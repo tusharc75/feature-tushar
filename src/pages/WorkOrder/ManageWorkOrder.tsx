@@ -29,7 +29,7 @@ import { useHistory } from 'react-router-dom';
 const disabledFieldArray = ['workOrderNumber', "type", "product", "repairOrder", "status"]
 
 const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null, refrenceType = null, refrenceData = null,
-    products = null, serviceMaster = null }) => {
+    products = null }) => {
 
     const { state: { user } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
@@ -114,7 +114,6 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                     tempInitialData["workOrderNumber"] = `${refrenceData?.repairOrderNumber}_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["product"] = products
-                    tempInitialData["serviceMaster"] = serviceMaster
                     if (refrenceType === "Repair Order") {
                         tempInitialData["repairOrder"] = refrenceData?._id;
                     }
