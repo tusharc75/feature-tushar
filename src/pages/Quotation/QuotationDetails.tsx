@@ -565,7 +565,7 @@ const QuotationDetails = () => {
                     <Paper>
                       <Steps
                         isNextStep={false}
-                        nextStep={!updatingStatus || nextStep}
+                        nextStep={nextStep}
                         steps={quotationProcessSteps}
                         currentStep={currentStep}
                         setCurrentStep={setCurrentStep}
