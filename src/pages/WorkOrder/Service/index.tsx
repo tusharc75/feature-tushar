@@ -20,6 +20,10 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Autocomplete from '@material-ui/lab/Autocomplete/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import BoxWithBorder from 'src/components/BoxWithBorder';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import { findLastIndex } from 'lodash';
+import Quotation from '../Quotation';
 
 
 const Service = ({ workOrderId }) => {
@@ -27,12 +31,13 @@ const Service = ({ workOrderId }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [serviceSteps, setServiceSteps] = useState([]);
-    const [selectedService, setSelectedService] = useState({ serviceId: null, uniqueId: null });
+    const [selectedService, setSelectedService] = useState({ serviceId: null, uniqueId: null, type: null });
     const [serviceData, setServiceData] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [userDialog, setUserDialog] = useState(false);
     const [userList, setUserList] = useState([]);
     const [selectedUserList, setSelectedUserList] = useState([]);
+    const [serviceDialog, setServiceDialog] = useState(false);
 
     useEffect(() => {
         fetchWorkOrderService();
@@ -52,10 +57,16 @@ const Service = ({ workOrderId }) => {
 
     const fetchWorkOrderService = () => {
         axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`).then(({ data: { data } }) => {
-            setServiceSteps(data)
-            if (!selectedService?.serviceId && data?.length) {
-                setSelectedService({ serviceId: data[0]._id, uniqueId: data[0].uniqueId })
+            if (data?.length && !(selectedService?.serviceId && data?.some(d => d._id === selectedService?.serviceId))) {
+                setSelectedService({ serviceId: data[0]._id, uniqueId: data[0].uniqueId, type: "service" })
             }
+            let tempArrayService = data.map(element => {
+                element["type"] = "service"
+                return element
+            });
+            let tempArrayServiceIndex = findLastIndex([...tempArrayService], d => d.preWork === true)
+            tempArrayService.splice(tempArrayServiceIndex + 1, 0, { _id: "quotation", uniqueId: "quotation", type: "quotation", name: "Quote" })
+            setServiceSteps(tempArrayService)
         }).catch((err) => {
             toastConfig.setToastConfig(err);
         });
@@ -119,6 +130,16 @@ const Service = ({ workOrderId }) => {
     return (<Box p={2}>
         <Grid container>
             <Grid item xs={3}>
+                <Box mb={2} display="flex" justifyContent="flex-end">
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => setServiceDialog(true)}
+                    >
+                        Add Services
+                    </Button>
+                </Box>
                 <Box>
                     {serviceSteps?.map((data) => (
                         <Box
@@ -126,22 +147,25 @@ const Service = ({ workOrderId }) => {
                             border={1}
                             p={2} mb={2}
                             borderColor="grey.300"
-                            onClick={() => { setSelectedService({ serviceId: data?._id, uniqueId: data?.uniqueId }) }}>
+                            onClick={() => {
+                                setSelectedService({ serviceId: data?._id, uniqueId: data?.uniqueId, type: data?.type })
+                            }}>
                             <Grid container>
                                 <Grid item xs={10} className="d-flex align-items-center gap-1 ">
-                                    <Typography>{data?.serviceName}</Typography>
+                                    <Typography>{data?.serviceName ?? data?.name}</Typography>
                                 </Grid>
-                                <Grid item xs={2} container justify="flex-end">
+                                {data?.type === "service" && <Grid item xs={2} container justify="flex-end">
                                     <IconButton
                                         size="small"
                                         color="primary"
                                         aria-label="delete"
                                         onClick={(event) => {
                                             handleOpenMenu(event, data?._id)
+                                            setSelectedService({ serviceId: data?._id, uniqueId: data?.uniqueId, type: data?.type })
                                         }}>
                                         <MoreHorizIcon />
                                     </IconButton>
-                                </Grid>
+                                </Grid>}
                             </Grid>
                         </Box>
                     ))}
@@ -153,12 +177,36 @@ const Service = ({ workOrderId }) => {
                             }}>
                             Assign Users
                         </MenuItem>
+                        <MenuItem
+                            onClick={() => {
+                                let tempUniqueId = serviceSteps.find(d => d._id === selectedService.serviceId)
+                                if (tempUniqueId?.uniqueId) {
+                                    axiosInstance()
+                                        .put(`${workOrder.api}/service/${workOrderId}/remove`, {
+                                            "uniqueIds": [tempUniqueId.uniqueId]
+                                        })
+                                        .then(({ data }) => {
+                                            toastConfig.setToastConfig({
+                                                open: true,
+                                                type: "success",
+                                                message: data?.message,
+                                            });
+                                            fetchWorkOrderService();
+                                        })
+                                        .catch((err) => {
+                                            toastConfig.setToastConfig(err);
+                                        });
+                                }
+                                setAnchorEl(null);
+                            }}>
+                            Remove
+                        </MenuItem>
                     </Menu>
                 </Box>
             </Grid>
             <Grid item xs={9}>
                 <Box border={1} ml={2} borderColor="grey.300">
-                    {selectedService.serviceId &&
+                    {selectedService.serviceId && selectedService.type === "service" ?
                         <Steps
                             workOrderId={workOrderId}
                             serviceId={selectedService.serviceId}
@@ -167,7 +215,8 @@ const Service = ({ workOrderId }) => {
                             serviceData={serviceData}
                             serviceSteps={serviceSteps}
                             setSelectedService={setSelectedService}
-                        />}
+                        />
+                        : <Quotation />}
                 </Box>
             </Grid>
         </Grid>
@@ -232,6 +281,18 @@ const Service = ({ workOrderId }) => {
                     > Save</CustomButton>
                 </CustomDialogFooter>
             </Dialog>
+        }
+        {serviceDialog &&
+            <AssignServiceDialog
+                reference="workorder"
+                referenceId={workOrderId}
+                handleClose={() => setServiceDialog(false)}
+                ids={[workOrderId]}
+                onSuccess={() => {
+                    fetchWorkOrderService();
+                    setServiceDialog(false);
+                }}
+            />
         }
     </Box >);
 }

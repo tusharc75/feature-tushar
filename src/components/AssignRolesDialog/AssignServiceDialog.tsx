@@ -5,7 +5,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, getLocalStorageArrayData, serviceMaster } from 'src/constants/helpers';
+import { gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, getLocalStorageArrayData, serviceMaster, workOrder } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
@@ -152,6 +152,20 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
         .post(`${packages.api}/material`, {
           ids: Array.isArray(referenceId) && referenceId.length ? referenceId : [referenceId],
           services: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) }))
+        })
+        .then(() => {
+          setAssigning(false);
+          onSuccess();
+        })
+        .catch((err) => {
+          setAssigning(false);
+          toastConfig.setToastConfig(err);
+        });
+    }
+    else if (reference === 'workorder') {
+      axiosInstance()
+        .post(`${workOrder.api}/service/${referenceId}`, {
+          serviceIds: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => d.id)
         })
         .then(() => {
           setAssigning(false);
