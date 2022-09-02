@@ -142,8 +142,8 @@ const ProductsTable = ({ packageId, packageData }) => {
 
   const handleArrangeUpdate = (rows: any) => {
     setIsAssigning(true);
-    console.log(rows);
     rows?.forEach((e: any) => {
+      delete e.preWork
       delete e.name;
     });
     axiosInstance()
@@ -220,9 +220,9 @@ const ProductsTable = ({ packageId, packageData }) => {
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => {}}
+          onEdit={(data) => { }}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => {}}
+          onDelete={(data) => { }}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -238,7 +238,7 @@ const ProductsTable = ({ packageId, packageData }) => {
             setShowProductAssignDialog(true);
           }}
           showClone={true}
-          onClone={(data) => {}}
+          onClone={(data) => { }}
           renderedFrom={renderedFrom}
         />
       ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -306,7 +306,7 @@ const ProductsTable = ({ packageId, packageData }) => {
         <ArrangeView
           data={
             dataRows?.map((d) => {
-              return { _id: d?._id, name: d?.serviceName || d?.productName, order: d?.order };
+              return { _id: d?._id, name: d?.serviceName || d?.productName, order: d?.order, preWork: d?.preWork };
             }) || []
           }
           title={'Arrange'}
