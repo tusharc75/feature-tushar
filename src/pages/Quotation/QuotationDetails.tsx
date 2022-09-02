@@ -22,12 +22,10 @@ import {
   QUOTATION_STATUS
 } from '../../constants/helpers';
 import ManageQuotationDialog from './ManageQuotationDialog';
-import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
 import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
-// import Steps from './Steps';
 import Productpackage from './Productpackage';
 import AdditionalCost from './AdditionalCost';
 import { isMobile, isTablet } from 'react-device-detect';
