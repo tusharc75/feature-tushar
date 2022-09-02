@@ -2075,3 +2075,11 @@ export const QUOTATION_STATUS = {
   acceptByCustomer: 'Accept by Customer',
   rejectByCustomer: 'Reject by Customer'
 };
+
+
+export const WORKORDER_SERVICE_COLOR = {
+  preWork: 'rgba(254, 249, 230, 1)',
+  quote: 'rgba(169, 43, 3, .1)',
+  postWork: 'rgba(222, 249, 255, 1)',
+};
+

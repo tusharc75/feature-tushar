@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { workOrder } from 'src/constants/helpers';
+import { workOrder, WORKORDER_SERVICE_COLOR } from 'src/constants/helpers';
 import { Badge, Box, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -136,11 +136,24 @@ const Service = ({ workOrderId }) => {
                     </Box>
                     <Box>
                         {serviceSteps?.map((data) => (
-                            <Box style={selectedService?._id == data?._id ? { backgroundColor: "#329592", color: "white", cursor: "pointer" } : { cursor: "pointer" }}
-                                border={1}
+                            <Box
+                                style={selectedService?._id == data?._id ? {
+                                    borderColor: "#329592",
+                                    borderWidth: "2px",
+                                    borderStyle: 'solid',
+                                    backgroundColor: `${data.type === "service" ? data?.preWork ?
+                                        WORKORDER_SERVICE_COLOR.preWork : WORKORDER_SERVICE_COLOR.postWork : WORKORDER_SERVICE_COLOR.quote}`,
+                                    cursor: "pointer"
+                                } : {
+                                    borderWidth: '1px',
+                                    borderStyle: 'solid',
+                                    borderColor: "rgb(224, 224, 224)",
+                                    backgroundColor: `${data.type === "service" ? data?.preWork ?
+                                        WORKORDER_SERVICE_COLOR.preWork : WORKORDER_SERVICE_COLOR.postWork : WORKORDER_SERVICE_COLOR.quote}`,
+                                    cursor: "pointer"
+                                }}
                                 p={2}
                                 mb={2}
-                                borderColor="grey.300"
                                 onClick={() => {
                                     setSelectedService(data)
                                 }}>
