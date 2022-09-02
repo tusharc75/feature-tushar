@@ -66,7 +66,8 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceSteps, setServiceId }) => {
+const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData, serviceSteps, setSelectedService }) => {
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const [currentStep, setCurrentStep] = useState(0);
@@ -107,7 +108,7 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
     setInitialData({ fields: [], values: {} });
     if (serviceDetails?.steps?.length) {
       let fieldsDataForCreate = serviceDetails?.steps[currentStep]?.fields ? serviceDetails?.steps[currentStep]?.fields : [];
-      let tempServiceData = serviceData.find((d) => d.uniqueId === serviceDetails?._id && d.stepId === serviceDetails?.steps[currentStep]?._id);
+      let tempServiceData = serviceData.find((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && d.stepId === serviceDetails?.steps[currentStep]?._id);
       if (tempServiceData) {
         setStepData(tempServiceData);
         setInitialData({
@@ -136,6 +137,7 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
 
   const handleSubmit = async (values) => {
     let tempData = {
+      uniqueId: uniqueId,
       serviceId: serviceId,
       stepId: serviceDetails?.steps[currentStep]?._id
     };
@@ -175,7 +177,8 @@ const Service = ({ workOrderId, serviceId, serviceData, getServiceData, serviceS
   const handleStartEnd = (type) => {
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
-        uniqueId: serviceId,
+        uniqueId: uniqueId,
+        serviceId: serviceId,
         stepId: serviceDetails?.steps[currentStep]?._id
       })
       .then(({ data }) => {
