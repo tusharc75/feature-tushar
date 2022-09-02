@@ -93,6 +93,7 @@ const Steps = ({ serviceId }) => {
         toastConfig.setToastConfig(err);
       });
   };
+  
   const handleArrangeUpdate = (rows: any[]) => {
     setIsAssigning(true);
     rows?.forEach((e: any) => {
