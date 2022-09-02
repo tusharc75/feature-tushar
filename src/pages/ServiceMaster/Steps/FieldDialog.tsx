@@ -9,6 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { camelCase } from 'lodash';
 import { FormBuilder } from '../../../components/FormBuilder';
 import { uniq, map } from 'lodash';
+import { CustomDialogTransition } from '../../../constants/helpers';
 
 const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds }) => {
 
@@ -90,14 +91,20 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds }) =
   };
 
   return (
-    <Dialog open onClose={handleClose} fullScreen>
+    <Dialog
+      open
+      aria-labelledby="customized-dialog-title"
+      onClose={handleClose}
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      fullScreen>
       <CustomDialogHeader
         showRequiredLabel={false}
         title="Fields Configuration"
         onClose={handleClose} />
       <CustomDialogContent>
-        <Box mr={2}>
-          <Grid container justify="flex-end">
+        <Box display="flex" justifyContent="flex-end">
+          <Box>
             <label htmlFor="importField" className="cursor-pointer mr-3">
               Import Fields
               <input
@@ -107,17 +114,17 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds }) =
                 onChange={handleImportFields}
                 style={{
                   opacity: '0',
-                  position: 'absolute',
+                  display: 'none',
                   zIndex: -1
                 }}
                 type="file"
               />
             </label>
-            <label className="cursor-pointer" onClick={handleExportFields}>
+            <label className="cursor-pointer mr-3" onClick={handleExportFields}>
               Export Fields
             </label>
             <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
-          </Grid>
+          </Box>
         </Box>
         <FormBuilder
           section={section}

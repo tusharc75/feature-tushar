@@ -34,7 +34,6 @@ const ServiceMasterDetailsPage = () => {
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-  const [activeTable, setActiveTable] = useState('packages');
 
   useEffect(() => {
     fetchFields();
@@ -79,11 +78,6 @@ const ServiceMasterDetailsPage = () => {
   };
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
-    // if (newValue === 1) {
-    //   setActiveTable('packages');
-    // } else if (newValue === 2) {
-    //   setActiveTable('parent');
-    // }
   };
 
   return (

@@ -23,11 +23,11 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 
 
 const Service = ({ workOrderId }) => {
-  // hi there
+    // hi there
 
     const toastConfig = useContext(CustomToastContext);
     const [serviceSteps, setServiceSteps] = useState([]);
-    const [serviceId, setServiceId] = useState(null);
+    const [selectedService, setSelectedService] = useState({ serviceId: null, uniqueId: null });
     const [serviceData, setServiceData] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [userDialog, setUserDialog] = useState(false);
@@ -41,20 +41,20 @@ const Service = ({ workOrderId }) => {
     }, []);
 
     useEffect(() => {
-        let tempService = serviceSteps.find(d => d._id === serviceId)
+        let tempService = serviceSteps.find(d => d._id === selectedService.serviceId)
         if (tempService?.assignedUsers?.length > 0) {
             setSelectedUserList(userList.filter(d => tempService?.assignedUsers.map(obj => obj?.optionValue).includes(d?.optionValue)))
         }
         else {
             setSelectedUserList([])
         }
-    }, [serviceId, serviceSteps]);
+    }, [selectedService, serviceSteps]);
 
     const fetchWorkOrderService = () => {
         axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`).then(({ data: { data } }) => {
             setServiceSteps(data)
-            if (!serviceId && data?.length) {
-                setServiceId(data[0]._id)
+            if (!selectedService?.serviceId && data?.length) {
+                setSelectedService({ serviceId: data[0]._id, uniqueId: data[0].uniqueId })
             }
         }).catch((err) => {
             toastConfig.setToastConfig(err);
@@ -73,7 +73,7 @@ const Service = ({ workOrderId }) => {
     }
 
     const handleAssignUser = () => {
-        let tempUniqueId = serviceSteps.find(d => d._id === serviceId)
+        let tempUniqueId = serviceSteps.find(d => d._id === selectedService.serviceId)
         if (tempUniqueId?.uniqueId) {
             axiosInstance()
                 .put(`${workOrder.api}/service/${workOrderId}/assign-user`, {
@@ -122,11 +122,11 @@ const Service = ({ workOrderId }) => {
                 <Box>
                     {serviceSteps?.map((data) => (
                         <Box
-                            style={serviceId == data?._id ? { backgroundColor: "#329592", color: "white", cursor: "pointer" } : { cursor: "pointer" }}
+                            style={selectedService.serviceId == data?._id ? { backgroundColor: "#329592", color: "white", cursor: "pointer" } : { cursor: "pointer" }}
                             border={1}
                             p={2} mb={2}
                             borderColor="grey.300"
-                            onClick={() => { setServiceId(data?._id) }}>
+                            onClick={() => { setSelectedService({ serviceId: data?._id, uniqueId: data?.uniqueId }) }}>
                             <Grid container>
                                 <Grid item xs={10} className="d-flex align-items-center gap-1 ">
                                     <Typography>{data?.serviceName}</Typography>
@@ -137,7 +137,6 @@ const Service = ({ workOrderId }) => {
                                         color="primary"
                                         aria-label="delete"
                                         onClick={(event) => {
-                                            setServiceId(data?._id)
                                             handleOpenMenu(event, data?._id)
                                         }}>
                                         <MoreHorizIcon />
@@ -159,14 +158,15 @@ const Service = ({ workOrderId }) => {
             </Grid>
             <Grid item xs={9}>
                 <Box border={1} ml={2} borderColor="grey.300">
-                    {serviceId &&
+                    {selectedService.serviceId &&
                         <Steps
                             workOrderId={workOrderId}
-                            serviceId={serviceId}
+                            serviceId={selectedService.serviceId}
+                            uniqueId={selectedService.uniqueId}
                             getServiceData={getServiceData}
                             serviceData={serviceData}
                             serviceSteps={serviceSteps}
-                            setServiceId={setServiceId}
+                            setSelectedService={setSelectedService}
                         />}
                 </Box>
             </Grid>
