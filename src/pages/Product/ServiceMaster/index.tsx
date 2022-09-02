@@ -254,6 +254,7 @@ const ServiceMaster = (props: Props) => {
   const handleArrangeUpdate = (rows: string[]) => {
     setIsAssigning(true);
     rows?.forEach((e: any) => {
+      delete e.preWork;
       delete e.name;
     });
     axiosInstance()
@@ -322,9 +323,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => {}}
+            onEdit={() => { }}
             extraParamsToCheckDelete={false}
-            onDelete={() => {}}
+            onDelete={() => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -332,7 +333,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -383,11 +384,7 @@ const ServiceMaster = (props: Props) => {
       )}
       {arrangeView && (
         <ArrangeView
-          data={
-            dataRows?.map((d) => {
-              return { _id: d?._id, name: d?.serviceName, order: d?.order };
-            }) || []
-          }
+          data={dataRows?.map((d) => { return { _id: d?._id, name: d?.serviceName, order: d?.order, preWork: d?.preWork }; }) || []}
           title={'Arrange'}
           handleClose={() => setArrangeView(false)}
           handleSubmit={handleArrangeUpdate}

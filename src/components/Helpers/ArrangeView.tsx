@@ -20,40 +20,71 @@ const ItemTypes = {
 
 const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
 
-  const [rows, setRows] = React.useState([]);
   const [valid, setValid] = React.useState(false);
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
 
+  const [preRows, setPreRows] = React.useState([]);
+  const [postRows, setPostRows] = React.useState([]);
+
   useEffect(() => {
-    setRows(data?.sort((a, b) => a.order - b.order));
+    setPreRows(data?.filter((e) => e.preWork)?.sort((a, b) => a.order - b.order));
+    setPostRows(data?.filter((e) => !e.preWork)?.sort((a, b) => a.order - b.order));
   }, [data]);
 
   useEffect(() => {
-    if (rows?.find((x) => isNaN(x.order) || x.order <= 0 || x.order === undefined)) {
+    if (preRows?.find((x) => isNaN(x.order) || x.order <= 0 || x.order === undefined)) {
       setValid(false);
     } else {
       setValid(true);
     }
-  }, [rows]);
+  }, [preRows]);
 
-  const moveItem = React.useCallback(
+  useEffect(() => {
+    if (postRows?.find((x) => isNaN(x.order) || x.order <= 0 || x.order === undefined)) {
+      setValid(false);
+    } else {
+      setValid(true);
+    }
+  }, [postRows]);
+
+  const moveItemPre = React.useCallback(
     (dragIndex: number, hoverIndex: number) => {
-      const dragCard = rows[dragIndex];
-      const updatedIndexColumns = update(rows, {
+      const dragCard = preRows[dragIndex];
+      const updatedIndexColumns = update(preRows, {
         $splice: [
           [dragIndex, 1],
           [hoverIndex, 0, dragCard]
         ]
       });
-      setRows(updatedIndexColumns);
+      setPreRows(updatedIndexColumns);
     },
-    [rows]
+    [preRows]
   );
 
-  const onChangeValue = (index, field, value) => {
-    let data = [...rows];
+  const onChangeValuePre = (index, field, value) => {
+    let data = [...preRows];
     data[index][field] = value;
-    setRows(data);
+    setPreRows(data);
+  };
+
+  const moveItemPost = React.useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragCard = postRows[dragIndex];
+      const updatedIndexColumns = update(postRows, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, dragCard]
+        ]
+      });
+      setPostRows(updatedIndexColumns);
+    },
+    [postRows]
+  );
+
+  const onChangeValuePost = (index, field, value) => {
+    let data = [...postRows];
+    data[index][field] = value;
+    setPostRows(data);
   };
 
   return (
@@ -79,13 +110,36 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
         onClose={handleClose} />
       <CustomDialogContent>
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-          {rows?.length ? (
-            rows?.map((column: any, index) => (
-              <RenderListItem key={column.field} column={column} moveItem={moveItem} index={index} onChangeValue={onChangeValue} id={column.field} />
-            ))
-          ) : (
-            <div>No Data Found</div>
-          )}
+          {(preRows?.length > 0) &&
+            <Box mb={2} p={1} border={1} borderColor="grey.300" bgcolor="grey.100">
+              <Typography variant="subtitle2" gutterBottom> Pre Work</Typography>
+              {preRows?.length && (
+                preRows?.map((column: any, index) => (
+                  <RenderListItem
+                    key={column.field}
+                    column={column}
+                    moveItem={moveItemPre}
+                    index={index}
+                    onChangeValue={onChangeValuePre}
+                    id={column.field} />
+                ))
+              )}
+            </Box>}
+          {(postRows?.length > 0) &&
+            <Box mb={2} p={1} border={1} borderColor="grey.300" bgcolor="grey.100">
+              {preRows?.length > 0 ? <Typography variant="subtitle2" gutterBottom>Post Work</Typography> : null}
+              {postRows?.length && (
+                postRows?.map((column: any, index) => (
+                  <RenderListItem
+                    key={column.field}
+                    column={column}
+                    moveItem={moveItemPost}
+                    index={index}
+                    onChangeValue={onChangeValuePost}
+                    id={column.field} />
+                ))
+              )}
+            </Box>}
         </DndProvider>
       </CustomDialogContent>
       <CustomDialogFooter>
@@ -99,7 +153,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
           type="submit"
           onClick={(e) => {
             e.preventDefault();
-            handleSubmit(rows);
+            handleSubmit([...preRows, ...postRows]);
           }}
           disabled={loading || !valid}
         >
@@ -192,8 +246,6 @@ const RenderListItem = ({ column, moveItem, id, index, onChangeValue }) => {
             <TextField
               id="standard-basic"
               name="Order"
-              label="Order"
-              required
               variant="outlined"
               margin="dense"
               type="number"
