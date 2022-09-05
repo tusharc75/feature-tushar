@@ -1,332 +1,273 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import Stepper from '@material-ui/core/Stepper';
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { Formik, Form } from "formik";
-import { dateTimeFormat, getObjKeys, getObjKeysWithValues, workOrder, yupSchema } from 'src/constants/helpers';
-import { Box, Divider, Grid, IconButton, Paper } from '@material-ui/core';
-import FormTypes from 'src/components/ServiceMaster/FormTypes';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { workOrder, WORKORDER_SERVICE_COLOR } from 'src/constants/helpers';
+import { Badge, Box, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { isMobile } from 'react-device-detect';
-import moment from 'moment';
+import routes from 'src/components/Helpers/Routes';
+import Steps from './Steps';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import { findLastIndex } from 'lodash';
+import Quotation from '../Quotation';
+import AssignUserDialog from './AssignUserDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
+import { GrDrag } from 'react-icons/gr';
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            marginTop: theme.spacing(3),
-            width: '100%',
-        },
-        backButton: {
-            marginRight: theme.spacing(1),
-        },
-        pbStepper: {
-            overflow: 'none',
-            justifyContent: 'space-evenly',
-            [theme.breakpoints.down('xs')]: {
-                overflow: 'auto'
-            }
-        },
-        instructions: {
-            marginTop: theme.spacing(1),
-            marginBottom: theme.spacing(1),
-        },
-        stepContent: {
-            margin: theme.spacing(1),
-        }
-    }),
-);
+const Service = ({ workOrderId }) => {
 
-const Service = ({ serviceDataFields, workOrderId, serviceData, getServiceData, setNextStep, setServiceCurrentStep, serviceSteps, currentServiceStep }) => {
-
-    const classes = useStyles();
     const toastConfig = useContext(CustomToastContext);
-    const [currentStep, setCurrentStep] = useState(0);
-    const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
-
-    const [stepList, setStepList] = useState([])
-    const [stepData, setStepData] = useState(null);
-
-    useEffect(() => {
-        setInitialDataFields();
-        const steps = serviceDataFields?.steps?.map(d => d.stepName);
-        setStepList(steps);
-        var curStep = 0;
-        const compltedSteps = serviceData?.filter((e) => e.serviceId === serviceDataFields?._id && e.status === "end");
-        if (compltedSteps?.length < steps?.length) {
-            curStep = compltedSteps?.length;
-        }
-        else if (compltedSteps?.length === steps?.length) {
-            curStep = compltedSteps?.length - 1;
-        }
-        setCurrentStep(curStep)
-    }, [serviceDataFields]);
+    const [serviceSteps, setServiceSteps] = useState(null);
+    const [selectedService, setSelectedService] = useState(null);
+    const [serviceData, setServiceData] = useState([]);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [userAssignDialog, setUserAssignDialog] = useState(false);
+    const [serviceDialog, setServiceDialog] = useState(false);
+    const [arrangeView, setArrangeView] = useState(false);
 
     useEffect(() => {
-        if (currentStep > -1) {
-            setInitialDataFields();
-        }
-    }, [currentStep, serviceData]);
+        fetchService();
+        getServiceData();
+    }, []);
 
-    const setInitialDataFields = () => {
-        setInitialData({ fields: [], values: {} });
-        if (serviceDataFields?.steps?.length) {
-            let fieldsDataForCreate = serviceDataFields?.steps[currentStep]?.fields ? serviceDataFields?.steps[currentStep]?.fields : []
-            let tempServiceData = serviceData.find(d => d.serviceId === serviceDataFields?._id && d.stepId === serviceDataFields?.steps[currentStep]?._id)
-            if (tempServiceData) {
-                setStepData(tempServiceData)
-                setInitialData({ fields: fieldsDataForCreate, values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate) });
-            }
-            else {
-                setStepData(null)
-                setInitialData({ fields: fieldsDataForCreate, values: getObjKeys("", fieldsDataForCreate) });
-            }
-            let tempServiceDataFieldsId = serviceDataFields?.steps?.map(d => d._id)
-            let tempServiceDataId = serviceData?.map(d => d.stepId)
-            if (tempServiceDataFieldsId.every(el => tempServiceDataId.includes(el))) {
-                setNextStep(true)
-            }
-        }
-    };
-
-    const handleNext = () => {
-        if (currentStep < stepList.length - 1) {
-            setCurrentStep((prevActiveStep) => prevActiveStep + 1);
-        }
-        else if (currentServiceStep < serviceSteps.length - 1) {
-            setServiceCurrentStep((prevActiveStep) => prevActiveStep + 1);
-        }
-    };
-
-    const handleBack = () => {
-        setCurrentStep((prevActiveStep) => prevActiveStep - 1);
-    };
-
-    const handleSubmit = async (values) => {
-        let tempData = {
-            "serviceId": serviceDataFields?._id,
-            "stepId": serviceDataFields?.steps[currentStep]?._id,
-        }
-        axiosInstance()
-            .put(`${workOrder.api}/update-steps-data/${workOrderId}`, { ...tempData, ...values })
-            .then(({ data }) => {
-                toastConfig.setToastConfig({
-                    open: true,
-                    type: "success",
-                    message: data.message,
-                });
-                handleNext()
-                getServiceData()
+    const fetchService = () => {
+        axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`).then(({ data: { data } }) => {
+            data?.forEach((e) => {
+                e.type = "service";
             })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
+            let tempArrayServiceIndex = findLastIndex([...data], d => d.preWork === true)
+            data.splice(tempArrayServiceIndex + 1, 0, { _id: "quotation", uniqueId: "quotation", type: "quotation", serviceName: "Quote" })
+            setServiceSteps(data)
+            if (data?.length && selectedService === null) {
+                setSelectedService(data[0])
+            }
+        }).catch((err) => {
+            toastConfig.setToastConfig(err);
+        });
     };
 
-    function validate(values) {
-        const errors = {};
-        return errors;
-    }
-
-    const handleScroll = (errors) => {
-        const err = Object.keys(errors);
-        if (err.length) {
-            const input = document.querySelector(
-                `input[name=${err[0]}]`,
-            );
-            input.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-                inline: 'start',
-            });
-        }
-    }
-
-    const handleStartEnd = (type) => {
+    const getServiceData = () => {
         axiosInstance()
-            .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
-                "serviceId": serviceDataFields?._id,
-                "stepId": serviceDataFields?.steps[currentStep]?._id,
+            .get(`${workOrder.api}/${workOrderId}/steps-data`)
+            .then(({ data: { data } }) => {
+                setServiceData(data);
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    }
+
+    const handleOpenMenu = (event, _id) => {
+        event.stopPropagation();
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = (event) => {
+        event.stopPropagation();
+        setAnchorEl(null);
+    };
+
+    const handleRemoveService = (id) => {
+        axiosInstance()
+            .put(`${workOrder.api}/service/${workOrderId}/remove`, {
+                "uniqueIds": [id]
             })
             .then(({ data }) => {
                 toastConfig.setToastConfig({
                     open: true,
                     type: "success",
-                    message: data.message,
+                    message: data?.message,
                 });
-                getServiceData()
+                fetchService();
             })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
             });
     }
 
-    return (stepList?.length ?
-        <div className={classes.root}>
+    const handleArrangeUpdate = (rows: any[]) => {
+        rows?.forEach((e: any) => {
+            delete e.name;
+            delete e.preWork;
+        });
+        axiosInstance()
+            .put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
+            .then(({ data }) => {
+                fetchService();
+                setArrangeView(false)
+                toastConfig.setToastConfig({
+                    open: true,
+                    message: data.message,
+                    severity: 'success'
+                });
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    };
 
-            <div className="position-relative">
-                <Stepper className={`${classes.pbStepper} stepper-responsive mt-2`} activeStep={currentStep} alternativeLabel>
-                    {stepList?.map((label) => (
-                        <Step key={label}>
-                            <StepLabel>{label}</StepLabel>
-                        </Step>
-                    ))}
-                </Stepper>
-            </div>
-            <Box p={2}>
-                <Paper variant="outlined">
-                    <Box p={2}>
-                        <Grid container>
-                            <Grid item xs={6} >
-                                <Typography style={{ fontWeight: "bold", fontSize: '1rem' }} color="primary" className="d-flex align-items-center">
-                                    {`${stepList[currentStep]}`}
-                                </Typography>
-                                <Typography style={{ fontWeight: "light", fontSize: '0.8rem' }} color="primary" className="d-flex align-items-center">
-                                    {`${currentStep + 1} of ${stepList.length}`}
-                                </Typography>
-                            </Grid>
-                            <Grid container item xs={6} justifyContent="flex-end" alignItems="flex-end">
-                                <Box display="flex">
-                                    {currentStep !== 0 &&
-                                        <Button
-                                            variant="outlined"
-                                            color="primary"
-                                            size="small"
-                                            disabled={currentStep === 0}
-                                            onClick={handleBack}
-                                        >
-                                            Back
-                                        </Button>}
-                                    <Box mx={isMobile ? 0.5 : 1} />
-                                    <CustomButton
-                                        variant="contained"
-                                        color="primary"
-                                        type="submit"
-                                        disabled={stepData?.endDate === undefined || stepData?.endDate === null}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            //handleScroll(errors)
-                                            handleNext();
-                                        }}
-                                    >Next
-                                    </CustomButton>
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                    <Divider />
-                    {!stepData?.status || stepData?.status === "start" ? <Fragment>
-                        <Box p={2}>
-                            {!stepData?.status ?
-                                <Button
-                                    variant="outlined"
-                                    color="secondary"
-                                    size="small"
-                                    onClick={() => { handleStartEnd("start") }}
-                                >
-                                    Start
-                                </Button> : null}
-                            {stepData?.status === "start" ?
-                                <Button
-                                    variant="outlined"
-                                    color="secondary"
-                                    size="small"
-                                    onClick={() => { handleStartEnd("end") }}
-                                >
-                                    End
-                                </Button> : null}
+    return (<Box p={2}>
+        {serviceSteps ?
+            <Grid container>
+                <Grid item xs={3}>
+                    <Box mb={1} display="flex">
+                        <Box flexGrow={1}>
+                            <Button
+                                variant="text"
+                                color="primary"
+                                size="small"
+                                onClick={() => setServiceDialog(true)}
+                            >
+                                Add Services
+                            </Button>
                         </Box>
-                        <Divider />
-                    </Fragment> : null}
-                    {initialData.fields.length ?
-                        <Fragment>
-                            <Box p={2}>
-                                <Formik
-                                    initialValues={initialData.values}
-                                    validationSchema={yupSchema(initialData.fields)}
-                                    onSubmit={handleSubmit}
-                                    validate={validate}
-                                    enableReinitialize
-                                >
-                                    {({ values, errors, setFieldValue, touched, submitForm }) => (
-                                        <Fragment>
-                                            <Form autoComplete="off" autoCorrect="off" noValidate >
-                                                <Box marginY={2}>
-                                                    <Grid spacing={3} container>
-                                                        {initialData.fields?.map((field, index) => (
-                                                            <Grid key={index} item xs={12} sm={6} md={6}>
-                                                                <FormTypes
-                                                                    {...field}
-                                                                    fieldData={field}
-                                                                    values={values}
-                                                                    label={field.fieldLabel}
-                                                                    name={field.fieldName}
-                                                                    type={field.type}
-                                                                    required={field.required}
-                                                                    options={field.option ? field.option : []}
-                                                                    setFieldValue={(name, value) => {
-                                                                        setFieldValue(name, value)
-                                                                    }}
-                                                                    fullWidth
-                                                                    size="small"
-                                                                />
-                                                            </Grid>
-                                                        ))}
-                                                    </Grid>
-                                                </Box>
-                                            </Form>
-                                            <Box display="flex" justifyContent="flex-end" pt={2}>
-                                                <CustomButton
-                                                    variant="contained"
-                                                    color="primary"
-                                                    type="submit"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        handleScroll(errors)
-                                                        submitForm();
-                                                    }}
-                                                > Save
-                                                </CustomButton>
-                                            </Box>
-                                        </Fragment>
-                                    )}
-                                </Formik>
-                            </Box>
-                            <Divider />
-                        </Fragment> : null}
-                    <Box p={2}>
-                        <Grid container>
-                            <Grid item xs={12} >
-                                <Box display="flex">
-                                    {stepData?.startDate ?
-                                        <Box>
-                                            <Typography variant="caption">Start Date Time</Typography>
-                                            <Typography> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
-                                        </Box>
-                                        : null}
-                                    {stepData?.endDate ?
-                                        <Box ml={2}>
-                                            <Typography variant="caption">End Date Time</Typography>
-                                            <Typography > {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
-                                        </Box>
-                                        : null}
-                                    {stepData?.startDate && stepData?.endDate ?
-                                        <Box ml={2}>
-                                            <Typography variant="caption">Duration</Typography>
-                                            <Typography >{`${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}</Typography>
-                                        </Box>
-                                        : null}
-                                </Box>
-                            </Grid>
-                        </Grid>
+                        <Box>
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                onClick={() => setArrangeView(true)}>
+                                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                                Arrange
+                            </Button>
+                        </Box>
                     </Box>
-                </Paper>
+                    <Box>
+                        {serviceSteps?.map((data) => (
+                            <Box
+                                style={selectedService?._id == data?._id ? {
+                                    borderColor: "#329592",
+                                    borderWidth: "2px",
+                                    borderStyle: 'solid',
+                                    backgroundColor: `${data.type === "service" ? data?.preWork ?
+                                        WORKORDER_SERVICE_COLOR.preWork : WORKORDER_SERVICE_COLOR.postWork : WORKORDER_SERVICE_COLOR.quote}`,
+                                    cursor: "pointer"
+                                } : {
+                                    borderWidth: '1px',
+                                    borderStyle: 'solid',
+                                    borderColor: "rgb(224, 224, 224)",
+                                    backgroundColor: `${data.type === "service" ? data?.preWork ?
+                                        WORKORDER_SERVICE_COLOR.preWork : WORKORDER_SERVICE_COLOR.postWork : WORKORDER_SERVICE_COLOR.quote}`,
+                                    cursor: "pointer"
+                                }}
+                                p={2}
+                                mb={2}
+                                onClick={() => {
+                                    setSelectedService(data)
+                                }}>
+                                <Grid container>
+                                    <Grid item xs={10} >
+                                        <Box display="flex">
+                                            <Box pt={0.5}>
+                                                <Badge badgeContent={data?.order} color="primary"></Badge>
+                                            </Box>
+                                            <Box ml={3}>
+                                                <Typography>{data?.serviceName}</Typography>
+                                            </Box>
+                                        </Box>
+                                    </Grid>
+                                    {data?.type === "service" &&
+                                        <Grid item xs={2} container justify="flex-end">
+                                            <IconButton
+                                                size="small"
+                                                color="primary"
+                                                aria-label="delete"
+                                                onClick={(event) => {
+                                                    handleOpenMenu(event, data?._id)
+                                                    setSelectedService(data)
+                                                }}>
+                                                <MoreHorizIcon />
+                                            </IconButton>
+                                        </Grid>}
+                                </Grid>
+                            </Box>
+                        ))}
+                        <Menu
+                            id="simple-menu"
+                            anchorEl={anchorEl}
+                            keepMounted
+                            open={Boolean(anchorEl)}
+                            onClose={handleCloseMenu}>
+                            <MenuItem
+                                onClick={() => {
+                                    setUserAssignDialog(true);
+                                    setAnchorEl(null);
+                                }}>
+                                Assign Users
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    handleRemoveService(selectedService?.uniqueId)
+                                    setAnchorEl(null);
+                                }}>
+                                Remove
+                            </MenuItem>
+                        </Menu>
+                    </Box>
+                </Grid>
+                <Grid item xs={9}>
+                    {selectedService &&
+                        <Box border={1} ml={2} borderColor="grey.300">
+                            {selectedService?.type === "service" ?
+                                <Steps
+                                    workOrderId={workOrderId}
+                                    serviceId={selectedService?._id}
+                                    uniqueId={selectedService?.uniqueId}
+                                    getServiceData={getServiceData}
+                                    serviceData={serviceData}
+                                    serviceSteps={serviceSteps}
+                                    setSelectedService={setSelectedService}
+                                />
+                                : <Quotation />}
+                        </Box>
+                    }
+                </Grid>
+            </Grid>
+            :
+            <Box p={2} height={500} bgcolor="white">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
-        </div> : null
-    );
+        }
+        {userAssignDialog &&
+            <AssignUserDialog
+                workOrderId={workOrderId}
+                serviceId={selectedService?._id}
+                uniqueId={selectedService?.uniqueId}
+                assignedUsers={selectedService?.assignedUsers}
+                handleClose={() => {
+                    setUserAssignDialog(false)
+                }}
+                handleSucess={() => {
+                    setUserAssignDialog(false)
+                    fetchService();
+                }}
+            />
+        }
+        {serviceDialog &&
+            <AssignServiceDialog
+                reference="workorder"
+                referenceId={workOrderId}
+                handleClose={() => setServiceDialog(false)}
+                ids={[workOrderId]}
+                onSuccess={() => {
+                    fetchService();
+                    setServiceDialog(false);
+                }}
+            />
+        }
+        {arrangeView && (
+            <ArrangeView
+                data={serviceSteps?.filter((e) => e.type === "service")?.map((d) => {
+                    return { _id: d?.uniqueId, name: d?.serviceName, order: d?.order, preWork: d?.preWork };
+                }) || []}
+                title={'Arrange'}
+                handleClose={() => setArrangeView(false)}
+                handleSubmit={handleArrangeUpdate}
+                loading={false}
+            />
+        )}
+    </Box >);
 }
 export default Service;

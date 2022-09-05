@@ -70,6 +70,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
         }
 
         setAllFields(productInventoryId ? fieldsDataForUpdate : fieldsDataForCreate)
+
         if (productInventoryId) {
           axiosInstance()
             .get(`${serializedAsset.api}/` + productInventoryId)
@@ -86,6 +87,11 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                 setFormValues(getObjKeysWithValues(oldValues, fieldsDataForCreate));
                 setLoading(false);
               } else {
+                fieldsDataForUpdate?.forEach((e: any) => {
+                  if (e?.fieldName === "warehouse") {
+                    e.required = false;
+                  }
+                })
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
                   values: getObjKeysWithValues(data, fieldsDataForUpdate)

@@ -61,11 +61,6 @@ const WorkOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [workOrderServiceData, setWorkOrderServiceData] = useState([]);
-  const [workOrderSteps, setWorkOrderSteps] = useState([]);
-  const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [serviceData, setServiceData] = useState([]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -90,36 +85,12 @@ const WorkOrderDetails = () => {
   useEffect(() => {
     if (id) {
       fetchWorkOrderData();
-      fetchWorkOrderService();
-      getServiceData();
     }
   }, [id]);
 
   useEffect(() => {
-    if (workOrderData?.processStatus && workOrderServiceData.length !== 0) {
-      let tempIndex = workOrderServiceData.findIndex(d => d?._id === workOrderData?.processStatus)
-      setCurrentStep(tempIndex > -1 ? tempIndex : 0)
-    }
-  }, [workOrderData, workOrderServiceData]);
-
-  useEffect(() => {
     getResourceFields();
   }, []);
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(workOrderServiceData[currentStep]);
-      setNextStep(false)
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = (currentStepData) => {
-    axiosInstance()
-      .put(`${workOrder.api}/update-process`, { "_id": id, "processStatus": currentStepData?._id, "subProcessStatus": "" })
-      .then(({ data }) => { })
-      .catch((error) => {
-      });
-  };
 
   const getResourceFields = () => {
     axiosInstance()
@@ -151,15 +122,6 @@ const WorkOrderDetails = () => {
       });
   };
 
-  const fetchWorkOrderService = () => {
-    axiosInstance().get(`${routes.workOrder.path}/service-detail/${id}`).then(({ data: { data } }) => {
-      setWorkOrderServiceData(data);
-      setWorkOrderSteps(data.map(d => d?.serviceName))
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
-  };
-
   const handleDelete = () => {
     axiosInstance()
       .put(`${workOrder.api}/remove`, { ids: [id] })
@@ -189,17 +151,6 @@ const WorkOrderDetails = () => {
       setActivityShow(false)
     }
   }, [isSmallScreen, tabValue])
-
-  const getServiceData = () => {
-    axiosInstance()
-      .get(`${workOrder.api}/${id}/steps-data`)
-      .then(({ data: { data } }) => {
-        setServiceData(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  }
 
   return (
     <>
@@ -277,37 +228,7 @@ const WorkOrderDetails = () => {
             </Box>
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
-            {(workOrderServiceData && workOrderSteps?.length) ?
-              <>
-                <Steps
-                  isNextStep={false}
-                  nextStep={nextStep}
-                  steps={workOrderSteps}
-                  currentStep={currentStep}
-                  setCurrentStep={setCurrentStep}
-                  isStepEnded={false}
-                  setStepFullScreen={() => setStepFullScreen(true)}
-                />
-                <ContentFullScreen title={workOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-                  {workOrderServiceData[currentStep] && workOrderData ? (
-                    <Service
-                      serviceDataFields={workOrderServiceData[currentStep]}
-                      workOrderId={id}
-                      setNextStep={setNextStep}
-                      serviceData={serviceData}
-                      getServiceData={getServiceData}
-                      setServiceCurrentStep={setCurrentStep}
-                      serviceSteps={workOrderSteps}
-                      currentServiceStep={currentStep}
-                    />
-                  ) : null}
-                </ContentFullScreen>
-              </>
-              : (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              )}
+            <Service workOrderId={id} />
           </TabPanel>
         </Paper>
         <Box my={1} />

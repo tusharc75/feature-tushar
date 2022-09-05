@@ -39,7 +39,7 @@ export default function ProfilePage(props) {
 
     const {
         state: { user }
-      }: any = useData();
+    }: any = useData();
     const { profileBreadCrumbs } = props
     const [activeItem, setActiveItem] = useState(profileMenuItems.profile)
     const [userData, setUserData] = useState(null)
@@ -107,13 +107,13 @@ export default function ProfilePage(props) {
 
     const getLoggedInUserData = async () => {
         axiosInstance()
-        .get(`user/${user.user?._id}`)
-        .then(({ data: { data } }) => {
-            if(data?.quotePDFTemplate){
-                setUserData((prevState) => ({...prevState, 'quotePDFTemplate': data?.quotePDFTemplate }))
+            .get(`user/${user.user?._id}`)
+            .then(({ data: { data } }) => {
+                if (data?.quotePDFTemplate) {
+                    setUserData((prevState) => ({ ...prevState, 'quotePDFTemplate': data?.quotePDFTemplate }))
 
-            }
-        })
+                }
+            })
     }
 
     return <Fragment>

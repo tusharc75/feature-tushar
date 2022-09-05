@@ -44,7 +44,7 @@ import { capitalize } from 'lodash';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 
-const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, setQuotationSummary }) => {
+const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, setQuotationSummary, version }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -76,9 +76,11 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
   const [selectedType, setSelectedType] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
 
+  const versionId = quotationData?.versions[version]?._id || null;
   useEffect(() => {
     fetchFields();
-  }, []);
+    version && fetchProductInventory();
+  }, [version]);
 
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
@@ -154,8 +156,9 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         Header: 'Lead Time (Days)',
         Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
         Footer: (info) => {
-          const total = info.rows.filter((f) => f.values.hasOwnProperty("leadTime") && !isNaN(f.values["leadTime"]))
-            .reduce((sum, row) => parseInt(row.values["leadTime"]) + sum, 0);
+          const total = info.rows
+            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
           return <>{total}</>;
         }
       }
@@ -234,7 +237,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />),
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
         });
       }
     });
@@ -304,14 +307,13 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       }
     });
     setColumns(coloum);
-    fetchProductInventory();
   };
 
   const fetchProductInventory = async () => {
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}`);
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
@@ -321,7 +323,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
 
@@ -331,7 +333,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
         _subRow.leadTime = Array.isArray(_subRow?.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
         _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
-        _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
+        _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
         _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
         _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
       });
@@ -410,7 +412,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     });
 
     axiosInstance()
-      .post(`${quotation.api}/productpackage/${quotationData._id}`, { material })
+      .post(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
@@ -440,7 +442,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData._id}`, { material: rows })
+      .put(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
@@ -455,7 +457,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/delete`, { ids: rows })
+      .put(`${quotation.api}/productpackage/${quotationData?._id}/${versionId}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
@@ -513,7 +515,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       protected: true,
       body: content ? content : '',
       supplierContact: contactId,
-      requiredFields: selectedFields
+      requiredFields: selectedFields,
+      versionId: versionId
     };
 
     axiosInstance()
@@ -746,6 +749,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       {requestDialog && selectedType && (
         <PriceRequestDialog
           quoteData={quotationData}
+          versionId={versionId}
           type={selectedType}
           handleClose={() => setRequestDialog(false)}
           onSuccess={() => {
@@ -767,12 +771,13 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         <LeadTimeDialog
           quotationId={quotationData._id}
           data={leadTimeDialog?.data}
+          versionId={versionId}
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });
           }}
           handleSucess={() => {
             setLeadTimeDialog({ open: false, data: null });
-            fetchProductInventory()
+            fetchProductInventory();
           }}
         />
       )}

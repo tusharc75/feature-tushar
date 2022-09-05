@@ -33,7 +33,7 @@ import { utils } from 'xlsx';
 import { fetch_quotation_product_fields, handleViewPdf } from 'src/components/Quotation/helper';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation } from 'src/constants/helpers';
+import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation, QUOTATION_STATUS } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import SendEmail from '../SendEmail';
@@ -43,10 +43,13 @@ const QuoteBuilder = ({
   setNextStep,
   currencySymbol,
   showActivity,
-  sendToCustomer = false,
+  sentToCustomer = false,
   stepFullScreen,
   fetchQuotationData,
-  setQuotationSummary
+  setQuotationSummary,
+  version,
+  currentStep,
+  versionData
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -62,6 +65,20 @@ const QuoteBuilder = ({
   useEffect(() => {
     fetchFields();
   }, []);
+
+  useEffect(() => {
+    if (versionData) {
+      fetchProductInventory();
+    }
+  }, [versionData]);
+
+  useEffect(() => {
+    if (currentStep === 3 && rowsData && !sentToCustomer) {
+      setNextStep(false);
+    } else {
+      setNextStep(true);
+    }
+  }, [currentStep, sentToCustomer, rowsData]);
 
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
@@ -203,15 +220,14 @@ const QuoteBuilder = ({
       }
     });
     setColumns(coloum);
-    fetchProductInventory();
   };
 
   const fetchProductInventory = async () => {
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}`);
-    const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}`);
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionData._id}`);
+    const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${versionData._id}`);
 
     data = response?.data?.data;
     inventory = data?.inventory ? data?.inventory : [];
@@ -291,7 +307,7 @@ const QuoteBuilder = ({
     <Fragment>
       <Box pb={2} display="flex" justifyContent="space-between">
         <Box display="flex">
-          <SendEmail quotationData={quotationData} />
+          <SendEmail versionData={versionData} quotationData={quotationData} />
         </Box>
         <Box display="flex">
           <Typography variant="h6" color={quotationData?.subStatus === 'Reject by Customer Waiting for New Price' ? 'error' : 'secondary'}>
@@ -305,21 +321,22 @@ const QuoteBuilder = ({
           </Typography>
         </Box>
         <Box display="flex">
-          {sendToCustomer && !['Waiting for Your Acceptance', 'Price Approved by Customer']?.includes(quotationData?.subStatus) ? (
+          {versionData?.processStatus === 'Send To Customer' && (
             <HtmlTooltip title={'Send to customer'}>
               <Button
                 variant="contained"
                 color="primary"
                 size="small"
+                disabled={sentToCustomer}
                 onClick={() => {
                   axiosInstance()
-                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer `)
-                    .then(({ data }) => {
-                      fetchQuotationData();
+                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}`)
+                    .then(() => {
+                      fetchQuotationData(version, false);
                       toastConfig.setToastConfig({
                         open: true,
                         type: 'success',
-                        message: 'Send to customer Sucessfully'
+                        message: 'Sent to customer Sucessfully'
                       });
                     })
                     .catch((error) => {
@@ -330,7 +347,7 @@ const QuoteBuilder = ({
                 Send to Customer
               </Button>
             </HtmlTooltip>
-          ) : null}
+          )}
           <Box p={1} />
         </Box>
       </Box>

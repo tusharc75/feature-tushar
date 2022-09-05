@@ -72,7 +72,7 @@ const Products = ({ handleClose, handleSucess, _id, products, warehouse }) => {
     onClose={handleClose}
     fullScreen>
     <CustomDialogHeader
-      title={`Enter Physical Inventory - ${warehouse}`}
+      title={`Enter Physical Inventory : ${warehouse}`}
       onClose={handleClose}
       showRequiredLabel={false}
     />

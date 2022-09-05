@@ -212,7 +212,8 @@ const AssignProductDialog = ({
           setAssigning(false);
           toastConfig.setToastConfig(error);
         });
-    } else if (reference === 'serviceMaster') {
+    }
+    else if (reference === 'serviceMaster') {
       const productObj = [...getLocalStorageArrayData(localStorageSelectedRecords)]
         .filter((d) => d.qty > 0)
         .map((d) => {
@@ -231,9 +232,10 @@ const AssignProductDialog = ({
           setAssigning(false);
           toastConfig.setToastConfig(error);
         });
-    } else {
+    }
+    else if (reference === 'package') {
       axiosInstance()
-        .post(`${packages.packageApi}/add-products`, {
+        .post(`${packages.api}/material`, {
           ids: Array.isArray(productId) && productId.length ? productId : [productId],
           products: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
         })

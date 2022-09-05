@@ -73,6 +73,7 @@ export const rentalManagementSteps = [
 export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
+export const repairOrderSteps = ['Add Products', 'Work Order', 'Pre Work', 'Quotation', 'Post Work', 'Invoice'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -86,7 +87,6 @@ export const leadImportErrorFileName = 'Leads-Errors.xlsx';
 export const opportunityTemplateFileName = 'Opportunities-Template.xlsx';
 export const opportunityImportErrorFileName = 'Opportunities-Errors.xlsx';
 
-export const repairOrderSteps = ['Add Products'];
 
 export const quoteStepColors = {
   'accepted by customer': { backgroundColor: '#008000', color: '#fff' },
@@ -379,7 +379,7 @@ export const CHILD_RESOURCE = {
   quotationProduct: 'Quotation Product',
   quotationCost: 'Quotation Cost',
   quotationService: 'Quotation Service',
-  repairOrderProduct: 'Repair Order Product',
+  repairOrderProduct: 'Repair Order Product'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -454,8 +454,8 @@ export const quotation = {
 };
 
 export const packages = {
-  packageResource: 'packages',
-  packageApi: '/packages',
+  resource: 'Packages',
+  api: '/packages',
   permissions: 'packages'
 };
 
@@ -1850,7 +1850,6 @@ export const RESOURCE_CALENDAR = [
   { title: sidebarResource.quoteBuilder, key: 'quoteBuilder' }
 ];
 
-
 export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.quoteBuilder, value: resourceNames.quoteBuilder, key: 'quoteBuilder' },
   { title: sidebarResource.quotation, value: resourceNames.quotation, key: 'quotation' },
@@ -1864,7 +1863,7 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.transferInventory, value: resourceNames.transferInventory, key: 'transferInventory' },
   { title: sidebarResource.salesOrder, value: resourceNames.salesOrder, key: 'salesOrder' },
   { title: sidebarResource.repairOrder, value: resourceNames.repairOrder, key: 'repairOrder' },
-  { title: sidebarResource.workOrder, value: resourceNames.workOrder, key: 'workOrder' },
+  { title: sidebarResource.workOrder, value: resourceNames.workOrder, key: 'workOrder' }
 ];
 
 export const getApi = (resource: string) => {
@@ -2068,3 +2067,19 @@ export const COLOUR_MASTER = {
 };
 
 export const leadTimeStatusDropdown = ['Production', 'Supplier', 'Assemble', 'Freight', 'Customer'];
+
+export const QUOTATION_STATUS = {
+  buildingQuote: 'Building Quote',
+  waitingForSupplierPrice: 'Waiting for Supplier Price',
+  sentToCustomer: 'Sent to Customer',
+  acceptByCustomer: 'Accept by Customer',
+  rejectByCustomer: 'Reject by Customer'
+};
+
+
+export const WORKORDER_SERVICE_COLOR = {
+  preWork: 'rgba(254, 249, 230, 1)',
+  quote: 'rgba(169, 43, 3, .1)',
+  postWork: 'rgba(222, 249, 255, 1)',
+};
+

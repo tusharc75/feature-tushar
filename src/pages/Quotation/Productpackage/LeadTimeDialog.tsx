@@ -14,8 +14,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-function LeadTimeDialog({ quotationId, data, onClose, handleSucess }) {
-
+function LeadTimeDialog({ quotationId, data, versionId, onClose, handleSucess }) {
   const toastConfig = useContext(CustomToastContext);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -31,7 +30,7 @@ function LeadTimeDialog({ quotationId, data, onClose, handleSucess }) {
     };
 
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationId}/lead-time`, value)
+      .put(`${quotation.api}/productpackage/${quotationId}/${versionId}/lead-time`, value)
       .then((res) => {
         setLoading(false);
         handleSucess();
@@ -86,7 +85,7 @@ function LeadTimeDialog({ quotationId, data, onClose, handleSucess }) {
         }}
       >
         <CustomDialogHeader
-          title={data?.productDetail?.productName || data?.serviceDetail?.serviceName || data?.packageDetail?.packageName || 'mother'}
+          title={data?.productDetail?.productName || data?.serviceDetail?.serviceName || data?.packageDetail?.packageName}
           onClose={(e, reason) => {
             onClose();
           }}
@@ -206,7 +205,7 @@ function LeadTimeDialog({ quotationId, data, onClose, handleSucess }) {
         {showConfirmDialog ? (
           <ConfirmCancelDialog
             open={showConfirmDialog}
-            onSave={() => { }}
+            onSave={() => {}}
             onClose={() => {
               setShowConfirmDialog(false);
               onClose();

@@ -2,35 +2,34 @@ import { useContext, useEffect, useReducer, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { Box, Button } from '@material-ui/core';
-
 import CustomAgGrid from 'src/components/AgGridComponents/CustomAgGridEditable';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { reducer, intialState } from 'src/components/AgGridComponents/CustomAgGrid';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, packages } from 'src/constants/helpers';
-import useColumns, { getFrameworkComponents, getStaticFields } from 'src/constants/useColumns';
+import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Loader from 'src/components/Loader';
+import { camelCase } from 'lodash';
+import { GrDrag } from 'react-icons/gr';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
 
-interface Props {
-  packageId: string;
-  renderedFrom: string;
-}
+const ProductsTable = ({ packageId, packageData }) => {
+  const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
-const ProductsTable = (props: Props) => {
-  const { packageId, renderedFrom } = props;
   const { setToastConfig } = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { permissions }
   }: any = useData();
-  const hasPermissions = permissions && permissions[packages.permissions]?.isUpdate
+
   const [columns, setColumns] = useState([]);
   const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
   const [gridApi, setGridApi] = useState(null);
@@ -39,21 +38,22 @@ const ProductsTable = (props: Props) => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const { getColumnData } = useColumns();
   const [state, dispatch] = useReducer(reducer, intialState);
+  const [arrangeView, setArrangeView] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   useEffect(() => {
     fetchGridColumns();
-    getProducts();
+    fetchData();
   }, []);
 
-  const getProducts = () => {
+  const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     axiosInstance()
-      .get(`${packages.packageApi}/get-products/${packageId}`)
+      .get(`${packages.api}/material/${packageId}`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
@@ -78,15 +78,20 @@ const ProductsTable = (props: Props) => {
       });
   };
 
+  const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
+
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=Product`)
+      .get(`/field?resource=${packageData?.packageType === 'Service' ? 'Service Master' : 'Product'}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.productDetail.path);
-
+          let currentColumn = getColumnData(
+            packageData?.packageType === 'Service' ? routes.serviceMaster.title : routes.product.title,
+            o?.fieldData,
+            packageData?.packageType === 'Service' ? routes.serviceMasterDetail.path : routes.productDetail.path
+          );
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -102,19 +107,18 @@ const ProductsTable = (props: Props) => {
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer
         });
-        columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        setColumns([...defaultColumns, ...columns]);
       });
   };
 
   const handleUpdateQuantity = (row) => {
     axiosInstance()
-      .put(`${packages.packageApi}/${packageId}/update-product`, {
+      .put(`${packages.api}/material/${packageId}`, {
         ids: [row.data._id],
         qty: Number(row.data.qty)
       })
       .then(() => {
-        getProducts();
+        fetchData();
       })
       .catch((err) => setToastConfig(err));
   };
@@ -123,13 +127,11 @@ const ProductsTable = (props: Props) => {
     setRemovingProducts(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.packageApi}/${packageId}/remove-product`, {
-        ids: Ids
-      })
+      .put(`${packages.api}/material/${packageId}/remove`, { ids: Ids })
       .then(() => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
-        getProducts();
+        fetchData();
       })
       .catch((err) => {
         setRemovingProducts(false);
@@ -138,23 +140,48 @@ const ProductsTable = (props: Props) => {
       });
   };
 
+  const handleArrangeUpdate = (rows: any) => {
+    setIsAssigning(true);
+    rows?.forEach((e: any) => {
+      delete e.preWork
+      delete e.name;
+    });
+    axiosInstance()
+      .put(`${packages.api}/material/${packageId}/order`, {
+        packageType: packageData?.packageType,
+        data: rows || []
+      })
+      .then(() => {
+        fetchData();
+        setIsAssigning(false);
+        setArrangeView(false);
+      })
+      .catch((err) => {
+        setIsAssigning(false);
+        setArrangeView(false);
+        setToastConfig(err);
+      });
+  };
+
   const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
 
   return (
     <Box mt={2} className="bg-white">
-      <Box mb={1} p={1} display="flex" justifyContent="space-between" alignItems="center">
-        <Box width={'118px'}>
-          {hasPermissions && <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
-            Add Products
-          </Button>}
+      <Box mb={1} p={1} display="flex" justifyContent="space-between">
+        <Box display="flex">
+          {permissions?.packages?.isUpdate && (
+            <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
+              {`Add ${packageData?.packageType === 'Service' ? 'Services' : 'Products'}`}
+            </Button>
+          )}
         </Box>
-        <>
+        <Box display="flex">
           <ImportExportLinks
             permissions={permissions?.packages}
             module="packages-products"
-            api={`${packages.packageApi}/package-products`}
+            api={`${packages.api}/material`}
             afterImportCompleted={() => {
-              getProducts();
+              fetchData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -163,22 +190,29 @@ const ProductsTable = (props: Props) => {
             additionalParams={`refrenceId=${packageId}`}
             isBackgroundWhite={true}
           />
-          {hasPermissions && <Box ml={1}>
-            <DeleteButton
-              disabled={selectedRecords.length === 0 || isRemovingProducts}
-              text={'Delete'}
-              onClick={() => {
-                setShowProductConfirmBox(true);
-              }}
-            />
-          </Box>}
-        </>
+          {permissions?.packages?.isUpdate && (
+            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <DeleteButton
+                disabled={selectedRecords.length === 0 || isRemovingProducts}
+                text={'Delete'}
+                onClick={() => {
+                  setShowProductConfirmBox(true);
+                }}
+              />
+              <Box ml={1} />
+              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                Arrange
+              </Button>
+            </Box>
+          )}
+        </Box>
       </Box>
       {isMobile && !isTablet ? (
         <CustomSwipableList
-          allowSelection={hasPermissions}
-          allowSwipe={hasPermissions}
-          permissions={hasPermissions && permissions[packages.permissions]}
+          allowSelection={permissions?.packages?.isUpdate}
+          allowSwipe={permissions?.packages?.isUpdate}
+          permissions={permissions?.packages}
           primaryField={columns?.find((d) => d.primaryField)}
           onClick={(data) => {
             history.push(`${routes.productDetail.path}/${data._id}`);
@@ -221,29 +255,42 @@ const ProductsTable = (props: Props) => {
           isClientSideGrid={true}
           actionWidth={150}
           loading={loading}
-          allowSelection={hasPermissions}
+          allowSelection={permissions?.packages?.isUpdate}
           actionLabel="Qty"
           renderedFrom={renderedFrom}
-          actionEditable={hasPermissions}
+          actionEditable={permissions?.packages?.isUpdate}
           onCellValueChanged={handleUpdateQuantity}
+          refreshGrid={fetchData}
         />
       ) : (
         <Loader noLoader={false} minHeight={'400px'} text="Loading..." />
       )}
-      {showProductAssignDialog && (
-        <AssignProductDialog
-          reference="package"
-          productsDialogOpen={true}
-          productId={packageId}
-          handleCloseDialog={() => setShowProductAssignDialog(false)}
-          assignedProducts={[...dataRows?.map((e) => e._id)]}
-          renderedFrom={`${renderedFrom}_sub-1`}
-          onSuccess={() => {
-            getProducts();
-            setShowProductAssignDialog(false);
-          }}
-        />
-      )}
+      {showProductAssignDialog &&
+        (packageData?.packageType === 'Service' ? (
+          <AssignServiceDialog
+            reference="package"
+            referenceId={packageId}
+            handleClose={() => setShowProductAssignDialog(false)}
+            ids={[...dataRows?.map((e) => e._id)]}
+            onSuccess={() => {
+              fetchData();
+              setShowProductAssignDialog(false);
+            }}
+          />
+        ) : (
+          <AssignProductDialog
+            reference="package"
+            productsDialogOpen={true}
+            productId={packageId}
+            handleCloseDialog={() => setShowProductAssignDialog(false)}
+            assignedProducts={[...dataRows?.map((e) => e._id)]}
+            renderedFrom={`${renderedFrom}_sub-1`}
+            onSuccess={() => {
+              fetchData();
+              setShowProductAssignDialog(false);
+            }}
+          />
+        ))}
       {showProductConfirmBox && (
         <ConfirmationDialog
           open={showProductConfirmBox}
@@ -253,6 +300,19 @@ const ProductsTable = (props: Props) => {
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}
+        />
+      )}
+      {arrangeView && (
+        <ArrangeView
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.serviceName || d?.productName, order: d?.order, preWork: d?.preWork };
+            }) || []
+          }
+          title={'Arrange'}
+          handleClose={() => setArrangeView(false)}
+          handleSubmit={handleArrangeUpdate}
+          loading={isAssigning}
         />
       )}
     </Box>

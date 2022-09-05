@@ -22,7 +22,6 @@ import { RiEditCircleLine, RiAddCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
-import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
 
 const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
 
@@ -44,7 +43,6 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [workOrderDialog, setWorkOrderDialog] = useState({ open: false, _id: null, product: null, serviceMaster: null });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -126,15 +124,6 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
           return <>Total</>;
         }
       },
-      {
-        accessor: 'workOrder',
-        Header: 'Work Order',
-        Cell: ({ row }) => (
-          row.original['workOrder'] ?
-            <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder'].optionValue}`} target="_blank">{row.original['workOrder'].optionLabel}</a>
-            : <NoDataCell />
-        )
-      }
     ];
     data.forEach((element) => {
 
@@ -171,28 +160,13 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
       isMobile ? <Box display={"none"} /> : coloum.push({
         accessor: 'action',
         Header: '',
-        minWidth: 100,
-        width: 100,
+        minWidth: 70,
+        width: 70,
         sticky: 'right',
         disableFilters: true,
         canDrag: false,
         Cell: ({ row }) =>
           <>
-
-            {<HtmlTooltip title={Boolean(row?.original?.workOrder) ? "Work Order already exist" : "Create Work Order"}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="History"
-                  disabled={Boolean(row?.original?.workOrder)}
-                  onClick={() => {
-                    setWorkOrderDialog({ open: true, _id: row?.original?._id, product: row?.original?.productDetail?._id, serviceMaster: row?.original?.serviceMaster.map(d => d.optionValue) });
-                  }}
-                >
-                  <RiAddCircleLine />
-                </IconButton>
-              </span>
-            </HtmlTooltip>}
             {!row.original.hideSelection && allowedToEdit && (
               <IconButton
                 size="small"
@@ -512,7 +486,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
-                renderedFrom="rental_management_product_package"
+                renderedFrom="repair_order_product_package"
                 isClientSideGrid={true}
               />
             </Box>
@@ -558,37 +532,6 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
           productInventory={[]}
           type={addExistingProductDialog.type}
           repairOrderData={repairOrderData}
-        />
-      )}
-      {workOrderDialog.open && (
-        <ManageWorkOrder
-          onClose={() => setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null })}
-          onSuccess={(data) => {
-            if (data._id) {
-              axiosInstance()
-                .put(`${repairOrder.api}/${repairOrderData._id}/product-package/add-work-order`, {
-                  "_id": workOrderDialog?._id,
-                  "workOrder": data?._id
-                }
-                )
-                .then(() => {
-                  setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null });
-                  fetchProductInventory();
-                })
-                .catch((error) => {
-                  setAddExistingProductDialog({ open: false, type: '', parentId: null });
-                  toastConfig.setToastConfig(error);
-                });
-            }
-            else {
-              fetchProductInventory();
-              setWorkOrderDialog({ open: false, _id: null, product: null, serviceMaster: null });
-            }
-          }}
-          refrenceType={"Repair Order"}
-          refrenceData={repairOrderData}
-          products={workOrderDialog.product}
-          serviceMaster={workOrderDialog.serviceMaster}
         />
       )}
     </Fragment>
