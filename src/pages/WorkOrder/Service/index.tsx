@@ -139,17 +139,15 @@ const Service = ({ workOrderId }) => {
                             <Box
                                 style={selectedService?._id == data?._id ? {
                                     borderColor: "#329592",
-                                    borderWidth: "2px",
+                                    borderWidth: "1px",
                                     borderStyle: 'solid',
-                                    backgroundColor: `${data.type === "service" ? data?.preWork ?
-                                        WORKORDER_SERVICE_COLOR.preWork : WORKORDER_SERVICE_COLOR.postWork : WORKORDER_SERVICE_COLOR.quote}`,
-                                    cursor: "pointer"
+                                    backgroundColor: `#329592`,
+                                    cursor: "pointer",
+                                    color: "white"
                                 } : {
                                     borderWidth: '1px',
                                     borderStyle: 'solid',
                                     borderColor: "rgb(224, 224, 224)",
-                                    backgroundColor: `${data.type === "service" ? data?.preWork ?
-                                        WORKORDER_SERVICE_COLOR.preWork : WORKORDER_SERVICE_COLOR.postWork : WORKORDER_SERVICE_COLOR.quote}`,
                                     cursor: "pointer"
                                 }}
                                 p={2}
