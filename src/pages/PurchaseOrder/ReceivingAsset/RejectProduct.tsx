@@ -104,7 +104,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
             <CustomDialogContent>
               <List style={{ padding: 0 }}>
                 <ListItem key={product.productId}>
-                  <ListItemText primary={product?.productName} secondary={`Quantity - ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`} />
+                  <ListItemText primary={product?.productName} secondary={`Quantity : ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`} />
                   <Field
                     component={TextFieldFormik}
                     margin="dense"

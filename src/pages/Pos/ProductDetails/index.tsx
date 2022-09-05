@@ -285,7 +285,7 @@ const ProductDetails = () => {
                                             <h4>{productData.productCategory?.optionLabel}</h4>
                                             <h2 className='pt-1 pb-1' style={{ color: "white", fontSize: "1.5rem" }}>{productData.productName}</h2>
                                             {productData?.availableInventory ?
-                                                <h4>{`Inventory - ${productData?.availableInventory}`}</h4> :
+                                                <h4>{`Inventory : ${productData?.availableInventory}`}</h4> :
                                                 <h4>{`No inventory`}</h4>
                                             }
                                         </Grid>

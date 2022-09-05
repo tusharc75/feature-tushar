@@ -138,6 +138,7 @@ function CustomReactTable({
     Filter: DefaultColumnFilter
   };
 
+  const [cellValue, setCellValue] = React.useState('');
   const [isCellEditing, setIsCellEditing] = React.useState(false);
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
   const [baseColumns, setBaseColumns] = React.useState([]);
@@ -466,6 +467,30 @@ function CustomReactTable({
     // localStorage.setItem(renderedFrom, newColumns);
   }, [allColumns]);
 
+  const submitInput = () => {
+    const rowData = Object.keys(rowState[currentRowEditing.id].cellState).filter((k) => rowState[currentRowEditing.id].cellState[k].isEditing);
+    const updatedData = data.map((row: any) => {
+      if (row._id == currentRowEditing?.original._id) {
+        row[rowData[0]] = cellValue;
+      }
+
+      return row;
+    });
+    dispatch({
+      type: 'initialize',
+      data: updatedData,
+      count: rowCount
+    });
+    Object.keys(rowState).forEach((rowId) => {
+      Object.keys(rowState[rowId].cellState).forEach((colId) => {
+        setCellState(rowId, colId, { isEditing: false });
+      });
+    });
+    setIsCellEditing(false);
+    setCurrentRowEditing(null);
+    setCellValue('');
+  };
+
   // Render the UI for your table
   return (
     <>
@@ -561,8 +586,9 @@ function CustomReactTable({
                             //     setRowState(k, { ...rowState[k], original: { ...rowState[k].original, isEditing: false } });
                             //   }
                             // });
+                            setCellValue(cell?.value || '');
                             setIsCellEditing(true);
-                            setCurrentRowEditing(row.id);
+                            setCurrentRowEditing(row);
                             setCellState(row.id, cell.column.id, { isEditing: true });
                             Object.keys(rowState).forEach((rowId) => {
                               Object.keys(rowState[rowId].cellState).forEach((colId) => {
@@ -584,15 +610,7 @@ function CustomReactTable({
                           rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
                             <input
                               autoFocus
-                              // onBlur={() => {
-                              //   setIsCellEditing(false);
-                              //   setCurrentRowEditing(null);
-                              //   Object.keys(rowState).forEach((rowId) => {
-                              //     Object.keys(rowState[rowId].cellState).forEach((colId) => {
-                              //       setCellState(rowId, colId, { isEditing: false });
-                              //     });
-                              //   });
-                              // }}
+                              onBlur={submitInput}
                               style={{
                                 borderLeft: '0',
                                 borderTop: '0',
@@ -601,23 +619,12 @@ function CustomReactTable({
                                 background: 'transparent',
                                 outline: 'none'
                               }}
-                              value={cell.value}
+                              value={cellValue}
+                              onChange={(e) => setCellValue(e.target.value)}
                             />
-                          ) : isCellEditing && currentRowEditing && currentRowEditing === row.id && cell?.column.id === 'action' ? (
+                          ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
                             <HtmlTooltip title="Save">
-                              <IconButton
-                                size="small"
-                                aria-label="Save"
-                                onClick={() => {
-                                  setIsCellEditing(false);
-                                  setCurrentRowEditing(null);
-                                  Object.keys(rowState).forEach((rowId) => {
-                                    Object.keys(rowState[rowId].cellState).forEach((colId) => {
-                                      setCellState(rowId, colId, { isEditing: false });
-                                    });
-                                  });
-                                }}
-                              >
+                              <IconButton size="small" aria-label="Save" onClick={submitInput}>
                                 <Check color="primary" />
                               </IconButton>
                             </HtmlTooltip>

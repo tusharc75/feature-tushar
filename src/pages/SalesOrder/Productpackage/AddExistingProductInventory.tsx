@@ -57,7 +57,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? `/product-inventory` : packages.packageApi}${queryString}`).then(({ data: { data, count } }) => {
+        axiosInstance().get(`${type === "product" ? `/product-inventory` : packages.api}${queryString}`).then(({ data: { data, count } }) => {
             const selectedProducts = getLocalStorageArrayData(localStorageSelectedRecords);
             let rows = data.map((u) => {
                 const selectedData = selectedProducts.find((d: any) => d._id === u._id);
@@ -150,7 +150,7 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
 
     const fetchPackageProduct = (packageId) => {
         if (type === "package") {
-            axiosInstance().get(`${packages.packageApi}/get-products/${packageId}`).then(({ data: { data } }) => {
+            axiosInstance().get(`${packages.api}/get-products/${packageId}`).then(({ data: { data } }) => {
                 const newArr = data.length > 0 ? data.map((product: any) => ({ product: product.productName, qty: product.qty })) : [];
                 setPackageProductData(newArr);
             })

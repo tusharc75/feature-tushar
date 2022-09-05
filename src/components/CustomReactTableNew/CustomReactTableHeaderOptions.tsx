@@ -186,7 +186,7 @@ function CustomReactTableHeaderOptions({
             {openColumnSelection &&
                 <>
                     {/* {
-                        renderedFrom.includes("report") ?
+                        renderedFrom?.includes("report") ?
                             <ReportArrangeView
                                 columns={columns}
                                 onClose={() => setOpenColumnSelection(false)}

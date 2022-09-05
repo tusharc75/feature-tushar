@@ -59,10 +59,10 @@ const AccordionDetails = withStyles((theme) => ({
         display: 'block'
     }
 }))(MuiAccordionDetails);
-const PriceRequestDialog = (props) => {
+
+const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId }) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { handleClose, quoteData, onSuccess, type } = props;
     const [productDataList, setproductDataList] = useState([]);
     const [response, setResponse] = useState({ open: false, type: "", id: "" });
     const [expandSupplierGrid, setExpandSupplierGrid] = useState(0);
@@ -101,7 +101,7 @@ const PriceRequestDialog = (props) => {
             });
         }
         if (type === "Supplier") {
-            axiosInstance().get(`/quotation/supplier-price-request/quotation-product-supplier-response/${quoteData?._id}`).then(({ data: { data } }) => {
+            axiosInstance().get(`/quotation/supplier-price-request/quotation-product-supplier-response/${quoteData?._id}/${versionId}`).then(({ data: { data } }) => {
                 setproductDataList(data)
             }).catch((error) => {
                 toastConfig.setToastConfig(error);

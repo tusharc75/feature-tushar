@@ -17,6 +17,10 @@ import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import AddServiceMaster from './AddServiceMaster';
+import { HiBadgeCheck } from 'react-icons/hi';
+import { FcApproval } from 'react-icons/fc';
+import { GrDrag } from 'react-icons/gr';
+import ArrangeView from 'src/components/Helpers/ArrangeView';
 
 interface Props {
   renderedFrom: string;
@@ -38,6 +42,9 @@ const ServiceMaster = (props: Props) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
+  const [arrangeView, setArrangeView] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
 
@@ -54,7 +61,10 @@ const ServiceMaster = (props: Props) => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
+  const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
+
   const fetchGridColumns = () => {
+    setColumns(null);
     axiosInstance()
       .get(`/field?resource=${serviceMaster.resource}`)
       .then(({ data: { data } }) => {
@@ -75,7 +85,7 @@ const ServiceMaster = (props: Props) => {
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
-        setColumns([...columns]);
+        setColumns([...defaultColumns, ...columns]);
       });
   };
 
@@ -103,6 +113,7 @@ const ServiceMaster = (props: Props) => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
+        fetchGridColumns();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -152,6 +163,38 @@ const ServiceMaster = (props: Props) => {
 
   const ActionsRenderer = (params) => (
     <>
+      {permissions?.product?.isUpdate &&
+        (params?.data?.default ? (
+          <HtmlTooltip title={'Remove Default'}>
+            <IconButton
+              aria-label={'Default'}
+              size="small"
+              onClick={() => {
+                handleUpdate({
+                  ids: [params?.data?._id],
+                  default: !params?.data?.default
+                });
+              }}
+            >
+              <FcApproval />
+            </IconButton>
+          </HtmlTooltip>
+        ) : (
+          <HtmlTooltip title={'Set Default'}>
+            <IconButton
+              aria-label={'Default'}
+              size="small"
+              onClick={() => {
+                handleUpdate({
+                  ids: [params?.data?._id],
+                  default: !params?.data?.default
+                });
+              }}
+            >
+              <HiBadgeCheck />
+            </IconButton>
+          </HtmlTooltip>
+        ))}
       {permissions?.product?.isUpdate && (
         <HtmlTooltip title="Delete">
           <IconButton
@@ -197,6 +240,40 @@ const ServiceMaster = (props: Props) => {
       });
   };
 
+  const handleUpdate = (data: any) => {
+    axiosInstance()
+      .put(`${routes.product.path}/${id}/service-master/update-default`, data)
+      .then(() => {
+        fetchData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleArrangeUpdate = (rows: string[]) => {
+    setIsAssigning(true);
+    rows?.forEach((e: any) => {
+      delete e.preWork;
+      delete e.name;
+    });
+    axiosInstance()
+      .put(`${routes.product.path}/${id}/service-master/update-order`, {
+        data: rows || []
+      })
+      .then(() => {
+        fetchData();
+        setIsAssigning(false);
+        setOpenAddDialog(false);
+        setArrangeView(false);
+      })
+      .catch((err) => {
+        setIsAssigning(false);
+        setArrangeView(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
   const handleSubmit = (ids: string[]) => {
     setSubmitting(true);
     axiosInstance()
@@ -216,20 +293,23 @@ const ServiceMaster = (props: Props) => {
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" p={1}>
-        <div>
-          {permissions?.product.isUpdate && (
-            <Button disabled={loading} variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
-              Add Service Master
-            </Button>
-          )}
-        </div>
-        <div>
-          {permissions?.product.isUpdate && (
-            <DeleteButton disabled={selectedRecords.length === 0 || loading} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
-          )}
-        </div>
-      </Box>
+      {permissions?.product?.isUpdate && (
+        <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
+          <Button variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
+            Add Services
+          </Button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
+            <Box ml={1} />
+            {dataRows?.length ? (
+              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                Arrange
+              </Button>
+            ) : null}
+          </div>
+        </Box>
+      )}
       {columns && Object.keys(frameWorkComponent).length > 0 ? (
         isMobile && !isTablet ? (
           <CustomSwipableList
@@ -243,9 +323,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => {}}
+            onEdit={() => { }}
             extraParamsToCheckDelete={false}
-            onDelete={() => {}}
+            onDelete={() => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -253,7 +333,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -300,6 +380,15 @@ const ServiceMaster = (props: Props) => {
           renderedFrom={`${renderedFrom}_sub-grid-1`}
           close={() => setOpenAddDialog(false)}
           exisitingIds={[]}
+        />
+      )}
+      {arrangeView && (
+        <ArrangeView
+          data={dataRows?.map((d) => { return { _id: d?._id, name: d?.serviceName, order: d?.order, preWork: d?.preWork }; }) || []}
+          title={'Arrange'}
+          handleClose={() => setArrangeView(false)}
+          handleSubmit={handleArrangeUpdate}
+          loading={isAssigning}
         />
       )}
     </Fragment>

@@ -8,9 +8,8 @@ import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { FaRegistered, FaListAlt } from 'react-icons/fa';
 import { BiPackage } from "react-icons/bi";
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, packages, product } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, packages, product } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
 import { useHistory } from 'react-router-dom';
@@ -20,7 +19,6 @@ import PackageHeader from './PackageHeader';
 import ManagePackageDialog from './ManagePackageDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import HideWhenOffline from '../../components/HideWhenOffline';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
@@ -36,15 +34,14 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 let packagesTimeout;
 
 const PackageList = () => {
-    const renderedFrom = camelCase(routes?.packages.title)
-    const toastConfig = useContext(CustomToastContext);
-    const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
 
+    const renderedFrom = camelCase(routes?.packages.title)
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
+    const toastConfig = useContext(CustomToastContext);
 
     const history = useHistory();
-    const {
-        state: { user, permissions, selectedEntity }
-    }: any = useData();
+    const { state: { user, permissions, selectedEntity } }: any = useData();
     const { getColumnData } = useColumns();
     const [selectedType, setSelectedType] = useState(1);
     const [renderCount, setRenderCount] = useState(0);
@@ -63,25 +60,10 @@ const PackageList = () => {
         show: false,
         packageName: ''
     });
-    const [accountDetails, setAccountDetails] = useState({
-        accountId: history.location?.state?.accountId,
-        accountName: history.location?.state?.accountName,
-        resource: history.location?.state?.resource
-    });
-    // const [packagePermissions, setPackagePermission] = useState({
-    //   isCreate: permissions?.package?.isCreate,
-    //   isUpdate: permissions?.quoteBuilder?.isUpdate,
-    //   isRead: permissions?.quoteBuilder?.isRead,
-    //   isDelete: permissions?.quoteBuilder?.isDelete,
-    // });
-    const { packageResource, packageApi } = packages;
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
-    const [isAllChecked, setIsAllChecked] = useState(false);
-    const [clonedData, setClonedData] = useState([])
-    const localStorageSelectedRecords = `${renderedFrom}_selected`;
     const [selectedPackageProducts, setSelectedPackageProducts] = useState([]);
 
     useEffect(() => {
@@ -90,27 +72,13 @@ const PackageList = () => {
 
     const fetchGridColumns = async () => {
         let data;
-        if (isOffline) {
-            data = offlineFieldsData;
-        } else {
-            const response = await axiosInstance().get(`/field?resource=Packages&entity=${selectedEntity}&view=true`);
-
-            data = response?.data?.data;
-            try {
-                updateFieldsData('packages', data);
-            } catch (ex) {
-                console.error(`Packages: Error while storing data for Offline context. Error: ${ex.message}`);
-            }
-        }
+        const response = await axiosInstance().get(`/field?resource=Packages&entity=${selectedEntity}&view=true`);
+        data = response?.data?.data;
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
             let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.packagesDetail.path}`);
             if (currentColumn !== null) {
-                if (isOffline) {
-                    currentColumn.columnData['filter'] = false;
-                    currentColumn.columnData['sortable'] = false;
-                }
                 columns = [...columns, currentColumn?.columnData];
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
                     rendererNames.push(currentColumn?.rendererName);
@@ -130,6 +98,7 @@ const PackageList = () => {
         });
         setColumns([...columns]);
     };
+
     const columnState = JSON.parse(localStorage.getItem(renderedFrom));
     if (columnState) {
         columns.forEach((item) => {
@@ -146,7 +115,6 @@ const PackageList = () => {
         if (packagesTimeout) {
             clearTimeout(packagesTimeout);
         }
-
         packagesTimeout = setTimeout(() => {
             fetchPackages();
         }, millisec);
@@ -157,13 +125,12 @@ const PackageList = () => {
         if (renderCount > 0) {
             fetchPackages();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, isOffline, showFilteredRecordsOnly]);
+    }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
     const handleSingleDeletePackage = async () => {
         dispatch({ type: 'loading', loading: true });
-
         axiosInstance()
-            .put(`${packageApi}/remove`, {
+            .put(`${packages.api}/remove`, {
                 ids: [singlePackageDelete.id]
             })
             .then(({ data }) => {
@@ -203,36 +170,19 @@ const PackageList = () => {
                     </IconButton>
                 </HtmlTooltip>
             )}
-
-            <HideWhenOffline>
-                <GridDeleteIcon
-                    hasDeletePermission={permissions?.packages.isDelete}
-                    ownerId={user?.user?._id}
-                    userId={user?.user?._id}
-                    onDelete={() =>
-                        setSinglePackageDelete({
-                            show: true,
-                            id: params.data._id,
-                            packageName: `${params.data.packageName}`
-                        })
-                    }
-                    entity="packages"
-                />
-            </HideWhenOffline>
-            {/* <HideWhenOffline>
-                <HtmlTooltip title="View product list">
-                    <IconButton
-                        color='primary'
-                        size="small"
-                        aria-label="View List"
-                        onClick={() => {
-                            setOpenProductListDialog({ open: true, id: params.data._id })
-                        }}
-                    >
-                        <FaListAlt fontSize="small" />
-                    </IconButton>
-                </HtmlTooltip>
-            </HideWhenOffline> */}
+            <GridDeleteIcon
+                hasDeletePermission={permissions?.packages.isDelete}
+                ownerId={user?.user?._id}
+                userId={user?.user?._id}
+                onDelete={() =>
+                    setSinglePackageDelete({
+                        show: true,
+                        id: params.data._id,
+                        packageName: `${params.data.packageName}`
+                    })
+                }
+                entity="packages"
+            />
         </>
     );
 
@@ -274,23 +224,6 @@ const PackageList = () => {
         if (isExport) {
             deepFilter = `filterpackagess=${selectedType}`;
         }
-        if (accountDetails.accountId) {
-            if (accountDetails.resource === customerAccount.accountResource) {
-                deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-                    {
-                        field: replaceFieldName('customerAccount'),
-                        term: accountDetails.accountId
-                    }
-                ])}`;
-            } else if (accountDetails.resource === supplierAccount.accountResource) {
-                deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-                    {
-                        field: replaceFieldName('supplierAccountName'),
-                        term: { $in: [accountDetails.accountId] }
-                    }
-                ])}`;
-            }
-        }
         if (showFilteredRecordsOnly) {
             const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
             deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
@@ -328,23 +261,9 @@ const PackageList = () => {
 
         try {
             let data, count;
-
-            if (!isOffline) {
-                const response: any = await axiosInstance().get(`${packageApi}${queryString}`);
-
-                data = response?.data?.data;
-                count = response?.data?.count;
-            } else {
-                data = offlineGridData?.packages || [];
-                count = offlineGridData?.packages?.length || 0;
-            }
-
-            try {
-                updateOfflineGridData('packages', data);
-            } catch (ex) {
-                console.error(`Packages: Error while storing data for Offline context. Error: ${ex.message}`);
-            }
-
+            const response: any = await axiosInstance().get(`${packages.api}${queryString}`);
+            data = response?.data?.data;
+            count = response?.data?.count;
             let rows = data.map((u) => {
                 let finalObject = prepareDataForGrid(u, user);
                 finalObject["canDelete"] = permissions.packages.isDelete;
@@ -354,7 +273,6 @@ const PackageList = () => {
                     ...finalObject,
                 };
             });
-
             dispatch({ type: 'initialize', data: rows, count: count });
             setTimeout(() => {
                 dispatch({ type: 'loading', loading: false });
@@ -406,16 +324,10 @@ const PackageList = () => {
         }
         if (recordsToDelete.length > 0) {
             axiosInstance()
-                .put(`${packageApi}/remove`, {
+                .put(`${packages.api}/remove`, {
                     ids: recordsToDelete
                 })
                 .then(({ data }) => {
-                    try {
-                        updateOfflineGridData('packages', [], recordsToDelete);
-                    } catch (ex) {
-                        console.error(`Packages: Error while removing data for Offline context. Error: ${ex.message}`);
-                    }
-
                     toastConfig.setToastConfig({
                         open: true,
                         type: 'success',
@@ -437,7 +349,7 @@ const PackageList = () => {
     const openAssingToProduct = async () => {
         if (selectedRecords.length > 0) {
             await axiosInstance()
-                .post(`${packageApi}/get/products`, {
+                .post(`${packages.api}/material/alreadyAssigned`, {
                     ids: selectedRecords.map(d => d._id)
                 })
                 .then(({ data }) => {
@@ -447,9 +359,9 @@ const PackageList = () => {
                     toastConfig.setToastConfig(error);
                 });
             setShowProductAssignDialog(true)
-
         }
     }
+
     return (
         <>
             <Fragment>
@@ -464,7 +376,7 @@ const PackageList = () => {
                                     <ImportExportLinks
                                         permissions={permissions?.packages}
                                         module="packagess"
-                                        api={packageApi}
+                                        api={packages.api}
                                         afterImportCompleted={() => {
                                             fetchPackages();
                                         }}
@@ -508,23 +420,8 @@ const PackageList = () => {
                         //   handleShowClonepackagesDialog()
                         // }}
                         >
-                            {accountDetails.accountId && (
-                                <Chip
-                                    className="ml-3"
-                                    color="primary"
-                                    label={`Account: ${accountDetails.accountName}`}
-                                    onDelete={() => {
-                                        setAccountDetails({
-                                            accountId: null,
-                                            accountName: null,
-                                            resource: null
-                                        });
-                                    }}
-                                />
-                            )}
                         </PackageHeader>
                     </div>
-
                     {Object.keys(frameWorkComponent).length > 0 ? (
                         isMobile && !isTablet ? <CustomSwipableList
                             allowSelection={true}
@@ -589,8 +486,7 @@ const PackageList = () => {
                                 actionWidth={140}
                                 loading={loading}
                                 renderedFrom={renderedFrom}
-                                allowSelection={!isOffline}
-                                isClientSideGrid={isOffline}
+                                allowSelection={true}
                                 refreshGrid={fetchPackages}
                                 showOnlyShowFilteredRecordSwitch={true}
                             />
@@ -652,9 +548,7 @@ const PackageList = () => {
                     packageId={showManagePackageDialog.idToClone}
                     onClose={() => setShowManagePackageDialog({ open: false, isClone: false, idToClone: null })}
                     onSuccess={() => {
-                        if (!isOffline) {
-                            fetchPackages();
-                        }
+                        fetchPackages();
                         setShowManagePackageDialog({ open: false, isClone: false, idToClone: null });
                     }}
                 />

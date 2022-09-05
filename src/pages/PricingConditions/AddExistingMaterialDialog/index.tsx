@@ -66,7 +66,7 @@ const AddExistingMaterialDialog = ({ type, handleAdd, handleClose, ignoreIds }) 
             gridApi.setRowData([]);
         }
         const queryString = getQueryString();
-        axiosInstance().get(`${type === "product" ? product.api : type === "service" ? serviceMaster.api : packages.packageApi}${queryString}`).then(({ data }) => {
+        axiosInstance().get(`${type === "product" ? product.api : type === "service" ? serviceMaster.api : packages.api}${queryString}`).then(({ data }) => {
             let rows = data.data.map((item) => {
                 let res = {
                     ...prepareDataForGrid(item),

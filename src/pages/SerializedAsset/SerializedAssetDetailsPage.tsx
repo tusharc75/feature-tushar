@@ -462,16 +462,14 @@ const SerializedAssetDetailsPage = () => {
                             </Button>
                           : null
                         }
-                        {![INVENTORY_STATUS.inUse].includes(productInventoryData.status) &&
-                          <Button
-                            variant={isMobile && !isTablet ? "text" : "outlined"}
-                            color="primary"
-                            size="small"
-                            onClick={handleOpenUpdateDialog}
-                          >
-                            {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
-                          </Button>
-                        }
+                        <Button
+                          variant={isMobile && !isTablet ? "text" : "outlined"}
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenUpdateDialog}
+                        >
+                          {isMobile && !isTablet ? <MdEdit size={22} /> : "Edit"}
+                        </Button>
                         <Menu
                           anchorEl={anchorEl}
                           keepMounted

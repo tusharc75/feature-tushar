@@ -37,7 +37,7 @@ const AssingProductsDialog = (props) => {
     const submitForm = () => {
         setSubmitting(true);
         axiosInstance()
-            .post(`${packages.packageApi}/add-products`, {
+            .post(`${packages.api}/material`, {
                 ids: packageIds,
                 products: [{ product: product.id, qty }]
             })

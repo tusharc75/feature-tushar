@@ -32,7 +32,7 @@ const customNodeStyles = {
 };
 
 const QuotationViews = (props) => {
-  const { quoteName, quoteId, status } = props;
+  const { quoteName, quoteId, status, versionId } = props;
   const [loading, setLoading] = useState(false);
   const [flowData, setFlowData] = useState([]);
   const history = useHistory();
@@ -41,13 +41,13 @@ const QuotationViews = (props) => {
   const [colorInfo, setColorInfo] = useState(false);
 
   useEffect(() => {
-    fetchData();
-  }, [quoteName]);
+    versionId && fetchData();
+  }, [versionId]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const viewsData = await axiosInstance().get(`${quotation.api}/productpackage/${quoteId}`);
+      const viewsData = await axiosInstance().get(`${quotation.api}/productpackage/${quoteId}/${versionId}`);
       const parent = viewsData.data.data.material?.filter((item) => item?.parentId === null);
       const parentIds = parent?.map((item) => `${item?.id}`);
       const child = viewsData.data.data.material?.filter((item) => item?.parentId !== null);

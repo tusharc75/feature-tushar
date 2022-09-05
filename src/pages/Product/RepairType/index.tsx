@@ -210,20 +210,21 @@ const ProductRepairType = (props: Props) => {
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" p={1}>
-        <div>
-          {permissions?.product.isUpdate && (
-            <Button disabled={loading} variant="contained" color="primary" size="small" onClick={() => setOpenAddDialog(true)}>
-              Add Repair Types
-            </Button>
-          )}
-        </div>
-        <div>
-          {permissions?.product.isUpdate && (
-            <DeleteButton disabled={selectedRecords.length === 0 || loading} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
-          )}
-        </div>
-      </Box>
+      {permissions?.product?.isUpdate &&
+        <Box display="flex" justifyContent="space-between" p={1} pt={2} pb={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => setOpenAddDialog(true)}>
+            Add Repair Types
+          </Button>
+          <DeleteButton
+            disabled={selectedRecords.length === 0}
+            text={'Delete'}
+            onClick={() => setShowDeleteConfirmBox(true)} />
+        </Box>
+      }
       {columns && Object.keys(frameWorkComponent).length > 0 ? (
         isMobile && !isTablet ? (
           <CustomSwipableList

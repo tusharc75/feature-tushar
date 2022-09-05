@@ -37,7 +37,7 @@ import { fetch_quotation_service_fields } from 'src/components/Quotation/helper'
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import LeadTimeDialog from './LeadTimeDialog';
 
-const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) => {
+const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen, version }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -56,22 +56,20 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) =
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
 
-  useEffect(() => {
-    fetchQuotationService();
-  }, [quotationData]);
-
+  const versionId = quotationData?.versions[version]?._id || null;
+  
   useEffect(() => {
     fetchFields();
-  }, []);
+    versionId && fetchQuotationService();
+  }, [versionId]);
 
-  const leadTimeColumn = {
+  const extraColoum = [{
     field: 'leadTime',
     headerName: 'Lead Time (Days)',
     cellRenderer: 'leadTimeRenderer'
-  };
+  }]
 
   const fetchFields = async () => {
-    columns.push(leadTimeColumn);
     const fields = await fetch_quotation_service_fields(quotationData?.currency);
     let rendererNames = [];
     genrateColoum(fields, columns, rendererNames, false, renderedFrom);
@@ -83,7 +81,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) =
       ...tempFrameworkComponent
     };
     setFrameWorkComponent({ ...tempFrameworkComponent });
-    setColumns([...columns]);
+    setColumns([...columns, ...extraColoum]);
   };
 
   const LeadTimeRenderer = (params) => (
@@ -107,7 +105,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) =
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${quotation.api}/service/${quotationData._id}`)
+      .get(`${quotation.api}/service/${quotationData._id}/${versionId}`)
       .then(({ data: { data } }) => {
         let rows = data?.map((item) => {
           let finalObject = prepareDataForGrid(item);
@@ -176,7 +174,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) =
 
   const handleAddService = (rows) => {
     axiosInstance()
-      .post(`${quotation.api}/service/${quotationData._id}/add`, { services: rows })
+      .post(`${quotation.api}/service/${quotationData._id}/${versionId}/add`, { services: rows })
       .then(() => {
         fetchQuotationService();
         setShowServiceDialog(false);
@@ -188,7 +186,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) =
 
   const handleUpdateService = (rows) => {
     axiosInstance()
-      .put(`${quotation.api}/service/${quotationData._id}/update`, { services: rows })
+      .put(`${quotation.api}/service/${quotationData._id}/${versionId}/update`, { services: rows })
       .then(() => {
         fetchQuotationService();
         setShowServiceDialog(false);
@@ -200,7 +198,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) =
 
   const handleDelete = () => {
     axiosInstance()
-      .post(`${quotation.api}/service/${quotationData._id}/delete`, { ids: deleteQuotationService })
+      .post(`${quotation.api}/service/${quotationData._id}/${versionId}/delete`, { ids: deleteQuotationService })
       .then(() => {
         fetchQuotationService();
         setShowDeleteConfirmBox(false);
@@ -306,7 +304,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) =
             showClone={false}
             fullHeight={true}
             renderedFrom={renderedFrom}
-            onClone={() => {}}
+            onClone={() => { }}
           />
         ) : (
           <CustomAgGridEditable
@@ -361,6 +359,7 @@ const Product = ({ quotationData, setNextStep, renderedFrom, stepFullScreen }) =
         <LeadTimeDialog
           quotationId={quotationData._id}
           data={leadTimeDialog?.data}
+          versionId={versionId}
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });
           }}
