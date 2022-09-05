@@ -202,6 +202,13 @@ const Service = ({ workOrderId }) => {
                                     handleRemoveService(selectedService?.uniqueId)
                                     setAnchorEl(null);
                                 }}>
+                                Update Status
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    handleRemoveService(selectedService?.uniqueId)
+                                    setAnchorEl(null);
+                                }}>
                                 Remove
                             </MenuItem>
                         </Menu>
