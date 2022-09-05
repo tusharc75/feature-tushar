@@ -194,6 +194,29 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
       });
   };
 
+  const handlePassFail = (type) => {
+    axiosInstance()
+      .put(`${workOrder.api}/${workOrderId}/step/pass-fail`, {
+        uniqueId: uniqueId,
+        serviceId: serviceId,
+        stepId: serviceDetails?.steps[currentStep]?._id,
+        passFailStatus: type
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        getServiceData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+
+
   const scrollRight = (elm) => {
     elm.scrollLeft -= STEP_WIDTH;
   };
@@ -268,16 +291,28 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
               </Button>
             ) : null}
             {stepData?.status === 'start' ? (
-              <Button
-                variant="outlined"
-                color="secondary"
-                size="small"
-                onClick={() => {
-                  handleStartEnd('end');
-                }}
-              >
-                End
-              </Button>
+              <Box display="flex">
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  onClick={() => {
+                    handlePassFail('Pass');
+                  }}
+                >
+                  Pass
+                </Button>
+                <Box marginX={1} />
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => {
+                    handlePassFail('Fail');
+                  }}
+                >
+                  Fail
+                </Button>
+              </Box>
             ) : null}
           </Box>
           <Divider />
@@ -408,6 +443,12 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
                 <Box ml={2}>
                   <Typography variant="caption">Duration</Typography>
                   <Typography variant="body2">{`${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}</Typography>
+                </Box>
+              ) : null}
+              {stepData?.passFailStatus ? (
+                <Box ml={2}>
+                  <Typography variant="caption">Status</Typography>
+                  <Typography variant="body2">{`${stepData?.passFailStatus} `}</Typography>
                 </Box>
               ) : null}
             </Box>

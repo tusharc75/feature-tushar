@@ -96,6 +96,12 @@ const RepairOrderDetails = () => {
     getResourceFields();
   }, []);
 
+  useEffect(() => {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= repairOrderSteps.length) {
+      updateProcessStatus(repairOrderSteps[currentStep]);
+    }
+  }, [currentStep]);
+
   const getResourceFields = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.repairOrder}`)
@@ -146,6 +152,14 @@ const RepairOrderDetails = () => {
     if (newValue === 0) {
       fetchRepairOrderData();
     }
+  };
+
+  const updateProcessStatus = (processStatus) => {
+    axiosInstance()
+      .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => { })
+      .catch((error) => {
+      });
   };
 
   useEffect(() => {
