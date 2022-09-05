@@ -1,16 +1,9 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext, Fragment } from 'react';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import {
-  deliveryTicket,
-  DELIVERY_TICKET_REFRENCE_TYPE,
-  INVENTORY_STATUS,
-  REPAIR_JOB_STATUS,
-  COLOUR_MASTER,
-  WORKORDER_SERVICE_COLOR
-} from 'src/constants/helpers';
+import { COLOUR_MASTER, WORKORDER_SERVICE_COLOR } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -21,12 +14,12 @@ import { Box, Button, Paper } from '@material-ui/core';
 const customNodeStyles = {
   workOrder: { name: 'WorkOrder', ...COLOUR_MASTER.repairJob },
   preWorkService: {
-    name: 'Service',
+    name: 'Pre Work Service',
     background: WORKORDER_SERVICE_COLOR.preWork,
     borderColor: '#C0C0C0'
   },
   postWorkService: {
-    name: 'Service',
+    name: 'Post Work Service',
     background: WORKORDER_SERVICE_COLOR.postWork,
     borderColor: 'green'
   },
