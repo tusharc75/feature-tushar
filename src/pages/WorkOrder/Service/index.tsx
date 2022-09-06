@@ -2,7 +2,7 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { workOrder, WORKORDER_SERVICE_COLOR } from 'src/constants/helpers';
-import { Badge, Box, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField } from '@material-ui/core';
+import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -15,6 +15,9 @@ import AssignUserDialog from './AssignUserDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { GrDrag } from 'react-icons/gr';
+import RestoreIcon from '@material-ui/icons/Restore';
+import UpdateIcon from '@material-ui/icons/Update';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const Service = ({ workOrderId }) => {
 
@@ -108,6 +111,16 @@ const Service = ({ workOrderId }) => {
             });
     };
 
+    const updateServiceStatus = (uniqueId, status) => {
+        axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status })
+            .then(({ data: { data } }) => {
+                fetchService()
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    }
+
     return (<Box p={2}>
         {serviceSteps ?
             <Grid container>
@@ -141,12 +154,14 @@ const Service = ({ workOrderId }) => {
                                     borderColor: "#329592",
                                     borderWidth: "1px",
                                     borderStyle: 'solid',
-                                    backgroundColor: `#329592`,
-                                    cursor: "pointer",
-                                    color: "white"
+                                    backgroundColor: data?.status === "Complete" ? "#E9FFE8" :
+                                        data?.status === "Fail" ? "#FFE9EA" : "white",
+                                    cursor: "pointer"
                                 } : {
                                     borderWidth: '1px',
                                     borderStyle: 'solid',
+                                    backgroundColor: data?.status === "Complete" ? "#E9FFE8" :
+                                        data?.status === "Fail" ? "#FFE9EA" : "white",
                                     borderColor: "rgb(224, 224, 224)",
                                     cursor: "pointer"
                                 }}
@@ -164,6 +179,26 @@ const Service = ({ workOrderId }) => {
                                             <Box ml={3}>
                                                 <Typography>{data?.serviceName}</Typography>
                                             </Box>
+                                            {data?.type === "service" &&
+                                                <Box ml={1}>
+                                                    {data?.preWork ?
+                                                        <HtmlTooltip title="Pre Work Service">
+                                                            <RestoreIcon />
+                                                        </HtmlTooltip>
+                                                        :
+                                                        <HtmlTooltip title="Post Work Service">
+                                                            <UpdateIcon />
+                                                        </HtmlTooltip>
+                                                    }
+                                                </Box>}
+                                            {data?.type === "service" &&
+                                                <Box ml={1}>
+                                                    <Chip
+                                                        label={data?.status}
+                                                        variant="outlined"
+                                                        color="primary"
+                                                    />
+                                                </Box>}
                                         </Box>
                                     </Grid>
                                     {data?.type === "service" &&
@@ -194,6 +229,20 @@ const Service = ({ workOrderId }) => {
                                     setAnchorEl(null);
                                 }}>
                                 Assign Users
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    updateServiceStatus(selectedService?.uniqueId, "Complete")
+                                    setAnchorEl(null);
+                                }}>
+                                Complete
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    updateServiceStatus(selectedService?.uniqueId, "Fail")
+                                    setAnchorEl(null);
+                                }}>
+                                Fail
                             </MenuItem>
                             <MenuItem
                                 onClick={() => {
