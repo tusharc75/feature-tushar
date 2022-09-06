@@ -319,7 +319,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName}`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
