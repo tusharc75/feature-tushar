@@ -24,6 +24,7 @@ import { RiShareForwardFill } from 'react-icons/ri';
 import { TiArrowBack } from 'react-icons/ti';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
+import DeleteButton from 'src/components/Helpers/DeleteButton';
 
 const STEP_WIDTH = 200;
 const ICON_WIDTH = 40;
@@ -74,8 +75,11 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
 
   const [stepList, setStepList] = useState([]);
+  const [stepId, setStepId] = useState(null);
   const [stepData, setStepData] = useState(null);
   const [serviceDetails, setServiceDetails] = useState(null);
+  const [disabledNextStep, setDisabledNextStep] = useState(true);
+
 
   useEffect(() => {
     axiosInstance()
@@ -108,6 +112,9 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
     setInitialData({ fields: [], values: {} });
     if (serviceDetails?.steps?.length) {
       let fieldsDataForCreate = serviceDetails?.steps[currentStep]?.fields ? serviceDetails?.steps[currentStep]?.fields : [];
+      if (serviceDetails?.steps[currentStep]) {
+        setStepId(serviceDetails?.steps[currentStep]?._id)
+      }
       let tempServiceData = serviceData.find((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && d.stepId === serviceDetails?.steps[currentStep]?._id);
       if (tempServiceData) {
         setStepData(tempServiceData);
@@ -119,10 +126,11 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
         setStepData(null);
         setInitialData({ fields: setFieldsInAscendingOrder(fieldsDataForCreate), values: getObjKeys('', fieldsDataForCreate) });
       }
-      let tempServiceDataFieldsId = serviceDetails?.steps?.map((d) => d._id);
-      let tempServiceDataId = serviceData?.map((d) => d.stepId);
-      if (tempServiceDataFieldsId.every((el) => tempServiceDataId.includes(el))) {
-        //setNextStep(true)
+      if (tempServiceData && tempServiceData?.status === "end") {
+        setDisabledNextStep(false)
+      }
+      else {
+        setDisabledNextStep(true)
       }
     }
   };
@@ -139,7 +147,7 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
     let tempData = {
       uniqueId: uniqueId,
       serviceId: serviceId,
-      stepId: serviceDetails?.steps[currentStep]?._id
+      stepId: stepId
     };
     axiosInstance()
       .put(`${workOrder.api}/update-steps-data/${workOrderId}`, { ...tempData, ...values })
@@ -149,7 +157,47 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
           type: 'success',
           message: data.message
         });
-        handleNext();
+        getServiceData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleStartEnd = (type) => {
+    axiosInstance()
+      .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
+        uniqueId: uniqueId,
+        serviceId: serviceId,
+        stepId: stepId
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        getServiceData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handlePassFail = (type) => {
+    axiosInstance()
+      .put(`${workOrder.api}/${workOrderId}/step/pass-fail`, {
+        uniqueId: uniqueId,
+        serviceId: serviceId,
+        stepId: stepId,
+        passFailStatus: type
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         getServiceData();
       })
       .catch((error) => {
@@ -174,25 +222,6 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
     }
   };
 
-  const handleStartEnd = (type) => {
-    axiosInstance()
-      .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
-        uniqueId: uniqueId,
-        serviceId: serviceId,
-        stepId: serviceDetails?.steps[currentStep]?._id
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        getServiceData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
 
   const scrollRight = (elm) => {
     elm.scrollLeft -= STEP_WIDTH;
@@ -244,14 +273,12 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
               handleNext();
             }}
             size="small"
-            disabled={currentStep === stepList?.length - 1}
+            disabled={currentStep === stepList?.length - 1 || disabledNextStep}
           >
             <RiShareForwardFill size={25} />
           </IconButton>
         </Box>
       </Box>
-
-      <Divider />
       {!stepData?.status || stepData?.status === 'start' ? (
         <Fragment>
           <Box p={2}>
@@ -268,22 +295,24 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
               </Button>
             ) : null}
             {stepData?.status === 'start' ? (
-              <Button
-                variant="outlined"
-                color="secondary"
-                size="small"
-                onClick={() => {
-                  handleStartEnd('end');
-                }}
-              >
-                End
-              </Button>
+              <Box display="flex">
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  onClick={() => {
+                    handlePassFail('Pass');
+                  }}
+                >
+                  Pass
+                </Button>
+                <Box marginX={1} />
+                <DeleteButton text="Fail" onClick={() => handlePassFail('Fail')} />
+              </Box>
             ) : null}
           </Box>
-          <Divider />
         </Fragment>
       ) : null}
-
       {initialData.fields.length ? (
         <Fragment>
           <Box p={2}>
@@ -408,6 +437,12 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
                 <Box ml={2}>
                   <Typography variant="caption">Duration</Typography>
                   <Typography variant="body2">{`${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}</Typography>
+                </Box>
+              ) : null}
+              {stepData?.passFailStatus ? (
+                <Box ml={2}>
+                  <Typography variant="caption">Status</Typography>
+                  <Typography variant="body2">{`${stepData?.passFailStatus} `}</Typography>
                 </Box>
               ) : null}
             </Box>

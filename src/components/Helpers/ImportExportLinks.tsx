@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
   darkExpandIcon: {
     position: 'absolute',
     right: '0',
-    color: theme.palette.info.dark,
+    color: theme.palette.info.dark
   }
 }));
 
@@ -61,11 +61,12 @@ export default function ImportExportLinks({
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
-  isBackgroundWhite = false
+  isBackgroundWhite = false,
+  isDropDownIconShow = false
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -214,29 +215,31 @@ export default function ImportExportLinks({
   );
 
   return !onlyExport ? (
-    <div id="importExportLinks" className={`${classes.root}`}>
-      <div className={classes.linksContainer}>
-        {permissions?.isCreate && (
-          <>
-            <label htmlFor="importFromExcel" className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
-              {ImportInput}
-              Import from Excel
-            </label>
-            <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
-          </>
-        )}
-        <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
-          Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
-        </label>
-        {isDownloadExcel && (
-          <>
-            <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
-            <label onClick={downloadTemplate} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
-              Download Template
-            </label>
-          </>
-        )}
-        {/* <Divider
+    <div id="importExportLinks" className={!isDropDownIconShow && `${classes.root}`}>
+      {!isDropDownIconShow ? (
+        <div className={classes.linksContainer}>
+          {permissions?.isCreate && (
+            <>
+              <label htmlFor="importFromExcel" className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+                {ImportInput}
+                Import from Excel
+              </label>
+              <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
+            </>
+          )}
+          <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+            Export to Excel{' '}
+            {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
+          </label>
+          {isDownloadExcel && (
+            <>
+              <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
+              <label onClick={downloadTemplate} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+                Download Template
+              </label>
+            </>
+          )}
+          {/* <Divider
           orientation="vertical"
           flexItem
           className={classes.linkDivider}
@@ -247,60 +250,66 @@ export default function ImportExportLinks({
         >
           Email a Link
         </label> */}
-      </div>
-      <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-        {permissions?.isCreate && (
-          <MenuItem>
-            <label htmlFor="importFromExcel" className="cursor-pointer">
-              {ImportInput}
-              Import from Excel
-            </label>
-          </MenuItem>
-        )}
-        <MenuItem
-          onClick={() => {
-            exportToExcel();
-            handleClose();
-          }}
-        >
-          Export to Excel ({recordsToExport === 0 ? 'All' : `(${recordsToExport})`})
-        </MenuItem>
-        {isDownloadExcel && (
+        </div>
+      ) : (
+        <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+          {permissions?.isCreate && (
+            <MenuItem>
+              <label htmlFor="importFromExcel" className="cursor-pointer">
+                {ImportInput}
+                Import from Excel
+              </label>
+            </MenuItem>
+          )}
           <MenuItem
             onClick={() => {
-              downloadTemplate();
+              exportToExcel();
               handleClose();
             }}
           >
-            Download Template
+            Export to Excel ({recordsToExport === 0 ? 'All' : `(${recordsToExport})`})
           </MenuItem>
-        )}
-        {/* <MenuItem>Email a Link</MenuItem> */}
-      </Menu>
-      {isMobile && (
+          {isDownloadExcel && (
+            <MenuItem
+              onClick={() => {
+                downloadTemplate();
+                handleClose();
+              }}
+            >
+              Download Template
+            </MenuItem>
+          )}
+          {/* <MenuItem>Email a Link</MenuItem> */}
+        </Menu>
+      )}
+      {(isMobile || isDropDownIconShow) && (
         <IconButton onClick={handleClick}>
           <IoIosArrowDropdown className={isBackgroundWhite ? classes.darkExpandIcon : classes.expandIcon} />
         </IconButton>
       )}
     </div>
   ) : (
-    <div id="importExportLinks" className={`${classes.root}`}>
-      <div className={classes.linksContainer}>
-        <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
-          Export to Excel {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
-        </label>
-      </div>
-      <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem
-          onClick={() => {
-            exportToExcel();
-            handleClose();
-          }}
-        >
-          Export to Excel ({recordsToExport === 0 ? 'All' : `(${recordsToExport})`})
-        </MenuItem>
-      </Menu>
-      {isMobile && (
+    <div id="importExportLinks" className={!isDropDownIconShow && `${classes.root}`}>
+      {!isDropDownIconShow ? (
+        <div className={classes.linksContainer}>
+          <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+            Export to Excel{' '}
+            {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
+          </label>
+        </div>
+      ) : (
+        <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+          <MenuItem
+            onClick={() => {
+              exportToExcel();
+              handleClose();
+            }}
+          >
+            Export to Excel ({recordsToExport === 0 ? 'All' : `(${recordsToExport})`})
+          </MenuItem>
+        </Menu>
+      )}
+      {(isMobile || isDropDownIconShow) && (
         <IconButton onClick={handleClick}>
           <IoIosArrowDropdown className={isBackgroundWhite ? classes.darkExpandIcon : classes.expandIcon} />
         </IconButton>

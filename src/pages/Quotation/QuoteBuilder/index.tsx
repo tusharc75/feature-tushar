@@ -233,7 +233,7 @@ const QuoteBuilder = ({
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName}`;
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -314,10 +314,10 @@ const QuoteBuilder = ({
             {quotationData?.subStatus === 'Waiting for Your Acceptance'
               ? 'Waiting for Customer Response'
               : quotationData?.subStatus === 'Reject by Customer Waiting for New Price'
-              ? 'Rejected by Customer'
-              : quotationData?.subStatus === 'Price Approved by Customer'
-              ? 'Approved by Customer'
-              : ''}
+                ? 'Rejected by Customer'
+                : quotationData?.subStatus === 'Price Approved by Customer'
+                  ? 'Approved by Customer'
+                  : ''}
           </Typography>
         </Box>
         <Box display="flex">
@@ -366,7 +366,7 @@ const QuoteBuilder = ({
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-              onSelect={() => {}}
+              onSelect={() => { }}
               hideSelection={true}
               childrenProperty="subRows"
               uniqueKey="_id"

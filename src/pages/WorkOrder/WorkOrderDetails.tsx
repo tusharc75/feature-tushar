@@ -30,6 +30,7 @@ import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
+import WorkOrderViews from './RoadMapViews';
 
 function a11yProps(index: any) {
   return {
@@ -145,12 +146,11 @@ const WorkOrderDetails = () => {
 
   useEffect(() => {
     if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true)
+      setActivityShow(true);
+    } else {
+      setActivityShow(false);
     }
-    else {
-      setActivityShow(false)
-    }
-  }, [isSmallScreen, tabValue])
+  }, [isSmallScreen, tabValue]);
 
   return (
     <>
@@ -215,7 +215,21 @@ const WorkOrderDetails = () => {
               }
               {...a11yProps(1)}
             />
+            <Tab
+              className={'tabLayout'}
+              style={{
+                background: tabValue === 3 ? 'white' : '',
+                color: tabValue === 3 ? '#163340' : '#163340'
+              }}
+              label={
+                <div className="d-flex align-items-center tab-font">
+                  <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                </div>
+              }
+              {...a11yProps(2)}
+            />
           </Tabs>
+
           <TabPanel value={tabValue} index={0}>
             <Box>
               {workOrderData && workOrderFields.length ? (
@@ -229,6 +243,11 @@ const WorkOrderDetails = () => {
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
             <Service workOrderId={id} />
+          </TabPanel>
+          <TabPanel value={tabValue} index={2}>
+            <Box>
+              <WorkOrderViews workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
+            </Box>
           </TabPanel>
         </Paper>
         <Box my={1} />
@@ -248,7 +267,9 @@ const WorkOrderDetails = () => {
                         resourceId={workOrderData._id}
                         resource={ACTIVITY_RESOURCE.workOrder}
                         restrictedAddActivities={
-                          permissions && permissions[`${ACTIVITY_RESOURCE.workOrder}`] && permissions[`${ACTIVITY_RESOURCE.workOrder}`].isUpdate ? [] : ['Attachment', 'Case']
+                          permissions && permissions[`${ACTIVITY_RESOURCE.workOrder}`] && permissions[`${ACTIVITY_RESOURCE.workOrder}`].isUpdate
+                            ? []
+                            : ['Attachment', 'Case']
                         }
                         relatedTo={[
                           {
@@ -257,7 +278,7 @@ const WorkOrderDetails = () => {
                             access: true
                           }
                         ]}
-                        handleActivityRefresh={() => { }}
+                        handleActivityRefresh={() => {}}
                         emails={[]}
                       />
                     </div>

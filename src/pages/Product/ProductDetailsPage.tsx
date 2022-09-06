@@ -249,7 +249,7 @@ const ProductDetailsPage = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
         <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={permissions?.serializedAsset ? 8 : 12} lg={permissions?.serializedAsset ? 8 : 12}>
+          <Grid item xs={12} sm={12} md={8} lg={8}>
             <Paper>
               {!productData ? (
                 <div>
@@ -340,241 +340,238 @@ const ProductDetailsPage = () => {
               {tabValue === 8 && <ServicePackage renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
             </Paper>
           </Grid>
-          {(permissions?.serializedAsset && permissions?.serializedAsset?.isRead) ||
-            (permissions?.productInventory && permissions?.productInventory?.isRead) ? (
-            <Grid item xs={12} sm={12} md={4} lg={4}>
-              {permissions?.productInventory?.isRead && (
-                <Box mb={2}>
-                  <Paper style={{ overflow: 'hidden' }}>
-                    <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                      <Box display={'flex'}>
-                        <Box>
-                          <Typography variant="subtitle2">{routes?.productInventory?.title}</Typography>
-                        </Box>
-                        <Box pl={1}>
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              history.push(`${routes.productInventory.path}`, { product: id, productName: productData?.productName });
-                            }}
-                          >
-                            <InfoOutlined fontSize="small" />
-                          </IconButton>
-                        </Box>
+          <Grid item xs={12} sm={12} md={4} lg={4}>
+            {permissions?.productInventory?.isRead && (
+              <Box mb={2}>
+                <Paper style={{ overflow: 'hidden' }}>
+                  <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
+                    <Box display={'flex'}>
+                      <Box>
+                        <Typography variant="subtitle2">{routes?.productInventory?.title}</Typography>
+                      </Box>
+                      <Box pl={1}>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            history.push(`${routes.productInventory.path}`, { product: id, productName: productData?.productName });
+                          }}
+                        >
+                          <InfoOutlined fontSize="small" />
+                        </IconButton>
                       </Box>
                     </Box>
-                    {productInventoryData?.filter((d) => d.inventory)?.length ? (
-                      <Box width="100%">
-                        <Box mx={2} mt={1} display="flex" justifyContent="space-between">
-                          <Typography variant="subtitle2">{routes.warehouse.title}</Typography>
-                          <Typography variant="subtitle2">Qty</Typography>
-                        </Box>
-                        {productInventoryData
-                          ?.filter((d) => d.inventory)
-                          .map(({ inventory, warehouse }) => (
-                            <List disablePadding key={warehouse?._id}>
-                              <ListItem dense>
-                                <ListItemText primary={warehouse?.name} />
-                                <ListItemSecondaryAction>
-                                  <Typography variant="subtitle2">{inventory}</Typography>
-                                </ListItemSecondaryAction>
-                              </ListItem>
-                            </List>
-                          ))}
+                  </Box>
+                  {productInventoryData?.filter((d) => d.inventory)?.length ? (
+                    <Box width="100%">
+                      <Box mx={2} mt={1} display="flex" justifyContent="space-between">
+                        <Typography variant="subtitle2">{routes.warehouse.title}</Typography>
+                        <Typography variant="subtitle2">Qty</Typography>
                       </Box>
-                    ) : (
-                      <Box textAlign="center" padding={2} minHeight={100}>
-                        <Typography>No {routes.productInventory.title} Found</Typography>
-                      </Box>
-                    )}
-                    {permissions?.product?.isUpdate && permissions?.serializedAsset?.isCreate && productData?.serializedProduct === false && (
-                      <Box p={2} borderTop={1} borderColor="grey.300">
-                        <Button
-                          variant={'outlined'}
-                          color="primary"
-                          onClick={() => {
-                            setShowConfirmBoxConvert(true);
+                      {productInventoryData
+                        ?.filter((d) => d.inventory)
+                        .map(({ inventory, warehouse }) => (
+                          <List disablePadding key={warehouse?._id}>
+                            <ListItem dense>
+                              <ListItemText primary={warehouse?.name} />
+                              <ListItemSecondaryAction>
+                                <Typography variant="subtitle2">{inventory}</Typography>
+                              </ListItemSecondaryAction>
+                            </ListItem>
+                          </List>
+                        ))}
+                    </Box>
+                  ) : (
+                    <Box textAlign="center" padding={2} minHeight={100}>
+                      <Typography>No {routes.productInventory.title} Found</Typography>
+                    </Box>
+                  )}
+                  {permissions?.product?.isUpdate && permissions?.serializedAsset?.isCreate && productData?.serializedProduct === false && (
+                    <Box p={2} borderTop={1} borderColor="grey.300">
+                      <Button
+                        variant={'outlined'}
+                        color="primary"
+                        onClick={() => {
+                          setShowConfirmBoxConvert(true);
+                        }}
+                        size="small"
+                      >
+                        Convert Serialized Product
+                      </Button>
+                      {showConfirmBoxConvert && (
+                        <ConfirmationDialog
+                          open={showConfirmBoxConvert}
+                          message={`Are you sure you want to convert serialized product ?`}
+                          onClose={() => {
+                            setShowConfirmBoxConvert(false);
                           }}
-                          size="small"
-                        >
-                          Convert Serialized Product
-                        </Button>
-                        {showConfirmBoxConvert && (
-                          <ConfirmationDialog
-                            open={showConfirmBoxConvert}
-                            message={`Are you sure you want to convert serialized product ?`}
-                            onClose={() => {
-                              setShowConfirmBoxConvert(false);
-                            }}
-                            onOk={handleConvertSerialized}
-                          />
-                        )}
-                      </Box>
-                    )}
-                  </Paper>
-                </Box>
-              )}
-              {permissions?.serializedAsset?.isRead && productData?.serializedProduct ? (
-                <Box mb={2}>
-                  <Paper style={{ overflow: 'hidden' }}>
-                    <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                      <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
-                      {permissions?.serializedAsset?.isCreate && (
-                        <IconButton
-                          title="Manage Plant(s)"
-                          color="primary"
-                          size="small"
-                          onClick={() => {
-                            setOpenProductInventoryDialog(true);
-                          }}
-                        >
-                          <ControlPoint fontSize="small" />
-                        </IconButton>
+                          onOk={handleConvertSerialized}
+                        />
                       )}
                     </Box>
-                    {
-                      <Box style={{ paddingBottom: '8px' }}>
-                        {loading || loadingWarehouse ? (
-                          [1, 2].map((i) => (
-                            <BoxWithBorder
-                              key={i}
-                              style={{
-                                margin: '8px'
-                              }}
-                            >
-                              <Box padding={1}>
-                                <Skeleton variant="text" width="100px" height="20px" />
-                                <Box marginTop={1} />
-                                <Skeleton variant="text" width="100%" height="15px" />
-                              </Box>
-                            </BoxWithBorder>
-                          ))
-                        ) : inventoriesData?.length ? (
-                          inventoriesData?.map(({ products, warehouse, plant, count }, i) => (
-                            <Box key={i} p={1}>
-                              <Box display="flex" bgcolor="#f7f5f5" borderRadius="3px" borderBottom="1px solid #efe7e7">
-                                <Grid>
-                                  <Grid item xs={8}>
-                                    <Box display="flex" alignItems="center">
-                                      <Box>
-                                        <IconButton
-                                          size="small"
-                                          onClick={() => {
-                                            if (selectedWarehouse !== warehouse?.optionValue ?? plant?.optionValue) {
-                                              setSelectedWarehouse(warehouse?.optionValue ?? plant?.optionValue);
-                                            } else {
-                                              setSelectedWarehouse(null);
-                                            }
-                                          }}
-                                        >
-                                          {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? <ExpandLess /> : <ExpandMore />}
-                                        </IconButton>
-                                      </Box>
-                                      <Box ml={1} display="flex" alignItems="center">
-                                        <Typography
-                                          variant="subtitle2"
-                                          color="primary"
-                                          className="d-flex align-items-center"
-                                          style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
-                                        >
-                                          {warehouse?.optionLabel} ({count || 0})
-                                        </Typography>
-                                        <Box mx={1} />
-                                        <HtmlTooltip
-                                          arrow
-                                          interactive
-                                          title={
-                                            <>
-                                              <Typography>Inventory Status: </Typography>
-                                              {products.map((s) => (
-                                                <Typography>{`(${s?.count}) ${s?.status}`}</Typography>
-                                              ))}
-                                            </>
-                                          }
-                                        >
-                                          <IconButton size="small">
-                                            <InfoOutlined fontSize="small" />
-                                          </IconButton>
-                                        </HtmlTooltip>
-                                      </Box>
-                                    </Box>
-                                  </Grid>
-                                </Grid>
-                              </Box>
-                              <Box p={1}>
-                                {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? (
-                                  inventoriesWarehouseLoading ? (
-                                    <Typography
-                                      variant="subtitle2"
-                                      color="primary"
-                                      className="d-flex align-items-center"
-                                      style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
-                                    >
-                                      Loading
-                                    </Typography>
-                                  ) : (
-                                    inventoriesWarehouse.map((i, index) => (
-                                      <Fragment key={i._id}>
-                                        {i?.assetNumber ? (
-                                          index === 5 ? (
-                                            <Button
-                                              fullWidth
-                                              className="mt-3"
-                                              variant="outlined"
-                                              color="primary"
-                                              size="small"
-                                              onClick={() => {
-                                                history.push(`${routes.serializedAsset.path}`, {
-                                                  warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse)
-                                                    .warehouse,
-                                                  product: { id: id, name: headingLabel }
-                                                });
-                                              }}
-                                            >
-                                              View All
-                                            </Button>
-                                          ) : (
-                                            <Chip
-                                              label={i?.assetNumber}
-                                              style={{
-                                                marginRight: '2px',
-                                                background: ['New', 'Available'].indexOf(i?.status) >= 0 ? '#b9ffce' : '#ffb4b4'
-                                              }}
-                                              onClick={() => {
-                                                history.push({ pathname: `${routes.serializedAssetDetail.path}/${i._id}` });
-                                              }}
-                                            />
-                                          )
-                                        ) : null}
-                                      </Fragment>
-                                    ))
-                                  )
-                                ) : null}
-                              </Box>
+                  )}
+                </Paper>
+              </Box>
+            )}
+            {permissions?.serializedAsset?.isRead && productData?.serializedProduct ? (
+              <Box mb={2}>
+                <Paper style={{ overflow: 'hidden' }}>
+                  <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
+                    {permissions?.serializedAsset?.isCreate && (
+                      <IconButton
+                        title="Manage Plant(s)"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setOpenProductInventoryDialog(true);
+                        }}
+                      >
+                        <ControlPoint fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+                  {
+                    <Box style={{ paddingBottom: '8px' }}>
+                      {loading || loadingWarehouse ? (
+                        [1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{
+                              margin: '8px'
+                            }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton variant="text" width="100px" height="20px" />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
                             </Box>
-                          ))
-                        ) : (
-                          <Box textAlign="center" padding={2} minHeight={100}>
-                            <Typography>No {routes.serializedAsset.title} Found</Typography>
+                          </BoxWithBorder>
+                        ))
+                      ) : inventoriesData?.length ? (
+                        inventoriesData?.map(({ products, warehouse, plant, count }, i) => (
+                          <Box key={i} p={1}>
+                            <Box display="flex" bgcolor="#f7f5f5" borderRadius="3px" borderBottom="1px solid #efe7e7">
+                              <Grid>
+                                <Grid item xs={8}>
+                                  <Box display="flex" alignItems="center">
+                                    <Box>
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => {
+                                          if (selectedWarehouse !== warehouse?.optionValue ?? plant?.optionValue) {
+                                            setSelectedWarehouse(warehouse?.optionValue ?? plant?.optionValue);
+                                          } else {
+                                            setSelectedWarehouse(null);
+                                          }
+                                        }}
+                                      >
+                                        {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? <ExpandLess /> : <ExpandMore />}
+                                      </IconButton>
+                                    </Box>
+                                    <Box ml={1} display="flex" alignItems="center">
+                                      <Typography
+                                        variant="subtitle2"
+                                        color="primary"
+                                        className="d-flex align-items-center"
+                                        style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
+                                      >
+                                        {warehouse?.optionLabel} ({count || 0})
+                                      </Typography>
+                                      <Box mx={1} />
+                                      <HtmlTooltip
+                                        arrow
+                                        interactive
+                                        title={
+                                          <>
+                                            <Typography>Inventory Status: </Typography>
+                                            {products.map((s) => (
+                                              <Typography>{`(${s?.count}) ${s?.status}`}</Typography>
+                                            ))}
+                                          </>
+                                        }
+                                      >
+                                        <IconButton size="small">
+                                          <InfoOutlined fontSize="small" />
+                                        </IconButton>
+                                      </HtmlTooltip>
+                                    </Box>
+                                  </Box>
+                                </Grid>
+                              </Grid>
+                            </Box>
+                            <Box p={1}>
+                              {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? (
+                                inventoriesWarehouseLoading ? (
+                                  <Typography
+                                    variant="subtitle2"
+                                    color="primary"
+                                    className="d-flex align-items-center"
+                                    style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
+                                  >
+                                    Loading
+                                  </Typography>
+                                ) : (
+                                  inventoriesWarehouse.map((i, index) => (
+                                    <Fragment key={i._id}>
+                                      {i?.assetNumber ? (
+                                        index === 5 ? (
+                                          <Button
+                                            fullWidth
+                                            className="mt-3"
+                                            variant="outlined"
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => {
+                                              history.push(`${routes.serializedAsset.path}`, {
+                                                warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse)
+                                                  .warehouse,
+                                                product: { id: id, name: headingLabel }
+                                              });
+                                            }}
+                                          >
+                                            View All
+                                          </Button>
+                                        ) : (
+                                          <Chip
+                                            label={i?.assetNumber}
+                                            style={{
+                                              marginRight: '2px',
+                                              background: ['New', 'Available'].indexOf(i?.status) >= 0 ? '#b9ffce' : '#ffb4b4'
+                                            }}
+                                            onClick={() => {
+                                              history.push({ pathname: `${routes.serializedAssetDetail.path}/${i._id}` });
+                                            }}
+                                          />
+                                        )
+                                      ) : null}
+                                    </Fragment>
+                                  ))
+                                )
+                              ) : null}
+                            </Box>
                           </Box>
-                        )}
-                      </Box>
-                    }
-                  </Paper>
-                </Box>
-              ) : null}
-              {permissions?.productInventory?.isRead && (
-                <Box mb={2}>
-                  <CostDetails product={id} productData={productData} />
-                </Box>
-              )}
-              {permissions?.leadTimeMaster?.isRead && (
-                <Box mb={2}>
-                  <LeadTimeMaster Id={id} type={'product'} />
-                </Box>
-              )}
-            </Grid>
-          ) : null}
+                        ))
+                      ) : (
+                        <Box textAlign="center" padding={2} minHeight={100}>
+                          <Typography>No {routes.serializedAsset.title} Found</Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  }
+                </Paper>
+              </Box>
+            ) : null}
+            {permissions?.productInventory?.isRead && (
+              <Box mb={2}>
+                <CostDetails product={id} productData={productData} />
+              </Box>
+            )}
+            {permissions?.leadTimeMaster?.isRead && (
+              <Box mb={2}>
+                <LeadTimeMaster Id={id} type={'product'} />
+              </Box>
+            )}
+          </Grid>
         </Grid>
       </Fragment>
       {showConfirmBox && (
