@@ -3,7 +3,7 @@ import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridCo
 import { Box, Grid, IconButton, Menu, MenuItem, Paper, Typography, Button, Tooltip } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import StepDialog from './StepDialog';
-import { serviceMaster } from 'src/constants/helpers';
+import { getLocalStorageArrayData, serviceMaster } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -22,6 +22,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { ExpandMore } from '@material-ui/icons';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { GrDrag } from 'react-icons/gr';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const Steps = ({ serviceId }) => {
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_stps`;
@@ -29,6 +30,7 @@ const Steps = ({ serviceId }) => {
   const [stepDialog, setStepDialog] = useState({ open: false, stepId: '' });
   const [stepFieldsDialog, setStepFieldsDialog] = useState({ open: false, stepIds: [] });
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
     state: { permissions, user, selectedEntity }
@@ -93,7 +95,7 @@ const Steps = ({ serviceId }) => {
         toastConfig.setToastConfig(err);
       });
   };
-  
+
   const handleArrangeUpdate = (rows: any[]) => {
     setIsAssigning(true);
     rows?.forEach((e: any) => {
@@ -246,6 +248,7 @@ const Steps = ({ serviceId }) => {
                     Delete
                   </MenuItem>
                 </Menu>
+
                 <Box ml={1} />
                 {dataRows?.length ? (
                   <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
@@ -253,6 +256,29 @@ const Steps = ({ serviceId }) => {
                     Arrange
                   </Button>
                 ) : null}
+                <Box ml={1} />
+                <ImportExportLinks
+                  permissions={permissions?.serviceMaster}
+                  module="Service Master Steps"
+                  api={`${serviceMaster.api}/steps/${serviceId}`}
+                  afterImportCompleted={() => {
+                    fetchStepsData();
+                  }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                  ids={
+                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                      : []
+                  }
+                  onExportToExcelSuccess={() => {
+                    if (gridApi) gridApi.deselectAll();
+                    else fetchStepsData();
+                  }}
+                  isDropDownIconShow={true}
+                  isBackgroundWhite={true}
+                />
               </Box>
             </Grid>
           </Grid>
