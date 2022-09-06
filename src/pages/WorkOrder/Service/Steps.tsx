@@ -78,6 +78,8 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
   const [stepId, setStepId] = useState(null);
   const [stepData, setStepData] = useState(null);
   const [serviceDetails, setServiceDetails] = useState(null);
+  const [disabledNextStep, setDisabledNextStep] = useState(true);
+
 
   useEffect(() => {
     axiosInstance()
@@ -110,7 +112,7 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
     setInitialData({ fields: [], values: {} });
     if (serviceDetails?.steps?.length) {
       let fieldsDataForCreate = serviceDetails?.steps[currentStep]?.fields ? serviceDetails?.steps[currentStep]?.fields : [];
-      if(serviceDetails?.steps[currentStep]){
+      if (serviceDetails?.steps[currentStep]) {
         setStepId(serviceDetails?.steps[currentStep]?._id)
       }
       let tempServiceData = serviceData.find((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && d.stepId === serviceDetails?.steps[currentStep]?._id);
@@ -124,10 +126,11 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
         setStepData(null);
         setInitialData({ fields: setFieldsInAscendingOrder(fieldsDataForCreate), values: getObjKeys('', fieldsDataForCreate) });
       }
-      let tempServiceDataFieldsId = serviceDetails?.steps?.map((d) => d._id);
-      let tempServiceDataId = serviceData?.map((d) => d.stepId);
-      if (tempServiceDataFieldsId.every((el) => tempServiceDataId.includes(el))) {
-        //setNextStep(true)
+      if (tempServiceData && tempServiceData?.status === "end") {
+        setDisabledNextStep(false)
+      }
+      else {
+        setDisabledNextStep(true)
       }
     }
   };
@@ -154,7 +157,6 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
           type: 'success',
           message: data.message
         });
-        handleNext();
         getServiceData();
       })
       .catch((error) => {
@@ -271,14 +273,12 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
               handleNext();
             }}
             size="small"
-            disabled={currentStep === stepList?.length - 1}
+            disabled={currentStep === stepList?.length - 1 || disabledNextStep}
           >
             <RiShareForwardFill size={25} />
           </IconButton>
         </Box>
       </Box>
-
-      <Divider />
       {!stepData?.status || stepData?.status === 'start' ? (
         <Fragment>
           <Box p={2}>
@@ -311,10 +311,8 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
               </Box>
             ) : null}
           </Box>
-          <Divider />
         </Fragment>
       ) : null}
-
       {initialData.fields.length ? (
         <Fragment>
           <Box p={2}>
