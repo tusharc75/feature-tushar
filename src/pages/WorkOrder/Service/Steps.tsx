@@ -25,6 +25,7 @@ import { TiArrowBack } from 'react-icons/ti';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const STEP_WIDTH = 200;
 const ICON_WIDTH = 40;
@@ -67,7 +68,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData, serviceSteps, setSelectedService }) => {
+const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData, handleAddService, serviceSteps, setSelectedService }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -79,7 +80,7 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
   const [stepData, setStepData] = useState(null);
   const [serviceDetails, setServiceDetails] = useState(null);
   const [disabledNextStep, setDisabledNextStep] = useState(true);
-
+  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [] });
 
   useEffect(() => {
     axiosInstance()
@@ -193,6 +194,13 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
         passFailStatus: type
       })
       .then(({ data }) => {
+        const result = data?.data;
+        if (type === "Pass" && result?.isPassAddon && result?.passAddon?.length) {
+          setAddServiceConfirmation({ open: true, services: result?.passAddon })
+        }
+        else if (type === "Fail" && result?.isFailAddon && result?.failAddon?.length) {
+          setAddServiceConfirmation({ open: true, services: result?.failAddon })
+        }
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -221,7 +229,6 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
       });
     }
   };
-
 
   const scrollRight = (elm) => {
     elm.scrollLeft -= STEP_WIDTH;
@@ -449,6 +456,19 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
           </Grid>
         </Grid>
       </Box>
+      {addServiceConfirmation.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()}`}
+          onClose={() => {
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
+          onOk={() => {
+            handleAddService(addServiceConfirmation.services?.map((e) => e._id), uniqueId)
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
+        />
+      )}
     </Box>
   ) : null;
 };
