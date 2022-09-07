@@ -18,6 +18,7 @@ import { GrDrag } from 'react-icons/gr';
 import RestoreIcon from '@material-ui/icons/Restore';
 import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import PeopleIcon from '@material-ui/icons/People';
 
 const Service = ({ workOrderId }) => {
 
@@ -27,7 +28,7 @@ const Service = ({ workOrderId }) => {
     const [serviceData, setServiceData] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [userAssignDialog, setUserAssignDialog] = useState(false);
-    const [serviceDialog, setServiceDialog] = useState(false);
+    const [serviceDialog, setServiceDialog] = useState({ open: false, preWork: false });
     const [arrangeView, setArrangeView] = useState(false);
 
     useEffect(() => {
@@ -134,7 +135,7 @@ const Service = ({ workOrderId }) => {
                                     variant="text"
                                     color="primary"
                                     size="small"
-                                    onClick={() => setServiceDialog(true)}
+                                    onClick={() => setServiceDialog({ open: true, preWork: false })}
                                 >
                                     Add Services
                                 </Button>}
@@ -186,11 +187,11 @@ const Service = ({ workOrderId }) => {
                                                 <Box ml={1}>
                                                     {data?.preWork ?
                                                         <HtmlTooltip title="Pre Work Service">
-                                                            <RestoreIcon />
+                                                            <RestoreIcon fontSize="small" />
                                                         </HtmlTooltip>
                                                         :
                                                         <HtmlTooltip title="Post Work Service">
-                                                            <UpdateIcon />
+                                                            <UpdateIcon fontSize="small" />
                                                         </HtmlTooltip>
                                                     }
                                                 </Box>}
@@ -201,6 +202,12 @@ const Service = ({ workOrderId }) => {
                                                         variant="outlined"
                                                         color="primary"
                                                     />
+                                                </Box>}
+                                            {(data?.type === "service" && data?.assignedUsers?.length > 0) &&
+                                                <Box ml={1}>
+                                                    <HtmlTooltip title={(data?.assignedUsers?.map((e) => e?.optionLabel))?.toString()}>
+                                                        <PeopleIcon />
+                                                    </HtmlTooltip>
                                                 </Box>}
                                         </Box>
                                     </Grid>
@@ -235,7 +242,7 @@ const Service = ({ workOrderId }) => {
                             </MenuItem>
                             <MenuItem
                                 onClick={() => {
-                                    setServiceDialog(true);
+                                    setServiceDialog({ open: true, preWork: selectedService.preWork });
                                     setAnchorEl(null);
                                 }}>
                                 Add Services
@@ -302,16 +309,17 @@ const Service = ({ workOrderId }) => {
                 }}
             />
         }
-        {serviceDialog &&
+        {serviceDialog.open &&
             <AssignServiceDialog
                 reference="workorder"
                 referenceId={workOrderId}
-                handleClose={() => setServiceDialog(false)}
+                handleClose={() => setServiceDialog({ open: false, preWork: false })}
                 ids={[workOrderId]}
                 onSuccess={() => {
                     fetchService();
-                    setServiceDialog(false);
+                    setServiceDialog({ open: false, preWork: false });
                 }}
+                extraStaticFilter={[{ field: 'preWork', term: serviceDialog.preWork }]}
             />
         }
         {arrangeView && (
