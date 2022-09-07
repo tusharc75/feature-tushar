@@ -43,7 +43,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
         .then(({ data: { data } }) => {
           setStepDetails({
             stepName: data?.stepName, leadDay: data?.leadDay, isPassFail: data?.isPassFail,
-            isFailAddon: data?.isFailAddon, failAddon: data?.failAddon, ispassAddon: data?.ispassAddon, passAddon: data?.passAddon,
+            isFailAddon: data?.isFailAddon, failAddon: data?.failAddon, isPassAddon: data?.isPassAddon, passAddon: data?.passAddon,
             isJumpStepPass: data?.isJumpStepPass, jumpStepsPass: data?.jumpStepsPass, isJumpStepFail: data?.isJumpStepFail, jumpStepsFail: data?.jumpStepsFail
           })
         })
@@ -52,7 +52,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
     }
     else {
       setStepDetails({
-        stepName: "", leadDay: 0, isPassFail: false, isFailAddon: false, failAddon: [], ispassAddon: false, passAddon: [],
+        stepName: "", leadDay: 0, isPassFail: false, isFailAddon: false, failAddon: [], isPassAddon: false, passAddon: [],
         isJumpStepPass: false, jumpStepsPass: [], isJumpStepFail: false, jumpStepsFail: []
       })
     }
@@ -190,10 +190,10 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                             <FormControlLabel
                               control={
                                 <Checkbox
-                                  name="ispassAddon"
-                                  checked={values['ispassAddon']}
+                                  name="isPassAddon"
+                                  checked={values['isPassAddon']}
                                   onChange={(e) => {
-                                    setFieldValue('ispassAddon', e.target.checked);
+                                    setFieldValue('isPassAddon', e.target.checked);
                                   }}
                                   color="primary"
                                 />
@@ -202,7 +202,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                             />
                           </Grid>
                           <Grid item xs={6}>
-                            {values['ispassAddon'] &&
+                            {values['isPassAddon'] &&
                               <Autocomplete
                                 options={services}
                                 fullWidth
