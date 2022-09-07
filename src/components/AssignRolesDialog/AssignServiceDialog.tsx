@@ -160,26 +160,14 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
         })
         .then(() => {
           setAssigning(false);
-          onSuccess();
         })
         .catch((err) => {
           setAssigning(false);
           toastConfig.setToastConfig(err);
         });
     }
-    else if (reference === 'workorder') {
-      axiosInstance()
-        .post(`${workOrder.api}/service/${referenceId}`, {
-          serviceIds: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => d.id)
-        })
-        .then(() => {
-          setAssigning(false);
-          onSuccess();
-        })
-        .catch((err) => {
-          setAssigning(false);
-          toastConfig.setToastConfig(err);
-        });
+    else {
+      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) })));
     }
   };
 
