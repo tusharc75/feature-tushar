@@ -28,7 +28,7 @@ const Service = ({ workOrderId }) => {
     const [serviceData, setServiceData] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [userAssignDialog, setUserAssignDialog] = useState(false);
-    const [serviceDialog, setServiceDialog] = useState({ open: false, preWork: false });
+    const [serviceDialog, setServiceDialog] = useState({ open: false, uniqueId: null, preWork: false });
     const [arrangeView, setArrangeView] = useState(false);
 
     useEffect(() => {
@@ -42,11 +42,13 @@ const Service = ({ workOrderId }) => {
                 data?.forEach((e) => {
                     e.type = "service";
                 })
-                let tempArrayServiceIndex = findLastIndex([...data], d => d.preWork === true)
-                data.splice(tempArrayServiceIndex + 1, 0, { _id: "quotation", uniqueId: "quotation", type: "quotation", serviceName: "Quote" })
-                setServiceSteps(data)
-                if (data?.length && selectedService === null) {
-                    setSelectedService(data[0])
+                const preWorkService = data?.filter((e) => e.preWork);
+                const postWorkService = data?.filter((e) => !e.preWork);
+                const quote = [{ _id: "quotation", uniqueId: "quotation", type: "quotation", serviceName: "Quote" }]
+                const services = [...preWorkService, ...quote, ...postWorkService];
+                setServiceSteps(services)
+                if (services?.length && selectedService === null) {
+                    setSelectedService(services[0])
                 }
             }
         }).catch((err) => {
@@ -124,6 +126,22 @@ const Service = ({ workOrderId }) => {
             });
     }
 
+    const handleAddService = (ids, uniqueId) => {
+        const data: any = {}
+        data.serviceIds = ids;
+        if (uniqueId) {
+            data.aboveServiceUniqueId = uniqueId;
+        }
+        axiosInstance()
+            .post(`${workOrder.api}/service/${workOrderId}`, data)
+            .then(() => {
+                fetchService();
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    }
+
     return (<Box p={2}>
         {serviceSteps ?
             <Grid container>
@@ -135,7 +153,7 @@ const Service = ({ workOrderId }) => {
                                     variant="text"
                                     color="primary"
                                     size="small"
-                                    onClick={() => setServiceDialog({ open: true, preWork: false })}
+                                    onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: false })}
                                 >
                                     Add Services
                                 </Button>}
@@ -242,7 +260,7 @@ const Service = ({ workOrderId }) => {
                             </MenuItem>
                             <MenuItem
                                 onClick={() => {
-                                    setServiceDialog({ open: true, preWork: selectedService.preWork });
+                                    setServiceDialog({ open: true, uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
                                     setAnchorEl(null);
                                 }}>
                                 Add Services
@@ -283,6 +301,7 @@ const Service = ({ workOrderId }) => {
                                     serviceData={serviceData}
                                     serviceSteps={serviceSteps}
                                     setSelectedService={setSelectedService}
+                                    handleAddService={handleAddService}
                                 />
                                 : <Quotation />}
                         </Box>
@@ -313,11 +332,11 @@ const Service = ({ workOrderId }) => {
             <AssignServiceDialog
                 reference="workorder"
                 referenceId={workOrderId}
-                handleClose={() => setServiceDialog({ open: false, preWork: false })}
-                ids={[workOrderId]}
-                onSuccess={() => {
-                    fetchService();
-                    setServiceDialog({ open: false, preWork: false });
+                handleClose={() => setServiceDialog({ open: false, uniqueId: null, preWork: false })}
+                ids={serviceSteps?.filter((e) => e.type === "service")?.map((e) => e._id)}
+                onSuccess={(data) => {
+                    handleAddService(data?.map((e) => e.service), serviceDialog.uniqueId)
+                    setServiceDialog({ open: false, uniqueId: null, preWork: false });
                 }}
                 extraStaticFilter={[{ field: 'preWork', term: serviceDialog.preWork }]}
             />

@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData, serviceSteps, setSelectedService }) => {
+const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData, handleAddService, serviceSteps, setSelectedService }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -212,10 +212,6 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
         toastConfig.setToastConfig(error);
       });
   };
-
-  const handleAddService = () => {
-    setAddServiceConfirmation({ open: false, services: [] });
-  }
 
   function validate(values) {
     const errors = {};
@@ -467,7 +463,10 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
           onClose={() => {
             setAddServiceConfirmation({ open: false, services: [] });
           }}
-          onOk={handleAddService}
+          onOk={() => {
+            handleAddService(addServiceConfirmation.services?.map((e) => e._id), uniqueId)
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
         />
       )}
     </Box>
