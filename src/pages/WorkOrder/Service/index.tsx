@@ -37,14 +37,16 @@ const Service = ({ workOrderId }) => {
 
     const fetchService = () => {
         axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`).then(({ data: { data } }) => {
-            data?.forEach((e) => {
-                e.type = "service";
-            })
-            let tempArrayServiceIndex = findLastIndex([...data], d => d.preWork === true)
-            data.splice(tempArrayServiceIndex + 1, 0, { _id: "quotation", uniqueId: "quotation", type: "quotation", serviceName: "Quote" })
-            setServiceSteps(data)
-            if (data?.length && selectedService === null) {
-                setSelectedService(data[0])
+            if (data?.length) {
+                data?.forEach((e) => {
+                    e.type = "service";
+                })
+                let tempArrayServiceIndex = findLastIndex([...data], d => d.preWork === true)
+                data.splice(tempArrayServiceIndex + 1, 0, { _id: "quotation", uniqueId: "quotation", type: "quotation", serviceName: "Quote" })
+                setServiceSteps(data)
+                if (data?.length && selectedService === null) {
+                    setSelectedService(data[0])
+                }
             }
         }).catch((err) => {
             toastConfig.setToastConfig(err);
@@ -127,14 +129,15 @@ const Service = ({ workOrderId }) => {
                 <Grid item xs={3}>
                     <Box mb={1} display="flex">
                         <Box flexGrow={1}>
-                            <Button
-                                variant="text"
-                                color="primary"
-                                size="small"
-                                onClick={() => setServiceDialog(true)}
-                            >
-                                Add Services
-                            </Button>
+                            {serviceSteps?.length === 0 &&
+                                <Button
+                                    variant="text"
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => setServiceDialog(true)}
+                                >
+                                    Add Services
+                                </Button>}
                         </Box>
                         <Box>
                             <Button
@@ -229,6 +232,13 @@ const Service = ({ workOrderId }) => {
                                     setAnchorEl(null);
                                 }}>
                                 Assign Users
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    setServiceDialog(true);
+                                    setAnchorEl(null);
+                                }}>
+                                Add Services
                             </MenuItem>
                             <MenuItem
                                 onClick={() => {
