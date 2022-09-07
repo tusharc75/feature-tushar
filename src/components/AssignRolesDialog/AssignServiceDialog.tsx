@@ -15,7 +15,7 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let searchTimeout;
 
-const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, ids }) => {
+const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, ids, extraStaticFilter = [] }) => {
 
   const renderedFrom = `${routes.serviceMaster.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -125,6 +125,11 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     const updatedFilters = [];
+    if (extraStaticFilter?.length) {
+      extraStaticFilter?.forEach((e) => {
+        updatedFilters.push(e);
+      })
+    }
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
@@ -155,26 +160,14 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
         })
         .then(() => {
           setAssigning(false);
-          onSuccess();
         })
         .catch((err) => {
           setAssigning(false);
           toastConfig.setToastConfig(err);
         });
     }
-    else if (reference === 'workorder') {
-      axiosInstance()
-        .post(`${workOrder.api}/service/${referenceId}`, {
-          serviceIds: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => d.id)
-        })
-        .then(() => {
-          setAssigning(false);
-          onSuccess();
-        })
-        .catch((err) => {
-          setAssigning(false);
-          toastConfig.setToastConfig(err);
-        });
+    else {
+      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) })));
     }
   };
 

@@ -18,6 +18,7 @@ import { GrDrag } from 'react-icons/gr';
 import RestoreIcon from '@material-ui/icons/Restore';
 import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import PeopleIcon from '@material-ui/icons/People';
 
 const Service = ({ workOrderId }) => {
 
@@ -27,7 +28,7 @@ const Service = ({ workOrderId }) => {
     const [serviceData, setServiceData] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [userAssignDialog, setUserAssignDialog] = useState(false);
-    const [serviceDialog, setServiceDialog] = useState(false);
+    const [serviceDialog, setServiceDialog] = useState({ open: false, uniqueId: null, preWork: false });
     const [arrangeView, setArrangeView] = useState(false);
 
     useEffect(() => {
@@ -37,14 +38,18 @@ const Service = ({ workOrderId }) => {
 
     const fetchService = () => {
         axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`).then(({ data: { data } }) => {
-            data?.forEach((e) => {
-                e.type = "service";
-            })
-            let tempArrayServiceIndex = findLastIndex([...data], d => d.preWork === true)
-            data.splice(tempArrayServiceIndex + 1, 0, { _id: "quotation", uniqueId: "quotation", type: "quotation", serviceName: "Quote" })
-            setServiceSteps(data)
-            if (data?.length && selectedService === null) {
-                setSelectedService(data[0])
+            if (data?.length) {
+                data?.forEach((e) => {
+                    e.type = "service";
+                })
+                const preWorkService = data?.filter((e) => e.preWork);
+                const postWorkService = data?.filter((e) => !e.preWork);
+                const quote = [{ _id: "quotation", uniqueId: "quotation", type: "quotation", serviceName: "Quote" }]
+                const services = [...preWorkService, ...quote, ...postWorkService];
+                setServiceSteps(services)
+                if (services?.length && selectedService === null) {
+                    setSelectedService(services[0])
+                }
             }
         }).catch((err) => {
             toastConfig.setToastConfig(err);
@@ -121,20 +126,37 @@ const Service = ({ workOrderId }) => {
             });
     }
 
+    const handleAddService = (ids, uniqueId) => {
+        const data: any = {}
+        data.serviceIds = ids;
+        if (uniqueId) {
+            data.aboveServiceUniqueId = uniqueId;
+        }
+        axiosInstance()
+            .post(`${workOrder.api}/service/${workOrderId}`, data)
+            .then(() => {
+                fetchService();
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    }
+
     return (<Box p={2}>
         {serviceSteps ?
             <Grid container>
                 <Grid item xs={3}>
                     <Box mb={1} display="flex">
                         <Box flexGrow={1}>
-                            <Button
-                                variant="text"
-                                color="primary"
-                                size="small"
-                                onClick={() => setServiceDialog(true)}
-                            >
-                                Add Services
-                            </Button>
+                            {serviceSteps?.length === 0 &&
+                                <Button
+                                    variant="text"
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: false })}
+                                >
+                                    Add Services
+                                </Button>}
                         </Box>
                         <Box>
                             <Button
@@ -183,11 +205,11 @@ const Service = ({ workOrderId }) => {
                                                 <Box ml={1}>
                                                     {data?.preWork ?
                                                         <HtmlTooltip title="Pre Work Service">
-                                                            <RestoreIcon />
+                                                            <RestoreIcon fontSize="small" />
                                                         </HtmlTooltip>
                                                         :
                                                         <HtmlTooltip title="Post Work Service">
-                                                            <UpdateIcon />
+                                                            <UpdateIcon fontSize="small" />
                                                         </HtmlTooltip>
                                                     }
                                                 </Box>}
@@ -198,6 +220,12 @@ const Service = ({ workOrderId }) => {
                                                         variant="outlined"
                                                         color="primary"
                                                     />
+                                                </Box>}
+                                            {(data?.type === "service" && data?.assignedUsers?.length > 0) &&
+                                                <Box ml={1}>
+                                                    <HtmlTooltip title={(data?.assignedUsers?.map((e) => e?.optionLabel))?.toString()}>
+                                                        <PeopleIcon />
+                                                    </HtmlTooltip>
                                                 </Box>}
                                         </Box>
                                     </Grid>
@@ -229,6 +257,13 @@ const Service = ({ workOrderId }) => {
                                     setAnchorEl(null);
                                 }}>
                                 Assign Users
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    setServiceDialog({ open: true, uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
+                                    setAnchorEl(null);
+                                }}>
+                                Add Services
                             </MenuItem>
                             <MenuItem
                                 onClick={() => {
@@ -266,6 +301,7 @@ const Service = ({ workOrderId }) => {
                                     serviceData={serviceData}
                                     serviceSteps={serviceSteps}
                                     setSelectedService={setSelectedService}
+                                    handleAddService={handleAddService}
                                 />
                                 : <Quotation />}
                         </Box>
@@ -292,16 +328,17 @@ const Service = ({ workOrderId }) => {
                 }}
             />
         }
-        {serviceDialog &&
+        {serviceDialog.open &&
             <AssignServiceDialog
                 reference="workorder"
                 referenceId={workOrderId}
-                handleClose={() => setServiceDialog(false)}
-                ids={[workOrderId]}
-                onSuccess={() => {
-                    fetchService();
-                    setServiceDialog(false);
+                handleClose={() => setServiceDialog({ open: false, uniqueId: null, preWork: false })}
+                ids={serviceSteps?.filter((e) => e.type === "service")?.map((e) => e._id)}
+                onSuccess={(data) => {
+                    handleAddService(data?.map((e) => e.service), serviceDialog.uniqueId)
+                    setServiceDialog({ open: false, uniqueId: null, preWork: false });
                 }}
+                extraStaticFilter={[{ field: 'preWork', term: serviceDialog.preWork }]}
             />
         }
         {arrangeView && (

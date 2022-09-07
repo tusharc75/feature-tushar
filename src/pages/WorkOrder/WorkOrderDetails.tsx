@@ -15,29 +15,17 @@ import { workOrder, sidebarResource, ACTIVITY_RESOURCE } from 'src/constants/hel
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
-import { BiEdit, BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
+import { BiEdit } from 'react-icons/bi';
 import TabPanel from 'src/components/TabPanel';
-import HideWhenOffline from 'src/components/HideWhenOffline';
 import { defaultActivityShow } from 'src/constants/helpers';
-import Steps from '../RentalManagement/Steps';
-import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from 'lodash';
-import { RiFlowChart } from 'react-icons/ri';
-import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
 import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
-import WorkOrderViews from './RoadMapViews';
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
+import View from './View';
+import Consumables from './Consumables';
 
 const WorkOrderDetails = () => {
   const renderedFrom = camelCase(routes?.workOrder.title);
@@ -57,7 +45,6 @@ const WorkOrderDetails = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [workOrderFields, setWorkOrderFields] = useState([]);
-  const [nextStep, setNextStep] = useState(false);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
@@ -189,47 +176,11 @@ const WorkOrderDetails = () => {
               }
             }}
           >
-            <Tab
-              className={'tabLayout'}
-              style={{
-                background: tabValue === 1 ? 'white' : '',
-                color: tabValue === 1 ? '#163340' : '#163340'
-              }}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                </div>
-              }
-              {...a11yProps(0)}
-            />
-            <Tab
-              className={'tabLayout'}
-              style={{
-                background: tabValue === 2 ? 'white' : '',
-                color: '#163340'
-              }}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                </div>
-              }
-              {...a11yProps(1)}
-            />
-            <Tab
-              className={'tabLayout'}
-              style={{
-                background: tabValue === 3 ? 'white' : '',
-                color: tabValue === 3 ? '#163340' : '#163340'
-              }}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                </div>
-              }
-              {...a11yProps(2)}
-            />
+            <Tab label="Header" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+            <Tab label="Services" value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+            <Tab label="Consumables" value={2} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+            <Tab label="Views" value={3} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
           </Tabs>
-
           <TabPanel value={tabValue} index={0}>
             <Box>
               {workOrderData && workOrderFields.length ? (
@@ -242,11 +193,20 @@ const WorkOrderDetails = () => {
             </Box>
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
-            <Service workOrderId={id} />
+            <Service
+              workOrderId={id} />
           </TabPanel>
           <TabPanel value={tabValue} index={2}>
+            <Consumables
+              workOrderId={id}
+            />
+          </TabPanel>
+          <TabPanel value={tabValue} index={3}>
             <Box>
-              <WorkOrderViews workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
+              <View
+                workOrderName={workOrderData?.workOrderNumber || ''}
+                workOrderId={id}
+                workOrderStatus={workOrderData?.status} />
             </Box>
           </TabPanel>
         </Paper>
@@ -278,7 +238,7 @@ const WorkOrderDetails = () => {
                             access: true
                           }
                         ]}
-                        handleActivityRefresh={() => {}}
+                        handleActivityRefresh={() => { }}
                         emails={[]}
                       />
                     </div>

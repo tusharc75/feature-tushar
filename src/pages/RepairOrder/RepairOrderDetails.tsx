@@ -31,6 +31,8 @@ import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Productpackage from './Productpackage';
 import WorkOrder from './WorkOrder';
+import Prework from './Prework';
+import Quotation from './Quotation';
 
 function a11yProps(index: any) {
   return {
@@ -275,7 +277,7 @@ const RepairOrderDetails = () => {
                       // allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {currentStep > 0 && repairOrderData && (
+                    {currentStep === 1 && repairOrderData && (
                       <WorkOrder
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
@@ -286,6 +288,35 @@ const RepairOrderDetails = () => {
                         renderedFrom={`${renderedFrom}_grid-2`}
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={false}
+                      // allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                    {(currentStep === 2 || currentStep === 4) && repairOrderData && (
+                      <Prework
+                        repairOrderData={repairOrderData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-3`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={false}
+                        isPrework={currentStep === 2 ? true : false}
+                      // allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                    {currentStep === 3 && repairOrderData && (
+                      <Quotation
+                        repairOrderData={repairOrderData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-4`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={true}
                       // allowedToEdit={allowedToEdit}
                       />
                     )}
