@@ -30,11 +30,13 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
   const [material, setMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
+  const [quotationData, setQuotationData] = useState(null);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields();
+    fetchQuotationData();
   }, []);
 
   useEffect(() => {
@@ -83,13 +85,13 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'service' ? "service"
+                label={`${row.original.type === 'service' ? "Service"
                   : row.original.type === 'product' ? "Product" : "Package"}`}
                 size="small"
                 color="primary"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                    `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
                   );
                 }}
               />
@@ -176,9 +178,6 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
           });
         }
       } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
@@ -188,7 +187,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     });
     {
       isMobile ? <Box display={"none"} /> : coloum.push({
-        accessor: 'actions',
+        accessor: 'action',
         Header: '',
         minWidth: 70,
         width: 70,
@@ -232,7 +231,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
-    const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/service/pre-work`);
+    const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/service/post-work`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data.inventory;
@@ -261,7 +260,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
 
   const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
     const subRows = material.filter((e) => e.parentId === parent._id);
-    const services = parent?.services?.filter((e) => e.preWork === true).map(d => {
+    const services = parent?.services?.map(d => {
       return {
         ...d,
         materialId: d._id,
@@ -346,10 +345,40 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     setRecordToUpdate(rowData);
   };
 
+  const fetchQuotationData = () => {
+    axiosInstance()
+      .get(`${repairOrder.api}/${repairOrderData._id}/quotation`)
+      .then(({ data: { data } }) => {
+        setQuotationData(data)
+      })
+  };
 
   return (
     <Fragment>
       <Grid container spacing={2}>
+        <Grid item xs={12} md={12} sm={12}>
+          <Box display="flex" justifyContent="flex-end" m={1}>
+            <Button
+              variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+              color="primary"
+              size="small"
+              style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+              disabled={quotationData?._id}
+              onClick={() => {
+                axiosInstance()
+                  .post(`${repairOrder.api}/${repairOrderData._id}/quotation`)
+                  .then(() => {
+                    fetchQuotationData();
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+            >
+              Create Quotation
+            </Button>
+          </Box>
+        </Grid>
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
             <Box
@@ -365,7 +394,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
                 uniqueKey="_id"
-                hideSelection={true}
+                hideSelection={false}
                 renderedFrom="repair_order_workorder_product_package"
                 isClientSideGrid={true}
               />
