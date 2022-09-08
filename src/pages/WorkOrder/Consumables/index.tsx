@@ -97,7 +97,10 @@ const Consumables = ({ workOrderId }) => {
         </Grid>
         {consumablesDialog &&
             <ConsumablesDialog
-                onSuccess={() => { setConsumablesDialog(false) }}
+                onSuccess={() => {
+                    setConsumablesDialog(false)
+                    fetchRecords()
+                }}
                 handleClose={() => { setConsumablesDialog(false) }}
                 workOrderId={workOrderId}
                 from={"consumable"}
