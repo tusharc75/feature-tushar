@@ -109,8 +109,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ?
-                  !row.original.serializedProduct ? "Non-Serialized Product" : "Product" : "Package"}`}
+                label={`${row.original.type === 'product' ? "Product" : "Package"}`}
                 size="small"
                 color="primary"
                 onClick={() => {

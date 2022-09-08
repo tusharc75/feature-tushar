@@ -19,6 +19,7 @@ import RestoreIcon from '@material-ui/icons/Restore';
 import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PeopleIcon from '@material-ui/icons/People';
+import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 
 const Service = ({ workOrderId }) => {
 
@@ -28,8 +29,9 @@ const Service = ({ workOrderId }) => {
     const [serviceData, setServiceData] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const [userAssignDialog, setUserAssignDialog] = useState(false);
-    const [serviceDialog, setServiceDialog] = useState({ open: false, uniqueId: null, preWork: false });
+    const [serviceDialog, setServiceDialog] = useState({ open: false, uniqueId: null, preWork: null });
     const [arrangeView, setArrangeView] = useState(false);
+    const [consumablesDialog, setConsumablesDialog] = useState(false);
 
     useEffect(() => {
         fetchService();
@@ -50,6 +52,9 @@ const Service = ({ workOrderId }) => {
                 if (services?.length && selectedService === null) {
                     setSelectedService(services[0])
                 }
+            }
+            else {
+                setServiceSteps([])
             }
         }).catch((err) => {
             toastConfig.setToastConfig(err);
@@ -153,21 +158,22 @@ const Service = ({ workOrderId }) => {
                                     variant="text"
                                     color="primary"
                                     size="small"
-                                    onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: false })}
+                                    onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}
                                 >
                                     Add Services
                                 </Button>}
                         </Box>
-                        <Box>
-                            <Button
-                                variant="outlined"
-                                color="primary"
-                                size="small"
-                                onClick={() => setArrangeView(true)}>
-                                <GrDrag fontSize="small" color="primary" className="mr-1" />
-                                Arrange
-                            </Button>
-                        </Box>
+                        {(serviceSteps?.length > 0) &&
+                            <Box>
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => setArrangeView(true)}>
+                                    <GrDrag fontSize="small" color="primary" className="mr-1" />
+                                    Arrange
+                                </Button>
+                            </Box>}
                     </Box>
                     <Box>
                         {serviceSteps?.map((data) => (
@@ -267,6 +273,13 @@ const Service = ({ workOrderId }) => {
                             </MenuItem>
                             <MenuItem
                                 onClick={() => {
+                                    setConsumablesDialog(true)
+                                    setAnchorEl(null);
+                                }}>
+                                Consume
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
                                     updateServiceStatus(selectedService?.uniqueId, "Complete")
                                     setAnchorEl(null);
                                 }}>
@@ -332,13 +345,13 @@ const Service = ({ workOrderId }) => {
             <AssignServiceDialog
                 reference="workorder"
                 referenceId={workOrderId}
-                handleClose={() => setServiceDialog({ open: false, uniqueId: null, preWork: false })}
+                handleClose={() => setServiceDialog({ open: false, uniqueId: null, preWork: null })}
                 ids={serviceSteps?.filter((e) => e.type === "service")?.map((e) => e._id)}
                 onSuccess={(data) => {
                     handleAddService(data?.map((e) => e.service), serviceDialog.uniqueId)
-                    setServiceDialog({ open: false, uniqueId: null, preWork: false });
+                    setServiceDialog({ open: false, uniqueId: null, preWork: null });
                 }}
-                extraStaticFilter={[{ field: 'preWork', term: serviceDialog.preWork }]}
+                extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
             />
         }
         {arrangeView && (
@@ -352,6 +365,12 @@ const Service = ({ workOrderId }) => {
                 loading={false}
             />
         )}
+        {consumablesDialog &&
+            <ConsumablesDialog
+                onSuccess={() => { setConsumablesDialog(false) }}
+                handleClose={() => { setConsumablesDialog(false) }}
+                workOrderId={workOrderId}
+                from={"service"} />}
     </Box >);
 }
 export default Service;
