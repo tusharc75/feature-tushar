@@ -12,12 +12,16 @@ import { CommonRenderer, CheckboxRenderer } from "../../../components/AgGridComp
 import { camelCase, capitalize } from "lodash";
 import { Link } from 'react-router-dom'
 import NoDataCell from "../../../components/Helpers/NoDataCell";
+import { Button } from "@material-ui/core";
+import { isMobile, isTablet } from "react-device-detect";
+import ConsumablesDialog from "./ConsumablesDialog";
 
 const Consumables = ({ workOrderId }) => {
 
     let renderedFrom = camelCase(routes?.workOrder.title + "_consumables")
 
     const [gridApi, setGridApi] = useState(null);
+    const [consumablesDialog, setConsumablesDialog] = useState(false);
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
     const { state: { user, permissions, selectedEntity } }: any = useData();
@@ -55,28 +59,49 @@ const Consumables = ({ workOrderId }) => {
     };
 
     return (<>
-        <Grid item xs={12} md={12} sm={12} className="mt-3">
-            {columns ?
-                <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameworkComponents}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    allowAction={false}
-                    loading={loading}
-                    isClientSideGrid={true}
-                    allowSelection={false}
-                    renderedFrom={renderedFrom}
-                    refreshGrid={fetchRecords}
-                />
-                : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-            }
+        <Grid container spacing={2}>
+            <Grid item xs={12} md={12} sm={12}>
+                <Box display="flex" justifyContent="flex-end" m={1}>
+                    <Button
+                        variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                        color="primary"
+                        size="small"
+                        style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                        onClick={() => setConsumablesDialog(true)}
+                    >
+                        Add Consumables
+                    </Button>
+                </Box>
+            </Grid>
+            <Grid item xs={12} md={12} sm={12} className="mt-3">
+                {columns ?
+                    <CustomAgGrid
+                        columns={columns}
+                        dataRows={dataRows}
+                        frameworkComponents={frameworkComponents}
+                        setGridApi={setGridApi}
+                        dispatch={dispatch}
+                        rowCount={rowCount}
+                        limit={limit}
+                        pageSizes={pageSizes}
+                        page={page}
+                        allowAction={false}
+                        loading={loading}
+                        isClientSideGrid={true}
+                        allowSelection={false}
+                        renderedFrom={renderedFrom}
+                        refreshGrid={fetchRecords}
+                    />
+                    : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
+                }
+            </Grid>
         </Grid>
+        {consumablesDialog &&
+            <ConsumablesDialog
+                onSuccess={() => { setConsumablesDialog(false) }}
+                handleClose={() => { setConsumablesDialog(false) }}
+                workOrderId={workOrderId}
+                from={"consumable"} />}
     </>
     );
 };
