@@ -19,6 +19,7 @@ import RestoreIcon from '@material-ui/icons/Restore';
 import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PeopleIcon from '@material-ui/icons/People';
+import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 
 const Service = ({ workOrderId }) => {
 
@@ -30,6 +31,7 @@ const Service = ({ workOrderId }) => {
     const [userAssignDialog, setUserAssignDialog] = useState(false);
     const [serviceDialog, setServiceDialog] = useState({ open: false, uniqueId: null, preWork: null });
     const [arrangeView, setArrangeView] = useState(false);
+    const [consumablesDialog, setConsumablesDialog] = useState(false);
 
     useEffect(() => {
         fetchService();
@@ -271,6 +273,13 @@ const Service = ({ workOrderId }) => {
                             </MenuItem>
                             <MenuItem
                                 onClick={() => {
+                                    setConsumablesDialog(true)
+                                    setAnchorEl(null);
+                                }}>
+                                Consumables
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
                                     updateServiceStatus(selectedService?.uniqueId, "Complete")
                                     setAnchorEl(null);
                                 }}>
@@ -356,6 +365,12 @@ const Service = ({ workOrderId }) => {
                 loading={false}
             />
         )}
+        {consumablesDialog &&
+            <ConsumablesDialog
+                onSuccess={() => { setConsumablesDialog(false) }}
+                handleClose={() => { setConsumablesDialog(false) }}
+                workOrderId={workOrderId}
+                from={"service"} />}
     </Box >);
 }
 export default Service;
