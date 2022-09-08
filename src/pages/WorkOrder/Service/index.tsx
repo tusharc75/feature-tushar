@@ -276,7 +276,7 @@ const Service = ({ workOrderId }) => {
                                     setConsumablesDialog(true)
                                     setAnchorEl(null);
                                 }}>
-                                Consumables
+                                Consume
                             </MenuItem>
                             <MenuItem
                                 onClick={() => {
