@@ -358,25 +358,43 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           <Box display="flex" justifyContent="flex-end" m={1}>
-            <Button
-              variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-              color="primary"
-              size="small"
-              style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-              disabled={quotationData?._id}
-              onClick={() => {
-                axiosInstance()
-                  .post(`${repairOrder.api}/${repairOrderData._id}/quotation`)
-                  .then(() => {
-                    fetchQuotationData();
-                  })
-                  .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                  });
-              }}
-            >
-              Create Quotation
-            </Button>
+            {quotationData?._id ?
+              <Button
+                variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                color="primary"
+                size="small"
+                style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                onClick={() => {
+                  window.open(
+                    `${routes.quotationDetail.path}/${quotationData?._id}`
+                  );
+                }}
+              >
+                View Quotation
+              </Button>
+              : <Button
+                variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                color="primary"
+                size="small"
+                style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                onClick={() => {
+                  axiosInstance()
+                    .post(`${repairOrder.api}/${repairOrderData._id}/quotation`)
+                    .then(({ data }) => {
+                      toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: data.message
+                      });
+                      fetchQuotationData();
+                    })
+                    .catch((error) => {
+                      toastConfig.setToastConfig(error);
+                    });
+                }}
+              >
+                Create Quotation
+              </Button>}
           </Box>
         </Grid>
         <Grid item xs={12} md={12} sm={12}>
