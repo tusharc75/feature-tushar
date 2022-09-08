@@ -165,6 +165,25 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from })
           toastConfig.setToastConfig(error);
         });
     }
+    else {
+      let tempData = selectedRecords.map(d => {
+        return {
+          "product": d._id,
+          "qty": d.qty
+        }
+      })
+      axiosInstance().post(`${workOrder.api}/${workOrderId}/consumable`, tempData).then(({ data }) => {
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   return (
