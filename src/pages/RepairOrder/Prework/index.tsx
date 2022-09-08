@@ -71,13 +71,13 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
                         {!isOffline && (
                             <Chip
                                 className="ml-1"
-                                label={`${row.original.type === 'service' ? "service"
+                                label={`${row.original.type === 'service' ? "Service"
                                     : row.original.type === 'product' ? "Product" : "Package"}`}
                                 size="small"
                                 color="primary"
                                 onClick={() => {
                                     window.open(
-                                        `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                                        `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
                                     );
                                 }}
                             />
@@ -94,6 +94,15 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
                 Cell: ({ row }) => (
                     row.original['status'] ?
                         <p> {row.original.status}</p>
+                        : <NoDataCell />
+                )
+            },
+            {
+                accessor: 'workOrder',
+                Header: 'Work Order',
+                Cell: ({ row }) => (
+                    row.original['workOrder'] ?
+                        <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`} target="_blank">{row.original['workOrder'].workOrderNumber}</a>
                         : <NoDataCell />
                 )
             }
@@ -138,7 +147,7 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
         var data: any = [];
         var inventory: any = [];
         var nonSerializeAsset: any = [];
-        const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/service/pre-work`);
+        const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/service/${isPrework ? "pre-work" : "post-work"}`);
         data = response?.data?.data;
         setMaterial(JSON.parse(JSON.stringify(data.material)));
         inventory = data.inventory;
@@ -150,6 +159,7 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
             parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
             parent.qtyDisplay = parent.qty;
             parent.isValid = true;
+            parent.status = parent?.workOrder?.status
             parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
             parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
             parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
@@ -167,11 +177,12 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
 
     const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
         const subRows = material.filter((e) => e.parentId === parent._id);
-        const services = parent?.services?.filter((e) => e.preWork === isPrework).map(d => {
+        const services = parent?.services?.map(d => {
             return {
                 ...d,
                 materialId: d._id,
                 parentId: parent._id,
+                workOrder: parent.workOrder,
                 type: "service"
             }
         });
