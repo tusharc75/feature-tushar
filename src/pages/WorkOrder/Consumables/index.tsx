@@ -40,6 +40,7 @@ const Consumables = ({ workOrderId }) => {
         data = response?.data?.data
         let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
+            finalObject.type = finalObject.type === "Service" ? "Soft" : "Hard";
             return finalObject;
         });
         dispatch({ type: "initialize", data: rows, count: rows.length });
@@ -50,6 +51,7 @@ const Consumables = ({ workOrderId }) => {
         { field: "product", headerName: "Product", show: true, cellRenderer: "commonRenderer" },
         { field: "service", headerName: "Service", show: true, cellRenderer: "commonRenderer" },
         { field: "qty", headerName: "Qty", show: true, cellRenderer: "commonRenderer" },
+        { field: "type", headerName: "Type", show: true, cellRenderer: "commonRenderer" },
         { field: "consumed", headerName: "Consumed", show: true, cellRenderer: "checkboxRenderer" },
     ];
 
@@ -59,21 +61,18 @@ const Consumables = ({ workOrderId }) => {
     };
 
     return (<>
+        <Box p={1}>
+            <Button
+                variant={'contained'}
+                color="primary"
+                size="small"
+                onClick={() => setConsumablesDialog(true)}
+            >
+                Add Consumables
+            </Button>
+        </Box>
         <Grid container spacing={2}>
-            <Grid item xs={12} md={12} sm={12}>
-                <Box display="flex" justifyContent="flex-end" m={1}>
-                    <Button
-                        variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                        color="primary"
-                        size="small"
-                        style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                        onClick={() => setConsumablesDialog(true)}
-                    >
-                        Add Consumables
-                    </Button>
-                </Box>
-            </Grid>
-            <Grid item xs={12} md={12} sm={12} className="mt-3">
+            <Grid item xs={12} md={12} sm={12} >
                 {columns ?
                     <CustomAgGrid
                         columns={columns}
@@ -101,7 +100,8 @@ const Consumables = ({ workOrderId }) => {
                 onSuccess={() => { setConsumablesDialog(false) }}
                 handleClose={() => { setConsumablesDialog(false) }}
                 workOrderId={workOrderId}
-                from={"consumable"} />}
+                from={"consumable"}
+            />}
     </>
     );
 };

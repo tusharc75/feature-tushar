@@ -159,6 +159,7 @@ const AssignServiceDialog = ({ reference, referenceId, onSuccess, handleClose, i
           services: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) }))
         })
         .then(() => {
+          onSuccess()
           setAssigning(false);
         })
         .catch((err) => {
