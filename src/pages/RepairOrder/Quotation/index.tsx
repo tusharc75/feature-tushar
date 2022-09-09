@@ -357,6 +357,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       delete element.packageDetail;
       delete element.subRows;
       delete element.services;
+      delete element.package;
     });
     setUpdating(true);
     axiosInstance()
