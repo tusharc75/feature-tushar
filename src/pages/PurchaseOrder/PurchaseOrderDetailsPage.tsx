@@ -235,7 +235,7 @@ const PurchaseOrderDetailsPage = () => {
     if (products?.length && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.closed) {
       var isCompleteReceived = false;
       var isPartialReceived = products?.some((e) => e?.actualReceived);
-      if (products?.filter((e) => e?.qty - ((e?.actualReceived || 0)) > 0).length > 0) {
+      if (products?.filter((e) => e?.qty - ((e?.actualReceived || 0) + (e?.rejectQuantity || 0)) > 0).length > 0) {
         isCompleteReceived = false;
       } else {
         isCompleteReceived = true;
@@ -272,7 +272,7 @@ const PurchaseOrderDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={purchaseOrderData?.purchaseOrderNumber} mainPoints={null} showHeading={true}>
-                  {![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) && (
+                  {![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ?
                     <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`}>
                       <span>
                         <Button
@@ -288,7 +288,22 @@ const PurchaseOrderDetailsPage = () => {
                         </Button>
                       </span>
                     </HtmlTooltip>
-                  )}
+                    :
+                    <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can reopen ${routes.purchaseOrder.title}`}>
+                      <span>
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          color="primary"
+                          size="small"
+                          onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
+                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                          style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                          disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
+                        >
+                          {isMobile && !isTablet ? <BiEdit size={20} /> : 'Reopen'}
+                        </Button>
+                      </span>
+                    </HtmlTooltip>}
                   {permissions?.purchaseOrder?.isUpdate && allowedToEdit && [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                     <>
                       <Button
