@@ -197,7 +197,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
         Cell: ({ row }) =>
           <>
 
-            {row.original.type === 'service' && <HtmlTooltip title={"Edit Service"}>
+            {row.original.type !== 'product' && <HtmlTooltip title={"Edit Service"}>
               <span>
                 <IconButton
                   size="small"
@@ -260,7 +260,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
 
   const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
     const subRows = material.filter((e) => e.parentId === parent._id);
-    const services = parent?.services?.map(d => {
+    const services = parent?.services?.filter(d => d.packageId === undefined || d.packageId === null || d.packageId === "").map(d => {
       return {
         ...d,
         materialId: d._id,
@@ -269,16 +269,26 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
         type: "service"
       }
     });
-    let combinedData = [...subRows, ...services]
+    const packages = parent?.packages?.map(d => {
+      return {
+        ...d,
+        materialId: d._id,
+        parentId: parent._id,
+        workOrder: parent.workOrder,
+        type: "package"
+      }
+    });
+
+    let combinedData = [...subRows, ...packages, ...services]
     combinedData.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow?.productDetail?.productName ?? _subRow?.serviceName;
+      _subRow.detail = _subRow?.type === "service" ? _subRow?.serviceName : _subRow?.type === "package" ? _subRow?.packageName : _subRow?.productDetail?.productName;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
       _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;;
-      _subRow.subRows = _subRow?.serviceName ? null : generateNestedData(material, inventory, nonSerializeAsset, _subRow);
+      _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow) : _subRow?.type !== "service" ? generateNestedData(material, inventory, nonSerializeAsset, _subRow) : null;
     });
     if (combinedData.length === 0 && parent.type === "package") {
       parent.isValid = false;
@@ -287,6 +297,28 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       parent.hideSelection = combinedData.filter((e) => e.hideSelection).length ? true : false;
     }
     return combinedData;
+  }
+
+  const getPackageSubRows = (parent, subRowPackage: any) => {
+
+    const services = parent?.services?.filter(d => d.packageId === subRowPackage._id).map(d => {
+      return {
+        ...d,
+        materialId: d._id,
+        parentId: parent._id,
+        workOrder: parent.workOrder,
+        type: "service"
+      }
+    });
+    services.forEach((_subRow, j) => {
+      _subRow.srno = subRowPackage.srno + '.' + (j + 1);
+      _subRow.detail = _subRow?.serviceName;
+      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
+      _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.isValid = true;
+      _subRow.subRows = null;
+    });
+    return services;
   }
 
   const getNestedSubRows = (obj, original) => {
@@ -314,7 +346,6 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       delete element.steps;
       delete element.materialId;
       delete element.parentId;
-      delete element.type;
       delete element.srno
       delete element.detail;
       delete element.serializedProduct;
@@ -325,6 +356,8 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       delete element.productDetail;
       delete element.packageDetail;
       delete element.subRows;
+      delete element.services;
+      delete element.package;
     });
     setUpdating(true);
     axiosInstance()
