@@ -20,6 +20,8 @@ import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PeopleIcon from '@material-ui/icons/People';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
+import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 // import useMediaQuery from '@mui/material/useMediaQuery';
 
 const Service = ({ workOrderId }) => {
@@ -32,6 +34,7 @@ const Service = ({ workOrderId }) => {
   const [serviceDialog, setServiceDialog] = useState({ open: false, uniqueId: null, preWork: null });
   const [arrangeView, setArrangeView] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
+  const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:600px)');
 
   useEffect(() => {
@@ -151,28 +154,47 @@ const Service = ({ workOrderId }) => {
       });
   };
 
+  const handleColapse = () => {
+    setIsColapsed((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (mobScreen) {
+      setIsColapsed(false);
+    }
+  }, [mobScreen]);
+
   const RenderSteps = () => {
     return (
       <>
-        <Box mb={1} display="flex">
-          <Box flexGrow={1}>
-            {serviceSteps?.length === 0 && (
-              <Button variant="text" color="primary" size="small" onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}>
-                Add Services
-              </Button>
-            )}
-          </Box>
-          {serviceSteps?.length > 0 && (
-            <Box>
-              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-                <GrDrag fontSize="small" color="primary" className="mr-1" />
-                Arrange
-              </Button>
-            </Box>
+        <Box mb={1} display="flex" style={{ flexWrap: 'wrap', justifyContent: isColapsed ? 'space-around' : 'space-between' }}>
+          {!isColapsed && (
+            <>
+              <Box>
+                {/* {serviceSteps?.length === 0 && ( */}
+                <Button variant="text" color="primary" size="small" onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}>
+                  Add Services
+                </Button>
+                {/* )} */}
+              </Box>
+              {serviceSteps?.length > 0 && (
+                <Box>
+                  <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                    <GrDrag fontSize="small" color="primary" className="mr-1" />
+                    Arrange
+                  </Button>
+                </Box>
+              )}
+            </>
+          )}
+          {mobScreen || (
+            <IconButton size={'small'} onClick={handleColapse}>
+              {isColapsed ? <ArrowForwardIosIcon /> : <ArrowBackIosIcon />}
+            </IconButton>
           )}
         </Box>
         <Box
-          sx={{ maxHeight: 'calc(100vh - 208px)', display: { xs: 'flex', sm: 'block' } }}
+          sx={{ height: mobScreen ? 'unset' : 'calc(100vh - 208px)', display: { xs: 'flex', sm: 'block' } }}
           style={{ overflowX: mobScreen ? 'auto' : 'hidden', overflowY: mobScreen ? 'hidden' : 'auto', marginBottom: mobScreen ? '20px' : '0px' }}
         >
           <Grid
@@ -211,54 +233,62 @@ const Service = ({ workOrderId }) => {
                 >
                   <Grid container>
                     <Grid item xs={10}>
-                      <Box display="flex" sx={{ flexWrap: 'wrap' }}>
-                        <Box pt={0.5}>
-                          <Badge badgeContent={data?.order} color="primary"></Badge>
+                      <Box display="flex" sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
+                        <Box>
+                          <Badge badgeContent={data?.order} color="primary" style={{ paddingLeft: isColapsed && '13px' }} />
                         </Box>
-                        <Box ml={3}>
-                          <Typography>{data?.serviceName}</Typography>
-                        </Box>
-                        {data?.type === 'service' && (
-                          <Box ml={1}>
-                            {data?.preWork ? (
-                              <HtmlTooltip title="Pre Work Service">
-                                <RestoreIcon fontSize="small" />
-                              </HtmlTooltip>
-                            ) : (
-                              <HtmlTooltip title="Post Work Service">
-                                <UpdateIcon fontSize="small" />
-                              </HtmlTooltip>
+                        {!isColapsed && (
+                          <>
+                            <Box ml={3}>
+                              <Typography>{data?.serviceName}</Typography>
+                            </Box>
+                            {data?.type === 'service' && (
+                              <Box ml={1}>
+                                {data?.preWork ? (
+                                  <HtmlTooltip title="Pre Work Service">
+                                    <RestoreIcon fontSize="small" />
+                                  </HtmlTooltip>
+                                ) : (
+                                  <HtmlTooltip title="Post Work Service">
+                                    <UpdateIcon fontSize="small" />
+                                  </HtmlTooltip>
+                                )}
+                              </Box>
                             )}
-                          </Box>
-                        )}
-                        {data?.type === 'service' && (
-                          <Box ml={1}>
-                            <Chip label={data?.status} variant="outlined" color="primary" />
-                          </Box>
-                        )}
-                        {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-                          <Box ml={1}>
-                            <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                              <PeopleIcon />
-                            </HtmlTooltip>
-                          </Box>
+                            {data?.type === 'service' && (
+                              <Box ml={1}>
+                                <Chip label={data?.status} variant="outlined" color="primary" />
+                              </Box>
+                            )}
+                            {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
+                              <Box ml={1}>
+                                <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                  <PeopleIcon />
+                                </HtmlTooltip>
+                              </Box>
+                            )}
+                          </>
                         )}
                       </Box>
                     </Grid>
-                    {data?.type === 'service' && (
-                      <Grid item xs={2} container justify="flex-end">
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          aria-label="delete"
-                          onClick={(event) => {
-                            handleOpenMenu(event, data?._id);
-                            setSelectedService(data);
-                          }}
-                        >
-                          <MoreHorizIcon />
-                        </IconButton>
-                      </Grid>
+                    {!isColapsed && (
+                      <>
+                        {data?.type === 'service' && (
+                          <Grid item xs={2} container justify="flex-end">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              aria-label="delete"
+                              onClick={(event) => {
+                                handleOpenMenu(event, data?._id);
+                                setSelectedService(data);
+                              }}
+                            >
+                              <MoreHorizIcon />
+                            </IconButton>
+                          </Grid>
+                        )}
+                      </>
                     )}
                   </Grid>
                 </Box>
@@ -325,11 +355,18 @@ const Service = ({ workOrderId }) => {
       {serviceSteps ? (
         <Grid container style={{ maxWidth: '92vw' }}>
           {/* {!mobScreen && ( */}
-          <Grid item xs={12} sm={5} md={4} lg={3}>
+          <Grid item xs={12} sm={5} md={4} lg={3} style={{ maxWidth: isColapsed && '60px', flexBasis: isColapsed && '60px' }}>
             <RenderSteps />
           </Grid>
           {/* )} */}
-          <Grid item xs={12} sm={7} md={8} lg={9}>
+          <Grid
+            item
+            xs={12}
+            sm={7}
+            md={8}
+            lg={9}
+            style={{ maxWidth: isColapsed && 'calc(100% - 60px)', flexBasis: isColapsed && 'calc(100% - 60px)' }}
+          >
             {selectedService && (
               <Box border={1} ml={2} borderColor="grey.300">
                 {selectedService?.type === 'service' ? (
