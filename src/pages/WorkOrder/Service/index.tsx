@@ -164,6 +164,28 @@ const Service = ({ workOrderId }) => {
     }
   }, [mobScreen]);
 
+  const stylesForEveryTab = (selectedService, data) => {
+    if (selectedService?._id == data?._id) {
+      return {
+        borderColor: '#329592',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        backgroundColor: data?.status === 'Complete' ? '#E9FFE8' : data?.status === 'Fail' ? '#FFE9EA' : 'white',
+        cursor: 'pointer',
+        boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px',
+        borderRadius: '3px'
+      };
+    } else {
+      return {
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        backgroundColor: data?.status === 'Complete' ? '#E9FFE8' : data?.status === 'Fail' ? '#FFE9EA' : 'white',
+        borderColor: 'rgb(224, 224, 224)',
+        cursor: 'pointer'
+      };
+    }
+  };
+
   const RenderSteps = () => {
     return (
       <>
@@ -206,94 +228,92 @@ const Service = ({ workOrderId }) => {
               paddingBottom: mobScreen ? '15px' : '0px'
             }}
           >
-            {serviceSteps?.map((data) => (
-              <Grid item xs={12}>
-                <Box
-                  style={
-                    selectedService?._id == data?._id
-                      ? {
-                          borderColor: '#329592',
-                          borderWidth: '1px',
-                          borderStyle: 'solid',
-                          backgroundColor: data?.status === 'Complete' ? '#E9FFE8' : data?.status === 'Fail' ? '#FFE9EA' : 'white',
-                          cursor: 'pointer'
-                        }
-                      : {
-                          borderWidth: '1px',
-                          borderStyle: 'solid',
-                          backgroundColor: data?.status === 'Complete' ? '#E9FFE8' : data?.status === 'Fail' ? '#FFE9EA' : 'white',
-                          borderColor: 'rgb(224, 224, 224)',
-                          cursor: 'pointer'
-                        }
-                  }
-                  p={2}
-                  onClick={() => {
-                    setSelectedService(data);
-                  }}
-                >
-                  <Grid container>
-                    <Grid item xs={10}>
-                      <Box display="flex" sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
-                        <Box>
-                          <Badge badgeContent={data?.order} color="primary" style={{ paddingLeft: isColapsed && '13px' }} />
+            {serviceSteps?.map((data, index) => {
+              const style = stylesForEveryTab(selectedService, data);
+
+              // for disabled section
+              const secondItem = index === 1;
+
+              return (
+                <Grid item xs={12}>
+                  <Box
+                    style={{
+                      ...style,
+
+                      // for disabled section
+                      pointerEvents: secondItem ? 'none' : 'auto',
+                      opacity: secondItem && '.5',
+                      userSelect: secondItem ? 'none' : 'auto'
+                    }}
+                    p={2}
+                    onClick={() => {
+                      setSelectedService(data);
+                    }}
+                  >
+                    <Grid container>
+                      <Grid item xs={10}>
+                        <Box display="flex" sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
+                          <Box>
+                            <Badge badgeContent={data?.order} color="primary" style={{ paddingLeft: isColapsed && '13px' }} />
+                          </Box>
+                          {!isColapsed && (
+                            <>
+                              <Box ml={3}>
+                                <Typography>{data?.serviceName}</Typography>
+                              </Box>
+                              {data?.type === 'service' && (
+                                <Box ml={1}>
+                                  {data?.preWork ? (
+                                    <HtmlTooltip title="Pre Work Service">
+                                      <RestoreIcon fontSize="small" />
+                                    </HtmlTooltip>
+                                  ) : (
+                                    <HtmlTooltip title="Post Work Service">
+                                      <UpdateIcon fontSize="small" />
+                                    </HtmlTooltip>
+                                  )}
+                                </Box>
+                              )}
+                              {data?.type === 'service' && (
+                                <Box ml={1}>
+                                  <Chip label={data?.status} variant="outlined" color="primary" />
+                                </Box>
+                              )}
+                              {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
+                                <Box ml={1}>
+                                  <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                    <PeopleIcon />
+                                  </HtmlTooltip>
+                                </Box>
+                              )}
+                            </>
+                          )}
                         </Box>
-                        {!isColapsed && (
-                          <>
-                            <Box ml={3}>
-                              <Typography>{data?.serviceName}</Typography>
-                            </Box>
-                            {data?.type === 'service' && (
-                              <Box ml={1}>
-                                {data?.preWork ? (
-                                  <HtmlTooltip title="Pre Work Service">
-                                    <RestoreIcon fontSize="small" />
-                                  </HtmlTooltip>
-                                ) : (
-                                  <HtmlTooltip title="Post Work Service">
-                                    <UpdateIcon fontSize="small" />
-                                  </HtmlTooltip>
-                                )}
-                              </Box>
-                            )}
-                            {data?.type === 'service' && (
-                              <Box ml={1}>
-                                <Chip label={data?.status} variant="outlined" color="primary" />
-                              </Box>
-                            )}
-                            {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-                              <Box ml={1}>
-                                <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                  <PeopleIcon />
-                                </HtmlTooltip>
-                              </Box>
-                            )}
-                          </>
-                        )}
-                      </Box>
+                      </Grid>
+                      {!isColapsed && (
+                        <>
+                          {data?.type === 'service' && (
+                            <Grid item xs={2} container justify="flex-end">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                aria-label="delete"
+                                onClick={(event) => {
+                                  handleOpenMenu(event, data?._id);
+                                  setSelectedService(data);
+                                }}
+                              >
+                                <MoreHorizIcon />
+                              </IconButton>
+                            </Grid>
+                          )}
+                        </>
+                      )}
                     </Grid>
-                    {!isColapsed && (
-                      <>
-                        {data?.type === 'service' && (
-                          <Grid item xs={2} container justify="flex-end">
-                            <IconButton
-                              size="small"
-                              color="primary"
-                              aria-label="delete"
-                              onClick={(event) => {
-                                handleOpenMenu(event, data?._id);
-                                setSelectedService(data);
-                              }}
-                            >
-                              <MoreHorizIcon />
-                            </IconButton>
-                          </Grid>
-                        )}
-                      </>
-                    )}
-                  </Grid>
-                </Box>
-              </Grid>
-            ))}
+                  </Box>
+                </Grid>
+              );
+            })}
           </Grid>
           <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
             <MenuItem
