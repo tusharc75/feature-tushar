@@ -78,7 +78,7 @@ const Service = ({ workOrderId }) => {
       });
   };
 
-  const handleOpenMenu = (event, _id) => {
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
@@ -172,7 +172,7 @@ const Service = ({ workOrderId }) => {
         borderStyle: 'solid',
         backgroundColor: data?.status === 'Complete' ? '#E9FFE8' : data?.status === 'Fail' ? '#FFE9EA' : 'white',
         cursor: 'pointer',
-        boxShadow: 'rgba(0, 0, 0, 0.35) 0px 5px 15px',
+        boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
       };
     } else {
@@ -232,18 +232,14 @@ const Service = ({ workOrderId }) => {
               const style = stylesForEveryTab(selectedService, data);
 
               // for disabled section
-              const secondItem = index === 1;
+              const secondItem = false;
 
               return (
                 <Grid item xs={12}>
                   <Box
                     style={{
                       ...style,
-
-                      // for disabled section
-                      pointerEvents: secondItem ? 'none' : 'auto',
-                      opacity: secondItem && '.5',
-                      userSelect: secondItem ? 'none' : 'auto'
+                      transition: '.3s'
                     }}
                     p={2}
                     onClick={() => {
@@ -299,7 +295,7 @@ const Service = ({ workOrderId }) => {
                                 color="primary"
                                 aria-label="delete"
                                 onClick={(event) => {
-                                  handleOpenMenu(event, data?._id);
+                                  handleOpenMenu(event);
                                   setSelectedService(data);
                                 }}
                               >
@@ -315,56 +311,66 @@ const Service = ({ workOrderId }) => {
               );
             })}
           </Grid>
-          <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-            <MenuItem
-              onClick={() => {
-                setUserAssignDialog(true);
-                setAnchorEl(null);
-              }}
+          {anchorEl && (
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleCloseMenu}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
-              Assign Users
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setServiceDialog({ open: true, uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
-                setAnchorEl(null);
-              }}
-            >
-              Add Services
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setConsumablesDialog(true);
-                setAnchorEl(null);
-              }}
-            >
-              Consume
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                updateServiceStatus(selectedService?.uniqueId, 'Complete');
-                setAnchorEl(null);
-              }}
-            >
-              Complete
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                updateServiceStatus(selectedService?.uniqueId, 'Fail');
-                setAnchorEl(null);
-              }}
-            >
-              Fail
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                handleRemoveService(selectedService?.uniqueId);
-                setAnchorEl(null);
-              }}
-            >
-              Remove
-            </MenuItem>
-          </Menu>
+              <MenuItem
+                onClick={() => {
+                  setUserAssignDialog(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Assign Users
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setServiceDialog({ open: true, uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
+                  setAnchorEl(null);
+                }}
+              >
+                Add Services
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setConsumablesDialog(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Consume
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  updateServiceStatus(selectedService?.uniqueId, 'Complete');
+                  setAnchorEl(null);
+                }}
+              >
+                Complete
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  updateServiceStatus(selectedService?.uniqueId, 'Fail');
+                  setAnchorEl(null);
+                }}
+              >
+                Fail
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleRemoveService(selectedService?.uniqueId);
+                  setAnchorEl(null);
+                }}
+              >
+                Remove
+              </MenuItem>
+            </Menu>
+          )}
         </Box>
       </>
     );
