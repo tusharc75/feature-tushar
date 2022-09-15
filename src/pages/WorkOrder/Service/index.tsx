@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { workOrder, WORKORDER_SERVICE_COLOR } from 'src/constants/helpers';
+import { workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -26,6 +26,7 @@ import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 const Service = ({ workOrderId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [serviceSteps, setServiceSteps] = useState(null);
+  const [disabledServicesOrder, setDisabledServicesOrder] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [serviceData, setServiceData] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -56,6 +57,16 @@ const Service = ({ workOrderId }) => {
           setServiceSteps(services);
           if (services?.length && selectedService === null) {
             setSelectedService(services[0]);
+          }
+          let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1))
+          let tempServiceIndex = tempServiceSortedArray.findIndex(d => [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.fail].includes(d.status))
+          if (tempServiceIndex > -1) {
+            tempServiceSortedArray[tempServiceIndex - 1] ?
+              setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
+              : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order)
+          }
+          else {
+            setDisabledServicesOrder(tempServiceSortedArray[0]?.order)
           }
         } else {
           setServiceSteps([]);
@@ -164,6 +175,17 @@ const Service = ({ workOrderId }) => {
   }, [mobScreen]);
 
   const stylesForEveryTab = (selectedService, data) => {
+
+    if (data?.type !== 'service' || data?.order > disabledServicesOrder) {
+      return {
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'rgb(224, 224, 224)',
+        cursor: 'not-allowed',
+        PointerEvent: 'none',
+        opacity: '.5'
+      };
+    }
     if (selectedService?._id == data?._id) {
       return {
         borderColor: '#329592',
@@ -232,9 +254,6 @@ const Service = ({ workOrderId }) => {
                 {serviceSteps?.map((data, index) => {
                   const style = stylesForEveryTab(selectedService, data);
 
-                  // for disabled section
-                  const secondItem = false;
-
                   return (
                     <Grid item xs={12}>
                       <Box
@@ -244,7 +263,9 @@ const Service = ({ workOrderId }) => {
                         }}
                         p={2}
                         onClick={() => {
-                          setSelectedService(data);
+                          if (!(data?.type !== 'service' || data?.order > disabledServicesOrder)) {
+                            setSelectedService(data);
+                          }
                         }}
                       >
                         <Grid container>
@@ -289,7 +310,7 @@ const Service = ({ workOrderId }) => {
                           </Grid>
                           {!isColapsed && (
                             <>
-                              {data?.type === 'service' && (
+                              {(!(data?.type !== 'service' || data?.order > disabledServicesOrder)) && (
                                 <Grid item xs={2} container justify="flex-end">
                                   <IconButton
                                     size="small"
@@ -349,16 +370,18 @@ const Service = ({ workOrderId }) => {
                 Consume
               </MenuItem>
               <MenuItem
+                disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.inProgress}
                 onClick={() => {
-                  updateServiceStatus(selectedService?.uniqueId, 'Complete');
+                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete);
                   setAnchorEl(null);
                 }}
               >
                 Complete
               </MenuItem>
               <MenuItem
+                disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.inProgress}
                 onClick={() => {
-                  updateServiceStatus(selectedService?.uniqueId, 'Fail');
+                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.fail);
                   setAnchorEl(null);
                 }}
               >
@@ -392,7 +415,8 @@ const Service = ({ workOrderId }) => {
                     getServiceData={getServiceData}
                     serviceData={serviceData}
                     serviceSteps={serviceSteps}
-                    setSelectedService={setSelectedService}
+                    selectedServiceStatus={selectedService.status}
+                    updateServiceStatus={updateServiceStatus}
                     handleAddService={handleAddService}
                   />
                 ) : (
