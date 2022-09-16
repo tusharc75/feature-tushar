@@ -13,7 +13,7 @@ import useColumns, { getFrameworkComponents } from 'src/constants/useColumns';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import AddServiceMaster from './AddServiceMaster';
@@ -61,7 +61,7 @@ const ServiceMaster = (props: Props) => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
+  const defaultColumns = [{ field: 'serviceName', headerName: 'Service Name', show: true, cellRenderer: 'serviceRenderer' }, { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
 
   const fetchGridColumns = () => {
     setColumns(null);
@@ -71,17 +71,20 @@ const ServiceMaster = (props: Props) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.serviceMaster?.title, o?.fieldData, routes.serviceMasterDetail.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
+          if (o?.fieldData?.fieldName !== "serviceName") {
+            let currentColumn = getColumnData(routes.serviceMaster?.title, o?.fieldData, routes.serviceMasterDetail.path);
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData];
+              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                rendererNames.push(currentColumn?.rendererName);
+              }
             }
           }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
+          serviceRenderer: ServiceRenderer,
           actionsRenderer: ActionsRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
@@ -160,6 +163,12 @@ const ServiceMaster = (props: Props) => {
         return field;
     }
   };
+
+  const ServiceRenderer = (params: any) => (
+    <Link className="link" title={params.value} to={`${routes.serviceMasterDetail.path}/${params.data.serviceId}`}>
+      {params.value}
+    </Link>
+  );
 
   const ActionsRenderer = (params) => (
     <>
