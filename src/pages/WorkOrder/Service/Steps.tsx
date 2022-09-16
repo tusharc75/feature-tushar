@@ -150,13 +150,13 @@ const Service = ({
   //   }
   // };
 
-  // const handleNext = () => {
-  //   setCurrentStep((prevActiveStep) => prevActiveStep + 1);
-  // };
+  const handleNext = () => {
+    setCurrentStep((prevActiveStep) => prevActiveStep + 1);
+  };
 
-  // const handleBack = () => {
-  //   setCurrentStep((prevActiveStep) => prevActiveStep - 1);
-  // };
+  const handleBack = () => {
+    setCurrentStep((prevActiveStep) => prevActiveStep - 1);
+  };
 
   const getFields = (step) => {
     let stepData = null;
@@ -244,6 +244,7 @@ const Service = ({
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+    handleNext();
   };
 
   function validate(values) {
@@ -275,10 +276,10 @@ const Service = ({
   return stepList?.length ? (
     <Box>
       <div className={classes.root}>
-        {serviceDetails?.steps?.map((step) => {
+        {serviceDetails?.steps?.map((step, index) => {
           const { fieldData, stepData } = getFields(step);
           return (
-            <Accordion key={step._id}>
+            <Accordion key={step._id} disabled={!currentStep <= index}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
                 <Typography className={classes.heading} style={{ fontWeight: '600' }}>
                   {step.stepName}
