@@ -85,7 +85,7 @@ const Service = ({
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  // const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
   // const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
 
   const [stepList, setStepList] = useState([]);
@@ -277,7 +277,6 @@ const Service = ({
       <div className={classes.root}>
         {serviceDetails?.steps?.map((step) => {
           const { fieldData, stepData } = getFields(step);
-          console.log(step);
           return (
             <Accordion key={step._id}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
