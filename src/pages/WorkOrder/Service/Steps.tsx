@@ -13,6 +13,7 @@ import {
   serviceMaster,
   setFieldsInAscendingOrder,
   workOrder,
+  WORKORDER_SERVICE_STATUS,
   yupSchema
 } from 'src/constants/helpers';
 import { Box, Divider, Grid, IconButton, Paper } from '@material-ui/core';
@@ -68,7 +69,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData, handleAddService, serviceSteps, setSelectedService }) => {
+const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData, handleAddService, serviceSteps, selectedServiceStatus, updateServiceStatus }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -296,6 +297,9 @@ const Service = ({ workOrderId, uniqueId, serviceId, serviceData, getServiceData
                 size="small"
                 onClick={() => {
                   handleStartEnd('start');
+                  if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) {
+                    updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress)
+                  }
                 }}
               >
                 Start

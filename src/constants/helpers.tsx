@@ -2083,3 +2083,10 @@ export const WORKORDER_SERVICE_COLOR = {
   postWork: 'rgba(222, 249, 255, 1)',
 };
 
+export const WORKORDER_SERVICE_STATUS = {
+  pending: 'Pending',
+  inProgress: 'In-Progress',
+  complete: 'Complete',
+  fail: 'Fail',
+};
+

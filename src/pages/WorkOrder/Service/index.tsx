@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { workOrder, WORKORDER_SERVICE_COLOR } from 'src/constants/helpers';
+import { workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -26,6 +26,7 @@ import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 const Service = ({ workOrderId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [serviceSteps, setServiceSteps] = useState(null);
+  const [disabledServicesOrder, setDisabledServicesOrder] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [serviceData, setServiceData] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -51,11 +52,21 @@ const Service = ({ workOrderId }) => {
           });
           const preWorkService = data?.filter((e) => e.preWork);
           const postWorkService = data?.filter((e) => !e.preWork);
-          const quote = [{ _id: 'quotation', uniqueId: 'quotation', type: 'quotation', serviceName: 'Quote' }];
+          const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote' }];
           const services = [...preWorkService, ...quote, ...postWorkService];
           setServiceSteps(services);
           if (services?.length && selectedService === null) {
             setSelectedService(services[0]);
+          }
+          let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1))
+          let tempServiceIndex = tempServiceSortedArray.findIndex(d => [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(d.status))
+          if (tempServiceIndex > -1) {
+            tempServiceSortedArray[tempServiceIndex - 1] ?
+              setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
+              : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order)
+          }
+          else {
+            setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order)
           }
         } else {
           setServiceSteps([]);
@@ -164,6 +175,17 @@ const Service = ({ workOrderId }) => {
   }, [mobScreen]);
 
   const stylesForEveryTab = (selectedService, data) => {
+
+    if (data?.type !== 'service' || data?.order > disabledServicesOrder) {
+      return {
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'rgb(224, 224, 224)',
+        cursor: 'not-allowed',
+        PointerEvent: 'none',
+        opacity: '.5'
+      };
+    }
     if (selectedService?._id == data?._id) {
       return {
         borderColor: '#329592',
@@ -190,18 +212,17 @@ const Service = ({ workOrderId }) => {
       {serviceSteps ? (
         <Grid container style={{ maxWidth: '92vw' }}>
           <Grid item xs={12} sm={5} md={4} lg={3} style={{ maxWidth: isColapsed && '60px', flexBasis: isColapsed && '60px' }}>
-            <Box mb={1} display="flex" style={{ flexWrap: 'wrap', justifyContent: isColapsed ? 'space-around' : 'space-between' }}>
+            <Box mb={1} display="flex" style={{ flexWrap: 'wrap', justifyContent: isColapsed ? 'space-around' : 'flex-end' }}>
               {!isColapsed && (
                 <>
                   <Box>
-                    {/* {serviceSteps?.length === 0 && ( */}
-                    <Button variant="text" color="primary" size="small" onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}>
-                      Add Services
-                    </Button>
-                    {/* )} */}
+                    {serviceSteps.filter(d => d.type === 'service')?.length === 0 &&
+                      <Button variant="text" color="primary" size="small" onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}>
+                        Add Services
+                      </Button>}
                   </Box>
                   {serviceSteps?.length > 0 && (
-                    <Box>
+                    <Box marginX={2}>
                       <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
                         <GrDrag fontSize="small" color="primary" className="mr-1" />
                         Arrange
@@ -232,9 +253,6 @@ const Service = ({ workOrderId }) => {
                 {serviceSteps?.map((data, index) => {
                   const style = stylesForEveryTab(selectedService, data);
 
-                  // for disabled section
-                  const secondItem = false;
-
                   return (
                     <Grid item xs={12}>
                       <Box
@@ -244,15 +262,17 @@ const Service = ({ workOrderId }) => {
                         }}
                         p={2}
                         onClick={() => {
-                          setSelectedService(data);
+                          if (!(data?.type !== 'service' || data?.order > disabledServicesOrder)) {
+                            setSelectedService(data);
+                          }
                         }}
                       >
                         <Grid container>
                           <Grid item xs={10}>
                             <Box display="flex" sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
-                              <Box>
+                              {data?.type === 'service' && <Box>
                                 <Badge badgeContent={data?.order} color="primary" style={{ paddingLeft: isColapsed && '13px' }} />
-                              </Box>
+                              </Box>}
                               {!isColapsed && (
                                 <>
                                   <Box ml={3}>
@@ -289,7 +309,7 @@ const Service = ({ workOrderId }) => {
                           </Grid>
                           {!isColapsed && (
                             <>
-                              {data?.type === 'service' && (
+                              {(!(data?.type !== 'service' || data?.order > disabledServicesOrder)) && (
                                 <Grid item xs={2} container justify="flex-end">
                                   <IconButton
                                     size="small"
@@ -349,16 +369,18 @@ const Service = ({ workOrderId }) => {
                 Consume
               </MenuItem>
               <MenuItem
+                disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.inProgress}
                 onClick={() => {
-                  updateServiceStatus(selectedService?.uniqueId, 'Complete');
+                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete);
                   setAnchorEl(null);
                 }}
               >
                 Complete
               </MenuItem>
               <MenuItem
+                disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.inProgress}
                 onClick={() => {
-                  updateServiceStatus(selectedService?.uniqueId, 'Fail');
+                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.fail);
                   setAnchorEl(null);
                 }}
               >
@@ -392,7 +414,8 @@ const Service = ({ workOrderId }) => {
                     getServiceData={getServiceData}
                     serviceData={serviceData}
                     serviceSteps={serviceSteps}
-                    setSelectedService={setSelectedService}
+                    selectedServiceStatus={selectedService.status}
+                    updateServiceStatus={updateServiceStatus}
                     handleAddService={handleAddService}
                   />
                 ) : (
