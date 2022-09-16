@@ -35,7 +35,7 @@ const Service = ({ workOrderId }) => {
   const [arrangeView, setArrangeView] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
-  const mobScreen = useMediaQuery('(max-width:600px)');
+  const mobScreen = useMediaQuery('(max-width:768px)');
 
   useEffect(() => {
     fetchService();
@@ -379,22 +379,31 @@ const Service = ({ workOrderId }) => {
   return (
     <Box p={2}>
       {serviceSteps ? (
-        <Grid container style={{ maxWidth: '92vw' }}>
-          {/* {!mobScreen && ( */}
-          <Grid item xs={12} sm={5} md={4} lg={3} style={{ maxWidth: isColapsed && '60px', flexBasis: isColapsed && '60px' }}>
+        <Grid container spacing={2}>
+          <Grid
+            item
+            xs={12}
+            sm={5}
+            md={4}
+            lg={3}
+            style={{ maxWidth: isColapsed ? '76px' : mobScreen ? '100%' : '', flexBasis: isColapsed ? '76px' : mobScreen ? '100%' : '' }}
+          >
             <RenderSteps />
           </Grid>
-          {/* )} */}
+
           <Grid
             item
             xs={12}
             sm={7}
             md={8}
             lg={9}
-            style={{ maxWidth: isColapsed && 'calc(100% - 60px)', flexBasis: isColapsed && 'calc(100% - 60px)' }}
+            style={{
+              maxWidth: isColapsed ? 'calc(100% - 76px)' : mobScreen ? '100%' : '',
+              flexBasis: isColapsed ? 'calc(100% - 76px)' : mobScreen ? '100%' : ''
+            }}
           >
             {selectedService && (
-              <Box border={1} ml={2} borderColor="grey.300">
+              <Box border={1} borderColor="grey.300">
                 {selectedService?.type === 'service' ? (
                   <Steps
                     workOrderId={workOrderId}
