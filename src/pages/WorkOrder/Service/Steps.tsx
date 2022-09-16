@@ -85,14 +85,14 @@ const Service = ({
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
+  // const [currentStep, setCurrentStep] = useState(0);
+  // const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
 
   const [stepList, setStepList] = useState([]);
-  const [stepId, setStepId] = useState(null);
-  const [stepData, setStepData] = useState(null);
+  // const [stepId, setStepId] = useState(null);
+  // const [stepData, setStepData] = useState(null);
   const [serviceDetails, setServiceDetails] = useState(null);
-  const [disabledNextStep, setDisabledNextStep] = useState(true);
+  // const [disabledNextStep, setDisabledNextStep] = useState(true);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [] });
 
   useEffect(() => {
@@ -251,17 +251,17 @@ const Service = ({
     return errors;
   }
 
-  const handleScroll = (errors) => {
-    const err = Object.keys(errors);
-    if (err.length) {
-      const input = document.querySelector(`input[name=${err[0]}]`);
-      input.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'start'
-      });
-    }
-  };
+  // const handleScroll = (errors) => {
+  //   const err = Object.keys(errors);
+  //   if (err.length) {
+  //     const input = document.querySelector(`input[name=${err[0]}]`);
+  //     input.scrollIntoView({
+  //       behavior: 'smooth',
+  //       block: 'center',
+  //       inline: 'start'
+  //     });
+  //   }
+  // };
 
   // const scrollRight = (elm) => {
   //   elm.scrollLeft -= STEP_WIDTH;
@@ -405,7 +405,7 @@ const Service = ({
                               type="submit"
                               onClick={(e) => {
                                 e.preventDefault();
-                                handleScroll(errors);
+                                // handleScroll(errors);
                                 submitForm();
                               }}
                             >

@@ -210,8 +210,8 @@ const Service = ({ workOrderId }) => {
   return (
     <Box p={2}>
       {serviceSteps ? (
-        <Grid container style={{ maxWidth: '92vw' }}>
-          <Grid item xs={12} sm={5} md={4} lg={3} style={{ maxWidth: isColapsed && '60px', flexBasis: isColapsed && '60px' }}>
+        <Grid container style={{ maxWidth: '92vw' }} spacing={2}>
+          <Grid item xs={12} sm={5} md={4} lg={3} style={{ maxWidth: isColapsed && '76px', flexBasis: isColapsed && '76px' }}>
             <Box mb={1} display="flex" style={{ flexWrap: 'wrap', justifyContent: isColapsed ? 'space-around' : 'flex-end' }}>
               {!isColapsed && (
                 <>
