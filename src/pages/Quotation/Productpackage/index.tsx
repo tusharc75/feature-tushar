@@ -15,7 +15,13 @@ import {
   InputAdornment,
   useMediaQuery,
   Menu,
-  MenuItem
+  MenuItem,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  makeStyles,
+  MenuList
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -43,9 +49,24 @@ import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import { capitalize } from 'lodash';
 import LeadTimeDialog from './LeadTimeDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
+import CloseIcon from '@material-ui/icons/Close';
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    width: '80%',
+    maxHeight: 435,
+  },
+  closeButton: {
+    position: 'absolute',
+    right: theme.spacing(1),
+    top: theme.spacing(1),
+    color: theme.palette.grey[500],
+  },
+}));
 
 const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, setQuotationSummary, version }) => {
   const toastConfig = useContext(CustomToastContext);
+  const classes = useStyles();
   const {
     state: { user, permissions }
   }: any = useData();
@@ -65,6 +86,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
 
   const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
+  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
@@ -99,39 +121,27 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                   handleOpen(row.original);
                 }}
                 className="link text-truncate"
-                title={row.original.detail}
+                title={row.original?.detail}
               >
-                {row.original.detail}
+                {row.original?.detail}
               </p>
             }
-            {row.original?.parentId === null && (
+
+            {(
               <Box ml={1} className="d-flex align-items-center">
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
-                <HtmlTooltip title="Add Product">
+                <HtmlTooltip title="Add ">
                   <IconButton
-                    onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
-                    size="small"
-                    color="primary"
+                    onClick={() => setAddchildDialog({ open: true, parentId: row.original?._id })}
                   >
                     <Add color="disabled" fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
+
+
               </Box>
             )}
-            {row.original?.parentId === null && (
-              <Box ml={1} className="d-flex align-items-center">
-                {/* <span title={`There are ${row.original?.subRows?.length} service(s) in this productpackage`}>({row.original?.subRows?.length})</span> */}
-                <HtmlTooltip title="Add Services">
-                  <IconButton
-                    onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })}
-                    size="small"
-                    color="primary"
-                  >
-                    <Add color="disabled" fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            )}
+
             <Chip
               className="ml-1"
               label={`${capitalize(row.original.type)}`}
@@ -326,22 +336,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
+      parent.subRows = generateNestedData(data.material, inventory, parent);
 
-      const subRows: any = data.material.filter((e) => e.parentId === parent._id);
-      subRows.forEach((_subRow, j) => {
-        _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`;
-        _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
-        _subRow.leadTime = Array.isArray(_subRow?.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-        _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
-        _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
-        _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-        _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      });
-      // if (subRows.length === 0) {
-      //     parent.isValid = false
-      // }
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-      parent.subRows = subRows;
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
@@ -372,6 +368,36 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     setRowsData(rows);
     setSelectedProducts([]);
   };
+
+  const generateNestedData = (material, inventory, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.packageDetail?.packageName}`;
+      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      _subRow.qtyDisplay = _subRow.qty;
+      _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
+      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
+      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
+      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+    });
+    if (subRows.length === 0 && parent.type === "package") {
+      parent.isValid = false;
+    }
+    if (parent.type === "package") {
+      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+    }
+    return subRows;
+  }
+
+  const getNestedSubRows = (obj, original) => {
+    if (original?.subRows?.length) {
+      original?.subRows.forEach((element) => {
+        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+        getNestedSubRows(obj, element);
+      });
+    }
+  }
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -561,6 +587,19 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
               }}
             >
               {`Add ${routes.packages.title}`}
+            </Button>
+          )}
+          <Box mx={1} />
+          {permissions?.serviceMaster?.isRead && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
+              }}
+            >
+              {`Add ${routes.serviceMaster.title}`}
             </Button>
           )}
         </Box>
@@ -781,6 +820,63 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
           }}
         />
       )}
+      {addchildDialog.open &&
+        <Dialog
+          disableEscapeKeyDown
+          maxWidth="xs"
+          aria-labelledby="dialog-title"
+          open={addchildDialog.open}
+          id="dialog"
+          keepMounted
+          classes={{
+            paper: classes.paper,
+          }}
+          onClose={(e, reason) => {
+            if (reason !== 'backdropClick') {
+            }
+          }}
+        >
+          <DialogTitle id="dialog-title" className="text-white">
+            Add
+            <IconButton title="Close Confirm Dialog" aria-label="close" className={classes.closeButton} onClick={() => setAddchildDialog({ open: false, parentId: null })}>
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            <MenuList>
+              <MenuItem
+                onClick={() => {
+                  setAddchildDialog({ open: false, parentId: null })
+                  setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId })
+                }
+                }
+              >
+                Product
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAddchildDialog({ open: false, parentId: null })
+                  setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId })
+                }
+                }
+              >
+                Package
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAddchildDialog({ open: false, parentId: null })
+                  setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId })
+                }
+                }
+              >
+                Services
+              </MenuItem>
+            </MenuList>
+          </DialogContent>
+          <DialogActions>
+          </DialogActions>
+        </Dialog>
+      }
     </Fragment>
   );
 };
