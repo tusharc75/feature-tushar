@@ -41,6 +41,12 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     heading: {
       fontSize: theme.typography.pxToRem(16)
+    },
+    accordion: {
+      marginBottom: '8px',
+      '&:last-child': {
+        marginBottom: '0'
+      }
     }
 
     // pbStepper: {
@@ -279,7 +285,7 @@ const Service = ({
         {serviceDetails?.steps?.map((step, index) => {
           const { fieldData, stepData } = getFields(step);
           return (
-            <Accordion key={step._id} disabled={!currentStep <= index}>
+            <Accordion key={step._id} className={classes.accordion}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
                 <Typography className={classes.heading} style={{ fontWeight: '600' }}>
                   {step.stepName}
