@@ -249,7 +249,7 @@ const Report = () => {
         columns = [
           ...columns,
           {
-            field: 'availableQty',
+            field: 'totalQty',
             headerName: 'Quantity',
             show: true,
             disabled: false,
@@ -296,7 +296,7 @@ const Report = () => {
               'productDescription',
               'productCategory',
               'productCondition',
-              'availableQty',
+              'totalQty',
               'averagePrice',
               'totalPrice',
               'margin'
