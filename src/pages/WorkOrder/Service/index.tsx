@@ -35,7 +35,7 @@ const Service = ({ workOrderId }) => {
   const [arrangeView, setArrangeView] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
-  const mobScreen = useMediaQuery('(max-width:600px)');
+  const mobScreen = useMediaQuery('(max-width:768px)');
 
   useEffect(() => {
     fetchService();
@@ -58,15 +58,16 @@ const Service = ({ workOrderId }) => {
           if (services?.length && selectedService === null) {
             setSelectedService(services[0]);
           }
-          let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1))
-          let tempServiceIndex = tempServiceSortedArray.findIndex(d => [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(d.status))
+          let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
+          let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
+            [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(d.status)
+          );
           if (tempServiceIndex > -1) {
-            tempServiceSortedArray[tempServiceIndex - 1] ?
-              setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
-              : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order)
-          }
-          else {
-            setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order)
+            tempServiceSortedArray[tempServiceIndex - 1]
+              ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
+              : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
+          } else {
+            setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
           }
         } else {
           setServiceSteps([]);
@@ -175,7 +176,6 @@ const Service = ({ workOrderId }) => {
   }, [mobScreen]);
 
   const stylesForEveryTab = (selectedService, data) => {
-
     if (data?.type !== 'service' || data?.order > disabledServicesOrder) {
       return {
         borderWidth: '1px',
@@ -210,16 +210,22 @@ const Service = ({ workOrderId }) => {
   return (
     <Box p={2}>
       {serviceSteps ? (
-        <Grid container style={{ maxWidth: '92vw' }}>
-          <Grid item xs={12} sm={5} md={4} lg={3} style={{ maxWidth: isColapsed && '60px', flexBasis: isColapsed && '60px' }}>
+        <Grid container style={{ maxWidth: '92vw' }} spacing={2}>
+          <Grid item xs={12} sm={5} md={4} lg={3} style={{ maxWidth: isColapsed && '76px', flexBasis: isColapsed && '76px' }}>
             <Box mb={1} display="flex" style={{ flexWrap: 'wrap', justifyContent: isColapsed ? 'space-around' : 'flex-end' }}>
               {!isColapsed && (
                 <>
                   <Box>
-                    {serviceSteps.filter(d => d.type === 'service')?.length === 0 &&
-                      <Button variant="text" color="primary" size="small" onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}>
+                    {serviceSteps.filter((d) => d.type === 'service')?.length === 0 && (
+                      <Button
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}
+                      >
                         Add Services
-                      </Button>}
+                      </Button>
+                    )}
                   </Box>
                   {serviceSteps?.length > 0 && (
                     <Box marginX={2}>
@@ -270,9 +276,11 @@ const Service = ({ workOrderId }) => {
                         <Grid container>
                           <Grid item xs={10}>
                             <Box display="flex" sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
-                              {data?.type === 'service' && <Box>
-                                <Badge badgeContent={data?.order} color="primary" style={{ paddingLeft: isColapsed && '13px' }} />
-                              </Box>}
+                              {data?.type === 'service' && (
+                                <Box>
+                                  <Badge badgeContent={data?.order} color="primary" style={{ paddingLeft: isColapsed && '13px' }} />
+                                </Box>
+                              )}
                               {!isColapsed && (
                                 <>
                                   <Box ml={3}>
@@ -309,7 +317,7 @@ const Service = ({ workOrderId }) => {
                           </Grid>
                           {!isColapsed && (
                             <>
-                              {(!(data?.type !== 'service' || data?.order > disabledServicesOrder)) && (
+                              {!(data?.type !== 'service' || data?.order > disabledServicesOrder) && (
                                 <Grid item xs={2} container justify="flex-end">
                                   <IconButton
                                     size="small"
@@ -341,8 +349,8 @@ const Service = ({ workOrderId }) => {
               keepMounted
               open={Boolean(anchorEl)}
               onClose={handleCloseMenu}
-            //transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            //anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              //transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              //anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
               <MenuItem
                 onClick={() => {
@@ -402,10 +410,13 @@ const Service = ({ workOrderId }) => {
             sm={7}
             md={8}
             lg={9}
-            style={{ maxWidth: isColapsed && 'calc(100% - 60px)', flexBasis: isColapsed && 'calc(100% - 60px)' }}
+            style={{
+              maxWidth: isColapsed ? 'calc(100% - 76px)' : mobScreen ? '100%' : '',
+              flexBasis: isColapsed ? 'calc(100% - 76px)' : mobScreen ? '100%' : ''
+            }}
           >
             {selectedService && (
-              <Box border={1} ml={2} borderColor="grey.300">
+              <Box border={1} borderColor="grey.300">
                 {selectedService?.type === 'service' ? (
                   <Steps
                     workOrderId={workOrderId}
