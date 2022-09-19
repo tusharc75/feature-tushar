@@ -48,6 +48,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
         data = response?.data?.data
         let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
+            finalObject.type = capitalize(u.type)
             finalObject.finalQty = finalObject.qty - (finalObject.soldQty || 0);
             finalObject.amount = parseFloat((finalObject.qty * finalObject.price)?.toFixed(2));
             return finalObject;
@@ -60,13 +61,40 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
         { field: "date", headerName: "Date", show: true, cellRenderer: "dateTimeRenderer", filter: false, sortable: false },
         { field: "referenceType", headerName: "Reference Type", show: true, cellRenderer: "commonRenderer" },
         { field: "reference", headerName: "Reference", filter: false, sortable: false, show: true, cellRenderer: "referenceRenderer" },
-        { field: "qty", headerName: "Quantity", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
-        { field: "soldQty", headerName: "Sold Quantity", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
-        { field: "finalQty", headerName: "Final Quantity", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
+        { field: "type", headerName: "Type", show: true, cellRenderer: "commonRenderer", filter: true, sortable: true, },
+        {
+            field: "qty", headerName: "Quantity", show: true, cellRenderer: "creditDebitRenderer", filter: false, sortable: false,
+            cellStyle: params => {
+                if (params?.data?.type === "Credit") {
+                    return { backgroundColor: "#90ee90" }
+                };
+                if (params?.data?.type === "Debit") {
+                    return { backgroundColor: "#FFCCCB" };
+                };
+            }
+        },
+        { field: "soldQty", headerName: "Sold Quantity", show: false, cellRenderer: "numberRenderer", filter: false, sortable: false, },
+        { field: "finalQty", headerName: "Final Quantity", show: false, cellRenderer: "numberRenderer", filter: false, sortable: false, },
         { field: "price", headerName: "Price", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
-        { field: "amount", headerName: "Amount", show: true, cellRenderer: "numberRenderer", filter: false, sortable: false, },
+        {
+            field: "amount", headerName: "Amount", show: true, cellRenderer: "creditDebitRenderer", filter: false, sortable: false,
+            cellStyle: params => {
+                if (params?.data?.type === "Credit") {
+                    return { backgroundColor: "#90ee90" }
+                };
+                if (params?.data?.type === "Debit") {
+                    return { backgroundColor: "#FFCCCB" };
+                };
+            }
+        },
         { field: "warehouse", headerName: "Plant", show: true, cellRenderer: "commonRenderer", },
     ];
+
+    const CreditDebitRenderer = (params: any) => (
+        <span>
+            {params?.value ? params?.data?.type === "Debit" ? `-${params?.value}` : params?.value : <NoDataCell />}
+        </span>
+    );
 
     const ReferenceRenderer = (params) =>
         params?.value ? (
@@ -102,6 +130,7 @@ const AverageCostHistory = ({ handleClose, product, productName, showPricefilter
 
     const frameworkComponents = {
         referenceRenderer: ReferenceRenderer,
+        creditDebitRenderer: CreditDebitRenderer,
         commonRenderer: CommonRenderer,
         numberRenderer: NumberRenderer,
         dateTimeRenderer: DateTimeRenderer

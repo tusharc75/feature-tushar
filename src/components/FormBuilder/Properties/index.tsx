@@ -135,6 +135,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (!values.addManualOptionInExcel && fieldData.type === 'dropDown') {
         values.addManualOptionInExcel = false;
       }
+      if (!values.isMinMaxValue && fieldData.type === 'decimal') {
+        values.isMinMaxValue = false;
+        values.minValue = 0;
+        values.maxValue = 0;
+      }
+
       if (
         !values.unique &&
         (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
@@ -241,7 +247,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.lookup = values.lookup || false;
             ele.lookupResource = values.lookup ? values.lookupResource : '';
             ele.entityWiseLookup = values.entityWiseLookup || false;
-
+            ele.isMinMaxValue = values.isMinMaxValue;
+            ele.minValue = values.minValue || 0;
+            ele.maxValue = values.maxValue || 0;
             ele.isDropdown = values.isDropdown || false;
 
             if (values.hasOwnProperty('isWarningTooltip')) {
@@ -1190,6 +1198,64 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       setFieldValue={setFieldValue}
                     />
                   )}
+                  {fieldData.type === 'decimal' && (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          disabled={values?.lookup}
+                          name="isMinMaxValue"
+                          checked={values['isMinMaxValue']}
+                          onChange={(e) => {
+                            setFieldValue('isMinMaxValue', e.target.checked);
+                            handleValuesChange({
+                              isMinMaxValue: e.target.checked
+                            });
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Add Minimum Value or Maximum Value"
+                    />
+                  )}
+                  {values['isMinMaxValue'] &&
+                    <Grid spacing={3} container>
+                      <Grid item xs={12} sm={6} md={6}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          label={"Min Value"}
+                          name={"minValue"}
+                          required={true}
+                          value={values["minValue"]}
+                          onChange={(e) => {
+                            setFieldValue('minValue', parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+                            handleValuesChange({
+                              minValue: parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
+                            });
+                          }
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={6}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          label={"Max Value"}
+                          name={"maxValue"}
+                          required={true}
+                          value={values["maxValue"]}
+                          onChange={(e) => {
+                            setFieldValue('maxValue', parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+                            handleValuesChange({
+                              maxValue: parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
+                            });
+                          }
+                          }
+                        />
+                      </Grid>
+                    </Grid>
+
+                  }
                   {module === "form-builder-master" &&
                     <Box>
                       <hr />
