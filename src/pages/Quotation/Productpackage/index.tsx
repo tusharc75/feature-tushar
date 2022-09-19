@@ -21,7 +21,8 @@ import {
   DialogTitle,
   DialogContent,
   makeStyles,
-  MenuList
+  MenuList,
+  Popover
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -86,7 +87,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
 
   const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
-  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null });
+  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
@@ -132,12 +133,14 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
                 <HtmlTooltip title="Add ">
                   <IconButton
-                    onClick={() => setAddchildDialog({ open: true, parentId: row.original?._id })}
+                    onClick={(event) =>
+                      setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })
+                    }
+                    size="small"
                   >
                     <Add color="disabled" fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
-
 
               </Box>
             )}
@@ -821,61 +824,50 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         />
       )}
       {addchildDialog.open &&
-        <Dialog
-          disableEscapeKeyDown
-          maxWidth="xs"
-          aria-labelledby="dialog-title"
+        <Popover
+          anchorReference="anchorPosition"
+          anchorPosition={{ top: addchildDialog.top, left: addchildDialog.bottom }}
+          anchorOrigin={{
+            vertical: 'center',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
           open={addchildDialog.open}
-          id="dialog"
-          keepMounted
-          classes={{
-            paper: classes.paper,
-          }}
-          onClose={(e, reason) => {
-            if (reason !== 'backdropClick') {
-            }
-          }}
+          onClose={() => { setAddchildDialog({ open: false, parentId: null, top: null, bottom: null }) }}
         >
-          <DialogTitle id="dialog-title" className="text-white">
-            Add
-            <IconButton title="Close Confirm Dialog" aria-label="close" className={classes.closeButton} onClick={() => setAddchildDialog({ open: false, parentId: null })}>
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent dividers>
-            <MenuList>
-              <MenuItem
-                onClick={() => {
-                  setAddchildDialog({ open: false, parentId: null })
-                  setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId })
-                }
-                }
-              >
-                Product
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setAddchildDialog({ open: false, parentId: null })
-                  setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId })
-                }
-                }
-              >
-                Package
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setAddchildDialog({ open: false, parentId: null })
-                  setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId })
-                }
-                }
-              >
-                Services
-              </MenuItem>
-            </MenuList>
-          </DialogContent>
-          <DialogActions>
-          </DialogActions>
-        </Dialog>
+          <MenuList>
+            <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId })
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
+              }
+              }
+            >
+              Product
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId })
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
+              }
+              }
+            >
+              Package
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId })
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
+              }
+              }
+            >
+              Services
+            </MenuItem>
+          </MenuList>
+        </Popover>
       }
     </Fragment>
   );
