@@ -15,7 +15,7 @@ import {
   WORKORDER_SERVICE_STATUS,
   yupSchema
 } from 'src/constants/helpers';
-import { Box, Divider, Grid, IconButton, Accordion, AccordionDetails, AccordionSummary, Typography } from '@material-ui/core';
+import { Box, Divider, Grid, IconButton, Accordion, AccordionDetails, AccordionSummary, Typography, Chip } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -290,6 +290,12 @@ const Service = ({
                 <Typography className={classes.heading} style={{ fontWeight: '600' }}>
                   {step.stepName}
                 </Typography>
+                {stepData?.passFailStatus ? (
+                  <Box ml={1}>
+                    <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
+                  </Box>
+                ) : null}
+
               </AccordionSummary>
               <AccordionDetails style={{ display: 'block' }}>
                 {!stepData?.status || stepData?.status === 'start' ? (
@@ -451,12 +457,12 @@ const Service = ({
                         <Typography variant="body2">{`${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}</Typography>
                       </Grid>
                     ) : null}
-                    {stepData?.passFailStatus ? (
+                    {/* {stepData?.passFailStatus ? (
                       <Grid item>
                         <Typography variant="caption">Status</Typography>
                         <Typography variant="body2">{`${stepData?.passFailStatus} `}</Typography>
                       </Grid>
-                    ) : null}
+                    ) : null} */}
                   </Grid>
                 </Box>
               </AccordionDetails>
