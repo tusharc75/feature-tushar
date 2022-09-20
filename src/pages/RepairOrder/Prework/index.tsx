@@ -10,7 +10,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
-import { repairOrder, dateFormat } from '../../../constants/helpers';
+import { repairOrder, dateFormat, workOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -21,6 +21,7 @@ import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/he
 import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
 import RepairOrderQtyDialog from '../Productpackage/RepairOrderQtyDialog';
 import AddExistingProductInventory from '../Productpackage/AddExistingProductInventory';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 
 const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit, isPrework }) => {
 
@@ -30,8 +31,20 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
     const [material, setMaterial] = useState([]);
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
+    const [addServicesDialog, setAddServicesDialog] = useState({ open: false });
 
     const { isOffline } = useContext(CustomOfflineContext);
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     useEffect(() => {
         fetchFields();
@@ -161,7 +174,7 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
             parent.isValid = true;
             parent.status = parent?.workOrder?.status
             parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-            parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
+            parent.hideSelection = parent.type !== 'product' ? true : false;
             parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
         });
 
@@ -178,65 +191,66 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
     const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
         const subRows = material.filter((e) => e.parentId === parent._id);
         const services = parent?.services?.filter(d => d.packageId === undefined || d.packageId === null || d.packageId === "").map(d => {
-          return {
-            ...d,
-            materialId: d._id,
-            parentId: parent._id,
-            workOrder: parent.workOrder,
-            type: "service"
-          }
+            return {
+                ...d,
+                materialId: d._id,
+                parentId: parent._id,
+                workOrder: parent.workOrder,
+                type: "service"
+            }
         });
         const packages = parent?.packages?.map(d => {
-          return {
-            ...d,
-            materialId: d._id,
-            parentId: parent._id,
-            workOrder: parent.workOrder,
-            type: "package"
-          }
+            return {
+                ...d,
+                materialId: d._id,
+                parentId: parent._id,
+                workOrder: parent.workOrder,
+                type: "package"
+            }
         });
-    
+
         let combinedData = [...subRows, ...packages, ...services]
         combinedData.forEach((_subRow, j) => {
-          _subRow.srno = parent.srno + '.' + (j + 1);
-          _subRow.detail = _subRow?.type === "service" ? _subRow?.serviceName : _subRow?.type === "package" ? _subRow?.packageName : _subRow?.productDetail?.productName;
-          _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-          _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
-          _subRow.isValid = true;
-          _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-          _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;;
-          _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow) : _subRow?.type !== "service" ? generateNestedData(material, inventory, nonSerializeAsset, _subRow) : null;
+            _subRow.srno = parent.srno + '.' + (j + 1);
+            _subRow.detail = _subRow?.type === "service" ? _subRow?.serviceName : _subRow?.type === "package" ? _subRow?.packageName : _subRow?.productDetail?.productName;
+            _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
+            _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
+            _subRow.isValid = true;
+            _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+            _subRow.hideSelection = _subRow.type !== 'product' ? true : false;
+            _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow) : _subRow?.type !== "service" ? generateNestedData(material, inventory, nonSerializeAsset, _subRow) : null;
         });
         if (combinedData.length === 0 && parent.type === "package") {
-          parent.isValid = false;
+            parent.isValid = false;
         }
         if (parent.type === "package") {
-          parent.hideSelection = combinedData.filter((e) => e.hideSelection).length ? true : false;
+            parent.hideSelection = combinedData.filter((e) => e.hideSelection).length ? true : false;
         }
         return combinedData;
-      }
-    
-      const getPackageSubRows = (parent, subRowPackage: any) => {
-    
+    }
+
+    const getPackageSubRows = (parent, subRowPackage: any) => {
+
         const services = parent?.services?.filter(d => d.packageId === subRowPackage._id).map(d => {
-          return {
-            ...d,
-            materialId: d._id,
-            parentId: parent._id,
-            workOrder: parent.workOrder,
-            type: "service"
-          }
+            return {
+                ...d,
+                materialId: d._id,
+                parentId: parent._id,
+                workOrder: parent.workOrder,
+                type: "service"
+            }
         });
         services.forEach((_subRow, j) => {
-          _subRow.srno = subRowPackage.srno + '.' + (j + 1);
-          _subRow.detail = _subRow?.serviceName;
-          _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-          _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
-          _subRow.isValid = true;
-          _subRow.subRows = null;
+            _subRow.srno = subRowPackage.srno + '.' + (j + 1);
+            _subRow.detail = _subRow?.serviceName;
+            _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
+            _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
+            _subRow.isValid = false;
+            _subRow.hideSelection = true;
+            _subRow.subRows = null;
         });
         return services;
-      }
+    }
 
     const getNestedSubRows = (obj, original) => {
         if (original?.subRows?.length) {
@@ -247,12 +261,62 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
         }
     }
 
-
+    const handleAddService = (ids) => {
+        const data: any = {};
+        data.serviceIds = ids;
+        axiosInstance()
+            .post(`${workOrder.api}/service/${selectedProducts[0]['workOrder']?._id}`, data)
+            .then(() => {
+                fetchProductInventory();
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    };
 
 
     return (
         <Fragment>
             <Grid container spacing={2}>
+                <Grid item xs={12} md={12} sm={12}>
+                    <Box marginRight={2} display="flex" justifyContent="flex-end">
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                            id="demo-positioned-button"
+                            aria-controls={open ? 'demo-positioned-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            onClick={handleClick}
+                            endIcon={<BiChevronDown />}
+                        >
+                            Actions
+                        </Button>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorEl}
+                            open={open}
+                            onClose={handleClose}
+                            MenuListProps={{
+                                'aria-labelledby': 'basic-button'
+                            }}
+                            className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
+                        >
+                            <HtmlTooltip
+                                title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}
+                            >
+                                <MenuItem 
+                                onClick={() => setAddServicesDialog({ open: true })} 
+                                // disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length && selectedProducts.filter((e) => !e.hideSelection).length === 1)}
+                                >
+                                    <ListItemText>Add Services</ListItemText>
+                                </MenuItem>
+                            </HtmlTooltip>
+                        </Menu>
+                    </Box>
+                </Grid>
                 <Grid item xs={12} md={12} sm={12}>
                     {columns && rowsData ? (
                         <Box
@@ -268,8 +332,8 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
                                 onSelect={setSelectedProducts}
                                 childrenProperty="subRows"
                                 uniqueKey="_id"
-                                hideSelection={isOffline || !allowedToEdit}
-                                renderedFrom="repair_order_workorder_product_package"
+                                hideSelection={false}
+                                renderedFrom="repair_order_workorder_prework"
                                 isClientSideGrid={true}
                             />
                         </Box>
@@ -277,6 +341,19 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
                         <Box p={2} height={500} bgcolor="white">
                             <CommonSkeleton lenArray={[...Array(10).keys()]} />
                         </Box>
+                    )}
+                    {addServicesDialog.open && (
+                        <AssignServiceDialog
+                            reference="workorder"
+                            handleClose={() => setAddServicesDialog({ open: false })}
+                            ids={[]}
+                            onSuccess={(data) => {
+                                handleAddService(
+                                    data?.map((e) => e.service));
+                                setAddServicesDialog({ open: false })
+                                handleClose()
+                            }}
+                        />
                     )}
                 </Grid>
             </Grid>
