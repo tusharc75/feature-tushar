@@ -27,8 +27,6 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { MdDone } from 'react-icons/md';
-import { RiErrorWarningLine } from 'react-icons/ri';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -50,8 +48,7 @@ const useStyles = makeStyles((theme: Theme) =>
         display: 'none'
       },
       '&.Mui-expanded': {
-        margin: '20px 0',
-        border: '1px solid hsl(0deg 0% 70%)'
+        margin: '20px 0'
       },
       marginBottom: '5px',
       '&:last-child': {
@@ -248,9 +245,7 @@ const Service = ({
               >
                 <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
                   <Box mr={2} className={classes.badge}>
-                    {stepData?.passFailStatus === undefined && index + 1}
-                    {stepData?.passFailStatus === 'Pass' && <MdDone />}
-                    {stepData?.passFailStatus === 'Fail' && <RiErrorWarningLine />}
+                    {index + 1}
                   </Box>
                   <Typography className={classes.heading} style={{ fontWeight: '600' }}>
                     {step.stepName}

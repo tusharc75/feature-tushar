@@ -210,7 +210,7 @@ const Service = ({ workOrderId }) => {
   return (
     <Box p={2}>
       {serviceSteps ? (
-        <Grid container style={{ maxWidth: '92vw' }} spacing={2}>
+        <Grid container spacing={2}>
           <Grid
             item
             xs={12}
