@@ -210,8 +210,15 @@ const Service = ({ workOrderId }) => {
   return (
     <Box p={2}>
       {serviceSteps ? (
-        <Grid container style={{ maxWidth: '92vw' }} spacing={2}>
-          <Grid item xs={12} sm={5} md={4} lg={3} style={{ maxWidth: isColapsed && '76px', flexBasis: isColapsed && '76px' }}>
+        <Grid container spacing={2}>
+          <Grid
+            item
+            xs={12}
+            sm={5}
+            md={4}
+            lg={3}
+            style={{ maxWidth: isColapsed ? '76px' : mobScreen ? '100%' : '', flexBasis: isColapsed ? '76px' : mobScreen ? '100%' : '' }}
+          >
             <Box mb={1} display="flex" style={{ flexWrap: 'wrap', justifyContent: isColapsed ? 'space-around' : 'flex-end' }}>
               {!isColapsed && (
                 <>
@@ -244,7 +251,7 @@ const Service = ({ workOrderId }) => {
               )}
             </Box>
             <Box
-              sx={{ height: mobScreen ? 'unset' : 'calc(100vh - 208px)', display: { xs: 'flex', sm: 'block' } }}
+              sx={{ height: mobScreen ? 'unset' : '550px', display: { xs: 'flex', sm: 'block' } }}
               style={{ overflowX: mobScreen ? 'auto' : 'hidden', overflowY: mobScreen ? 'hidden' : 'auto', marginBottom: mobScreen ? '20px' : '0px' }}
             >
               <Grid
@@ -277,13 +284,28 @@ const Service = ({ workOrderId }) => {
                           <Grid item xs={10}>
                             <Box display="flex" sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
                               {data?.type === 'service' && (
-                                <Box>
-                                  <Badge badgeContent={data?.order} color="primary" style={{ paddingLeft: isColapsed && '13px' }} />
+                                <Box
+                                  style={{
+                                    backgroundColor: 'var(--primary)',
+                                    color: 'white',
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    lineHeight: '20px',
+                                    textAlign: 'center',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '10px',
+                                    flexShrink: 0
+                                  }}
+                                >
+                                  {data?.order}
                                 </Box>
                               )}
                               {!isColapsed && (
                                 <>
-                                  <Box ml={3}>
+                                  <Box ml={'10px'}>
                                     <Typography>{data?.serviceName}</Typography>
                                   </Box>
                                   {data?.type === 'service' && (
@@ -416,7 +438,7 @@ const Service = ({ workOrderId }) => {
             }}
           >
             {selectedService && (
-              <Box border={1} borderColor="grey.300">
+              <Box>
                 {selectedService?.type === 'service' ? (
                   <Steps
                     workOrderId={workOrderId}
