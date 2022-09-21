@@ -30,13 +30,12 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { MdDone } from 'react-icons/md';
 import { RiErrorWarningLine } from 'react-icons/ri';
 
-const STEP_WIDTH = 200;
-const ICON_WIDTH = 40;
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      width: '100%'
+      width: '100%',
+      height: '550px',
+      overflowY: 'auto'
     },
     backButton: {
       marginRight: theme.spacing(1)
@@ -78,10 +77,10 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: '50%',
       lineHeight: '20px',
       textAlign: 'center',
-      fontSize: '0.75rem',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      fontSize: '10px'
     },
     green: {
       backgroundColor: 'rgba(0,255,0,.1)'

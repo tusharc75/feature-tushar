@@ -211,7 +211,14 @@ const Service = ({ workOrderId }) => {
     <Box p={2}>
       {serviceSteps ? (
         <Grid container style={{ maxWidth: '92vw' }} spacing={2}>
-          <Grid item xs={12} sm={5} md={4} lg={3} style={{ maxWidth: isColapsed && '76px', flexBasis: isColapsed && '76px' }}>
+          <Grid
+            item
+            xs={12}
+            sm={5}
+            md={4}
+            lg={3}
+            style={{ maxWidth: isColapsed ? '76px' : mobScreen ? '100%' : '', flexBasis: isColapsed ? '76px' : mobScreen ? '100%' : '' }}
+          >
             <Box mb={1} display="flex" style={{ flexWrap: 'wrap', justifyContent: isColapsed ? 'space-around' : 'flex-end' }}>
               {!isColapsed && (
                 <>
@@ -244,7 +251,7 @@ const Service = ({ workOrderId }) => {
               )}
             </Box>
             <Box
-              sx={{ height: mobScreen ? 'unset' : 'calc(100vh - 208px)', display: { xs: 'flex', sm: 'block' } }}
+              sx={{ height: mobScreen ? 'unset' : '550px', display: { xs: 'flex', sm: 'block' } }}
               style={{ overflowX: mobScreen ? 'auto' : 'hidden', overflowY: mobScreen ? 'hidden' : 'auto', marginBottom: mobScreen ? '20px' : '0px' }}
             >
               <Grid
