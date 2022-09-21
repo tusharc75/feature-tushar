@@ -416,7 +416,7 @@ const Service = ({ workOrderId }) => {
             }}
           >
             {selectedService && (
-              <Box border={1} borderColor="grey.300">
+              <Box>
                 {selectedService?.type === 'service' ? (
                   <Steps
                     workOrderId={workOrderId}
