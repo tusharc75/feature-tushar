@@ -244,7 +244,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
+      parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
 
@@ -287,7 +287,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
       _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;;
+      _subRow.hideSelection = false;;
       _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow) : _subRow?.type !== "service" ? generateNestedData(material, inventory, nonSerializeAsset, _subRow) : null;
     });
     if (combinedData.length === 0 && parent.type === "package") {
@@ -315,6 +315,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       _subRow.detail = _subRow?.serviceName;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.hideSelection = false;;
       _subRow.isValid = true;
       _subRow.subRows = null;
     });
@@ -388,9 +389,9 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
 
   return (
     <Fragment>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={12} sm={12}>
-          <Box display="flex" justifyContent="flex-end" m={1}>
+      <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
+        <Box display="flex" alignItems="center" justifyContent={"flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
+          <Box display="flex" gridColumnGap={5}>
             {quotationData?._id ?
               <Button
                 variant={isMobile && !isTablet ? 'outlined' : 'contained'}
@@ -429,7 +430,9 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
                 Create Quotation
               </Button>}
           </Box>
-        </Grid>
+        </Box>
+      </Box>
+      <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
             <Box

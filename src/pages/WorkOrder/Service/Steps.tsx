@@ -15,7 +15,7 @@ import {
   WORKORDER_SERVICE_STATUS,
   yupSchema
 } from 'src/constants/helpers';
-import { Box, Divider, Grid, IconButton, Accordion, AccordionDetails, AccordionSummary, Typography } from '@material-ui/core';
+import { Box, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -28,13 +28,12 @@ import { FaDiceOne } from 'react-icons/fa';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const STEP_WIDTH = 200;
-const ICON_WIDTH = 40;
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      width: '100%'
+      width: '100%',
+      height: '550px',
+      overflowY: 'auto'
     },
     backButton: {
       marginRight: theme.spacing(1)
@@ -43,38 +42,47 @@ const useStyles = makeStyles((theme: Theme) =>
       fontSize: theme.typography.pxToRem(16)
     },
     accordion: {
-      marginBottom: '8px',
+      border: '1px solid hsl(0deg 0% 85%)',
+      '&::before': {
+        content: 'unset !important',
+        display: 'none'
+      },
+      '&.Mui-expanded': {
+        margin: '20px 0'
+      },
+      marginBottom: '5px',
       '&:last-child': {
-        marginBottom: '0'
+        marginBottom: '1px'
+      },
+      boxShadow: 'none !important'
+    },
+    accordionHeading: {
+      '&.Mui-expanded': {
+        minHeight: 'unset !important',
+        borderBottom: '1px solid hsl(0deg 0% 70%)'
+      },
+      '& > div': {
+        alignItems: 'center',
+        justifyContent: 'space-between'
       }
-    }
-
-    // pbStepper: {
-    //   paddingBottom: '50px',
-    //   overflow: 'auto',
-    //   [theme.breakpoints.down('xs')]: {
-    //     overflow: 'auto'
-    //   }
-    // },
-    // instructions: {
-    //   marginTop: theme.spacing(1),
-    //   marginBottom: theme.spacing(1)
-    // },
-    // stepContent: {
-    //   margin: theme.spacing(1)
-    // },
-    // stepTitle: {
-    //   textOverflow: 'ellipsis',
-    //   overflow: 'hidden',
-    //   display: '-webkit-box !important',
-    //   '-webkit-line-clamp': '2',
-    //   '-webkit-box-orient': 'vertical',
-    //   whiteSpace: 'normal',
-    //   paddingTop: '0 !important',
-    //   paddingBottom: '0 !important',
-    //   height: '32px',
-    //   marginBottom: '5px'
-    // }
+    },
+    badge: {
+      backgroundColor: 'var(--primary)',
+      color: 'white',
+      width: '20px',
+      height: '20px',
+      borderRadius: '50%',
+      lineHeight: '20px',
+      textAlign: 'center',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '10px'
+    },
+    green: {
+      backgroundColor: 'rgba(0,255,0,.1)'
+    },
+    red: { backgroundColor: 'rgba(255,0,0,.1)' }
   })
 );
 
@@ -92,13 +100,9 @@ const Service = ({
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const [currentStep, setCurrentStep] = useState(0);
-  // const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
 
   const [stepList, setStepList] = useState([]);
-  // const [stepId, setStepId] = useState(null);
-  // const [stepData, setStepData] = useState(null);
   const [serviceDetails, setServiceDetails] = useState(null);
-  // const [disabledNextStep, setDisabledNextStep] = useState(true);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [] });
 
   useEffect(() => {
@@ -121,40 +125,6 @@ const Service = ({
         toastConfig.setToastConfig(err);
       });
   }, [serviceId]);
-
-  // useEffect(() => {
-  //   if (currentStep > -1) {
-  //     // setInitialDataFields();
-  //   }
-  // }, [currentStep, serviceData, serviceDetails]);
-
-  // const setInitialDataFields = () => {
-  //   setInitialData({ fields: [], values: {} });
-  //   if (serviceDetails?.steps?.length) {
-  //     let fieldsDataForCreate = serviceDetails?.steps[currentStep]?.fields ? serviceDetails?.steps[currentStep]?.fields : [];
-  //     if (serviceDetails?.steps[currentStep]) {
-  //       setStepId(serviceDetails?.steps[currentStep]?._id);
-  //     }
-  //     let tempServiceData = serviceData.find(
-  //       (d) => d.uniqueId === uniqueId && d.serviceId === serviceId && d.stepId === serviceDetails?.steps[currentStep]?._id
-  //     );
-  //     if (tempServiceData) {
-  //       setStepData(tempServiceData);
-  //       setInitialData({
-  //         fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-  //         values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate)
-  //       });
-  //     } else {
-  //       setStepData(null);
-  //       setInitialData({ fields: setFieldsInAscendingOrder(fieldsDataForCreate), values: getObjKeys('', fieldsDataForCreate) });
-  //     }
-  //     if (tempServiceData && tempServiceData?.status === 'end') {
-  //       setDisabledNextStep(false);
-  //     } else {
-  //       setDisabledNextStep(true);
-  //     }
-  //   }
-  // };
 
   const handleNext = () => {
     setCurrentStep((prevActiveStep) => prevActiveStep + 1);
@@ -258,27 +228,6 @@ const Service = ({
     return errors;
   }
 
-  // const handleScroll = (errors) => {
-  //   const err = Object.keys(errors);
-  //   if (err.length) {
-  //     const input = document.querySelector(`input[name=${err[0]}]`);
-  //     input.scrollIntoView({
-  //       behavior: 'smooth',
-  //       block: 'center',
-  //       inline: 'start'
-  //     });
-  //   }
-  // };
-
-  // const scrollRight = (elm) => {
-  //   elm.scrollLeft -= STEP_WIDTH;
-  // };
-  // const scrollLeft = (elm) => {
-  //   elm.scrollLeft += STEP_WIDTH;
-  // };
-
-  // const stepContainer = React.useRef<HTMLHeadingElement>(null);
-
   return stepList?.length ? (
     <Box>
       <div className={classes.root}>
@@ -286,28 +235,47 @@ const Service = ({
           const { fieldData, stepData } = getFields(step);
           return (
             <Accordion key={step._id} className={classes.accordion}>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
-                <Typography className={classes.heading} style={{ fontWeight: '600' }}>
-                  {step.stepName}
-                </Typography>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel2a-content"
+                id="panel2a-header"
+                className={`${classes.accordionHeading} ${stepData?.passFailStatus === 'Pass' && classes.green} ${
+                  stepData?.passFailStatus === 'Fail' && classes.red
+                }`}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Box mr={2} className={classes.badge}>
+                    {index + 1}
+                  </Box>
+                  <Typography className={classes.heading} style={{ fontWeight: '600' }}>
+                    {step.stepName}
+                  </Typography>
+                </div>
+                {stepData?.passFailStatus ? (
+                  <Box ml={1}>
+                    <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
+                  </Box>
+                ) : null}
               </AccordionSummary>
-              <AccordionDetails style={{ display: 'block' }}>
+              <AccordionDetails style={{ display: 'block', padding: '16px' }}>
                 {!stepData?.status || stepData?.status === 'start' ? (
                   <>
                     {!stepData?.status ? (
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        size="small"
-                        onClick={() => {
-                          handleStartEnd('start', step._id);
-                        }}
-                      >
-                        Start
-                      </Button>
+                      <Box mb={2}>
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          size="small"
+                          onClick={() => {
+                            handleStartEnd('start', step._id);
+                          }}
+                        >
+                          Start
+                        </Button>
+                      </Box>
                     ) : null}
                     {stepData?.status === 'start' ? (
-                      <Box display="flex">
+                      <Box display="flex" mb={2}>
                         <Button
                           variant="outlined"
                           color="secondary"
@@ -404,7 +372,7 @@ const Service = ({
                                 );
                               })}
                           </Form>
-                          <Box display="flex" justifyContent="flex-end" pt={2}>
+                          <Box display="flex" justifyContent="flex-end">
                             <CustomButton
                               variant="contained"
                               color="primary"
@@ -422,39 +390,35 @@ const Service = ({
                         </Fragment>
                       )}
                     </Formik>
-                    <Divider style={{ marginTop: '8px' }} />
                   </>
                 ) : (
-                  <Box p={3} textAlign="center">
-                    <Typography variant="h5">📪 Empty</Typography>
-                  </Box>
+                  <>
+                    <Box p={3} textAlign="center">
+                      <Typography variant="h5">📪 Empty</Typography>
+                    </Box>
+                  </>
                 )}
-                <Box mt={2}>
-                  <Grid container justifyContent="space-between" spacing={1} style={{ maxWidth: '833px', margin: '0 auto' }}>
+                <Box>
+                  <Divider style={{ marginTop: '20px' }} />
+                  <Grid container>
                     {stepData?.startDate ? (
-                      <Grid item>
+                      <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>
                         <Typography variant="caption">Start By</Typography>
                         <Typography variant="body2"> {stepData?.startedBy?.optionLabel}</Typography>
                         <Typography variant="caption"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
                       </Grid>
                     ) : null}
                     {stepData?.endDate ? (
-                      <Grid item>
+                      <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>
                         <Typography variant="caption">End By</Typography>
                         <Typography variant="body2"> {stepData?.endedBy?.optionLabel}</Typography>
                         <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
                       </Grid>
                     ) : null}
                     {stepData?.startDate && stepData?.endDate ? (
-                      <Grid item>
+                      <Grid item style={{ paddingTop: '20px', flexGrow: 1 }}>
                         <Typography variant="caption">Duration</Typography>
                         <Typography variant="body2">{`${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}</Typography>
-                      </Grid>
-                    ) : null}
-                    {stepData?.passFailStatus ? (
-                      <Grid item>
-                        <Typography variant="caption">Status</Typography>
-                        <Typography variant="body2">{`${stepData?.passFailStatus} `}</Typography>
                       </Grid>
                     ) : null}
                   </Grid>
@@ -464,229 +428,7 @@ const Service = ({
           );
         })}
       </div>
-      {/* 
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Box sx={{ flexBasis: `${ICON_WIDTH}px` }}>
-          <IconButton
-            color="primary"
-            onClick={() => {
-              scrollRight(stepContainer.current);
-              handleBack();
-            }}
-            size="small"
-            disabled={currentStep === 0}
-          >
-            <TiArrowBack size={25} />
-          </IconButton>
-        </Box>
 
-        <div style={{ overflow: 'auto', flexBasis: `calc(100% - ${ICON_WIDTH * 2}px)` }} id="scroller_id">
-          <Stepper
-            className={`${classes.pbStepper} stepper-responsive mt-2`}
-            activeStep={currentStep}
-            alternativeLabel
-            ref={stepContainer}
-            style={{ scrollBehavior: 'smooth' }}
-          >
-            {stepList?.map((label) => (
-              <Step key={label} style={{ minWidth: `${STEP_WIDTH}px` }}>
-                <StepLabel>
-                  <Box className={`${classes.stepTitle}`}>{label}</Box>
-                </StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </div>
-        <Box sx={{ flexBasis: `${ICON_WIDTH}px` }}>
-          <IconButton
-            color="primary"
-            onClick={() => {
-              scrollLeft(stepContainer.current);
-              handleNext();
-            }}
-            size="small"
-            disabled={currentStep === stepList?.length - 1 || disabledNextStep}
-          >
-            <RiShareForwardFill size={25} />
-          </IconButton>
-        </Box>
-      </Box>
-     
-      {!stepData?.status || stepData?.status === 'start' ? (
-        <Fragment>
-          <Box p={2}>
-            {!stepData?.status ? (
-              <Button
-                variant="outlined"
-                color="secondary"
-                size="small"
-                onClick={() => {
-                  handleStartEnd('start');
-                  if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) {
-                    updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress)
-                  }
-                }}
-              >
-                Start
-              </Button>
-            ) : null}
-            {stepData?.status === 'start' ? (
-              <Box display="flex">
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  size="small"
-                  onClick={() => {
-                    handlePassFail('Pass');
-                  }}
-                >
-                  Pass
-                </Button>
-                <Box marginX={1} />
-                <DeleteButton text="Fail" onClick={() => handlePassFail('Fail')} />
-              </Box>
-            ) : null}
-          </Box>
-        </Fragment>
-      ) : null}
-     
-      {initialData.fields.length ? (
-        <Fragment>
-          <Box p={2}>
-            <Formik
-              initialValues={initialData.values}
-              validationSchema={yupSchema(initialData.fields)}
-              onSubmit={handleSubmit}
-              validate={validate}
-              enableReinitialize
-            >
-              {({ values, errors, setFieldValue, touched, submitForm }) => (
-                <Fragment>
-                  <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {initialData.fields.length > 0 &&
-                      initialData.fields?.map((form, index1) => {
-                        return form?.name ? (
-                          <div key={index1}>
-                            <div className="detail-box-content">
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className="form-label-style form-label-quotes">{form?.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form?.sectionFields?.map((field, index2) => (
-                                  <Grid key={index2} item xs={12} sm={6} md={6}>
-                                    {
-                                      <FormTypes
-                                        {...field}
-                                        fieldData={field}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={null}
-                                      />
-                                    }
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        ) : (
-                          form?.sectionFields.map((field) => (
-                            <FormTypes
-                              {...field}
-                              fieldData={field}
-                              disabled={Boolean(workOrderId) && field.disableOnEdit}
-                              isNew={Boolean(workOrderId)}
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldLabel}
-                              name={field.fieldName}
-                              type={field.type}
-                              options={field.option}
-                              setFieldValue={(name, value) => {
-                                setFieldValue(name, value);
-                              }}
-                              required={field.required}
-                              fullWidth
-                              isTooltip={field?.isTooltip || false}
-                              tooltipMessage={field?.tooltipMessage}
-                              size="small"
-                              style={{ visibility: 'hidden' }}
-                            />
-                          ))
-                        );
-                      })}
-                  </Form>
-                  <Box display="flex" justifyContent="flex-end" pt={2}>
-                    <CustomButton
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleScroll(errors);
-                        submitForm();
-                      }}
-                    >
-                      {' '}
-                      Save
-                    </CustomButton>
-                  </Box>
-                </Fragment>
-              )}
-            </Formik>
-          </Box>
-          <Divider />
-        </Fragment>
-      ) : null} */}
-
-      {/* <Box m={2}>
-        <Grid container>
-          <Grid item xs={12}>
-            <Box display="flex">
-              {stepData?.startDate ? (
-                <Box>
-                  <Typography variant="caption">Start By</Typography>
-                  <Typography variant="body2"> {stepData?.startedBy?.optionLabel}</Typography>
-                  <Typography variant="caption"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
-                </Box>
-              ) : null}
-              {stepData?.endDate ? (
-                <Box ml={2}>
-                  <Typography variant="caption">End By</Typography>
-                  <Typography variant="body2"> {stepData?.endedBy?.optionLabel}</Typography>
-                  <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
-                </Box>
-              ) : null}
-              {stepData?.startDate && stepData?.endDate ? (
-                <Box ml={2}>
-                  <Typography variant="caption">Duration</Typography>
-                  <Typography variant="body2">{`${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}</Typography>
-                </Box>
-              ) : null}
-              {stepData?.passFailStatus ? (
-                <Box ml={2}>
-                  <Typography variant="caption">Status</Typography>
-                  <Typography variant="body2">{`${stepData?.passFailStatus} `}</Typography>
-                </Box>
-              ) : null}
-            </Box>
-          </Grid>
-        </Grid>
-      </Box> */}
       {addServiceConfirmation.open && (
         <ConfirmationDialog
           open={true}
