@@ -251,7 +251,6 @@ const Service = ({
                     {stepData?.passFailStatus === undefined && index + 1}
                     {stepData?.passFailStatus === 'Pass' && <MdDone />}
                     {stepData?.passFailStatus === 'Fail' && <RiErrorWarningLine />}
-                    {console.log(stepData?.passFailStatus)}
                   </Box>
                   <Typography className={classes.heading} style={{ fontWeight: '600' }}>
                     {step.stepName}
