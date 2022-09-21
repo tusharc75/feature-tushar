@@ -44,14 +44,14 @@ const useStyles = makeStyles((theme: Theme) =>
       fontSize: theme.typography.pxToRem(16)
     },
     accordion: {
-      border: '1px solid hsl(0deg 0% 75%)',
+      border: '1px solid hsl(0deg 0% 85%)',
       '&::before': {
         content: 'unset !important',
         display: 'none'
       },
       '&.Mui-expanded': {
         margin: '20px 0',
-        border: '1px solid hsl(0deg 0% 57%)'
+        border: '1px solid hsl(0deg 0% 70%)'
       },
       marginBottom: '5px',
       '&:last-child': {
