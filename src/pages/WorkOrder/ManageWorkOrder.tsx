@@ -111,7 +111,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
                 if (products && refrenceType && refrenceData) {
 
-                    tempInitialData["workOrderNumber"] = `${refrenceData?.repairOrderNumber}_${generateUniqueIdOnly()}`
+                    tempInitialData["workOrderNumber"] = `WO_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
                     tempInitialData["product"] = products
                     if (refrenceType === "Repair Order") {

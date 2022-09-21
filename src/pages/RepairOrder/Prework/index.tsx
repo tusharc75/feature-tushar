@@ -22,6 +22,7 @@ import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
 import RepairOrderQtyDialog from '../Productpackage/RepairOrderQtyDialog';
 import AddExistingProductInventory from '../Productpackage/AddExistingProductInventory';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import { ExpandMore } from '@material-ui/icons';
 
 const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit, isPrework }) => {
 
@@ -277,22 +278,17 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
 
     return (
         <Fragment>
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={12} sm={12}>
-                    <Box marginRight={2} display="flex" justifyContent="flex-end">
+            <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
+                <Box display="flex" alignItems="center" justifyContent={"flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
+                    <Box display="flex" gridColumnGap={5}>
                         <Button
                             variant="outlined"
-                            color="primary"
+                            color="default"
                             size="small"
-                            style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                            id="demo-positioned-button"
-                            aria-controls={open ? 'demo-positioned-menu' : undefined}
-                            aria-haspopup="true"
-                            aria-expanded={open ? 'true' : undefined}
                             onClick={handleClick}
-                            endIcon={<BiChevronDown />}
+                            aria-controls="action-menu"
                         >
-                            Actions
+                            Actions <ExpandMore />
                         </Button>
                         <Menu
                             id="basic-menu"
@@ -304,19 +300,17 @@ const Prework = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen,
                             }}
                             className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
                         >
-                            <HtmlTooltip
-                                title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}
+                            <MenuItem
+                                onClick={() => setAddServicesDialog({ open: true })}
+                                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                             >
-                                <MenuItem 
-                                onClick={() => setAddServicesDialog({ open: true })} 
-                                // disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length && selectedProducts.filter((e) => !e.hideSelection).length === 1)}
-                                >
-                                    <ListItemText>Add Services</ListItemText>
-                                </MenuItem>
-                            </HtmlTooltip>
+                                <ListItemText>Add Services</ListItemText>
+                            </MenuItem>
                         </Menu>
                     </Box>
-                </Grid>
+                </Box>
+            </Box>
+            <Grid container spacing={2}>
                 <Grid item xs={12} md={12} sm={12}>
                     {columns && rowsData ? (
                         <Box
