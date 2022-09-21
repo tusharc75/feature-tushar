@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       marginBottom: '5px',
       '&:last-child': {
-        marginBottom: '0'
+        marginBottom: '1px'
       },
       boxShadow: 'none !important'
     },
