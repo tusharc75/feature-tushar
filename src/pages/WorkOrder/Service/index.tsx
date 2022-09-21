@@ -284,13 +284,28 @@ const Service = ({ workOrderId }) => {
                           <Grid item xs={10}>
                             <Box display="flex" sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
                               {data?.type === 'service' && (
-                                <Box>
-                                  <Badge badgeContent={data?.order} color="primary" style={{ paddingLeft: isColapsed && '13px' }} />
+                                <Box
+                                  style={{
+                                    backgroundColor: 'var(--primary)',
+                                    color: 'white',
+                                    width: '20px',
+                                    height: '20px',
+                                    borderRadius: '50%',
+                                    lineHeight: '20px',
+                                    textAlign: 'center',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '10px',
+                                    flexShrink: 0
+                                  }}
+                                >
+                                  {data?.order}
                                 </Box>
                               )}
                               {!isColapsed && (
                                 <>
-                                  <Box ml={3}>
+                                  <Box ml={'10px'}>
                                     <Typography>{data?.serviceName}</Typography>
                                   </Box>
                                   {data?.type === 'service' && (
