@@ -44,7 +44,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [workOrderDialog, setWorkOrderDialog] = useState({ open: false, _id: null, product: null });
+  const [workOrderDialog, setWorkOrderDialog] = useState({ open: false, _id: null, product: null, asset: null });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -109,12 +109,12 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ? "Product" : "Package"}`}
+                label={`${row.original.type === 'product' ? "Product" : row.original.type === 'serializedAsset' ? "Asset" : "Package"}`}
                 size="small"
                 color="primary"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                    `${row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
                   );
                 }}
               />
@@ -185,7 +185,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
                   aria-label="History"
                   disabled={Boolean(row?.original?.workOrder)}
                   onClick={() => {
-                    setWorkOrderDialog({ open: true, _id: row?.original?._id, product: row?.original?.productDetail?._id });
+                    setWorkOrderDialog({ open: true, _id: row?.original?._id, product: row?.original?.type === 'serializedAsset' ? row?.original?.serializedAssetDetail.product : row?.original?.productDetail?._id, asset: row?.original?.type === 'serializedAsset' ? row?.original?.serializedAssetDetail._id : null });
                   }}
                 >
                   <RiAddCircleLine />
@@ -234,11 +234,9 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = (i + 1);
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
-      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAssetDetail.assetNumber : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
@@ -258,10 +256,8 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = _subRow?.productDetail?.productName;
-      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
-      _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
@@ -561,7 +557,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       )}
       {workOrderDialog.open && (
         <ManageWorkOrder
-          onClose={() => setWorkOrderDialog({ open: false, _id: null, product: null })}
+          onClose={() => setWorkOrderDialog({ open: false, _id: null, product: null, asset: null })}
           onSuccess={(data) => {
             if (data._id) {
               axiosInstance()
@@ -571,22 +567,20 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
                 }
                 )
                 .then(() => {
-                  setWorkOrderDialog({ open: false, _id: null, product: null });
+                  setWorkOrderDialog({ open: false, _id: null, product: null, asset: null });
                   fetchProductInventory();
                 })
                 .catch((error) => {
-                  setAddExistingProductDialog({ open: false, type: '', parentId: null });
                   toastConfig.setToastConfig(error);
                 });
             }
             else {
               fetchProductInventory();
-              setWorkOrderDialog({ open: false, _id: null, product: null });
+              setWorkOrderDialog({ open: false, _id: null, product: null, asset: null });
             }
           }}
           refrenceType={"Repair Order"}
-          refrenceData={repairOrderData}
-          products={workOrderDialog.product}
+          refrenceData={{ ...repairOrderData, product: workOrderDialog.product, serializedAsset: workOrderDialog.asset }}
         />
       )}
     </Fragment>

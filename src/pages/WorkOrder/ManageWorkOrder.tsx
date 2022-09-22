@@ -10,7 +10,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import {
     getOwnerDropdownDataSource,
     getCollaboratorDropdownDataSource,
-    CustomDialogTransition, setFieldsInAscendingOrder, generateUniqueIdOnly
+    CustomDialogTransition, setFieldsInAscendingOrder, generateUniqueIdOnly, serializedAsset
 } from "../../constants/helpers";
 import {
     getObjKeysWithValues, getObjKeys, yupSchema, workOrder, sidebarResource
@@ -28,8 +28,7 @@ import { useHistory } from 'react-router-dom';
 
 const disabledFieldArray = ['workOrderNumber', "type", "product", "repairOrder", "status"]
 
-const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null, refrenceType = null, refrenceData = null,
-    products = null }) => {
+const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null, refrenceType = null, refrenceData = null }) => {
 
     const { state: { user } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
@@ -81,6 +80,13 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             let data;
             const response = await axiosInstance().get(`/field?resource=${sidebarResource["workOrder"]}`)
             data = response?.data?.data
+            let serializedAssetFieldIndex = data.findIndex((obj) => obj?.fieldData.fieldName === 'serializedAsset');
+            if (serializedAssetFieldIndex > -1) {
+                const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}`);
+                if (lookupResource["Serialized Asset"]) {
+                    data[serializedAssetFieldIndex].fieldData.option = lookupResource["Serialized Asset"]
+                }
+            }
             let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
             let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             if (workOrderId) {
@@ -109,18 +115,16 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             }
             else {
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
-                if (products && refrenceType && refrenceData) {
-
+                if (refrenceType && refrenceData) {
                     tempInitialData["workOrderNumber"] = `WO_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
-                    tempInitialData["product"] = products
+                    tempInitialData["product"] = refrenceData?.product
                     if (refrenceType === "Repair Order") {
                         tempInitialData["repairOrder"] = refrenceData?._id;
                     }
-                    if (refrenceData.status) {
-                        tempInitialData["status"] = refrenceData.status;
+                    if (serializedAssetFieldIndex > -1 && refrenceData.serializedAsset) {
+                        tempInitialData["serializedAsset"] = refrenceData.serializedAsset
                     }
-
                 }
                 else {
                     tempInitialData["workOrderNumber"] = `WO_${generateUniqueIdOnly()}`
@@ -173,7 +177,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             let updatedValues = { ...values }
             axiosInstance().post(`${workOrder.api}`, updatedValues).then(({ data }) => {
                 setLoading(false);
-                if (products && refrenceType && refrenceData) {
+                if (refrenceType && refrenceData) {
                     onSuccess(data?.data)
                 }
                 else {
@@ -357,7 +361,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                         {...field}
                                                                         fieldData={field}
                                                                         isNew={!Boolean(workOrderId)}
-                                                                        disabled={products && refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)}
+                                                                        disabled={refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)}
                                                                         values={values}
                                                                         errors={errors}
                                                                         touched={touched}

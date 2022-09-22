@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       width: '100%',
-      height: '550px',
+      height: 'calc(100vh - 250px)',
       overflowY: 'auto'
     },
     backButton: {
@@ -48,9 +48,9 @@ const useStyles = makeStyles((theme: Theme) =>
         display: 'none'
       },
       '&.Mui-expanded': {
-        margin: '20px 0'
+        margin: '15px 0'
       },
-      marginBottom: '5px',
+      marginBottom: '15px',
       '&:last-child': {
         marginBottom: '1px'
       },
@@ -137,17 +137,20 @@ const Service = ({
   const getFields = (step) => {
     let stepData = null;
     let fieldData = { fields: [], values: {} };
-    if (step?.fields?.length) {
-      let fieldsDataForCreate = step?.fields ? step?.fields : [];
-      let tempServiceData = serviceData.find((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && d.stepId === step?._id);
 
-      if (tempServiceData) {
-        stepData = tempServiceData;
+    let fieldsDataForCreate = step?.fields ? step?.fields : [];
+    let tempServiceData = serviceData.find((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && d.stepId === step?._id);
+
+    if (tempServiceData) {
+      stepData = tempServiceData;
+      if (step?.fields?.length) {
         fieldData = {
           fields: setFieldsInAscendingOrder(fieldsDataForCreate),
           values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate)
         };
-      } else {
+      }
+    } else {
+      if (step?.fields?.length) {
         fieldData = { fields: setFieldsInAscendingOrder(fieldsDataForCreate), values: getObjKeys('', fieldsDataForCreate) };
       }
     }
@@ -239,9 +242,8 @@ const Service = ({
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel2a-content"
                 id="panel2a-header"
-                className={`${classes.accordionHeading} ${stepData?.passFailStatus === 'Pass' && classes.green} ${
-                  stepData?.passFailStatus === 'Fail' && classes.red
-                }`}
+                className={`${classes.accordionHeading} ${['Pass', 'Complete'].includes(stepData?.passFailStatus) && classes.green} ${stepData?.passFailStatus === 'Fail' && classes.red
+                  }`}
               >
                 <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
                   <Box mr={2} className={classes.badge}>
@@ -267,6 +269,7 @@ const Service = ({
                           color="secondary"
                           size="small"
                           onClick={() => {
+                            if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) { updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress) }
                             handleStartEnd('start', step._id);
                           }}
                         >
@@ -275,24 +278,40 @@ const Service = ({
                       </Box>
                     ) : null}
                     {stepData?.status === 'start' ? (
-                      <Box display="flex" mb={2}>
-                        <Button
-                          variant="outlined"
-                          color="secondary"
-                          size="small"
-                          onClick={() => {
-                            handlePassFail('Pass', step._id);
-                          }}
-                        >
-                          Pass
-                        </Button>
-                        <Box marginX={1} />
-                        <DeleteButton text="Fail" onClick={() => handlePassFail('Fail', step._id)} />
-                      </Box>
+                      stepData?.isPassFail ?
+                        <Box display="flex" mb={2}>
+                          <Button
+                            variant="outlined"
+                            color="secondary"
+                            size="small"
+                            onClick={() => {
+                              handlePassFail('Pass', step._id);
+                            }}
+                          >
+                            Pass
+                          </Button>
+                          <Box marginX={1} />
+                          <DeleteButton
+                            text="Fail"
+                            onClick={() => handlePassFail('Fail', step._id)}
+                          />
+                        </Box>
+                        :
+                        <Box display="flex" mb={2}>
+                          <Button
+                            variant="outlined"
+                            color="secondary"
+                            size="small"
+                            onClick={() => {
+                              handlePassFail('Complete', step._id);
+                            }}
+                          >
+                            Complete
+                          </Button>
+                        </Box>
                     ) : null}
                   </>
                 ) : null}
-                {/* // data start */}
                 {fieldData.fields.length ? (
                   <>
                     <Formik
@@ -391,15 +410,8 @@ const Service = ({
                       )}
                     </Formik>
                   </>
-                ) : (
-                  <>
-                    <Box p={3} textAlign="center">
-                      <Typography variant="h5">📪 Empty</Typography>
-                    </Box>
-                  </>
-                )}
+                ) : null}
                 <Box>
-                  <Divider style={{ marginTop: '20px' }} />
                   <Grid container>
                     {stepData?.startDate ? (
                       <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>
