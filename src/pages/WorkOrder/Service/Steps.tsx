@@ -266,7 +266,7 @@ const Service = ({
                           color="secondary"
                           size="small"
                           onClick={() => {
-                            if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) { updateServiceStatus(serviceId, WORKORDER_SERVICE_STATUS.inProgress) }
+                            if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) { updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress) }
                             handleStartEnd('start', step._id);
                           }}
                         >
