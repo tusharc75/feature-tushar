@@ -22,6 +22,7 @@ import { RiEditCircleLine, RiAddCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
+import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 
 const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
 
@@ -41,6 +42,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
 
   const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
+
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
 
@@ -107,12 +109,12 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ? "Product" : "Package"}`}
+                label={`${row.original.type === 'product' ? "Product" : row.original.type === 'serializedAsset' ? "Asset" : "Package"}`}
                 size="small"
                 color="primary"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                    `${row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
                   );
                 }}
               />
@@ -208,11 +210,9 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = (i + 1);
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
-      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAssetDetail.assetNumber : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
@@ -232,10 +232,8 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = _subRow?.productDetail?.productName;
-      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
-      _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
@@ -349,7 +347,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
     const obj: any = [];
     const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
     dataToDelete?.forEach((ele) => {
-      obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
+      obj.push(ele._id);
     })
     dataToDelete?.forEach((ele) => {
       getNestedSubRows(obj, ele)
@@ -391,6 +389,21 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
                     }}
                   >
                     {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
+                  </Button>
+                }
+                <Box mx={isMobile ? 0.5 : 1} />
+                {permissions?.serializedAsset?.isRead &&
+                  <Button
+                    color="primary"
+                    size="small"
+                    variant={isMobile && !isTablet ? "outlined" : "contained"}
+                    style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+                    disabled={isOffline}
+                    onClick={() => {
+                      setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null });
+                    }}
+                  >
+                    {isMobile && !isTablet ? 'Serialized Asset' : `Create ${routes.serializedAsset.title}`}
                   </Button>
                 }
               </Box>
@@ -520,7 +533,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
           loading={isUpdating}
         />
       )}
-      {addExistingProductDialog.open && (
+      {addExistingProductDialog.open && addExistingProductDialog.type !== 'serializedAsset' && (
         <AddExistingProductInventory
           renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
           isAddingProducts={isAddingProducts}
@@ -533,6 +546,16 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
           repairOrderData={repairOrderData}
         />
       )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'serializedAsset' &&
+        <ManageSerializedAsset
+          onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          customerAccountId={repairOrderData?.customerAccount?.optionValue}
+          onSuccess={(data) => {
+            setAddExistingProductDialog({ open: false, type: '', parentId: null });
+            handleAdd([data])
+          }}
+        />
+      }
     </Fragment>
   );
 };

@@ -84,17 +84,17 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
             </Box>}
             {!isOffline && (
               <Chip
-                className="ml-1"
-                label={`${row.original.type === 'service' ? "Service"
-                  : row.original.type === 'product' ? "Product" : "Package"}`}
-                size="small"
-                color="primary"
-                onClick={() => {
+              className="ml-1"
+              label={`${row.original.type === 'service' ? "Service"
+                  : row.original.type === 'product' ? "Product" : row.original.type === 'serializedAsset' ? "Asset" : "Package"}`}
+              size="small"
+              color="primary"
+              onClick={() => {
                   window.open(
-                    `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                      `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
                   );
-                }}
-              />
+              }}
+          />
             )}
           </div>
         ),
@@ -239,11 +239,9 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = (i + 1);
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
-      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAsset.optionLabel : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
@@ -283,10 +281,8 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     combinedData.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = _subRow?.type === "service" ? _subRow?.serviceName : _subRow?.type === "package" ? _subRow?.packageName : _subRow?.productDetail?.productName;
-      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
-      _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = false;;
       _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow) : _subRow?.type !== "service" ? generateNestedData(material, inventory, nonSerializeAsset, _subRow) : null;
     });
