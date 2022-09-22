@@ -140,10 +140,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.minValue = 0;
         values.maxValue = 0;
       }
-
-      if (
-        !values.unique &&
-        (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
+      if (!values.unique && (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
       ) {
         values.unique = false;
       }
@@ -246,11 +243,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.addAdditionalOption = values.addAdditionalOption;
             ele.lookup = values.lookup || false;
             ele.lookupResource = values.lookup ? values.lookupResource : '';
-            ele.entityWiseLookup = values.entityWiseLookup || false;
-            ele.isMinMaxValue = values.isMinMaxValue;
-            ele.minValue = values.minValue || 0;
-            ele.maxValue = values.maxValue || 0;
+            ele.entityWiseLookup = values?.entityWiseLookup || false;
+            ele.isMinMaxValue = values?.isMinMaxValue || false;
+            ele.minValue = values?.minValue || 0;
+            ele.maxValue = values?.maxValue || 0;
             ele.isDropdown = values.isDropdown || false;
+            ele.isSystemGenerate = values?.isSystemGenerate || false;
 
             if (values.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip;
@@ -1032,6 +1030,24 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       }
                       label="Primary Field"
                     />
+                    {fieldData.type === 'singleLine' && (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="isSystemGenerate"
+                            checked={values['isSystemGenerate']}
+                            onChange={(e) => {
+                              setFieldValue('isSystemGenerate', e.target.checked);
+                              handleValuesChange({
+                                isSystemGenerate: e.target.checked
+                              });
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="System Generate"
+                      />
+                    )}
                     {fieldData.type === 'imageUpload' && values['isDefaultValue'] ? (
                       <FormTypes
                         values={{ defaultValue: values['defaultValue'] }}
@@ -1202,7 +1218,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     <FormControlLabel
                       control={
                         <Checkbox
-                          disabled={values?.lookup}
                           name="isMinMaxValue"
                           checked={values['isMinMaxValue']}
                           onChange={(e) => {
@@ -1214,7 +1229,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           color="primary"
                         />
                       }
-                      label="Add Minimum Value or Maximum Value"
+                      label="Min Max Value"
                     />
                   )}
                   {values['isMinMaxValue'] &&
@@ -1225,7 +1240,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           variant="outlined"
                           label={"Min Value"}
                           name={"minValue"}
-                          required={true}
+                          margin="dense"
+                          type="number"
                           value={values["minValue"]}
                           onChange={(e) => {
                             setFieldValue('minValue', parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
@@ -1242,7 +1258,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           variant="outlined"
                           label={"Max Value"}
                           name={"maxValue"}
-                          required={true}
+                          margin="dense"
+                          type="number"
                           value={values["maxValue"]}
                           onChange={(e) => {
                             setFieldValue('maxValue', parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
@@ -1254,7 +1271,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         />
                       </Grid>
                     </Grid>
-
                   }
                   {module === "form-builder-master" &&
                     <Box>
