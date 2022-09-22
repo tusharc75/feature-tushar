@@ -239,9 +239,8 @@ const Service = ({
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel2a-content"
                 id="panel2a-header"
-                className={`${classes.accordionHeading} ${stepData?.passFailStatus === 'Pass' && classes.green} ${
-                  stepData?.passFailStatus === 'Fail' && classes.red
-                }`}
+                className={`${classes.accordionHeading} ${stepData?.passFailStatus === 'Pass' && classes.green} ${stepData?.passFailStatus === 'Fail' && classes.red
+                  }`}
               >
                 <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
                   <Box mr={2} className={classes.badge}>
@@ -267,6 +266,7 @@ const Service = ({
                           color="secondary"
                           size="small"
                           onClick={() => {
+                            if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) { updateServiceStatus(serviceId, WORKORDER_SERVICE_STATUS.inProgress) }
                             handleStartEnd('start', step._id);
                           }}
                         >
