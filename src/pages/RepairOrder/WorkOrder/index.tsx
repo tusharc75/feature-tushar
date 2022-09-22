@@ -580,9 +580,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
             }
           }}
           refrenceType={"Repair Order"}
-          refrenceData={repairOrderData}
-          products={workOrderDialog.product}
-          serializedAssetId={workOrderDialog.asset}
+          refrenceData={{ ...repairOrderData, product: workOrderDialog.product, serializedAsset: workOrderDialog.asset }}
         />
       )}
     </Fragment>
