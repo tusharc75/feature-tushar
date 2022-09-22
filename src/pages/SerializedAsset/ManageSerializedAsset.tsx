@@ -26,7 +26,7 @@ import CreateProduct from "../../components/Product/CreateProduct";
 import ManageWarehouse from "../Warehouse/ManageWarehouse"
 import ManageAccountDialog from "../Account/ManageAccount";
 
-const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null, isNew = true }) => {
+const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null, isNew = true, customerAccountId = null }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
@@ -109,6 +109,9 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
           }
           if (productCategory && fieldsDataForCreate.some((e) => e.fieldName === "productCategory")) {
             createValues['productCategory'] = productCategory;
+          }
+          if (customerAccountId && fieldsDataForCreate.some((e) => e.fieldName === "customerAccount")) {
+            createValues['customerAccount'] = customerAccountId;
           }
           if (fieldsDataForCreate.some((e) => e.fieldName === "recertDate")) {
             createValues["recertDate"] = ""

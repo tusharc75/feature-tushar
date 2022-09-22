@@ -251,7 +251,7 @@ const Service = ({ workOrderId }) => {
               )}
             </Box>
             <Box
-              sx={{ height: mobScreen ? 'unset' : '550px', display: { xs: 'flex', sm: 'block' } }}
+              sx={{ height: mobScreen ? 'unset' : 'calc(100vh - 300px)', display: { xs: 'flex', sm: 'block' } }}
               style={{ overflowX: mobScreen ? 'auto' : 'hidden', overflowY: mobScreen ? 'hidden' : 'auto', marginBottom: mobScreen ? '20px' : '0px' }}
             >
               <Grid
@@ -371,8 +371,8 @@ const Service = ({ workOrderId }) => {
               keepMounted
               open={Boolean(anchorEl)}
               onClose={handleCloseMenu}
-              //transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              //anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            //transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            //anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
               <MenuItem
                 onClick={() => {
