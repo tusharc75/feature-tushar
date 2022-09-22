@@ -137,17 +137,20 @@ const Service = ({
   const getFields = (step) => {
     let stepData = null;
     let fieldData = { fields: [], values: {} };
-    if (step?.fields?.length) {
-      let fieldsDataForCreate = step?.fields ? step?.fields : [];
-      let tempServiceData = serviceData.find((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && d.stepId === step?._id);
 
-      if (tempServiceData) {
-        stepData = tempServiceData;
+    let fieldsDataForCreate = step?.fields ? step?.fields : [];
+    let tempServiceData = serviceData.find((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && d.stepId === step?._id);
+
+    if (tempServiceData) {
+      stepData = tempServiceData;
+      if (step?.fields?.length) {
         fieldData = {
           fields: setFieldsInAscendingOrder(fieldsDataForCreate),
           values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate)
         };
-      } else {
+      }
+    } else {
+      if (step?.fields?.length) {
         fieldData = { fields: setFieldsInAscendingOrder(fieldsDataForCreate), values: getObjKeys('', fieldsDataForCreate) };
       }
     }
@@ -407,15 +410,8 @@ const Service = ({
                       )}
                     </Formik>
                   </>
-                ) : (
-                  <>
-                    <Box p={3} textAlign="center">
-                      <Typography variant="h5">📪 Empty</Typography>
-                    </Box>
-                  </>
-                )}
+                ) : null}
                 <Box>
-                  <Divider style={{ marginTop: '20px' }} />
                   <Grid container>
                     {stepData?.startDate ? (
                       <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>

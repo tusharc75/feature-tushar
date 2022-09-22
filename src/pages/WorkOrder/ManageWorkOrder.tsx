@@ -28,8 +28,7 @@ import { useHistory } from 'react-router-dom';
 
 const disabledFieldArray = ['workOrderNumber', "type", "product", "repairOrder", "status"]
 
-const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null, refrenceType = null, refrenceData = null,
-    products = null, serializedAssetId = null }) => {
+const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null, refrenceType = null, refrenceData = null }) => {
 
     const { state: { user } }: any = useData();
     const toastConfig = useContext(CustomToastContext)
@@ -116,21 +115,16 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             }
             else {
                 const tempInitialData = getObjKeys("", fieldsDataForCreate)
-                if (serializedAsset) {
-                    tempInitialData["serializedAsset"] = serializedAssetId
-                }
-                if (products && refrenceType && refrenceData) {
-
+                if (refrenceType && refrenceData) {
                     tempInitialData["workOrderNumber"] = `WO_${generateUniqueIdOnly()}`
                     tempInitialData["type"] = refrenceType;
-                    tempInitialData["product"] = products
+                    tempInitialData["product"] = refrenceData?.product
                     if (refrenceType === "Repair Order") {
                         tempInitialData["repairOrder"] = refrenceData?._id;
                     }
-                    if (refrenceData.status) {
-                        tempInitialData["status"] = refrenceData.status;
+                    if (serializedAssetFieldIndex > -1 && refrenceData.serializedAsset) {
+                        tempInitialData["serializedAsset"] = refrenceData.serializedAsset
                     }
-
                 }
                 else {
                     tempInitialData["workOrderNumber"] = `WO_${generateUniqueIdOnly()}`
@@ -183,7 +177,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             let updatedValues = { ...values }
             axiosInstance().post(`${workOrder.api}`, updatedValues).then(({ data }) => {
                 setLoading(false);
-                if (products && refrenceType && refrenceData) {
+                if (refrenceType && refrenceData) {
                     onSuccess(data?.data)
                 }
                 else {
@@ -367,7 +361,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                         {...field}
                                                                         fieldData={field}
                                                                         isNew={!Boolean(workOrderId)}
-                                                                        disabled={products && refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)}
+                                                                        disabled={refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)}
                                                                         values={values}
                                                                         errors={errors}
                                                                         touched={touched}
