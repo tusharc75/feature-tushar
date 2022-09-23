@@ -278,7 +278,7 @@ const Service = ({
                       </Box>
                     ) : null}
                     {stepData?.status === 'start' ? (
-                      stepData?.isPassFail ?
+                      step?.isPassFail ?
                         <Box display="flex" mb={2}>
                           <Button
                             variant="outlined"
