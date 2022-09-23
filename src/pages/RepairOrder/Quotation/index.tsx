@@ -84,17 +84,17 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
             </Box>}
             {!isOffline && (
               <Chip
-              className="ml-1"
-              label={`${row.original.type === 'service' ? "Service"
+                className="ml-1"
+                label={`${row.original.type === 'service' ? "Service"
                   : row.original.type === 'product' ? "Product" : row.original.type === 'serializedAsset' ? "Asset" : "Package"}`}
-              size="small"
-              color="primary"
-              onClick={() => {
+                size="small"
+                color="primary"
+                onClick={() => {
                   window.open(
-                      `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                    `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
                   );
-              }}
-          />
+                }}
+              />
             )}
           </div>
         ),
@@ -284,7 +284,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
       _subRow.hideSelection = false;;
-      _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow) : _subRow?.type !== "service" ? generateNestedData(material, inventory, nonSerializeAsset, _subRow) : null;
+      _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow, material) : _subRow?.type === "service" ? getConsumableSubRows(parent, _subRow, material) : generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
     if (combinedData.length === 0 && parent.type === "package") {
       parent.isValid = false;
@@ -295,7 +295,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     return combinedData;
   }
 
-  const getPackageSubRows = (parent, subRowPackage: any) => {
+  const getPackageSubRows = (parent, subRowPackage: any, material) => {
 
     const services = parent?.services?.filter(d => d.packageId === subRowPackage._id).map(d => {
       return {
@@ -313,9 +313,30 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.hideSelection = false;;
       _subRow.isValid = true;
-      _subRow.subRows = null;
+      _subRow.subRows = _subRow?.type === "service" ? getConsumableSubRows(parent, _subRow, material) : null;
     });
     return services;
+  }
+
+  const getConsumableSubRows = (parent, subRowService: any, material) => {
+
+    const consumable = parent?.consumable?.filter(d => d.service.optionValue === subRowService._id).map(d => {
+      return {
+        ...d,
+        materialId: d.product?.optionValue,
+        parentId: subRowService._id,
+        workOrder: subRowService.workOrder,
+        type: "product"
+      }
+    });
+    consumable.forEach((_subRow, j) => {
+      _subRow.srno = subRowService.srno + '.' + (j + 1);
+      _subRow.detail = _subRow?.product?.optionLabel;
+      _subRow.hideSelection = false;;
+      _subRow.isValid = true;
+      _subRow.subRows = null;
+    });
+    return consumable;
   }
 
   const getNestedSubRows = (obj, original) => {
