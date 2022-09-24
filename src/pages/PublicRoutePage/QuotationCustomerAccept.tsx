@@ -1,33 +1,18 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import axios from 'axios';
-import { backendApi } from '../../config';
 import { Box, Button, capitalize, Chip, Divider, Grid, makeStyles, Tooltip, Typography } from '@material-ui/core';
 import { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import {
-  dateFormat,
-  downloadExcel,
-  formatAmountWithCurrency,
-  getUniqueCurrencies,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  quotation,
-  QUOTATION_STATUS
-} from '../../constants/helpers';
+import { dateFormat, downloadExcel, formatAmountWithCurrency, getUniqueCurrencies, quotation } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { getFrameworkComponents } from '../../constants/useColumns';
-import { CommonRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
-import CustomAgGridEditable from 'src/components/AgGridComponents/CustomAgGridEditable';
-import { sortBy } from 'lodash';
-import DetailsPage from 'src/components/Shared/DetailsPage';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import { isMobile, isTablet } from 'react-device-detect';
+import { Skeleton } from '@material-ui/lab';
+import CustomButton from 'src/components/Helpers/CustomButton';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -88,15 +73,11 @@ const QuotationCustomerAccept = ({ quotationData, openAuthId }) => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting } = state;
   const [columns, setColumns] = useState(null);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [productData, setProductData] = useState([]);
-  const [productArray, setProductArray] = useState([]);
-  const [requireFieldArray, setRequireFieldArray] = useState([]);
   const [isSubmited, setIsSubmited] = useState(false);
-  const [disabledSubmitButton, setDisabledSubmitButton] = useState(true);
   const [quotationCurrency, setQuotationCurrency] = useState('');
   const [quotationName, setQuotationName] = useState('');
   const [isRateRequired, setIsRateRequired] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState({ accept: false, reject: false });
 
   console.log(quotationData, openAuthId);
 
@@ -566,61 +547,75 @@ const QuotationCustomerAccept = ({ quotationData, openAuthId }) => {
 
   return (
     <>
-      <Box display="flex" pt={1} mx={2}>
-        <Grid container justifyContent="space-between" style={{ marginBottom: 0, paddingBottom: 1 }}>
-          <Grid item className="d-flex align-items-center">
-            <Typography
-              className="text-capitalize"
-              style={{ display: 'inline-block' }}
-              variant="h6"
-              component="h2"
-              color="primary"
-              id="detailHeaderPageTitle"
+      {!isSubmited && (
+        <Box display="flex" pt={1} mx={2}>
+          <Grid container justifyContent="space-between" style={{ marginBottom: 0, paddingBottom: 1 }}>
+            <Grid item className="d-flex align-items-center">
+              {loading ? (
+                <Skeleton width={100} />
+              ) : (
+                <Typography
+                  className="text-capitalize"
+                  style={{ display: 'inline-block' }}
+                  variant="h6"
+                  component="h2"
+                  color="primary"
+                  id="detailHeaderPageTitle"
+                >
+                  <span className="d-flex align-items-center">
+                    <span className="listingHeader"> {quotationName}</span>
+                  </span>
+                </Typography>
+              )}
+            </Grid>
+            <Grid
+              id="detailHeaderPageActions"
+              item
+              className={
+                isMobile && !isTablet ? 'd-flex align-items-center justify-flex-end gap-1' : 'd-flex align-items-center gap-2 justify-flex-end'
+              }
             >
-              <span className="d-flex align-items-center">
-                <span className="listingHeader"> {quotationName}</span>
-              </span>
-            </Typography>
+              {loading ? (
+                <>
+                  <Skeleton width={50} />
+                  <Skeleton width={50} />
+                </>
+              ) : (
+                <>
+                  <Tooltip title="Accept">
+                    <CustomButton
+                      loading={isSubmitting.accept}
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      disabled={isSubmitting.accept}
+                      onClick={() => {
+                        handleSubmit('accept');
+                      }}
+                    >
+                      Accept
+                    </CustomButton>
+                  </Tooltip>
+                  <Tooltip title="Reject">
+                    <CustomButton
+                      loading={isSubmitting.reject}
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      disabled={isSubmitting.reject}
+                      onClick={() => {
+                        handleSubmit('reject');
+                      }}
+                    >
+                      Reject
+                    </CustomButton>
+                  </Tooltip>
+                </>
+              )}
+            </Grid>
           </Grid>
-          <Grid
-            id="detailHeaderPageActions"
-            item
-            className={
-              isMobile && !isTablet ? 'd-flex align-items-center justify-flex-end gap-1' : 'd-flex align-items-center gap-2 justify-flex-end'
-            }
-          >
-            {!isSubmited && (
-              <>
-                <Tooltip title="Accept">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      handleSubmit('accept');
-                    }}
-                  >
-                    Accept
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Reject">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      handleSubmit('reject');
-                    }}
-                  >
-                    Reject
-                  </Button>
-                </Tooltip>
-              </>
-            )}
-          </Grid>
-        </Grid>
-      </Box>
-
+        </Box>
+      )}
       {isSubmited ? (
         <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
           Thanks for your submission
