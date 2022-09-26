@@ -1,84 +1,87 @@
-import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from 'react';
-import {
-  Grid,
-  Box,
-  Button,
-  Paper,
-  Typography,
-  IconButton,
-  CircularProgress,
-  Tab,
-  Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
-  useMediaQuery,
-  Menu,
-  MenuItem,
-  Tooltip,
-  Chip,
-  capitalize
-} from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import { ExpandMore } from '@material-ui/icons';
-import { isMobile, isTablet } from 'react-device-detect';
-import { FiDownloadCloud } from 'react-icons/fi';
-import { AiFillEdit, AiOutlineEye, AiOutlineFileExcel, AiOutlineFilePdf } from 'react-icons/ai';
-import { GiVintageRobot } from 'react-icons/gi';
-import { utils } from 'xlsx';
-import { fetch_quotation_product_fields, handleViewPdf } from 'src/components/Quotation/helper';
-import moment from 'moment';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { dateFormat, formatAmountWithCurrency, prepareDataForGrid, quotation, QUOTATION_STATUS } from 'src/constants/helpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { Box, Button, capitalize, Chip, Divider, Grid, makeStyles, Tooltip, Typography } from '@material-ui/core';
+import { reducer, intialState } from '../../../components/AgGridComponents/CustomAgGrid';
+import { dateFormat, downloadExcel, formatAmountWithCurrency, getUniqueCurrencies, prepareDataForGrid, quotation } from '../../../constants/helpers';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { FaDiceOne } from 'react-icons/fa';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
-import SendEmail from '../SendEmail';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import moment from 'moment';
+import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
+import { isMobile, isTablet } from 'react-device-detect';
+import { Skeleton } from '@material-ui/lab';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import QCcomment from './QCcomment';
 
-const QuoteBuilder = ({
-  quotationData,
-  setNextStep,
-  currencySymbol,
-  showActivity,
-  sentToCustomer = false,
-  stepFullScreen,
-  fetchQuotationData,
-  setQuotationSummary,
-  version,
-  currentStep,
-  versionData
-}) => {
+let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    padding: '10px',
+    width: '100%',
+    flexGrow: 1,
+    display: 'flex',
+    justifyContent: 'flex-end'
+  },
+  linksContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    ['@media (max-width: 960px)']: {
+      display: 'none'
+    }
+  },
+  links: {
+    color: theme.palette.info.light, //  textDark
+    fontSize: 15
+  },
+  darkLinks: {
+    color: theme.palette.info.dark, //  textDark
+    fontSize: 15
+  },
+  linkDivider: {
+    backgroundColor: '#ffffff42', //  darkBg
+    margin: '0 10px'
+  },
+  darkLinkDivider: {
+    backgroundColor: 'grey', //  darkBg
+    margin: '0 10px'
+  },
+  delBtn: {
+    color: 'red'
+  },
+  expandIcon: {
+    position: 'absolute',
+    right: '0',
+    color: 'white'
+  },
+  darkExpandIcon: {
+    position: 'absolute',
+    right: '0',
+    color: theme.palette.info.dark
+  }
+}));
+
+const QuotationCustomerAccept = ({ openAuthId }) => {
+  let renderedFrom = 'QuotationCustomerAccept';
+  const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
-
-  const [isRateRequired, setIsRateRequired] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [columns, setColumns] = useState(null);
+  const [isSubmited, setIsSubmited] = useState(false);
+  const [quotationName, setQuotationName] = useState('');
+  const [isRateRequired, setIsRateRequired] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState({ accept: false, reject: false });
   const [rowsData, setRowsData] = useState(null);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
+  const [quotationData, setQuotationData] = useState<any>({});
+
+  console.log(quotationData, openAuthId);
 
   useEffect(() => {
-    fetchFields();
-  }, []);
-
-  useEffect(() => {
-    if (versionData) {
-      fetchProductInventory();
-    }
-  }, [versionData]);
-
-  useEffect(() => {
-    if (currentStep === 3 && rowsData && !sentToCustomer) {
-      setNextStep(false);
-    } else {
-      setNextStep(true);
-    }
-  }, [currentStep, sentToCustomer, rowsData]);
+    fetchProductInventory();
+  }, [openAuthId]);
 
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
@@ -218,23 +221,25 @@ const QuoteBuilder = ({
             .reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
           return (
             <>
-              {currencySymbol} {formatAmountWithCurrency(quotationData?.currency, total)?.amountWithouCurrencyCode ?? total}
+              {getUniqueCurrencies().find((d) => d.currencyCode === quotationData?.currency)?.symbolNative}{' '}
+              {formatAmountWithCurrency(quotationData?.currency, total)?.amountWithouCurrencyCode ?? total}
             </>
           );
         };
       }
     });
     setColumns(coloum);
+    setLoading(false);
   };
 
   const fetchProductInventory = async () => {
-    setNextStep(false);
+    setLoading(true);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionData._id}`);
-    const serviceResponse = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${versionData._id}`);
-
-    data = response?.data?.data;
+    const response = await axiosInstance().get(`${quotation.api}/customer/${openAuthId}`);
+    setQuotationName(response?.data?.data?.name);
+    setQuotationData(response?.data?.data?.quoteData);
+    data = response?.data?.data?.product;
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
@@ -273,15 +278,9 @@ const QuoteBuilder = ({
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
       parent.subRows = subRows;
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
-    } else {
-      setNextStep(true);
-    }
-
     let serviceRows = [];
-    if (serviceResponse?.data?.data?.length) {
-      serviceRows = serviceResponse?.data?.data?.map((item) => {
+    if (response?.data?.data?.service.length) {
+      serviceRows = response?.data?.data?.service?.map((item) => {
         let finalObject = prepareDataForGrid(item);
         finalObject['detail'] = item?.serviceName;
         finalObject['qtyDisplay'] = item?.qty;
@@ -299,110 +298,154 @@ const QuoteBuilder = ({
       });
     }
     setRowsData([...rows, ...serviceRows]);
+    fetchFields();
+  };
 
-    const totalFinalPrice = rows
-      .filter(
-        (f) =>
-          f?.parentId === null &&
-          f?.hasOwnProperty('finalPrice_' + quotationData?.currency?.toLowerCase()) &&
-          !isNaN(f['finalPrice_' + quotationData?.currency?.toLowerCase()])
-      )
-      .reduce((sum, row) => row['finalPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-    const totalSupplierPrice = rows
-      .filter(
-        (f) =>
-          f?.parentId === null &&
-          f?.hasOwnProperty('supplierPrice_' + quotationData?.currency?.toLowerCase()) &&
-          !isNaN(f['supplierPrice_' + quotationData?.currency?.toLowerCase()])
-      )
-      .reduce((sum, row) => row['supplierPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-
-    setQuotationSummary({
-      totalProfit: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice - totalSupplierPrice),
-      totalcost: formatAmountWithCurrency(quotationData?.currency, totalSupplierPrice),
-      totalsale: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice)
-    });
+  const handleSubmit = (value: any, comment: string = '') => {
+    let dataObj: any = {
+      response: value,
+      comment: comment,
+      openAuthId: openAuthId
+    };
+    axiosInstance()
+      .put(`${quotation.api}/customer/customer-response`, dataObj)
+      .then((res) => {
+        setIsSubmited(true);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Your Response Submitted Successfully`
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   return (
-    <Fragment>
-      <Box pb={2} display="flex" justifyContent="space-between">
-        <Box display="flex">
-          <SendEmail versionData={versionData} quotationData={quotationData} />
-        </Box>
-        <Box display="flex">
-          <Typography variant="h6" color={quotationData?.subStatus === 'Reject by Customer Waiting for New Price' ? 'error' : 'secondary'}>
-            {quotationData?.subStatus === 'Waiting for Your Acceptance'
-              ? 'Waiting for Customer Response'
-              : quotationData?.subStatus === 'Reject by Customer Waiting for New Price'
-              ? 'Rejected by Customer'
-              : quotationData?.subStatus === 'Price Approved by Customer'
-              ? 'Approved by Customer'
-              : ''}
-          </Typography>
-        </Box>
-        <Box display="flex">
-          {versionData?.processStatus === 'Send To Customer' && (
-            <HtmlTooltip title={'Send to customer'}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                disabled={sentToCustomer}
-                onClick={() => {
-                  axiosInstance()
-                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${versionData._id}`)
-                    .then(() => {
-                      fetchQuotationData(version, false);
-                      toastConfig.setToastConfig({
-                        open: true,
-                        type: 'success',
-                        message: 'Sent to customer Sucessfully'
-                      });
-                    })
-                    .catch((error) => {
-                      toastConfig.setToastConfig(error);
-                    });
-                }}
-              >
-                Send to Customer
-              </Button>
-            </HtmlTooltip>
-          )}
-          <Box p={1} />
-        </Box>
-      </Box>
-      {columns && rowsData ? (
-        <>
-          <Box
-            p="6px"
-            zIndex={5}
-            width={
-              stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
-            }
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-          >
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-              columns={columns}
-              data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-              onSelect={() => {}}
-              hideSelection={true}
-              childrenProperty="subRows"
-              uniqueKey="_id"
-              renderedFrom="quotation_product_package"
-              isClientSideGrid={true}
-            />
-          </Box>
-        </>
-      ) : (
-        <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+    <>
+      {!isSubmited && (
+        <Box display="flex" pt={1} mx={2}>
+          <Grid container justifyContent="space-between" style={{ marginBottom: 0, paddingBottom: 1 }}>
+            <Grid item className="d-flex align-items-center">
+              {loading ? (
+                <Skeleton width={100} />
+              ) : (
+                <Typography
+                  className="text-capitalize"
+                  style={{ display: 'inline-block' }}
+                  variant="h6"
+                  component="h2"
+                  color="primary"
+                  id="detailHeaderPageTitle"
+                >
+                  <span className="d-flex align-items-center">
+                    <span className="listingHeader"> {quotationName}</span>
+                  </span>
+                </Typography>
+              )}
+            </Grid>
+            <Grid
+              id="detailHeaderPageActions"
+              item
+              className={
+                isMobile && !isTablet ? 'd-flex align-items-center justify-flex-end gap-1' : 'd-flex align-items-center gap-2 justify-flex-end'
+              }
+            >
+              {loading ? (
+                <>
+                  <Skeleton width={50} />
+                  <Skeleton width={50} />
+                </>
+              ) : (
+                <>
+                  <Tooltip title="Accept">
+                    <CustomButton
+                      loading={isSubmitting.accept}
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      disabled={isSubmitting.accept}
+                      onClick={() => {
+                        handleSubmit('accept');
+                        setIsSubmitting({ accept: true, reject: false });
+                      }}
+                    >
+                      Accept
+                    </CustomButton>
+                  </Tooltip>
+                  <Tooltip title="Reject">
+                    <CustomButton
+                      loading={isSubmitting.reject}
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      disabled={isSubmitting.reject}
+                      onClick={() => {
+                        setIsSubmitting({ accept: false, reject: true });
+                      }}
+                    >
+                      Reject
+                    </CustomButton>
+                  </Tooltip>
+                </>
+              )}
+            </Grid>
+          </Grid>
         </Box>
       )}
-    </Fragment>
+      {isSubmited ? (
+        <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
+          Thanks for your submission
+        </h1>
+      ) : (
+        <>
+          <Box p={2}>
+            <>
+              <div className={'detail-box-content'} style={{ marginTop: 0 }}>
+                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                <h3 className="form-label-style" title={' Product List'}>
+                  Product List
+                </h3>
+              </div>
+              {columns ? (
+                !loading ? (
+                  <CustomReactTable
+                    height={'calc(100vh - 345px)'}
+                    columns={columns}
+                    data={rowsData}
+                    setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+                    onSelect={() => {}}
+                    hideSelection={true}
+                    childrenProperty="subRows"
+                    uniqueKey="_id"
+                    renderedFrom="quotation_product_package"
+                    isClientSideGrid={true}
+                  />
+                ) : (
+                  <Box p={2} bgcolor="white">
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </Box>
+                )
+              ) : (
+                <Box p={2} bgcolor="white">
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+              )}
+            </>
+          </Box>
+        </>
+      )}
+      {isSubmitting.reject && (
+        <QCcomment
+          onClose={() => {
+            setIsSubmitting({ accept: false, reject: false });
+          }}
+          onSubmit={handleSubmit}
+        />
+      )}
+    </>
   );
 };
 
-export default QuoteBuilder;
+export default QuotationCustomerAccept;
