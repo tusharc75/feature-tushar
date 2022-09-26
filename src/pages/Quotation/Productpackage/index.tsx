@@ -147,16 +147,18 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
 
             <Chip
               className="ml-1"
-              label={`${capitalize(row.original.type)}`}
+              label={`${row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'product'
-                    ? routes.productDetail.path
-                    : row.original.type === 'package'
-                      ? routes.packagesDetail.path
-                      : routes.serviceMasterDetail.path
+                  `${row.original.type === 'serializedAsset'
+                    ? routes.serializedAssetDetail.path
+                    : row.original.type === 'product'
+                      ? routes.productDetail.path
+                      : row.original.type === 'package'
+                        ? routes.packagesDetail.path
+                        : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -332,7 +334,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName}`;
+      parent.detail = `${parent.type === 'serializedAsset' ? parent.serializedAssetDetail?.assetNumber : parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName}`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -343,7 +345,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
 
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
+      setNextStep(true);
     } else {
       setNextStep(true);
     }
@@ -375,7 +377,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.packageDetail?.packageName}`;
+      _subRow.detail = `${_subRow.type === 'serializedAsset' ? _subRow.serializedAssetDetail?.assetNumber : _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.packageDetail?.packageName}`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -731,7 +733,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
               columns={columns}
               data={rowsData}
-              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
