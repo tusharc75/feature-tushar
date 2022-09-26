@@ -238,40 +238,21 @@ const QuoteBuilder = ({
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-
-      const subRows: any = data.material.filter((e) => e.parentId === parent._id);
-      subRows.forEach((_subRow, j) => {
-        _subRow.detail = `${
-          _subRow.type === 'serializedAsset'
-            ? _subRow.serializedAssetDetail?.assetNumber
-            : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
-        _subRow.leadTime = Array.isArray(_subRow?.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
-        _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
-        _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
-        _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-        _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      });
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-      parent.subRows = subRows;
+      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
+      parent.subRows = generateNestedData(data.material, inventory, parent);
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
@@ -324,6 +305,28 @@ const QuoteBuilder = ({
     });
   };
 
+  const generateNestedData = (material, inventory, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.detail = `${_subRow.type === 'serializedAsset' ? _subRow.serializedAssetDetail?.assetNumber : _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.packageDetail?.packageName}`;
+      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      _subRow.qtyDisplay = _subRow.qty;
+      // _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
+      _subRow.isValid = true;
+      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
+      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
+      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+    });
+    if (subRows.length === 0 && parent.type === "package") {
+      parent.isValid = false;
+    }
+    if (parent.type === "package") {
+      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+    }
+    return subRows;
+  }
+
   return (
     <Fragment>
       <Box pb={2} display="flex" justifyContent="space-between">
@@ -335,10 +338,10 @@ const QuoteBuilder = ({
             {quotationData?.subStatus === 'Waiting for Your Acceptance'
               ? 'Waiting for Customer Response'
               : quotationData?.subStatus === 'Reject by Customer Waiting for New Price'
-              ? 'Rejected by Customer'
-              : quotationData?.subStatus === 'Price Approved by Customer'
-              ? 'Approved by Customer'
-              : ''}
+                ? 'Rejected by Customer'
+                : quotationData?.subStatus === 'Price Approved by Customer'
+                  ? 'Approved by Customer'
+                  : ''}
           </Typography>
         </Box>
         <Box display="flex">
@@ -387,7 +390,7 @@ const QuoteBuilder = ({
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-              onSelect={() => {}}
+              onSelect={() => { }}
               hideSelection={true}
               childrenProperty="subRows"
               uniqueKey="_id"
