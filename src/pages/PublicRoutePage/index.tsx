@@ -108,8 +108,8 @@ const PublicRoutePage = () => {
   };
 
   useEffect(() => {
-    document.title = 'Equipt Supplier Portal';
-  }, []);
+    document.title = resourceData?.referenceIdType === 'QuotationCustomer' ? 'Equipt Customer Portal' : 'Equipt Supplier Portal';
+  }, [resourceData?.referenceIdType]);
 
   return (
     <>

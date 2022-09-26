@@ -15,58 +15,7 @@ import { Skeleton } from '@material-ui/lab';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import QCcomment from './QCcomment';
 
-let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    padding: '10px',
-    width: '100%',
-    flexGrow: 1,
-    display: 'flex',
-    justifyContent: 'flex-end'
-  },
-  linksContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
-      display: 'none'
-    }
-  },
-  links: {
-    color: theme.palette.info.light, //  textDark
-    fontSize: 15
-  },
-  darkLinks: {
-    color: theme.palette.info.dark, //  textDark
-    fontSize: 15
-  },
-  linkDivider: {
-    backgroundColor: '#ffffff42', //  darkBg
-    margin: '0 10px'
-  },
-  darkLinkDivider: {
-    backgroundColor: 'grey', //  darkBg
-    margin: '0 10px'
-  },
-  delBtn: {
-    color: 'red'
-  },
-  expandIcon: {
-    position: 'absolute',
-    right: '0',
-    color: 'white'
-  },
-  darkExpandIcon: {
-    position: 'absolute',
-    right: '0',
-    color: theme.palette.info.dark
-  }
-}));
-
 const QuotationCustomerAccept = ({ openAuthId }) => {
-  let renderedFrom = 'QuotationCustomerAccept';
-  const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [columns, setColumns] = useState(null);
@@ -75,15 +24,12 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState({ accept: false, reject: false });
   const [rowsData, setRowsData] = useState(null);
-  const [quotationData, setQuotationData] = useState<any>({});
-
-  console.log(quotationData, openAuthId);
 
   useEffect(() => {
     fetchProductInventory();
   }, [openAuthId]);
 
-  const fetchFields = async () => {
+  const fetchFields = async (quotationData) => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
     const coloum: any = [
       {
@@ -237,8 +183,8 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     var data: any = [];
     var inventory: any = [];
     const response = await axiosInstance().get(`${quotation.api}/customer/${openAuthId}`);
+
     setQuotationName(response?.data?.data?.name);
-    setQuotationData(response?.data?.data?.quoteData);
     data = response?.data?.data?.product;
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
@@ -254,7 +200,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       }`;
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      parent.isValid = parent['finalPrice_' + response?.data?.data?.quoteData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
 
@@ -271,13 +217,14 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         }`;
         _subRow.leadTime = Array.isArray(_subRow?.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
         _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
-        _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
+        _subRow.isValid = _subRow['finalPrice_' + response?.data?.data?.quoteData?.currency?.toLowerCase()] ? true : !isRateRequired;
         _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
         _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
       });
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
       parent.subRows = subRows;
     });
+
     let serviceRows = [];
     if (response?.data?.data?.service.length) {
       serviceRows = response?.data?.data?.service?.map((item) => {
@@ -298,7 +245,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       });
     }
     setRowsData([...rows, ...serviceRows]);
-    fetchFields();
+    fetchFields(response?.data?.data?.quoteData);
   };
 
   const handleSubmit = (value: any, comment: string = '') => {
@@ -408,10 +355,11 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                   Product List
                 </h3>
               </div>
+              <Box my={2} />
               {columns ? (
                 !loading ? (
                   <CustomReactTable
-                    height={'calc(100vh - 345px)'}
+                    height={'calc(100vh - 218px)'}
                     columns={columns}
                     data={rowsData}
                     setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
