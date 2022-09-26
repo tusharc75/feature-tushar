@@ -11,7 +11,7 @@ export default function QCcomment({ onClose, onSubmit }) {
   const [comment, setComment] = useState('');
 
   return (
-    <Dialog open onClose={onClose} fullWidth fullScreen={fullScreen || isMobile || isTablet}>
+    <Dialog open onClose={onClose} fullWidth>
       <CustomDialogHeader
         title={`Reason for Rejection`}
         onClose={onClose}
