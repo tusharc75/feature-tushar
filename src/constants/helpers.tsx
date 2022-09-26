@@ -2078,8 +2078,8 @@ export const QUOTATION_STATUS = {
   buildingQuote: 'Building Quote',
   waitingForSupplierPrice: 'Waiting for Supplier Price',
   sentToCustomer: 'Sent to Customer',
-  acceptByCustomer: 'Accept by Customer',
-  rejectByCustomer: 'Reject by Customer'
+  acceptByCustomer: 'Acceptd by Customer',
+  rejectByCustomer: 'Rejectd by Customer'
 };
 
 
