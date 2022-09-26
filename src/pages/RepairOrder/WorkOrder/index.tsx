@@ -241,10 +241,10 @@ const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
 
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
-    } else {
+    if (rows.filter((_rows) => _rows.workOrder).length > 0) {
       setNextStep(true);
+    } else {
+      setNextStep(false);
     }
 
     setRowsData(rows);

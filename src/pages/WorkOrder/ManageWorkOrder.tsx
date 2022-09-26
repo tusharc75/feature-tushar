@@ -361,7 +361,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                         {...field}
                                                                         fieldData={field}
                                                                         isNew={!Boolean(workOrderId)}
-                                                                        disabled={refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)}
+                                                                        disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.serializedAsset && field.fieldName === 'serializedAsset')}
                                                                         values={values}
                                                                         errors={errors}
                                                                         touched={touched}
