@@ -100,7 +100,7 @@ const QuoteBuilder = ({
                 <span>({row.original?.subRows?.length})</span>
               </Box>
             )}
-            <Chip className="ml-1" label={`${capitalize(row.original?.type)}`} size="small" color="primary" />
+            <Chip className="ml-1" label={`${row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}`} size="small" color="primary" />
           </div>
         )
       },
@@ -233,7 +233,7 @@ const QuoteBuilder = ({
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName}`;
+      parent.detail = `${parent.type === 'serializedAsset' ? parent.serializedAssetDetail?.assetNumber : parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName}`;
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -242,7 +242,7 @@ const QuoteBuilder = ({
 
       const subRows: any = data.material.filter((e) => e.parentId === parent._id);
       subRows.forEach((_subRow, j) => {
-        _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.serviceDetail?.serviceName}`;
+        _subRow.detail = `${_subRow.type === 'serializedAsset' ? _subRow.serializedAssetDetail?.assetNumber : _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.packageDetail?.packageName}`;
         _subRow.leadTime = Array.isArray(_subRow?.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
         _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
         _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
