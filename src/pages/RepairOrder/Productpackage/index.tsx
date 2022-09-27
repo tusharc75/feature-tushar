@@ -360,9 +360,9 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
       <Grid container spacing={2}>
         {allowedToEdit &&
           <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1}>
+            <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex">
-                {permissions?.product?.isRead &&
+                {/* {permissions?.product?.isRead &&
                   <Button
                     color="primary"
                     size="small"
@@ -390,8 +390,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
                   >
                     {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
                   </Button>
-                }
-                <Box mx={isMobile ? 0.5 : 1} />
+                } */}
                 {permissions?.serializedAsset?.isRead &&
                   <Button
                     color="primary"
@@ -407,78 +406,43 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
                   </Button>
                 }
               </Box>
-              {isMobile ? (
-                <Box display="flex">
-                  <Button
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    color="primary"
-                    size="small"
-                    style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                    id="demo-positioned-button"
-                    aria-controls={open ? 'demo-positioned-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={handleClick}
-                    endIcon={<BiChevronDown />}
+              <Box display="flex">
+                <Button
+                  variant={'outlined'}
+                  color="primary"
+                  size="small"
+                  onClick={handleClick}
+                  disabled={selectedProducts.length ? false : true}
+                  endIcon={<BiChevronDown />}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                  keepMounted
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right'
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right'
+                  }}
+                >
+                  <MenuItem
+                    onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
                   >
-                    Actions
-                  </Button>
-                  <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{
-                      'aria-labelledby': 'basic-button'
-                    }}
-                    className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
-                  >
-                    <HtmlTooltip
-                      title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}
-                    >
-                      <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })} disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}>
-                        <ListItemText>Bulk edit</ListItemText>
-                      </MenuItem>
-                    </HtmlTooltip>
-                    <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                      <MenuItem disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                        onClick={() => { handleDeleteMultiple() }}>
-                        <ListItemText>Delete</ListItemText>
-                      </MenuItem>
-                    </HtmlTooltip>
-                  </Menu>
-                </Box>
-              ) : (
-                <Box display="flex">
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-                    <span>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                        disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                        onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
-                      >
-                        {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : 'Bulk Edit'}
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
-                  <Box mx={1} />
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                      onClick={() => { handleDeleteMultiple() }}
-                      endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
-                    >
-                      {isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                    </Button>
-                  </HtmlTooltip>
-                </Box>
-              )}
+                    Bulk Edit
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => { handleDeleteMultiple() }}>
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </Box>
             </Box>
           </Grid>
         }
