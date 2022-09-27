@@ -513,7 +513,11 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
       {addExistingProductDialog.open && addExistingProductDialog.type === 'serializedAsset' &&
         <ManageSerializedAsset
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
-          customerAccountId={repairOrderData?.customerAccount?.optionValue}
+          referenceType={"repairOrder"}
+          referenceData={{
+            customerAccount: repairOrderData?.customerAccount?.optionValue,
+            warehouse: repairOrderData?.warehouse?.optionValue
+          }}
           onSuccess={(data) => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
             handleAdd([data])
