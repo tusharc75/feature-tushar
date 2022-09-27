@@ -23,11 +23,23 @@ import { BiChevronDown } from 'react-icons/bi';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
+import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 
-const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
-
+const Productpackage = ({
+  repairOrderData,
+  setNextStep,
+  currencySymbol,
+  isTabletScreen,
+  isSmallScreen,
+  showActivity,
+  renderedFrom,
+  stepFullScreen,
+  allowedToEdit
+}) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
 
@@ -42,6 +54,8 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
 
   const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
+
+  const [addExistingAssetDialog, setAddExistingAssetDialog] = useState(false);
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -63,11 +77,8 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
         accessor: 'srno',
         Header: '#',
         width: 70,
-        sticky: isMobile ? "none" : "left",
-        Cell: ({ row }) => (
-          <p className="text-truncate"  >
-            {row.original.srno}
-          </p>),
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
       },
       {
         accessor: 'detail',
@@ -90,31 +101,39 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
                 {row.original.detail}
               </p>
             )}
-            {<Box ml={1} className="d-flex align-items-center">
-              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-              </span>
-              {!isOffline &&
-                allowedToEdit &&
-                <HtmlTooltip title="Add Products">
-                  <IconButton
-                    onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
-                    size="small"
-                    color="primary"
-                  >
-                    <Add color="disabled" fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>}
-            </Box>}
+            {
+              <Box ml={1} className="d-flex align-items-center">
+                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+                </span>
+                {!isOffline && allowedToEdit && (
+                  <HtmlTooltip title="Add Products">
+                    <IconButton
+                      onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
+                      size="small"
+                      color="primary"
+                    >
+                      <Add color="disabled" fontSize="small" />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+              </Box>
+            }
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ? "Product" : row.original.type === 'serializedAsset' ? "Asset" : "Package"}`}
+                label={`${row.original.type === 'product' ? 'Product' : row.original.type === 'serializedAsset' ? 'Asset' : 'Package'}`}
                 size="small"
                 color="primary"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                    `${
+                      row.original.type === 'product'
+                        ? routes.productDetail.path
+                        : row.original.type === 'serializedAsset'
+                        ? routes.serializedAssetDetail.path
+                        : routes.packagesDetail.path
+                    }/${row.original.materialId}`
                   );
                 }}
               />
@@ -124,10 +143,9 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
         Footer: () => {
           return <>Total</>;
         }
-      },
+      }
     ];
     data.forEach((element) => {
-
       if (element.type === 'date') {
         coloum.push({
           accessor: element.fieldName,
@@ -136,17 +154,18 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
           Cell: ({ row }) =>
             row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
         });
-      }
-      else if (element.fieldName === "serviceMaster") {
+      } else if (element.fieldName === 'serviceMaster') {
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (
-            row.original[element.fieldName] ? <p className="text-truncate">{row.original[element.fieldName].map(d => d?.optionLabel).toString()}</p> : <NoDataCell />
-          )
-        })
-      }
-      else {
+          Cell: ({ row }) =>
+            row.original[element.fieldName] ? (
+              <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
+            ) : (
+              <NoDataCell />
+            )
+        });
+      } else {
         if (element.fieldName === 'qty') {
           element.fieldName = 'qtyDisplay';
         }
@@ -158,31 +177,35 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
       }
     });
     {
-      isMobile ? <Box display={"none"} /> : coloum.push({
-        accessor: 'action',
-        Header: '',
-        minWidth: 70,
-        width: 70,
-        sticky: 'right',
-        disableFilters: true,
-        canDrag: false,
-        Cell: ({ row }) =>
-          <>
-            {!row.original.hideSelection && allowedToEdit && (
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [row.original._id];
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            )
-            }
-          </>
-      });
+      isMobile ? (
+        <Box display={'none'} />
+      ) : (
+        coloum.push({
+          accessor: 'action',
+          Header: '',
+          minWidth: 70,
+          width: 70,
+          sticky: 'right',
+          disableFilters: true,
+          canDrag: false,
+          Cell: ({ row }) => (
+            <>
+              {!row.original.hideSelection && allowedToEdit && (
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [row.original._id];
+                    setDeleteData(obj);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
+              )}
+            </>
+          )
+        })
+      );
     }
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
@@ -209,8 +232,14 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
     nonSerializeAsset = data.nonSerializeAsset;
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.srno = (i + 1);
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAssetDetail.assetNumber : parent.packageDetail?.packageName}`;
+      parent.srno = i + 1;
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail.assetNumber
+          : parent.packageDetail?.packageName
+      }`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
@@ -234,17 +263,17 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
       _subRow.detail = _subRow?.productDetail?.productName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
-      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;;
+      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
-    if (subRows.length === 0 && parent.type === "package") {
+    if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
     }
-    if (parent.type === "package") {
+    if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
-  }
+  };
 
   const getNestedSubRows = (obj, original) => {
     if (original?.subRows?.length) {
@@ -253,7 +282,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
         getNestedSubRows(obj, element);
       });
     }
-  }
+  };
 
   const handleAdd = async (rows) => {
     setAddingProducts(true);
@@ -285,7 +314,7 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
 
   const handleSaveData = async (rows: any) => {
     rows.forEach((element) => {
-      delete element.srno
+      delete element.srno;
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;
@@ -331,7 +360,6 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
     setRecordToUpdate(rowData);
   };
 
-
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -348,17 +376,21 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
     const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
     dataToDelete?.forEach((ele) => {
       obj.push(ele._id);
-    })
+    });
     dataToDelete?.forEach((ele) => {
-      getNestedSubRows(obj, ele)
-    })
+      getNestedSubRows(obj, ele);
+    });
     setDeleteData(obj);
-  }
+  };
+
+  const handleAssignAsset = (ids) => {
+    console.log([...ids]);
+  };
 
   return (
     <Fragment>
       <Grid container spacing={2}>
-        {allowedToEdit &&
+        {allowedToEdit && (
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex">
@@ -391,20 +423,35 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
                     {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
                   </Button>
                 } */}
-                {permissions?.serializedAsset?.isRead &&
-                  <Button
-                    color="primary"
-                    size="small"
-                    variant={isMobile && !isTablet ? "outlined" : "contained"}
-                    style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                    disabled={isOffline}
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Serialized Asset' : `Create ${routes.serializedAsset.title}`}
-                  </Button>
-                }
+                {permissions?.serializedAsset?.isRead && (
+                  <>
+                    <Button
+                      color="primary"
+                      size="small"
+                      variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                      style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                      disabled={isOffline}
+                      onClick={() => {
+                        setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null });
+                      }}
+                    >
+                      {isMobile && !isTablet ? 'Serialized Asset' : `Create ${routes.serializedAsset.title}`}
+                    </Button>
+                    <Box ml={1} />
+                    <Button
+                      color="primary"
+                      size="small"
+                      variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                      style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                      disabled={isOffline}
+                      onClick={() => {
+                        setAddExistingAssetDialog(true);
+                      }}
+                    >
+                      {isMobile && !isTablet ? 'Existing Serialized Asset' : `Add Existing ${routes.serializedAsset.title}`}
+                    </Button>
+                  </>
+                )}
               </Box>
               <Box display="flex">
                 <Button
@@ -432,32 +479,41 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
                     horizontal: 'right'
                   }}
                 >
+                  <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}>Bulk Edit</MenuItem>
                   <MenuItem
-                    onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
+                    onClick={() => {
+                      handleDeleteMultiple();
+                    }}
                   >
-                    Bulk Edit
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => { handleDeleteMultiple() }}>
                     Delete
                   </MenuItem>
                 </Menu>
               </Box>
             </Box>
           </Grid>
-        }
+        )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
-              height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
+              width={
+                stepFullScreen
+                  ? '100%'
+                  : isTabletScreen
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
+              }
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
               <CustomReactTable
-                height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
                 columns={columns}
                 data={rowsData}
-                setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
+                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
                 uniqueKey="_id"
@@ -510,16 +566,29 @@ const Productpackage = ({ repairOrderData, setNextStep, currencySymbol, isTablet
           repairOrderData={repairOrderData}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'serializedAsset' &&
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'serializedAsset' && (
         <ManageSerializedAsset
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
           customerAccountId={repairOrderData?.customerAccount?.optionValue}
           onSuccess={(data) => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
-            handleAdd([data])
+            handleAdd([data]);
           }}
         />
-      }
+      )}
+      {addExistingAssetDialog && (
+        <AssignSerializedAssetDialog
+          reference="Assign Serialized Asset"
+          referenceId={repairOrderData?._id}
+          handleClose={() => setAddExistingAssetDialog(false)}
+          ids={[...rowsData?.map((e) => e._id)]}
+          onSubmit={handleAssignAsset}
+          onSuccess={() => {
+            fetchProductInventory();
+            setAddExistingAssetDialog(false);
+          }}
+        />
+      )}
     </Fragment>
   );
 };
