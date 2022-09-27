@@ -9,10 +9,8 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import Add from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
 import moment from 'moment';
-import { repairOrder, dateFormat } from '../../../constants/helpers';
+import { repairOrder, dateFormat, workOrder, sidebarResource, getObjKeys, generateUniqueIdOnly } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -23,568 +21,396 @@ import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/he
 import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
 import RepairOrderQtyDialog from '../Productpackage/RepairOrderQtyDialog';
 import AddExistingProductInventory from '../Productpackage/AddExistingProductInventory';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import { ExpandMore } from '@material-ui/icons';
 
-const WorkOrder = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen }) => {
+    const toastConfig = useContext(CustomToastContext);
+    const { state: { user, permissions } }: any = useData();
+    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [material, setMaterial] = useState([]);
+    const [columns, setColumns] = useState(null);
+    const [rowsData, setRowsData] = useState(null);
+    const [addServicesDialog, setAddServicesDialog] = useState({ open: false });
 
-  const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
+    const { isOffline } = useContext(CustomOfflineContext);
 
-  const [isUpdating, setUpdating] = useState(false);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
-  const [isAddingProducts, setAddingProducts] = useState(false);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
 
-  const [recordToUpdate, setRecordToUpdate] = useState(null);
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
-  const [deleteData, setDeleteData] = useState(null);
-  const [isDeleting, setDeleting] = useState(false);
+    useEffect(() => {
+        fetchFields();
+    }, []);
 
-  const [material, setMaterial] = useState([]);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
-  const [columns, setColumns] = useState(null);
-  const [rowsData, setRowsData] = useState(null);
-  const [workOrderDialog, setWorkOrderDialog] = useState({ open: false, _id: null, product: null, asset: null });
-
-  const { isOffline } = useContext(CustomOfflineContext);
-
-  useEffect(() => {
-    fetchFields();
-  }, []);
-
-  useEffect(() => {
-    fetchProductInventory();
-  }, [columns]);
-
-  const fetchFields = async () => {
-    var data = await fetch_repair_order_product_fields(repairOrderData?.currency);
-    const coloum: any = [
-      {
-        accessor: 'srno',
-        Header: '#',
-        width: 70,
-        sticky: isMobile ? "none" : "left",
-        Cell: ({ row }) => (
-          <p className="text-truncate"  >
-            {row.original.srno}
-          </p>),
-      },
-      {
-        accessor: 'detail',
-        Header: 'Detail',
-        minWidth: 300,
-        width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {isOffline || !allowedToEdit ? (
-              <p> {row.original.detail}</p>
-            ) : (
-              <p
-                onClick={() => {
-                  handleOpen(row.original);
-                }}
-                className="link text-truncate"
-                title={row.original.detail}
-              >
-                {row.original.detail}
-              </p>
-            )}
-            {<Box ml={1} className="d-flex align-items-center">
-              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-              </span>
-              {!isOffline &&
-                allowedToEdit &&
-                <HtmlTooltip title="Add Products">
-                  <IconButton
-                    onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
-                    size="small"
-                    color="primary"
-                  >
-                    <Add color="disabled" fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>}
-            </Box>}
-            {!isOffline && (
-              <Chip
-                className="ml-1"
-                label={`${row.original.type === 'product' ? "Product" : row.original.type === 'serializedAsset' ? "Asset" : "Package"}`}
-                size="small"
-                color="primary"
-                onClick={() => {
-                  window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                  );
-                }}
-              />
-            )}
-          </div>
-        ),
-        Footer: () => {
-          return <>Total</>;
-        }
-      },
-      {
-        accessor: 'workOrder',
-        Header: 'Work Order',
-        Cell: ({ row }) => (
-          row.original['workOrder'] ?
-            <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder'].optionValue}`} target="_blank">{row.original['workOrder'].optionLabel}</a>
-            : <NoDataCell />
-        )
-      }
-    ];
-    data.forEach((element) => {
-
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      }
-      else if (element.fieldName === "serviceMaster") {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (
-            row.original[element.fieldName] ? <p className="text-truncate">{row.original[element.fieldName].map(d => d?.optionLabel).toString()}</p> : <NoDataCell />
-          )
-        })
-      }
-      else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
-    {
-      isMobile ? <Box display={"none"} /> : coloum.push({
-        accessor: 'actions',
-        Header: '',
-        minWidth: 70,
-        width: 70,
-        sticky: 'right',
-        disableFilters: true,
-        canDrag: false,
-        Cell: ({ row }) =>
-          <>
-
-            {<HtmlTooltip title={Boolean(row?.original?.workOrder) ? "Work Order already exist" : "Create Work Order"}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="History"
-                  disabled={Boolean(row?.original?.workOrder)}
-                  onClick={() => {
-                    setWorkOrderDialog({ open: true, _id: row?.original?._id, product: row?.original?.type === 'serializedAsset' ? row?.original?.serializedAssetDetail.product : row?.original?.productDetail?._id, asset: row?.original?.type === 'serializedAsset' ? row?.original?.serializedAssetDetail._id : null });
-                  }}
-                >
-                  <RiAddCircleLine />
-                </IconButton>
-              </span>
-            </HtmlTooltip>}
-            {!row.original.hideSelection && allowedToEdit && (
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [row.original._id];
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            )
-            }
-          </>
-      });
-    }
-    coloum.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
-    setColumns(coloum);
-  };
-
-  const fetchProductInventory = async () => {
-    setNextStep(false);
-    var data: any = [];
-    var inventory: any = [];
-    var nonSerializeAsset: any = [];
-    const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
-    data = response?.data?.data;
-    setMaterial(JSON.parse(JSON.stringify(data.material)));
-    inventory = data.inventory;
-    nonSerializeAsset = data.nonSerializeAsset;
-    const rows = data.material.filter((e) => e.parentId === null);
-    rows.forEach((parent, i) => {
-      parent.srno = (i + 1);
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAssetDetail.assetNumber : parent.packageDetail?.packageName}`;
-      parent.qtyDisplay = parent.qty;
-      parent.isValid = true;
-      parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
-      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
-    });
-
-    if (rows.filter((_rows) => _rows.workOrder).length > 0) {
-      setNextStep(true);
-    } else {
-      setNextStep(false);
-    }
-
-    setRowsData(rows);
-    setSelectedProducts([]);
-  };
-
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow?.productDetail?.productName;
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
-      _subRow.isValid = true;
-      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
-    });
-    if (subRows.length === 0 && parent.type === "package") {
-      parent.isValid = false;
-    }
-    if (parent.type === "package") {
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-    }
-    return subRows;
-  }
-
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
-  }
-
-  const handleAdd = async (rows) => {
-    setAddingProducts(true);
-    const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = addExistingProductDialog.type;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.parentId = addExistingProductDialog.parentId;
-      material.push(element);
-    });
-
-    axiosInstance()
-      .post(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material })
-      .then(() => {
-        setAddExistingProductDialog({ open: false, type: '', parentId: null });
+    useEffect(() => {
         fetchProductInventory();
-        setAddingProducts(false);
-      })
-      .catch((error) => {
-        setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        toastConfig.setToastConfig(error);
-        setAddingProducts(false);
-      });
-  };
+    }, [columns]);
 
-  const handleSaveData = async (rows: any) => {
-    rows.forEach((element) => {
-      delete element.srno
-      delete element.detail;
-      delete element.serializedProduct;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
-    });
-    setUpdating(true);
-    axiosInstance()
-      .put(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material: rows })
-      .then(() => {
-        setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleDelete = (rows) => {
-    setDeleting(true);
-    axiosInstance()
-      .put(`${repairOrder.api}/${repairOrderData?._id}/product-package/delete`, { ids: rows })
-      .then(() => {
-        setDeleting(false);
-        fetchProductInventory();
-        setDeleteData(null);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-      });
-  };
-
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
-  };
-
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleDeleteMultiple = () => {
-    const obj: any = [];
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
-    dataToDelete?.forEach((ele) => {
-      obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
-    })
-    dataToDelete?.forEach((ele) => {
-      getNestedSubRows(obj, ele)
-    })
-    setDeleteData(obj);
-  }
-
-  return (
-    <Fragment>
-      <Grid container spacing={2}>
-        {allowedToEdit &&
-          <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1}>
-              <Box display="flex">
-                {permissions?.product?.isRead &&
-                  <Button
-                    color="primary"
-                    size="small"
-                    disabled={isOffline}
-                    variant={isMobile && !isTablet ? "outlined" : "contained"}
-                    style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Product' : `Add ${routes.product.title}`}
-                  </Button>
+    const fetchFields = async () => {
+        var data = await fetch_repair_order_product_fields(repairOrderData?.currency);
+        const coloum: any = [
+            {
+                accessor: 'srno',
+                Header: '#',
+                width: 70,
+                sticky: isMobile ? "none" : "left",
+                Cell: ({ row }) => (
+                    <p className="text-truncate"  >
+                        {row.original.srno}
+                    </p>),
+            },
+            {
+                accessor: 'detail',
+                Header: 'Detail',
+                minWidth: 300,
+                width: 300,
+                sticky: isMobile ? 'none' : 'left',
+                Cell: ({ row }) => (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <p> {row.original.detail}</p>
+                        {<Box ml={1} className="d-flex align-items-center">
+                            <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+                            </span>
+                        </Box>}
+                        {!isOffline && (
+                            <Chip
+                                className="ml-1"
+                                label={`${row.original.type === 'service' ? "Service"
+                                    : row.original.type === 'product' ? "Product" : row.original.type === 'serializedAsset' ? "Asset" : "Package"}`}
+                                size="small"
+                                color="primary"
+                                onClick={() => {
+                                    window.open(
+                                        `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                                    );
+                                }}
+                            />
+                        )}
+                    </div>
+                ),
+                Footer: () => {
+                    return <>Total</>;
                 }
-                <Box mx={isMobile ? 0.5 : 1} />
-                {permissions?.packages?.isRead &&
-                  <Button
-                    color="primary"
-                    size="small"
-                    variant={isMobile && !isTablet ? "outlined" : "contained"}
-                    style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
-                    disabled={isOffline}
-                    onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                    }}
-                  >
-                    {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
-                  </Button>
-                }
-              </Box>
-              {isMobile ? (
-                <Box display="flex">
-                  <Button
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    color="primary"
-                    size="small"
-                    style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                    id="demo-positioned-button"
-                    aria-controls={open ? 'demo-positioned-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={handleClick}
-                    endIcon={<BiChevronDown />}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{
-                      'aria-labelledby': 'basic-button'
-                    }}
-                    className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
-                  >
-                    <HtmlTooltip
-                      title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}
-                    >
-                      <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })} disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}>
-                        <ListItemText>Bulk edit</ListItemText>
-                      </MenuItem>
-                    </HtmlTooltip>
-                    <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                      <MenuItem disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                        onClick={() => { handleDeleteMultiple() }}>
-                        <ListItemText>Delete</ListItemText>
-                      </MenuItem>
-                    </HtmlTooltip>
-                  </Menu>
-                </Box>
-              ) : (
-                <Box display="flex">
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-                    <span>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                        disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                        onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
-                      >
-                        {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : 'Bulk Edit'}
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
-                  <Box mx={1} />
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                      onClick={() => { handleDeleteMultiple() }}
-                      endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
-                    >
-                      {isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                    </Button>
-                  </HtmlTooltip>
-                </Box>
-              )}
-            </Box>
-          </Grid>
-        }
-        <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
-              height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
-            >
-              <CustomReactTable
-                height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
-                columns={columns}
-                data={rowsData}
-                setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
-                onSelect={setSelectedProducts}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                hideSelection={isOffline || !allowedToEdit}
-                renderedFrom="repair_order_workorder_product_package"
-                isClientSideGrid={true}
-              />
-            </Box>
-          ) : (
-            <Box p={2} height={500} bgcolor="white">
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
-        </Grid>
-      </Grid>
-      {deleteData && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to delete the record(s)?`}
-          onClose={() => setDeleteData(null)}
-          onOk={() => handleDelete(deleteData)}
-          okBtnLoading={isDeleting}
-        />
-      )}
-      {isProductEdit.open && (
-        <RepairOrderQtyDialog
-          onClose={() => {
-            setIsProductEdit({ open: false, isBulkedit: false });
-            setRecordToUpdate(null);
-          }}
-          isBulkedit={isProductEdit.isBulkedit}
-          handleSaveData={handleSaveData}
-          repairOrderData={repairOrderData}
-          rowData={recordToUpdate}
-          material={material}
-          selectedProducts={selectedProducts}
-          loading={isUpdating}
-        />
-      )}
-      {addExistingProductDialog.open && (
-        <AddExistingProductInventory
-          renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAdd}
-          handleProductInventoryClose={() => {
-            setAddExistingProductDialog({ open: false, type: '', parentId: null });
-          }}
-          productInventory={[]}
-          type={addExistingProductDialog.type}
-          repairOrderData={repairOrderData}
-        />
-      )}
-      {workOrderDialog.open && (
-        <ManageWorkOrder
-          onClose={() => setWorkOrderDialog({ open: false, _id: null, product: null, asset: null })}
-          onSuccess={(data) => {
-            if (data._id) {
-              axiosInstance()
-                .put(`${repairOrder.api}/${repairOrderData._id}/product-package/add-work-order`, {
-                  "_id": workOrderDialog?._id,
-                  "workOrder": data?._id
-                }
+            },
+            {
+                accessor: 'status',
+                Header: 'Status',
+                Cell: ({ row }) => (
+                    row.original['status'] ?
+                        <p> {row.original.status}</p>
+                        : <NoDataCell />
                 )
-                .then(() => {
-                  setWorkOrderDialog({ open: false, _id: null, product: null, asset: null });
-                  fetchProductInventory();
-                })
-                .catch((error) => {
-                  toastConfig.setToastConfig(error);
+            },
+            {
+                accessor: 'workOrder',
+                Header: 'Work Order',
+                Cell: ({ row }) => (
+                    row.original['workOrder'] ?
+                        <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`} target="_blank">{row.original['workOrder'].workOrderNumber}</a>
+                        : <NoDataCell />
+                )
+            }
+        ];
+        data.forEach((element) => {
+
+            if (element.type === 'date') {
+                coloum.push({
+                    accessor: element.fieldName,
+                    Header: element.fieldLabel,
+                    disableFilters: true,
+                    Cell: ({ row }) =>
+                        row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
                 });
             }
             else {
-              fetchProductInventory();
-              setWorkOrderDialog({ open: false, _id: null, product: null, asset: null });
+                if (element.fieldName === 'qty') {
+                    element.fieldName = 'qtyDisplay';
+                }
+                coloum.push({
+                    accessor: element.fieldName,
+                    Header: element.fieldLabel,
+                    Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+                });
             }
-          }}
-          refrenceType={"Repair Order"}
-          refrenceData={{ ...repairOrderData, product: workOrderDialog.product, serializedAsset: workOrderDialog.asset }}
-        />
-      )}
-    </Fragment>
-  );
+        });
+        coloum.forEach((element) => {
+            if (element.accessor === 'qtyDisplay') {
+                element['Footer'] = (info) => {
+                    const qtyTotal = info.rows
+                        .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+                        .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+                    return <>{qtyTotal}</>;
+                };
+            }
+        });
+        setColumns(coloum);
+    };
+
+    const fetchProductInventory = async () => {
+        setNextStep(false);
+        var data: any = [];
+        var inventory: any = [];
+        var nonSerializeAsset: any = [];
+        const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
+        data = response?.data?.data;
+        setMaterial(JSON.parse(JSON.stringify(data.material)));
+        inventory = data.inventory;
+        nonSerializeAsset = data.nonSerializeAsset;
+        const rows = data.material.filter((e) => e.parentId === null);
+        //create automatic workorder
+        createWorkorderService(rows)
+        rows.forEach((parent, i) => {
+            parent.srno = (i + 1);
+            parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAsset.assetNumber : parent.packageDetail?.packageName}`;
+            parent.qtyDisplay = parent.qty;
+            parent.isValid = true;
+            parent.status = parent?.workOrder?.status
+            parent.hideSelection = parent.type !== 'product' ? true : false;
+            parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+        });
+
+        if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+            setNextStep(false);
+        } else {
+            setNextStep(true);
+        }
+
+        setRowsData(rows);
+        setSelectedProducts([]);
+    };
+
+    const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
+        const subRows = material.filter((e) => e.parentId === parent._id);
+        const services = parent?.services?.filter(d => d.packageId === undefined || d.packageId === null || d.packageId === "").map(d => {
+            return {
+                ...d,
+                materialId: d._id,
+                parentId: parent._id,
+                workOrder: parent.workOrder,
+                type: "service"
+            }
+        });
+        const packages = parent?.packages?.map(d => {
+            return {
+                ...d,
+                materialId: d._id,
+                parentId: parent._id,
+                workOrder: parent.workOrder,
+                type: "package"
+            }
+        });
+
+        let combinedData = [...subRows, ...packages, ...services]
+        combinedData.forEach((_subRow, j) => {
+            _subRow.srno = parent.srno + '.' + (j + 1);
+            _subRow.detail = _subRow?.type === "service" ? _subRow?.serviceName : _subRow?.type === "package" ? _subRow?.packageName : _subRow?.productDetail?.productName;
+            _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
+            _subRow.isValid = true;
+            _subRow.hideSelection = false;;
+            _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow, material) : _subRow?.type === "service" ? getConsumableSubRows(parent, _subRow, material) : generateNestedData(material, inventory, nonSerializeAsset, _subRow);
+        });
+        if (combinedData.length === 0 && parent.type === "package") {
+            parent.isValid = false;
+        }
+        if (parent.type === "package") {
+            parent.hideSelection = combinedData.filter((e) => e.hideSelection).length ? true : false;
+        }
+        return combinedData;
+    }
+
+    const getPackageSubRows = (parent, subRowPackage: any, material) => {
+
+        const services = parent?.services?.filter(d => d.packageId === subRowPackage._id).map(d => {
+            return {
+                ...d,
+                materialId: d._id,
+                parentId: parent._id,
+                workOrder: parent.workOrder,
+                type: "service"
+            }
+        });
+        services.forEach((_subRow, j) => {
+            _subRow.srno = subRowPackage.srno + '.' + (j + 1);
+            _subRow.detail = _subRow?.serviceName;
+            _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
+            _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
+            _subRow.hideSelection = false;;
+            _subRow.isValid = true;
+            _subRow.subRows = _subRow?.type === "service" ? getConsumableSubRows(parent, _subRow, material) : null;
+        });
+        return services;
+    }
+
+    const getConsumableSubRows = (parent, subRowService: any, material) => {
+
+        const consumable = parent?.consumable?.filter(d => d.service.optionValue === subRowService._id).map(d => {
+            return {
+                ...d,
+                materialId: d.product?.optionValue,
+                parentId: subRowService._id,
+                workOrder: subRowService.workOrder,
+                type: "product"
+            }
+        });
+        consumable.forEach((_subRow, j) => {
+            _subRow.srno = subRowService.srno + '.' + (j + 1);
+            _subRow.detail = _subRow?.product?.optionLabel;
+            _subRow.hideSelection = false;;
+            _subRow.isValid = true;
+            _subRow.subRows = null;
+        });
+        return consumable;
+    }
+
+    const getNestedSubRows = (obj, original) => {
+        if (original?.subRows?.length) {
+            original?.subRows.forEach((element) => {
+                obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+                getNestedSubRows(obj, element);
+            });
+        }
+    }
+
+    const handleAddService = (ids) => {
+        const data: any = {};
+        data.serviceIds = ids;
+        axiosInstance()
+            .post(`${workOrder.api}/service/${selectedProducts[0]['workOrder']?._id}`, data)
+            .then(() => {
+                fetchProductInventory();
+            })
+            .catch((err) => {
+                toastConfig.setToastConfig(err);
+            });
+    };
+
+    const createWorkorderService = async (rows) => {
+
+        const rowsForWorkorder = rows.filter(d => !d.workOrder)
+        if (rowsForWorkorder.length > 0) {
+            const response = await axiosInstance().get(`/field?resource=${sidebarResource["workOrder"]}`)
+            let fieldsDataForCreate = response?.data?.data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+            const tempInitialData = getObjKeys("", fieldsDataForCreate)
+            rowsForWorkorder.forEach(element => {
+                tempInitialData["workOrderNumber"] = `WO_${generateUniqueIdOnly()}`
+                tempInitialData["type"] = "Repair Order";
+                tempInitialData["repairOrder"] = repairOrderData?._id;
+                if (element.serializedAsset) {
+                    tempInitialData["serializedAsset"] = element?.serializedAsset?._id
+                    tempInitialData["product"] = element?.serializedAsset?.product
+                }
+                axiosInstance().post(`${workOrder.api}`, tempInitialData).then(({ data }) => {
+                    if (data?.data?._id) {
+                        axiosInstance()
+                            .put(`${repairOrder.api}/${repairOrderData._id}/product-package/add-work-order`, {
+                                "_id": element?._id,
+                                "workOrder": data?.data?._id
+                            }
+                            )
+                            .then(() => {
+                                fetchProductInventory();
+                            })
+                            .catch((error) => {
+                                toastConfig.setToastConfig(error);
+                            });
+                    }
+                    else {
+                        fetchProductInventory();
+                    }
+                }).catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+            });
+
+        }
+    };
+
+    return (
+        <Fragment>
+            <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
+                <Box display="flex" alignItems="center" justifyContent={"flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
+                    <Box display="flex" gridColumnGap={5}>
+                        <Button
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            onClick={handleClick}
+                            aria-controls="action-menu"
+                        >
+                            Actions <ExpandMore />
+                        </Button>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorEl}
+                            open={open}
+                            onClose={handleClose}
+                            MenuListProps={{
+                                'aria-labelledby': 'basic-button'
+                            }}
+                            className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
+                        >
+                            <MenuItem
+                                onClick={() => setAddServicesDialog({ open: true })}
+                                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                            >
+                                <ListItemText>Add Services</ListItemText>
+                            </MenuItem>
+                        </Menu>
+                    </Box>
+                </Box>
+            </Box>
+            <Grid container spacing={2}>
+                <Grid item xs={12} md={12} sm={12}>
+                    {columns && rowsData ? (
+                        <Box
+                            zIndex={5}
+                            width={stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
+                            height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
+                        >
+                            <CustomReactTable
+                                height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
+                                columns={columns}
+                                data={rowsData}
+                                setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
+                                onSelect={setSelectedProducts}
+                                childrenProperty="subRows"
+                                uniqueKey="_id"
+                                hideSelection={false}
+                                renderedFrom="repair_order_workorder"
+                                isClientSideGrid={true}
+                            />
+                        </Box>
+                    ) : (
+                        <Box p={2} height={500} bgcolor="white">
+                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                        </Box>
+                    )}
+                    {addServicesDialog.open && (
+                        <AssignServiceDialog
+                            reference="workorder"
+                            handleClose={() => setAddServicesDialog({ open: false })}
+                            ids={[]}
+                            onSuccess={(data) => {
+                                handleAddService(
+                                    data?.map((e) => e.service));
+                                setAddServicesDialog({ open: false })
+                                handleClose()
+                            }}
+                        />
+                    )}
+                </Grid>
+            </Grid>
+        </Fragment>
+    );
 };
 
 export default WorkOrder;

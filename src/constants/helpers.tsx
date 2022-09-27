@@ -73,7 +73,7 @@ export const rentalManagementSteps = [
 export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
-export const repairOrderSteps = ['Add Products', 'Work Order', 'Pre Work', 'Quotation', 'Post Work', 'Invoice'];
+export const repairOrderSteps = ['Add Products', 'Work Order', 'Quotation', 'Invoice'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
