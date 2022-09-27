@@ -34,9 +34,12 @@ const AssignUserDialog = ({ workOrderId, serviceId, assignedUsers, uniqueId, han
 
     const handleAssignUser = () => {
         axiosInstance()
-            .put(`${workOrder.api}/service/${workOrderId}/assign-user`, {
+            .put(`${workOrder.api}/service/assign-user`, {
                 "users": selectedUsers?.map(d => d.optionValue),
-                "uniqueIds": [uniqueId]
+                "workOrder": [{
+                    "uniqueId": uniqueId,
+                    "workOrderId": workOrderId
+                }]
             })
             .then(({ data }) => {
                 toastConfig.setToastConfig({

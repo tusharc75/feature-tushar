@@ -233,7 +233,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
-    const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/service/post-work`);
+    const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data.inventory;
@@ -241,7 +241,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = (i + 1);
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAsset.optionLabel : parent.packageDetail?.packageName}`;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAsset.assetNumber : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.hideSelection = false;
@@ -486,7 +486,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={false}
-                renderedFrom="repair_order_workorder_product_package"
+                renderedFrom="repair_order_workorder_quotation"
                 isClientSideGrid={true}
               />
             </Box>
