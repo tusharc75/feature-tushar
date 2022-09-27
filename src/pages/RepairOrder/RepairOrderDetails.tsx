@@ -30,9 +30,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Productpackage from './Productpackage';
-import WorkOrder from './WorkOrder';
-import Prework from './Prework';
 import Quotation from './Quotation';
+import WorkOrder from './WorkOrder';
 
 function a11yProps(index: any) {
   return {
@@ -281,17 +280,14 @@ const RepairOrderDetails = () => {
                       <WorkOrder
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-2`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={false}
                       // allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {(currentStep === 2 || currentStep === 4) && repairOrderData && (
+                    {/* {(currentStep === 2 || currentStep === 4) && repairOrderData && (
                       <Prework
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
@@ -305,8 +301,8 @@ const RepairOrderDetails = () => {
                         isPrework={currentStep === 2 ? true : false}
                       // allowedToEdit={allowedToEdit}
                       />
-                    )}
-                    {currentStep === 3 && repairOrderData && (
+                    )} */}
+                    {currentStep === 2 && repairOrderData && (
                       <Quotation
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
