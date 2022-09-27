@@ -25,26 +25,19 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import { ExpandMore } from '@material-ui/icons';
 
 const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen }) => {
+
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
     const [selectedProducts, setSelectedProducts] = useState([]);
-    const [material, setMaterial] = useState([]);
+
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
     const [addServicesDialog, setAddServicesDialog] = useState({ open: false });
 
-    const { isOffline } = useContext(CustomOfflineContext);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
 
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
 
     useEffect(() => {
         fetchFields();
@@ -52,7 +45,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
 
     useEffect(() => {
         fetchProductInventory();
-    }, [columns]);
+    }, []);
 
     const fetchFields = async () => {
         var data = await fetch_repair_order_product_fields(repairOrderData?.currency);
@@ -81,20 +74,18 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                             </span>
                         </Box>}
-                        {!isOffline && (
-                            <Chip
-                                className="ml-1"
-                                label={`${row.original.type === 'service' ? "Service"
-                                    : row.original.type === 'product' ? "Product" : row.original.type === 'serializedAsset' ? "Asset" : "Package"}`}
-                                size="small"
-                                color="primary"
-                                onClick={() => {
-                                    window.open(
-                                        `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                                    );
-                                }}
-                            />
-                        )}
+                        <Chip
+                            className="ml-1"
+                            label={`${row.original.type === 'service' ? "Service"
+                                : row.original.type === 'product' ? "Product" : row.original.type === 'serializedAsset' ? "Asset" : "Package"}`}
+                            size="small"
+                            color="primary"
+                            onClick={() => {
+                                window.open(
+                                    `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                                );
+                            }}
+                        />
                     </div>
                 ),
                 Footer: () => {
@@ -162,11 +153,9 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         var nonSerializeAsset: any = [];
         const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
         data = response?.data?.data;
-        setMaterial(JSON.parse(JSON.stringify(data.material)));
         inventory = data.inventory;
         nonSerializeAsset = data.nonSerializeAsset;
         const rows = data.material.filter((e) => e.parentId === null);
-        //create automatic workorder
         createWorkorderService(rows)
         rows.forEach((parent, i) => {
             parent.srno = (i + 1);
@@ -174,16 +163,13 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
             parent.qtyDisplay = parent.qty;
             parent.isValid = true;
             parent.status = parent?.workOrder?.status
-            parent.hideSelection = parent.type !== 'product' ? true : false;
             parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
         });
-
         if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
             setNextStep(false);
         } else {
             setNextStep(true);
         }
-
         setRowsData(rows);
         setSelectedProducts([]);
     };
@@ -215,20 +201,15 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
             _subRow.detail = _subRow?.type === "service" ? _subRow?.serviceName : _subRow?.type === "package" ? _subRow?.packageName : _subRow?.productDetail?.productName;
             _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
             _subRow.isValid = true;
-            _subRow.hideSelection = false;;
             _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow, material) : _subRow?.type === "service" ? getConsumableSubRows(parent, _subRow, material) : generateNestedData(material, inventory, nonSerializeAsset, _subRow);
         });
         if (combinedData.length === 0 && parent.type === "package") {
             parent.isValid = false;
         }
-        if (parent.type === "package") {
-            parent.hideSelection = combinedData.filter((e) => e.hideSelection).length ? true : false;
-        }
         return combinedData;
     }
 
     const getPackageSubRows = (parent, subRowPackage: any, material) => {
-
         const services = parent?.services?.filter(d => d.packageId === subRowPackage._id).map(d => {
             return {
                 ...d,
@@ -243,7 +224,6 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
             _subRow.detail = _subRow?.serviceName;
             _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
             _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
-            _subRow.hideSelection = false;;
             _subRow.isValid = true;
             _subRow.subRows = _subRow?.type === "service" ? getConsumableSubRows(parent, _subRow, material) : null;
         });
@@ -251,7 +231,6 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     }
 
     const getConsumableSubRows = (parent, subRowService: any, material) => {
-
         const consumable = parent?.consumable?.filter(d => d.service.optionValue === subRowService._id).map(d => {
             return {
                 ...d,
@@ -264,7 +243,6 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         consumable.forEach((_subRow, j) => {
             _subRow.srno = subRowService.srno + '.' + (j + 1);
             _subRow.detail = _subRow?.product?.optionLabel;
-            _subRow.hideSelection = false;;
             _subRow.isValid = true;
             _subRow.subRows = null;
         });
@@ -294,8 +272,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     };
 
     const createWorkorderService = async (rows) => {
-
-        const rowsForWorkorder = rows.filter(d => !d.workOrder)
+        const rowsForWorkorder = rows.filter(d => d.type === "serializedAsset" && !d.workOrder)
         if (rowsForWorkorder.length > 0) {
             const response = await axiosInstance().get(`/field?resource=${sidebarResource["workOrder"]}`)
             let fieldsDataForCreate = response?.data?.data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
@@ -334,6 +311,14 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         }
     };
 
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
     return (
         <Fragment>
             <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
@@ -360,7 +345,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                         >
                             <MenuItem
                                 onClick={() => setAddServicesDialog({ open: true })}
-                                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                                disabled={selectedProducts?.length ? false : true}
                             >
                                 <ListItemText>Add Services</ListItemText>
                             </MenuItem>
@@ -400,8 +385,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                             handleClose={() => setAddServicesDialog({ open: false })}
                             ids={[]}
                             onSuccess={(data) => {
-                                handleAddService(
-                                    data?.map((e) => e.service));
+                                handleAddService(data?.map((e) => e.service));
                                 setAddServicesDialog({ open: false })
                                 handleClose()
                             }}
