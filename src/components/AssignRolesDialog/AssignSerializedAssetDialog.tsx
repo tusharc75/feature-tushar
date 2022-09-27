@@ -23,19 +23,15 @@ import styles from 'src/pages/Leads/Header.module.scss';
 import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
-import { Link } from 'react-router-dom';
-import HtmlTooltip from '../CustomTooltipTitle';
-import WarningIcon from '@material-ui/icons/Warning';
 
 let searchTimeout;
 
-const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [], onSubmit }) => {
+const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceData = null, handleClose, handleSucess, ids, extraStaticFilter = [] }) => {
+
   const renderedFrom = `${routes.serializedAsset.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  const {
-    state: { permissions, selectedEntity }
-  }: any = useData();
+  const { state: { permissions, selectedEntity } }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [isAssigning, setAssigning] = useState(false);
   const [disableSaveButton, setDisableSaveButton] = useState(false);
@@ -45,20 +41,12 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess,
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
   const [columns, setColumns] = useState([]);
-
-  //   const defaultColumns = [
-  //     { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
-  //   ];
   const { getColumnData } = useColumns();
 
   useEffect(() => {
     localStorage.removeItem(localStorageSelectedRecords);
     fetchGridColumns();
   }, []);
-
-  useEffect(() => {
-    setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)].some((d) => d.qty === 0));
-  }, [selectedRecords]);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -70,31 +58,10 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess,
     }, millisec);
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  const AssetNumberRenderer = (params) => (
-    <Fragment>
-      <Link className="link text-truncate" title={params.value} to={`${routes.serializedAssetDetail.path}/${params.data?._id}`}>
-        {params.value}
-      </Link>
-      {params.data?.recertDate && new Date(params.data?.recertDate)?.getTime() <= new Date()?.getTime() && (
-        <Box ml={1} pt={1}>
-          <HtmlTooltip title="Asset needs to be recert">
-            <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-          </HtmlTooltip>
-        </Box>
-      )}
-    </Fragment>
-  );
-
   const fetchGridColumns = () => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data: { data } }) => {
-        // data?.some((o) => {
-        //   if (o?.fieldData?.fieldName === 'status') {
-        //     setAllowUpdateStatus(o?.isUpdate);
-        //     return true;
-        //   }
-        // });
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
@@ -106,42 +73,9 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess,
             }
           }
         });
-        columns?.forEach((e) => {
-          if (e.field === 'assetNumber') {
-            e.cellRenderer = 'assetNumberRenderer';
-            e.cellStyle = (params) => {
-              if (
-                [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(
-                  params?.data?.status
-                )
-              ) {
-                return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-              }
-              // if (params.data?.recertDate) {
-              //   var a = moment(params.data?.recertDate);
-              //   var b = moment();
-              //   const days = a.diff(b, 'days')
-              //   if (days <= 60 && days >= 30) {
-              //     return { backgroundColor: "#ACF1C8" };
-              //   }
-              //   else if (days < 30 && days >= 15) {
-              //     return { backgroundColor: "#FAE498" };
-              //   }
-              //   else if (days < 15 && days >= 0) {
-              //     return { backgroundColor: "#FEB1B1" };
-              //   }
-              //   else if (days < 0) {
-              //     return { backgroundColor: "#FEB1B1" };
-              //   }
-              // }
-              return null;
-            };
-          }
-        });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
-          assetNumberRenderer: AssetNumberRenderer
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
@@ -155,7 +89,6 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess,
       gridApi.setRowData([]);
     }
     const queryString = getQueryString();
-    console.log(queryString);
     axiosInstance()
       .get(`${serializedAsset.api}${queryString}`)
       .then(({ data }) => {
@@ -163,11 +96,6 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess,
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = false;
           finalObject['id'] = u._id;
-          finalObject['qty'] = 1;
-          const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id);
-          if (qtyAdded.length) {
-            finalObject['qty'] = qtyAdded[0].qty;
-          }
           return {
             ...finalObject
           };
@@ -188,11 +116,10 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess,
   };
 
   const getQueryString = () => {
-    console.log(ids);
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
-    if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}&isNonSerializedAsset=0`;
+    if (reference === "repairOrder") {
+      deepFilter = `${deepFilter}&owner=${referenceData?.customerAccount}&entityWise=0&plant=${referenceData?.warehouse}`;
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
@@ -215,11 +142,6 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess,
     } else {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
-    // if (isNonSerializedAsset) {
-    //   deepFilter = `${deepFilter}&isNonSerializedAsset=1`;
-    // } else {
-    //   deepFilter = `${deepFilter}&isNonSerializedAsset=0`;
-    // }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -229,50 +151,14 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess,
     return deepFilter;
   };
 
-  //   const handleSubmit = async () => {
-  //     setAssigning(true);
-  //     if (reference === 'package') {
-  //       axiosInstance()
-  //         .post(`${packages.api}/material`, {
-  //           ids: Array.isArray(referenceId) && referenceId.length ? referenceId : [referenceId],
-  //           services: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) }))
-  //         })
-  //         .then(() => {
-  //           onSuccess();
-  //           setAssigning(false);
-  //         })
-  //         .catch((err) => {
-  //           setAssigning(false);
-  //           toastConfig.setToastConfig(err);
-  //         });
-  //     } else {
-  //       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) })));
-  //     }
-  //   };
-
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const onCellValueChanged = (row) => {
-    if (!row || !row?.data) return;
-    const { data } = row;
-    const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)];
-    if (!selectedFromStorage || selectedFromStorage.length === 0) return;
-    const updatedRecords = selectedFromStorage.map((d) => {
-      if (data._id === d._id) {
-        d.qty = data.qty;
-      }
-      return d;
-    });
-    localStorage.setItem(localStorageSelectedRecords, JSON.stringify(updatedRecords));
-    setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((d) => d.qty === 0));
   };
 
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader
-        title={`Assign ${routes.serializedAsset.title}`}
+        title={`Add ${routes.serializedAsset.title}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
@@ -287,15 +173,14 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess,
                 <Button
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                   onClick={() => {
-                    onSubmit([...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => d._id));
+                    handleSucess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
                   }}
                   color="primary"
                   size="small"
                   variant="contained"
                   endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
                 >
-                  Add{' '}
-                  {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
+                  Add{' '}  {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
                     ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
                     : ''}
                 </Button>
@@ -317,7 +202,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, onSuccess,
             allowAction={false}
             loading={loading}
             allowSelection={true}
-            onCellValueChanged={onCellValueChanged}
+            onCellValueChanged={() => { }}
             showOnlyShowFilteredRecordSwitch={true}
             refreshGrid={fetchData}
             renderedFrom={renderedFrom}
