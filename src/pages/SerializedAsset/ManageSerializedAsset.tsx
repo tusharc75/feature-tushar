@@ -26,7 +26,8 @@ import CreateProduct from "../../components/Product/CreateProduct";
 import ManageWarehouse from "../Warehouse/ManageWarehouse"
 import ManageAccountDialog from "../Account/ManageAccount";
 
-const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null, isNew = true, customerAccountId = null }) => {
+const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onClose, onSuccess, productId = null, productCategory = null, isNew = true,
+  referenceType = null, referenceData = null }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
@@ -110,11 +111,27 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
           if (productCategory && fieldsDataForCreate.some((e) => e.fieldName === "productCategory")) {
             createValues['productCategory'] = productCategory;
           }
-          if (customerAccountId && fieldsDataForCreate.some((e) => e.fieldName === "customerAccount")) {
-            createValues['customerAccount'] = customerAccountId;
-          }
           if (fieldsDataForCreate.some((e) => e.fieldName === "recertDate")) {
             createValues["recertDate"] = ""
+          }
+
+          if (referenceType && referenceType === "repairOrder") {
+            if (fieldsDataForCreate.some((e) => e.fieldName === "customerAccount")) {
+              createValues['customerAccount'] = referenceData?.customerAccount;
+            }
+            if (fieldsDataForCreate.some((e) => e.fieldName === "warehouse")) {
+              createValues['warehouse'] = referenceData?.warehouse;
+              console.log(plantsOptions)
+              const warehouseAddress = plantsOptions?.find((e) => e.optionValue === referenceData?.warehouse);
+              if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === "currentLocation")) {
+                createValues['currentLocation'] = warehouseAddress?.address;
+              }
+            }
+            fieldsDataForCreate?.forEach((e) => {
+              if (["customerAccount", "warehouse", "currentLocation"].includes(e.fieldName)) {
+                e.isUneditable = true;
+              }
+            });
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -332,7 +349,8 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                           <FormTypes
                                             isNew={Boolean(productInventoryId)}
                                             {...field}
-                                            disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                            disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone && field.isUneditable}
+                                            fieldData={field}
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -360,7 +378,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                                 onClick={() => {
                                                   setPlantsOpen({ open: true, isClone: false });
                                                 }}
-                                                disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
+                                                disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone && field.isUneditable}
                                                 size="small"
                                               >
                                                 <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
@@ -408,31 +426,14 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                           </Box>}
                                       </Box>
                                     </Grid>)
-                                    : field.fieldName === 'status' ? (
-                                      <FormTypes
-                                        isNew={Boolean(productInventoryId)}
-                                        {...field}
-                                        disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : (
+                                    : (
                                       <FormTypes
                                         isNew={Boolean(productInventoryId)}
                                         {...field}
                                         disabled={(Boolean(productInventoryId) && field.disableOnEdit && !isClone) || (field.fieldName === 'assetNumber' && field.isUneditable)}
                                         values={values}
                                         errors={errors}
+                                        fieldData={field}
                                         touched={touched}
                                         label={field.fieldLabel}
                                         name={field.fieldName}

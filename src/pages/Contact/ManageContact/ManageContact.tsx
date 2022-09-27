@@ -130,7 +130,7 @@ export default function ManageContact(props) {
 
 
   useEffect(() => {
-    if (contactId) {
+    if (contactId && isClone) {
       axiosInstance()
         .get(`/${contactApi}/${contactId}`)
         .then(({ data: { data } }) => {

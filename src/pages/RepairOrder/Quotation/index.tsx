@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -10,7 +10,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
-import { repairOrder, dateFormat, formatAmountWithCurrency } from '../../../constants/helpers';
+import { repairOrder, dateFormat, formatAmountWithCurrency, QUOTATION_STATUS } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -18,6 +18,7 @@ import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import EditIcon from '@material-ui/icons/Edit';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
+import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 
 const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
 
@@ -31,6 +32,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [quotationData, setQuotationData] = useState(null);
+  const [currentVersion, setCurrentVersion] = useState(0);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -84,17 +86,17 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
             </Box>}
             {!isOffline && (
               <Chip
-              className="ml-1"
-              label={`${row.original.type === 'service' ? "Service"
+                className="ml-1"
+                label={`${row.original.type === 'service' ? "Service"
                   : row.original.type === 'product' ? "Product" : row.original.type === 'serializedAsset' ? "Asset" : "Package"}`}
-              size="small"
-              color="primary"
-              onClick={() => {
+                size="small"
+                color="primary"
+                onClick={() => {
                   window.open(
-                      `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                    `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : row.original.type === 'serializedAsset' ? routes.serializedAssetDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
                   );
-              }}
-          />
+                }}
+              />
             )}
           </div>
         ),
@@ -231,7 +233,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
-    const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/service/post-work`);
+    const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data.inventory;
@@ -239,7 +241,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = (i + 1);
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAsset.optionLabel : parent.packageDetail?.packageName}`;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAsset.assetNumber : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.hideSelection = false;
@@ -284,7 +286,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
       _subRow.hideSelection = false;;
-      _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow) : _subRow?.type !== "service" ? generateNestedData(material, inventory, nonSerializeAsset, _subRow) : null;
+      _subRow.subRows = _subRow?.type === "package" ? getPackageSubRows(parent, _subRow, material) : _subRow?.type === "service" ? getConsumableSubRows(parent, _subRow, material) : generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
     if (combinedData.length === 0 && parent.type === "package") {
       parent.isValid = false;
@@ -295,7 +297,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
     return combinedData;
   }
 
-  const getPackageSubRows = (parent, subRowPackage: any) => {
+  const getPackageSubRows = (parent, subRowPackage: any, material) => {
 
     const services = parent?.services?.filter(d => d.packageId === subRowPackage._id).map(d => {
       return {
@@ -313,9 +315,30 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       _subRow.qtyDisplay = _subRow?.serviceName ? `` : `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.hideSelection = false;;
       _subRow.isValid = true;
-      _subRow.subRows = null;
+      _subRow.subRows = _subRow?.type === "service" ? getConsumableSubRows(parent, _subRow, material) : null;
     });
     return services;
+  }
+
+  const getConsumableSubRows = (parent, subRowService: any, material) => {
+
+    const consumable = parent?.consumable?.filter(d => d.service.optionValue === subRowService._id).map(d => {
+      return {
+        ...d,
+        materialId: d.product?.optionValue,
+        parentId: subRowService._id,
+        workOrder: subRowService.workOrder,
+        type: "product"
+      }
+    });
+    consumable.forEach((_subRow, j) => {
+      _subRow.srno = subRowService.srno + '.' + (j + 1);
+      _subRow.detail = _subRow?.product?.optionLabel;
+      _subRow.hideSelection = false;;
+      _subRow.isValid = true;
+      _subRow.subRows = null;
+    });
+    return consumable;
   }
 
   const getNestedSubRows = (obj, original) => {
@@ -380,6 +403,8 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
       .get(`${repairOrder.api}/${repairOrderData._id}/quotation`)
       .then(({ data: { data } }) => {
         setQuotationData(data)
+        let keys = Object.keys(data.versions);
+        setCurrentVersion(parseInt(keys[keys.length - 1]));
       })
   };
 
@@ -428,6 +453,22 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
           </Box>
         </Box>
       </Box>
+      {quotationData?.versions ? (
+        <div className="d-flex align-items-center justify-content-center flex-column m-1">
+          <FcClock size={25} />
+          <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+        </div>
+      ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+        <div className="d-flex align-items-center justify-content-center flex-column m-1">
+          <FcOk size={25} />
+          <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+        </div>
+      ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+        <div className="d-flex align-items-center justify-content-center flex-column m-1">
+          <FcCancel size={25} />
+          <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+        </div>
+      ) : null}
       <Grid container spacing={2}>
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
@@ -445,7 +486,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, isTabletScree
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={false}
-                renderedFrom="repair_order_workorder_product_package"
+                renderedFrom="repair_order_workorder_quotation"
                 isClientSideGrid={true}
               />
             </Box>

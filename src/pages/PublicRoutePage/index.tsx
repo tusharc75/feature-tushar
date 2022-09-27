@@ -1,189 +1,185 @@
-import { useParams, useLocation } from "react-router-dom";
-import axios from 'axios'
+import { useParams, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import { backendApi } from './../../config';
-import { Grid, Box, Button, Typography, Paper, makeStyles, Dialog, TextField, AppBar, Toolbar } from "@material-ui/core";
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Grid, Box, Button, Typography, Paper, makeStyles, Dialog, TextField, AppBar, Toolbar } from '@material-ui/core';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { SVG } from '../../assets';
-import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import QuoteSupplierPrice from "./QuoteSupplierPrice";
-import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import QuotationSupplierPrice from "./QuotationSupplierPrice";
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import QuoteSupplierPrice from './QuoteSupplierPrice';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import QuotationSupplierPrice from './QuotationSupplierPrice';
+import QuotationCustomerAccept from './QuotationCustomer/QuotationCustomerAccept';
 
 const useStyles = makeStyles((theme) => ({
-
-    header: {
-        background: "#163340",
-        textAlign: "center",
-        paddingLeft: "22px",
-        paddingTop: "5px",
-        paddingBottom: "5px",
-        color: "white",
-        boxShadow: "1px 4px 5px #7c7979",
-    },
-    logo: {
-        paddingTop: "8px",
-        width: '120px'
-    },
-    brandLogo: {
-        height: "45px",
-        borderRadius: "3px",
-    },
-    footer: {
-        position: "fixed",
-        bottom: "7px",
-        background: "#ecfcef",
-        width: "100%",
-        padding: "10px",
-        display: "flex",
-        alignItems: "center",
-    },
-    gridContent: {
-        height: "calc(100vh - 24vh)",
-        width: "100%",
-        marginTop: "10px",
-        overflow: "auto"
-    },
-    warningIcon: {
-        display: 'inline-flex'
-    }
+  header: {
+    background: '#163340',
+    textAlign: 'center',
+    paddingLeft: '22px',
+    paddingTop: '5px',
+    paddingBottom: '5px',
+    color: 'white',
+    boxShadow: '1px 4px 5px #7c7979'
+  },
+  logo: {
+    paddingTop: '8px',
+    width: '120px'
+  },
+  brandLogo: {
+    height: '45px',
+    borderRadius: '3px'
+  },
+  footer: {
+    position: 'fixed',
+    bottom: '7px',
+    background: '#ecfcef',
+    width: '100%',
+    padding: '10px',
+    display: 'flex',
+    alignItems: 'center'
+  },
+  gridContent: {
+    height: 'calc(100vh - 24vh)',
+    width: '100%',
+    marginTop: '10px',
+    overflow: 'auto'
+  },
+  warningIcon: {
+    display: 'inline-flex'
+  }
 }));
 
 const PublicRoutePage = () => {
+  const { id } = useParams();
+  const toastConfig = useContext(CustomToastContext);
+  const classes = useStyles();
+  const [loading, setLoading] = useState(false);
+  const [valid, setValid] = useState(true);
+  const [resourceData, setResourceData] = useState(null);
+  const [passwordVerification, setPasswordVerification] = useState(false);
+  const [password, setPassword] = useState(null);
+  const [validPassword, setValidPassword] = useState(true);
 
-    const { id } = useParams();
-    const toastConfig = useContext(CustomToastContext);
-    const classes = useStyles();
-    const [loading, setLoading] = useState(false);
-    const [valid, setValid] = useState(true);
-    const [resourceData, setResourceData] = useState(null);
-    const [passwordVerification, setPasswordVerification] = useState(false);
-    const [password, setPassword] = useState(null);
-    const [validPassword, setValidPassword] = useState(true);
+  useEffect(() => {
+    if (id) {
+      fetchLinkData();
+    }
+  }, [id]);
 
-    useEffect(() => {
-        if (id) {
-            fetchLinkData();
+  const fetchLinkData = async () => {
+    setLoading(true);
+    axios
+      .get(backendApi + `/public/check-link/${id}`)
+      .then(async ({ data }) => {
+        if (data?.data?.valid) {
+          if (data?.data?.protected) {
+            setPasswordVerification(true);
+          } else {
+            fetchResourceData();
+          }
+        } else {
+          setValid(false);
         }
-    }, [id]);
+      })
+      .catch((error) => {
+        setValid(false);
+      });
+  };
 
-    const fetchLinkData = async () => {
-        setLoading(true);
-        axios.get(backendApi + `/public/check-link/${id}`)
-            .then(async ({ data }) => {
-                if (data?.data?.valid) {
-                    if (data?.data?.protected) {
-                        setPasswordVerification(true)
-                    }
-                    else {
-                        fetchResourceData()
-                    }
-                }
-                else {
-                    setValid(false)
-                }
-            })
-            .catch((error) => {
-                setValid(false)
-            });
+  const fetchResourceData = () => {
+    let tempData = {
+      id: id
     };
+    if (password) tempData['password'] = password;
+    axios
+      .post(backendApi + `/public/get-data`, tempData)
+      .then(async ({ data }) => {
+        setResourceData(data.data);
+        setPasswordVerification(false);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setValidPassword(false);
+        toastConfig.setToastConfig({
+          message: `Password is not correct`,
+          type: 'error',
+          open: true
+        });
+      });
+  };
 
-    const fetchResourceData = () => {
-        let tempData = {
-            "id": id
-        }
-        if (password) tempData["password"] = password
-        axios.post(backendApi + `/public/get-data`, tempData)
-            .then(async ({ data }) => {
-                setResourceData(data.data)
-                setPasswordVerification(false)
-                setLoading(false)
-            })
-            .catch((error) => {
-                setValidPassword(false)
-                toastConfig.setToastConfig({
-                    message: `Password is not correct`,
-                    type: "error",
-                    open: true,
-                });
-            });
-    };
+  useEffect(() => {
+    document.title = resourceData?.referenceIdType === 'QuotationCustomer' ? 'Equipt Customer Portal' : 'Equipt Supplier Portal';
+  }, [resourceData?.referenceIdType]);
 
-    useEffect(() => {
-        document.title = "Equipt Supplier Portal"
-    }, []);
-
-    return (
-        <>
-            <Grid container className={classes.header}>
-                <Grid item container xs={6} md={6} sm={6} justify={"flex-start"}>
-                    <img
-                        className={classes.logo}
-                        src={SVG('LogoNew')}
-                        alt="equip logo"
-                        title="eQuipt Logo"
-                    />
-                </Grid>
-                <Grid item container xs={6} md={6} sm={6} justify={"flex-end"}>
-                    <h2 style={{ paddingTop: "10px", paddingRight: "10px", color: "white", textAlign: "right" }}>
-                        Supplier Portal
-                    </h2>
-                </Grid>
+  return (
+    <>
+      <Grid container className={classes.header}>
+        <Grid item container xs={6} md={6} sm={6} justify={'flex-start'}>
+          <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
+        </Grid>
+        <Grid item container xs={6} md={6} sm={6} justify={'flex-end'}>
+          <h2 style={{ paddingTop: '10px', paddingRight: '10px', color: 'white', textAlign: 'right' }}>
+            {resourceData?.referenceIdType === 'QuotationCustomer' ? 'Customer Portal' : 'Supplier Portal'}
+          </h2>
+        </Grid>
+      </Grid>
+      {passwordVerification ? (
+        <Box style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
+          <Box style={{ marginTop: '50px', width: '400px' }} boxShadow={3}>
+            <Grid spacing={1} style={{ padding: '10px', display: 'flex', justifyContent: 'center' }} container>
+              <Grid item xs={12} sm={12} md={12}>
+                <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={'Authentication Required'}>
+                  Authentication Required
+                </h1>
+              </Grid>
+              <Grid item xs={10} sm={10} md={10}>
+                <TextField
+                  id="outlined-full-width"
+                  margin="normal"
+                  variant="outlined"
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                  label="Password"
+                  name="Password"
+                  type="password"
+                  placeholder="Please enter password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  fullWidth
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={10} sm={10} md={10}>
+                <Button style={{ marginBottom: '20px' }} variant="contained" color="primary" size="medium" fullWidth onClick={fetchResourceData}>
+                  Submit
+                </Button>
+              </Grid>
             </Grid>
-            {passwordVerification ?
-                <Box style={{ padding: "10px", display: "flex", justifyContent: "center" }}>
-                    <Box style={{ marginTop: "50px", width: "400px" }} boxShadow={3}>
-                        <Grid spacing={1} style={{ padding: "10px", display: "flex", justifyContent: "center" }} container>
-                            <Grid item xs={12} sm={12} md={12} >
-                                <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={"Authentication Required"}>
-                                    Authentication Required
-                                </h1>
-                            </Grid>
-                            <Grid item xs={10} sm={10} md={10} >
-                                <TextField
-                                    id="outlined-full-width"
-                                    margin="normal"
-                                    variant="outlined"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    label="Password"
-                                    name="Password"
-                                    type="password"
-                                    placeholder="Please enter password"
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    fullWidth
-                                    size="small"
-                                />
-                            </Grid>
-                            <Grid item xs={10} sm={10} md={10} >
-                                <Button
-                                    style={{ marginBottom: "20px" }}
-                                    variant="contained"
-                                    color="primary"
-                                    size="medium"
-                                    fullWidth
-                                    onClick={fetchResourceData}
-                                >
-                                    Submit
-                                </Button>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                </Box>
-                : !valid ?
-                    <h1 style={{ padding: "10px", display: "flex", justifyContent: "center", color: "#047d1c" }} title={" Thanks for your submission"}>
-                        Link is expired or already used
-                    </h1>
-                    : loading || resourceData ?
-                        resourceData?.referenceIdType === "Quotes" ? <QuoteSupplierPrice quoteData={resourceData} openAuthId={id} />
-                            : resourceData?.referenceIdType === "Quotation" ? <QuotationSupplierPrice quotationData={resourceData} openAuthId={id} />
-                                : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-                        : <Box p={2} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-            }
-
-
-        </>
-    );
-}
+          </Box>
+        </Box>
+      ) : !valid ? (
+        <h1 style={{ padding: '10px', display: 'flex', justifyContent: 'center', color: '#047d1c' }} title={' Thanks for your submission'}>
+          Link is expired or already used
+        </h1>
+      ) : loading || resourceData ? (
+        resourceData?.referenceIdType === 'Quotes' ? (
+          <QuoteSupplierPrice quoteData={resourceData} openAuthId={id} />
+        ) : resourceData?.referenceIdType === 'Quotation' ? (
+          <QuotationSupplierPrice quotationData={resourceData} openAuthId={id} />
+        ) : resourceData?.referenceIdType === 'QuotationCustomer' ? (
+          <QuotationCustomerAccept openAuthId={id} />
+        ) : (
+          <Box p={2} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )
+      ) : (
+        <Box p={2} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+    </>
+  );
+};
 
 export default PublicRoutePage;
