@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, setQuotationSummary, version }) => {
+const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, version }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
@@ -349,27 +349,6 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     } else {
       setNextStep(true);
     }
-    const totalFinalPrice = rows
-      .filter(
-        (f) =>
-          f?.parentId === null &&
-          f?.hasOwnProperty('finalPrice_' + quotationData?.currency?.toLowerCase()) &&
-          !isNaN(f['finalPrice_' + quotationData?.currency?.toLowerCase()])
-      )
-      .reduce((sum, row) => row['finalPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-    const totalSupplierPrice = rows
-      .filter(
-        (f) =>
-          f?.parentId === null &&
-          f?.hasOwnProperty('supplierPrice_' + quotationData?.currency?.toLowerCase()) &&
-          !isNaN(f['supplierPrice_' + quotationData?.currency?.toLowerCase()])
-      )
-      .reduce((sum, row) => row['supplierPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-    setQuotationSummary({
-      totalProfit: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice - totalSupplierPrice),
-      totalcost: formatAmountWithCurrency(quotationData?.currency, totalSupplierPrice),
-      totalsale: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice)
-    });
     setRowsData(rows);
     setSelectedProducts([]);
   };
