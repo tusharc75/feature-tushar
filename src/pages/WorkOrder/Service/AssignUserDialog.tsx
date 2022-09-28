@@ -11,7 +11,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import Autocomplete from '@material-ui/lab/Autocomplete/Autocomplete';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 
-const AssignUserDialog = ({ workOrderId, serviceId, assignedUsers, uniqueId, handleClose, handleSucess }) => {
+const AssignUserDialog = ({ workOrderData, assignedUsers, handleClose, handleSucess }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [userList, setUserList] = useState([]);
@@ -36,10 +36,7 @@ const AssignUserDialog = ({ workOrderId, serviceId, assignedUsers, uniqueId, han
         axiosInstance()
             .put(`${workOrder.api}/service/assign-user`, {
                 "users": selectedUsers?.map(d => d.optionValue),
-                "workOrder": [{
-                    "uniqueId": uniqueId,
-                    "workOrderId": workOrderId
-                }]
+                "workOrder": workOrderData
             })
             .then(({ data }) => {
                 toastConfig.setToastConfig({
