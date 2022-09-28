@@ -16,11 +16,11 @@ import moment from 'moment';
 import { repairOrder, dateFormat } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiChevronDown } from 'react-icons/bi';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
+import { ExpandMore } from '@material-ui/icons';
 
 const Productpackage = ({
   repairOrderData,
@@ -54,16 +54,19 @@ const Productpackage = ({
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
 
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
+
+
   useEffect(() => {
     fetchFields();
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchData();
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_repair_order_product_fields(repairOrderData?.currency);
+    //var data = await fetch_repair_order_product_fields(repairOrderData?.currency);
     const coloum: any = [
       {
         accessor: 'srno',
@@ -81,13 +84,13 @@ const Productpackage = ({
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {!allowedToEdit ? (
-              <p> {row.original.detail}</p>
+              <p>{row.original.detail}</p>
             ) : (
               <p
-                onClick={() => {
-                  handleOpen(row.original);
-                }}
-                className="link text-truncate"
+                // onClick={() => {
+                //   handleOpen(row.original);
+                // }}
+                //className="link text-truncate"
                 title={row.original.detail}
               >
                 {row.original.detail}
@@ -98,7 +101,7 @@ const Productpackage = ({
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
-                {allowedToEdit && (
+                {/* {allowedToEdit && (
                   <HtmlTooltip title="Add Products">
                     <IconButton
                       onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id, existing: true })}
@@ -108,7 +111,7 @@ const Productpackage = ({
                       <Add color="disabled" fontSize="small" />
                     </IconButton>
                   </HtmlTooltip>
-                )}
+                )} */}
               </Box>
             }
             <Chip
@@ -134,70 +137,35 @@ const Productpackage = ({
         }
       }
     ];
-    data.forEach((element) => {
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.fieldName === 'serviceMaster') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? (
-              <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
-    {
-      isMobile ? (
-        <Box display={'none'} />
-      ) : (
-        coloum.push({
-          accessor: 'action',
-          Header: '',
-          minWidth: 70,
-          width: 70,
-          sticky: 'right',
-          disableFilters: true,
-          canDrag: false,
-          Cell: ({ row }) => (
-            <>
-              {!row.original.hideSelection && allowedToEdit && (
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    const obj: any = [row.original._id];
-                    setDeleteData(obj);
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              )}
-            </>
-          )
-        })
-      );
-    }
+
+    coloum.push({
+      accessor: 'action',
+      Header: '',
+      minWidth: 70,
+      width: 70,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          {!row.original.hideSelection && allowedToEdit && (
+            <IconButton
+              size="small"
+              aria-label="Details"
+              onClick={() => {
+                const obj: any = [row.original._id];
+                setDeleteData(obj);
+              }}
+            >
+              <DeleteIcon fontSize="small" color="error" />
+            </IconButton>
+          )}
+        </>
+      )
+    })
+
     coloum.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
+      if (element.accessor === 'qty') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
             .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
@@ -206,27 +174,30 @@ const Productpackage = ({
         };
       }
     });
+
     setColumns(coloum);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchData = async () => {
     setNextStep(false);
+
     var data: any = [];
-    var inventory: any = [];
-    var nonSerializeAsset: any = [];
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
     data = response?.data?.data;
+
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    inventory = data.inventory;
-    nonSerializeAsset = data.nonSerializeAsset;
+
     const rows = data.material.filter((e) => e.parentId === null);
+
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'serializedAsset' ? parent.serializedAssetDetail.assetNumber : parent.packageDetail?.packageName}`;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName :
+        parent.type === 'serializedAsset' ? parent.serializedAssetDetail.assetNumber : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+      parent.subRows = generateNestedData(data.material, parent);
     });
+
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
     } else {
@@ -236,14 +207,14 @@ const Productpackage = ({
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
+  const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = _subRow?.productDetail?.productName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
+      _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -279,7 +250,7 @@ const Productpackage = ({
       .post(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
-        fetchProductInventory();
+        fetchData();
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -308,7 +279,7 @@ const Productpackage = ({
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
+        fetchData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -322,7 +293,7 @@ const Productpackage = ({
       .put(`${repairOrder.api}/${repairOrderData?._id}/product-package/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -337,17 +308,6 @@ const Productpackage = ({
     setRecordToUpdate(rowData);
   };
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleDeleteMultiple = () => {
     const obj: any = [];
     const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
@@ -360,7 +320,13 @@ const Productpackage = ({
     setDeleteData(obj);
   };
 
-  console.log(rowsData)
+  const openActions = (event) => {
+    setAnchorActionEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorActionEl(null);
+  };
 
   return (
     <Fragment>
@@ -426,38 +392,35 @@ const Productpackage = ({
               </Box>
               <Box display="flex">
                 <Button
-                  variant={'outlined'}
-                  color="primary"
+                  variant="outlined"
+                  color="default"
                   size="small"
-                  onClick={handleClick}
-                  disabled={selectedProducts.length ? false : true}
-                  endIcon={<BiChevronDown />}
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={(selectedProducts.length === 0)}
                 >
-                  Actions
+                  Actions <ExpandMore />
                 </Button>
                 <Menu
-                  id="basic-menu"
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleClose}
+                  anchorEl={anchorActionEl}
                   keepMounted
+                  getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
-                    horizontal: 'right'
+                    horizontal: 'left'
                   }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right'
-                  }}
+                  id="action-menu"
+                  open={Boolean(anchorActionEl)}
+                  onClose={closeActions}
                 >
-                  <MenuItem onClick={() => {
-                    handleClose()
+                  {/* <MenuItem onClick={() => {
+                    closeActions()
                     setIsProductEdit({ open: true, isBulkedit: true })
                   }
-                  }>Bulk Edit</MenuItem>
+                  }>Bulk Edit</MenuItem> */}
                   <MenuItem
                     onClick={() => {
-                      handleClose()
+                      closeActions()
                       handleDeleteMultiple();
                     }}
                   >
