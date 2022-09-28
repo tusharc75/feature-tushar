@@ -23,8 +23,11 @@ import { read, utils, writeFile } from 'xlsx';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { capitalize } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
-import { productInventory } from '../../../constants/helpers';
+import { dateFormat, productInventory } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { KeyboardDatePicker } from 'formik-material-ui-pickers';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import MomentUtils from '@date-io/moment';
 
 const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -63,6 +66,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
           ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
           : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: values['serialNumbers'] })),
         warehouse: warehouse,
+        receiveDate: values.receiveDate,
         comment: values.comment
       };
       axiosInstance()
@@ -140,23 +144,17 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
     } else if (duplicates.length > 0) {
       errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
     }
-
-
     return errors;
   }
 
   const handleExport = (values) => {
     const { qty } = values;
-
     const productName = product[0].productName;
-
     let json_data = [...new Array(Number(qty)).keys()].map((_, i) => ({
       Name: productName,
       'Serial Number': ''
     }));
-
     const header = ['Name', 'Serial Number'];
-
     const ws = utils.json_to_sheet(json_data);
     if (header.length) {
       utils.sheet_add_aoa(ws, [header]);
@@ -209,150 +207,170 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
           <CircularProgress color="inherit" />
         </Box>
       ) : (
-        <Formik initialValues={{ qty: 1, price: 0, comment: '', serialNumbers: [] }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+        <Formik initialValues={{ qty: 1, price: 0, comment: '', serialNumbers: [], receiveDate: new Date() }} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
-              <CustomDialogHeader
-                title={`${capitalize(type)} Inventory`}
-                showRequiredLabel={true}
-                onClose={handleClose}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                  setFullScreen((prevState) => !prevState);
-                }}
-                showManimizeMaximize={true}
-              />
-              <CustomDialogContent>
-                <List style={{ padding: 0 }}>
-                  <ListItem key={product[0]?._id}>
-                    {product?.length === 1 ? (
-                      <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${product[0]?.availableInventory}`} />
-                    ) : (
-                      <ListItemText primary={`${product?.length} Products`} />
-                    )}
-                    <Field
-                      component={TextFieldFormik}
-                      margin="dense"
-                      type="number"
-                      label="Qty"
-                      name="qty"
-                      variant="outlined"
-                      value={values['qty']}
-                      error={touched['qty'] && Boolean(errors['qty'])}
-                      helperText={touched['qty'] && errors['qty']}
-                      onChange={(e) => {
-                        setFieldValue('qty', e.target.value);
-                      }}
-                    />
-                  </ListItem>
-                </List>
-                {type === 'add' ?
+              <MuiPickersUtilsProvider utils={MomentUtils}>
+                <CustomDialogHeader
+                  title={`${capitalize(type)} Inventory`}
+                  showRequiredLabel={true}
+                  onClose={handleClose}
+                  isMinimized={!fullScreen}
+                  onMinimizeMaximize={() => {
+                    setFullScreen((prevState) => !prevState);
+                  }}
+                  showManimizeMaximize={true}
+                />
+                <CustomDialogContent>
+                  <List style={{ padding: 0 }}>
+                    <ListItem key={product[0]?._id}>
+                      {product?.length === 1 ? (
+                        <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${product[0]?.availableInventory}`} />
+                      ) : (
+                        <ListItemText primary={`${product?.length} Products`} />
+                      )}
+                      <Field
+                        component={TextFieldFormik}
+                        margin="dense"
+                        type="number"
+                        label="Qty"
+                        name="qty"
+                        variant="outlined"
+                        value={values['qty']}
+                        error={touched['qty'] && Boolean(errors['qty'])}
+                        helperText={touched['qty'] && errors['qty']}
+                        onChange={(e) => {
+                          setFieldValue('qty', e.target.value);
+                        }}
+                      />
+                    </ListItem>
+                  </List>
+                  {type === 'add' ?
+                    <Box m={1}>
+                      <Field
+                        component={TextFieldFormik}
+                        margin="dense"
+                        type="number"
+                        label="Price"
+                        name="price"
+                        fullWidth
+                        variant="outlined"
+                        value={values['price']}
+                        error={touched['price'] && Boolean(errors['price'])}
+                        helperText={touched['price'] && errors['price']}
+                        onChange={(e) => {
+                          setFieldValue('price', e.target.value);
+                        }}
+                      />
+                      <Field
+                        fullWidth
+                        label='Received Date'
+                        variant="inline"
+                        inputVariant="outlined"
+                        autoOk
+                        size="small"
+                        margin="dense"
+                        component={KeyboardDatePicker}
+                        name="receiveDate"
+                        placeholder="Receive Date"
+                        value={values.receiveDate}
+                        format={dateFormat}
+                        maxDate={new Date()}
+                        onChange={(value) => {
+                          setFieldValue('receiveDate', value);
+                        }}
+                      />
+                    </Box> : null}
                   <Box m={1}>
                     <Field
                       component={TextFieldFormik}
                       margin="dense"
-                      type="number"
-                      label="Price"
-                      name="price"
+                      type="text"
+                      label="Comment"
+                      name="comment"
                       fullWidth
+                      multiline
+                      rows={2}
                       variant="outlined"
-                      value={values['price']}
-                      error={touched['price'] && Boolean(errors['price'])}
-                      helperText={touched['price'] && errors['price']}
+                      value={values['comment']}
+                      error={touched['comment'] && Boolean(errors['comment'])}
+                      helperText={touched['comment'] && errors['comment']}
                       onChange={(e) => {
-                        setFieldValue('price', e.target.value);
+                        setFieldValue('comment', e.target.value);
                       }}
                     />
-                  </Box> : null}
-                <Box m={1}>
-                  <Field
-                    component={TextFieldFormik}
-                    margin="dense"
-                    type="text"
-                    label="Comment"
-                    name="comment"
-                    fullWidth
-                    multiline
-                    rows={2}
-                    variant="outlined"
-                    value={values['comment']}
-                    error={touched['comment'] && Boolean(errors['comment'])}
-                    helperText={touched['comment'] && errors['comment']}
-                    onChange={(e) => {
-                      setFieldValue('comment', e.target.value);
-                    }}
-                  />
-                </Box>
-                {product?.length === 1 && product[0]?.serializedProduct && (
-                  <Fragment>
-                    <Box my={2} mx={1}>
-                      <Divider />
-                    </Box>
-                    <Box m={1}>
-                      {type === 'add' && (
-                        <Box mb={1} display="flex" justifyContent="flex-end">
-                          <Box mr={2}>
-                            <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExport(values)}>
-                              Export
-                            </Typography>
-                          </Box>
-                          <Box mr={1}>
-                            <input
-                              accept="json"
-                              style={{ display: 'none' }}
-                              onChange={handleImport(setFieldValue)}
-                              id="import-file"
-                              multiple={false}
-                              type="file"
-                            />
-                            <label htmlFor="import-file">
-                              <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
-                                Import
+                  </Box>
+                  {product?.length === 1 && product[0]?.serializedProduct && (
+                    <Fragment>
+                      <Box my={2} mx={1}>
+                        <Divider />
+                      </Box>
+                      <Box m={1}>
+                        {type === 'add' && (
+                          <Box mb={1} display="flex" justifyContent="flex-end">
+                            <Box mr={2}>
+                              <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExport(values)}>
+                                Export
                               </Typography>
-                            </label>
+                            </Box>
+                            <Box mr={1}>
+                              <input
+                                accept="json"
+                                style={{ display: 'none' }}
+                                onChange={handleImport(setFieldValue)}
+                                id="import-file"
+                                multiple={false}
+                                type="file"
+                              />
+                              <label htmlFor="import-file">
+                                <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
+                                  Import
+                                </Typography>
+                              </label>
+                            </Box>
                           </Box>
-                        </Box>
-                      )}
-                      <Autocomplete
-                        size="small"
-                        options={type === 'add' ? [] : serialNumbers.map((item: any) => item?.serialNumber)}
-                        freeSolo={type === 'add'}
-                        multiple={true}
-                        disableCloseOnSelect
-                        value={values['serialNumbers']}
-                        onChange={(_, val) => {
-                          if (type === 'remove') {
-                            setFieldValue('serialNumbers', val);
-                          } else {
-                            setFieldValue(
-                              'serialNumbers',
-                              val.map((item: string) => item.toUpperCase())
-                            );
-                          }
-                        }}
-                        getOptionSelected={(item, current) => item === current}
-                        getOptionLabel={(option) => option}
-                        renderInput={(props) => (
-                          <TextField
-                            {...props}
-                            placeholder={type === 'add' ? 'Enter serial number and press enter' : ''}
-                            variant="outlined"
-                            name="serialNumbers"
-                            label={type === 'add' ? 'Serial Numbers' : 'Select Serial Numbers'}
-                            error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
-                            helperText={touched['serialNumbers'] && errors['serialNumbers']}
-                          />
                         )}
-                      />
-                    </Box>
-                  </Fragment>
-                )}
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
-                  {capitalize(type)}
-                </CustomButton>
-              </CustomDialogFooter>
+                        <Autocomplete
+                          size="small"
+                          options={type === 'add' ? [] : serialNumbers.map((item: any) => item?.serialNumber)}
+                          freeSolo={type === 'add'}
+                          multiple={true}
+                          disableCloseOnSelect
+                          value={values['serialNumbers']}
+                          onChange={(_, val) => {
+                            if (type === 'remove') {
+                              setFieldValue('serialNumbers', val);
+                            } else {
+                              setFieldValue(
+                                'serialNumbers',
+                                val.map((item: string) => item.toUpperCase())
+                              );
+                            }
+                          }}
+                          getOptionSelected={(item, current) => item === current}
+                          getOptionLabel={(option) => option}
+                          renderInput={(props) => (
+                            <TextField
+                              {...props}
+                              placeholder={type === 'add' ? 'Enter serial number and press enter' : ''}
+                              variant="outlined"
+                              name="serialNumbers"
+                              label={type === 'add' ? 'Serial Numbers' : 'Select Serial Numbers'}
+                              error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
+                              helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                            />
+                          )}
+                        />
+                      </Box>
+                    </Fragment>
+                  )}
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                  <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                    {capitalize(type)}
+                  </CustomButton>
+                </CustomDialogFooter>
+              </MuiPickersUtilsProvider>
             </Form>
           )}
         </Formik>
