@@ -47,6 +47,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import Versions from 'src/pages/Quotation/Versions';
 import { FcCancel, FcClock, FcOk, GiReceiveMoney, VscVersions } from 'react-icons/all';
 import contactClass from '../../Contact/contact.module.scss';
+import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 
 
 
@@ -84,6 +85,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
     totalsale: null
   });
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
+  const [customerAcceptable, setCustomerAcceptable] = useState(false);
 
   useEffect(() => {
     fetchQuotationData();
@@ -485,6 +487,24 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
     setShowAllVersionStatus(false);
   };
 
+  const findProfitPercentage = (CP, Profit) => {
+    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
+    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
+    return ((profit * 100) / parsedCP).toFixed(2);
+  };
+
+  const cloneVersion = () => {
+    const versionId = quotationData?.versions[currentVersion]?._id;
+    axiosInstance()
+      .post(`/quotation/clone-version/${quotationData._id}/${versionId}`)
+      .then(() => {
+        fetchQuotationData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
@@ -537,6 +557,52 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
         </Box>
         <Box display="flex">
           <div>
+            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (<Button
+              onClick={() => {
+                axiosInstance()
+                  .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+                  .then(() => {
+                    fetchQuotationData(currentVersion);
+                    toastConfig.setToastConfig({
+                      open: true,
+                      type: 'success',
+                      message: 'Sent to customer Sucessfully'
+                    });
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+              variant="outlined"
+              size="small"
+              className="mx-1"
+              color="primary"
+            >
+              Send to customer
+            </Button>)
+              : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (<Button
+                onClick={() => {
+                  setCustomerAcceptable(true)
+                }}
+                variant="outlined"
+                size="small"
+                className="mx-1"
+                color="primary"
+              >
+                Accept / Reject
+              </Button>)
+                : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (<Button
+                  onClick={() => {
+                    cloneVersion();
+                  }}
+                  variant="outlined"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  {`Clone Version-${currentVersion}`}
+                </Button>) : null
+            }
             <Button
               variant="outlined"
               color="default"
@@ -718,12 +784,18 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
           handleChangeVersion={handleChangeVersion}
         />
       )}
+      {customerAcceptable && (
+        <ManualReponseDialog
+          versionId={versionId}
+          quotationId={quotationData?._id}
+          setCurrentStep={() => { fetchQuotationData(currentVersion) }}
+          updateStatus={() => { fetchQuotationData(currentVersion) }}
+          setCustomerAcceptable={setCustomerAcceptable}
+        />
+      )}
     </Fragment>
   );
 };
 
 export default Quotation;
-function findProfitPercentage(totalcost: any, totalProfit: any) {
-  throw new Error('Function not implemented.');
-}
 
