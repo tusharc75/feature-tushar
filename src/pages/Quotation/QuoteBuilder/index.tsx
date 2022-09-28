@@ -46,7 +46,6 @@ const QuoteBuilder = ({
   sentToCustomer = false,
   stepFullScreen,
   fetchQuotationData,
-  setQuotationSummary,
   version,
   currentStep,
   versionData
@@ -279,30 +278,7 @@ const QuoteBuilder = ({
         return res;
       });
     }
-    setRowsData([...rows, ...serviceRows]);
-
-    const totalFinalPrice = rows
-      .filter(
-        (f) =>
-          f?.parentId === null &&
-          f?.hasOwnProperty('finalPrice_' + quotationData?.currency?.toLowerCase()) &&
-          !isNaN(f['finalPrice_' + quotationData?.currency?.toLowerCase()])
-      )
-      .reduce((sum, row) => row['finalPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-    const totalSupplierPrice = rows
-      .filter(
-        (f) =>
-          f?.parentId === null &&
-          f?.hasOwnProperty('supplierPrice_' + quotationData?.currency?.toLowerCase()) &&
-          !isNaN(f['supplierPrice_' + quotationData?.currency?.toLowerCase()])
-      )
-      .reduce((sum, row) => row['supplierPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-
-    setQuotationSummary({
-      totalProfit: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice - totalSupplierPrice),
-      totalcost: formatAmountWithCurrency(quotationData?.currency, totalSupplierPrice),
-      totalsale: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice)
-    });
+    setRowsData([...rows, ...serviceRows]);    
   };
 
   const generateNestedData = (material, inventory, parent) => {
