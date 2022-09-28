@@ -307,13 +307,9 @@ const RepairOrderDetails = () => {
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
                         currencySymbol={currencySymbol}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-4`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={true}
-                      // allowedToEdit={allowedToEdit}
                       />
                     )}
                   </ContentFullScreen>
