@@ -466,9 +466,10 @@ const Service = ({ workOrderId }) => {
       )}
       {userAssignDialog && (
         <AssignUserDialog
-          workOrderId={workOrderId}
-          serviceId={selectedService?._id}
-          uniqueId={selectedService?.uniqueId}
+          workOrderData={[{
+            "uniqueId": selectedService?.uniqueId,
+            "workOrderId": workOrderId
+          }]}
           assignedUsers={selectedService?.assignedUsers}
           handleClose={() => {
             setUserAssignDialog(false);

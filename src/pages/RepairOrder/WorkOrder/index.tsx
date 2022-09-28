@@ -23,6 +23,7 @@ import RepairOrderQtyDialog from '../Productpackage/RepairOrderQtyDialog';
 import AddExistingProductInventory from '../Productpackage/AddExistingProductInventory';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { ExpandMore } from '@material-ui/icons';
+import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 
 const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen }) => {
 
@@ -33,6 +34,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
     const [addServicesDialog, setAddServicesDialog] = useState({ open: false });
+    const [userAssignDialog, setUserAssignDialog] = useState(false);
 
 
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -349,6 +351,12 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                             >
                                 <ListItemText>Add Services</ListItemText>
                             </MenuItem>
+                            <MenuItem
+                                onClick={() => setUserAssignDialog(true)}
+                                disabled={selectedProducts?.length ? false : true}
+                            >
+                                <ListItemText>Add Users</ListItemText>
+                            </MenuItem>
                         </Menu>
                     </Box>
                 </Box>
@@ -388,6 +396,23 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                                 handleAddService(data?.map((e) => e.service));
                                 setAddServicesDialog({ open: false })
                                 handleClose()
+                            }}
+                        />
+                    )}
+                    {userAssignDialog && (
+                        <AssignUserDialog
+                            workOrderData={selectedProducts.filter((e) => e.type === 'service').map(d => {
+                                return {
+                                    "uniqueId": d?.uniqueId,
+                                    "workOrderId": d?.workOrder?._id
+                                }
+                            })}
+                            assignedUsers={[]}
+                            handleClose={() => {
+                                setUserAssignDialog(false);
+                            }}
+                            handleSucess={() => {
+                                setUserAssignDialog(false);
                             }}
                         />
                     )}
