@@ -334,17 +334,6 @@ const QuoteBuilder = ({
           <SendEmail versionData={versionData} quotationData={quotationData} />
         </Box>
         <Box display="flex">
-          <Typography variant="h6" color={quotationData?.subStatus === 'Reject by Customer Waiting for New Price' ? 'error' : 'secondary'}>
-            {quotationData?.subStatus === 'Waiting for Your Acceptance'
-              ? 'Waiting for Customer Response'
-              : quotationData?.subStatus === 'Reject by Customer Waiting for New Price'
-                ? 'Rejected by Customer'
-                : quotationData?.subStatus === 'Price Approved by Customer'
-                  ? 'Approved by Customer'
-                  : ''}
-          </Typography>
-        </Box>
-        <Box display="flex">
           {versionData?.processStatus === 'Send To Customer' && (
             <HtmlTooltip title={'Send to customer'}>
               <Button
