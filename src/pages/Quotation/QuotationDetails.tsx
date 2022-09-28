@@ -58,6 +58,7 @@ import contactClass from '../Contact/contact.module.scss';
 import { CircularProgress } from '@material-ui/core';
 import ManualReponseDialog from './ManualRespondDialog';
 import Versions from './Versions';
+import QuotationSummeryDialog from './QuotationSummeryDialog';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -92,15 +93,9 @@ const QuotationDetails = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorElAction, setAnchorElAction] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
-  const [redCard, setRedCard] = useState(false);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
-  const [quotationSummary, setQuotationSummary] = useState({
-    totalProfit: null,
-    totalcost: null,
-    totalsale: null
-  });
+
   const [currentVersion, setCurrentVersion] = useState(0);
   const [isCloning, setCloning] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
@@ -119,14 +114,6 @@ const QuotationDetails = () => {
       'aria-controls': `main-tabpanel-${index}`
     };
   }
-
-  const defaultTotalValue = useMemo(() => {
-    let result = '0';
-    if (quotationData && quotationData?.currency) {
-      result = `${currencyCodeToSymbol(quotationData.currency)} 0`;
-    }
-    return result;
-  }, [quotationData]);
 
   const handleChangeVersion = (versionNumber) => {
     fetchQuotationData(versionNumber);
@@ -319,11 +306,7 @@ const QuotationDetails = () => {
       });
   };
 
-  const findProfitPercentage = (CP, Profit) => {
-    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
-    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
-    return ((profit * 100) / parsedCP).toFixed(2);
-  };
+
 
   return (
     <>
@@ -574,8 +557,8 @@ const QuotationDetails = () => {
                         handleNext={
                           currentStep > 2
                             ? () => {
-                                setCustomerAcceptable(true);
-                              }
+                              setCustomerAcceptable(true);
+                            }
                             : null
                         }
                       />
@@ -588,7 +571,6 @@ const QuotationDetails = () => {
                             renderedFrom={`${renderedFrom}_grid-1`}
                             showActivity={showActivity}
                             stepFullScreen={stepFullScreen}
-                            setQuotationSummary={setQuotationSummary}
                             version={currentVersion}
                           />
                         )}
@@ -609,7 +591,6 @@ const QuotationDetails = () => {
                             showActivity={showActivity}
                             stepFullScreen={stepFullScreen}
                             fetchQuotationData={fetchQuotationData}
-                            setQuotationSummary={setQuotationSummary}
                             version={currentVersion}
                             currentStep={currentStep}
                             versionData={quotationData.versions[currentVersion]}
@@ -624,7 +605,6 @@ const QuotationDetails = () => {
                             showActivity={showActivity}
                             stepFullScreen={stepFullScreen}
                             fetchQuotationData={fetchQuotationData}
-                            setQuotationSummary={setQuotationSummary}
                             version={currentVersion}
                             currentStep={currentStep}
                             versionData={quotationData.versions[currentVersion]}
@@ -638,7 +618,6 @@ const QuotationDetails = () => {
                             showActivity={showActivity}
                             stepFullScreen={stepFullScreen}
                             fetchQuotationData={fetchQuotationData}
-                            setQuotationSummary={setQuotationSummary}
                             version={currentVersion}
                             currentStep={currentStep}
                             versionData={quotationData.versions[currentVersion]}
@@ -724,73 +703,12 @@ const QuotationDetails = () => {
         />
       )}
       {showQuotationSummaryDialog && (
-        <Dialog
-          open={showQuotationSummaryDialog}
-          aria-labelledby="customized-dialog-title"
-          maxWidth="md"
+        <QuotationSummeryDialog
+          quotationData={quotationData}
+          versionId={currVersionId}
           onClose={() => {
-            setShowQuotationSummaryDialog(false);
-          }}
-          fullWidth
-          fullScreen={fullScreen || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-        >
-          <CustomDialogHeader
-            title="Quotation Summary"
-            onClose={() => {
-              setShowQuotationSummaryDialog(false);
-            }}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-            showRequiredLabel={false}
-          />
-          <CustomDialogContent>
-            <Grid item className="quoteHeader">
-              <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
-                <span className="quoteAmount" title={quotationSummary?.totalProfit?.fullFormatAmount}>
-                  {quotationSummary?.totalProfit?.fullFormatAmount ? quotationSummary?.totalProfit?.fullFormatAmount : defaultTotalValue}{' '}
-                  {quotationSummary?.totalcost?.fullFormatAmount
-                    ? `(${findProfitPercentage(quotationSummary?.totalcost, quotationSummary?.totalProfit)} %)`
-                    : ''}
-                </span>
-                <div className={'quoteBoxContent'}>
-                  <span className={'quoteDetailHeading'}>Total Profit </span>
-                </div>
-              </div>
-              <div className="quoteBox quoteCost">
-                <span className="quoteAmount" title={quotationSummary?.totalcost?.fullFormatAmount}>
-                  {quotationSummary?.totalcost?.fullFormatAmount ? quotationSummary?.totalcost?.fullFormatAmount : defaultTotalValue}
-                </span>
-                <div className={'quoteBoxContent'}>
-                  <span className={'quoteDetailHeading'}>Total Cost Price </span>
-                </div>
-              </div>
-              {redCard ? (
-                <div className="quoteBox quoteRed">
-                  <div className={'quoteBoxContent'}>
-                    {' '}
-                    <span>Total Selling Price </span>
-                  </div>
-                  <span className="quoteAmount" title={quotationSummary?.totalsale?.fullFormatAmount}>
-                    {quotationSummary?.totalsale?.fullFormatAmount ? quotationSummary?.totalsale?.fullFormatAmount : defaultTotalValue}
-                  </span>
-                </div>
-              ) : (
-                <div className="quoteBox quoteSale">
-                  <span className="quoteAmount" title={quotationSummary?.totalsale?.fullFormatAmount}>
-                    {quotationSummary?.totalsale?.fullFormatAmount ? quotationSummary?.totalsale?.fullFormatAmount : defaultTotalValue}
-                  </span>
-                  <div className={'quoteBoxContent'}>
-                    <span className={'quoteDetailHeading'}>Total Selling Price </span>
-                  </div>
-                </div>
-              )}
-            </Grid>
-          </CustomDialogContent>
-        </Dialog>
+            setShowQuotationSummaryDialog(false)
+          }} />
       )}
       {quotationData && showAllVersionStatus && (
         <Versions

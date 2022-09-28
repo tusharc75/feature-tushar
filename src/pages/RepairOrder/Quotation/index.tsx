@@ -48,6 +48,7 @@ import Versions from 'src/pages/Quotation/Versions';
 import { FcCancel, FcClock, FcOk, GiReceiveMoney, VscVersions } from 'react-icons/all';
 import contactClass from '../../Contact/contact.module.scss';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
+import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 
 
 
@@ -79,11 +80,6 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
   const [currentVersion, setCurrentVersion] = useState(null);
   const [versionId, setVersionId] = useState(null);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
-  const [quotationSummary, setQuotationSummary] = useState({
-    totalProfit: null,
-    totalcost: null,
-    totalsale: null
-  });
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
 
@@ -332,27 +328,6 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
     } else {
       setNextStep(true);
     }
-    const totalFinalPrice = rows
-      .filter(
-        (f) =>
-          f?.parentId === null &&
-          f?.hasOwnProperty('finalPrice_' + quotationData?.currency?.toLowerCase()) &&
-          !isNaN(f['finalPrice_' + quotationData?.currency?.toLowerCase()])
-      )
-      .reduce((sum, row) => row['finalPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-    const totalSupplierPrice = rows
-      .filter(
-        (f) =>
-          f?.parentId === null &&
-          f?.hasOwnProperty('supplierPrice_' + quotationData?.currency?.toLowerCase()) &&
-          !isNaN(f['supplierPrice_' + quotationData?.currency?.toLowerCase()])
-      )
-      .reduce((sum, row) => row['supplierPrice_' + quotationData?.currency?.toLowerCase()] + sum, 0);
-    setQuotationSummary({
-      totalProfit: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice - totalSupplierPrice),
-      totalcost: formatAmountWithCurrency(quotationData?.currency, totalSupplierPrice),
-      totalsale: formatAmountWithCurrency(quotationData?.currency, totalFinalPrice)
-    });
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -718,65 +693,6 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
           }}
         />
       )}
-      {showQuotationSummaryDialog && (
-        <Dialog
-          open={showQuotationSummaryDialog}
-          aria-labelledby="customized-dialog-title"
-          maxWidth="md"
-          onClose={() => {
-            setShowQuotationSummaryDialog(false);
-          }}
-          fullWidth
-          fullScreen={fullScreen || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-        >
-          <CustomDialogHeader
-            title="Quotation Summary"
-            onClose={() => {
-              setShowQuotationSummaryDialog(false);
-            }}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-            showRequiredLabel={false}
-          />
-          <CustomDialogContent>
-            <Grid item className="quoteHeader">
-              <div className={'quoteBox quoteProfit'}>
-                <span className="quoteAmount" title={quotationSummary?.totalProfit?.fullFormatAmount}>
-                  {quotationSummary?.totalProfit?.fullFormatAmount ? quotationSummary?.totalProfit?.fullFormatAmount : defaultTotalValue}{' '}
-                  {quotationSummary?.totalcost?.fullFormatAmount
-                    ? `(${findProfitPercentage(quotationSummary?.totalcost, quotationSummary?.totalProfit)} %)`
-                    : ''}
-                </span>
-                <div className={'quoteBoxContent'}>
-                  <span className={'quoteDetailHeading'}>Total Profit </span>
-                </div>
-              </div>
-              <div className="quoteBox quoteCost">
-                <span className="quoteAmount" title={quotationSummary?.totalcost?.fullFormatAmount}>
-                  {quotationSummary?.totalcost?.fullFormatAmount ? quotationSummary?.totalcost?.fullFormatAmount : defaultTotalValue}
-                </span>
-                <div className={'quoteBoxContent'}>
-                  <span className={'quoteDetailHeading'}>Total Cost Price </span>
-                </div>
-              </div>
-              {(
-                <div className="quoteBox quoteSale">
-                  <span className="quoteAmount" title={quotationSummary?.totalsale?.fullFormatAmount}>
-                    {quotationSummary?.totalsale?.fullFormatAmount ? quotationSummary?.totalsale?.fullFormatAmount : defaultTotalValue}
-                  </span>
-                  <div className={'quoteBoxContent'}>
-                    <span className={'quoteDetailHeading'}>Total Selling Price </span>
-                  </div>
-                </div>
-              )}
-            </Grid>
-          </CustomDialogContent>
-        </Dialog>
-      )}
       {quotationData && showAllVersionStatus && (
         <Versions
           onClose={() => setShowAllVersionStatus(false)}
@@ -792,6 +708,14 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
           updateStatus={() => { fetchQuotationData(currentVersion) }}
           setCustomerAcceptable={setCustomerAcceptable}
         />
+      )}
+      {showQuotationSummaryDialog && (
+        <QuotationSummeryDialog
+          quotationData={quotationData}
+          versionId={versionId}
+          onClose={() => {
+            setShowQuotationSummaryDialog(false)
+          }} />
       )}
     </Fragment>
   );
