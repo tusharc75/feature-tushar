@@ -273,41 +273,20 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
             });
     };
 
-    const createWorkorderService = async (rows) => {
+    const createWorkorderService = (rows) => {
         const rowsForWorkorder = rows.filter(d => d.type === "serializedAsset" && !d.workOrder)
         if (rowsForWorkorder.length > 0) {
-            const response = await axiosInstance().get(`/field?resource=${sidebarResource["workOrder"]}`)
-            let fieldsDataForCreate = response?.data?.data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-            const tempInitialData = getObjKeys("", fieldsDataForCreate)
-            rowsForWorkorder.forEach(element => {
-                tempInitialData["workOrderNumber"] = `WO_${generateUniqueIdOnly()}`
-                tempInitialData["type"] = "Repair Order";
-                tempInitialData["repairOrder"] = repairOrderData?._id;
-                if (element.serializedAsset) {
-                    tempInitialData["serializedAsset"] = element?.serializedAsset?._id
-                    tempInitialData["product"] = element?.serializedAsset?.product
+            const tempInitialData = rowsForWorkorder.map(element => {
+                return {
+                    "_id": element?._id,
+                    "product": element?.serializedAsset?.product,
+                    "serializedAsset": element?.serializedAsset?._id
                 }
-                axiosInstance().post(`${workOrder.api}`, tempInitialData).then(({ data }) => {
-                    if (data?.data?._id) {
-                        axiosInstance()
-                            .put(`${repairOrder.api}/${repairOrderData._id}/product-package/add-work-order`, {
-                                "_id": element?._id,
-                                "workOrder": data?.data?._id
-                            }
-                            )
-                            .then(() => {
-                                fetchProductInventory();
-                            })
-                            .catch((error) => {
-                                toastConfig.setToastConfig(error);
-                            });
-                    }
-                    else {
-                        fetchProductInventory();
-                    }
-                }).catch((error) => {
-                    toastConfig.setToastConfig(error);
-                });
+            });
+            axiosInstance().post(`${repairOrder.api}/${repairOrderData._id}/work-order/create-many`, tempInitialData).then(({ data }) => {
+                fetchProductInventory();
+            }).catch((error) => {
+                toastConfig.setToastConfig(error);
             });
 
         }
