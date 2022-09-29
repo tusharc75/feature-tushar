@@ -288,7 +288,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
             .reduce((sum, row) => row.values[element.accessor] + sum, 0);
           return <>{qtyTotal}</>;
         };
-      } else if (element.accessor.includes('finalPrice')) {
+      } else if (element.accessor.includes(`${currency.toLowerCase()}`)) {
         element['Footer'] = (info) => {
           const total = info.rows
             .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
@@ -532,29 +532,31 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
         </Box>
         <Box display="flex">
           <div>
-            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (<Button
-              onClick={() => {
-                axiosInstance()
-                  .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
-                  .then(() => {
-                    fetchQuotationData(currentVersion);
-                    toastConfig.setToastConfig({
-                      open: true,
-                      type: 'success',
-                      message: 'Sent to customer Sucessfully'
+            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+              <Button
+                disabled={material.filter((e) => e.parentId === null).some(d => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 || d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null || d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined)}
+                onClick={() => {
+                  axiosInstance()
+                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+                    .then(() => {
+                      fetchQuotationData(currentVersion);
+                      toastConfig.setToastConfig({
+                        open: true,
+                        type: 'success',
+                        message: 'Sent to customer Sucessfully'
+                      });
+                    })
+                    .catch((error) => {
+                      toastConfig.setToastConfig(error);
                     });
-                  })
-                  .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                  });
-              }}
-              variant="outlined"
-              size="small"
-              className="mx-1"
-              color="primary"
-            >
-              Send to customer
-            </Button>)
+                }}
+                variant="outlined"
+                size="small"
+                className="mx-1"
+                color="primary"
+              >
+                Send to customer
+              </Button>)
               : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (<Button
                 onClick={() => {
                   setCustomerAcceptable(true)
