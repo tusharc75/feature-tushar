@@ -17,6 +17,7 @@ import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
+import { isNull } from 'util';
 
 
 interface EditDialogProps {
@@ -180,7 +181,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     })
   }
 
-  const sumOnParent = (packages, product) => {
+  const sumOnParent = (parent, child) => {
     const resetFields = []
     initialData.fields.forEach((element) => {
       if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
@@ -209,17 +210,17 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     const sumValues: any = {}
     resetFields.forEach((_field: any) => {
       sumValues[_field.fieldName] = 0;
-      product.forEach(element => {
+      child.forEach(element => {
         sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
       });
     });
-    packages.forEach((row) => {
+    parent.forEach((row) => {
       resetFields.forEach((ele) => {
         if (ele.type === "amount") {
           row[ele.fieldName] = sumValues[ele.fieldName];
         }
         else {
-          row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / product.length).toFixed(2));
+          row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / parent.length).toFixed(2));
         }
       })
     })
@@ -296,30 +297,28 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
       handleSaveData(rows)
     }
     else {
-      if (rowData.type === "package" && !showConfirmationDialog) {
+      if (rowData.parentId !== null && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       }
       else {
         let rows: any = [{ ...rowData, ...values }]
-        if (rowData.type === "package") {
-          const product = material.filter((e) => e.parentId === rowData._id)
-          resetValueZero(product)
-          rows = [...rows, ...product]
-        }
-        else if (rowData.type === "product" && rowData.parentId) {
-          const packages: any = material.filter((e) => e._id === rowData.parentId)
-          const product: any = material.filter((e) => e.parentId === rowData.parentId)
-          product.forEach((element) => {
+        if (rowData.parentId) {
+          const parent: any = material.filter((e) => e._id === rowData.parentId)
+          const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
+          sameParent.forEach((element) => {
             if (element._id === rowData._id) {
               for (var key in values) {
                 element[key] = values[key];
               }
             }
           })
-          sumOnParent(packages, product)
-          rows = [...rows, ...packages]
+
+          sumOnParent(parent, sameParent)
+          rows = [...rows, ...parent]
         }
-        handleSaveData(rows)
+        const child = material.filter((e) => e.parentId === rowData._id)
+        resetValueZero(child)
+        handleSaveData([...rows, ...child])
         setShowConfirmationDialog(false);
       }
     }
@@ -547,7 +546,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
             {
               showConfirmationDialog && <ConfirmationDialog
                 open={showConfirmationDialog}
-                message="Would you prefer to override the product-level price configuration?"
+                message="Would you prefer to override the parent-level price configuration?"
                 onOk={() => {
                   submitForm()
                 }}
