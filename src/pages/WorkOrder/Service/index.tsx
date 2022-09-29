@@ -56,7 +56,10 @@ const Service = ({ workOrderId }) => {
           const services = [...preWorkService, ...quote, ...postWorkService];
           setServiceSteps(services);
           if (services?.length) {
-            let pendingServiceIndex = services.findIndex(d => d.status === WORKORDER_SERVICE_STATUS.pending)
+            let pendingServiceIndex = services.findIndex(d => d.status === WORKORDER_SERVICE_STATUS.inProgress)
+            if (pendingServiceIndex === -1) {
+              pendingServiceIndex = services.findIndex(d => d.status === WORKORDER_SERVICE_STATUS.pending)
+            }
             setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
           }
           let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
