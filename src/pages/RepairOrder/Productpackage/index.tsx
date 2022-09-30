@@ -31,7 +31,8 @@ const Productpackage = ({
   showActivity,
   renderedFrom,
   stepFullScreen,
-  allowedToEdit
+  allowedToEdit,
+  allowedToDelete
 }) => {
 
   const toastConfig = useContext(CustomToastContext);
@@ -148,7 +149,7 @@ const Productpackage = ({
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {!row.original.hideSelection && allowedToEdit && (
+          {!row.original.hideSelection && allowedToDelete && (
             <IconButton
               size="small"
               aria-label="Details"
@@ -362,7 +363,7 @@ const Productpackage = ({
                     {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
                   </Button>
                 } */}
-                {permissions?.serializedAsset?.isRead && (
+                {permissions?.serializedAsset?.isRead && allowedToEdit && (
                   <>
                     <Button
                       color="primary"
@@ -419,6 +420,7 @@ const Productpackage = ({
                   }
                   }>Bulk Edit</MenuItem> */}
                   <MenuItem
+                    disabled={!allowedToDelete}
                     onClick={() => {
                       closeActions()
                       handleDeleteMultiple();

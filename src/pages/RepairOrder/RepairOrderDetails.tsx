@@ -61,6 +61,7 @@ const RepairOrderDetails = () => {
   const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
@@ -122,6 +123,7 @@ const RepairOrderDetails = () => {
         setCurrentStep(repairOrderSteps.indexOf(data?.processStatus) !== -1 ? repairOrderSteps.indexOf(data?.processStatus) : 0);
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
+        setAllowedToDelete(data.owner.optionValue === user?.user?._id)
         if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -184,7 +186,7 @@ const RepairOrderDetails = () => {
             <Paper>
               {repairOrderData ? (
                 <DetailsPageHeader heading={repairOrderData?.repairOrderNumber} mainPoints={null} showHeading={true}>
-                  {permissions?.repairOrder?.isUpdate && (
+                  {permissions?.repairOrder?.isUpdate && allowedToEdit && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
@@ -196,7 +198,7 @@ const RepairOrderDetails = () => {
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   )}
-                  {permissions?.repairOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                  {permissions?.repairOrder?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 </DetailsPageHeader>
               ) : (
                 <Skeleton variant="text" width="150px" height="40px" />
@@ -272,8 +274,8 @@ const RepairOrderDetails = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={true}
-                      // allowedToEdit={allowedToEdit}
+                        allowedToEdit={allowedToEdit}
+                        allowedToDelete={allowedToDelete}
                       />
                     )}
                     {currentStep === 1 && repairOrderData && (
@@ -284,7 +286,7 @@ const RepairOrderDetails = () => {
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
                         stepFullScreen={stepFullScreen}
-                      // allowedToEdit={allowedToEdit}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                     {/* {(currentStep === 2 || currentStep === 4) && repairOrderData && (
@@ -310,6 +312,8 @@ const RepairOrderDetails = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-4`}
                         stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                        allowedToDelete={allowedToDelete}
                       />
                     )}
                   </ContentFullScreen>

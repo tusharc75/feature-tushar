@@ -17,7 +17,7 @@ import RestoreIcon from '@material-ui/icons/Restore';
 import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen }) => {
+const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen, allowedToEdit }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -297,43 +297,44 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         <Fragment>
             <Box display="flex" justifyContent="flex-end" pt={1} pb={2} >
                 <Box display="flex" alignItems="center" justifyContent={"flex-end"} paddingX={1} gridColumnGap={8} flex={1}>
-                    <Box display="flex" gridColumnGap={5}>
-                        <Button
-                            variant="outlined"
-                            color="default"
-                            size="small"
-                            onClick={openActions}
-                            aria-controls="action-menu"
-                            disabled={(selectedProducts.length === 0)}
-                        >
-                            Actions <ExpandMore />
-                        </Button>
-                        <Menu
-                            anchorEl={anchorActionEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left'
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorActionEl)}
-                            onClose={closeActions}
-                        >
-                            <MenuItem onClick={() => {
-                                closeActions()
-                                setAddServicesDialog({ open: true })
-                            }} >
-                                Add Services
-                            </MenuItem>
-                            <MenuItem onClick={() => {
-                                closeActions()
-                                setUserAssignDialog(true)
-                            }}  >
-                                Assign Users
-                            </MenuItem>
-                        </Menu>
-                    </Box>
+                    {allowedToEdit &&
+                        <Box display="flex" gridColumnGap={5}>
+                            <Button
+                                variant="outlined"
+                                color="default"
+                                size="small"
+                                onClick={openActions}
+                                aria-controls="action-menu"
+                                disabled={(selectedProducts.length === 0)}
+                            >
+                                Actions <ExpandMore />
+                            </Button>
+                            <Menu
+                                anchorEl={anchorActionEl}
+                                keepMounted
+                                getContentAnchorEl={null}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left'
+                                }}
+                                id="action-menu"
+                                open={Boolean(anchorActionEl)}
+                                onClose={closeActions}
+                            >
+                                <MenuItem onClick={() => {
+                                    closeActions()
+                                    setAddServicesDialog({ open: true })
+                                }} >
+                                    Add Services
+                                </MenuItem>
+                                <MenuItem onClick={() => {
+                                    closeActions()
+                                    setUserAssignDialog(true)
+                                }}  >
+                                    Assign Users
+                                </MenuItem>
+                            </Menu>
+                        </Box>}
                 </Box>
             </Box>
             <Grid container spacing={2}>
@@ -351,7 +352,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                                 onSelect={setSelectedProducts}
                                 childrenProperty="subRows"
                                 uniqueKey="_id"
-                                hideSelection={false}
+                                hideSelection={!allowedToEdit}
                                 renderedFrom="repair_order_workorder"
                                 isClientSideGrid={true}
                             />
