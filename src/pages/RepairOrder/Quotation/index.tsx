@@ -52,7 +52,7 @@ import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 
 
 
-const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen }) => {
+const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -251,7 +251,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
           Cell: ({ row }) =>
             !row.original.hideSelection && (
               <Grid container spacing={1}>
-                <IconButton
+                {allowedToEdit && <IconButton
                   size="small"
                   aria-label="Details"
                   onClick={() => {
@@ -259,9 +259,9 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
                   }}
                 >
                   <DateRangeIcon fontSize="small" color="primary" />
-                </IconButton>
+                </IconButton>}
                 <Box ml={1} />
-                <IconButton
+                {allowedToDelete && <IconButton
                   size="small"
                   aria-label="Details"
                   onClick={() => {
@@ -270,7 +270,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
                   }}
                 >
                   <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
+                </IconButton>}
               </Grid>
             )
         })
@@ -531,7 +531,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
           ) : null}
         </Box>
         <Box display="flex">
-          <div>
+          {allowedToEdit && <div>
             {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
               <Button
                 disabled={material.filter((e) => e.parentId === null).some(d => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 || d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null || d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined)}
@@ -609,7 +609,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
                 }}>
                 Bulk Edit
               </MenuItem>
-              <MenuItem
+              {allowedToDelete && <MenuItem
                 onClick={() => {
                   closeActions()
                   const dataToDelete = selectedProducts && selectedProducts
@@ -624,9 +624,9 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
                   setDeleteData(dataToDelete);
                 }} >
                 Delete
-              </MenuItem>
+              </MenuItem>}
             </Menu>
-          </div>
+          </div>}
         </Box>
       </Box>
       {columns && rowsData ? (
@@ -647,7 +647,8 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
-              renderedFrom="quotation_product_package"
+              hideSelection={!allowedToEdit}
+              renderedFrom="quotation_product_package_quotation"
               isClientSideGrid={true}
             />
           </Box>
