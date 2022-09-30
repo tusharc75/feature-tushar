@@ -97,7 +97,7 @@ const WorkOrderDetails = () => {
       .then(({ data: { data } }) => {
         setWorkOrderData({ ...data });
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        setAllowedToEdit(isAllowedToEdit);
+        setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
         if (permissions?.workOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -194,11 +194,12 @@ const WorkOrderDetails = () => {
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
             <Service
-              workOrderId={id} isAllowedToEdit={permissions?.workOrder?.isUpdate && allowedToEdit} />
+              workOrderId={id}
+              allowedToEdit={allowedToEdit} />
           </TabPanel>
           <TabPanel value={tabValue} index={2}>
             <Consumables
-              isAllowedToEdit={permissions?.workOrder?.isUpdate && allowedToEdit}
+              allowedToEdit={allowedToEdit}
               workOrderId={id}
             />
           </TabPanel>

@@ -24,9 +24,10 @@ import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import { useData } from 'src/StateProvider/Provider';
 
-const Service = ({ workOrderId, isAllowedToEdit }) => {
+const Service = ({ workOrderId, allowedToEdit }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {state: {user: {user}}} = useData()
+  const { state: { user: { user } } } = useData()
   const [serviceSteps, setServiceSteps] = useState(null);
   const [disabledServicesOrder, setDisabledServicesOrder] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
@@ -38,8 +39,6 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
-
-  const allowedToEdit = isAllowedToEdit || Boolean(selectedService?.assignedUsers?.find((u:any) => u?._id === user?._id))
 
   useEffect(() => {
     fetchService();
@@ -66,6 +65,7 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
             }
             setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
           }
+
           let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
           let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
             [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(d.status)
@@ -183,8 +183,10 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
     }
   }, [mobScreen]);
 
+  const isAllowedToServiceEdit = (allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?._id === user?._id))
+
   const stylesForEveryTab = (selectedService, data) => {
-    if (data?.type !== 'service' || (data?.order > disabledServicesOrder && allowedToEdit)) {
+    if (data?.type !== 'service' || (data?.order > disabledServicesOrder)) {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
@@ -244,7 +246,7 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
                   </Box>
                   {serviceSteps?.length > 0 && (
                     <Box marginX={2}>
-                      <Button disabled={isAllowedToEdit} variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                      <Button disabled={!allowedToEdit} variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
                         <GrDrag fontSize="small" color="primary" className="mr-1" />
                         Arrange
                       </Button>
@@ -283,7 +285,7 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
                         }}
                         p={2}
                         onClick={() => {
-                          if (!(data?.type !== 'service' || (data?.order > disabledServicesOrder && allowedToEdit))) {
+                          if (!(data?.type !== 'service' || (data?.order > disabledServicesOrder))) {
                             setSelectedService(data);
                           }
                         }}
@@ -347,13 +349,13 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
                           </Grid>
                           {!isColapsed && (
                             <>
-                              {!(data?.type !== 'service' || (data?.order > disabledServicesOrder && allowedToEdit)) && (
+                              {!(data?.type !== 'service' || (data?.order > disabledServicesOrder)) && (
                                 <Grid item xs={2} container justify="flex-end">
                                   <IconButton
                                     size="small"
                                     color="primary"
                                     aria-label="delete"
-                                    disabled={!allowedToEdit}
+                                    disabled={!isAllowedToServiceEdit}
                                     onClick={(event) => {
                                       handleOpenMenu(event);
                                       setSelectedService(data);
@@ -380,10 +382,9 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
               keepMounted
               open={Boolean(anchorEl)}
               onClose={handleCloseMenu}
-            //transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            //anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
               <MenuItem
+                disabled={!allowedToEdit}
                 onClick={() => {
                   setUserAssignDialog(true);
                   setAnchorEl(null);
@@ -426,6 +427,7 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
                 Fail
               </MenuItem>
               <MenuItem
+                disabled={!allowedToEdit}
                 onClick={() => {
                   handleRemoveService(selectedService?.uniqueId);
                   setAnchorEl(null);
@@ -459,7 +461,7 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
                     selectedServiceStatus={selectedService.status}
                     updateServiceStatus={updateServiceStatus}
                     handleAddService={handleAddService}
-                    isAllowedToEdit={allowedToEdit}
+                    allowedToEdit={isAllowedToServiceEdit}
                   />
                 ) : (
                   <Quotation />
