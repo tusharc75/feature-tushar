@@ -22,9 +22,11 @@ import PeopleIcon from '@material-ui/icons/People';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
+import { useData } from 'src/StateProvider/Provider';
 
-const Service = ({ workOrderId }) => {
+const Service = ({ workOrderId, isAllowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
+  const {state: {user: {user}}} = useData()
   const [serviceSteps, setServiceSteps] = useState(null);
   const [disabledServicesOrder, setDisabledServicesOrder] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
@@ -36,6 +38,8 @@ const Service = ({ workOrderId }) => {
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
+
+  const allowedToEdit = isAllowedToEdit || Boolean(selectedService?.assignedUsers?.find((u:any) => u?._id === user?._id))
 
   useEffect(() => {
     fetchService();
@@ -240,7 +244,7 @@ const Service = ({ workOrderId }) => {
                   </Box>
                   {serviceSteps?.length > 0 && (
                     <Box marginX={2}>
-                      <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                      <Button disabled={isAllowedToEdit} variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
                         <GrDrag fontSize="small" color="primary" className="mr-1" />
                         Arrange
                       </Button>
@@ -349,6 +353,7 @@ const Service = ({ workOrderId }) => {
                                     size="small"
                                     color="primary"
                                     aria-label="delete"
+                                    disabled={!allowedToEdit}
                                     onClick={(event) => {
                                       handleOpenMenu(event);
                                       setSelectedService(data);
@@ -454,6 +459,7 @@ const Service = ({ workOrderId }) => {
                     selectedServiceStatus={selectedService.status}
                     updateServiceStatus={updateServiceStatus}
                     handleAddService={handleAddService}
+                    isAllowedToEdit={allowedToEdit}
                   />
                 ) : (
                   <Quotation />

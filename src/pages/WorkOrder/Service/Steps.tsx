@@ -95,7 +95,8 @@ const Service = ({
   handleAddService,
   serviceSteps,
   selectedServiceStatus,
-  updateServiceStatus
+  updateServiceStatus,
+  isAllowedToEdit
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -268,6 +269,7 @@ const Service = ({
                           variant="outlined"
                           color="secondary"
                           size="small"
+                          disabled={!isAllowedToEdit}
                           onClick={() => {
                             if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) { updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress) }
                             handleStartEnd('start', step._id);
@@ -396,6 +398,7 @@ const Service = ({
                               variant="contained"
                               color="primary"
                               type="submit"
+                              disabled={!isAllowedToEdit}
                               onClick={(e) => {
                                 e.preventDefault();
                                 // handleScroll(errors);

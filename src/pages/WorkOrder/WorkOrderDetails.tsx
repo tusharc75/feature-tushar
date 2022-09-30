@@ -97,7 +97,6 @@ const WorkOrderDetails = () => {
       .then(({ data: { data } }) => {
         setWorkOrderData({ ...data });
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        console.log(isAllowedToEdit)
         setAllowedToEdit(isAllowedToEdit);
         if (permissions?.workOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
@@ -195,7 +194,7 @@ const WorkOrderDetails = () => {
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
             <Service
-              workOrderId={id} />
+              workOrderId={id} isAllowedToEdit={permissions?.workOrder?.isUpdate && allowedToEdit} />
           </TabPanel>
           <TabPanel value={tabValue} index={2}>
             <Consumables
