@@ -184,7 +184,7 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
   }, [mobScreen]);
 
   const stylesForEveryTab = (selectedService, data) => {
-    if (data?.type !== 'service' || data?.order > disabledServicesOrder) {
+    if (data?.type !== 'service' || (data?.order > disabledServicesOrder && allowedToEdit)) {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
@@ -283,7 +283,7 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
                         }}
                         p={2}
                         onClick={() => {
-                          if (!(data?.type !== 'service' || data?.order > disabledServicesOrder)) {
+                          if (!(data?.type !== 'service' || (data?.order > disabledServicesOrder && allowedToEdit))) {
                             setSelectedService(data);
                           }
                         }}
@@ -347,7 +347,7 @@ const Service = ({ workOrderId, isAllowedToEdit }) => {
                           </Grid>
                           {!isColapsed && (
                             <>
-                              {!(data?.type !== 'service' || data?.order > disabledServicesOrder) && (
+                              {!(data?.type !== 'service' || (data?.order > disabledServicesOrder && allowedToEdit)) && (
                                 <Grid item xs={2} container justify="flex-end">
                                   <IconButton
                                     size="small"
