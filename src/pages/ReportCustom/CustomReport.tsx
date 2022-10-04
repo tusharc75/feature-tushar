@@ -222,7 +222,7 @@ const Report = () => {
   const getFilter = (isExport = false) => {
     let filterQuery = `page=${page}&`;
     if (!isExport) {
-      filterQuery = `limit=${limit}&`;
+      filterQuery = `${filterQuery}limit=${limit}&`;
     }
     if (sorting.length > 0) {
       filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
