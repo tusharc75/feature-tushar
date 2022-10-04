@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
+import { QUOTATION_STATUS, repairOrder, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -39,10 +39,13 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
+  const [quotationData, setQuotationData] = useState(null);
+  const [currentVersion, setCurrentVersion] = useState(null);
 
   useEffect(() => {
     fetchService();
     getServiceData();
+    fetchQuotationData();
   }, []);
 
   const fetchService = () => {
@@ -91,6 +94,23 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       .get(`${workOrder.api}/${workOrderId}/steps-data`)
       .then(({ data: { data } }) => {
         setServiceData(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchQuotationData = (versionNumber = null) => {
+    axiosInstance()
+      .get(`${routes.workOrder.path}/${workOrderId}`)
+      .then(({ data: { data } }) => {
+        axiosInstance()
+          .get(`${repairOrder.api}/${data?.repairOrder?.optionValue}/quotation`)
+          .then(({ data: { data } }) => {
+            setQuotationData(data)
+            let keys = Object.keys(data.versions);
+            setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
+          })
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -186,7 +206,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const isAllowedToServiceEdit = (allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?._id === user?._id))
 
   const stylesForEveryTab = (selectedService, data) => {
-    if (data?.type !== 'service' || (data?.order > disabledServicesOrder)) {
+    if (data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer)) {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
@@ -278,14 +298,14 @@ const Service = ({ workOrderId, allowedToEdit }) => {
 
                   return (
                     <Grid item xs={12}>
-                      <Box
+                      {data?.type === 'service' ? <Box
                         style={{
                           ...style,
                           transition: '.3s'
                         }}
                         p={2}
                         onClick={() => {
-                          if (!(data?.type !== 'service' || (data?.order > disabledServicesOrder))) {
+                          if (!(data?.type !== 'service' || (data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer)))) {
                             setSelectedService(data);
                           }
                         }}
@@ -349,7 +369,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                           </Grid>
                           {!isColapsed && (
                             <>
-                              {!(data?.type !== 'service' || (data?.order > disabledServicesOrder)) && (
+                              {!(data?.type !== 'service' || (data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.versions[currentVersion]?.status !== QUOTATION_STATUS.acceptByCustomer))) && (
                                 <Grid item xs={2} container justify="flex-end">
                                   <IconButton
                                     size="small"
@@ -368,7 +388,26 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                             </>
                           )}
                         </Grid>
-                      </Box>
+                      </Box> :
+                        <Grid container>
+                          <Grid item xs={10}>
+                            <Box display="flex" sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
+                              <Box ml={'10px'}>
+                                <Typography>{quotationData?.quotationNumber}</Typography>
+                              </Box>
+                              <Box ml={1}>
+                                <Chip label={data?.serviceName} variant="outlined" color="primary" />
+                              </Box>
+                              <Box ml={1}>
+                                <Chip label={`Status : ${quotationData?.versions[currentVersion]?.status}`} variant="outlined" color="primary" />
+                              </Box>
+                              <Box ml={1}>
+                                <Chip label={`Version No. : ${currentVersion}`} variant="outlined" color="primary" />
+                              </Box>
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      }
                     </Grid>
                   );
                 })}

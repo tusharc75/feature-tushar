@@ -27,6 +27,7 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -463,6 +464,8 @@ const Service = ({
         />
       )}
     </Box>
-  ) : null;
+  ) : <Box p={2} height={500} bgcolor="white">
+    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+  </Box>;
 };
 export default Service;
