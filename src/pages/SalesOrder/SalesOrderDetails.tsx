@@ -31,6 +31,7 @@ import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
 import { camelCase } from 'lodash';
+import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -62,6 +63,7 @@ const SalesOrderDetails = () => {
   const [statusOptions, setStatusOptions] = useState([])
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -346,22 +348,23 @@ const SalesOrderDetails = () => {
                       setCurrentStep={setCurrentStep}
                       isStepEnded={["Invoiced", "Closed"].includes(salesOrderData?.status)}
                     />
-                    {currentStep === 0 && salesOrderData && (
-                      <Productpackage
-                        salesOrderData={salesOrderData}
-                        setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        showActivity={showActivity}
-                      />
-                    )}
-                    {currentStep === 1 && salesOrderData &&
-                      <AdditionalCost
-                        salesOrderData={salesOrderData}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-2`}
-                      />}
-                    {/* {currentStep === 2 && salesOrderData && (
+                    <ContentFullScreen title={salesOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                      {currentStep === 0 && salesOrderData && (
+                        <Productpackage
+                          salesOrderData={salesOrderData}
+                          setNextStep={setNextStep}
+                          currencySymbol={currencySymbol}
+                          renderedFrom={`${renderedFrom}_grid-1`}
+                          showActivity={showActivity}
+                          stepFullScreen={stepFullScreen}
+                        />)}
+                      {currentStep === 1 && salesOrderData &&
+                        <AdditionalCost
+                          salesOrderData={salesOrderData}
+                          setNextStep={setNextStep}
+                          renderedFrom={`${renderedFrom}_grid-2`}
+                        />}
+                      {/* {currentStep === 2 && salesOrderData && (
                       <SerializedAsset
                         salesOrderData={salesOrderData}
                         setNextStep={setNextStep}
@@ -381,16 +384,17 @@ const SalesOrderDetails = () => {
                         renderedFrom={`${renderedFrom}_grid-4`}  
                       />
                     )} */}
-                    {(currentStep === 2) && salesOrderData && (
-                      <Invoice
-                        salesOrderData={salesOrderData}
-                        setNextStep={setNextStep}
-                        fetchSalesOrderData={fetchSalesOrderData}
-                        updateJobStatus={updateJobStatus}
-                        statusOptions={statusOptions}
-                        renderedFrom={`${renderedFrom}_grid-5`}
-                      />
-                    )}
+                      {(currentStep === 2) && salesOrderData && (
+                        <Invoice
+                          salesOrderData={salesOrderData}
+                          setNextStep={setNextStep}
+                          fetchSalesOrderData={fetchSalesOrderData}
+                          updateJobStatus={updateJobStatus}
+                          statusOptions={statusOptions}
+                          renderedFrom={`${renderedFrom}_grid-5`}
+                        />
+                      )}
+                    </ContentFullScreen>
                   </Paper>
                 </TabPanel>
 

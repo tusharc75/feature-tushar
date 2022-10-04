@@ -97,7 +97,7 @@ const WorkOrderDetails = () => {
       .then(({ data: { data } }) => {
         setWorkOrderData({ ...data });
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        setAllowedToEdit(isAllowedToEdit);
+        setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
         if (permissions?.workOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -148,7 +148,7 @@ const WorkOrderDetails = () => {
         <Paper>
           {workOrderData ? (
             <DetailsPageHeader heading={workOrderData?.workOrderNumber} mainPoints={null} showHeading={true}>
-              {permissions?.workOrder?.isUpdate && (
+              {permissions?.workOrder?.isUpdate && allowedToEdit && (
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   color="primary"
@@ -160,7 +160,7 @@ const WorkOrderDetails = () => {
                   {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.workOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.workOrder?.isDelete && allowedToEdit && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </DetailsPageHeader>
           ) : (
             <Skeleton variant="text" width="150px" height="40px" />
@@ -194,10 +194,12 @@ const WorkOrderDetails = () => {
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
             <Service
-              workOrderId={id} />
+              workOrderId={id}
+              allowedToEdit={allowedToEdit} />
           </TabPanel>
           <TabPanel value={tabValue} index={2}>
             <Consumables
+              allowedToEdit={allowedToEdit}
               workOrderId={id}
             />
           </TabPanel>

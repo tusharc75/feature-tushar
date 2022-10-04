@@ -16,7 +16,7 @@ import { Button } from "@material-ui/core";
 import { isMobile, isTablet } from "react-device-detect";
 import ConsumablesDialog from "./ConsumablesDialog";
 
-const Consumables = ({ workOrderId }) => {
+const Consumables = ({ workOrderId, allowedToEdit }) => {
 
     let renderedFrom = camelCase(routes?.workOrder.title + "_consumables")
 
@@ -62,14 +62,14 @@ const Consumables = ({ workOrderId }) => {
 
     return (<>
         <Box p={1}>
-            <Button
+           {allowedToEdit && <Button
                 variant={'contained'}
                 color="primary"
                 size="small"
                 onClick={() => setConsumablesDialog(true)}
             >
                 Add Consumables
-            </Button>
+            </Button>}
         </Box>
         <Grid container spacing={2}>
             <Grid item xs={12} md={12} sm={12} >
