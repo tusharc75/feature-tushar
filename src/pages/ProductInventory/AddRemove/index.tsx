@@ -66,7 +66,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
           ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
           : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: values['serialNumbers'] })),
         warehouse: warehouse,
-        receiveDate: values.receiveDate,
+        receiveDate: values.customDate,
         comment: values.comment
       };
       axiosInstance()
@@ -92,6 +92,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: [] }))
             : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: serialNumberIds.map((item) => item?._id) })),
         warehouse: warehouse,
+        customDate: values.customDate,
         comment: values.comment
       };
       axiosInstance()
@@ -207,7 +208,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
           <CircularProgress color="inherit" />
         </Box>
       ) : (
-        <Formik initialValues={{ qty: 1, price: 0, comment: '', serialNumbers: [], receiveDate: new Date() }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+        <Formik initialValues={{ qty: 1, price: 0, comment: '', serialNumbers: [], customDate: new Date() }} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -262,25 +263,27 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                           setFieldValue('price', e.target.value);
                         }}
                       />
-                      <Field
-                        fullWidth
-                        label='Received Date'
-                        variant="inline"
-                        inputVariant="outlined"
-                        autoOk
-                        size="small"
-                        margin="dense"
-                        component={KeyboardDatePicker}
-                        name="receiveDate"
-                        placeholder="Receive Date"
-                        value={values.receiveDate}
-                        format={dateFormat}
-                        maxDate={new Date()}
-                        onChange={(value) => {
-                          setFieldValue('receiveDate', value);
-                        }}
-                      />
                     </Box> : null}
+                  <Box m={1}>
+                    <Field
+                      fullWidth
+                      label='Custom Date'
+                      variant="inline"
+                      inputVariant="outlined"
+                      autoOk
+                      size="small"
+                      margin="dense"
+                      component={KeyboardDatePicker}
+                      name="customDate"
+                      placeholder={type === 'add' ? "Receive Date" : "Remove Date"}
+                      value={values.customDate}
+                      format={dateFormat}
+                      maxDate={new Date()}
+                      onChange={(value) => {
+                        setFieldValue('customDate', value);
+                      }}
+                    />
+                  </Box>
                   <Box m={1}>
                     <Field
                       component={TextFieldFormik}

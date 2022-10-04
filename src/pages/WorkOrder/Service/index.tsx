@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
+import { QUOTATION_STATUS, repairOrder, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -39,10 +39,12 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
+  const [quotationData, setQuotationData] = useState(null);
 
   useEffect(() => {
     fetchService();
     getServiceData();
+    fetchQuotationData();
   }, []);
 
   const fetchService = () => {
@@ -91,6 +93,27 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       .get(`${workOrder.api}/${workOrderId}/steps-data`)
       .then(({ data: { data } }) => {
         setServiceData(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchQuotationData = () => {
+    axiosInstance()
+      .get(`${routes.workOrder.path}/${workOrderId}`)
+      .then(({ data: { data } }) => {
+        axiosInstance()
+          .get(`${repairOrder.api}/${data?.repairOrder?.optionValue}/quotation`)
+          .then(({ data: { data } }) => {
+            let keys = Object.keys(data.versions);
+            if (keys?.length) {
+              const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
+              if ([QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer]?.includes(status)) {
+                setQuotationData({ quotationNumber: data?.quotationNumber, status: status })
+              }
+            }
+          })
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -186,7 +209,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const isAllowedToServiceEdit = (allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?._id === user?._id))
 
   const stylesForEveryTab = (selectedService, data) => {
-    if (data?.type !== 'service' || (data?.order > disabledServicesOrder)) {
+    if (data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)) {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
@@ -275,9 +298,8 @@ const Service = ({ workOrderId, allowedToEdit }) => {
               >
                 {serviceSteps?.map((data, index) => {
                   const style = stylesForEveryTab(selectedService, data);
-
                   return (
-                    <Grid item xs={12}>
+                    <Grid item xs={12} key={index}>
                       <Box
                         style={{
                           ...style,
@@ -285,7 +307,8 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                         }}
                         p={2}
                         onClick={() => {
-                          if (!(data?.type !== 'service' || (data?.order > disabledServicesOrder))) {
+                          if (!(data?.type !== 'service' ||
+                            (data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)))) {
                             setSelectedService(data);
                           }
                         }}
@@ -343,13 +366,18 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                                       </HtmlTooltip>
                                     </Box>
                                   )}
+                                  {(data?.type === 'quotation' && quotationData) &&
+                                    <Box ml={1}>
+                                      <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
+                                    </Box>
+                                  }
                                 </>
                               )}
                             </Box>
                           </Grid>
                           {!isColapsed && (
                             <>
-                              {!(data?.type !== 'service' || (data?.order > disabledServicesOrder)) && (
+                              {!(data?.type !== 'service' || (data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer))) && (
                                 <Grid item xs={2} container justify="flex-end">
                                   <IconButton
                                     size="small"
@@ -375,68 +403,70 @@ const Service = ({ workOrderId, allowedToEdit }) => {
               </Grid>
             </Box>
           </Grid>
-          {anchorEl && (
-            <Menu
-              id="simple-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleCloseMenu}
-            >
-              <MenuItem
-                disabled={!allowedToEdit}
-                onClick={() => {
-                  setUserAssignDialog(true);
-                  setAnchorEl(null);
-                }}
+          {
+            anchorEl && (
+              <Menu
+                id="simple-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={handleCloseMenu}
               >
-                Assign Users
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setServiceDialog({ open: true, uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
-                  setAnchorEl(null);
-                }}
-              >
-                Add Services
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setConsumablesDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Consume
-              </MenuItem>
-              <MenuItem
-                disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.inProgress}
-                onClick={() => {
-                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete);
-                  setAnchorEl(null);
-                }}
-              >
-                Complete
-              </MenuItem>
-              <MenuItem
-                disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.inProgress}
-                onClick={() => {
-                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.fail);
-                  setAnchorEl(null);
-                }}
-              >
-                Fail
-              </MenuItem>
-              <MenuItem
-                disabled={!allowedToEdit}
-                onClick={() => {
-                  handleRemoveService(selectedService?.uniqueId);
-                  setAnchorEl(null);
-                }}
-              >
-                Remove
-              </MenuItem>
-            </Menu>
-          )}
+                <MenuItem
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setUserAssignDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Assign Users
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setServiceDialog({ open: true, uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
+                    setAnchorEl(null);
+                  }}
+                >
+                  Add Services
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setConsumablesDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Consume
+                </MenuItem>
+                <MenuItem
+                  disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.inProgress}
+                  onClick={() => {
+                    updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Complete
+                </MenuItem>
+                <MenuItem
+                  disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.inProgress}
+                  onClick={() => {
+                    updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.fail);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Fail
+                </MenuItem>
+                <MenuItem
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    handleRemoveService(selectedService?.uniqueId);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Remove
+                </MenuItem>
+              </Menu>
+            )
+          }
           <Grid
             item
             xs={12}
@@ -469,72 +499,80 @@ const Service = ({ workOrderId, allowedToEdit }) => {
               </Box>
             )}
           </Grid>
-        </Grid>
+        </Grid >
       ) : (
         <Box p={2} height={500} bgcolor="white">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {userAssignDialog && (
-        <AssignUserDialog
-          workOrderData={[{
-            "uniqueId": selectedService?.uniqueId,
-            "workOrderId": workOrderId
-          }]}
-          assignedUsers={selectedService?.assignedUsers}
-          handleClose={() => {
-            setUserAssignDialog(false);
-          }}
-          handleSucess={() => {
-            setUserAssignDialog(false);
-            fetchService();
-          }}
-        />
-      )}
-      {serviceDialog.open && (
-        <AssignServiceDialog
-          reference="workorder"
-          referenceId={workOrderId}
-          handleClose={() => setServiceDialog({ open: false, uniqueId: null, preWork: null })}
-          ids={serviceSteps?.filter((e) => e.type === 'service')?.map((e) => e._id)}
-          onSuccess={(data) => {
-            handleAddService(
-              data?.map((e) => e.service),
-              serviceDialog.uniqueId
-            );
-            setServiceDialog({ open: false, uniqueId: null, preWork: null });
-          }}
-          extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
-        />
-      )}
-      {arrangeView && (
-        <ArrangeView
-          data={
-            serviceSteps
-              ?.filter((e) => e.type === 'service')
-              ?.map((d) => {
-                return { _id: d?.uniqueId, name: d?.serviceName, order: d?.order, preWork: d?.preWork };
-              }) || []
-          }
-          title={'Arrange'}
-          handleClose={() => setArrangeView(false)}
-          handleSubmit={handleArrangeUpdate}
-          loading={false}
-        />
-      )}
-      {consumablesDialog && (
-        <ConsumablesDialog
-          onSuccess={() => {
-            setConsumablesDialog(false);
-          }}
-          handleClose={() => {
-            setConsumablesDialog(false);
-          }}
-          workOrderId={workOrderId}
-          from={'service'}
-        />
-      )}
-    </Box>
+      {
+        userAssignDialog && (
+          <AssignUserDialog
+            workOrderData={[{
+              "uniqueId": selectedService?.uniqueId,
+              "workOrderId": workOrderId
+            }]}
+            assignedUsers={selectedService?.assignedUsers}
+            handleClose={() => {
+              setUserAssignDialog(false);
+            }}
+            handleSucess={() => {
+              setUserAssignDialog(false);
+              fetchService();
+            }}
+          />
+        )
+      }
+      {
+        serviceDialog.open && (
+          <AssignServiceDialog
+            reference="workorder"
+            referenceId={workOrderId}
+            handleClose={() => setServiceDialog({ open: false, uniqueId: null, preWork: null })}
+            ids={serviceSteps?.filter((e) => e.type === 'service')?.map((e) => e._id)}
+            onSuccess={(data) => {
+              handleAddService(
+                data?.map((e) => e.service),
+                serviceDialog.uniqueId
+              );
+              setServiceDialog({ open: false, uniqueId: null, preWork: null });
+            }}
+            extraStaticFilter={serviceDialog.preWork === null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
+          />
+        )
+      }
+      {
+        arrangeView && (
+          <ArrangeView
+            data={
+              serviceSteps
+                ?.filter((e) => e.type === 'service')
+                ?.map((d) => {
+                  return { _id: d?.uniqueId, name: d?.serviceName, order: d?.order, preWork: d?.preWork };
+                }) || []
+            }
+            title={'Arrange'}
+            handleClose={() => setArrangeView(false)}
+            handleSubmit={handleArrangeUpdate}
+            loading={false}
+          />
+        )
+      }
+      {
+        consumablesDialog && (
+          <ConsumablesDialog
+            onSuccess={() => {
+              setConsumablesDialog(false);
+            }}
+            handleClose={() => {
+              setConsumablesDialog(false);
+            }}
+            workOrderId={workOrderId}
+            from={'service'}
+          />
+        )
+      }
+    </Box >
   );
 };
 export default Service;
