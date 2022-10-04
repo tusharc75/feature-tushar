@@ -6,7 +6,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, arrayToDropwdownOption } from "..//../../constants/helpers";
+import { CustomDialogTransition, arrayToDropwdownOption } from "../../../constants/helpers";
 import { Formik, Form } from "formik";
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton'
 import CustomButton from '../../../components/Helpers/CustomButton'
@@ -15,8 +15,8 @@ import FormTypes from "../../../components/Helpers/FormTypes";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
-import { fetch_salesOrder_product_fields } from '../../../components/SalesOrder/helper';
 import moment from "moment";
+import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 
 
 interface EditDialogProps {
@@ -43,6 +43,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
     selectedProducts,
     isBulkedit
   }) => {
+
 
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -105,7 +106,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
       if (rowData?.[`${rowData.type}Detail`]?.unit) {
         unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
       }
-      if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
+      if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       data.forEach(element => {
@@ -179,7 +180,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
     })
   }
 
-  const sumOnParent = (packages, product) => {
+  const sumOnParent = (parent, child) => {
     const resetFields = []
     initialData.fields.forEach((element) => {
       if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
@@ -208,17 +209,17 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
     const sumValues: any = {}
     resetFields.forEach((_field: any) => {
       sumValues[_field.fieldName] = 0;
-      product.forEach(element => {
+      child.forEach(element => {
         sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
       });
     });
-    packages.forEach((row) => {
+    parent.forEach((row) => {
       resetFields.forEach((ele) => {
         if (ele.type === "amount") {
           row[ele.fieldName] = sumValues[ele.fieldName];
         }
         else {
-          row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / product.length).toFixed(2));
+          row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / parent.length).toFixed(2));
         }
       })
     })
@@ -232,91 +233,51 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
         }
       }
       let rows: any = []
-      let priceData: any = []
-
-      if (values["unit"] || values["pricingMethod"]) {
-        const material: any = [];
-        selectedProducts.forEach(d => {
-          const element: any = {};
-          element.materialId = d.materialId;
-          element.type = d.type;
-          element.unit = values["unit"] || d.unit;
-          element.pricingMethod = values["pricingMethod"] || d.pricingMethod;
-          element.qty = d.qty;
-          material.push(element);
-        });
-        priceData = await calculatePrice(material);
-      }
-
       selectedProducts.forEach(element => {
 
-        const rateResult = priceData?.filter((e) => e.materialId === element.materialId &&
-          e.materialType === element.type && e.unit === (values["unit"] || element.unit) && e.pricingMethod === (values["pricingMethod"] || element.pricingMethod))
-
-        if (rateResult.length && rateResult[0].mrp) {
-          const priceFieldName = `price_${salesOrderData?.currency?.toLowerCase()}`
-          values[priceFieldName] = rateResult[0].mrp;
-        }
-
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-        if (element.type === "product" && element.parentId === null) {
-          rows.push({ ...element, ...calValues })
-        }
-        else if (element.type === "package") {
-          rows.push({ ...element, ...calValues })
-          const product = material.filter((e) => e.parentId === element._id)
-          resetValueZero(product)
-          rows = [...rows, ...product]
-        }
-      });
+        rows.push({ ...element, ...calValues })
 
-      //Code for Bulk Update Only Product in Packages
-      let packageProducts = selectedProducts.filter((ele) => ele.parentId !== null && !selectedProducts.some(f => f._id === ele.parentId));
-      if (packageProducts.length) {
-        const packageIds = uniq(map(packageProducts, 'parentId'))
-        packageIds.forEach((_packageId) => {
-          const packages: any = material.filter((e) => e._id === _packageId)
-          const product: any = material.filter((e) => e.parentId === _packageId)
-          product.forEach((element) => {
-            if (packageProducts.filter((e) => element._id === e._id).length) {
-              const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
-              rows.push({ ...element, ...calValues })
-              for (var key in calValues) {
-                element[key] = calValues[key];
+        if (element.parentId) {
+          const parent: any = material.filter((e) => e._id === element.parentId)
+          const sameParent: any = material.filter((e) => e.parentId === element.parentId)
+          sameParent.forEach((element) => {
+            if (element._id === element._id) {
+              for (var key in values) {
+                element[key] = values[key];
               }
             }
           })
-          sumOnParent(packages, product)
-          rows = [...rows, ...packages]
-        })
-      }
+
+          sumOnParent(parent, sameParent)
+          rows = [...rows, ...parent]
+        }
+      });
       handleSaveData(rows)
     }
     else {
-      if (rowData.type === "package" && !showConfirmationDialog) {
+      if (rowData.parentId !== null && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       }
       else {
         let rows: any = [{ ...rowData, ...values }]
-        if (rowData.type === "package") {
-          const product = material.filter((e) => e.parentId === rowData._id)
-          resetValueZero(product)
-          rows = [...rows, ...product]
-        }
-        else if (rowData.type === "product" && rowData.parentId) {
-          const packages: any = material.filter((e) => e._id === rowData.parentId)
-          const product: any = material.filter((e) => e.parentId === rowData.parentId)
-          product.forEach((element) => {
+        if (rowData.parentId) {
+          const parent: any = material.filter((e) => e._id === rowData.parentId)
+          const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
+          sameParent.forEach((element) => {
             if (element._id === rowData._id) {
               for (var key in values) {
                 element[key] = values[key];
               }
             }
           })
-          sumOnParent(packages, product)
-          rows = [...rows, ...packages]
+
+          sumOnParent(parent, sameParent)
+          rows = [...rows, ...parent]
         }
-        handleSaveData(rows)
+        const child = material.filter((e) => e.parentId === rowData._id)
+        resetValueZero(child)
+        handleSaveData([...rows, ...child])
         setShowConfirmationDialog(false);
       }
     }
@@ -544,7 +505,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = (
             {
               showConfirmationDialog && <ConfirmationDialog
                 open={showConfirmationDialog}
-                message="Would you prefer to override the product-level price configuration?"
+                message="Would you prefer to override the parent-level price configuration?"
                 onOk={() => {
                   submitForm()
                 }}
