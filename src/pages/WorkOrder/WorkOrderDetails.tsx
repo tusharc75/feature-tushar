@@ -145,74 +145,68 @@ const WorkOrderDetails = () => {
         <CustomBreadCrumbs routes={[routes.workOrder, { title: workOrderData?.workOrderNumber }]} />
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <Paper>
-          {workOrderData ? (
-            <DetailsPageHeader heading={workOrderData?.workOrderNumber} mainPoints={null} showHeading={true}>
-              {permissions?.workOrder?.isUpdate && allowedToEdit && (
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  color="primary"
-                  size="small"
-                  onClick={() => setOpenUpdateDialog(true)}
-                  className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                >
-                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                </Button>
-              )}
-              {permissions?.workOrder?.isDelete && allowedToEdit && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            </DetailsPageHeader>
-          ) : (
-            <Skeleton variant="text" width="150px" height="40px" />
-          )}
-          <Tabs
-            className="quote-tab"
-            value={tabValue}
-            onChange={handleMainTabChange}
-            textColor="primary"
-            TabIndicatorProps={{
-              style: {
-                display: 'none'
-              }
-            }}
-          >
-            <Tab label="Header" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-            <Tab label="Services" value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-            <Tab label="Consumables" value={2} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-            <Tab label="Views" value={3} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-          </Tabs>
-          <TabPanel value={tabValue} index={0}>
-            <Box>
-              {workOrderData && workOrderFields.length ? (
-                <DetailsPage data={workOrderData} fields={workOrderFields} />
-              ) : (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              )}
-            </Box>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <Service
-              workOrderId={id}
-              allowedToEdit={allowedToEdit} />
-          </TabPanel>
-          <TabPanel value={tabValue} index={2}>
-            <Consumables
-              allowedToEdit={allowedToEdit}
-              workOrderId={id}
-            />
-          </TabPanel>
-          <TabPanel value={tabValue} index={3}>
-            <Box>
-              <View
-                workOrderName={workOrderData?.workOrderNumber || ''}
-                workOrderId={id}
-                workOrderStatus={workOrderData?.status} />
-            </Box>
-          </TabPanel>
-        </Paper>
-        <Box my={1} />
+        <div>
+          <Paper>
+            {workOrderData ? (
+              <DetailsPageHeader heading={workOrderData?.workOrderNumber} mainPoints={null} showHeading={true}>
+                {permissions?.workOrder?.isUpdate && allowedToEdit && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    color="primary"
+                    size="small"
+                    onClick={() => setOpenUpdateDialog(true)}
+                    className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                  >
+                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                  </Button>
+                )}
+                {permissions?.workOrder?.isDelete && allowedToEdit && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              </DetailsPageHeader>
+            ) : (
+              <Skeleton variant="text" width="150px" height="40px" />
+            )}
+            <Tabs
+              className="quote-tab"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              textColor="primary"
+              TabIndicatorProps={{
+                style: {
+                  display: 'none'
+                }
+              }}
+            >
+              <Tab label="Header" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              <Tab label="Services" value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              <Tab label="Consumables" value={2} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              <Tab label="Views" value={3} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+            </Tabs>
+            <TabPanel value={tabValue} index={0}>
+              <Box>
+                {workOrderData && workOrderFields.length ? (
+                  <DetailsPage data={workOrderData} fields={workOrderFields} />
+                ) : (
+                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                )}
+              </Box>
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <Service workOrderId={id} allowedToEdit={allowedToEdit} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={2}>
+              <Consumables allowedToEdit={allowedToEdit} workOrderId={id} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={3}>
+              <Box>
+                <View workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
+              </Box>
+            </TabPanel>
+          </Paper>
+          <Box my={1} />
+        </div>
         <div className="position-relative">
           <Paper>
             {!isSmallScreen && (
@@ -240,7 +234,7 @@ const WorkOrderDetails = () => {
                             access: true
                           }
                         ]}
-                        handleActivityRefresh={() => { }}
+                        handleActivityRefresh={() => {}}
                         emails={[]}
                       />
                     </div>
