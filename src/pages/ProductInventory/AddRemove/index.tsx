@@ -34,6 +34,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
+  const [availableQtyOnRemoveDate, setAvailableQtyOnRemoveDate] = useState(null);
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
@@ -125,7 +126,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
           return obj.availableInventory < min ? obj.availableInventory : min;
         }, Infinity);
       }
-      if (parseInt(values.qty) > validateQty) {
+      let maxQty = availableQtyOnRemoveDate !== null ? Math.min(validateQty, availableQtyOnRemoveDate) : validateQty
+      if (parseInt(values.qty) > maxQty) {
         errors['qty'] = 'qty not more than inventory';
       }
     }
@@ -226,7 +228,10 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                   <List style={{ padding: 0 }}>
                     <ListItem key={product[0]?._id}>
                       {product?.length === 1 ? (
-                        <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${product[0]?.availableInventory}`} />
+                        <>
+                          <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${product[0]?.availableInventory}`} />
+                          <ListItemText secondary={availableQtyOnRemoveDate !== null ? `Inventory on Custom Date : ${availableQtyOnRemoveDate}` : ""} />
+                        </>
                       ) : (
                         <ListItemText primary={`${product?.length} Products`} />
                       )}
@@ -281,6 +286,16 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                       maxDate={new Date()}
                       onChange={(value) => {
                         setFieldValue('customDate', value);
+                        if (type === 'remove' && product.length === 1) {
+                          axiosInstance()
+                            .get(`${productInventory.api}/inventory-at-date?date=${value}&warehouse=${warehouse}&product=${product[0]._id}`)
+                            .then(({ data: { data } }) => {
+                              setAvailableQtyOnRemoveDate(data)
+                            })
+                            .catch((err) => {
+                              toastConfig.setToastConfig(err);
+                            });
+                        }
                       }}
                     />
                   </Box>
