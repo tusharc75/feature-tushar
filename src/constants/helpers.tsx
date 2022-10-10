@@ -839,14 +839,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
-    } else if (input.type === 'percent' || input.type === 'number') {
+    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
       schema[input.fieldName] = input.required ? number().required(`${input.fieldLabel} is required`).nullable() : number().nullable();
-    } else if (input.type === 'decimal') {
-      schema[input.fieldName] = input.required && input.isMinMaxValue ?
-        number().required(`${input.fieldLabel} is required`).min(input.minValue, `Allowed Minimum is ${input.minValue}`).max(input.maxValue, `Allowed Maximum is ${input.maxValue}`).nullable()
-        : input.required ? number().required(`${input.fieldLabel} is required`).nullable()
-          : input.isMinMaxValue ? number().min(input.minValue, `Allowed Minimum is ${input.minValue}`).max(input.maxValue, `Allowed Maximum is ${input.maxValue}`).nullable()
-            : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail

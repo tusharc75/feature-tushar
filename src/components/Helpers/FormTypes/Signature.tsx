@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react';
-import { Typography, Box, Avatar, CircularProgress, Button, IconButton, Dialog } from '@material-ui/core';
+import { Typography, Box, CircularProgress, Button, IconButton, Dialog } from '@material-ui/core';
 import { AddCircle, Delete, Info } from '@material-ui/icons';
 import SignaturePad from 'react-signature-canvas';
+import { FaSignature } from 'react-icons/fa';
 
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -53,10 +54,28 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
 
   return (
     <Fragment>
-      <Typography color="textSecondary">{label}</Typography>
-      <Box display="flex" flexDirection="row" mt={1}>
-        <Box position="relative">
-          <Avatar src={values[name]} style={{ width: 70, height: 70 }} alt="org_logo" />
+      <Typography style={{ color: '#656565', marginBottom: '12px', fontWeight: '500' }}>{label}</Typography>
+      <Box display="flex" flexDirection="row" mt={1} alignItems="center">
+        <Box
+          position="relative"
+          sx={{
+            width: 76,
+            height: 76,
+            border: '2px solid #a0a0a0',
+            borderRadius: '8px',
+            marginRight: '10px',
+            padding: '3px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {values[name] ? (
+            <img src={values[name]} style={{ maxWidth: 70, maxHeight: 70, width: '100%', height: 'auto' }} alt="Signature" />
+          ) : (
+            <FaSignature style={{ width: 70, height: 70, color: '#5b5b5b' }} />
+          )}
+
           {/* <Box display="flex" justifyContent="center" alignItems="center" position="absolute" top="0" right="0" width="100%" height="100%">
         {isImgUploading && (
           <>

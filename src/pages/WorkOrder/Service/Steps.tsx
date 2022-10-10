@@ -106,7 +106,7 @@ const Service = ({
   const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [] });
-
+  const isAllowedToServiceEdit = allowedToEdit && (selectedServiceStatus !== 'Complete' && selectedServiceStatus !== 'Fail')
   useEffect(() => {
     axiosInstance()
       .get(`${workOrder.api}/service/detail/${serviceId}`)
@@ -138,7 +138,7 @@ const Service = ({
 
   const getFields = (step) => {
     let stepData = null;
-    let fieldData = { fields: [], values: {} };
+    let fieldData = { fields: [], formsData: [], values: {} };
 
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
     let tempServiceData = serviceData.find((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && d.stepId === step?._id);
@@ -147,13 +147,18 @@ const Service = ({
       stepData = tempServiceData;
       if (step?.fields?.length) {
         fieldData = {
-          fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+          fields: fieldsDataForCreate,
+          formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           values: getObjKeysWithValues(tempServiceData, fieldsDataForCreate)
         };
       }
     } else {
       if (step?.fields?.length) {
-        fieldData = { fields: setFieldsInAscendingOrder(fieldsDataForCreate), values: getObjKeys('', fieldsDataForCreate) };
+        fieldData = {
+          fields: fieldsDataForCreate,
+          formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
+          values: getObjKeys('', fieldsDataForCreate)
+        };
       }
     }
     return { fieldData, stepData };
@@ -270,7 +275,7 @@ const Service = ({
                           variant="outlined"
                           color="secondary"
                           size="small"
-                          disabled={!allowedToEdit}
+                          disabled={!isAllowedToServiceEdit}
                           onClick={() => {
                             if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) { updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress) }
                             handleStartEnd('start', step._id);
@@ -327,8 +332,8 @@ const Service = ({
                       {({ values, errors, setFieldValue, touched, submitForm }) => (
                         <Fragment>
                           <Form autoComplete="off" autoCorrect="off" noValidate>
-                            {fieldData.fields.length > 0 &&
-                              fieldData.fields?.map((form, index1) => {
+                            {fieldData.formsData.length > 0 &&
+                              fieldData.formsData?.map((form, index1) => {
                                 return form?.name ? (
                                   <div key={index1}>
                                     <div className="detail-box-content">
@@ -399,7 +404,7 @@ const Service = ({
                               variant="contained"
                               color="primary"
                               type="submit"
-                              disabled={!allowedToEdit}
+                              disabled={!isAllowedToServiceEdit}
                               onClick={(e) => {
                                 e.preventDefault();
                                 // handleScroll(errors);
