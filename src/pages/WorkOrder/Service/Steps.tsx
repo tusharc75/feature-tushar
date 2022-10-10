@@ -106,7 +106,8 @@ const Service = ({
   const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [] });
-  const isAllowedToServiceEdit = allowedToEdit && (selectedServiceStatus !== 'Complete' && selectedServiceStatus !== 'Fail')
+  const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
+
   useEffect(() => {
     axiosInstance()
       .get(`${workOrder.api}/service/detail/${serviceId}`)
@@ -122,6 +123,7 @@ const Service = ({
           curStep = compltedSteps?.length - 1;
         }
         setCurrentStep(curStep);
+        setDisabledFieldSteps(serviceData.filter((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && ['Pass', 'Complete', 'Fail'].includes(d?.passFailStatus)).map(d => d.stepId))
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -275,7 +277,7 @@ const Service = ({
                           variant="outlined"
                           color="secondary"
                           size="small"
-                          disabled={!isAllowedToServiceEdit}
+                          disabled={!allowedToEdit}
                           onClick={() => {
                             if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) { updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress) }
                             handleStartEnd('start', step._id);
@@ -348,6 +350,7 @@ const Service = ({
                                               <FormTypes
                                                 {...field}
                                                 fieldData={field}
+                                                disabled={disabledFieldSteps.includes(step._id) || (Boolean(workOrderId) && field.disableOnEdit)}
                                                 values={values}
                                                 errors={errors}
                                                 touched={touched}
@@ -376,7 +379,7 @@ const Service = ({
                                     <FormTypes
                                       {...field}
                                       fieldData={field}
-                                      disabled={Boolean(workOrderId) && field.disableOnEdit}
+                                      disabled={disabledFieldSteps.includes(step._id) || (Boolean(workOrderId) && field.disableOnEdit)}
                                       isNew={Boolean(workOrderId)}
                                       values={values}
                                       errors={errors}
@@ -400,20 +403,32 @@ const Service = ({
                               })}
                           </Form>
                           <Box display="flex" justifyContent="flex-end">
-                            <CustomButton
+                            {disabledFieldSteps.includes(step._id) ? <CustomButton
                               variant="contained"
                               color="primary"
                               type="submit"
-                              disabled={!isAllowedToServiceEdit}
+                              disabled={!allowedToEdit}
                               onClick={(e) => {
-                                e.preventDefault();
-                                // handleScroll(errors);
-                                submitForm();
+                                setDisabledFieldSteps(disabledFieldSteps.filter(d => d !== step._id))
                               }}
                             >
                               {' '}
-                              Save
+                              Edit
                             </CustomButton>
+                              : <CustomButton
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                disabled={!allowedToEdit}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  // handleScroll(errors);
+                                  submitForm();
+                                }}
+                              >
+                                {' '}
+                                Save
+                              </CustomButton>}
                           </Box>
                         </Fragment>
                       )}
