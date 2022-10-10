@@ -1417,6 +1417,15 @@ const FormTypes = (props) => {
           readOnly: fieldData && fieldData.isUneditable ? true : false
         }}
       />
+      {rest?.isMinMaxValue && <Typography
+        variant="caption"
+        style={{
+          marginLeft: '4px',
+        }}
+        color={(values[name] > rest?.maxValue || values[name] < rest?.minValue) ? 'error' : 'secondary'}
+      >
+        {(values[name] > rest?.maxValue || values[name] < rest?.minValue) ? `${label} should be between ${rest?.minValue} and ${rest?.maxValue}` : `Allowed value between ${rest?.minValue} and ${rest?.maxValue}`}
+      </Typography>}
     </InfoLabel>
   ) : type === 'formula' ? (
     <InfoLabel info={tooltipMessage} isTooltip={isTooltip} warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip} warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}>
@@ -2056,17 +2065,17 @@ const FormTypes = (props) => {
       value={values[name]}
     />
   ) : type === 'signature' ?
-    <Signature 
-      label={label} 
-      values={values} 
-      name={name} 
-      touched={touched} 
-      errors={errors} 
-      isTooltip={isTooltip} 
-      tooltipMessage={tooltipMessage} 
+    <Signature
+      label={label}
+      values={values}
+      name={name}
+      touched={touched}
+      errors={errors}
+      isTooltip={isTooltip}
+      tooltipMessage={tooltipMessage}
       setFieldValue={setFieldValue}
     />
-  : null;
+    : null;
 };
 
 export default FormTypes;
