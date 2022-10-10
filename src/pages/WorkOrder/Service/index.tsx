@@ -23,6 +23,7 @@ import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import { useData } from 'src/StateProvider/Provider';
+import Logs from './Logs';
 
 const Service = ({ workOrderId, allowedToEdit }) => {
 
@@ -37,6 +38,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const [serviceDialog, setServiceDialog] = useState({ open: false, uniqueId: null, preWork: null });
   const [arrangeView, setArrangeView] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState(false);
+  const [logsDialog, setLogsDialog] = useState(false);
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [quotationData, setQuotationData] = useState(null);
@@ -464,6 +466,14 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                 >
                   Remove
                 </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setLogsDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Logs
+                </MenuItem>
               </Menu>
             )
           }
@@ -571,6 +581,13 @@ const Service = ({ workOrderId, allowedToEdit }) => {
             from={'service'}
           />
         )
+      }
+      {logsDialog &&
+        <Logs
+          workOrderId={workOrderId}
+          handleClose={() => {
+            setLogsDialog(false);
+          }} />
       }
     </Box >
   );

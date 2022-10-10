@@ -1424,7 +1424,7 @@ const FormTypes = (props) => {
         }}
         color={(values[name] > rest?.maxValue || values[name] < rest?.minValue) ? 'error' : 'secondary'}
       >
-        {(values[name] > rest?.maxValue || values[name] < rest?.minValue) ? `${label} should be between ${rest?.minValue} and ${rest?.maxValue}` : `Allowed value between ${rest?.minValue} and ${rest?.maxValue}`}
+        {(values[name] > rest?.maxValue || values[name] < rest?.minValue) ? `${label} should be between ${rest?.minValue} and ${rest?.maxValue}` : `Valid value`}
       </Typography>}
     </InfoLabel>
   ) : type === 'formula' ? (
@@ -1677,7 +1677,7 @@ const FormTypes = (props) => {
         <FormLabel component="legend">{label}</FormLabel>
         <RadioGroup aria-label="gender" name={name} value={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}>
           {options.map((opt) => (
-            <FormControlLabel key={opt.order} value={opt.optionLabel} control={<Radio />} label={opt.optionLabel} />
+            <FormControlLabel key={opt.order} value={opt.optionLabel} disabled={rest?.disabled} control={<Radio />} label={opt.optionLabel} />
           ))}
         </RadioGroup>
       </FormControl>
