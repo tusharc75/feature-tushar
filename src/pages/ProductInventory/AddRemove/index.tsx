@@ -28,6 +28,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { KeyboardDatePicker } from 'formik-material-ui-pickers';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
+import moment from 'moment';
 
 const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -228,10 +229,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                   <List style={{ padding: 0 }}>
                     <ListItem key={product[0]?._id}>
                       {product?.length === 1 ? (
-                        <>
-                          <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${product[0]?.availableInventory}`} />
-                          <ListItemText secondary={availableQtyOnRemoveDate !== null ? `Inventory on Custom Date : ${availableQtyOnRemoveDate}` : ""} />
-                        </>
+                        <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${product[0]?.availableInventory}`} />
                       ) : (
                         <ListItemText primary={`${product?.length} Products`} />
                       )}
@@ -287,17 +285,23 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
                       onChange={(value) => {
                         setFieldValue('customDate', value);
                         if (type === 'remove' && product.length === 1) {
-                          axiosInstance()
-                            .get(`${productInventory.api}/inventory-at-date?date=${value}&warehouse=${warehouse}&product=${product[0]._id}`)
-                            .then(({ data: { data } }) => {
-                              setAvailableQtyOnRemoveDate(data)
-                            })
-                            .catch((err) => {
-                              toastConfig.setToastConfig(err);
-                            });
+                          var date = moment(value);
+                          if (date.isValid()) {
+                            axiosInstance()
+                              .get(`${productInventory.api}/inventory-at-date?date=${value}&warehouse=${warehouse}&product=${product[0]._id}`)
+                              .then(({ data: { data } }) => {
+                                setAvailableQtyOnRemoveDate(data)
+                              })
+                              .catch((err) => {
+                                toastConfig.setToastConfig(err);
+                              });
+                          }
                         }
                       }}
                     />
+                    {availableQtyOnRemoveDate || availableQtyOnRemoveDate === 0 ?
+                      <Typography variant="caption" >{`Inventory on custom date : ${availableQtyOnRemoveDate}`}</Typography>
+                      : null}
                   </Box>
                   <Box m={1}>
                     <Field
