@@ -44,7 +44,8 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
           setStepDetails({
             stepName: data?.stepName, leadDay: data?.leadDay, isPassFail: data?.isPassFail,
             isFailAddon: data?.isFailAddon, failAddon: data?.failAddon, isPassAddon: data?.isPassAddon, passAddon: data?.passAddon,
-            isJumpStepPass: data?.isJumpStepPass, jumpStepsPass: data?.jumpStepsPass, isJumpStepFail: data?.isJumpStepFail, jumpStepsFail: data?.jumpStepsFail
+            isJumpStepPass: data?.isJumpStepPass, jumpStepsPass: data?.jumpStepsPass, isJumpStepFail: data?.isJumpStepFail, jumpStepsFail: data?.jumpStepsFail,
+            isQuoteRevisionOnFail: data?.isQuoteRevisionOnFail, isReturnStepOnFail: data?.isReturnStepOnFail, returnStepOnFail: data?.returnStepOnFail
           })
         })
         .catch((err) => {
@@ -53,7 +54,8 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
     else {
       setStepDetails({
         stepName: "", leadDay: 0, isPassFail: false, isFailAddon: false, failAddon: [], isPassAddon: false, passAddon: [],
-        isJumpStepPass: false, jumpStepsPass: [], isJumpStepFail: false, jumpStepsFail: []
+        isJumpStepPass: false, jumpStepsPass: [], isJumpStepFail: false, jumpStepsFail: [],
+        isQuoteRevisionOnFail: false, isReturnStepOnFail: false, returnStepOnFail: ""
       })
     }
   }, []);
@@ -345,6 +347,66 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                                     {...params}
                                     label="Jump Steps On Fail"
                                     name="jumpStepsFail"
+                                    variant="outlined"
+                                  />
+                                )}
+                              />}
+                          </Grid>
+                        </Grid>
+                      </Box>
+                      <Box pt={2}>
+                        <Grid container >
+                          <Grid item xs={6}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  name="isQuoteRevisionOnFail"
+                                  checked={values?.isQuoteRevisionOnFail}
+                                  onChange={(e) => {
+                                    setFieldValue('isQuoteRevisionOnFail', e.target.checked);
+                                  }}
+                                  color="primary"
+                                />
+                              }
+                              label="Quote Revision On Fail"
+                            />
+                          </Grid>
+                        </Grid>
+                      </Box>
+                      <Box pt={2}>
+                        <Grid container >
+                          <Grid item xs={6}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  name="isReturnStepOnFail"
+                                  checked={values?.isReturnStepOnFail}
+                                  onChange={(e) => {
+                                    setFieldValue('isReturnStepOnFail', e.target.checked);
+                                  }}
+                                  color="primary"
+                                />
+                              }
+                              label="Return Step On Fail"
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            {values['isReturnStepOnFail'] &&
+                              <Autocomplete
+                                options={stepOption}
+                                fullWidth
+                                size="small"
+                                value={values?.returnStepOnFail ? stepOption?.find((data) => data?.optionValue === values?.returnStepOnFail) : ""}
+                                getOptionLabel={(option) => option.optionLabel}
+                                getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                onChange={(_, newVal: any) => {
+                                  setFieldValue('returnStepOnFail', newVal ? newVal?.optionValue : "");
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Return Step On Fail"
+                                    name="returnStepOnFail"
                                     variant="outlined"
                                   />
                                 )}
