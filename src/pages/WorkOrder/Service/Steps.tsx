@@ -106,7 +106,7 @@ const Service = ({
   const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [] });
-
+  const isAllowedToServiceEdit = allowedToEdit && (selectedServiceStatus !== 'Complete' && selectedServiceStatus !== 'Fail')
   useEffect(() => {
     axiosInstance()
       .get(`${workOrder.api}/service/detail/${serviceId}`)
@@ -275,7 +275,7 @@ const Service = ({
                           variant="outlined"
                           color="secondary"
                           size="small"
-                          disabled={!allowedToEdit}
+                          disabled={!isAllowedToServiceEdit}
                           onClick={() => {
                             if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) { updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress) }
                             handleStartEnd('start', step._id);
@@ -404,7 +404,7 @@ const Service = ({
                               variant="contained"
                               color="primary"
                               type="submit"
-                              disabled={!allowedToEdit}
+                              disabled={!isAllowedToServiceEdit}
                               onClick={(e) => {
                                 e.preventDefault();
                                 // handleScroll(errors);
