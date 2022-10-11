@@ -1,15 +1,12 @@
-import { useState, useEffect, useContext, useReducer } from 'react';
-import { Box, Dialog, Typography } from '@material-ui/core';
+import { useState, useEffect, useContext } from 'react';
+import { Box, Dialog } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CheckboxRenderer, CommonRenderer, DateRenderer, DateTimeRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import styles from './logs.module.scss';
 import { BiRefresh, BiMinus } from 'react-icons/bi';
 import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-icons/bs';
