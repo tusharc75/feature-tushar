@@ -28,6 +28,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { isEqual } from 'lodash';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -97,11 +98,11 @@ const Service = ({
   serviceSteps,
   selectedServiceStatus,
   updateServiceStatus,
-  allowedToEdit
+  allowedToEdit,
+  setDisableCompleteFail
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const [currentStep, setCurrentStep] = useState(0);
 
   const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
@@ -115,28 +116,14 @@ const Service = ({
         setServiceDetails(data);
         const steps = data?.steps?.map((d) => d.stepName);
         setStepList(steps);
-        var curStep = 0;
-        const compltedSteps = serviceData?.filter((e) => e.uniqueId === serviceDetails?._id && e.status === 'end');
-        if (compltedSteps?.length < steps?.length) {
-          curStep = compltedSteps?.length;
-        } else if (compltedSteps?.length === steps?.length) {
-          curStep = compltedSteps?.length - 1;
-        }
-        setCurrentStep(curStep);
-        setDisabledFieldSteps(serviceData.filter((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && ['Pass', 'Complete', 'Fail'].includes(d?.passFailStatus)).map(d => d.stepId))
+        const completedSteps = serviceData.filter((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && ['Pass', 'Complete', 'Fail','end'].includes(d?.passFailStatus))
+        setDisabledFieldSteps(completedSteps.map(d => d.stepId))
+        setDisableCompleteFail(!isEqual(completedSteps.map(d => d.stepId).sort(), data?.steps?.map((d) => d._id).sort()))
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }, [serviceId]);
-
-  const handleNext = () => {
-    setCurrentStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setCurrentStep((prevActiveStep) => prevActiveStep - 1);
-  };
+  }, [serviceId, serviceData]);
 
   const getFields = (step) => {
     let stepData = null;
@@ -232,7 +219,6 @@ const Service = ({
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-    handleNext();
   };
 
   function validate(values) {
@@ -415,20 +401,29 @@ const Service = ({
                               {' '}
                               Edit
                             </CustomButton>
-                              : <CustomButton
-                                variant="contained"
-                                color="primary"
-                                type="submit"
-                                disabled={!allowedToEdit}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  // handleScroll(errors);
-                                  submitForm();
-                                }}
-                              >
-                                {' '}
-                                Save
-                              </CustomButton>}
+                              : <>
+                                {['Pass', 'Complete', 'Fail','end'].includes(stepData?.status) && <DeleteButton
+                                  text="Cancel"
+                                  onClick={() => setDisabledFieldSteps([...disabledFieldSteps, step._id])}
+                                />}
+                                <Box marginX={1} />
+                                <CustomButton
+                                  variant="contained"
+                                  color="primary"
+                                  type="submit"
+                                  disabled={!allowedToEdit}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    // handleScroll(errors);
+                                    submitForm();
+                                  }}
+                                >
+                                  {' '}
+                                  Save
+                                </CustomButton>
+
+                              </>
+                            }
                           </Box>
                         </Fragment>
                       )}
