@@ -164,7 +164,7 @@ const Logs = ({ handleClose, workOrderId = null }) => {
                     {rows[key]?.map((row: any) => {
                       const colors = getIconColor(row.operation);
                       return (
-                        <div className={styles.singleLog}>
+                        <div className={styles.singleLog} key={row._id}>
                           <div className={styles.iconContainer} style={colors}>
                             {getIcon(row.operation)}
                           </div>
