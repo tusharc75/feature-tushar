@@ -27,13 +27,23 @@ const Logs = ({ handleClose, workOrderId = null }) => {
 
   useEffect(() => {
     const groupedData = group(data);
-
     if (groupedData) {
       const allKeys = Object.keys(groupedData);
       setKeys(allKeys);
     }
     setRows(groupedData);
   }, [data]);
+
+  const fetchData = () => {
+    axiosInstance()
+      .get(`${routes.workOrder.path}/${workOrderId}/log`)
+      .then(({ data: { data } }) => {
+        setData(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   const group = (data: any) => {
     const groups = data?.reduce((data1, data2) => {
@@ -45,17 +55,6 @@ const Logs = ({ handleClose, workOrderId = null }) => {
       return data1;
     }, {});
     return groups;
-  };
-
-  const fetchData = () => {
-    axiosInstance()
-      .get(`${routes.workOrder.path}/${workOrderId}/log`)
-      .then(({ data: { data } }) => {
-        setData(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
   };
 
   const operations = {
