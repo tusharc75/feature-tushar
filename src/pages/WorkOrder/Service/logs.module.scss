@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+.main {
+  --head-spacing: 20px 0 30px;
+  --row-gap: 40px;
+  --icon-container-size: 52px;
+  --icon-size: 20px;
+  --icon-text-space: 20px;
+  & * {
+    font-family: 'Inter', sans-serif;
+  }
+  .headContainer {
+    margin: var(--head-spacing, 20px);
+  }
+  .sectionHeading {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 24px;
+    color: #3a3a3a;
+  }
+  .date {
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 17px;
+    color: #5b5b5b;
+    background: #ededed;
+    border-radius: 20px;
+    padding: 9px 26px;
+    max-width: max-content;
+    display: block;
+    margin-bottom: 30px;
+  }
+
+  .iconContainer {
+    width: var(--icon-container-size, 40px);
+    height: var(--icon-container-size, 40px);
+    background-color: var(--icon-bg-color, #e2fbec);
+    position: relative;
+    border-radius: 50%;
+    flex-shrink: 0;
+    & svg {
+      max-width: var(--icon-size, 18px);
+      max-height: var(--icon-size, 18px);
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      fill: var(--icon-color, #138a86);
+      color: var(--icon-color, #138a86);
+    }
+  }
+  .logContainer {
+    display: grid;
+    gap: var(--row-gap, 15px);
+    isolation: isolate;
+  }
+  .singleLog {
+    display: flex;
+    margin-top: calc(var(--icon-text-space, 15px) * -1);
+    margin-left: calc(var(--icon-text-space, 15px) * -1);
+    position: relative;
+
+    & > * {
+      margin-top: var(--icon-text-space, 15px);
+      margin-left: var(--icon-text-space, 15px);
+    }
+    &::after {
+      content: '';
+      --icon-container-size: 52px;
+      --icon-text-space: 20px;
+      position: absolute;
+      z-index: -1;
+      width: 1px;
+      background-color: #c4c4c4;
+      top: calc(var(--icon-container-size, 40px) + 24px);
+      bottom: calc(calc(var(--icon-container-size, 40px) - 17px) * -1);
+      left: calc(var(--icon-container-size, 40px) * 0.5 + var(--icon-text-space, 40px));
+    }
+    &:last-child::after {
+      content: unset;
+    }
+  }
+  .badgeComplete,
+  .badgePass,
+  .badgeFail {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 17px;
+    padding: 7px 26px;
+    margin-left: 15px;
+    border-radius: 20px;
+    display: inline;
+  }
+  .badgeFail {
+    background-color: #fee4e0;
+    color: #d15241;
+  }
+  .badgePass {
+    background-color: #d9f9da;
+    color: #109f16;
+  }
+  .badgeComplete {
+    background-color: #d9f9da;
+    color: #109f16;
+  }
+  .logHead {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    color: #3a3a3a;
+    strong {
+      font-weight: 600;
+    }
+    span {
+      color: #13ab19;
+    }
+    margin: 4px 0 12px;
+  }
+  .timePassedBadge {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 17px;
+    color: #5b5b5b;
+    background: #ededed;
+    padding: 6px 15px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-left: 15px;
+  }
+}
