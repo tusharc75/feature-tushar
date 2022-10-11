@@ -16,49 +16,45 @@ import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-i
 import moment from 'moment';
 
 const Logs = ({ handleClose, workOrderId = null }) => {
-  // const renderedFrom = `workorder_service_log`;
   const {
     state: { selectedEntity }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
+  const [data, setData] = useState(null);
+  const [rows, setRows] = useState(null);
+  const [keys, setKeys] = useState(null);
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  console.log(dataRows);
+  useEffect(() => {
+    const groupedData = group(data);
 
-  const frameWorkComponent = {
-    commonRenderer: CommonRenderer,
-    dateTimeRenderer: DateTimeRenderer
+    if (groupedData) {
+      const allKeys = Object.keys(groupedData);
+      setKeys(allKeys);
+    }
+    setRows(groupedData);
+  }, [data]);
+
+  const group = (data: any) => {
+    const groups = data?.reduce((data1, data2) => {
+      const date = data2.date.split('T')[0];
+      if (!data1[date]) {
+        data1[date] = [];
+      }
+      data1[date].push(data2);
+      return data1;
+    }, {});
+    return groups;
   };
-  //   const columns = [
-  //     { field: 'date', headerName: 'Date', show: true, cellRenderer: 'dateTimeRenderer' },
-  //     { field: 'service', headerName: 'Service', show: true, cellRenderer: 'commonRenderer' },
-  //     { field: 'operation', headerName: 'Operation', show: true, cellRenderer: 'commonRenderer' }
-  //   ];
 
   const fetchData = () => {
-    dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     axiosInstance()
       .get(`${routes.workOrder.path}/${workOrderId}/log`)
       .then(({ data: { data } }) => {
-        let rows = data.map((u) => {
-          let res: any = {
-            ...prepareDataForGrid(u)
-          };
-          return res;
-        });
-        dispatch({ type: 'initialize', data: rows, count: rows.length });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
+        setData(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -130,28 +126,27 @@ const Logs = ({ handleClose, workOrderId = null }) => {
 
   const getHeadMessage = (row: any = 'Fail') => {
     let message;
-
     switch (row?.operation) {
       default:
-        message = `<strong>${row.user}</strong> updated <strong>${row?.service}</strong> `;
+        message = `<strong>${row.user?.optionLabel}</strong> updated <strong>${row?.service?.optionLabel}</strong> `;
         break;
       case operations.Complete:
-        message = `<strong>${row.user}</strong> <span>Completed</span> <strong>${row?.service}</strong> <span class=${styles.badgeComplete}>COMPLETE</span>`;
+        message = `<strong>${row.user?.optionLabel}</strong> <span>Completed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeComplete}>COMPLETE</span>`;
         break;
       case operations.Start:
-        message = `<strong>${row.user}</strong> <span>started</span> <strong>${row?.service}</strong> `;
+        message = `<strong>${row.user?.optionLabel}</strong> <span>started</span> <strong>${row?.service?.optionLabel}</strong> `;
         break;
       case operations.Pass:
-        message = `<strong>${row.user}</strong> <span>Passed</span> <strong>${row?.service}</strong> <span class=${styles.badgePass}>PASS</span>`;
+        message = `<strong>${row.user?.optionLabel}</strong> <span>Passed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgePass}>PASS</span>`;
         break;
       case operations.Fail:
-        message = `<strong>${row.user}</strong> <span>Failed</span> <strong>${row?.service}</strong> <span class=${styles.badgeFail}>FAIL</span>`;
+        message = `<strong>${row.user?.optionLabel}</strong> <span>Failed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeFail}>FAIL</span>`;
         break;
       case operations.valueAdded:
-        message = `<strong>${row.user}</strong> added new <strong>${row?.service}</strong> `;
+        message = `<strong>${row.user?.optionLabel}</strong> added new <strong>${row?.service?.optionLabel}</strong> `;
         break;
       case operations.valueUpdated:
-        message = `<strong>${row.user}</strong> updated <strong>${row?.service}</strong> `;
+        message = `<strong>${row.user?.optionLabel}</strong> updated <strong>${row?.service?.optionLabel}</strong> `;
     }
     return message;
   };
@@ -160,50 +155,35 @@ const Logs = ({ handleClose, workOrderId = null }) => {
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="logs-dialog">
       <CustomDialogHeader title={`Logs`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent>
-        {frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? (
-          // <CustomAgGrid
-          //     columns={columns}
-          //     dataRows={dataRows}
-          //     frameworkComponents={frameWorkComponent}
-          //     setGridApi={setGridApi}
-          //     dispatch={dispatch}
-          //     rowCount={rowCount}
-          //     limit={limit}
-          //     pageSizes={pageSizes}
-          //     page={page}
-          //     allowAction={false}
-          //     loading={loading}
-          //     allowSelection={true}
-          //     showOnlyShowFilteredRecordSwitch={true}
-          //     refreshGrid={fetchData}
-          //     renderedFrom={renderedFrom}
-          //     isClientSideGrid={true}
-          // />
+        {keys?.length > 0 ? (
           <Box className={styles.main}>
-            <Box className={styles.headContainer}>
-              <h5 className={styles.sectionHeading}>Work Logs</h5>
-            </Box>
-            <Box>
-              <p className={styles.date}>October 10, 2022</p>
-            </Box>
-            <div className={styles.logContainer}>
-              {dataRows?.map((row: any) => {
-                const colors = getIconColor(row.operation);
-                return (
-                  <div className={styles.singleLog}>
-                    <div className={styles.iconContainer} style={colors}>
-                      {getIcon(row.operation)}
-                    </div>
-                    <div className={styles.textContainer}>
-                      <h4 className={styles.logHead} dangerouslySetInnerHTML={{ __html: getHeadMessage(row) }} />
-                      <p className={styles.logDetails}>
-                        {moment(row?.date).format('LT')} <span className={styles.timePassedBadge}>{moment(row?.date).fromNow()}</span>
-                      </p>
-                    </div>
+            {keys?.map((key: string) => {
+              return (
+                <div className={styles.singleGroup}>
+                  <Box key={key}>
+                    <p className={styles.date}>{moment(key).format('MMM Do YYYY')}</p>
+                  </Box>
+                  <div className={styles.logContainer}>
+                    {rows[key]?.map((row: any) => {
+                      const colors = getIconColor(row.operation);
+                      return (
+                        <div className={styles.singleLog}>
+                          <div className={styles.iconContainer} style={colors}>
+                            {getIcon(row.operation)}
+                          </div>
+                          <div className={styles.textContainer}>
+                            <h4 className={styles.logHead} dangerouslySetInnerHTML={{ __html: getHeadMessage(row) }} />
+                            <p className={styles.logDetails}>
+                              {moment(row?.date).format('LT')} <span className={styles.timePassedBadge}>{moment(row?.date).fromNow()}</span>
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </Box>
         ) : (
           <Box p={2} height={500} bgcolor="white">
