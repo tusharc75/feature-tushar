@@ -24,6 +24,7 @@ import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import { useData } from 'src/StateProvider/Provider';
 import Logs from './Logs';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 
 const Service = ({ workOrderId, allowedToEdit }) => {
 
@@ -43,6 +44,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [quotationData, setQuotationData] = useState(null);
   const [disableCompleteFail, setDisableCompleteFail] = useState(false);
+  const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
 
   useEffect(() => {
     fetchService();
@@ -177,6 +179,9 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status })
       .then(({ data: { data } }) => {
         fetchService();
+        if (openCompleteDialog) {
+          setOpenCompleteDialog(false)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -441,7 +446,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                   Consume
                 </MenuItem>
                 <MenuItem
-                  disabled={disableCompleteFail}
+                  disabled={disableCompleteFail || [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(selectedService?.status)}
                   onClick={() => {
                     updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete);
                     setAnchorEl(null);
@@ -450,7 +455,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                   Complete
                 </MenuItem>
                 <MenuItem
-                  disabled={disableCompleteFail}
+                  disabled={disableCompleteFail || [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(selectedService?.status)}
                   onClick={() => {
                     updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.fail);
                     setAnchorEl(null);
@@ -504,6 +509,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                     handleAddService={handleAddService}
                     allowedToEdit={isAllowedToServiceEdit}
                     setDisableCompleteFail={setDisableCompleteFail}
+                    setOpenCompleteDialog={setOpenCompleteDialog}
                   />
                 ) : (
                   <Quotation />
@@ -590,6 +596,11 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           handleClose={() => {
             setLogsDialog(false);
           }} />
+      }
+      {openCompleteDialog && <ConfirmationDialogRaw
+        message={`All steps are done for ${selectedService?.serviceName}, Do you want to complete it?`}
+        onOk={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)}
+        onClose={() => setOpenCompleteDialog(false)} open={openCompleteDialog} />
       }
     </Box >
   );
