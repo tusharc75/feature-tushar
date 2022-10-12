@@ -42,6 +42,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const [isColapsed, setIsColapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
   const [quotationData, setQuotationData] = useState(null);
+  const [disableCompleteFail, setDisableCompleteFail] = useState(false);
 
   useEffect(() => {
     fetchService();
@@ -440,7 +441,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                   Consume
                 </MenuItem>
                 <MenuItem
-                  disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.inProgress}
+                  disabled={disableCompleteFail}
                   onClick={() => {
                     updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete);
                     setAnchorEl(null);
@@ -449,7 +450,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                   Complete
                 </MenuItem>
                 <MenuItem
-                  disabled={selectedService?.status !== WORKORDER_SERVICE_STATUS.inProgress}
+                  disabled={disableCompleteFail}
                   onClick={() => {
                     updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.fail);
                     setAnchorEl(null);
@@ -502,6 +503,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                     updateServiceStatus={updateServiceStatus}
                     handleAddService={handleAddService}
                     allowedToEdit={isAllowedToServiceEdit}
+                    setDisableCompleteFail={setDisableCompleteFail}
                   />
                 ) : (
                   <Quotation />
