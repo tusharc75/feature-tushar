@@ -83,10 +83,12 @@ const PurchaseOrderViews = (props) => {
       var flowEdge: any[] = [];
       xPosition += 300;
       var productReceived = 0;
+      const allProductId = {};
       allProducts?.map((item, pIdx) => {
+        allProductId[`${item?.productId}_${item?._id}`] = item?._id;
         if (item?.actualReceived > 0) productReceived += 1;
         flow.push({
-          id: `${item?.productId}`,
+          id: `${item?.productId}_${item?._id}`,
           type: 'default',
           className: 'dark-node',
           sourcePosition: 'right',
@@ -100,9 +102,9 @@ const PurchaseOrderViews = (props) => {
           style: customNodeStyles.product
         });
         flowEdge.push({
-          id: `${pId}_${item?.productId}_edge`,
+          id: `${pId}_${item?.productId}_${item?._id}_edge`,
           source: `${pId}`,
-          target: `${item?.productId}`
+          target: `${item?.productId}_${item?._id}`
         });
       });
 
@@ -178,11 +180,11 @@ const PurchaseOrderViews = (props) => {
           style: customNodeStyles.receiving
         });
         allProducts
-          ?.filter((i) => !serialisedAssetInProduct[i?.productId] && i?.actualReceived > 0)
+          // ?.filter((i) => !serialisedAssetInProduct[i?.productId] && i?.actualReceived > 0)
           ?.map((item, pIdx) => {
             flowEdge.push({
               id: `${pId}_${item}_received_edge`,
-              source: `${item?.productId}`,
+              source: `${item?.productId}_${item?._id}`,
               target: `${pId}_received`
             });
           });
