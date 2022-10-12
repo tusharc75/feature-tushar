@@ -116,7 +116,7 @@ const Service = ({
         setServiceDetails(data);
         const steps = data?.steps?.map((d) => d.stepName);
         setStepList(steps);
-        const completedSteps = serviceData.filter((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && ['Pass', 'Complete', 'Fail','end'].includes(d?.passFailStatus))
+        const completedSteps = serviceData.filter((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && ['Pass', 'Complete', 'Fail', 'end'].includes(d?.passFailStatus))
         setDisabledFieldSteps(completedSteps.map(d => d.stepId))
         setDisableCompleteFail(!isEqual(completedSteps.map(d => d.stepId).sort(), data?.steps?.map((d) => d._id).sort()))
       })
@@ -402,10 +402,15 @@ const Service = ({
                               Edit
                             </CustomButton>
                               : <>
-                                {['Pass', 'Complete', 'Fail','end'].includes(stepData?.status) && <DeleteButton
-                                  text="Cancel"
+                                {['Pass', 'Complete', 'Fail', 'end'].includes(stepData?.status) && <CustomButton
+                                  variant="outlined"
+                                  color="primary"
+                                  type="submit"
                                   onClick={() => setDisabledFieldSteps([...disabledFieldSteps, step._id])}
-                                />}
+                                >
+                                  {' '}
+                                  Cancel
+                                </CustomButton>}
                                 <Box marginX={1} />
                                 <CustomButton
                                   variant="contained"
