@@ -99,7 +99,8 @@ const Service = ({
   selectedServiceStatus,
   updateServiceStatus,
   allowedToEdit,
-  setDisableCompleteFail
+  setDisableCompleteFail,
+  setOpenCompleteDialog
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -108,6 +109,7 @@ const Service = ({
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [] });
   const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
+  const [inSteps, setInSteps] = useState(false)
 
   useEffect(() => {
     axiosInstance()
@@ -116,9 +118,17 @@ const Service = ({
         setServiceDetails(data);
         const steps = data?.steps?.map((d) => d.stepName);
         setStepList(steps);
-        const completedSteps = serviceData.filter((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && ['Pass', 'Complete', 'Fail','end'].includes(d?.passFailStatus))
-        setDisabledFieldSteps(completedSteps.map(d => d.stepId))
-        setDisableCompleteFail(!isEqual(completedSteps.map(d => d.stepId).sort(), data?.steps?.map((d) => d._id).sort()))
+        const completedSteps = serviceData.filter(
+          (d) => d.uniqueId === uniqueId && d.serviceId === serviceId && ['Pass', 'Complete', 'Fail', 'end'].includes(d?.passFailStatus)
+        );
+        const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort())
+        setDisabledFieldSteps(completedSteps.map((d) => d.stepId));
+        setDisableCompleteFail(!allStepsDone);
+
+        if (inSteps && allStepsDone && selectedServiceStatus === WORKORDER_SERVICE_STATUS.inProgress) {
+          setOpenCompleteDialog(true)
+          setInSteps(false)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -153,12 +163,13 @@ const Service = ({
     return { fieldData, stepData };
   };
 
-  const handleSubmit = async (values, stepId) => {
+  const handleSubmit = async (values, step) => {
     let tempData = {
       uniqueId: uniqueId,
       serviceId: serviceId,
-      stepId: stepId
+      stepId: step?._id
     };
+
     axiosInstance()
       .put(`${workOrder.api}/update-steps-data/${workOrderId}`, { ...tempData, ...values })
       .then(({ data }) => {
@@ -168,10 +179,35 @@ const Service = ({
           message: data.message
         });
         getServiceData();
+
+        if (step?.isPassFail) {
+          const type = automatePassFail(values, step);
+          handlePassFail(type, step?._id);
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const automatePassFail = (values: any, step: any): string => {
+    const fields = getFields(step).fieldData?.fields.filter((field) => field.type === 'decimal');
+    let invalidValues: any = {};
+
+    const keys = Object.keys(values);
+
+    keys.forEach((k) => {
+      const field = fields.find((f: any) => f?.fieldName === k);
+      if (field && field.fieldName === k) {
+        if (parseFloat(values[k]) > field?.maxValue || parseFloat(values[k]) < field?.minValue) {
+          invalidValues[k] = 'Invalid value';
+        } else if (invalidValues[k]) {
+          delete invalidValues[k];
+        }
+      }
+    });
+
+    return Object.keys(invalidValues).length > 0 ? 'Fail' : 'Pass';
   };
 
   const handleStartEnd = (type, stepId) => {
@@ -195,6 +231,7 @@ const Service = ({
   };
 
   const handlePassFail = (type, stepId) => {
+    setInSteps(true)
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/pass-fail`, {
         uniqueId: uniqueId,
@@ -265,7 +302,9 @@ const Service = ({
                           size="small"
                           disabled={!allowedToEdit}
                           onClick={() => {
-                            if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) { updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress) }
+                            if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) {
+                              updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
+                            }
                             handleStartEnd('start', step._id);
                           }}
                         >
@@ -274,7 +313,7 @@ const Service = ({
                       </Box>
                     ) : null}
                     {stepData?.status === 'start' ? (
-                      step?.isPassFail ?
+                      step?.isPassFail ? (
                         <Box display="flex" mb={2}>
                           <Button
                             variant="outlined"
@@ -287,12 +326,9 @@ const Service = ({
                             Pass
                           </Button>
                           <Box marginX={1} />
-                          <DeleteButton
-                            text="Fail"
-                            onClick={() => handlePassFail('Fail', step._id)}
-                          />
+                          <DeleteButton text="Fail" onClick={() => handlePassFail('Fail', step._id)} />
                         </Box>
-                        :
+                      ) : (
                         <Box display="flex" mb={2}>
                           <Button
                             variant="outlined"
@@ -305,6 +341,7 @@ const Service = ({
                             Complete
                           </Button>
                         </Box>
+                      )
                     ) : null}
                   </>
                 ) : null}
@@ -313,7 +350,7 @@ const Service = ({
                     <Formik
                       initialValues={fieldData.values}
                       validationSchema={yupSchema(fieldData.fields)}
-                      onSubmit={(values) => handleSubmit(values, step._id)}
+                      onSubmit={(values) => handleSubmit(values, step)}
                       validate={validate}
                       enableReinitialize
                     >
@@ -324,37 +361,36 @@ const Service = ({
                               fieldData.formsData?.map((form, index1) => {
                                 return form?.name ? (
                                   <div key={index1}>
-                                    <div className="detail-box-content">
-                                      <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                                    <div className="detail-box-content" >
+                                      <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: '5px' }} />
                                       <h2 className="form-label-style form-label-quotes">{form?.name}</h2>
                                     </div>
                                     <Box marginY={2}>
                                       <Grid spacing={3} container>
                                         {form?.sectionFields?.map((field, index2) => (
                                           <Grid key={index2} item xs={12} sm={6} md={6}>
-                                            {
-                                              <FormTypes
-                                                {...field}
-                                                fieldData={field}
-                                                disabled={disabledFieldSteps.includes(step._id) || (Boolean(workOrderId) && field.disableOnEdit)}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={field.option}
-                                                setFieldValue={(name, value) => {
-                                                  setFieldValue(name, value);
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                                imageOrFileUploadCompletePercentage={null}
-                                              />
-                                            }
+                                            <FormTypes
+                                              {...field}
+                                              row={field.type === 'radio'}
+                                              fieldData={field}
+                                              disabled={disabledFieldSteps.includes(step._id) || (Boolean(workOrderId) && field.disableOnEdit)}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(name, value);
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                              imageOrFileUploadCompletePercentage={null}
+                                            />
                                           </Grid>
                                         ))}
                                       </Grid>
@@ -389,23 +425,30 @@ const Service = ({
                               })}
                           </Form>
                           <Box display="flex" justifyContent="flex-end">
-                            {disabledFieldSteps.includes(step._id) ? <CustomButton
-                              variant="contained"
-                              color="primary"
-                              type="submit"
-                              disabled={!allowedToEdit}
-                              onClick={(e) => {
-                                setDisabledFieldSteps(disabledFieldSteps.filter(d => d !== step._id))
-                              }}
-                            >
-                              {' '}
-                              Edit
-                            </CustomButton>
-                              : <>
-                                {['Pass', 'Complete', 'Fail','end'].includes(stepData?.status) && <DeleteButton
-                                  text="Cancel"
-                                  onClick={() => setDisabledFieldSteps([...disabledFieldSteps, step._id])}
-                                />}
+                            {disabledFieldSteps.includes(step._id) ? (
+                              <CustomButton
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                disabled={!allowedToEdit}
+                                onClick={(e) => {
+                                  setDisabledFieldSteps(disabledFieldSteps.filter((d) => d !== step._id));
+                                }}
+                              >
+                                Edit
+                              </CustomButton>
+                            ) : (
+                              <>
+                                {['Pass', 'Complete', 'Fail', 'end'].includes(stepData?.status) && (
+                                  <Button
+                                    color="primary"
+                                    variant='outlined'
+                                    size="small"
+                                    onClick={() => setDisabledFieldSteps([...disabledFieldSteps, step._id])}
+                                  >
+                                    Cancle
+                                  </Button>
+                                )}
                                 <Box marginX={1} />
                                 <CustomButton
                                   variant="contained"
@@ -418,12 +461,10 @@ const Service = ({
                                     submitForm();
                                   }}
                                 >
-                                  {' '}
                                   Save
                                 </CustomButton>
-
                               </>
-                            }
+                            )}
                           </Box>
                         </Fragment>
                       )}
@@ -479,8 +520,10 @@ const Service = ({
         />
       )}
     </Box>
-  ) : <Box p={2} height={500} bgcolor="white">
-    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-  </Box>;
+  ) : (
+    <Box p={2} height={500} bgcolor="white">
+      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+    </Box>
+  );
 };
 export default Service;
