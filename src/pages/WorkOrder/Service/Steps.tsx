@@ -99,7 +99,8 @@ const Service = ({
   selectedServiceStatus,
   updateServiceStatus,
   allowedToEdit,
-  setDisableCompleteFail
+  setDisableCompleteFail,
+  setOpenCompleteDialog
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -108,6 +109,7 @@ const Service = ({
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [] });
   const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
+  const [inSteps, setInSteps] = useState(false)
 
   useEffect(() => {
     axiosInstance()
@@ -119,8 +121,14 @@ const Service = ({
         const completedSteps = serviceData.filter(
           (d) => d.uniqueId === uniqueId && d.serviceId === serviceId && ['Pass', 'Complete', 'Fail', 'end'].includes(d?.passFailStatus)
         );
+        const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort())
         setDisabledFieldSteps(completedSteps.map((d) => d.stepId));
-        setDisableCompleteFail(!isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort()));
+        setDisableCompleteFail(!allStepsDone);
+
+        if(inSteps && allStepsDone) {
+          setOpenCompleteDialog(true)
+          setInSteps(false)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -223,6 +231,7 @@ const Service = ({
   };
 
   const handlePassFail = (type, stepId) => {
+    setInSteps(true)
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/pass-fail`, {
         uniqueId: uniqueId,
