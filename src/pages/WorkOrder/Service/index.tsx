@@ -179,6 +179,9 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status })
       .then(({ data: { data } }) => {
         fetchService();
+        if(openCompleteDialog){
+          setOpenCompleteDialog(false)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -195,9 +198,6 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
         fetchService();
-        if(openCompleteDialog){
-          setOpenCompleteDialog(false)
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
