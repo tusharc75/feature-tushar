@@ -171,8 +171,11 @@ const Service = ({
           message: data.message
         });
         getServiceData();
-        const type = automatePassFail(values, step);
-        handlePassFail(type, step?._id);
+
+        if (step?.isPassFail) {
+          const type = automatePassFail(values, step);
+          handlePassFail(type, step?._id);
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
