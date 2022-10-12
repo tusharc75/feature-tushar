@@ -242,8 +242,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
         if (element.parentId) {
           const parent: any = material.filter((e) => e._id === element.parentId)
           const sameParent: any = material.filter((e) => e.parentId === element.parentId)
-          sameParent.forEach((element) => {
-            if (element._id === element._id) {
+          sameParent.forEach((ele) => {
+            if (ele._id === element._id) {
               for (var key in values) {
                 element[key] = values[key];
               }
@@ -266,7 +266,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
           const parent: any = material.filter((e) => e._id === rowData.parentId)
           const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
           sameParent.forEach((element) => {
-            if (element._id === rowData._id) {
+            if (element.materialId === rowData.materialId) {
               for (var key in values) {
                 element[key] = values[key];
               }
