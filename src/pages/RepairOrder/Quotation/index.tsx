@@ -89,7 +89,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
-      .get(`${repairOrder.api}/${repairOrderData._id}/quotation`)
+      .get(`${repairOrder.api}/${repairOrderData._id}/repairorder/quotation`)
       .then(({ data: { data } }) => {
         setQuotationData(data)
         fetchFields(data?.currency);

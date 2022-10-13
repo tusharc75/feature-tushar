@@ -8,7 +8,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { repairOrder, workOrder, sidebarResource, getObjKeys, generateUniqueIdOnly } from '../../../constants/helpers';
+import { repairOrder, workOrder, sidebarResource, getObjKeys, generateUniqueIdOnly, WORKORDER_SERVICE_STATUS } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { ExpandMore } from '@material-ui/icons';
@@ -157,8 +157,16 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
             parent.status = parent?.workOrder?.status
             parent.subRows = generateNestedData(data.material, parent);
         });
+
+        data?.material?.forEach(element => {
+            if (element?.services?.filter((e) => e?.preWork && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(e?.status))?.length) {
+                setNextStep(false);
+            }
+            else {
+                setNextStep(true);
+            }
+        });
         setRowsData(rows);
-        setNextStep(true);
         setSelectedProducts([]);
     };
 

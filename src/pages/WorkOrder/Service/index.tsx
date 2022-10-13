@@ -110,13 +110,12 @@ const Service = ({ workOrderId, allowedToEdit }) => {
     axiosInstance()
       .get(`${routes.workOrder.path}/${workOrderId}`)
       .then(({ data: { data } }) => {
-        axiosInstance()
-          .get(`${repairOrder.api}/${data?.repairOrder?.optionValue}/quotation`)
+        axiosInstance().get(`${repairOrder.api}/${data?.repairOrder?.optionValue}/workorder/quotation`)
           .then(({ data: { data } }) => {
-            let keys = Object.keys(data.versions);
-            if (keys?.length) {
-              const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
-              if ([QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer]?.includes(status)) {
+            if (data) {
+              let keys = Object.keys(data?.versions);
+              if (keys?.length) {
+                const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
                 setQuotationData({ quotationNumber: data?.quotationNumber, status: status })
               }
             }
@@ -187,7 +186,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        if(openCompleteDialog){
+        if (openCompleteDialog) {
           setOpenCompleteDialog(false)
         }
       });
@@ -222,7 +221,17 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const isAllowedToServiceEdit = (allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?._id === user?._id))
 
   const stylesForEveryTab = (selectedService, data) => {
-    if (data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)) {
+    if (data?.type === 'quotation') {
+      return {
+        borderColor: 'rgb(224, 224, 224)',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        backgroundColor: quotationData?.status === QUOTATION_STATUS.acceptByCustomer ? '#E9FFE8' : quotationData?.status === QUOTATION_STATUS.rejectByCustomer ? '#FFE9EA' : 'white',
+        cursor: 'pointer',
+        borderRadius: '3px'
+      };
+    }
+    else if (data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)) {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
@@ -603,12 +612,12 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           }} />
       }
       {openCompleteDialog && (
-        <CompleteDialog 
-          serviceName={selectedService?.serviceName} 
-          comment={comment} 
-          setComment={setComment} 
-          updateStatus={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)} 
-          handleClose={() => setOpenCompleteDialog(false)} 
+        <CompleteDialog
+          serviceName={selectedService?.serviceName}
+          comment={comment}
+          setComment={setComment}
+          updateStatus={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)}
+          handleClose={() => setOpenCompleteDialog(false)}
         />
       )}
     </Box >
