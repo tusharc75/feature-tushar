@@ -249,7 +249,6 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
               }
             }
           })
-
           sumOnParent(parent, sameParent)
           rows = [...rows, ...parent]
         }
@@ -257,30 +256,23 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
       handleSaveData(rows)
     }
     else {
-      if (rowData.parentId !== null && !showConfirmationDialog) {
-        setShowConfirmationDialog(true);
-      }
-      else {
-        let rows: any = [{ ...rowData, ...values }]
-        if (rowData.parentId) {
-          const parent: any = material.filter((e) => e._id === rowData.parentId)
-          const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
-          sameParent.forEach((element) => {
-            if (element.materialId === rowData.materialId) {
-              for (var key in values) {
-                element[key] = values[key];
-              }
+      let rows: any = [{ ...rowData, ...values }]
+      if (rowData.parentId) {
+        const parent: any = material.filter((e) => e._id === rowData.parentId)
+        const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
+        sameParent.forEach((element) => {
+          if (element.materialId === rowData.materialId) {
+            for (var key in values) {
+              element[key] = values[key];
             }
-          })
-
-          sumOnParent(parent, sameParent)
-          rows = [...rows, ...parent]
-        }
-        const child = material.filter((e) => e.parentId === rowData._id)
-        resetValueZero(child)
-        handleSaveData([...rows, ...child])
-        setShowConfirmationDialog(false);
+          }
+        })
+        sumOnParent(parent, sameParent)
+        rows = [...rows, ...parent]
       }
+      const child = material.filter((e) => e.parentId === rowData._id)
+      resetValueZero(child)
+      handleSaveData([...rows, ...child])
     }
   };
 

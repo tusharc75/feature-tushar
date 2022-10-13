@@ -9,7 +9,6 @@ import routes from 'src/components/Helpers/Routes';
 import Steps from './Steps';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { findLastIndex } from 'lodash';
 import Quotation from '../Quotation';
 import AssignUserDialog from './AssignUserDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -24,7 +23,6 @@ import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import { useData } from 'src/StateProvider/Provider';
 import Logs from './Logs';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import CompleteDialog from './CompleteDialog';
 
 const Service = ({ workOrderId, allowedToEdit }) => {
@@ -86,6 +84,14 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           } else {
             setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
           }
+
+        
+          if (preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(d.status))?.length === preWorkService?.length) {
+            if (services.findIndex(d => d.type === 'quotation') > -1) {
+              setSelectedService(services[services.findIndex(d => d.type === 'quotation')])
+            }
+          }
+
         } else {
           setServiceSteps([]);
         }
@@ -107,20 +113,18 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   };
 
   const fetchQuotationData = () => {
-    axiosInstance()
-      .get(`${routes.workOrder.path}/${workOrderId}`)
-      .then(({ data: { data } }) => {
-        axiosInstance().get(`${repairOrder.api}/${data?.repairOrder?.optionValue}/workorder/quotation`)
-          .then(({ data: { data } }) => {
-            if (data) {
-              let keys = Object.keys(data?.versions);
-              if (keys?.length) {
-                const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
-                setQuotationData({ quotationNumber: data?.quotationNumber, status: status })
-              }
+    axiosInstance().get(`${routes.workOrder.path}/${workOrderId}`).then(({ data: { data } }) => {
+      axiosInstance().get(`${repairOrder.api}/${data?.repairOrder?.optionValue}/workorder/quotation`)
+        .then(({ data: { data } }) => {
+          if (data) {
+            let keys = Object.keys(data?.versions);
+            if (keys?.length) {
+              const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
+              setQuotationData({ quotationNumber: data?.quotationNumber, status: status })
             }
-          })
-      })
+          }
+        })
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -183,6 +187,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
         if (openCompleteDialog) {
           setOpenCompleteDialog(false)
         }
+        setComment("")
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -221,13 +226,24 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const isAllowedToServiceEdit = (allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?._id === user?._id))
 
   const stylesForEveryTab = (selectedService, data) => {
-    if (data?.type === 'quotation') {
+    if (data?.type === 'quotation' && selectedService?.type !== "quotation") {
       return {
         borderColor: 'rgb(224, 224, 224)',
         borderWidth: '1px',
         borderStyle: 'solid',
         backgroundColor: quotationData?.status === QUOTATION_STATUS.acceptByCustomer ? '#E9FFE8' : quotationData?.status === QUOTATION_STATUS.rejectByCustomer ? '#FFE9EA' : 'white',
         cursor: 'pointer',
+        borderRadius: '3px'
+      };
+    }
+    else if (data?.type === 'quotation' && selectedService?.type === "quotation") {
+      return {
+        borderColor: '#329592',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        backgroundColor: quotationData?.status === QUOTATION_STATUS.acceptByCustomer ? '#E9FFE8' : quotationData?.status === QUOTATION_STATUS.rejectByCustomer ? '#FFE9EA' : 'white',
+        cursor: 'pointer',
+        boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
       };
     }
@@ -616,8 +632,13 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           serviceName={selectedService?.serviceName}
           comment={comment}
           setComment={setComment}
-          updateStatus={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)}
-          handleClose={() => setOpenCompleteDialog(false)}
+          updateStatus={() =>
+            updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)
+          }
+          handleClose={() => {
+            setComment("");
+            setOpenCompleteDialog(false)
+          }}
         />
       )}
     </Box >
