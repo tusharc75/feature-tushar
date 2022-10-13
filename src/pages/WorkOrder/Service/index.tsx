@@ -185,6 +185,9 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        if(openCompleteDialog){
+          setOpenCompleteDialog(false)
+        }
       });
   };
 
