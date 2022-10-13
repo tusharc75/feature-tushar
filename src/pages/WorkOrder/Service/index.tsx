@@ -114,9 +114,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
             let keys = Object.keys(data.versions);
             if (keys?.length) {
               const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
-              if ([QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer]?.includes(status)) {
-                setQuotationData({ quotationNumber: data?.quotationNumber, status: status })
-              }
+              setQuotationData({ quotationNumber: data?.quotationNumber, status: status })
             }
           })
       })
