@@ -7,18 +7,22 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 
 const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setComment }) => {
   return (
-    <Dialog open fullWidth maxWidth="sm" onClose={handleClose}>
-      <CustomDialogHeader title="Confirm Dialog" onClose={handleClose} />
+    <Dialog
+      open
+      fullWidth
+      maxWidth="sm"
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          handleClose()
+        }
+      }}>
+      <CustomDialogHeader title="Confirmation" onClose={handleClose} />
       <CustomDialogContent>
         <Box>
-          <Typography>
-            All steps are done for{' '}
-            <Box component="span" fontWeight="bold">
-              {serviceName}
-            </Box>
+          <Typography>  All steps are done for{' '}
+            <Box component="span" fontWeight="bold">   {serviceName}   </Box>
             , Do you want to complete it?
           </Typography>
-
           <Box mt={2}>
             <TextField
               multiline
@@ -38,7 +42,7 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
           Cancel
         </Button>
         <Button variant="contained" size="small" onClick={updateStatus} color='primary'>
-          Save
+          Complete
         </Button>
       </CustomDialogFooter>
     </Dialog>
