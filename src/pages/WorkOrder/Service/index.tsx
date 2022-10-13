@@ -179,7 +179,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status })
       .then(({ data: { data } }) => {
         fetchService();
-        if(openCompleteDialog){
+        if (openCompleteDialog) {
           setOpenCompleteDialog(false)
         }
       })
@@ -449,7 +449,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                   Consume
                 </MenuItem>
                 <MenuItem
-                  disabled={disableCompleteFail}
+                  disabled={disableCompleteFail || [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(selectedService?.status)}
                   onClick={() => {
                     updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete);
                     setAnchorEl(null);
@@ -458,7 +458,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                   Complete
                 </MenuItem>
                 <MenuItem
-                  disabled={disableCompleteFail}
+                  disabled={disableCompleteFail || [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(selectedService?.status)}
                   onClick={() => {
                     updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.fail);
                     setAnchorEl(null);
@@ -600,12 +600,10 @@ const Service = ({ workOrderId, allowedToEdit }) => {
             setLogsDialog(false);
           }} />
       }
-      {
-        openCompleteDialog && 
-          <ConfirmationDialogRaw 
-            message={`All steps are done for ${selectedService?.serviceName}, Do you want to complete it?`} 
-            onOk={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)} 
-            onClose={() => setOpenCompleteDialog(false)} open={openCompleteDialog} />
+      {openCompleteDialog && <ConfirmationDialogRaw
+        message={`All steps are done for ${selectedService?.serviceName}, Do you want to complete it?`}
+        onOk={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)}
+        onClose={() => setOpenCompleteDialog(false)} open={openCompleteDialog} />
       }
     </Box >
   );

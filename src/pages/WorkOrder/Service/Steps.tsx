@@ -125,7 +125,7 @@ const Service = ({
         setDisabledFieldSteps(completedSteps.map((d) => d.stepId));
         setDisableCompleteFail(!allStepsDone);
 
-        if(inSteps && allStepsDone) {
+        if (inSteps && allStepsDone && selectedServiceStatus === WORKORDER_SERVICE_STATUS.inProgress) {
           setOpenCompleteDialog(true)
           setInSteps(false)
         }
@@ -274,9 +274,8 @@ const Service = ({
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel2a-content"
                 id="panel2a-header"
-                className={`${classes.accordionHeading} ${['Pass', 'Complete'].includes(stepData?.passFailStatus) && classes.green} ${
-                  stepData?.passFailStatus === 'Fail' && classes.red
-                }`}
+                className={`${classes.accordionHeading} ${['Pass', 'Complete'].includes(stepData?.passFailStatus) && classes.green} ${stepData?.passFailStatus === 'Fail' && classes.red
+                  }`}
               >
                 <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
                   <Box mr={2} className={classes.badge}>
@@ -362,38 +361,36 @@ const Service = ({
                               fieldData.formsData?.map((form, index1) => {
                                 return form?.name ? (
                                   <div key={index1}>
-                                    <div className="detail-box-content">
-                                      <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                                    <div className="detail-box-content" >
+                                      <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: '5px' }} />
                                       <h2 className="form-label-style form-label-quotes">{form?.name}</h2>
                                     </div>
                                     <Box marginY={2}>
                                       <Grid spacing={3} container>
                                         {form?.sectionFields?.map((field, index2) => (
                                           <Grid key={index2} item xs={12} sm={6} md={6}>
-                                            {
-                                              <FormTypes
-                                                {...field}
-                                                row={field.type === 'radio'}
-                                                fieldData={field}
-                                                disabled={disabledFieldSteps.includes(step._id) || (Boolean(workOrderId) && field.disableOnEdit)}
-                                                values={values}
-                                                errors={errors}
-                                                touched={touched}
-                                                label={field.fieldLabel}
-                                                name={field.fieldName}
-                                                type={field.type}
-                                                options={field.option}
-                                                setFieldValue={(name, value) => {
-                                                  setFieldValue(name, value);
-                                                }}
-                                                required={field.required}
-                                                fullWidth
-                                                isTooltip={field?.isTooltip || false}
-                                                tooltipMessage={field?.tooltipMessage}
-                                                size="small"
-                                                imageOrFileUploadCompletePercentage={null}
-                                              />
-                                            }
+                                            <FormTypes
+                                              {...field}
+                                              row={field.type === 'radio'}
+                                              fieldData={field}
+                                              disabled={disabledFieldSteps.includes(step._id) || (Boolean(workOrderId) && field.disableOnEdit)}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(name, value);
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                              imageOrFileUploadCompletePercentage={null}
+                                            />
                                           </Grid>
                                         ))}
                                       </Grid>
@@ -438,13 +435,19 @@ const Service = ({
                                   setDisabledFieldSteps(disabledFieldSteps.filter((d) => d !== step._id));
                                 }}
                               >
-                                {' '}
                                 Edit
                               </CustomButton>
                             ) : (
                               <>
                                 {['Pass', 'Complete', 'Fail', 'end'].includes(stepData?.status) && (
-                                  <DeleteButton text="Cancel" onClick={() => setDisabledFieldSteps([...disabledFieldSteps, step._id])} />
+                                  <Button
+                                    color="primary"
+                                    variant='outlined'
+                                    size="small"
+                                    onClick={() => setDisabledFieldSteps([...disabledFieldSteps, step._id])}
+                                  >
+                                    Cancle
+                                  </Button>
                                 )}
                                 <Box marginX={1} />
                                 <CustomButton
@@ -458,7 +461,6 @@ const Service = ({
                                     submitForm();
                                   }}
                                 >
-                                  {' '}
                                   Save
                                 </CustomButton>
                               </>
