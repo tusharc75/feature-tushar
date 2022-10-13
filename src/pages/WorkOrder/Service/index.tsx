@@ -25,6 +25,7 @@ import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import { useData } from 'src/StateProvider/Provider';
 import Logs from './Logs';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import CompleteDialog from './CompleteDialog';
 
 const Service = ({ workOrderId, allowedToEdit }) => {
 
@@ -45,6 +46,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const [quotationData, setQuotationData] = useState(null);
   const [disableCompleteFail, setDisableCompleteFail] = useState(false);
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
+  const [comment, setComment] = useState('')
 
   useEffect(() => {
     fetchService();
@@ -176,7 +178,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
 
   const updateServiceStatus = (uniqueId, status) => {
     axiosInstance()
-      .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status })
+      .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status, comment })
       .then(({ data: { data } }) => {
         fetchService();
         if (openCompleteDialog) {
@@ -185,6 +187,9 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        if(openCompleteDialog){
+          setOpenCompleteDialog(false)
+        }
       });
   };
 
@@ -597,11 +602,15 @@ const Service = ({ workOrderId, allowedToEdit }) => {
             setLogsDialog(false);
           }} />
       }
-      {openCompleteDialog && <ConfirmationDialogRaw
-        message={`All steps are done for ${selectedService?.serviceName}, Do you want to complete it?`}
-        onOk={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)}
-        onClose={() => setOpenCompleteDialog(false)} open={openCompleteDialog} />
-      }
+      {openCompleteDialog && (
+        <CompleteDialog 
+          serviceName={selectedService?.serviceName} 
+          comment={comment} 
+          setComment={setComment} 
+          updateStatus={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)} 
+          handleClose={() => setOpenCompleteDialog(false)} 
+        />
+      )}
     </Box >
   );
 };
