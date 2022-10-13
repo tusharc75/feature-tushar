@@ -17,7 +17,6 @@ import { Autocomplete } from '@material-ui/lab';
 import Grid from '@material-ui/core/Grid';
 
 export default function StepDialog({ handleClose, handleSucess, serviceId, stepId, steps }) {
-
   const toastConfig = useContext(CustomToastContext);
   const [stepDetails, setStepDetails] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -26,81 +25,109 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
   const [stepOption, setStepOption] = useState([]);
 
   useEffect(() => {
-    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Service Master`).then(({ data: { data } }) => {
-      setServices(data["Service Master"])
-    })
-    const options = []
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=Service Master`)
+      .then(({ data: { data } }) => {
+        setServices(data['Service Master']);
+      });
+    const options = [];
     steps?.forEach((e: any) => {
-      options.push({ optionValue: e._id, optionLabel: e.stepName })
-    })
-    setStepOption(options)
+      options.push({ optionValue: e._id, optionLabel: e.stepName });
+    });
+    setStepOption(options);
   }, []);
 
   useEffect(() => {
-    if (stepId != "") {
+    if (stepId != '') {
       axiosInstance()
         .get(`${serviceMaster.api}/steps/${serviceId}/${stepId}`)
         .then(({ data: { data } }) => {
           setStepDetails({
-            stepName: data?.stepName, leadDay: data?.leadDay, isPassFail: data?.isPassFail,
-            isFailAddon: data?.isFailAddon, failAddon: data?.failAddon, isPassAddon: data?.isPassAddon, passAddon: data?.passAddon,
-            isJumpStepPass: data?.isJumpStepPass, jumpStepsPass: data?.jumpStepsPass, isJumpStepFail: data?.isJumpStepFail, jumpStepsFail: data?.jumpStepsFail,
-            isQuoteRevisionOnFail: data?.isQuoteRevisionOnFail, isReturnStepOnFail: data?.isReturnStepOnFail, returnStepOnFail: data?.returnStepOnFail
-          })
+            stepName: data?.stepName,
+            leadDay: data?.leadDay,
+            isPassFail: data?.isPassFail,
+            isFailAddon: data?.isFailAddon,
+            failAddon: data?.failAddon,
+            isPassAddon: data?.isPassAddon,
+            passAddon: data?.passAddon,
+            isJumpStepPass: data?.isJumpStepPass,
+            jumpStepsPass: data?.jumpStepsPass,
+            isJumpStepFail: data?.isJumpStepFail,
+            jumpStepsFail: data?.jumpStepsFail,
+            isQuoteRevisionOnFail: data?.isQuoteRevisionOnFail,
+            isReturnToStepOnFail: data?.isReturnToStepOnFail,
+            returnToStepOnFail: data?.returnToStepOnFail,
+            isReturnToServiceOnFail: data?.isReturnToServiceOnFail,
+            returnToServiceOnFail: data?.returnToServiceOnFail
+          });
         })
-        .catch((err) => {
-        });
-    }
-    else {
+        .catch((err) => {});
+    } else {
       setStepDetails({
-        stepName: "", leadDay: 0, isPassFail: false, isFailAddon: false, failAddon: [], isPassAddon: false, passAddon: [],
-        isJumpStepPass: false, jumpStepsPass: [], isJumpStepFail: false, jumpStepsFail: [],
-        isQuoteRevisionOnFail: false, isReturnStepOnFail: false, returnStepOnFail: ""
-      })
+        stepName: '',
+        leadDay: 0,
+        isPassFail: false,
+        isFailAddon: false,
+        failAddon: [],
+        isPassAddon: false,
+        passAddon: [],
+        isJumpStepPass: false,
+        jumpStepsPass: [],
+        isJumpStepFail: false,
+        jumpStepsFail: [],
+        isQuoteRevisionOnFail: false,
+        isReturnToStepOnFail: false,
+        returnToStepOnFail: '',
+        isReturnToServiceOnFail: false,
+        returnToServiceOnFail: ''
+      });
     }
   }, []);
 
   const handleSubmit = (values) => {
-    values.leadDay = parseInt(values.leadDay)
-    setLoading(true)
-    if (stepId != "") {
-      axiosInstance().put(`${serviceMaster.api}/steps/${serviceId}/${stepId}`, values).then(({ data }) => {
-        handleSucess()
-        toastConfig.setToastConfig({
-          open: true,
-          message: data.message,
-          severity: 'success'
-        });
-        setLoading(false)
-      })
+    values.leadDay = parseInt(values.leadDay);
+    setLoading(true);
+    if (stepId != '') {
+      axiosInstance()
+        .put(`${serviceMaster.api}/steps/${serviceId}/${stepId}`, values)
+        .then(({ data }) => {
+          handleSucess();
+          toastConfig.setToastConfig({
+            open: true,
+            message: data.message,
+            severity: 'success'
+          });
+          setLoading(false);
+        })
         .catch((err) => {
-          setLoading(false)
+          setLoading(false);
+          toastConfig.setToastConfig(err);
+        });
+    } else {
+      axiosInstance()
+        .post(`${serviceMaster.api}/steps/${serviceId}`, values)
+        .then(({ data }) => {
+          handleSucess();
+          toastConfig.setToastConfig({
+            open: true,
+            message: data.message,
+            severity: 'success'
+          });
+          setLoading(false);
+        })
+        .catch((err) => {
+          setLoading(false);
           toastConfig.setToastConfig(err);
         });
     }
-    else {
-      axiosInstance().post(`${serviceMaster.api}/steps/${serviceId}`, values).then(({ data }) => {
-        handleSucess()
-        toastConfig.setToastConfig({
-          open: true,
-          message: data.message,
-          severity: 'success'
-        });
-        setLoading(false)
-      })
-        .catch((err) => {
-          setLoading(false)
-          toastConfig.setToastConfig(err);
-        });
-    }
-  }
+  };
 
   function validate(values) {
     const errors = {};
-    if (values.stepName === "") {
+    if (values.stepName === '') {
       errors['stepName'] = 'Please enter step name';
     }
-    if (values.leadDay === "" || parseInt(values.leadDay) < 0) {
+    if (values.leadDay === '' || parseInt(values.leadDay) < 0) {
       errors['leadDay'] = 'Please enter valid lead day';
     }
     return errors;
@@ -133,8 +160,8 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
           showManimizeMaximize={true}
           showRequiredLabel={false}
         ></CustomDialogHeader>
-        {stepDetails &&
-          <Formik initialValues={stepDetails} onSubmit={handleSubmit} validateOnMount validate={validate} >
+        {stepDetails && (
+          <Formik initialValues={stepDetails} onSubmit={handleSubmit} validateOnMount validate={validate}>
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <CustomDialogContent>
@@ -184,10 +211,10 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                       label="Pass Fail"
                     />
                   </Box>
-                  {values['isPassFail'] &&
+                  {values['isPassFail'] && (
                     <Box>
                       <Box pt={2}>
-                        <Grid container >
+                        <Grid container>
                           <Grid item xs={6}>
                             <FormControlLabel
                               control={
@@ -204,7 +231,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                             />
                           </Grid>
                           <Grid item xs={6}>
-                            {values['isPassAddon'] &&
+                            {values['isPassAddon'] && (
                               <Autocomplete
                                 options={services}
                                 fullWidth
@@ -214,22 +241,19 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                                 getOptionLabel={(option) => option.optionLabel}
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any) => {
-                                  setFieldValue('passAddon', newVal?.map((val) => val.optionValue));
+                                  setFieldValue(
+                                    'passAddon',
+                                    newVal?.map((val) => val.optionValue)
+                                  );
                                 }}
-                                renderInput={(params) => (
-                                  <TextField
-                                    {...params}
-                                    label="Pass Addon Services"
-                                    name="passAddon"
-                                    variant="outlined"
-                                  />
-                                )}
-                              />}
+                                renderInput={(params) => <TextField {...params} label="Pass Addon Services" name="passAddon" variant="outlined" />}
+                              />
+                            )}
                           </Grid>
                         </Grid>
                       </Box>
                       <Box pt={2}>
-                        <Grid container >
+                        <Grid container>
                           <Grid item xs={6}>
                             <FormControlLabel
                               control={
@@ -246,7 +270,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                             />
                           </Grid>
                           <Grid item xs={6}>
-                            {values['isFailAddon'] &&
+                            {values['isFailAddon'] && (
                               <Autocomplete
                                 options={services}
                                 fullWidth
@@ -256,22 +280,19 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                                 getOptionLabel={(option) => option.optionLabel}
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any) => {
-                                  setFieldValue('failAddon', newVal?.map((val) => val.optionValue));
+                                  setFieldValue(
+                                    'failAddon',
+                                    newVal?.map((val) => val.optionValue)
+                                  );
                                 }}
-                                renderInput={(params) => (
-                                  <TextField
-                                    {...params}
-                                    label="Fail Addon Services"
-                                    name="failAddon"
-                                    variant="outlined"
-                                  />
-                                )}
-                              />}
+                                renderInput={(params) => <TextField {...params} label="Fail Addon Services" name="failAddon" variant="outlined" />}
+                              />
+                            )}
                           </Grid>
                         </Grid>
                       </Box>
                       <Box pt={2}>
-                        <Grid container >
+                        <Grid container>
                           <Grid item xs={6}>
                             <FormControlLabel
                               control={
@@ -288,32 +309,31 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                             />
                           </Grid>
                           <Grid item xs={6}>
-                            {values['isJumpStepPass'] &&
+                            {values['isJumpStepPass'] && (
                               <Autocomplete
                                 options={stepOption}
                                 fullWidth
                                 multiple
                                 size="small"
-                                value={values?.jumpStepsPass ? stepOption?.filter((data: any) => values?.jumpStepsPass?.includes(data.optionValue)) : []}
+                                value={
+                                  values?.jumpStepsPass ? stepOption?.filter((data: any) => values?.jumpStepsPass?.includes(data.optionValue)) : []
+                                }
                                 getOptionLabel={(option) => option.optionLabel}
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any) => {
-                                  setFieldValue('jumpStepsPass', newVal?.map((val) => val.optionValue));
+                                  setFieldValue(
+                                    'jumpStepsPass',
+                                    newVal?.map((val) => val.optionValue)
+                                  );
                                 }}
-                                renderInput={(params) => (
-                                  <TextField
-                                    {...params}
-                                    label="Jump Steps On Pass"
-                                    name="jumpStepsPass"
-                                    variant="outlined"
-                                  />
-                                )}
-                              />}
+                                renderInput={(params) => <TextField {...params} label="Jump Steps On Pass" name="jumpStepsPass" variant="outlined" />}
+                              />
+                            )}
                           </Grid>
                         </Grid>
                       </Box>
                       <Box pt={2}>
-                        <Grid container >
+                        <Grid container>
                           <Grid item xs={6}>
                             <FormControlLabel
                               control={
@@ -330,32 +350,31 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                             />
                           </Grid>
                           <Grid item xs={6}>
-                            {values['isJumpStepFail'] &&
+                            {values['isJumpStepFail'] && (
                               <Autocomplete
                                 options={stepOption}
                                 fullWidth
                                 multiple
                                 size="small"
-                                value={values?.jumpStepsFail ? stepOption?.filter((data: any) => values?.jumpStepsFail?.includes(data.optionValue)) : []}
+                                value={
+                                  values?.jumpStepsFail ? stepOption?.filter((data: any) => values?.jumpStepsFail?.includes(data.optionValue)) : []
+                                }
                                 getOptionLabel={(option) => option.optionLabel}
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any) => {
-                                  setFieldValue('jumpStepsFail', newVal?.map((val) => val.optionValue));
+                                  setFieldValue(
+                                    'jumpStepsFail',
+                                    newVal?.map((val) => val.optionValue)
+                                  );
                                 }}
-                                renderInput={(params) => (
-                                  <TextField
-                                    {...params}
-                                    label="Jump Steps On Fail"
-                                    name="jumpStepsFail"
-                                    variant="outlined"
-                                  />
-                                )}
-                              />}
+                                renderInput={(params) => <TextField {...params} label="Jump Steps On Fail" name="jumpStepsFail" variant="outlined" />}
+                              />
+                            )}
                           </Grid>
                         </Grid>
                       </Box>
                       <Box pt={2}>
-                        <Grid container >
+                        <Grid container>
                           <Grid item xs={6}>
                             <FormControlLabel
                               control={
@@ -374,47 +393,83 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                         </Grid>
                       </Box>
                       <Box pt={2}>
-                        <Grid container >
+                        <Grid container>
                           <Grid item xs={6}>
                             <FormControlLabel
                               control={
                                 <Checkbox
-                                  name="isReturnStepOnFail"
-                                  checked={values?.isReturnStepOnFail}
+                                  name="isReturnToStepOnFail"
+                                  checked={values?.isReturnToStepOnFail}
                                   onChange={(e) => {
-                                    setFieldValue('isReturnStepOnFail', e.target.checked);
+                                    setFieldValue('isReturnToStepOnFail', e.target.checked);
                                   }}
                                   color="primary"
                                 />
                               }
-                              label="Return Step On Fail"
+                              label="Return To Step On Fail"
                             />
                           </Grid>
                           <Grid item xs={6}>
-                            {values['isReturnStepOnFail'] &&
+                            {values['isReturnToStepOnFail'] && (
                               <Autocomplete
                                 options={stepOption}
                                 fullWidth
                                 size="small"
-                                value={values?.returnStepOnFail ? stepOption?.find((data) => data?.optionValue === values?.returnStepOnFail) : ""}
+                                value={values?.returnToStepOnFail ? stepOption?.find((data) => data?.optionValue === values?.returnToStepOnFail) : ''}
                                 getOptionLabel={(option) => option.optionLabel}
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any) => {
-                                  setFieldValue('returnStepOnFail', newVal ? newVal?.optionValue : "");
+                                  setFieldValue('returnToStepOnFail', newVal ? newVal?.optionValue : '');
                                 }}
                                 renderInput={(params) => (
-                                  <TextField
-                                    {...params}
-                                    label="Return Step On Fail"
-                                    name="returnStepOnFail"
-                                    variant="outlined"
-                                  />
+                                  <TextField {...params} label="Return To Step On Fail" name="returnToStepOnFail" variant="outlined" />
                                 )}
-                              />}
+                              />
+                            )}
                           </Grid>
                         </Grid>
                       </Box>
-                    </Box>}
+                      <Box pt={2}>
+                        <Grid container>
+                          <Grid item xs={6}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  name="isReturnToServiceOnFail"
+                                  checked={values?.isReturnToServiceOnFail}
+                                  onChange={(e) => {
+                                    setFieldValue('isReturnToServiceOnFail', e.target.checked);
+                                  }}
+                                  color="primary"
+                                />
+                              }
+                              label="Return To Service On Fail"
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            {values['isReturnToServiceOnFail'] && (
+                              <Autocomplete
+                                options={services}
+                                fullWidth
+                                size="small"
+                                value={services?.find((data) => data?.optionValue === values?.returnToServiceOnFail) ?? ''}
+                                getOptionLabel={(option) => option?.optionLabel}
+                                renderOption={(option) => option?.optionLabel}
+                                // getOptionSelected={(option: any, val: any) => option?.optionValue === val?.optionValue}
+                                onChange={(_, newVal: any) => {
+                                  console.log(newVal.optionValue);
+                                  setFieldValue('returnToServiceOnFail', newVal?.optionValue ?? '');
+                                }}
+                                renderInput={(params) => (
+                                  <TextField {...params} label="Return To Service On Fail" name="returnToServiceOnFail" variant="outlined" />
+                                )}
+                              />
+                            )}
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    </Box>
+                  )}
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <Button
@@ -426,20 +481,14 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                   >
                     Cancel
                   </Button>
-                  <CustomButton
-                    loading={loading}
-                    disabled={loading}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    onClick={submitForm}>
+                  <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
                     Save
                   </CustomButton>
                 </CustomDialogFooter>
               </Form>
             )}
           </Formik>
-        }
+        )}
       </Fragment>
     </Dialog>
   );
