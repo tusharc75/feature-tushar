@@ -85,8 +85,9 @@ const Service = ({ workOrderId, allowedToEdit }) => {
             setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
           }
 
-        
-          if (preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(d.status))?.length === preWorkService?.length) {
+
+          if (preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(d.status))?.length === preWorkService?.length
+            && postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length) {
             if (services.findIndex(d => d.type === 'quotation') > -1) {
               setSelectedService(services[services.findIndex(d => d.type === 'quotation')])
             }
