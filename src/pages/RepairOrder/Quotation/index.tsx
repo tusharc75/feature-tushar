@@ -89,7 +89,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
-      .get(`${repairOrder.api}/${repairOrderData._id}/quotation`)
+      .get(`${repairOrder.api}/${repairOrderData._id}/repairorder/quotation`)
       .then(({ data: { data } }) => {
         setQuotationData(data)
         fetchFields(data?.currency);
@@ -448,24 +448,10 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
     }
   };
 
-  const defaultTotalValue = useMemo(() => {
-    let result = '0';
-    if (quotationData && quotationData?.currency) {
-      result = `${currencyCodeToSymbol(quotationData.currency)} 0`;
-    }
-    return result;
-  }, [quotationData]);
-
   const handleChangeVersion = (versionNumber) => {
     setVersionId(quotationData?.versions[versionNumber]?._id || null)
     setCurrentVersion(versionNumber);
     setShowAllVersionStatus(false);
-  };
-
-  const findProfitPercentage = (CP, Profit) => {
-    let parsedCP = parseInt(CP?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
-    let profit = parseInt(Profit?.amountWithouCurrencyCode?.replace(/[^0-9]/g, '') ?? 0);
-    return ((profit * 100) / parsedCP).toFixed(2);
   };
 
   const cloneVersion = () => {

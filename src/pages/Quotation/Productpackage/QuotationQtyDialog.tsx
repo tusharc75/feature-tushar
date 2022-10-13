@@ -235,52 +235,44 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
       }
       let rows: any = []
       selectedProducts.forEach(element => {
-
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
         rows.push({ ...element, ...calValues })
+      });
 
-        if (element.parentId) {
-          const parent: any = material.filter((e) => e._id === element.parentId)
-          const sameParent: any = material.filter((e) => e.parentId === element.parentId)
-          sameParent.forEach((ele) => {
+      const parentIds = uniq(map(selectedProducts, "parentId"));
+      parentIds?.forEach((parentId) => {
+        const parent: any = material.filter((e) => e._id === parentId)
+        const sameParent: any = material.filter((e) => e.parentId === parentId)
+        sameParent.forEach((ele) => {
+          rows.forEach((element) => {
             if (ele._id === element._id) {
-              for (var key in values) {
-                element[key] = values[key];
-              }
+              Object.assign(ele, element);
             }
           })
-
-          sumOnParent(parent, sameParent)
-          rows = [...rows, ...parent]
-        }
-      });
+        })
+        sumOnParent(parent, sameParent)
+        rows = [...rows, ...parent]
+      })
       handleSaveData(rows)
     }
     else {
-      if (rowData.parentId !== null && !showConfirmationDialog) {
-        setShowConfirmationDialog(true);
-      }
-      else {
-        let rows: any = [{ ...rowData, ...values }]
-        if (rowData.parentId) {
-          const parent: any = material.filter((e) => e._id === rowData.parentId)
-          const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
-          sameParent.forEach((element) => {
-            if (element.materialId === rowData.materialId) {
-              for (var key in values) {
-                element[key] = values[key];
-              }
+      let rows: any = [{ ...rowData, ...values }]
+      if (rowData.parentId) {
+        const parent: any = material.filter((e) => e._id === rowData.parentId)
+        const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
+        sameParent.forEach((element) => {
+          if (element.materialId === rowData.materialId) {
+            for (var key in values) {
+              element[key] = values[key];
             }
-          })
-
-          sumOnParent(parent, sameParent)
-          rows = [...rows, ...parent]
-        }
-        const child = material.filter((e) => e.parentId === rowData._id)
-        resetValueZero(child)
-        handleSaveData([...rows, ...child])
-        setShowConfirmationDialog(false);
+          }
+        })
+        sumOnParent(parent, sameParent)
+        rows = [...rows, ...parent]
       }
+      const child = material.filter((e) => e.parentId === rowData._id)
+      resetValueZero(child)
+      handleSaveData([...rows, ...child])
     }
   };
 

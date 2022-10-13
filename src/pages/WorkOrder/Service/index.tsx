@@ -9,7 +9,6 @@ import routes from 'src/components/Helpers/Routes';
 import Steps from './Steps';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { findLastIndex } from 'lodash';
 import Quotation from '../Quotation';
 import AssignUserDialog from './AssignUserDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -24,7 +23,7 @@ import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import { useData } from 'src/StateProvider/Provider';
 import Logs from './Logs';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import CompleteDialog from './CompleteDialog';
 
 const Service = ({ workOrderId, allowedToEdit }) => {
 
@@ -45,6 +44,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const [quotationData, setQuotationData] = useState(null);
   const [disableCompleteFail, setDisableCompleteFail] = useState(false);
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
+  const [comment, setComment] = useState('')
 
   useEffect(() => {
     fetchService();
@@ -84,6 +84,15 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           } else {
             setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
           }
+
+
+          if (preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(d.status))?.length === preWorkService?.length
+            && postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length) {
+            if (services.findIndex(d => d.type === 'quotation') > -1) {
+              setSelectedService(services[services.findIndex(d => d.type === 'quotation')])
+            }
+          }
+
         } else {
           setServiceSteps([]);
         }
@@ -105,21 +114,18 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   };
 
   const fetchQuotationData = () => {
-    axiosInstance()
-      .get(`${routes.workOrder.path}/${workOrderId}`)
-      .then(({ data: { data } }) => {
-        axiosInstance()
-          .get(`${repairOrder.api}/${data?.repairOrder?.optionValue}/quotation`)
-          .then(({ data: { data } }) => {
-            let keys = Object.keys(data.versions);
+    axiosInstance().get(`${routes.workOrder.path}/${workOrderId}`).then(({ data: { data } }) => {
+      axiosInstance().get(`${repairOrder.api}/${data?.repairOrder?.optionValue}/workorder/quotation`)
+        .then(({ data: { data } }) => {
+          if (data) {
+            let keys = Object.keys(data?.versions);
             if (keys?.length) {
               const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
-              if ([QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer]?.includes(status)) {
-                setQuotationData({ quotationNumber: data?.quotationNumber, status: status })
-              }
+              setQuotationData({ quotationNumber: data?.quotationNumber, status: status })
             }
-          })
-      })
+          }
+        })
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -176,15 +182,19 @@ const Service = ({ workOrderId, allowedToEdit }) => {
 
   const updateServiceStatus = (uniqueId, status) => {
     axiosInstance()
-      .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status })
+      .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status, comment })
       .then(({ data: { data } }) => {
         fetchService();
         if (openCompleteDialog) {
           setOpenCompleteDialog(false)
         }
+        setComment("")
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        if (openCompleteDialog) {
+          setOpenCompleteDialog(false)
+        }
       });
   };
 
@@ -217,7 +227,28 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const isAllowedToServiceEdit = (allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?._id === user?._id))
 
   const stylesForEveryTab = (selectedService, data) => {
-    if (data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)) {
+    if (data?.type === 'quotation' && selectedService?.type !== "quotation") {
+      return {
+        borderColor: 'rgb(224, 224, 224)',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        backgroundColor: quotationData?.status === QUOTATION_STATUS.acceptByCustomer ? '#E9FFE8' : quotationData?.status === QUOTATION_STATUS.rejectByCustomer ? '#FFE9EA' : 'white',
+        cursor: 'pointer',
+        borderRadius: '3px'
+      };
+    }
+    else if (data?.type === 'quotation' && selectedService?.type === "quotation") {
+      return {
+        borderColor: '#329592',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        backgroundColor: quotationData?.status === QUOTATION_STATUS.acceptByCustomer ? '#E9FFE8' : quotationData?.status === QUOTATION_STATUS.rejectByCustomer ? '#FFE9EA' : 'white',
+        cursor: 'pointer',
+        boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
+        borderRadius: '3px'
+      };
+    }
+    else if (data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)) {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
@@ -597,11 +628,20 @@ const Service = ({ workOrderId, allowedToEdit }) => {
             setLogsDialog(false);
           }} />
       }
-      {openCompleteDialog && <ConfirmationDialogRaw
-        message={`All steps are done for ${selectedService?.serviceName}, Do you want to complete it?`}
-        onOk={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)}
-        onClose={() => setOpenCompleteDialog(false)} open={openCompleteDialog} />
-      }
+      {openCompleteDialog && (
+        <CompleteDialog
+          serviceName={selectedService?.serviceName}
+          comment={comment}
+          setComment={setComment}
+          updateStatus={() =>
+            updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)
+          }
+          handleClose={() => {
+            setComment("");
+            setOpenCompleteDialog(false)
+          }}
+        />
+      )}
     </Box >
   );
 };

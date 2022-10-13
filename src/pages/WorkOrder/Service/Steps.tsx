@@ -125,6 +125,7 @@ const Service = ({
         setDisabledFieldSteps(completedSteps.map((d) => d.stepId));
         setDisableCompleteFail(!allStepsDone);
 
+        console.log(inSteps, allStepsDone, selectedServiceStatus === WORKORDER_SERVICE_STATUS.inProgress)
         if (inSteps && allStepsDone && selectedServiceStatus === WORKORDER_SERVICE_STATUS.inProgress) {
           setOpenCompleteDialog(true)
           setInSteps(false)
