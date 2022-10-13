@@ -452,13 +452,13 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                                 options={services}
                                 fullWidth
                                 size="small"
-                                value={
-                                  values?.returnToServiceOnFail ? stepOption?.find((data) => data?.optionValue === values?.returnToServiceOnFail) : ''
-                                }
-                                getOptionLabel={(option) => option.optionLabel}
-                                getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                                value={services?.find((data) => data?.optionValue === values?.returnToServiceOnFail) ?? ''}
+                                getOptionLabel={(option) => option?.optionLabel}
+                                renderOption={(option) => option?.optionLabel}
+                                // getOptionSelected={(option: any, val: any) => option?.optionValue === val?.optionValue}
                                 onChange={(_, newVal: any) => {
-                                  setFieldValue('returnToServiceOnFail', newVal ? newVal?.optionValue : '');
+                                  console.log(newVal.optionValue);
+                                  setFieldValue('returnToServiceOnFail', newVal?.optionValue ?? '');
                                 }}
                                 renderInput={(params) => (
                                   <TextField {...params} label="Return To Service On Fail" name="returnToServiceOnFail" variant="outlined" />
