@@ -2086,7 +2086,14 @@ export const WORKORDER_SERVICE_COLOR = {
 export const WORKORDER_SERVICE_STATUS = {
   pending: 'Pending',
   inProgress: 'In-Progress',
-  complete: 'Complete',
-  fail: 'Fail',
+  completed: 'Completed',
+  failed: 'Failed',
+};
+
+export const WORKORDER_SERVICE_STEP_STATUS = {
+  completed: 'Completed',
+  passed: 'Passed',
+  failed: 'Failed',
+  end: 'end',
 };
 

@@ -58,10 +58,10 @@ const Logs = ({ handleClose, workOrderId = null }) => {
   };
 
   const operations = {
-    Start: 'Start',
-    Complete: 'Complete',
-    Pass: 'Pass',
-    Fail: 'Fail',
+    start: 'Start',
+    completed: 'Completed',
+    passed: 'Passed',
+    failed: 'Failed',
     valueAdded: 'valueAdded',
     valueUpdated: 'valueUpdated'
   };
@@ -72,16 +72,16 @@ const Logs = ({ handleClose, workOrderId = null }) => {
       default:
         icon = <BsExclamationLg />;
         break;
-      case operations.Complete:
+      case operations.completed:
         icon = <BsCheckLg />;
         break;
-      case operations.Start:
+      case operations.start:
         icon = <BsFillSkipEndFill />;
         break;
-      case operations.Pass:
+      case operations.passed:
         icon = <BsCheckLg />;
         break;
-      case operations.Fail:
+      case operations.failed:
         icon = <BsExclamationLg />;
         break;
       case operations.valueAdded:
@@ -99,16 +99,16 @@ const Logs = ({ handleClose, workOrderId = null }) => {
       default:
         color = { '--icon-color': '#D15241', '--icon-bg-color': '#FEE4E0' } as React.CSSProperties;
         break;
-      case operations.Complete:
+      case operations.completed:
         color = { '--icon-color': '#138A86', '--icon-bg-color': '#E2FBEC' } as React.CSSProperties;
         break;
-      case operations.Start:
+      case operations.start:
         color = { '--icon-color': '#138A86', '--icon-bg-color': '#E2FBEC' } as React.CSSProperties;
         break;
-      case operations.Pass:
+      case operations.passed:
         color = { '--icon-color': '#138A86', '--icon-bg-color': '#E2FBEC' } as React.CSSProperties;
         break;
-      case operations.Fail:
+      case operations.failed:
         color = { '--icon-color': '#D15241', '--icon-bg-color': '#FEE4E0' } as React.CSSProperties;
         break;
       case operations.valueAdded:
@@ -126,16 +126,16 @@ const Logs = ({ handleClose, workOrderId = null }) => {
       default:
         message = `<strong>${row.user?.optionLabel}</strong> updated <strong>${row?.service?.optionLabel}</strong> `;
         break;
-      case operations.Complete:
+      case operations.completed:
         message = `<strong>${row.user?.optionLabel}</strong> <span>Completed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeComplete}>COMPLETE</span>`;
         break;
-      case operations.Start:
+      case operations.start:
         message = `<strong>${row.user?.optionLabel}</strong> <span>started</span> <strong>${row?.service?.optionLabel}</strong> `;
         break;
-      case operations.Pass:
+      case operations.passed:
         message = `<strong>${row.user?.optionLabel}</strong> <span>Passed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgePass}>PASS</span>`;
         break;
-      case operations.Fail:
+      case operations.failed:
         message = `<strong>${row.user?.optionLabel}</strong> <span>Failed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeFail}>FAIL</span>`;
         break;
       case operations.valueAdded:
