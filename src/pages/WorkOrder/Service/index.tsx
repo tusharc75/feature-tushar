@@ -535,6 +535,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                     getServiceData={getServiceData}
                     serviceData={serviceData}
                     serviceSteps={serviceSteps}
+                    serviceIndex={serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}
                     selectedServiceStatus={selectedService.status}
                     updateServiceStatus={updateServiceStatus}
                     handleAddService={handleAddService}

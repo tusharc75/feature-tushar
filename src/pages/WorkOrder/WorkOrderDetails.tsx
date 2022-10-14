@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Divider } from '@material-ui/core';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Divider, CircularProgress } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -26,6 +26,7 @@ import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
 import View from './View';
 import Consumables from './Consumables';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 const WorkOrderDetails = () => {
   const renderedFrom = camelCase(routes?.workOrder.title);
@@ -49,6 +50,7 @@ const WorkOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
+  const [previewPdf, setPreviewPdf] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -139,6 +141,35 @@ const WorkOrderDetails = () => {
     }
   }, [isSmallScreen, tabValue]);
 
+  const previewWorkOrderPdf = () => {
+    setPreviewPdf(true);
+
+    axiosInstance()
+      .get(`${workOrder.api}/${id}/pdf`)
+      .then(({ data }) => {
+        axiosInstance()
+          .get(`user/download?fileName=${data.data.fileName}`, {
+            responseType: 'blob'
+          })
+          .then(({ data }) => {
+            const file = new Blob([data], { type: 'application/pdf' });
+            const fileURL = URL.createObjectURL(file);
+            const pdfWindow = window.open();
+            pdfWindow.location.href = fileURL;
+            toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+            setPreviewPdf(false);
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+            setPreviewPdf(false);
+          });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setPreviewPdf(false);
+      });
+  };
+
   return (
     <>
       <Grid container className="headerbox">
@@ -149,6 +180,17 @@ const WorkOrderDetails = () => {
           <Paper>
             {workOrderData ? (
               <DetailsPageHeader heading={workOrderData?.workOrderNumber} mainPoints={null} showHeading={true}>
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                  color="primary"
+                  size="small"
+                  onClick={previewWorkOrderPdf}
+                  className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                  endIcon={previewPdf ? <CircularProgress size={20} /> : null}
+                >
+                  {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
+                </Button>
                 {permissions?.workOrder?.isUpdate && allowedToEdit && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
