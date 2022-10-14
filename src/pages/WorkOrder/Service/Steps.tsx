@@ -17,15 +17,9 @@ import {
   yupSchema
 } from 'src/constants/helpers';
 import { Box, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import moment from 'moment';
-import { RiShareForwardFill } from 'react-icons/ri';
-import { TiArrowBack } from 'react-icons/ti';
-import FormTypes from 'src/components/Helpers/FormTypes';
-import { FaDiceOne } from 'react-icons/fa';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -114,6 +108,7 @@ const Service = ({
   const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
+
 
   useEffect(() => {
     axiosInstance()
@@ -259,255 +254,98 @@ const Service = ({
       });
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
-
   return stepList?.length ? (
     <Box>
       <div className={classes.root}>
         {serviceDetails?.steps?.map((step, index) => {
-          const {stepData } = getFields(step);
+          const { stepData } = getFields(step);
           return (
-            <Box key={step._id} className={classes.accordion} style={{cursor: stepData?.passFailStatus || !stepData?.status ? "default" : "pointer"}} onClick={() => {
-              if(stepData?.passFailStatus || !stepData?.status) return
-              setSelectedStep(step)
-            }}>
-              <Box
-                aria-controls="panel2a-content"
-                id="panel2a-header"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 16 }}
-                className={`${classes.accordionHeading} ${[WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus)
-                  && classes.green} ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed && classes.red}`}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <Box mr={2} className={classes.badge}>
+            <Box
+              key={step._id}
+              border={1}
+              borderColor={"grey.300"}
+              mb={2}
+              style={{ cursor: !stepData?.status ? "default" : "pointer", padding: 16 }}
+              className={`${classes.accordionHeading} ${[WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus)
+                && classes.green} ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed && classes.red}`}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (!stepData?.status) return
+                setSelectedStep(step)
+              }}>
+              <Box sx={{ display: 'flex' }}  >
+                <Box sx={{ display: 'flex' }} >
+                  <Box mt={0.5} className={classes.badge}>
                     {serviceIndex}.{index + 1}
                   </Box>
-                  <Typography className={classes.heading} style={{ fontWeight: '600' }}>
-                    {step.stepName}
-                  </Typography>
-                </div>
-                {!stepData?.status ? (
-                  <Box mb={2}>
-                    <Button
-                      variant="outlined"
-                      color="secondary"
-                      size="small"
-                      disabled={!allowedToEdit}
-                      onClick={() => {
-                        if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) {
-                          updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
-                        }
-                        handleStartEnd('start', step._id);
-                      }}
-                    >
-                      Start
-                    </Button>
+                  <Box ml={2}>
+                    <Typography className={classes.heading} style={{ fontWeight: '600' }}>
+                      {step.stepName}
+                    </Typography>
                   </Box>
-                ) : stepData?.passFailStatus ? (
-                  <Box ml={1}>
-                    <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
-                  </Box>
-                ) : stepData?.status === 'start' ? (
-                  step?.isPassFail ? (
-                    <Box display="flex" mb={2}>
+                </Box>
+                <Box sx={{ justifyContent: 'flex-end' }}>
+                  {!stepData?.status ? (
+                    <Box mb={2}>
                       <Button
                         variant="outlined"
                         color="secondary"
                         size="small"
-                        onClick={() => {
-                          handlePassFail('Pass', step._id);
+                        disabled={!allowedToEdit}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) {
+                            updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
+                          }
+                          handleStartEnd('start', step._id);
                         }}
                       >
-                        Pass
-                      </Button>
-                      <Box marginX={1} />
-                      <DeleteButton text="Fail" onClick={() => handlePassFail('Fail', step._id)} />
-                    </Box>
-                  ) : (
-                    <Box display="flex" mb={2}>
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        size="small"
-                        onClick={() => {
-                          handlePassFail('Complete', step._id);
-                        }}
-                      >
-                        Complete
+                        Start
                       </Button>
                     </Box>
-                  )
-                ) : null}
+                  ) : stepData?.passFailStatus ? (
+                    <Box ml={1}>
+                      <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
+                    </Box>
+                  ) : stepData?.status === 'start' ? (
+                    step?.isPassFail ? (
+                      <Box display="flex" mb={2}>
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step._id);
+                          }}
+                        >
+                          Pass
+                        </Button>
+                        <Box marginX={1} />
+                        <DeleteButton text="Fail" onClick={(e) => {
+                          e.stopPropagation()
+                          handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id)
+                        }} />
+                      </Box>
+                    ) : (
+                      <Box display="flex" mb={2}>
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step._id);
+                          }}
+                        >
+                          Complete
+                        </Button>
+                      </Box>
+                    )
+                  ) : null}
+                </Box>
               </Box>
-              {/* <Box style={{ display: 'block', padding: '16px' }}> */}
-              {/* {!stepData?.status || stepData?.status === 'start' ? (
-                  <>
-                    {stepData?.status === 'start' ? (
-                      step?.isPassFail ? (
-                        <Box display="flex" mb={2}>
-                          <Button
-                            variant="outlined"
-                            color="secondary"
-                            size="small"
-                            onClick={() => {
-                              handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step._id);
-                            }}
-                          >
-                            Pass
-                          </Button>
-                          <Box marginX={1} />
-                          <DeleteButton
-                            text="Fail"
-                            onClick={() => handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id)} />
-                        </Box>
-                      ) : (
-                        <Box display="flex" mb={2}>
-                          <Button
-                            variant="outlined"
-                            color="secondary"
-                            size="small"
-                            onClick={() => {
-                              handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step._id);
-                            }}
-                          >
-                            Complete
-                          </Button>
-                        </Box>
-                      )
-                    ) : null}
-                  </>
-                ) : null} */}
-              {/* {fieldData.fields.length ? (
-                  <>
-                    <Formik
-                      initialValues={fieldData.values}
-                      validationSchema={yupSchema(fieldData.fields)}
-                      onSubmit={(values) => handleSubmit(values, step)}
-                      validate={validate}
-                      enableReinitialize
-                    >
-                      {({ values, errors, setFieldValue, touched, submitForm }) => (
-                        <Fragment>
-                          <Form autoComplete="off" autoCorrect="off" noValidate>
-                            {fieldData.formsData.length > 0 &&
-                              fieldData.formsData?.map((form, index1) => {
-                                return form?.name ? (
-                                  <div key={index1}>
-                                    <div className="detail-box-content">
-                                      <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                                      <h2 className="form-label-style form-label-quotes">{form?.name}</h2>
-                                    </div>
-                                    <Box marginY={2}>
-                                      <Grid spacing={3} container>
-                                        {form?.sectionFields?.map((field, index2) => (
-                                          <Grid key={index2} item xs={12} sm={6} md={6}>
-                                            <FormTypes
-                                              {...field}
-                                              row={field.type === 'radio'}
-                                              fieldData={field}
-                                              disabled={disabledFieldSteps.includes(step._id) || (Boolean(workOrderId) && field.disableOnEdit)}
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={field.option}
-                                              setFieldValue={(name, value) => {
-                                                setFieldValue(name, value);
-                                              }}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field?.isTooltip || false}
-                                              tooltipMessage={field?.tooltipMessage}
-                                              size="small"
-                                              imageOrFileUploadCompletePercentage={null}
-                                            />
-                                          </Grid>
-                                        ))}
-                                      </Grid>
-                                    </Box>
-                                  </div>
-                                ) : (
-                                  form?.sectionFields.map((field) => (
-                                    <FormTypes
-                                      {...field}
-                                      fieldData={field}
-                                      disabled={disabledFieldSteps.includes(step._id) || (Boolean(workOrderId) && field.disableOnEdit)}
-                                      isNew={Boolean(workOrderId)}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      style={{ visibility: 'hidden' }}
-                                    />
-                                  ))
-                                );
-                              })}
-                          </Form>
-                          <Box display="flex" justifyContent="flex-end">
-                            {disabledFieldSteps.includes(step._id) ? (
-                              <CustomButton
-                                variant="contained"
-                                color="primary"
-                                type="submit"
-                                disabled={!allowedToEdit}
-                                onClick={(e) => {
-                                  setDisabledFieldSteps(disabledFieldSteps.filter((d) => d !== step._id));
-                                }}
-                              >
-                                Edit
-                              </CustomButton>
-                            ) : (
-                              <>
-                                {[WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.failed,
-                                WORKORDER_SERVICE_STEP_STATUS.completed, WORKORDER_SERVICE_STEP_STATUS.end].includes(stepData?.status) && (
-                                    <Button
-                                      color="primary"
-                                      variant='outlined'
-                                      size="small"
-                                      onClick={() => setDisabledFieldSteps([...disabledFieldSteps, step._id])}
-                                    >
-                                      Cancle
-                                    </Button>
-                                  )}
-                                <Box marginX={1} />
-                                <CustomButton
-                                  variant="contained"
-                                  color="primary"
-                                  type="submit"
-                                  disabled={!allowedToEdit}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    // handleScroll(errors);
-                                    submitForm();
-                                  }}
-                                >
-                                  Save
-                                </CustomButton>
-                              </>
-                            )}
-                          </Box>
-                        </Fragment>
-                      )}
-                    </Formik>
-                  </>
-                ) : null} */}
-              <Box style={{ padding: stepData?.startDate ? '16px' : '0px' }}>
+              <Box>
                 <Grid container>
                   {stepData?.startDate ? (
                     <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>
@@ -531,23 +369,18 @@ const Service = ({
                   ) : null}
                 </Grid>
               </Box>
-              {/* </Box> */}
             </Box>
           );
         })}
       </div>
-
       {Boolean(selectedStep) && (
         <StepFieldsDialog
           fieldData={getFields(selectedStep)?.fieldData}
-          handleClose={() => setSelectedStep(null)} 
-          handleSubmit={handleSubmit}  
-          step={selectedStep} 
-          disabledFieldSteps={disabledFieldSteps}
-          workOrderId={workOrderId}
+          handleClose={() => setSelectedStep(null)}
+          handleSubmit={handleSubmit}
+          step={selectedStep}
         />
       )}
-
       {addServiceConfirmation.open && (
         <ConfirmationDialog
           open={true}

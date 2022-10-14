@@ -2,18 +2,37 @@ import React from 'react';
 import { Dialog, Box, Grid, Button } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { FaDiceOne } from 'react-icons/fa';
-
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { yupSchema } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import { isMobile, isTablet } from 'react-device-detect';
 
-const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, disabledFieldSteps, workOrderId }) => {
+const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step }) => {
+
+  const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
 
   return (
-    <Dialog open fullWidth maxWidth="md" onClose={handleClose}>
-      <CustomDialogHeader title={step.stepName} onClose={handleClose} />
+    <Dialog
+      open
+      fullWidth
+      fullScreen={fullScreen || isMobile || isTablet}
+      maxWidth="md"
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          handleClose()
+        }
+      }}>
+      <CustomDialogHeader
+        title={step.stepName}
+        onClose={handleClose}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen((prevState) => !prevState);
+        }}
+        showManimizeMaximize={true}
+      />
       {fieldData.fields.length ? (
         <Formik
           initialValues={fieldData.values}
@@ -42,7 +61,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, disabled
                                       {...field}
                                       row={field.type === 'radio'}
                                       fieldData={field}
-                                      disabled={disabledFieldSteps.includes(step._id) || (Boolean(workOrderId) && field.disableOnEdit)}
+                                      disabled={field.disableOnEdit}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
@@ -70,8 +89,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, disabled
                             <FormTypes
                               {...field}
                               fieldData={field}
-                              disabled={disabledFieldSteps.includes(step._id) || (Boolean(workOrderId) && field.disableOnEdit)}
-                              isNew={Boolean(workOrderId)}
+                              disabled={field.disableOnEdit}
                               values={values}
                               errors={errors}
                               touched={touched}
