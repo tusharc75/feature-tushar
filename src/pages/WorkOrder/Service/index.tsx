@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { QUOTATION_STATUS, repairOrder, workOrder, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
+import { QUOTATION_STATUS, repairOrder, workOrder, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -75,7 +75,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
 
           let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
           let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
-            [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(d.status)
+            [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
           );
           if (tempServiceIndex > -1) {
             tempServiceSortedArray[tempServiceIndex - 1]
@@ -86,7 +86,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           }
 
 
-          if (preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(d.status))?.length === preWorkService?.length
+          if (preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length === preWorkService?.length
             && postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length) {
             if (services.findIndex(d => d.type === 'quotation') > -1) {
               setSelectedService(services[services.findIndex(d => d.type === 'quotation')])
@@ -263,7 +263,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
         borderColor: '#329592',
         borderWidth: '1px',
         borderStyle: 'solid',
-        backgroundColor: data?.status === 'Complete' ? '#E9FFE8' : data?.status === 'Fail' ? '#FFE9EA' : 'white',
+        backgroundColor: data?.status === WORKORDER_SERVICE_STEP_STATUS.completed ? '#E9FFE8' : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed ? '#FFE9EA' : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -272,7 +272,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
-        backgroundColor: data?.status === 'Complete' ? '#E9FFE8' : data?.status === 'Fail' ? '#FFE9EA' : 'white',
+        backgroundColor: data?.status === WORKORDER_SERVICE_STEP_STATUS.completed ? '#E9FFE8' : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed ? '#FFE9EA' : 'white',
         borderColor: 'rgb(224, 224, 224)',
         cursor: 'pointer'
       };
@@ -477,18 +477,18 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                   Consume
                 </MenuItem>
                 <MenuItem
-                  disabled={disableCompleteFail || [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(selectedService?.status)}
+                  disabled={disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)}
                   onClick={() => {
-                    updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete);
+                    updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
                     setAnchorEl(null);
                   }}
                 >
                   Complete
                 </MenuItem>
                 <MenuItem
-                  disabled={disableCompleteFail || [WORKORDER_SERVICE_STATUS.complete, WORKORDER_SERVICE_STATUS.fail].includes(selectedService?.status)}
+                  disabled={disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)}
                   onClick={() => {
-                    updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.fail);
+                    updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.failed);
                     setAnchorEl(null);
                   }}
                 >
@@ -535,6 +535,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                     getServiceData={getServiceData}
                     serviceData={serviceData}
                     serviceSteps={serviceSteps}
+                    serviceIndex={serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}
                     selectedServiceStatus={selectedService.status}
                     updateServiceStatus={updateServiceStatus}
                     handleAddService={handleAddService}
@@ -634,7 +635,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           comment={comment}
           setComment={setComment}
           updateStatus={() =>
-            updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.complete)
+            updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed)
           }
           handleClose={() => {
             setComment("");
