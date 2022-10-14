@@ -13,6 +13,7 @@ import {
   setFieldsInAscendingOrder,
   workOrder,
   WORKORDER_SERVICE_STATUS,
+  WORKORDER_SERVICE_STEP_STATUS,
   yupSchema
 } from 'src/constants/helpers';
 import { Box, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip } from '@material-ui/core';
@@ -122,13 +123,13 @@ const Service = ({
         const steps = data?.steps?.map((d) => d.stepName);
         setStepList(steps);
         const completedSteps = serviceData.filter(
-          (d) => d.uniqueId === uniqueId && d.serviceId === serviceId && ['Pass', 'Complete', 'Fail', 'end'].includes(d?.passFailStatus)
+          (d) => d.uniqueId === uniqueId && d.serviceId === serviceId && [WORKORDER_SERVICE_STEP_STATUS.passed,
+          WORKORDER_SERVICE_STEP_STATUS.completed, WORKORDER_SERVICE_STEP_STATUS.failed, WORKORDER_SERVICE_STEP_STATUS.end].includes(d?.passFailStatus)
         );
         const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
         setDisabledFieldSteps(completedSteps.map((d) => d.stepId));
         setDisableCompleteFail(!allStepsDone);
 
-        console.log(inSteps, allStepsDone, selectedServiceStatus === WORKORDER_SERVICE_STATUS.inProgress);
         if (inSteps && allStepsDone && selectedServiceStatus === WORKORDER_SERVICE_STATUS.inProgress) {
           setOpenCompleteDialog(true);
           setInSteps(false);
@@ -173,7 +174,6 @@ const Service = ({
       serviceId: serviceId,
       stepId: step?._id
     };
-
     axiosInstance()
       .put(`${workOrder.api}/update-steps-data/${workOrderId}`, { ...tempData, ...values })
       .then(({ data }) => {
@@ -183,7 +183,6 @@ const Service = ({
           message: data.message
         });
         getServiceData();
-
         if (step?.isPassFail) {
           const type = automatePassFail(values, step);
           handlePassFail(type, step?._id);
@@ -198,9 +197,7 @@ const Service = ({
   const automatePassFail = (values: any, step: any): string => {
     const fields = getFields(step).fieldData?.fields.filter((field) => field.type === 'decimal');
     let invalidValues: any = {};
-
     const keys = Object.keys(values);
-
     keys.forEach((k) => {
       const field = fields.find((f: any) => f?.fieldName === k);
       if (field && field.fieldName === k) {
@@ -211,8 +208,7 @@ const Service = ({
         }
       }
     });
-
-    return Object.keys(invalidValues).length > 0 ? 'Fail' : 'Pass';
+    return Object.keys(invalidValues).length > 0 ? WORKORDER_SERVICE_STEP_STATUS.failed : WORKORDER_SERVICE_STEP_STATUS.passed;
   };
 
   const handleStartEnd = (type, stepId) => {
@@ -246,9 +242,9 @@ const Service = ({
       })
       .then(({ data }) => {
         const result = data?.data;
-        if (type === 'Pass' && result?.isPassAddon && result?.passAddon?.length) {
+        if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isPassAddon && result?.passAddon?.length) {
           setAddServiceConfirmation({ open: true, services: result?.passAddon });
-        } else if (type === 'Fail' && result?.isFailAddon && result?.failAddon?.length) {
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
           setAddServiceConfirmation({ open: true, services: result?.failAddon });
         }
         toastConfig.setToastConfig({
@@ -282,9 +278,8 @@ const Service = ({
                 aria-controls="panel2a-content"
                 id="panel2a-header"
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 16 }}
-                className={`${classes.accordionHeading} ${['Pass', 'Complete'].includes(stepData?.passFailStatus) && classes.green} ${
-                  stepData?.passFailStatus === 'Fail' && classes.red
-                }`}
+                className={`${classes.accordionHeading} ${[WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus)
+                  && classes.green} ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed && classes.red}`}
               >
                 <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
                   <Box mr={2} className={classes.badge}>
@@ -358,13 +353,15 @@ const Service = ({
                             color="secondary"
                             size="small"
                             onClick={() => {
-                              handlePassFail('Pass', step._id);
+                              handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step._id);
                             }}
                           >
                             Pass
                           </Button>
                           <Box marginX={1} />
-                          <DeleteButton text="Fail" onClick={() => handlePassFail('Fail', step._id)} />
+                          <DeleteButton
+                            text="Fail"
+                            onClick={() => handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id)} />
                         </Box>
                       ) : (
                         <Box display="flex" mb={2}>
@@ -373,7 +370,7 @@ const Service = ({
                             color="secondary"
                             size="small"
                             onClick={() => {
-                              handlePassFail('Complete', step._id);
+                              handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step._id);
                             }}
                           >
                             Complete
@@ -477,16 +474,17 @@ const Service = ({
                               </CustomButton>
                             ) : (
                               <>
-                                {['Pass', 'Complete', 'Fail', 'end'].includes(stepData?.status) && (
-                                  <Button
-                                    color="primary"
-                                    variant="outlined"
-                                    size="small"
-                                    onClick={() => setDisabledFieldSteps([...disabledFieldSteps, step._id])}
-                                  >
-                                    Cancle
-                                  </Button>
-                                )}
+                                {[WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.failed,
+                                WORKORDER_SERVICE_STEP_STATUS.completed, WORKORDER_SERVICE_STEP_STATUS.end].includes(stepData?.status) && (
+                                    <Button
+                                      color="primary"
+                                      variant='outlined'
+                                      size="small"
+                                      onClick={() => setDisabledFieldSteps([...disabledFieldSteps, step._id])}
+                                    >
+                                      Cancle
+                                    </Button>
+                                  )}
                                 <Box marginX={1} />
                                 <CustomButton
                                   variant="contained"

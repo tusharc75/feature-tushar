@@ -1424,7 +1424,7 @@ const FormTypes = (props) => {
         }}
         color={(values[name] > rest?.maxValue || values[name] < rest?.minValue) ? 'error' : 'secondary'}
       >
-        {(values[name] > rest?.maxValue || values[name] < rest?.minValue) ? `${label} should be between ${rest?.minValue} and ${rest?.maxValue}` : `Valid value`}
+        {(values[name] > rest?.maxValue || values[name] < rest?.minValue) ? `Step is considered successful if the value is between ${rest?.minValue} and ${rest?.maxValue}` : `Valid value`}
       </Typography>}
     </InfoLabel>
   ) : type === 'formula' ? (
