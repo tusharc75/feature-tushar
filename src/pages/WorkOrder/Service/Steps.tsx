@@ -275,10 +275,10 @@ const Service = ({
               }}>
               <Box sx={{ display: 'flex' }}  >
                 <Box sx={{ display: 'flex' }} >
-                  <Box mt={0.5} className={classes.badge}>
-                    {serviceIndex}.{index + 1}
+                  <Box>
+                    <Chip color="primary"  label={`${serviceIndex}.${index + 1}`} />
                   </Box>
-                  <Box ml={2}>
+                  <Box ml={1}>
                     <Typography className={classes.heading} style={{ fontWeight: '600' }}>
                       {step.stepName}
                     </Typography>
@@ -372,7 +372,7 @@ const Service = ({
             </Box>
           );
         })}
-      </div>
+      </div >
       {Boolean(selectedStep) && (
         <StepFieldsDialog
           fieldData={getFields(selectedStep)?.fieldData}
@@ -381,25 +381,27 @@ const Service = ({
           step={selectedStep}
         />
       )}
-      {addServiceConfirmation.open && (
-        <ConfirmationDialog
-          open={true}
-          message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
-            ?.map((e) => e.serviceName)
-            ?.toString()}`}
-          onClose={() => {
-            setAddServiceConfirmation({ open: false, services: [] });
-          }}
-          onOk={() => {
-            handleAddService(
-              addServiceConfirmation.services?.map((e) => e._id),
-              uniqueId
-            );
-            setAddServiceConfirmation({ open: false, services: [] });
-          }}
-        />
-      )}
-    </Box>
+      {
+        addServiceConfirmation.open && (
+          <ConfirmationDialog
+            open={true}
+            message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
+              ?.map((e) => e.serviceName)
+              ?.toString()}`}
+            onClose={() => {
+              setAddServiceConfirmation({ open: false, services: [] });
+            }}
+            onOk={() => {
+              handleAddService(
+                addServiceConfirmation.services?.map((e) => e._id),
+                uniqueId
+              );
+              setAddServiceConfirmation({ open: false, services: [] });
+            }}
+          />
+        )
+      }
+    </Box >
   ) : (
     <Box p={2} height={500} bgcolor="white">
       <CommonSkeleton lenArray={[...Array(10).keys()]} />
