@@ -24,7 +24,7 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
-import StepFieldsDialog from './StepFieldsDialog'
+import StepFieldsDialog from './StepFieldsDialog';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -108,7 +108,7 @@ const Service = ({
   const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
-
+  const [validStep, setValidStep] = useState({});
 
   useEffect(() => {
     axiosInstance()
@@ -118,8 +118,15 @@ const Service = ({
         const steps = data?.steps?.map((d) => d.stepName);
         setStepList(steps);
         const completedSteps = serviceData.filter(
-          (d) => d.uniqueId === uniqueId && d.serviceId === serviceId && [WORKORDER_SERVICE_STEP_STATUS.passed,
-          WORKORDER_SERVICE_STEP_STATUS.completed, WORKORDER_SERVICE_STEP_STATUS.failed, WORKORDER_SERVICE_STEP_STATUS.end].includes(d?.passFailStatus)
+          (d) =>
+            d.uniqueId === uniqueId &&
+            d.serviceId === serviceId &&
+            [
+              WORKORDER_SERVICE_STEP_STATUS.passed,
+              WORKORDER_SERVICE_STEP_STATUS.completed,
+              WORKORDER_SERVICE_STEP_STATUS.failed,
+              WORKORDER_SERVICE_STEP_STATUS.end
+            ].includes(d?.passFailStatus)
         );
         const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
         setDisabledFieldSteps(completedSteps.map((d) => d.stepId));
@@ -160,7 +167,26 @@ const Service = ({
         };
       }
     }
-    return { fieldData, stepData };
+
+    let isStepValid = true;
+    let givenValues = {};
+    const requiredFields = fieldsDataForCreate.filter((f) => f.required);
+
+    requiredFields.forEach((f) => {
+      if (fieldData.values[f.fieldName]) {
+        givenValues[f.fieldName] = fieldData.values[f.fieldName];
+      } else {
+        if (givenValues[f.fieldName]) delete givenValues[f.fieldName];
+      }
+    });
+
+    if(requiredFields.length === Object.keys(givenValues).length) {
+      isStepValid = true
+    } else {
+      isStepValid = false
+    }
+
+    return { fieldData, stepData, isStepValid };
   };
 
   const handleSubmit = async (values, step) => {
@@ -182,7 +208,7 @@ const Service = ({
           const type = automatePassFail(values, step);
           handlePassFail(type, step?._id);
         }
-        setSelectedStep(null)
+        setSelectedStep(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -258,25 +284,27 @@ const Service = ({
     <Box>
       <div className={classes.root}>
         {serviceDetails?.steps?.map((step, index) => {
-          const { stepData } = getFields(step);
+          const { stepData, isStepValid } = getFields(step);
           return (
             <Box
               key={step._id}
               border={1}
-              borderColor={"grey.300"}
+              borderColor={'grey.300'}
               mb={2}
-              style={{ cursor: !stepData?.status ? "default" : "pointer", padding: 16 }}
-              className={`${classes.accordionHeading} ${[WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus)
-                && classes.green} ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed && classes.red}`}
+              style={{ cursor: !stepData?.status ? 'default' : 'pointer', padding: 16 }}
+              className={`${classes.accordionHeading} ${
+                [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus) && classes.green
+              } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed && classes.red}`}
               onClick={(e) => {
-                e.stopPropagation()
-                if (!stepData?.status) return
-                setSelectedStep(step)
-              }}>
-              <Box sx={{ display: 'flex' }}  >
-                <Box sx={{ display: 'flex' }} >
+                e.stopPropagation();
+                if (!stepData?.status) return;
+                setSelectedStep(step);
+              }}
+            >
+              <Box sx={{ display: 'flex' }}>
+                <Box sx={{ display: 'flex' }}>
                   <Box>
-                    <Chip color="primary"  label={`${serviceIndex}.${index + 1}`} />
+                    <Chip color="primary" label={`${serviceIndex}.${index + 1}`} />
                   </Box>
                   <Box ml={1}>
                     <Typography className={classes.heading} style={{ fontWeight: '600' }}>
@@ -293,7 +321,7 @@ const Service = ({
                         size="small"
                         disabled={!allowedToEdit}
                         onClick={(e) => {
-                          e.stopPropagation()
+                          e.stopPropagation();
                           if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) {
                             updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
                           }
@@ -307,7 +335,7 @@ const Service = ({
                     <Box ml={1}>
                       <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
                     </Box>
-                  ) : stepData?.status === 'start' ? (
+                  ) : stepData?.status === 'start' && isStepValid ? (
                     step?.isPassFail ? (
                       <Box display="flex" mb={2}>
                         <Button
@@ -315,17 +343,20 @@ const Service = ({
                           color="secondary"
                           size="small"
                           onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
                             handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step._id);
                           }}
                         >
                           Pass
                         </Button>
                         <Box marginX={1} />
-                        <DeleteButton text="Fail" onClick={(e) => {
-                          e.stopPropagation()
-                          handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id)
-                        }} />
+                        <DeleteButton
+                          text="Fail"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id);
+                          }}
+                        />
                       </Box>
                     ) : (
                       <Box display="flex" mb={2}>
@@ -334,7 +365,7 @@ const Service = ({
                           color="secondary"
                           size="small"
                           onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
                             handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step._id);
                           }}
                         >
@@ -372,7 +403,7 @@ const Service = ({
             </Box>
           );
         })}
-      </div >
+      </div>
       {Boolean(selectedStep) && (
         <StepFieldsDialog
           fieldData={getFields(selectedStep)?.fieldData}
@@ -381,27 +412,25 @@ const Service = ({
           step={selectedStep}
         />
       )}
-      {
-        addServiceConfirmation.open && (
-          <ConfirmationDialog
-            open={true}
-            message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
-              ?.map((e) => e.serviceName)
-              ?.toString()}`}
-            onClose={() => {
-              setAddServiceConfirmation({ open: false, services: [] });
-            }}
-            onOk={() => {
-              handleAddService(
-                addServiceConfirmation.services?.map((e) => e._id),
-                uniqueId
-              );
-              setAddServiceConfirmation({ open: false, services: [] });
-            }}
-          />
-        )
-      }
-    </Box >
+      {addServiceConfirmation.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
+            ?.map((e) => e.serviceName)
+            ?.toString()}`}
+          onClose={() => {
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
+          onOk={() => {
+            handleAddService(
+              addServiceConfirmation.services?.map((e) => e._id),
+              uniqueId
+            );
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
+        />
+      )}
+    </Box>
   ) : (
     <Box p={2} height={500} bgcolor="white">
       <CommonSkeleton lenArray={[...Array(10).keys()]} />
