@@ -109,6 +109,7 @@ const Service = ({
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
   const [validStep, setValidStep] = useState({});
+  const [stepState, setStepState] = useState(null);
 
   useEffect(() => {
     axiosInstance()
@@ -180,10 +181,10 @@ const Service = ({
       }
     });
 
-    if(requiredFields.length === Object.keys(givenValues).length) {
-      isStepValid = true
+    if (requiredFields.length === Object.keys(givenValues).length) {
+      isStepValid = true;
     } else {
-      isStepValid = false
+      isStepValid = false;
     }
 
     return { fieldData, stepData, isStepValid };
@@ -281,7 +282,7 @@ const Service = ({
   };
 
   return stepList?.length ? (
-    <Box>
+    <Box sx={{ position: 'relative', overflow: 'hidden' }}>
       <div className={classes.root}>
         {serviceDetails?.steps?.map((step, index) => {
           const { stepData, isStepValid } = getFields(step);
@@ -291,7 +292,12 @@ const Service = ({
               border={1}
               borderColor={'grey.300'}
               mb={2}
-              style={{ cursor: !stepData?.status ? 'default' : 'pointer', padding: 16 }}
+              style={{
+                cursor: !stepData?.status ? 'default' : 'pointer',
+                padding: 16,
+                transition: 'background .5s ease',
+                backgroundColor: selectedStep?._id == step._id ? 'rgb(22, 51, 64 , 10%)' : ''
+              }}
               className={`${classes.accordionHeading} ${
                 [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus) && classes.green
               } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed && classes.red}`}
@@ -299,6 +305,7 @@ const Service = ({
                 e.stopPropagation();
                 if (!stepData?.status) return;
                 setSelectedStep(step);
+                setStepState(stepData);
               }}
             >
               <Box sx={{ display: 'flex' }}>
@@ -376,7 +383,7 @@ const Service = ({
                   ) : null}
                 </Box>
               </Box>
-              <Box>
+              {/* <Box>
                 <Grid container>
                   {stepData?.startDate ? (
                     <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>
@@ -399,17 +406,44 @@ const Service = ({
                     </Grid>
                   ) : null}
                 </Grid>
-              </Box>
+              </Box> */}
             </Box>
           );
         })}
       </div>
-      {Boolean(selectedStep) && (
+      {/* {Boolean(selectedStep) && (
         <StepFieldsDialog
+          isOpen={Boolean(selectedStep)}
           fieldData={getFields(selectedStep)?.fieldData}
           handleClose={() => setSelectedStep(null)}
           handleSubmit={handleSubmit}
           step={selectedStep}
+        />
+      )} */}
+      <StepFieldsDialog
+        isOpen={Boolean(selectedStep)}
+        fieldData={getFields(selectedStep)?.fieldData}
+        handleClose={() => setSelectedStep(null)}
+        handleSubmit={handleSubmit}
+        step={selectedStep}
+        stepData={stepState}
+      />
+      {addServiceConfirmation.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
+            ?.map((e) => e.serviceName)
+            ?.toString()}`}
+          onClose={() => {
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
+          onOk={() => {
+            handleAddService(
+              addServiceConfirmation.services?.map((e) => e._id),
+              uniqueId
+            );
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
         />
       )}
       {addServiceConfirmation.open && (
