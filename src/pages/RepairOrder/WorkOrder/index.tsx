@@ -32,7 +32,6 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
-
   const [services, setServices] = useState([]);
 
   useEffect(() => {
@@ -175,8 +174,9 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
 
     data?.material?.forEach((element) => {
       if (
-        element?.services?.filter((e) => e?.preWork && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(e?.status))
-          ?.length
+        element?.services?.filter(
+          (e) => e?.preWork && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status)
+        )?.length
       ) {
         setNextStep(false);
       } else {
@@ -194,6 +194,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     if (parent?.services && parent?.services?.length) {
       services = parent?.services
         ?.filter((d) => d.packageId === undefined || d.packageId === null || d.packageId === '')
+        ?.sort((a, b) => b?.order - a?.order)
         ?.map((d) => {
           return {
             ...d,
@@ -250,7 +251,8 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
   const getPackageSubRows = (parent, subRowPackage: any) => {
     const services = parent?.services
       ?.filter((d) => d.packageId === subRowPackage._id)
-      .map((d) => {
+      ?.sort((a, b) => a?.order - b?.order)
+      ?.map((d) => {
         return {
           ...d,
           materialId: d._id,
@@ -433,7 +435,6 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                 columns={columns}
                 data={rowsData}
                 onSelect={(data) => {
-                  console.log(data?.filter((d) => d.type === 'service'));
                   setServices(data?.filter((d) => d.type === 'service') || []);
                   setSelectedProducts(data);
                 }}
