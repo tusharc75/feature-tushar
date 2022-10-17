@@ -108,6 +108,7 @@ const Service = ({
   const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
+  const [validStep, setValidStep] = useState({});
   const [stepState, setStepState] = useState(null);
 
   useEffect(() => {
@@ -167,7 +168,26 @@ const Service = ({
         };
       }
     }
-    return { fieldData, stepData };
+
+    let isStepValid = true;
+    let givenValues = {};
+    const requiredFields = fieldsDataForCreate.filter((f) => f.required);
+
+    requiredFields.forEach((f) => {
+      if (fieldData.values[f.fieldName]) {
+        givenValues[f.fieldName] = fieldData.values[f.fieldName];
+      } else {
+        if (givenValues[f.fieldName]) delete givenValues[f.fieldName];
+      }
+    });
+
+    if (requiredFields.length === Object.keys(givenValues).length) {
+      isStepValid = true;
+    } else {
+      isStepValid = false;
+    }
+
+    return { fieldData, stepData, isStepValid };
   };
 
   const handleSubmit = async (values, step) => {
@@ -265,7 +285,7 @@ const Service = ({
     <Box sx={{ position: 'relative', overflow: 'hidden' }}>
       <div className={classes.root}>
         {serviceDetails?.steps?.map((step, index) => {
-          const { stepData } = getFields(step);
+          const { stepData, isStepValid } = getFields(step);
           return (
             <Box
               key={step._id}
@@ -275,8 +295,8 @@ const Service = ({
               style={{
                 cursor: !stepData?.status ? 'default' : 'pointer',
                 padding: 16,
-                backgroundColor: selectedStep?._id === step._id ? 'rgb(22, 51, 64, 0.1)' : '',
-                transition: 'background .5s'
+                transition: 'background .5s ease',
+                backgroundColor: selectedStep?._id == step._id ? 'rgb(22, 51, 64 , 10%)' : ''
               }}
               className={`${classes.accordionHeading} ${
                 [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus) && classes.green
@@ -322,7 +342,7 @@ const Service = ({
                     <Box ml={1}>
                       <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
                     </Box>
-                  ) : stepData?.status === 'start' ? (
+                  ) : stepData?.status === 'start' && isStepValid ? (
                     step?.isPassFail ? (
                       <Box display="flex" mb={2}>
                         <Button
@@ -408,6 +428,24 @@ const Service = ({
         step={selectedStep}
         stepData={stepState}
       />
+      {addServiceConfirmation.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
+            ?.map((e) => e.serviceName)
+            ?.toString()}`}
+          onClose={() => {
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
+          onOk={() => {
+            handleAddService(
+              addServiceConfirmation.services?.map((e) => e._id),
+              uniqueId
+            );
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
+        />
+      )}
       {addServiceConfirmation.open && (
         <ConfirmationDialog
           open={true}
