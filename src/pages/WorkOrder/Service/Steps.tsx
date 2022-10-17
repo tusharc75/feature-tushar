@@ -24,7 +24,7 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
-import StepFieldsDialog from './StepFieldsDialog'
+import StepFieldsDialog from './StepFieldsDialog';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -108,7 +108,7 @@ const Service = ({
   const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
-
+  const [stepState, setStepState] = useState(null);
 
   useEffect(() => {
     axiosInstance()
@@ -118,8 +118,15 @@ const Service = ({
         const steps = data?.steps?.map((d) => d.stepName);
         setStepList(steps);
         const completedSteps = serviceData.filter(
-          (d) => d.uniqueId === uniqueId && d.serviceId === serviceId && [WORKORDER_SERVICE_STEP_STATUS.passed,
-          WORKORDER_SERVICE_STEP_STATUS.completed, WORKORDER_SERVICE_STEP_STATUS.failed, WORKORDER_SERVICE_STEP_STATUS.end].includes(d?.passFailStatus)
+          (d) =>
+            d.uniqueId === uniqueId &&
+            d.serviceId === serviceId &&
+            [
+              WORKORDER_SERVICE_STEP_STATUS.passed,
+              WORKORDER_SERVICE_STEP_STATUS.completed,
+              WORKORDER_SERVICE_STEP_STATUS.failed,
+              WORKORDER_SERVICE_STEP_STATUS.end
+            ].includes(d?.passFailStatus)
         );
         const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
         setDisabledFieldSteps(completedSteps.map((d) => d.stepId));
@@ -182,7 +189,7 @@ const Service = ({
           const type = automatePassFail(values, step);
           handlePassFail(type, step?._id);
         }
-        setSelectedStep(null)
+        setSelectedStep(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -255,7 +262,7 @@ const Service = ({
   };
 
   return stepList?.length ? (
-    <Box>
+    <Box sx={{ position: 'relative', overflow: 'hidden' }}>
       <div className={classes.root}>
         {serviceDetails?.steps?.map((step, index) => {
           const { stepData } = getFields(step);
@@ -263,20 +270,28 @@ const Service = ({
             <Box
               key={step._id}
               border={1}
-              borderColor={"grey.300"}
+              borderColor={'grey.300'}
               mb={2}
-              style={{ cursor: !stepData?.status ? "default" : "pointer", padding: 16 }}
-              className={`${classes.accordionHeading} ${[WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus)
-                && classes.green} ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed && classes.red}`}
+              style={{
+                cursor: !stepData?.status ? 'default' : 'pointer',
+                padding: 16,
+                backgroundColor: selectedStep?._id === step._id ? 'rgb(22, 51, 64, 0.1)' : '',
+                transition: 'background .5s'
+              }}
+              className={`${classes.accordionHeading} ${
+                [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus) && classes.green
+              } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed && classes.red}`}
               onClick={(e) => {
-                e.stopPropagation()
-                if (!stepData?.status) return
-                setSelectedStep(step)
-              }}>
-              <Box sx={{ display: 'flex' }}  >
-                <Box sx={{ display: 'flex' }} >
+                e.stopPropagation();
+                if (!stepData?.status) return;
+                setSelectedStep(step);
+                setStepState(stepData);
+              }}
+            >
+              <Box sx={{ display: 'flex' }}>
+                <Box sx={{ display: 'flex' }}>
                   <Box>
-                    <Chip color="primary"  label={`${serviceIndex}.${index + 1}`} />
+                    <Chip color="primary" label={`${serviceIndex}.${index + 1}`} />
                   </Box>
                   <Box ml={1}>
                     <Typography className={classes.heading} style={{ fontWeight: '600' }}>
@@ -293,7 +308,7 @@ const Service = ({
                         size="small"
                         disabled={!allowedToEdit}
                         onClick={(e) => {
-                          e.stopPropagation()
+                          e.stopPropagation();
                           if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) {
                             updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
                           }
@@ -315,17 +330,20 @@ const Service = ({
                           color="secondary"
                           size="small"
                           onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
                             handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step._id);
                           }}
                         >
                           Pass
                         </Button>
                         <Box marginX={1} />
-                        <DeleteButton text="Fail" onClick={(e) => {
-                          e.stopPropagation()
-                          handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id)
-                        }} />
+                        <DeleteButton
+                          text="Fail"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id);
+                          }}
+                        />
                       </Box>
                     ) : (
                       <Box display="flex" mb={2}>
@@ -334,7 +352,7 @@ const Service = ({
                           color="secondary"
                           size="small"
                           onClick={(e) => {
-                            e.stopPropagation()
+                            e.stopPropagation();
                             handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step._id);
                           }}
                         >
@@ -345,7 +363,7 @@ const Service = ({
                   ) : null}
                 </Box>
               </Box>
-              <Box>
+              {/* <Box>
                 <Grid container>
                   {stepData?.startDate ? (
                     <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>
@@ -368,40 +386,47 @@ const Service = ({
                     </Grid>
                   ) : null}
                 </Grid>
-              </Box>
+              </Box> */}
             </Box>
           );
         })}
-      </div >
-      {Boolean(selectedStep) && (
+      </div>
+      {/* {Boolean(selectedStep) && (
         <StepFieldsDialog
+          isOpen={Boolean(selectedStep)}
           fieldData={getFields(selectedStep)?.fieldData}
           handleClose={() => setSelectedStep(null)}
           handleSubmit={handleSubmit}
           step={selectedStep}
         />
+      )} */}
+      <StepFieldsDialog
+        isOpen={Boolean(selectedStep)}
+        fieldData={getFields(selectedStep)?.fieldData}
+        handleClose={() => setSelectedStep(null)}
+        handleSubmit={handleSubmit}
+        step={selectedStep}
+        stepData={stepState}
+      />
+      {addServiceConfirmation.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
+            ?.map((e) => e.serviceName)
+            ?.toString()}`}
+          onClose={() => {
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
+          onOk={() => {
+            handleAddService(
+              addServiceConfirmation.services?.map((e) => e._id),
+              uniqueId
+            );
+            setAddServiceConfirmation({ open: false, services: [] });
+          }}
+        />
       )}
-      {
-        addServiceConfirmation.open && (
-          <ConfirmationDialog
-            open={true}
-            message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
-              ?.map((e) => e.serviceName)
-              ?.toString()}`}
-            onClose={() => {
-              setAddServiceConfirmation({ open: false, services: [] });
-            }}
-            onOk={() => {
-              handleAddService(
-                addServiceConfirmation.services?.map((e) => e._id),
-                uniqueId
-              );
-              setAddServiceConfirmation({ open: false, services: [] });
-            }}
-          />
-        )
-      }
-    </Box >
+    </Box>
   ) : (
     <Box p={2} height={500} bgcolor="white">
       <CommonSkeleton lenArray={[...Array(10).keys()]} />
