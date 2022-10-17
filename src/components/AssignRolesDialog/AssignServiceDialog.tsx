@@ -5,7 +5,15 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, getLocalStorageArrayData, serviceMaster, workOrder } from 'src/constants/helpers';
+import {
+  gridLoadingTimeout,
+  isObjectEmpty,
+  packages,
+  prepareDataForGrid,
+  getLocalStorageArrayData,
+  serviceMaster,
+  workOrder
+} from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
@@ -16,11 +24,12 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 let searchTimeout;
 
 const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [] }) => {
-
   const renderedFrom = `${routes.serviceMaster.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  const { state: { permissions, selectedEntity } }: any = useData();
+  const {
+    state: { permissions, selectedEntity }
+  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [isAssigning, setAssigning] = useState(false);
@@ -57,26 +66,28 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
-    axiosInstance().get('/field?resource=Service Master&view=true').then(({ data: { data } }) => {
-      let columns = [];
-      let rendererNames = [];
-      data.forEach((o) => {
-        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packages.path);
-        if (currentColumn !== null) {
-          columns = [...columns, currentColumn?.columnData];
-          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-            rendererNames.push(currentColumn?.rendererName);
+    axiosInstance()
+      .get('/field?resource=Service Master&view=true')
+      .then(({ data: { data } }) => {
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packages.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
+            }
           }
-        }
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...defaultColumns, ...columns]);
       });
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-      tempFrameworkComponent = {
-        ...tempFrameworkComponent
-      };
-      setFrameWorkComponent({ ...tempFrameworkComponent });
-      columns = [...columns, ...getStaticFields()];
-      setColumns([...defaultColumns, ...columns]);
-    });
   };
 
   const fetchData = () => {
@@ -85,30 +96,32 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
       gridApi.setRowData([]);
     }
     const queryString = getQueryString();
-    axiosInstance().get(`${serviceMaster.api}${queryString}`).then(({ data }) => {
-      let rows = data.data.map((u) => {
-        let finalObject = prepareDataForGrid(u);
-        finalObject['isChecked'] = false;
-        finalObject['id'] = u._id;
-        finalObject['qty'] = 1;
-        const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id);
-        if (qtyAdded.length) {
-          finalObject['qty'] = qtyAdded[0].qty;
-        }
-        return {
-          ...finalObject
-        };
-      });
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      dispatch({
-        type: 'selection',
-        selectedRecords: savedRecords
-      });
-      dispatch({ type: 'initialize', data: rows, count: data.count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
+    axiosInstance()
+      .get(`${serviceMaster.api}${queryString}`)
+      .then(({ data }) => {
+        let rows = data.data.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          finalObject['isChecked'] = false;
+          finalObject['id'] = u._id;
+          finalObject['qty'] = 1;
+          const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id);
+          if (qtyAdded.length) {
+            finalObject['qty'] = qtyAdded[0].qty;
+          }
+          return {
+            ...finalObject
+          };
+        });
+        const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+        dispatch({
+          type: 'selection',
+          selectedRecords: savedRecords
+        });
+        dispatch({ type: 'initialize', data: rows, count: data.count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -128,7 +141,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
         updatedFilters.push(e);
-      })
+      });
     }
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
@@ -159,15 +172,14 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
           services: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) }))
         })
         .then(() => {
-          onSuccess()
+          onSuccess();
           setAssigning(false);
         })
         .catch((err) => {
           setAssigning(false);
           toastConfig.setToastConfig(err);
         });
-    }
-    else {
+    } else {
       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) })));
     }
   };
@@ -192,13 +204,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
   };
 
   return (
-    <Dialog
-      fullWidth
-      maxWidth="md"
-      fullScreen={true}
-      open={true}
-      onClose={handleClose}
-      aria-labelledby="assign-roles-dialog">
+    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader
         title={`Assign ${routes.serviceMaster.title}`}
         showManimizeMaximize={false}
@@ -208,8 +214,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
       <CustomDialogContent>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={6} className="d-flex align-items-center gap-1">
-            </Grid>
+            <Grid item xs={6} className="d-flex align-items-center gap-1"></Grid>
             <Grid item xs={6} className={styles.filter_side}>
               <Box className={styles.filter_side_header} component="div">
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
@@ -221,7 +226,8 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
                   variant="contained"
                   endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
                 >
-                  Add{' '}  {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
+                  Add{' '}
+                  {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
                     ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
                     : ''}
                 </Button>

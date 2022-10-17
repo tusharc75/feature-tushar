@@ -35,6 +35,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { ResourceDropdown } from './resourceDropdown';
 
 import styles from '../Form.module.scss';
+import { MinMax } from '../AddField/minMax';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
@@ -139,6 +140,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.isMinMaxValue = false;
         values.minValue = 0;
         values.maxValue = 0;
+        values.minValueServiceAdd = '';
+        values.maxValueServiceAdd = '';
       }
       if (!values.unique && (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
       ) {
@@ -247,6 +250,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isMinMaxValue = values?.isMinMaxValue || false;
             ele.minValue = values?.minValue || 0;
             ele.maxValue = values?.maxValue || 0;
+            ele.minValueServiceAdd = values.minValueServiceAdd ? values.minValueServiceAdd : '';
+            ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
             ele.isSystemGenerate = values?.isSystemGenerate || false;
 
@@ -1215,63 +1220,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     />
                   )}
                   {fieldData.type === 'decimal' && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name="isMinMaxValue"
-                          checked={values['isMinMaxValue']}
-                          onChange={(e) => {
-                            setFieldValue('isMinMaxValue', e.target.checked);
-                            handleValuesChange({
-                              isMinMaxValue: e.target.checked
-                            });
-                          }}
-                          color="primary"
-                        />
-                      }
-                      label="Min Max Value"
+                    <MinMax
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      handleValuesChange={handleValuesChange}
                     />
                   )}
-                  {values['isMinMaxValue'] &&
-                    <Grid spacing={3} container>
-                      <Grid item xs={12} sm={6} md={6}>
-                        <TextField
-                          fullWidth
-                          variant="outlined"
-                          label={"Min Value"}
-                          name={"minValue"}
-                          margin="dense"
-                          type="number"
-                          value={values["minValue"]}
-                          onChange={(e) => {
-                            setFieldValue('minValue', parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-                            handleValuesChange({
-                              minValue: parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
-                            });
-                          }
-                          }
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={6}>
-                        <TextField
-                          fullWidth
-                          variant="outlined"
-                          label={"Max Value"}
-                          name={"maxValue"}
-                          margin="dense"
-                          type="number"
-                          value={values["maxValue"]}
-                          onChange={(e) => {
-                            setFieldValue('maxValue', parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-                            handleValuesChange({
-                              maxValue: parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
-                            });
-                          }
-                          }
-                        />
-                      </Grid>
-                    </Grid>
-                  }
+
                   {module === "form-builder-master" &&
                     <Box>
                       <hr />
