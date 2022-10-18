@@ -313,7 +313,7 @@ const Service = ({
               style={{
                 cursor: !stepData?.status ? 'default' : 'pointer',
                 transition: 'background .5s ease',
-                backgroundColor: selectedStep?._id === step._id ? '#ECFDF7' : '#FFFFFF'
+                backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : '#FFFFFF'
               }}
               className={`${classes.accordionHeading} ${
                 [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus) && classes.green

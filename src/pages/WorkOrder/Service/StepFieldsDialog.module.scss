@@ -1,6 +1,15 @@
 .sidebarContainer {
   --sidebar-width: 440px;
   --spacing: 12px;
+  @media all and (min-width: 768px) and (max-width: 857px) {
+    --sidebar-width: 340px;
+  }
+  @media all and (max-width: 507px) {
+    --sidebar-width: 340px;
+  }
+  @media all and (max-width: 387px) {
+    --sidebar-width: 278px;
+  }
 
   position: absolute;
   top: 0;
