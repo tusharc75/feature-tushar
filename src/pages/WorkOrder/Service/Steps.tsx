@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme: Theme) =>
         padding: '16px 20px'
       },
       ['@media (min-width:1024px)']: {
-        padding: '16px 40px'
+        padding: '16px 60px'
       },
       '& > div': {
         alignItems: 'center',
@@ -328,7 +328,12 @@ const Service = ({
               <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
                 <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px' }}>
                   <Box sx={{ padding: '0 20px 0 0' }}>
-                    <Checkbox className={classes.checkbox} aria-label="Step Selected checkbox" checked={selectedStep?._id === step._id} />
+                    <Checkbox
+                      disabled={!stepData?.status}
+                      className={classes.checkbox}
+                      aria-label="Step Selected checkbox"
+                      checked={selectedStep?._id === step._id}
+                    />
                   </Box>
                   <Box>
                     <Chip color="primary" label={`${serviceIndex}.${index + 1}`} />
