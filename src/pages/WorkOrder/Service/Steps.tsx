@@ -231,7 +231,6 @@ const Service = ({
           const type = automatePassFail(values, step);
           handlePassFail(type, step?._id);
         }
-        setSelectedStep(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -451,6 +450,7 @@ const Service = ({
       <StepFieldsDialog
         isOpen={Boolean(selectedStep)}
         fieldData={getFields(selectedStep)?.fieldData}
+        isStepValid={getFields(selectedStep)?.isStepValid}
         handleClose={() => setSelectedStep(null)}
         handleSubmit={handleSubmit}
         step={selectedStep}
