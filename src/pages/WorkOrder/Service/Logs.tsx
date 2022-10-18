@@ -127,16 +127,16 @@ const Logs = ({ handleClose, workOrderId = null }) => {
         message = `<strong>${row.user?.optionLabel}</strong> updated <strong>${row?.service?.optionLabel}</strong> `;
         break;
       case operations.completed:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>Completed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeComplete}>COMPLETE</span>`;
+        message = `<strong>${row.user?.optionLabel}</strong> <span>Completed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeComplete}>${operations.completed}</span>`;
         break;
       case operations.start:
         message = `<strong>${row.user?.optionLabel}</strong> <span>started</span> <strong>${row?.service?.optionLabel}</strong> `;
         break;
       case operations.passed:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>Passed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgePass}>PASS</span>`;
+        message = `<strong>${row.user?.optionLabel}</strong> <span>Passed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgePass}>${operations.passed}</span>`;
         break;
       case operations.failed:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>Failed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeFail}>FAIL</span>`;
+        message = `<strong>${row.user?.optionLabel}</strong> <span>Failed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeFail}>${operations.failed}</span>`;
         break;
       case operations.valueAdded:
         message = `<strong>${row.user?.optionLabel}</strong> added new <strong>${row?.service?.optionLabel}</strong> `;
