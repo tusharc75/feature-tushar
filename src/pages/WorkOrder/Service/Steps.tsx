@@ -86,7 +86,12 @@ const useStyles = makeStyles((theme: Theme) =>
     green: {
       backgroundColor: 'rgba(0,255,0,.1)'
     },
-    red: { backgroundColor: 'rgba(255,0,0,.1)' },
+    red: {
+      backgroundColor: 'rgba(255,0,0,.1)'
+    },
+    white: {
+      backgroundColor: 'white'
+    },
     checkbox: {
       padding: '0',
       color: '#000000',
@@ -316,11 +321,20 @@ const Service = ({
               style={{
                 cursor: !stepData?.status ? 'default' : 'pointer',
                 transition: 'background .5s ease',
-                backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : '#FFFFFF'
+                backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
               }}
-              className={`${classes.accordionHeading} ${
-                [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus) && classes.green
-              } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed && classes.red}`}
+              className={`${classes.accordionHeading} 
+              ${
+                Boolean(stepData?.passFailStatus)
+                  ? `${
+                      Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                        ? classes.green
+                        : ''
+                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                  : classes.white
+              }
+              
+              `}
               onClick={(e) => {
                 e.stopPropagation();
                 if (!stepData?.status) return;
