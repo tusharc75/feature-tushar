@@ -1,11 +1,20 @@
 .sidebarContainer {
   --sidebar-width: 440px;
   --spacing: 12px;
+  @media all and (min-width: 768px) and (max-width: 857px) {
+    --sidebar-width: 340px;
+  }
+  @media all and (max-width: 507px) {
+    --sidebar-width: 340px;
+  }
+  @media all and (max-width: 387px) {
+    --sidebar-width: 278px;
+  }
 
   position: absolute;
   top: 0;
-  bottom: 1px;
-  right: -105%;
+  bottom: 0;
+  right: calc(var(--sidebar-width) * -1);
   z-index: 2;
   width: var(--sidebar-width);
   transition: right 0.5s;
@@ -14,6 +23,7 @@
   box-shadow: 0px 5.64929px 70.6161px rgba(0, 0, 0, 0.1);
   // border-radius: 8.47393px;
   overflow: hidden;
+  max-height: 600px;
 
   &.active {
     right: 0px;
@@ -47,22 +57,33 @@
   }
   .content {
     padding: var(--spacing, 10px);
-    height: calc(100% - calc(64px + 39px));
+    height: calc(100% - calc(64px + 37px));
     overflow-y: auto;
   }
   .formHead {
     position: relative;
-    &::after {
-      content: '';
-      position: absolute;
-      height: 1px;
-      width: 100%;
-      background-color: lightgray;
-      bottom: 0;
-    }
+    // &::after {
+    //   content: '';
+    //   position: absolute;
+    //   height: 1px;
+    //   width: 100%;
+    //   background-color: lightgray;
+    //   bottom: 0;
+    // }
     h2 {
       font-size: 0.8rem;
       color: inherit;
     }
+  }
+  .dates {
+    position: relative;
+    // &::before {
+    //   content: '';
+    //   position: absolute;
+    //   top: 0;
+    //   width: 100%;
+    //   height: 1px;
+    //   background-color: lightgray;
+    // }
   }
 }
