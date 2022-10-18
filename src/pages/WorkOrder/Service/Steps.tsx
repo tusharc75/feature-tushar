@@ -19,7 +19,6 @@ import {
 import { Box, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip, Checkbox } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import moment from 'moment';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -131,11 +130,10 @@ const Service = ({
 
   const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
-  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [] });
+  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, type: "", services: [] });
   const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
-  const [validStep, setValidStep] = useState({});
   const [stepState, setStepState] = useState(null);
 
   useEffect(() => {
@@ -236,7 +234,6 @@ const Service = ({
           const type = automatePassFail(values, step);
           handlePassFail(type, step?._id);
         }
-        setSelectedStep(null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -292,9 +289,9 @@ const Service = ({
       .then(({ data }) => {
         const result = data?.data;
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isPassAddon && result?.passAddon?.length) {
-          setAddServiceConfirmation({ open: true, services: result?.passAddon });
+          setAddServiceConfirmation({ open: true, type: WORKORDER_SERVICE_STEP_STATUS.passed, services: result?.passAddon });
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
-          setAddServiceConfirmation({ open: true, services: result?.failAddon });
+          setAddServiceConfirmation({ open: true, type: WORKORDER_SERVICE_STEP_STATUS.failed, services: result?.failAddon });
         }
         toastConfig.setToastConfig({
           open: true,
@@ -324,15 +321,13 @@ const Service = ({
                 backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
               }}
               className={`${classes.accordionHeading} 
-              ${
-                Boolean(stepData?.passFailStatus)
-                  ? `${
-                      Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                        ? classes.green
-                        : ''
-                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+              ${Boolean(stepData?.passFailStatus)
+                  ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                    ? classes.green
+                    : ''
+                  } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
                   : classes.white
-              }
+                }
               
               `}
               onClick={(e) => {
@@ -425,46 +420,14 @@ const Service = ({
                   ) : null}
                 </Box>
               </Box>
-              {/* <Box>
-                <Grid container>
-                  {stepData?.startDate ? (
-                    <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>
-                      <Typography variant="caption">Start By</Typography>
-                      <Typography variant="body2"> {stepData?.startedBy?.optionLabel}</Typography>
-                      <Typography variant="caption"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
-                    </Grid>
-                  ) : null}
-                  {stepData?.endDate ? (
-                    <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>
-                      <Typography variant="caption">End By</Typography>
-                      <Typography variant="body2"> {stepData?.endedBy?.optionLabel}</Typography>
-                      <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
-                    </Grid>
-                  ) : null}
-                  {stepData?.startDate && stepData?.endDate ? (
-                    <Grid item style={{ paddingTop: '20px', flexGrow: 1 }}>
-                      <Typography variant="caption">Duration</Typography>
-                      <Typography variant="body2">{`${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}</Typography>
-                    </Grid>
-                  ) : null}
-                </Grid>
-              </Box> */}
             </Box>
           );
         })}
       </div>
-      {/* {Boolean(selectedStep) && (
-        <StepFieldsDialog
-          isOpen={Boolean(selectedStep)}
-          fieldData={getFields(selectedStep)?.fieldData}
-          handleClose={() => setSelectedStep(null)}
-          handleSubmit={handleSubmit}
-          step={selectedStep}
-        />
-      )} */}
       <StepFieldsDialog
         isOpen={Boolean(selectedStep)}
         fieldData={getFields(selectedStep)?.fieldData}
+        isStepValid={getFields(selectedStep)?.isStepValid}
         handleClose={() => setSelectedStep(null)}
         handleSubmit={handleSubmit}
         step={selectedStep}
@@ -473,36 +436,18 @@ const Service = ({
       {addServiceConfirmation.open && (
         <ConfirmationDialog
           open={true}
-          message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
-            ?.map((e) => e.serviceName)
-            ?.toString()}`}
+          message={addServiceConfirmation.type === WORKORDER_SERVICE_STEP_STATUS.failed ?
+            `Since the previous step was failed, the service requested in the add-on service will then be added. - ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()}`
+            : `On pass, a new service has been added in compliance with the configuration - ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()}`}
           onClose={() => {
-            setAddServiceConfirmation({ open: false, services: [] });
+            setAddServiceConfirmation({ open: false, type: "", services: [] });
           }}
           onOk={() => {
             handleAddService(
               addServiceConfirmation.services?.map((e) => e._id),
               uniqueId
             );
-            setAddServiceConfirmation({ open: false, services: [] });
-          }}
-        />
-      )}
-      {addServiceConfirmation.open && (
-        <ConfirmationDialog
-          open={true}
-          message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
-            ?.map((e) => e.serviceName)
-            ?.toString()}`}
-          onClose={() => {
-            setAddServiceConfirmation({ open: false, services: [] });
-          }}
-          onOk={() => {
-            handleAddService(
-              addServiceConfirmation.services?.map((e) => e._id),
-              uniqueId
-            );
-            setAddServiceConfirmation({ open: false, services: [] });
+            setAddServiceConfirmation({ open: false, type: "", services: [] });
           }}
         />
       )}
