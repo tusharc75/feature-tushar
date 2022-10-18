@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       width: '100%',
-      height: 'calc(100vh - 250px)',
+      height: 'calc(100vh - 290px)',
       overflowY: 'auto'
     },
     backButton: {
