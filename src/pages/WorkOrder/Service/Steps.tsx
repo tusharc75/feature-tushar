@@ -16,7 +16,7 @@ import {
   WORKORDER_SERVICE_STEP_STATUS,
   yupSchema
 } from 'src/constants/helpers';
-import { Box, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip } from '@material-ui/core';
+import { Box, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip, Checkbox } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import moment from 'moment';
@@ -55,9 +55,15 @@ const useStyles = makeStyles((theme: Theme) =>
       boxShadow: 'none !important'
     },
     accordionHeading: {
-      '&.Mui-expanded': {
-        minHeight: 'unset !important',
-        borderBottom: '1px solid hsl(0deg 0% 70%)'
+      padding: '16px',
+      ['@media (min-width:768px)']: {
+        padding: '16px 20px'
+      },
+      ['@media (min-width:1024px)']: {
+        padding: '16px 40px'
+      },
+      ['@media (min-width:1150px)']: {
+        padding: '16px 60px'
       },
       '& > div': {
         alignItems: 'center',
@@ -80,7 +86,23 @@ const useStyles = makeStyles((theme: Theme) =>
     green: {
       backgroundColor: 'rgba(0,255,0,.1)'
     },
-    red: { backgroundColor: 'rgba(255,0,0,.1)' }
+    red: { backgroundColor: 'rgba(255,0,0,.1)' },
+    checkbox: {
+      padding: '0',
+      color: '#000000',
+      '&.Mui-checked': {
+        color: '#000000'
+      }
+    },
+    mainContainer: {
+      padding: '10px',
+      ['@media (min-width:768px)']: {
+        padding: '17px'
+      },
+      ['@media (min-width:1024px)']: {
+        padding: '25px'
+      }
+    }
   })
 );
 
@@ -282,7 +304,7 @@ const Service = ({
   };
 
   return stepList?.length ? (
-    <Box sx={{ position: 'relative', overflow: 'hidden' }}>
+    <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'rgba(242, 243, 247, 0.9)' }}>
       <div className={classes.root}>
         {serviceDetails?.steps?.map((step, index) => {
           const { stepData, isStepValid } = getFields(step);
@@ -291,12 +313,10 @@ const Service = ({
               key={step._id}
               border={1}
               borderColor={'grey.300'}
-              mb={2}
               style={{
                 cursor: !stepData?.status ? 'default' : 'pointer',
-                padding: 16,
                 transition: 'background .5s ease',
-                backgroundColor: selectedStep?._id == step._id ? 'rgb(22, 51, 64 , 10%)' : ''
+                backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : '#FFFFFF'
               }}
               className={`${classes.accordionHeading} ${
                 [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus) && classes.green
@@ -308,8 +328,16 @@ const Service = ({
                 setStepState(stepData);
               }}
             >
-              <Box sx={{ display: 'flex' }}>
-                <Box sx={{ display: 'flex' }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
+                <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px' }}>
+                  <Box sx={{ padding: '0 20px 0 0' }}>
+                    <Checkbox
+                      disabled={!stepData?.status}
+                      className={classes.checkbox}
+                      aria-label="Step Selected checkbox"
+                      checked={selectedStep?._id === step._id}
+                    />
+                  </Box>
                   <Box>
                     <Chip color="primary" label={`${serviceIndex}.${index + 1}`} />
                   </Box>
@@ -319,9 +347,9 @@ const Service = ({
                     </Typography>
                   </Box>
                 </Box>
-                <Box sx={{ justifyContent: 'flex-end' }}>
+                <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px' }}>
                   {!stepData?.status ? (
-                    <Box mb={2}>
+                    <Box>
                       <Button
                         variant="outlined"
                         color="secondary"
@@ -344,7 +372,7 @@ const Service = ({
                     </Box>
                   ) : stepData?.status === 'start' && isStepValid ? (
                     step?.isPassFail ? (
-                      <Box display="flex" mb={2}>
+                      <Box display="inline-flex">
                         <Button
                           variant="outlined"
                           color="secondary"
@@ -366,7 +394,7 @@ const Service = ({
                         />
                       </Box>
                     ) : (
-                      <Box display="flex" mb={2}>
+                      <Box display="inline-flex">
                         <Button
                           variant="outlined"
                           color="secondary"

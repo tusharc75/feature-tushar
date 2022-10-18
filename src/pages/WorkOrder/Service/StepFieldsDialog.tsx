@@ -45,12 +45,12 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                       fieldData?.formsData?.map((form, index1) => {
                         return form?.name ? (
                           <div key={index1}>
-                            <div className={`detail-box ${styles.formHead}`} style={{ color: 'gray', padding: '8px 0' }}>
+                            <div className={`detail-box ${styles.formHead}`} style={{ color: 'gray', padding: '0' }}>
                               <FaDiceOne size={16} color={'inherit'} style={{ marginRight: '5px', float: 'left' }} />
                               <h2>{form?.name}</h2>
                             </div>
                             <Box marginY={2}>
-                              <Grid spacing={3} container>
+                              <Grid spacing={2} container>
                                 {form?.sectionFields?.map((field, index2) => (
                                   <Grid key={index2} item xs={12}>
                                     <FormTypes
@@ -107,7 +107,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                         );
                       })}
                   </Form>
-                  <Box>
+                  <Box className={styles.dates}>
                     <Grid container spacing={2}>
                       {stepData?.startDate ? (
                         <Grid item style={{ paddingRight: '20px', flexGrow: 1 }}>
