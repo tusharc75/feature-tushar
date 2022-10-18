@@ -130,7 +130,7 @@ const Service = ({
 
   const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
-  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, type: "", services: [] });
+  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, type: '', services: [] });
   const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
@@ -306,7 +306,7 @@ const Service = ({
   };
 
   return stepList?.length ? (
-    <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'rgba(242, 243, 247, 0.9)' }}>
+    <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}>
       <div className={classes.root}>
         {serviceDetails?.steps?.map((step, index) => {
           const { stepData, isStepValid } = getFields(step);
@@ -321,13 +321,15 @@ const Service = ({
                 backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
               }}
               className={`${classes.accordionHeading} 
-              ${Boolean(stepData?.passFailStatus)
-                  ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                    ? classes.green
-                    : ''
-                  } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+              ${
+                Boolean(stepData?.passFailStatus)
+                  ? `${
+                      Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                        ? classes.green
+                        : ''
+                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
                   : classes.white
-                }
+              }
               
               `}
               onClick={(e) => {
@@ -436,18 +438,24 @@ const Service = ({
       {addServiceConfirmation.open && (
         <ConfirmationDialog
           open={true}
-          message={addServiceConfirmation.type === WORKORDER_SERVICE_STEP_STATUS.failed ?
-            `Since the previous step was failed, the service requested in the add-on service will then be added. - ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()}`
-            : `On pass, a new service has been added in compliance with the configuration - ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()}`}
+          message={
+            addServiceConfirmation.type === WORKORDER_SERVICE_STEP_STATUS.failed
+              ? `Since the previous step was failed, the service requested in the add-on service will then be added. - ${addServiceConfirmation.services
+                  ?.map((e) => e.serviceName)
+                  ?.toString()}`
+              : `On pass, a new service has been added in compliance with the configuration - ${addServiceConfirmation.services
+                  ?.map((e) => e.serviceName)
+                  ?.toString()}`
+          }
           onClose={() => {
-            setAddServiceConfirmation({ open: false, type: "", services: [] });
+            setAddServiceConfirmation({ open: false, type: '', services: [] });
           }}
           onOk={() => {
             handleAddService(
               addServiceConfirmation.services?.map((e) => e._id),
               uniqueId
             );
-            setAddServiceConfirmation({ open: false, type: "", services: [] });
+            setAddServiceConfirmation({ open: false, type: '', services: [] });
           }}
         />
       )}
