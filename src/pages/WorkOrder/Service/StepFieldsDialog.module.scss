@@ -4,8 +4,8 @@
 
   position: absolute;
   top: 0;
-  bottom: 1px;
-  right: -105%;
+  bottom: 0;
+  right: calc(var(--sidebar-width) * -1);
   z-index: 2;
   width: var(--sidebar-width);
   transition: right 0.5s;
@@ -47,22 +47,33 @@
   }
   .content {
     padding: var(--spacing, 10px);
-    height: calc(100% - calc(64px + 39px));
+    height: calc(100% - calc(64px + 37px));
     overflow-y: auto;
   }
   .formHead {
     position: relative;
-    &::after {
-      content: '';
-      position: absolute;
-      height: 1px;
-      width: 100%;
-      background-color: lightgray;
-      bottom: 0;
-    }
+    // &::after {
+    //   content: '';
+    //   position: absolute;
+    //   height: 1px;
+    //   width: 100%;
+    //   background-color: lightgray;
+    //   bottom: 0;
+    // }
     h2 {
       font-size: 0.8rem;
       color: inherit;
     }
+  }
+  .dates {
+    position: relative;
+    // &::before {
+    //   content: '';
+    //   position: absolute;
+    //   top: 0;
+    //   width: 100%;
+    //   height: 1px;
+    //   background-color: lightgray;
+    // }
   }
 }
