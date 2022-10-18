@@ -316,6 +316,19 @@ const RepairOrderDetails = () => {
                         allowedToDelete={allowedToDelete}
                       />
                     )}
+                    {currentStep === 3 && repairOrderData && (
+                      <Quotation
+                        repairOrderData={repairOrderData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-4`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={false}
+                        allowedToDelete={false}
+                        invoiceStep={true}
+                      />
+                    )}
                   </ContentFullScreen>
                 </Paper>
               </TabPanel>
