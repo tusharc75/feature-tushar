@@ -60,6 +60,9 @@ const useStyles = makeStyles((theme: Theme) =>
         padding: '16px 20px'
       },
       ['@media (min-width:1024px)']: {
+        padding: '16px 40px'
+      },
+      ['@media (min-width:1150px)']: {
         padding: '16px 60px'
       },
       '& > div': {
