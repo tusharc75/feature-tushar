@@ -1,18 +1,14 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Grid, Box, Button, CircularProgress, Chip, } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
-import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import Add from '@material-ui/icons/Add';
 import moment from 'moment';
-import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency, QUOTATION_STATUS } from '../../../constants/helpers';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
+import { rentalManagement, dateFormat, formatAmountWithCurrency, QUOTATION_STATUS } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -20,6 +16,7 @@ import { MdDelete } from 'react-icons/md';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 
 const Quotation = ({
+  fetchRentalData,
   rentalManagementData,
   setNextStep,
   currencySymbol,
@@ -30,19 +27,12 @@ const Quotation = ({
   stepFullScreen,
   allowedToEdit
 }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const [material, setMaterial] = useState([]);
-  const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [allFields, setAllFields] = useState([]);
-  const [isRateRequired, setIsRateRequired] = useState(false);
   const [sendCustomerLoading, setSendCustomerLoading] = useState(false);
-  const [responseLoading, setResponseLoading] = useState({
-    accept: false,
-    reject: false
-  });
-  const [rentalManagementUpdated, setRentalManagementUpdated] = useState(rentalManagementData);
+  const [responseLoading, setResponseLoading] = useState({ accept: false, reject: false });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -54,27 +44,8 @@ const Quotation = ({
     fetchProductInventory();
   }, [columns]);
 
-  useEffect(() => {
-    fetchQuotationData();
-  }, [rentalManagementData?._id]);
-
-  const fetchQuotationData = async () => {
-    axiosInstance()
-      .get(`${rentalManagement.api}/${rentalManagementData?._id}`)
-      .then((res) => {
-        setRentalManagementUpdated(res?.data?.data);
-        if (
-          res?.data?.data?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ||
-          res?.data?.data?.quotationStatus === QUOTATION_STATUS.rejectByCustomer
-        ) {
-          setNextStep(true);
-        }
-      });
-  };
-
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
-    setAllFields(JSON.parse(JSON.stringify(allFields)));
     const coloum: any = [
       {
         accessor: 'srno',
@@ -103,17 +74,6 @@ const Quotation = ({
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
-                {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title="Add Products">
-                    <IconButton
-                      onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
-                      size="small"
-                      color="primary"
-                    >
-                      <Add color="disabled" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
               </Box>
             }
             {!isOffline && (
@@ -137,9 +97,6 @@ const Quotation = ({
       }
     ];
     data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
       if (element.type === 'date') {
         coloum.push({
           accessor: element.fieldName,
@@ -231,43 +188,29 @@ const Quotation = ({
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
-    if (
-      rentalManagementUpdated?.quotationStatus &&
-      (rentalManagementUpdated?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ||
-        rentalManagementUpdated?.quotationStatus === QUOTATION_STATUS.rejectByCustomer)
-    ) {
+    if (rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer) {
       setNextStep(true);
     }
-
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
       inventory = data.productInventory;
     } else {
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
       data = response?.data?.data;
-      setMaterial(JSON.parse(JSON.stringify(data.material)));
       inventory = data.inventory;
       nonSerializeAsset = data.nonSerializeAsset;
     }
     const rows = data.material.filter((e) => e.parentId === null);
-
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty = parent.serializedProduct
-        ? inventory?.filter((e) => e._id === parent._id).length
-        : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+      parent.isValid = true;
+      parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
-
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
-    }
-
     setRowsData(rows);
   };
 
@@ -278,7 +221,7 @@ const Quotation = ({
       _subRow.detail = _subRow?.productDetail?.productName;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
-      _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
+      _subRow.isValid = true;
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
@@ -294,69 +237,17 @@ const Quotation = ({
     return subRows;
   };
 
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
-  };
-
-  const calculatePrice = (arr: any[]) => {
-    //materialType can be =["product","packages","productCategory"]
-    //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
-    if (rentalManagementData) {
-      const data: any = {};
-      data.conditionType = ['Rent'];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: rentalManagementData?.currency
-      }));
-      data.supplier = [];
-      data.customer = [rentalManagementData?.customerAccount?.optionValue];
-      data.warehouse = [rentalManagementData?.warehouse?.optionValue];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
-  };
-
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const sendToCustomer = () => {
     setSendCustomerLoading(true);
-    axiosInstance()
-      .get(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/send-to-customer`)
-      .then(() => {
-        fetchQuotationData();
-        setSendCustomerLoading(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'Sent to customer Sucessfully'
-        });
-      })
+    axiosInstance().get(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/send-to-customer`).then(() => {
+      setSendCustomerLoading(false);
+      fetchRentalData()
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Sent to customer Sucessfully'
+      });
+    })
       .catch((error) => {
         setSendCustomerLoading(false);
         toastConfig.setToastConfig(error);
@@ -364,33 +255,28 @@ const Quotation = ({
   };
 
   const handleResponse = (res) => {
-    const data = {
-      response: res
-    };
+    const data = { response: res };
     if (res === QUOTATION_STATUS.acceptByCustomer) {
       setResponseLoading({ accept: true, reject: false });
     } else {
       setResponseLoading({ accept: false, reject: true });
     }
-    axiosInstance()
-      .put(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/response`, data)
-      .then(() => {
-        fetchQuotationData();
-        setResponseLoading({ accept: false, reject: false });
-        if (res === QUOTATION_STATUS.acceptByCustomer) {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: 'Accepted Quotation Sucessfully'
-          });
-        } else {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'info',
-            message: 'Quotation Rejected Sucessfully'
-          });
-        }
-      })
+    axiosInstance().put(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/response`, data).then(() => {
+      setResponseLoading({ accept: false, reject: false });
+      if (res === QUOTATION_STATUS.acceptByCustomer) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Accepted Quotation Sucessfully'
+        });
+      } else {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'info',
+          message: 'Quotation Rejected Sucessfully'
+        });
+      }
+    })
       .catch((error) => {
         setResponseLoading({ accept: false, reject: false });
         toastConfig.setToastConfig(error);
@@ -405,7 +291,7 @@ const Quotation = ({
             <Box display="flex" justifyContent="space-between" m={1}>
               <Box />
               <Box display="flex">
-                {!rentalManagementUpdated?.quotationStatus && (
+                {!rentalManagementData?.quotationStatus && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
@@ -419,9 +305,9 @@ const Quotation = ({
                     Send To Customer
                   </Button>
                 )}
-                {rentalManagementUpdated?.quotationStatus === QUOTATION_STATUS.sentToCustomer &&
-                  rentalManagementUpdated?.quotationStatus !== QUOTATION_STATUS.acceptByCustomer &&
-                  rentalManagementUpdated?.quotationStatus !== QUOTATION_STATUS.rejectByCustomer && (
+                {rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer &&
+                  rentalManagementData?.quotationStatus !== QUOTATION_STATUS.acceptByCustomer &&
+                  rentalManagementData?.quotationStatus !== QUOTATION_STATUS.rejectByCustomer && (
                     <Box display="flex">
                       <Box mx={1} />
                       <Button
@@ -437,7 +323,6 @@ const Quotation = ({
                         {isMobile && !isTablet ? <MdDelete size={20} /> : 'Accept'}
                       </Button>
                       <Box mx={1} />
-
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
                         color="primary"
@@ -464,12 +349,12 @@ const Quotation = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -478,7 +363,7 @@ const Quotation = ({
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                onSelect={() => {}}
+                onSelect={() => { }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
