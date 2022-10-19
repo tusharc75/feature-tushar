@@ -430,11 +430,13 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                   ? value.optionValue
                                                   : ""
                                               );
-                                              setFieldValue("customerContact", "");
-                                              handleValuesChange({
-                                                [field.fieldName]: value && value.optionValue ? value.optionValue : "",
-                                                "customerContact": "",
-                                              })
+                                              if (repairOrderInitialData.fields.find((d) => d.fieldName === "customerContact")) {
+                                                setFieldValue("customerContact", "");
+                                                handleValuesChange({
+                                                  [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                  "customerContact": "",
+                                                })
+                                              }
                                             }}
                                           />
                                         </Grid>
