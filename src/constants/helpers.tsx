@@ -65,6 +65,7 @@ export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
   'Services and Consumables',
+  'Quotation',
   'Serialized Asset',
   'Loading Ticket',
   'Receiving Ticket',
@@ -86,7 +87,6 @@ export const leadImportErrorFileName = 'Leads-Errors.xlsx';
 
 export const opportunityTemplateFileName = 'Opportunities-Template.xlsx';
 export const opportunityImportErrorFileName = 'Opportunities-Errors.xlsx';
-
 
 export const quoteStepColors = {
   'accepted by customer': { backgroundColor: '#008000', color: '#fff' },
@@ -2076,18 +2076,17 @@ export const QUOTATION_STATUS = {
   rejectByCustomer: 'Rejectd by Customer'
 };
 
-
 export const WORKORDER_SERVICE_COLOR = {
   preWork: 'rgba(254, 249, 230, 1)',
   quote: 'rgba(169, 43, 3, .1)',
-  postWork: 'rgba(222, 249, 255, 1)',
+  postWork: 'rgba(222, 249, 255, 1)'
 };
 
 export const WORKORDER_SERVICE_STATUS = {
   pending: 'Pending',
   inProgress: 'In-Progress',
   completed: 'Completed',
-  failed: 'Failed',
+  failed: 'Failed'
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
@@ -2097,4 +2096,3 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   skipped: 'Skipped',
   end: 'end',
 };
-
