@@ -238,7 +238,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                           <Grid item xs={6}>
                             {values['isPassAddon'] && (
                               <Autocomplete
-                                options={[...services, {optionValue: 'all', optionLabel: "Select All"}]}
+                                options={[{optionValue: 'all', optionLabel: "Select All"},...services]}
                                 fullWidth
                                 multiple
                                 size="small"
@@ -279,7 +279,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                           <Grid item xs={6}>
                             {values['isFailAddon'] && (
                               <Autocomplete
-                                options={[...services, {optionValue: "all", optionLabel: "Select All"}]}
+                                options={[{optionValue: "all", optionLabel: "Select All"},...services, ]}
                                 fullWidth
                                 multiple
                                 size="small"
@@ -321,7 +321,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                           <Grid item xs={6}>
                             {values['isJumpStepPass'] && (
                               <Autocomplete
-                                options={[...stepOption, {optionValue: "all", optionLabel: "Select All"}]}
+                                options={[{optionValue: "all", optionLabel: "Select All"},...stepOption, ]}
                                 fullWidth
                                 multiple
                                 size="small"
@@ -365,7 +365,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                           <Grid item xs={6}>
                             {values['isJumpStepFail'] && (
                               <Autocomplete
-                                options={[...stepOption, {optionValue: "all", optionLabel: "Select All"}]}
+                                options={[{optionValue: "all", optionLabel: "Select All"},...stepOption, ]}
                                 fullWidth
                                 multiple
                                 size="small"
