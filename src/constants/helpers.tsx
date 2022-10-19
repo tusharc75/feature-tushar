@@ -2095,5 +2095,6 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   completed: 'Completed',
   passed: 'Passed',
   failed: 'Failed',
-  end: 'end'
+  skipped: 'Skipped',
+  end: 'end',
 };

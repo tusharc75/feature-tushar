@@ -130,8 +130,7 @@ const Service = ({
 
   const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
-  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [], forMinMax: false, step: null, values: null });
-  const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
+  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: "", services: [], step: null, values: null });
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
   const [stepState, setStepState] = useState(null);
@@ -143,19 +142,15 @@ const Service = ({
         setServiceDetails(data);
         const steps = data?.steps?.map((d) => d.stepName);
         setStepList(steps);
-        const completedSteps = serviceData.filter(
-          (d) =>
-            d.uniqueId === uniqueId &&
-            d.serviceId === serviceId &&
-            [
-              WORKORDER_SERVICE_STEP_STATUS.passed,
-              WORKORDER_SERVICE_STEP_STATUS.completed,
-              WORKORDER_SERVICE_STEP_STATUS.failed,
-              WORKORDER_SERVICE_STEP_STATUS.end
-            ].includes(d?.passFailStatus)
-        );
+        const completedSteps = serviceData.filter((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && [
+          WORKORDER_SERVICE_STEP_STATUS.passed,
+          WORKORDER_SERVICE_STEP_STATUS.completed,
+          WORKORDER_SERVICE_STEP_STATUS.failed,
+          WORKORDER_SERVICE_STEP_STATUS.skipped,
+          WORKORDER_SERVICE_STEP_STATUS.end
+        ].includes(d?.passFailStatus));
+
         const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
-        setDisabledFieldSteps(completedSteps.map((d) => d.stepId));
         setDisableCompleteFail(!allStepsDone);
 
         if (inSteps && allStepsDone && selectedServiceStatus === WORKORDER_SERVICE_STATUS.inProgress) {
@@ -181,7 +176,7 @@ const Service = ({
           const type = automatePassFail(values, step);
           handlePassFail(type, step?._id);
         }
-        setAddServiceConfirmation({ open: false, services: [], forMinMax: false, step: null, values: null });
+        setAddServiceConfirmation({ open: false, services: [], status: "", step: null, values: null });
         fetchService()
       })
       .catch((err) => {
@@ -250,15 +245,17 @@ const Service = ({
           type: 'success',
           message: data.message
         });
-        getServiceData();
-        const serviceIds = determinServiceDialog(values, step);
+        setSelectedStep(null)
 
+        getServiceData();
+
+        const serviceIds = determinServiceDialog(values, step);
         if (serviceIds.length > 0) {
           const services = serviceIds.filter((s) => {
             return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
           });
           if (services.length > 0) {
-            setAddServiceConfirmation({ open: true, services, forMinMax: true, step, values });
+            setAddServiceConfirmation({ open: true, status: "", services, step, values });
           }
         } else if (step?.isPassFail) {
           const type = automatePassFail(values, step);
@@ -272,7 +269,6 @@ const Service = ({
 
   const determinServiceDialog = (values: any, step: any) => {
     const { fieldData } = getFields(step);
-
     const minMaxFields = fieldData.fields.filter((f) => {
       const keys = Object.keys(f);
       if (keys.includes('minValueServiceAdd') || keys.includes('maxValueServiceAdd')) {
@@ -281,9 +277,7 @@ const Service = ({
         return false;
       }
     });
-
     const serviceIds = [];
-
     minMaxFields.forEach((f) => {
       if (values[f?.fieldName] && values[f?.fieldName] < f?.minValue && f?.minValueServiceAdd) {
         serviceIds.push({ _id: f?.minValueServiceAdd });
@@ -291,7 +285,6 @@ const Service = ({
         serviceIds.push({ _id: f?.maxValueServiceAdd });
       }
     });
-
     return serviceIds;
   };
 
@@ -350,14 +343,14 @@ const Service = ({
           });
 
           if (services.length > 0) {
-            setAddServiceConfirmation((s) => ({ ...s, open: true, services }));
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, services }));
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
           const services = result?.failAddon.filter((s) => {
             return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
           });
           if (services.length > 0) {
-            setAddServiceConfirmation((s) => ({ ...s, open: true, services }));
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, services }));
           }
         }
         toastConfig.setToastConfig({
@@ -388,15 +381,13 @@ const Service = ({
                 backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
               }}
               className={`${classes.accordionHeading} 
-              ${
-                Boolean(stepData?.passFailStatus)
-                  ? `${
-                      Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                        ? classes.green
-                        : ''
-                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+              ${Boolean(stepData?.passFailStatus)
+                  ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                    ? classes.green
+                    : ''
+                  } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
                   : classes.white
-              }
+                }
               
               `}
               onClick={(e) => {
@@ -505,20 +496,22 @@ const Service = ({
       {addServiceConfirmation.open && (
         <ConfirmationDialog
           open={true}
-          message={`You have to add addional services based on your recent action ${
-            addServiceConfirmation.forMinMax ? '' : '- ' + addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-          }`}
+          message={addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed ?
+            `Since the previous step was failed, the service requested in the add-on service will then be added. ` + addServiceConfirmation.services?.map((e) => e.serviceName)?.toString() :
+            addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed ?
+              `On pass, a new service has been added in compliance with the configuration ` + addServiceConfirmation.services?.map((e) => e.serviceName)?.toString() :
+              `You have to add addional services based on your recent action`}
           onClose={() => {
-            setAddServiceConfirmation({ open: false, services: [], forMinMax: false, step: null, values: null });
+            setAddServiceConfirmation({ open: false, services: [], status: "", step: null, values: null });
           }}
           onOk={() => {
             handleAddService(
               addServiceConfirmation.services?.map((e) => e._id),
-              addServiceConfirmation.forMinMax,
+              addServiceConfirmation.status === "" ? true : false,
               addServiceConfirmation.step,
               addServiceConfirmation.values
             );
-            setAddServiceConfirmation({ open: false, services: [], forMinMax: false, step: null, values: null });
+            setAddServiceConfirmation({ open: false, services: [], status: "", step: null, values: null });
           }}
         />
       )}
