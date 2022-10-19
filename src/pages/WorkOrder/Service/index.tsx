@@ -571,10 +571,10 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                     serviceIndex={serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}
                     selectedServiceStatus={selectedService.status}
                     updateServiceStatus={updateServiceStatus}
-                    handleAddService={handleAddService}
                     allowedToEdit={isAllowedToServiceEdit}
                     setDisableCompleteFail={setDisableCompleteFail}
                     setOpenCompleteDialog={setOpenCompleteDialog}
+                    fetchService={fetchService}
                   />
                 ) : (
                   <Quotation />

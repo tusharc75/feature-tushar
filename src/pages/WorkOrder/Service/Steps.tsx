@@ -117,25 +117,24 @@ const Service = ({
   serviceId,
   serviceData,
   getServiceData,
-  handleAddService,
   serviceSteps,
   selectedServiceStatus,
   updateServiceStatus,
   allowedToEdit,
   setDisableCompleteFail,
   setOpenCompleteDialog,
-  serviceIndex
+  serviceIndex,
+  fetchService
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
   const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
-  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [] });
+  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, services: [], forMinMax: false, step: null, values: null });
   const [disabledFieldSteps, setDisabledFieldSteps] = useState([]);
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
-  const [validStep, setValidStep] = useState({});
   const [stepState, setStepState] = useState(null);
 
   useEffect(() => {
@@ -169,6 +168,27 @@ const Service = ({
         toastConfig.setToastConfig(err);
       });
   }, [serviceId, serviceData]);
+
+  const handleAddService = (ids, forMinMax = false, step = null, values = null) => {
+    const data: any = {};
+    data.serviceIds = ids;
+    if (uniqueId) {
+      data.aboveServiceUniqueId = uniqueId;
+    }
+    axiosInstance()
+      .post(`${workOrder.api}/service/${workOrderId}`, data)
+      .then(() => {
+        if (forMinMax) {
+          const type = automatePassFail(values, step);
+          handlePassFail(type, step?._id);
+        }
+        setAddServiceConfirmation({ open: false, services: [], forMinMax: false, step: null, values: null });
+        fetchService()
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   const getFields = (step) => {
     let stepData = null;
@@ -232,7 +252,16 @@ const Service = ({
           message: data.message
         });
         getServiceData();
-        if (step?.isPassFail) {
+        const serviceIds = determinServiceDialog(values, step);
+
+        if (serviceIds.length > 0) {
+          const services = serviceIds.filter((s) => {
+            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
+          });
+          if (services.length > 0) {
+            setAddServiceConfirmation({ open: true, services, forMinMax: true, step, values });
+          }
+        } else if (step?.isPassFail) {
           const type = automatePassFail(values, step);
           handlePassFail(type, step?._id);
         }
@@ -240,6 +269,31 @@ const Service = ({
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const determinServiceDialog = (values: any, step: any) => {
+    const { fieldData } = getFields(step);
+
+    const minMaxFields = fieldData.fields.filter((f) => {
+      const keys = Object.keys(f);
+      if (keys.includes('minValueServiceAdd') || keys.includes('maxValueServiceAdd')) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+    const serviceIds = [];
+
+    minMaxFields.forEach((f) => {
+      if (values[f?.fieldName] && values[f?.fieldName] < f?.minValue && f?.minValueServiceAdd) {
+        serviceIds.push({ _id: f?.minValueServiceAdd });
+      } else if (values[f?.fieldName] && values[f?.fieldName] > f?.maxValue && f?.maxValueServiceAdd) {
+        serviceIds.push({ _id: f?.maxValueServiceAdd });
+      }
+    });
+
+    return serviceIds;
   };
 
   const automatePassFail = (values: any, step: any): string => {
@@ -290,10 +344,22 @@ const Service = ({
       })
       .then(({ data }) => {
         const result = data?.data;
+
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isPassAddon && result?.passAddon?.length) {
-          setAddServiceConfirmation({ open: true, services: result?.passAddon });
+          const services = result?.passAddon.filter((s) => {
+            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
+          });
+
+          if (services.length > 0) {
+            setAddServiceConfirmation((s) => ({ ...s, open: true, services }));
+          }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
-          setAddServiceConfirmation({ open: true, services: result?.failAddon });
+          const services = result?.failAddon.filter((s) => {
+            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
+          });
+          if (services.length > 0) {
+            setAddServiceConfirmation((s) => ({ ...s, open: true, services }));
+          }
         }
         toastConfig.setToastConfig({
           open: true,
@@ -473,36 +539,20 @@ const Service = ({
       {addServiceConfirmation.open && (
         <ConfirmationDialog
           open={true}
-          message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
-            ?.map((e) => e.serviceName)
-            ?.toString()}`}
+          message={`You have to add addional services based on your recent action ${
+            addServiceConfirmation.forMinMax ? '' : '- ' + addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+          }`}
           onClose={() => {
-            setAddServiceConfirmation({ open: false, services: [] });
+            setAddServiceConfirmation({ open: false, services: [], forMinMax: false, step: null, values: null });
           }}
           onOk={() => {
             handleAddService(
               addServiceConfirmation.services?.map((e) => e._id),
-              uniqueId
+              addServiceConfirmation.forMinMax,
+              addServiceConfirmation.step,
+              addServiceConfirmation.values
             );
-            setAddServiceConfirmation({ open: false, services: [] });
-          }}
-        />
-      )}
-      {addServiceConfirmation.open && (
-        <ConfirmationDialog
-          open={true}
-          message={`You have to add addional services based on your recent action - ${addServiceConfirmation.services
-            ?.map((e) => e.serviceName)
-            ?.toString()}`}
-          onClose={() => {
-            setAddServiceConfirmation({ open: false, services: [] });
-          }}
-          onOk={() => {
-            handleAddService(
-              addServiceConfirmation.services?.map((e) => e._id),
-              uniqueId
-            );
-            setAddServiceConfirmation({ open: false, services: [] });
+            setAddServiceConfirmation({ open: false, services: [], forMinMax: false, step: null, values: null });
           }}
         />
       )}
