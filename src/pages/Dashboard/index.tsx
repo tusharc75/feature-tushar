@@ -7,7 +7,7 @@ import styles from './Dashboard.module.scss';
 
 import './style.scss';
 import { SVG, IMAGE_WIDTH, IMAGE_HEIGHT } from '../../assets/dashboard_images';
-import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL, FORM_ICON, GEN_ICON } from '../../assets/dashboard_images/constants/imageTypes';
+import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL, FORM_ICON, GEN_ICON, INV_ICON } from '../../assets/dashboard_images/constants/imageTypes';
 import Icon from '@material-ui/core/Icon';
 import { SiCivicrm } from 'react-icons/si';
 import { MdNavigateNext, MdLocalActivity } from 'react-icons/md';
@@ -123,6 +123,14 @@ function Dashboard() {
             </Icon>
           );
           text = 'Setup Dynamic Forms & Templates';
+          break;
+        case 'Inventory Management':
+          icon = (
+            <Icon>
+              <img src={SVG(INV_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
+            </Icon>
+          );
+          text = 'Manage Inventory and Purchases Smartly.';
           break;
         default:
           icon = (

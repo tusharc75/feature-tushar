@@ -9,7 +9,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import DetailsPageHeader from '../../components/DetailsPageHeader';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   serializedAsset,
@@ -49,11 +48,12 @@ import Invoice from './Invoice';
 import RentalManagementViews from './RoadMapViews';
 import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
+import Quotation from './Quotation';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
-  const renderedFrom = camelCase(routes?.rentalManagement.title)
+  const renderedFrom = camelCase(routes?.rentalManagement.title);
 
   const { id } = useParams();
   const history = useHistory();
@@ -88,6 +88,8 @@ const RentalManagementDetailsPage = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
+
+  const [rentalSteps, setRentalSteps] = useState(user?.role?.selectedEntity?.policy?.isQuotationRentalManagement ? rentalManagementSteps : rentalManagementSteps?.filter((e) => e !== "Quotation"));
 
   useEffect(() => {
     return history.listen((location) => {
@@ -127,12 +129,11 @@ const RentalManagementDetailsPage = () => {
 
   useEffect(() => {
     if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true)
+      setActivityShow(true);
+    } else {
+      setActivityShow(false);
     }
-    else {
-      setActivityShow(false)
-    }
-  }, [isSmallScreen, tabValue])
+  }, [isSmallScreen, tabValue]);
 
   useEffect(() => {
     if (id) {
@@ -140,30 +141,30 @@ const RentalManagementDetailsPage = () => {
       fetchRentalManagementData();
     }
     if (!isOffline) {
-      fetchAssetStatusRights()
+      fetchAssetStatusRights();
     }
   }, [id]);
 
   const fetchAssetStatusRights = () => {
-    axiosInstance().get(`/field?resource=${serializedAsset.resource}&view=true`)
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data }) => {
         if (data.data && data.data.length) {
-          data.data.some(o => {
-            if (o?.fieldData?.fieldName === "status") {
-              setAllowUpdateStatus(o?.isUpdate)
-              return true
+          data.data.some((o) => {
+            if (o?.fieldData?.fieldName === 'status') {
+              setAllowUpdateStatus(o?.isUpdate);
+              return true;
             }
-          })
+          });
         }
       })
-      .catch((err) => {
-      });
+      .catch((err) => { });
   };
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(rentalManagementSteps[currentStep]);
-      setNextStep(false)
+      updateProcessStatus(rentalSteps[currentStep]);
+      setNextStep(false);
     }
   }, [currentStep]);
 
@@ -181,7 +182,7 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      setCurrentStep(rentalManagementSteps.indexOf(data?.processStatus) !== -1 ? rentalManagementSteps.indexOf(data?.processStatus) : 0);
+      setCurrentStep(rentalSteps.indexOf(data?.processStatus) !== -1 ? rentalSteps.indexOf(data?.processStatus) : 0);
       handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
@@ -272,14 +273,12 @@ const RentalManagementDetailsPage = () => {
 
   const updateProcessStatus = async (processStatus) => {
     if (isOffline) {
-      await updateRentalProcessStatus(id, processStatus)
-    }
-    else {
+      await updateRentalProcessStatus(id, processStatus);
+    } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
         .then(({ data }) => { })
-        .catch((error) => {
-        });
+        .catch((error) => { });
     }
   };
 
@@ -288,8 +287,8 @@ const RentalManagementDetailsPage = () => {
       .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status })
       .then(({ data: { data } }) => {
         if (status === 'Invoiced' || status === 'Closed') {
-          updateProcessStatus(rentalManagementSteps[5]);
-          setCurrentStep(5);
+          updateProcessStatus(rentalSteps[rentalSteps?.length - 1]);
+          setCurrentStep(rentalSteps?.length - 1);
         }
         fetchRentalManagementData();
         toastConfig.setToastConfig({
@@ -306,7 +305,7 @@ const RentalManagementDetailsPage = () => {
   return (
     <>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ""}` }]} />
+        <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ''}` }]} />
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
         <div>
@@ -349,8 +348,10 @@ const RentalManagementDetailsPage = () => {
                         {'Cancel ' + routes.rentalManagement.title}
                       </Button>
                     )} */}
-                  {(permissions?.rentalManagement?.isUpdate && !isOffline) &&
-                    ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) && allowedToEdit) && (
+                  {permissions?.rentalManagement?.isUpdate &&
+                    !isOffline &&
+                    [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) &&
+                    allowedToEdit && (
                       <Fragment>
                         <Button
                           variant="outlined"
@@ -430,7 +431,7 @@ const RentalManagementDetailsPage = () => {
                   }
                   {...a11yProps(1)}
                 />
-                {!isOffline &&
+                {!isOffline && (
                   <Tab
                     className={'tabLayout'}
                     style={{
@@ -443,15 +444,15 @@ const RentalManagementDetailsPage = () => {
                       </div>
                     }
                     {...a11yProps(2)}
-                  />}
+                  />
+                )}
                 <div className={'uio'}> </div>
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
-                  {(!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ?
-                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields}
-                    /> : null
-                  )}
+                  {!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ? (
+                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+                  ) : null}
                 </Box>
               </TabPanel>
               <TabPanel value={tabValue} index={1}>
@@ -459,14 +460,14 @@ const RentalManagementDetailsPage = () => {
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}
-                    steps={rentalManagementSteps}
+                    steps={rentalSteps}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
                     isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
                     setStepFullScreen={() => setStepFullScreen(true)}
                   />
-                  <ContentFullScreen title={rentalManagementSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-                    {currentStep === 0 && rentalManagementData && (
+                  <ContentFullScreen title={rentalSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                    {rentalSteps[currentStep] === "Add Products" && rentalManagementData && (
                       <Productpackage
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -479,14 +480,29 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {currentStep === 1 && rentalManagementData && (
+                    {rentalSteps[currentStep] === "Services and Consumables" && rentalManagementData && (
                       <AdditionalCost
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
-                        allowedToEdit={allowedToEdit} />
+                        allowedToEdit={allowedToEdit}
+                      />
                     )}
-                    {currentStep === 2 && rentalManagementData && (
+                    {rentalSteps[currentStep] === "Quotation" && rentalManagementData && (
+                      <Quotation
+                        fetchRentalData={fetchRentalManagementData}
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-6`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                    {rentalSteps[currentStep] === "Serialized Asset" && rentalManagementData && (
                       <SerializedAsset
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -498,7 +514,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {currentStep === 3 && rentalManagementData && (
+                    {rentalSteps[currentStep] === "Loading Ticket" && rentalManagementData && (
                       <LoadingTicket
                         fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
@@ -510,7 +526,7 @@ const RentalManagementDetailsPage = () => {
                         allowUpdateStatus={allowUpdateStatus}
                       />
                     )}
-                    {currentStep === 4 && rentalManagementData && (
+                    {rentalSteps[currentStep] === "Receiving Ticket" && rentalManagementData && (
                       <ReceivingTicket
                         fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
@@ -522,7 +538,7 @@ const RentalManagementDetailsPage = () => {
                         allowUpdateStatus={allowUpdateStatus}
                       />
                     )}
-                    {currentStep === 5 && rentalManagementData && (
+                    {rentalSteps[currentStep] === "Packing Slip" && rentalManagementData && (
                       <Invoice
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -567,7 +583,11 @@ const RentalManagementDetailsPage = () => {
                           resourceId={rentalManagementData._id}
                           resource={ACTIVITY_RESOURCE.rentalManagement}
                           restrictedAddActivities={
-                            permissions && permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] && permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate ? [] : ['Attachment', 'Case']
+                            permissions &&
+                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
+                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
+                              ? []
+                              : ['Attachment', 'Case']
                           }
                           relatedTo={[
                             {
