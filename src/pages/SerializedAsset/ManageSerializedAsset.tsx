@@ -121,7 +121,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
             }
             if (fieldsDataForCreate.some((e) => e.fieldName === "warehouse")) {
               createValues['warehouse'] = referenceData?.warehouse;
-              console.log(plantsOptions)
               const warehouseAddress = plantsOptions?.find((e) => e.optionValue === referenceData?.warehouse);
               if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === "currentLocation")) {
                 createValues['currentLocation'] = warehouseAddress?.address;
