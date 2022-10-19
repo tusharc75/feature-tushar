@@ -473,23 +473,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
       {invoiceStep ?
         <Box pb={2} display="flex" justifyContent="space-between">
           <Box display="flex">
-            <SendEmail versionData={null} quotationData={quotationData} />
-          </Box>
-          <Box display="flex">
-            {(
-              <HtmlTooltip title={'Send to customer'}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                  }}
-                >
-                  Send to Customer
-                </Button>
-              </HtmlTooltip>
-            )}
-            <Box p={1} />
+            <SendEmail versionData={quotationData?.versions[currentVersion]} quotationData={quotationData} />
           </Box>
         </Box>
         :

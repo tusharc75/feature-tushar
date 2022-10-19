@@ -457,7 +457,6 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                                 renderOption={(option) => option?.optionLabel}
                                 // getOptionSelected={(option: any, val: any) => option?.optionValue === val?.optionValue}
                                 onChange={(_, newVal: any) => {
-                                  console.log(newVal.optionValue);
                                   setFieldValue('returnToServiceOnFail', newVal?.optionValue ?? '');
                                 }}
                                 renderInput={(params) => (
