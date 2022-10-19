@@ -49,11 +49,12 @@ import Invoice from './Invoice';
 import RentalManagementViews from './RoadMapViews';
 import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
+import Quotation from './Quotation';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
-  const renderedFrom = camelCase(routes?.rentalManagement.title)
+  const renderedFrom = camelCase(routes?.rentalManagement.title);
 
   const { id } = useParams();
   const history = useHistory();
@@ -127,12 +128,11 @@ const RentalManagementDetailsPage = () => {
 
   useEffect(() => {
     if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true)
+      setActivityShow(true);
+    } else {
+      setActivityShow(false);
     }
-    else {
-      setActivityShow(false)
-    }
-  }, [isSmallScreen, tabValue])
+  }, [isSmallScreen, tabValue]);
 
   useEffect(() => {
     if (id) {
@@ -140,30 +140,30 @@ const RentalManagementDetailsPage = () => {
       fetchRentalManagementData();
     }
     if (!isOffline) {
-      fetchAssetStatusRights()
+      fetchAssetStatusRights();
     }
   }, [id]);
 
   const fetchAssetStatusRights = () => {
-    axiosInstance().get(`/field?resource=${serializedAsset.resource}&view=true`)
+    axiosInstance()
+      .get(`/field?resource=${serializedAsset.resource}&view=true`)
       .then(({ data }) => {
         if (data.data && data.data.length) {
-          data.data.some(o => {
-            if (o?.fieldData?.fieldName === "status") {
-              setAllowUpdateStatus(o?.isUpdate)
-              return true
+          data.data.some((o) => {
+            if (o?.fieldData?.fieldName === 'status') {
+              setAllowUpdateStatus(o?.isUpdate);
+              return true;
             }
-          })
+          });
         }
       })
-      .catch((err) => {
-      });
+      .catch((err) => {});
   };
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
       updateProcessStatus(rentalManagementSteps[currentStep]);
-      setNextStep(false)
+      setNextStep(false);
     }
   }, [currentStep]);
 
@@ -272,14 +272,12 @@ const RentalManagementDetailsPage = () => {
 
   const updateProcessStatus = async (processStatus) => {
     if (isOffline) {
-      await updateRentalProcessStatus(id, processStatus)
-    }
-    else {
+      await updateRentalProcessStatus(id, processStatus);
+    } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => {
-        });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -306,7 +304,7 @@ const RentalManagementDetailsPage = () => {
   return (
     <>
       <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ""}` }]} />
+        <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ''}` }]} />
       </Grid>
       <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
         <div>
@@ -349,8 +347,10 @@ const RentalManagementDetailsPage = () => {
                         {'Cancel ' + routes.rentalManagement.title}
                       </Button>
                     )} */}
-                  {(permissions?.rentalManagement?.isUpdate && !isOffline) &&
-                    ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) && allowedToEdit) && (
+                  {permissions?.rentalManagement?.isUpdate &&
+                    !isOffline &&
+                    [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) &&
+                    allowedToEdit && (
                       <Fragment>
                         <Button
                           variant="outlined"
@@ -430,7 +430,7 @@ const RentalManagementDetailsPage = () => {
                   }
                   {...a11yProps(1)}
                 />
-                {!isOffline &&
+                {!isOffline && (
                   <Tab
                     className={'tabLayout'}
                     style={{
@@ -443,15 +443,15 @@ const RentalManagementDetailsPage = () => {
                       </div>
                     }
                     {...a11yProps(2)}
-                  />}
+                  />
+                )}
                 <div className={'uio'}> </div>
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
-                  {(!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ?
-                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields}
-                    /> : null
-                  )}
+                  {!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ? (
+                    <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+                  ) : null}
                 </Box>
               </TabPanel>
               <TabPanel value={tabValue} index={1}>
@@ -465,7 +465,7 @@ const RentalManagementDetailsPage = () => {
                     isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
                     setStepFullScreen={() => setStepFullScreen(true)}
                   />
-                  <ContentFullScreen title={rentalManagementSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                  <ContentFullScreen title={rentalManagementSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {currentStep === 0 && rentalManagementData && (
                       <Productpackage
                         rentalManagementData={rentalManagementData}
@@ -484,9 +484,23 @@ const RentalManagementDetailsPage = () => {
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
-                        allowedToEdit={allowedToEdit} />
+                        allowedToEdit={allowedToEdit}
+                      />
                     )}
                     {currentStep === 2 && rentalManagementData && (
+                      <Quotation
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                    {currentStep === 3 && rentalManagementData && (
                       <SerializedAsset
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -498,7 +512,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {currentStep === 3 && rentalManagementData && (
+                    {currentStep === 4 && rentalManagementData && (
                       <LoadingTicket
                         fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
@@ -510,7 +524,7 @@ const RentalManagementDetailsPage = () => {
                         allowUpdateStatus={allowUpdateStatus}
                       />
                     )}
-                    {currentStep === 4 && rentalManagementData && (
+                    {currentStep === 5 && rentalManagementData && (
                       <ReceivingTicket
                         fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
@@ -522,7 +536,7 @@ const RentalManagementDetailsPage = () => {
                         allowUpdateStatus={allowUpdateStatus}
                       />
                     )}
-                    {currentStep === 5 && rentalManagementData && (
+                    {currentStep === 6 && rentalManagementData && (
                       <Invoice
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -567,7 +581,11 @@ const RentalManagementDetailsPage = () => {
                           resourceId={rentalManagementData._id}
                           resource={ACTIVITY_RESOURCE.rentalManagement}
                           restrictedAddActivities={
-                            permissions && permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] && permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate ? [] : ['Attachment', 'Case']
+                            permissions &&
+                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
+                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
+                              ? []
+                              : ['Attachment', 'Case']
                           }
                           relatedTo={[
                             {
@@ -576,7 +594,7 @@ const RentalManagementDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>
