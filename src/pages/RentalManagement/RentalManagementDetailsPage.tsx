@@ -48,6 +48,8 @@ import Invoice from './Invoice';
 import RentalManagementViews from './RoadMapViews';
 import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
+import Quotation from './Quotation';
+import ProgressiveBilling from './ProgressiveBilling';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -571,10 +573,10 @@ const RentalManagementDetailsPage = () => {
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
                 <Box>
-                  <ProgressiveBilling 
-                  rentalId={id} 
-                  rentalManagementData={rentalManagementData}
-                  currencySymbol={currencySymbol}
+                  <ProgressiveBilling
+                    rentalId={id}
+                    rentalManagementData={rentalManagementData}
+                    currencySymbol={currencySymbol}
                   />
                 </Box>
               </TabPanel>
