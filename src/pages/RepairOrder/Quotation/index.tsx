@@ -38,7 +38,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { ExpandMore } from '@material-ui/icons';
-import { capitalize } from 'lodash';
+import { capitalize, orderBy } from 'lodash';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
 import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
@@ -49,10 +49,12 @@ import { FcCancel, FcClock, FcOk, GiReceiveMoney, VscVersions } from 'react-icon
 import contactClass from '../../Contact/contact.module.scss';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
+import SendEmail from 'src/pages/Quotation/SendEmail';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 
 
-const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete }) => {
+const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, invoiceStep = false }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -350,7 +352,7 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
     if (parent.type === "package") {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return subRows;
+    return orderBy(subRows, ['order'], ['asc']);
   }
 
   const getNestedSubRows = (obj, original) => {
@@ -468,153 +470,179 @@ const Quotation = ({ repairOrderData, setNextStep, currencySymbol, showActivity,
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
-        <Box display="flex">
-          <div>
-            <Button
-              onClick={() => {
-                setShowQuotationSummaryDialog(true);
-              }}
-              variant="outlined"
-              size="small"
-              className="mx-1"
-              startIcon={<GiReceiveMoney />}
-              color="primary"
-            >
-              Summary
-            </Button>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              size="small"
-              className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
-              onClick={() => {
-                setShowAllVersionStatus(true);
-              }}
-              style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-              startIcon={isMobile && !isTablet ? null : <VscVersions />}
-            >
-              {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-            </Button>
-          </div>
-        </Box>
-        <Box display="flex">
-          {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcClock size={25} />
-              <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-            </div>
-          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcOk size={25} />
-              <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-            </div>
-          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcCancel size={25} />
-              <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-            </div>
-          ) : null}
-        </Box>
-        <Box display="flex">
-          {allowedToEdit && <div>
-            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-              <Button
-                disabled={material.filter((e) => e.parentId === null).some(d => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 || d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null || d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined)}
-                onClick={() => {
-                  axiosInstance()
-                    .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
-                    .then(() => {
-                      fetchQuotationData(currentVersion);
-                      toastConfig.setToastConfig({
-                        open: true,
-                        type: 'success',
-                        message: 'Sent to customer Sucessfully'
-                      });
-                    })
-                    .catch((error) => {
-                      toastConfig.setToastConfig(error);
-                    });
-                }}
-                variant="outlined"
-                size="small"
-                className="mx-1"
-                color="primary"
-              >
-                Send to customer
-              </Button>)
-              : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (<Button
-                onClick={() => {
-                  setCustomerAcceptable(true)
-                }}
-                variant="outlined"
-                size="small"
-                className="mx-1"
-                color="primary"
-              >
-                Accept / Reject
-              </Button>)
-                : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (<Button
+      {invoiceStep ?
+        <Box pb={2} display="flex" justifyContent="space-between">
+          <Box display="flex">
+            <SendEmail versionData={null} quotationData={quotationData} />
+          </Box>
+          <Box display="flex">
+            {(
+              <HtmlTooltip title={'Send to customer'}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
                   onClick={() => {
-                    cloneVersion();
+                  }}
+                >
+                  Send to Customer
+                </Button>
+              </HtmlTooltip>
+            )}
+            <Box p={1} />
+          </Box>
+        </Box>
+        :
+        <Box display="flex" justifyContent="space-between" m={1}>
+          <Box display="flex">
+            <div>
+              <Button
+                onClick={() => {
+                  setShowQuotationSummaryDialog(true);
+                }}
+                variant="outlined"
+                size="small"
+                className="mx-1"
+                startIcon={<GiReceiveMoney />}
+                color="primary"
+              >
+                Summary
+              </Button>
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                size="small"
+                className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+                onClick={() => {
+                  setShowAllVersionStatus(true);
+                }}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+              >
+                {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+              </Button>
+            </div>
+          </Box>
+          <Box display="flex">
+            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+              <div className="d-flex align-items-center justify-content-center flex-column m-1">
+                <FcClock size={25} />
+                <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+              </div>
+            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+              <div className="d-flex align-items-center justify-content-center flex-column m-1">
+                <FcOk size={25} />
+                <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+              </div>
+            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+              <div className="d-flex align-items-center justify-content-center flex-column m-1">
+                <FcCancel size={25} />
+                <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+              </div>
+            ) : null}
+          </Box>
+          <Box display="flex">
+            {allowedToEdit && <div>
+              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                <Button
+                  disabled={material.filter((e) => e.parentId === null).some(d => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 || d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null || d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined)}
+                  onClick={() => {
+                    axiosInstance()
+                      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+                      .then(() => {
+                        fetchQuotationData(currentVersion);
+                        toastConfig.setToastConfig({
+                          open: true,
+                          type: 'success',
+                          message: 'Sent to customer Sucessfully'
+                        });
+                      })
+                      .catch((error) => {
+                        toastConfig.setToastConfig(error);
+                      });
                   }}
                   variant="outlined"
                   size="small"
                   className="mx-1"
                   color="primary"
                 >
-                  {`Clone Version-${currentVersion}`}
-                </Button>) : null
-            }
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
-              onClick={openActions}
-              aria-controls="action-menu"
-              disabled={(selectedProducts.length === 0)}
-            >
-              Actions<ExpandMore />
-            </Button>
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              getContentAnchorEl={null}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left'
-              }}
-              id="action-menu"
-              open={Boolean(anchorEl)}
-              onClose={closeActions}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeActions()
-                  setIsProductEdit({ open: true, isBulkedit: true })
-                }}>
-                Bulk Edit
-              </MenuItem>
-              {allowedToDelete && <MenuItem
-                onClick={() => {
-                  closeActions()
-                  const dataToDelete = selectedProducts && selectedProducts
-                    .filter((e) => !e.hideSelection)
-                    .map((rec: any) => {
-                      const obj: any = {};
-                      obj.id = rec._id;
-                      obj.type = rec?.type;
-                      obj.materialId = rec?.materialId;
-                      return obj;
-                    });
-                  setDeleteData(dataToDelete);
-                }} >
-                Delete
-              </MenuItem>}
-            </Menu>
-          </div>}
+                  Send to customer
+                </Button>)
+                : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (<Button
+                  onClick={() => {
+                    setCustomerAcceptable(true)
+                  }}
+                  variant="outlined"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  Accept / Reject
+                </Button>)
+                  : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (<Button
+                    onClick={() => {
+                      cloneVersion();
+                    }}
+                    variant="outlined"
+                    size="small"
+                    className="mx-1"
+                    color="primary"
+                  >
+                    {`Clone Version-${currentVersion}`}
+                  </Button>) : null
+              }
+              <Button
+                variant="outlined"
+                color="default"
+                size="small"
+                onClick={openActions}
+                aria-controls="action-menu"
+                disabled={(selectedProducts.length === 0)}
+              >
+                Actions<ExpandMore />
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions()
+                    setIsProductEdit({ open: true, isBulkedit: true })
+                  }}>
+                  Bulk Edit
+                </MenuItem>
+                {allowedToDelete && <MenuItem
+                  onClick={() => {
+                    closeActions()
+                    const dataToDelete = selectedProducts && selectedProducts
+                      .filter((e) => !e.hideSelection)
+                      .map((rec: any) => {
+                        const obj: any = {};
+                        obj.id = rec._id;
+                        obj.type = rec?.type;
+                        obj.materialId = rec?.materialId;
+                        return obj;
+                      });
+                    setDeleteData(dataToDelete);
+                  }} >
+                  Delete
+                </MenuItem>}
+              </Menu>
+            </div>}
+          </Box>
         </Box>
-      </Box>
+      }
+
+
       {columns && rowsData ? (
         <>
           <Box

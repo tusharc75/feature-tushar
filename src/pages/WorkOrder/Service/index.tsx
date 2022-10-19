@@ -384,7 +384,10 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                       >
                         <Grid container>
                           <Grid item xs={10}>
-                            <Box display="flex" sx={{ flexWrap: 'wrap', alignItems: 'center', position: 'relative', paddingLeft: '20px' }}>
+                            <Box
+                              display="flex"
+                              sx={{ flexWrap: 'wrap', alignItems: 'center', position: 'relative', paddingLeft: !isColapsed ? '20px' : '' }}
+                            >
                               {data?.type === 'service' && (
                                 <Box
                                   style={{
@@ -400,10 +403,10 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                                     justifyContent: 'center',
                                     fontSize: '10px',
                                     flexShrink: 0,
-                                    position: 'absolute',
                                     top: '4px',
                                     left: 0
                                   }}
+                                  sx={{ position: !isColapsed ? 'absolute' : '' }}
                                 >
                                   {data?.order}
                                 </Box>

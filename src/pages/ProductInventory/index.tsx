@@ -223,14 +223,16 @@ const InventoryProduct = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
 
+    const updatedFilters = [{ field: "serializedProduct", term: "No" }];
     if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         });
       });
+    }
+    if (updatedFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}`;
     }
     if (sorting.length > 0) {

@@ -19,7 +19,6 @@ import {
 import { Box, Divider, Grid, Badge, Accordion, AccordionDetails, AccordionSummary, Typography, Chip, Checkbox } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import moment from 'moment';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -30,7 +29,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       width: '100%',
-      height: 'calc(100vh - 250px)',
+      height: 'calc(100vh - 290px)',
       overflowY: 'auto'
     },
     backButton: {
@@ -374,7 +373,7 @@ const Service = ({
   };
 
   return stepList?.length ? (
-    <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'rgba(242, 243, 247, 0.9)' }}>
+    <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}>
       <div className={classes.root}>
         {serviceDetails?.steps?.map((step, index) => {
           const { stepData, isStepValid } = getFields(step);
@@ -490,43 +489,10 @@ const Service = ({
                   ) : null}
                 </Box>
               </Box>
-              {/* <Box>
-                <Grid container>
-                  {stepData?.startDate ? (
-                    <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>
-                      <Typography variant="caption">Start By</Typography>
-                      <Typography variant="body2"> {stepData?.startedBy?.optionLabel}</Typography>
-                      <Typography variant="caption"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
-                    </Grid>
-                  ) : null}
-                  {stepData?.endDate ? (
-                    <Grid item style={{ paddingTop: '20px', paddingRight: '20px', flexGrow: 1 }}>
-                      <Typography variant="caption">End By</Typography>
-                      <Typography variant="body2"> {stepData?.endedBy?.optionLabel}</Typography>
-                      <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
-                    </Grid>
-                  ) : null}
-                  {stepData?.startDate && stepData?.endDate ? (
-                    <Grid item style={{ paddingTop: '20px', flexGrow: 1 }}>
-                      <Typography variant="caption">Duration</Typography>
-                      <Typography variant="body2">{`${moment(stepData?.endDate).diff(moment(stepData?.startDate), 'hours')} hours`}</Typography>
-                    </Grid>
-                  ) : null}
-                </Grid>
-              </Box> */}
             </Box>
           );
         })}
       </div>
-      {/* {Boolean(selectedStep) && (
-        <StepFieldsDialog
-          isOpen={Boolean(selectedStep)}
-          fieldData={getFields(selectedStep)?.fieldData}
-          handleClose={() => setSelectedStep(null)}
-          handleSubmit={handleSubmit}
-          step={selectedStep}
-        />
-      )} */}
       <StepFieldsDialog
         isOpen={Boolean(selectedStep)}
         fieldData={getFields(selectedStep)?.fieldData}
