@@ -10,18 +10,13 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
 import moment from 'moment';
 import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency, QUOTATION_STATUS } from '../../../constants/helpers';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
-import { RiEditCircleLine } from 'react-icons/ri';
-import { BiChevronDown } from 'react-icons/bi';
+import { MdDelete } from 'react-icons/md';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 
 const Quotation = ({
@@ -36,27 +31,17 @@ const Quotation = ({
   allowedToEdit
 }) => {
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
-
-  const [isUpdating, setUpdating] = useState(false);
-
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
-  const [isAddingProducts, setAddingProducts] = useState(false);
-
-  const [recordToUpdate, setRecordToUpdate] = useState(null);
-
-  const [deleteData, setDeleteData] = useState(null);
-  const [isDeleting, setDeleting] = useState(false);
-
   const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
+  const [sendCustomerLoading, setSendCustomerLoading] = useState(false);
+  const [responseLoading, setResponseLoading] = useState({
+    accept: false,
+    reject: false
+  });
   const [rentalManagementUpdated, setRentalManagementUpdated] = useState(rentalManagementData);
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -69,9 +54,22 @@ const Quotation = ({
     fetchProductInventory();
   }, [columns]);
 
+  useEffect(() => {
+    fetchQuotationData();
+  }, [rentalManagementData?._id]);
+
   const fetchQuotationData = async () => {
-    const response: any = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData?._id}`);
-    setRentalManagementUpdated(response?.data?.data);
+    axiosInstance()
+      .get(`${rentalManagement.api}/${rentalManagementData?._id}`)
+      .then((res) => {
+        setRentalManagementUpdated(res?.data?.data);
+        if (
+          res?.data?.data?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ||
+          res?.data?.data?.quotationStatus === QUOTATION_STATUS.rejectByCustomer
+        ) {
+          setNextStep(true);
+        }
+      });
   };
 
   const fetchFields = async () => {
@@ -96,13 +94,7 @@ const Quotation = ({
             {isOffline || !allowedToEdit ? (
               <p> {row.original.detail}</p>
             ) : (
-              <p
-                onClick={() => {
-                  handleOpen(row.original);
-                }}
-                className="link text-truncate"
-                title={row.original.detail}
-              >
+              <p className="link text-truncate" title={row.original.detail}>
                 {row.original.detail}
               </p>
             )}
@@ -239,6 +231,13 @@ const Quotation = ({
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
+    if (
+      rentalManagementUpdated?.quotationStatus &&
+      (rentalManagementUpdated?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ||
+        rentalManagementUpdated?.quotationStatus === QUOTATION_STATUS.rejectByCustomer)
+    ) {
+      setNextStep(true);
+    }
 
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
@@ -267,12 +266,9 @@ const Quotation = ({
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
-    } else {
-      setNextStep(true);
     }
 
     setRowsData(rows);
-    setSelectedProducts([]);
   };
 
   const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
@@ -305,109 +301,6 @@ const Quotation = ({
         getNestedSubRows(obj, element);
       });
     }
-  };
-
-  const handleAdd = async (rows) => {
-    setAddingProducts(true);
-    const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = addExistingProductDialog.type;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
-      element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
-      element.actualStartDate = '';
-      element.actualEndDate = '';
-      element.actualJobDuration = '';
-      element.parentId = addExistingProductDialog.parentId;
-      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      element.estimateJobDuration = 1;
-      if (calValues && calValues['estimateJobDuration']) {
-        element.estimateJobDuration = calValues['estimateJobDuration'];
-      }
-      material.push(element);
-    });
-
-    const priceData: any = await calculatePrice(material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
-      if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-        Object.assign(element, calValues);
-      }
-    });
-
-    axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
-      .then(() => {
-        setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        fetchProductInventory();
-        setAddingProducts(false);
-      })
-      .catch((error) => {
-        setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        toastConfig.setToastConfig(error);
-        setAddingProducts(false);
-      });
-  };
-
-  const handleSaveData = async (rows: any) => {
-    rows.forEach((element) => {
-      delete element.srno;
-      delete element.detail;
-      delete element.serializedProduct;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
-    });
-    setUpdating(true);
-    axiosInstance()
-      .put(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: rows })
-      .then(() => {
-        setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleDelete = (rows) => {
-    setDeleting(true);
-    axiosInstance()
-      .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
-      .then(() => {
-        setDeleting(false);
-        fetchProductInventory();
-        setDeleteData(null);
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-      });
-  };
-
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
   };
 
   const calculatePrice = (arr: any[]) => {
@@ -451,18 +344,59 @@ const Quotation = ({
     setAnchorEl(null);
   };
 
-  const handleDeleteMultiple = () => {
-    const obj: any = [];
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
-    dataToDelete?.forEach((ele) => {
-      obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
-    });
-    dataToDelete?.forEach((ele) => {
-      getNestedSubRows(obj, ele);
-    });
-    setDeleteData(obj);
+  const sendToCustomer = () => {
+    setSendCustomerLoading(true);
+    axiosInstance()
+      .get(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/send-to-customer`)
+      .then(() => {
+        fetchQuotationData();
+        setSendCustomerLoading(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Sent to customer Sucessfully'
+        });
+      })
+      .catch((error) => {
+        setSendCustomerLoading(false);
+        toastConfig.setToastConfig(error);
+      });
   };
-  console.log(rentalManagementData);
+
+  const handleResponse = (res) => {
+    const data = {
+      response: res
+    };
+    if (res === QUOTATION_STATUS.acceptByCustomer) {
+      setResponseLoading({ accept: true, reject: false });
+    } else {
+      setResponseLoading({ accept: false, reject: true });
+    }
+    axiosInstance()
+      .put(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/response`, data)
+      .then(() => {
+        fetchQuotationData();
+        setResponseLoading({ accept: false, reject: false });
+        if (res === QUOTATION_STATUS.acceptByCustomer) {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: 'Accepted Quotation Sucessfully'
+          });
+        } else {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'info',
+            message: 'Quotation Rejected Sucessfully'
+          });
+        }
+      })
+      .catch((error) => {
+        setResponseLoading({ accept: false, reject: false });
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Fragment>
       <Grid container spacing={2}>
@@ -471,31 +405,33 @@ const Quotation = ({
             <Box display="flex" justifyContent="space-between" m={1}>
               <Box />
               <Box display="flex">
-                {!rentalManagementData?.quotationStatus && (
+                {!rentalManagementUpdated?.quotationStatus && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
                     size="small"
-                    disabled={false}
+                    disabled={sendCustomerLoading}
+                    endIcon={sendCustomerLoading && <CircularProgress size={20} />}
                     onClick={() => {
-                      handleDeleteMultiple();
+                      sendToCustomer();
                     }}
                   >
-                    {isMobile && !isTablet ? <MdDelete size={20} /> : 'Send To Customer'}
+                    Send To Customer
                   </Button>
                 )}
-                {rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer &&
-                  rentalManagementData?.quotationStatus !== QUOTATION_STATUS.acceptByCustomer &&
-                  rentalManagementData?.quotationStatus !== QUOTATION_STATUS.rejectByCustomer && (
+                {rentalManagementUpdated?.quotationStatus === QUOTATION_STATUS.sentToCustomer &&
+                  rentalManagementUpdated?.quotationStatus !== QUOTATION_STATUS.acceptByCustomer &&
+                  rentalManagementUpdated?.quotationStatus !== QUOTATION_STATUS.rejectByCustomer && (
                     <Box display="flex">
                       <Box mx={1} />
                       <Button
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
                         color="primary"
                         size="small"
-                        disabled={false}
+                        disabled={responseLoading.accept}
+                        endIcon={responseLoading.accept && <CircularProgress size={20} />}
                         onClick={() => {
-                          handleDeleteMultiple();
+                          handleResponse(QUOTATION_STATUS.acceptByCustomer);
                         }}
                       >
                         {isMobile && !isTablet ? <MdDelete size={20} /> : 'Accept'}
@@ -506,9 +442,10 @@ const Quotation = ({
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
                         color="primary"
                         size="small"
-                        disabled={false}
+                        disabled={responseLoading.reject}
+                        endIcon={responseLoading.reject && <CircularProgress size={20} />}
                         onClick={() => {
-                          handleDeleteMultiple();
+                          handleResponse(QUOTATION_STATUS.rejectByCustomer);
                         }}
                       >
                         {isMobile && !isTablet ? <MdDelete size={20} /> : 'Reject'}
@@ -541,10 +478,10 @@ const Quotation = ({
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                onSelect={setSelectedProducts}
+                onSelect={() => {}}
                 childrenProperty="subRows"
                 uniqueKey="_id"
-                hideSelection={isOffline || !allowedToEdit}
+                hideSelection={true}
                 renderedFrom="rental_management_product_package"
                 isClientSideGrid={true}
               />
