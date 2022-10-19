@@ -40,33 +40,33 @@ const PolicyResources = (
                 </TableRow>
             </TableHead>
             <TableBody>
-                {policyResources?.filter((item) => permissions[camelCase(item?.resource)]?.isRead).map((resource, outerIndex) => (
+                {[...new Set(policyResources.map((m) => m.resource).flat())]?.filter((item: string) => permissions[camelCase(item)]?.isRead).map((resource: string, outerIndex) => (
                     <>
                         <TableRow>
                             <TableCell style={{ minWidth: 300 }}>
                                 <Box display='flex' justifyContent={'flex-start'} alignItems={'center'}>
-                                    <Typography className="tableMainHeader">{resource.resource}</Typography>
+                                    <Typography className="tableMainHeader">{resource}</Typography>
                                     {fieldOfPolicyResources.length > 0 && <Box ml={1}>
                                         <IconButton
                                             size="small"
                                             aria-label="expand row"
-                                            onClick={() => setOpen((prevState) => ({ ...prevState, [camelCase(resource.resource)]: !(open[camelCase(resource.resource)]) }))}
+                                            onClick={() => setOpen((prevState) => ({ ...prevState, [camelCase(resource)]: !(open[camelCase(resource)]) }))}
                                         >
-                                            {open[camelCase(resource?.resource)] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                                            {open[camelCase(resource)] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                                         </IconButton>
                                     </Box>}
                                 </Box>
                             </TableCell>
                             <TableCell align="center">
                                 <Checkbox
-                                    checked={resourceCheckbox[camelCase(resource.resource)]}
+                                    checked={resourceCheckbox[camelCase(resource)]}
                                     onChange={(e) => {
                                         handlePolicyCheckBox("Policy-CheckBox", e, resource)
                                     }}
                                 />
                             </TableCell>
                         </TableRow>
-                        {open[camelCase(resource.resource)] && fieldOfPolicyResources.filter((item) => item.resource === resource.resource).map((obj) => (
+                        {open[camelCase(resource)] && fieldOfPolicyResources.filter((item) => item.resource === resource).map((obj) => (
                             <TableRow key={2}>
                                 <TableCell>
                                     <Typography variant="body1">
