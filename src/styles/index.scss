@@ -48,7 +48,10 @@
 
 .ag-theme-material {
   border: 1px solid #eeeaea;
-  @include ag-theme-material((font-family: (Nunito,
+  @include ag-theme-material(
+    (
+      font-family: (
+        Nunito,
         BlinkMacSystemFont,
         'Segoe UI',
         Roboto,
@@ -63,7 +66,9 @@
       material-accent-color: var(--primary-light),
       input-focus-border-color: red,
       range-selection-background-color: red,
-      odd-row-background-color: #f5f3f3));
+      odd-row-background-color: #f5f3f3
+    )
+  );
 }
 
 .ag-theme-material .ag-cell,
@@ -101,7 +106,7 @@ body {
   // background-color: var(--aliceblue) !important;
 }
 
-body>iframe {
+body > iframe {
   z-index: -1 !important;
 }
 
@@ -1117,7 +1122,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 @supports (not (gap: 0.25rem)) and (not (-webkit-gap: 0.25rem)) {
-  .quoteHeader>*:not(:nth-child(1)) {
+  .quoteHeader > *:not(:nth-child(1)) {
     margin-left: 0.25rem !important;
   }
 }
@@ -1343,7 +1348,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 /* Style your items */
-.my-masonry-grid_column>div {
+.my-masonry-grid_column > div {
   /* change div to reference your elements you put in <Masonry> */
   margin-bottom: 30px;
 }
@@ -1357,15 +1362,15 @@ body::-webkit-scrollbar-thumb {
 }
 
 .light-red-data-row {
-  background-color: #FEB1B1 !important;
+  background-color: #feb1b1 !important;
 }
 
 .light-yellow-data-row {
-  background-color: #FAE498 !important;
+  background-color: #fae498 !important;
 }
 
 .light-green-data-row {
-  background-color: #ACF1C8 !important;
+  background-color: #acf1c8 !important;
 }
 
 .a_divider_inner {
@@ -1585,7 +1590,8 @@ body::-webkit-scrollbar-thumb {
 @media only screen and (max-width: 560px) {
   .grid-without-activity {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 100%;
+    max-width: 100%;
   }
 
   .detail-box {
@@ -1788,11 +1794,11 @@ svg.MuiSvgIcon-root {
   align-items: center;
   position: relative;
 
-  div[role='tablist']>button:first-child {
+  div[role='tablist'] > button:first-child {
     margin-left: 0;
   }
 
-  div[role='tablist']>button {
+  div[role='tablist'] > button {
     min-width: 189px;
     padding: 15px 10px;
     position: relative;
@@ -1975,7 +1981,7 @@ svg.MuiSvgIcon-root {
       right: 50px;
     }
 
-    div[role='tablist']>button {
+    div[role='tablist'] > button {
       min-width: 169px;
       padding: 9px 6px;
     }
@@ -2009,7 +2015,7 @@ svg.MuiSvgIcon-root {
       pointer-events: none;
     }
 
-    div[role='tablist']>button {
+    div[role='tablist'] > button {
       margin: 0 5px 15px;
     }
   }
@@ -2035,7 +2041,7 @@ svg.MuiSvgIcon-root {
     border-right: 0;
     border-bottom: 0;
 
-    &>div {
+    & > div {
       padding: 10px 0 0px;
     }
   }
