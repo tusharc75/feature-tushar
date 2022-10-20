@@ -11,10 +11,11 @@
   border-bottom: 0;
   .control {
     position: absolute;
-    top: -24px;
+    top: -25px;
     right: 20px;
     button {
       background-color: var(--primary-light);
+      border-radius: 6px 6px 0 0;
       color: white;
       border: 1px solid lightgray;
       border-bottom: 0;
@@ -23,6 +24,7 @@
       cursor: pointer;
       position: relative;
       transition: 0.3s;
+      outline: none;
 
       &:active {
         background-color: hsl(199deg, 49%, 29%);
