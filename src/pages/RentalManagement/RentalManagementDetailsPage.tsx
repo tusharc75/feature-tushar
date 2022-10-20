@@ -573,11 +573,14 @@ const RentalManagementDetailsPage = () => {
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
                 <Box>
-                  <ProgressiveBilling
+                  {user?.role?.selectedEntity?.policy?.isProgressiveBillingRentalManagement ? <ProgressiveBilling
                     rentalId={id}
                     rentalManagementData={rentalManagementData}
                     currencySymbol={currencySymbol}
                   />
+                    :
+                    <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
+                  }
                 </Box>
               </TabPanel>
               <TabPanel value={tabValue} index={3}>
