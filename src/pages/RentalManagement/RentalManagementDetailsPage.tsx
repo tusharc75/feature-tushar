@@ -49,6 +49,7 @@ import RentalManagementViews from './RoadMapViews';
 import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import Quotation from './Quotation';
+import ProgressiveBilling from './ProgressiveBilling';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -431,7 +432,7 @@ const RentalManagementDetailsPage = () => {
                   }
                   {...a11yProps(1)}
                 />
-                {!isOffline && (
+                {user?.role?.selectedEntity?.policy?.isProgressiveBillingRentalManagement &&
                   <Tab
                     className={'tabLayout'}
                     style={{
@@ -440,12 +441,25 @@ const RentalManagementDetailsPage = () => {
                     }}
                     label={
                       <div className="d-flex align-items-center tab-font">
-                        <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                        <RiFlowChart className="mr-1" fontSize="inherit" /> Progressive Billing
                       </div>
                     }
                     {...a11yProps(2)}
-                  />
-                )}
+                  />}
+                {!isOffline &&
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 4 ? 'white' : '',
+                      color: tabValue === 4 ? 'blue' : '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                      </div>
+                    }
+                    {...a11yProps(3)}
+                  />}
                 <div className={'uio'}> </div>
               </Tabs>
               <TabPanel value={tabValue} index={0}>
@@ -558,6 +572,15 @@ const RentalManagementDetailsPage = () => {
                 </Paper>
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
+                <Box>
+                  <ProgressiveBilling
+                    rentalId={id}
+                    rentalManagementData={rentalManagementData}
+                    currencySymbol={currencySymbol}
+                  />
+                </Box>
+              </TabPanel>
+              <TabPanel value={tabValue} index={3}>
                 <Box>
                   <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
                 </Box>
