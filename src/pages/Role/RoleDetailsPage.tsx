@@ -87,7 +87,9 @@ const RoleDetailsPage = () => {
     isPricingRentalManagement: false,
     isPricingSublease: false,
     isPricingPurchaseOrder: false,
-    isQuoteAskSupplierPrice: false
+    isQuoteAskSupplierPrice: false,
+    isQuotationRentalManagement: false,
+    isProgressiveBillingRentalManagement: false,
   });
 
   const [resourceCheckbox, setResourceCheckBox] = useState({
@@ -106,6 +108,16 @@ const RoleDetailsPage = () => {
       resource: 'Rental Management',
       fieldLabel: 'Pricing Information',
       fieldName: 'isPricingRentalManagement'
+    },
+    {
+      resource: 'Rental Management',
+      fieldLabel: 'Quotation Information',
+      fieldName: 'isQuotationRentalManagement'
+    },
+    {
+      resource: 'Rental Management',
+      fieldLabel: 'Progressive Billing',
+      fieldName: 'isProgressiveBillingRentalManagement'
     },
     {
       resource: 'Sublease',
@@ -191,17 +203,25 @@ const RoleDetailsPage = () => {
         isPricingPurchaseOrder: e.target.checked,
         isPricingRentalManagement: e.target.checked,
         isPricingSublease: e.target.checked,
-        isQuoteAskSupplierPrice: e.target.checked
+        isQuoteAskSupplierPrice: e.target.checked,
+        isQuotationRentalManagement: e.target.checked,
+        isProgressiveBillingRentalManagement: e.target.checked,
+
       });
     }
     if (checkBoxType === 'Policy-CheckBox') {
-      setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(type.resource)]: e.target.checked }));
-      SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [type.fieldName]: e.target.checked }));
+      setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(type)]: e.target.checked }));
+      policyResources.filter(d => d.resource === type).forEach(obj => {
+        SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [obj.fieldName]: e.target.checked }));
+      })
     }
 
     if (checkBoxType === 'Fields') {
       SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [type.field]: e.target.checked }));
-      setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resourceObject.resource)]: e.target.checked }));
+      let temppolicyFieldCheckBox = policyFieldCheckBox
+      temppolicyFieldCheckBox[type.field] = e.target.checked
+      let tempResourceCheckBox = policyResources.filter(d => d.resource === type.resource).every(d => temppolicyFieldCheckBox[d.fieldName])
+      setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resourceObject)]: tempResourceCheckBox }));
     }
   };
 

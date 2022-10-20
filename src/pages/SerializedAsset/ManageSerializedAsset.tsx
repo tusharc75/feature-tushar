@@ -121,7 +121,6 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
             }
             if (fieldsDataForCreate.some((e) => e.fieldName === "warehouse")) {
               createValues['warehouse'] = referenceData?.warehouse;
-              console.log(plantsOptions)
               const warehouseAddress = plantsOptions?.find((e) => e.optionValue === referenceData?.warehouse);
               if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === "currentLocation")) {
                 createValues['currentLocation'] = warehouseAddress?.address;
@@ -349,7 +348,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                           <FormTypes
                                             isNew={Boolean(productInventoryId)}
                                             {...field}
-                                            disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone && field.isUneditable}
+                                            disabled={Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
                                             fieldData={field}
                                             values={values}
                                             errors={errors}
@@ -378,10 +377,10 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                                                 onClick={() => {
                                                   setPlantsOpen({ open: true, isClone: false });
                                                 }}
-                                                disabled={Boolean(productInventoryId) && field.disableOnEdit && !isClone && field.isUneditable}
+                                                disabled={Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
                                                 size="small"
                                               >
-                                                <AddIcon color={Boolean(productInventoryId) && field.disableOnEdit && !isClone ? 'disabled' : 'primary'} />
+                                                <AddIcon color={Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable ? 'disabled' : 'primary' : field.isUneditable ? 'disabled' : 'primary'} />
                                               </IconButton>
                                             </Tooltip>
                                           </Box>}
