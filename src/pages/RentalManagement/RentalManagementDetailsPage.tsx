@@ -53,7 +53,7 @@ import Quotation from './Quotation';
 import ProgressiveBilling from './ProgressiveBilling';
 
 const RentalManagementDetailsPage = () => {
-  
+
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
   const renderedFrom = camelCase(routes?.rentalManagement.title);
@@ -169,7 +169,6 @@ const RentalManagementDetailsPage = () => {
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
       updateProcessStatus(rentalSteps[currentStep]);
-      setNextStep(false);
     }
   }, [currentStep]);
 
@@ -233,20 +232,17 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleCancelRentalJob = () => {
-    axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData._id}/cancel`)
-      .then(() => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `${routes.rentalManagement.title} cancelled successfully`
-        });
-        fetchRentalManagementData();
-        setShowCancelConfirmBox(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/cancel`).then(() => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `${routes.rentalManagement.title} cancelled successfully`
       });
+      fetchRentalManagementData();
+      setShowCancelConfirmBox(false);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleDelete = () => {
@@ -328,9 +324,7 @@ const RentalManagementDetailsPage = () => {
               ) : (
                 <DetailsPageHeader heading={rentalManagementData?.rentalJobName} mainPoints={mainPoints} showHeading={true}>
                   {permissions?.rentalManagement?.isUpdate &&
-                    allowedToEdit &&
-                    !isOffline &&
-                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
+                    allowedToEdit && !isOffline && ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
                         <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                           Edit
