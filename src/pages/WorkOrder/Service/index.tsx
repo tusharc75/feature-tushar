@@ -568,7 +568,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                                   {data?.type === 'service' &&
                                     (data?.preWork ? (
                                       <HtmlTooltip title="Pre Work Service">
-                                        <RestoreIcon fontSize="small" />
+                                        <RestoreIcon fontSize="small" style={{ width: '15px', height: '15px' }} />
                                       </HtmlTooltip>
                                     ) : (
                                       <HtmlTooltip title="Post Work Service">
@@ -577,7 +577,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                                     ))}
                                   {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                                     <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                      <PeopleIcon />
+                                      <PeopleIcon style={{ width: '15px', height: '15px' }} />
                                     </HtmlTooltip>
                                   )}
                                 </Box>
