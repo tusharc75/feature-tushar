@@ -27,6 +27,7 @@ const Quotation = ({
   stepFullScreen,
   allowedToEdit
 }) => {
+  
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -36,6 +37,13 @@ const Quotation = ({
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
 
   useEffect(() => {
+    setNextStep(false);
+    if (rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer) {
+      setNextStep(true);
+    }
+  }, []);
+
+  useEffect(() => {
     fetchFields();
   }, []);
 
@@ -43,15 +51,8 @@ const Quotation = ({
     fetchProductInventory();
   }, [columns]);
 
-  useEffect(() => {
-    setNextStep(false);
-    if (rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer) {
-      setNextStep(true);
-    }
-  }, [rentalManagementData]);
-
   const fetchFields = async () => {
-    var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     const coloum: any = [
       {
         accessor: 'srno',
