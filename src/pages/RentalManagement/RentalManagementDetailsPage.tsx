@@ -18,7 +18,8 @@ import {
   defaultActivityShow,
   RENTAL_STATUS,
   rentalManagementSteps,
-  ACTIVITY_RESOURCE
+  ACTIVITY_RESOURCE,
+  QUOTATION_STATUS
 } from '../../constants/helpers';
 import Steps from './Steps';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
@@ -49,8 +50,10 @@ import RentalManagementViews from './RoadMapViews';
 import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import Quotation from './Quotation';
+import ProgressiveBilling from './ProgressiveBilling';
 
 const RentalManagementDetailsPage = () => {
+
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
   const renderedFrom = camelCase(routes?.rentalManagement.title);
@@ -89,7 +92,9 @@ const RentalManagementDetailsPage = () => {
 
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
 
-  const [rentalSteps, setRentalSteps] = useState(user?.role?.selectedEntity?.policy?.isQuotationRentalManagement ? rentalManagementSteps : rentalManagementSteps?.filter((e) => e !== "Quotation"));
+  const [rentalSteps, setRentalSteps] = useState(
+    user?.role?.selectedEntity?.policy?.isQuotationRentalManagement ? rentalManagementSteps : rentalManagementSteps?.filter((e) => e !== 'Quotation')
+  );
 
   useEffect(() => {
     return history.listen((location) => {
@@ -164,7 +169,6 @@ const RentalManagementDetailsPage = () => {
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
       updateProcessStatus(rentalSteps[currentStep]);
-      setNextStep(false);
     }
   }, [currentStep]);
 
@@ -228,20 +232,17 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleCancelRentalJob = () => {
-    axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData._id}/cancel`)
-      .then(() => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `${routes.rentalManagement.title} cancelled successfully`
-        });
-        fetchRentalManagementData();
-        setShowCancelConfirmBox(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/cancel`).then(() => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `${routes.rentalManagement.title} cancelled successfully`
       });
+      fetchRentalManagementData();
+      setShowCancelConfirmBox(false);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleDelete = () => {
@@ -323,9 +324,7 @@ const RentalManagementDetailsPage = () => {
               ) : (
                 <DetailsPageHeader heading={rentalManagementData?.rentalJobName} mainPoints={mainPoints} showHeading={true}>
                   {permissions?.rentalManagement?.isUpdate &&
-                    allowedToEdit &&
-                    !isOffline &&
-                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
+                    allowedToEdit && !isOffline && ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
                         <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                           Edit
@@ -431,22 +430,35 @@ const RentalManagementDetailsPage = () => {
                   }
                   {...a11yProps(1)}
                 />
-                {!isOffline && (
+                {user?.role?.selectedEntity?.policy?.isProgressiveBillingRentalManagement &&
                   <Tab
                     className={'tabLayout'}
                     style={{
                       background: tabValue === 3 ? 'white' : '',
-                      color: tabValue === 3 ? 'blue' : '#163340'
+                      color: '#163340'
                     }}
                     label={
                       <div className="d-flex align-items-center tab-font">
-                        <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                        <RiFlowChart className="mr-1" fontSize="inherit" /> Progressive Billing
                       </div>
                     }
                     {...a11yProps(2)}
-                  />
-                )}
-                <div className={'uio'}> </div>
+                  />}
+                {!isOffline &&
+                  <Tab
+                    className={'tabLayout'}
+                    style={{
+                      background: tabValue === 4 ? 'white' : '',
+                      color: '#163340'
+                    }}
+                    label={
+                      <div className="d-flex align-items-center tab-font">
+                        <RiFlowChart className="mr-1" fontSize="inherit" />Views
+                      </div>
+                    }
+                    {...a11yProps(3)}
+                  />}
+                <div className={'uio'}></div>
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
@@ -467,7 +479,7 @@ const RentalManagementDetailsPage = () => {
                     setStepFullScreen={() => setStepFullScreen(true)}
                   />
                   <ContentFullScreen title={rentalSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                    {rentalSteps[currentStep] === "Add Products" && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Add Products' && rentalManagementData && (
                       <Productpackage
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -480,7 +492,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {rentalSteps[currentStep] === "Services and Consumables" && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Services and Consumables' && rentalManagementData && (
                       <AdditionalCost
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -488,7 +500,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {rentalSteps[currentStep] === "Quotation" && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
                       <Quotation
                         fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
@@ -502,7 +514,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {rentalSteps[currentStep] === "Serialized Asset" && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Serialized Asset' && rentalManagementData && (
                       <SerializedAsset
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -514,7 +526,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {rentalSteps[currentStep] === "Loading Ticket" && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Loading Ticket' && rentalManagementData && (
                       <LoadingTicket
                         fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
@@ -526,7 +538,7 @@ const RentalManagementDetailsPage = () => {
                         allowUpdateStatus={allowUpdateStatus}
                       />
                     )}
-                    {rentalSteps[currentStep] === "Receiving Ticket" && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Receiving Ticket' && rentalManagementData && (
                       <ReceivingTicket
                         fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
@@ -538,7 +550,7 @@ const RentalManagementDetailsPage = () => {
                         allowUpdateStatus={allowUpdateStatus}
                       />
                     )}
-                    {rentalSteps[currentStep] === "Packing Slip" && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Packing Slip' && rentalManagementData && (
                       <Invoice
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -558,6 +570,18 @@ const RentalManagementDetailsPage = () => {
                 </Paper>
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
+                <Box>
+                  {user?.role?.selectedEntity?.policy?.isProgressiveBillingRentalManagement ? <ProgressiveBilling
+                    rentalId={id}
+                    rentalManagementData={rentalManagementData}
+                    currencySymbol={currencySymbol}
+                  />
+                    :
+                    <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
+                  }
+                </Box>
+              </TabPanel>
+              <TabPanel value={tabValue} index={3}>
                 <Box>
                   <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
                 </Box>
