@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, CircularProgress, Chip } from '@material-ui/core';
+import { Grid, Box, Button, CircularProgress, Chip, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -14,6 +14,8 @@ import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import ManualReponseDialog from './manualResponseDialog';
+import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 
 const Quotation = ({
   fetchRentalData,
@@ -33,6 +35,7 @@ const Quotation = ({
   const [sendCustomerLoading, setSendCustomerLoading] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
+  const [customerAcceptable, setCustomerAcceptable] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -41,6 +44,12 @@ const Quotation = ({
   useEffect(() => {
     fetchProductInventory();
   }, [columns]);
+
+  useEffect(() => {
+    if (rentalManagementData?.quotationStatus || rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer) {
+      setNextStep(true);
+    }
+  }, [rentalManagementData?.quotationStatus]);
 
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
@@ -186,9 +195,6 @@ const Quotation = ({
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
-    if (rentalManagementData?.quotationStatus || rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer) {
-      setNextStep(true);
-    }
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
       inventory = data.productInventory;
@@ -256,35 +262,6 @@ const Quotation = ({
       });
   };
 
-  // const handleResponse = (res) => {
-  //   const data = { response: res };
-  //   if (res === QUOTATION_STATUS.acceptByCustomer) {
-  //     setResponseLoading({ accept: true, reject: false });
-  //   } else {
-  //     setResponseLoading({ accept: false, reject: true });
-  //   }
-  //   axiosInstance().put(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/response`, data).then(() => {
-  //     setResponseLoading({ accept: false, reject: false });
-  //     if (res === QUOTATION_STATUS.acceptByCustomer) {
-  //       toastConfig.setToastConfig({
-  //         open: true,
-  //         type: 'success',
-  //         message: 'Accepted Quotation Sucessfully'
-  //       });
-  //     } else {
-  //       toastConfig.setToastConfig({
-  //         open: true,
-  //         type: 'info',
-  //         message: 'Quotation Rejected Sucessfully'
-  //       });
-  //     }
-  //   })
-  //     .catch((error) => {
-  //       setResponseLoading({ accept: false, reject: false });
-  //       toastConfig.setToastConfig(error);
-  //     });
-  // };
-
   return (
     <Fragment>
       <Grid container spacing={2}>
@@ -292,22 +269,54 @@ const Quotation = ({
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1}>
               <Box />
-              <Box display="flex">
-                {!rentalManagementData?.quotationStatus && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
-                    disabled={sendCustomerLoading}
-                    endIcon={sendCustomerLoading && <CircularProgress size={20} />}
-                    onClick={() => {
-                      sendToCustomer();
-                    }}
-                  >
-                    Send To Customer
-                  </Button>
-                )}
-              </Box>
+              <div>
+                {rentalManagementData?.quotationStatus && rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer ? (
+                  <div className="d-flex align-items-center justify-content-center flex-column m-1">
+                    <FcClock size={25} />
+                    <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+                  </div>
+                ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ? (
+                  <div className="d-flex align-items-center justify-content-center flex-column m-1">
+                    <FcOk size={25} />
+                    <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+                  </div>
+                ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.rejectByCustomer ? (
+                  <div className="d-flex align-items-center justify-content-center flex-column m-1">
+                    <FcCancel size={25} />
+                    <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+                  </div>
+                ) : null}
+              </div>
+              <div>
+                <Box display="flex">
+                  {(!rentalManagementData?.quotationStatus || rentalManagementData?.quotationStatus === QUOTATION_STATUS.rejectByCustomer) && (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      color="primary"
+                      size="small"
+                      disabled={sendCustomerLoading}
+                      endIcon={sendCustomerLoading && <CircularProgress size={20} />}
+                      onClick={() => {
+                        sendToCustomer();
+                      }}
+                    >
+                      Send To Customer
+                    </Button>
+                  )}
+                  {rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer && (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        setCustomerAcceptable(true);
+                      }}
+                    >
+                      Accept / Reject
+                    </Button>
+                  )}
+                </Box>
+              </div>
             </Box>
           </Grid>
         )}
@@ -348,6 +357,17 @@ const Quotation = ({
           )}
         </Grid>
       </Grid>
+      {customerAcceptable && (
+        <ManualReponseDialog
+          rentalId={rentalManagementData?._id}
+          onSuccess={() => {
+            fetchRentalData();
+          }}
+          onClose={() => {
+            setCustomerAcceptable(false);
+          }}
+        />
+      )}
     </Fragment>
   );
 };

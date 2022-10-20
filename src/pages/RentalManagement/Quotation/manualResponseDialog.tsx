@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { quotation, QUOTATION_STATUS, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const ManualReponseDialog = ({ rentalId, setCurrentStep, updateStatus, setCustomerAcceptable }) => {
+const ManualReponseDialog = ({ rentalId, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const [selectedOption, setSelectedOption] = useState(null);
   const options = { Accept: QUOTATION_STATUS.acceptByCustomer, Reject: QUOTATION_STATUS.rejectByCustomer };
@@ -20,7 +20,7 @@ const ManualReponseDialog = ({ rentalId, setCurrentStep, updateStatus, setCustom
   };
 
   const closeManualDiaog = () => {
-    setCustomerAcceptable(false);
+    onClose();
     setSelectedOption(null);
     setComment('');
     setCommentError(null);
@@ -37,14 +37,8 @@ const ManualReponseDialog = ({ rentalId, setCurrentStep, updateStatus, setCustom
         .put(`${rentalManagement.api}/quotation/${rentalId}/response`, dataObj)
         .then(() => {
           setSubmitting(false);
-          setCurrentStep((prevStep) => {
-            const newStep = prevStep + 1;
-            if (updateStatus) {
-              updateStatus(newStep);
-            }
-            return newStep;
-          });
-          setCustomerAcceptable(false);
+          onSuccess();
+          onClose();
         })
         .catch((error) => {
           setSubmitting(false);

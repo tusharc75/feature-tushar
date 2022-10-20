@@ -37,7 +37,7 @@ import TabPanel from '../../components/TabPanel';
 import Menu from '@material-ui/core/Menu';
 import { isMobile } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { FcCancel, FcClock, FcOk, GrStatusInfo } from 'react-icons/all';
+import { GrStatusInfo } from 'react-icons/all';
 import MenuItem from '@material-ui/core/MenuItem';
 import { objectStore, insertUpdate, findAll, findOne } from '../../constants/indexdbhelper';
 import Productpackage from './Productpackage';
@@ -96,7 +96,6 @@ const RentalManagementDetailsPage = () => {
   const [rentalSteps, setRentalSteps] = useState(
     user?.role?.selectedEntity?.policy?.isQuotationRentalManagement ? rentalManagementSteps : rentalManagementSteps?.filter((e) => e !== 'Quotation')
   );
-  const [customerAcceptable, setCustomerAcceptable] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -476,135 +475,106 @@ const RentalManagementDetailsPage = () => {
                 </Box>
               </TabPanel>
               <TabPanel value={tabValue} index={1}>
-                {rentalManagementData?.quotationStatus && rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer ? (
-                  <div className="d-flex align-items-center justify-content-center flex-column m-1">
-                    <FcClock size={25} />
-                    <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-                  </div>
-                ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ? (
-                  <div className="d-flex align-items-center justify-content-center flex-column m-1">
-                    <FcOk size={25} />
-                    <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-                  </div>
-                ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.rejectByCustomer ? (
-                  <div className="d-flex align-items-center justify-content-center flex-column m-1">
-                    <FcCancel size={25} />
-                    <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-                  </div>
-                ) : null}
-                <div>
-                  <Paper>
-                    <Steps
-                      isNextStep={false}
-                      nextStep={nextStep}
-                      steps={rentalSteps}
-                      currentStep={currentStep}
-                      setCurrentStep={setCurrentStep}
-                      isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
-                      setStepFullScreen={() => setStepFullScreen(true)}
-                      isPrevStep={
-                        rentalSteps[currentStep] === 'Serialized Asset' ||
-                        (rentalSteps[currentStep] === 'Quotation' && rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer)
-                      }
-                      handleNext={
-                        rentalSteps[currentStep] === 'Quotation' && currentStep > 1
-                          ? () => {
-                              setCustomerAcceptable(true);
-                            }
-                          : null
-                      }
-                    />
-                    <ContentFullScreen title={rentalSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                      {rentalSteps[currentStep] === 'Add Products' && rentalManagementData && (
-                        <Productpackage
-                          rentalManagementData={rentalManagementData}
-                          setNextStep={setNextStep}
-                          currencySymbol={currencySymbol}
-                          isSmallScreen={isSmallScreen}
-                          isTabletScreen={isTabletScreen}
-                          showActivity={showActivity}
-                          renderedFrom={`${renderedFrom}_grid-1`}
-                          stepFullScreen={stepFullScreen}
-                          allowedToEdit={allowedToEdit}
-                        />
-                      )}
-                      {rentalSteps[currentStep] === 'Services and Consumables' && rentalManagementData && (
-                        <AdditionalCost
-                          rentalManagementData={rentalManagementData}
-                          setNextStep={setNextStep}
-                          renderedFrom={`${renderedFrom}_grid-2`}
-                          allowedToEdit={allowedToEdit}
-                        />
-                      )}
-                      {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
-                        <Quotation
-                          fetchRentalData={fetchRentalManagementData}
-                          rentalManagementData={rentalManagementData}
-                          setNextStep={setNextStep}
-                          currencySymbol={currencySymbol}
-                          isSmallScreen={isSmallScreen}
-                          isTabletScreen={isTabletScreen}
-                          showActivity={showActivity}
-                          renderedFrom={`${renderedFrom}_grid-6`}
-                          stepFullScreen={stepFullScreen}
-                          allowedToEdit={allowedToEdit}
-                        />
-                      )}
-                      {rentalSteps[currentStep] === 'Serialized Asset' && rentalManagementData && (
-                        <SerializedAsset
-                          rentalManagementData={rentalManagementData}
-                          setNextStep={setNextStep}
-                          isSmallScreen={isSmallScreen}
-                          isTabletScreen={isTabletScreen}
-                          showActivity={showActivity}
-                          currencySymbol={currencySymbol}
-                          stepFullScreen={stepFullScreen}
-                          allowedToEdit={allowedToEdit}
-                        />
-                      )}
-                      {rentalSteps[currentStep] === 'Loading Ticket' && rentalManagementData && (
-                        <LoadingTicket
-                          fetchRentalData={fetchRentalManagementData}
-                          rentalManagementData={rentalManagementData}
-                          currentStep={currentStep}
-                          setNextStep={setNextStep}
-                          renderedFrom={`${renderedFrom}_grid-3`}
-                          allowedToEdit={allowedToEdit}
-                          isProcessor={isProcessor}
-                          allowUpdateStatus={allowUpdateStatus}
-                        />
-                      )}
-                      {rentalSteps[currentStep] === 'Receiving Ticket' && rentalManagementData && (
-                        <ReceivingTicket
-                          fetchRentalData={fetchRentalManagementData}
-                          rentalManagementData={rentalManagementData}
-                          currentStep={currentStep}
-                          setNextStep={setNextStep}
-                          renderedFrom={`${renderedFrom}_grid-4`}
-                          allowedToEdit={allowedToEdit}
-                          isProcessor={isProcessor}
-                          allowUpdateStatus={allowUpdateStatus}
-                        />
-                      )}
-                      {rentalSteps[currentStep] === 'Packing Slip' && rentalManagementData && (
-                        <Invoice
-                          rentalManagementData={rentalManagementData}
-                          setNextStep={setNextStep}
-                          fetchRentalData={fetchRentalManagementData}
-                          updateJobStatus={updateJobStatus}
-                          isSmallScreen={isSmallScreen}
-                          isTabletScreen={isTabletScreen}
-                          statusOptions={statusOptions}
-                          renderedFrom={`${renderedFrom}_grid-5`}
-                          showActivity={showActivity}
-                          currencySymbol={currencySymbol}
-                          stepFullScreen={stepFullScreen}
-                          allowedToEdit={allowedToEdit}
-                        />
-                      )}
-                    </ContentFullScreen>
-                  </Paper>
-                </div>
+                <Paper>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={rentalSteps}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                    isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
+                    setStepFullScreen={() => setStepFullScreen(true)}
+                  />
+                  <ContentFullScreen title={rentalSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                    {rentalSteps[currentStep] === 'Add Products' && rentalManagementData && (
+                      <Productpackage
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                    {rentalSteps[currentStep] === 'Services and Consumables' && rentalManagementData && (
+                      <AdditionalCost
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-2`}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                    {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
+                      <Quotation
+                        fetchRentalData={fetchRentalManagementData}
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-6`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                    {rentalSteps[currentStep] === 'Serialized Asset' && rentalManagementData && (
+                      <SerializedAsset
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        currencySymbol={currencySymbol}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                    {rentalSteps[currentStep] === 'Loading Ticket' && rentalManagementData && (
+                      <LoadingTicket
+                        fetchRentalData={fetchRentalManagementData}
+                        rentalManagementData={rentalManagementData}
+                        currentStep={currentStep}
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-3`}
+                        allowedToEdit={allowedToEdit}
+                        isProcessor={isProcessor}
+                        allowUpdateStatus={allowUpdateStatus}
+                      />
+                    )}
+                    {rentalSteps[currentStep] === 'Receiving Ticket' && rentalManagementData && (
+                      <ReceivingTicket
+                        fetchRentalData={fetchRentalManagementData}
+                        rentalManagementData={rentalManagementData}
+                        currentStep={currentStep}
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-4`}
+                        allowedToEdit={allowedToEdit}
+                        isProcessor={isProcessor}
+                        allowUpdateStatus={allowUpdateStatus}
+                      />
+                    )}
+                    {rentalSteps[currentStep] === 'Packing Slip' && rentalManagementData && (
+                      <Invoice
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        fetchRentalData={fetchRentalManagementData}
+                        updateJobStatus={updateJobStatus}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        statusOptions={statusOptions}
+                        renderedFrom={`${renderedFrom}_grid-5`}
+                        showActivity={showActivity}
+                        currencySymbol={currencySymbol}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                  </ContentFullScreen>
+                </Paper>
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
                 <Box>
@@ -700,14 +670,6 @@ const RentalManagementDetailsPage = () => {
             setOpenUpdateDialog(false);
             fetchRentalManagementData();
           }}
-        />
-      )}
-      {customerAcceptable && (
-        <ManualReponseDialog
-          rentalId={rentalManagementData?._id}
-          setCurrentStep={setCurrentStep}
-          updateStatus={updateProcessStatus}
-          setCustomerAcceptable={setCustomerAcceptable}
         />
       )}
     </>
