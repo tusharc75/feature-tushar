@@ -50,11 +50,10 @@ import RentalManagementViews from './RoadMapViews';
 import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import Quotation from './Quotation';
-import ManualReponseDialog from './Quotation/manualResponseDialog';
 import ProgressiveBilling from './ProgressiveBilling';
 
-
 const RentalManagementDetailsPage = () => {
+  
   const toastConfig = useContext(CustomToastContext);
   const { isOffline, updateOfflineGridData } = useContext(CustomOfflineContext);
   const renderedFrom = camelCase(routes?.rentalManagement.title);
@@ -164,7 +163,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -283,8 +282,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
@@ -442,7 +441,7 @@ const RentalManagementDetailsPage = () => {
                     className={'tabLayout'}
                     style={{
                       background: tabValue === 3 ? 'white' : '',
-                      color: tabValue === 3 ? 'blue' : '#163340'
+                      color: '#163340'
                     }}
                     label={
                       <div className="d-flex align-items-center tab-font">
@@ -456,16 +455,16 @@ const RentalManagementDetailsPage = () => {
                     className={'tabLayout'}
                     style={{
                       background: tabValue === 4 ? 'white' : '',
-                      color: tabValue === 4 ? 'blue' : '#163340'
+                      color: '#163340'
                     }}
                     label={
                       <div className="d-flex align-items-center tab-font">
-                        <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+                        <RiFlowChart className="mr-1" fontSize="inherit" />Views
                       </div>
                     }
                     {...a11yProps(3)}
                   />}
-                <div className={'uio'}> </div>
+                <div className={'uio'}></div>
               </Tabs>
               <TabPanel value={tabValue} index={0}>
                 <Box>
@@ -615,8 +614,8 @@ const RentalManagementDetailsPage = () => {
                           resource={ACTIVITY_RESOURCE.rentalManagement}
                           restrictedAddActivities={
                             permissions &&
-                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
-                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
+                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
+                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }
@@ -627,7 +626,7 @@ const RentalManagementDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>

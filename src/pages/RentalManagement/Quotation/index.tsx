@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, CircularProgress, Chip, Typography } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -12,9 +11,8 @@ import { rentalManagement, dateFormat, formatAmountWithCurrency, QUOTATION_STATU
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdDelete } from 'react-icons/md';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
-import ManualReponseDialog from './manualResponseDialog';
+import ResponseDialog from './ResponseDialog';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 
 const Quotation = ({
@@ -46,10 +44,11 @@ const Quotation = ({
   }, [columns]);
 
   useEffect(() => {
-    if (rentalManagementData?.quotationStatus || rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer) {
+    setNextStep(false);
+    if (rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer) {
       setNextStep(true);
     }
-  }, [rentalManagementData?.quotationStatus]);
+  }, [rentalManagementData]);
 
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
@@ -191,7 +190,6 @@ const Quotation = ({
   };
 
   const fetchProductInventory = async () => {
-    setNextStep(false);
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
@@ -312,7 +310,7 @@ const Quotation = ({
                         setCustomerAcceptable(true);
                       }}
                     >
-                      Accept / Reject
+                      Accept/Reject
                     </Button>
                   )}
                 </Box>
@@ -324,16 +322,14 @@ const Quotation = ({
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
+              width={stepFullScreen ? '100%'
+                : isTabletScreen
                   ? 'calc(100vw)'
                   : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : showActivity
+                      ? '100%'
+                      : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -342,7 +338,7 @@ const Quotation = ({
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                onSelect={() => {}}
+                onSelect={() => { }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
@@ -358,7 +354,7 @@ const Quotation = ({
         </Grid>
       </Grid>
       {customerAcceptable && (
-        <ManualReponseDialog
+        <ResponseDialog
           rentalId={rentalManagementData?._id}
           onSuccess={() => {
             fetchRentalData();
