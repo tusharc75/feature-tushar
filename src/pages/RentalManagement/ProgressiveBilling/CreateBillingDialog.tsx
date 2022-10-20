@@ -18,8 +18,10 @@ import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import RentalJobQtyDialog from "../Productpackage/RentalJobQtyDialog";
 import { Edit, ExpandMore } from "@material-ui/icons";
+import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
+import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 
-const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, onSuccess }) => {
+const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, onClose, onSuccess }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -68,7 +70,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
                 sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {(
+                        {(billData ? <p>
+                            {row.original.detail}
+                        </p> :
                             <p
                                 onClick={() => {
                                     handleOpen(row.original);
@@ -184,7 +188,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
             }
         });
         {
-            isMobile ? <Box display={"none"} /> : coloum.push({
+            isMobile || billData ? <Box display={"none"} /> : coloum.push({
                 accessor: 'action',
                 Header: '',
                 minWidth: 50,
@@ -218,8 +222,13 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
     const fetchProductInventory = async () => {
         var data: any = [];
 
-        const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
-        data = response?.data?.data;
+        if (billData) {
+            data = billData
+        }
+        else {
+            const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
+            data = response?.data?.data;
+        }
         setMaterial(JSON.parse(JSON.stringify(data.material)));
         setProductData(data)
         initializeTable(data)
@@ -228,8 +237,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
     const initializeTable = (data) => {
         var inventory: any = [];
         var nonSerializeAsset: any = [];
-        inventory = data.inventory;
-        nonSerializeAsset = data.nonSerializeAsset;
+        inventory = data?.inventory;
+        nonSerializeAsset = data?.nonSerializeAsset;
         const rows = data.material.filter((e) => e.parentId === null);
         rows.forEach((parent, i) => {
             parent.srno = (i + 1);
@@ -273,6 +282,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
         let tempProduct = productData
         tempProduct["material"] = [...tempRows, ...rows]
         setProductData(tempProduct)
+        setMaterial([...tempRows, ...rows]);
         initializeTable(tempProduct)
         setIsProductEdit({ open: false, isBulkedit: false });
     };
@@ -378,10 +388,11 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
             aria-labelledby="customized-dialog-title"
             open={true}
         >
-            <CustomDialogHeader title={`Create Billing Dialog `} onClose={onClose} ></CustomDialogHeader>
-            <Fragment>
-                <Box display="flex" justifyContent="flex-end" m={1}>
-                    {/* <Button
+            <CustomDialogHeader title={billData ? `Bill Number : ${billData?.billNumber}` : `Create Billing `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
+            <CustomDialogContent>
+                <Fragment>
+                    <Box display="flex" justifyContent="flex-end" mb={1}>
+                        {/* <Button
                         variant='contained'
                         color="primary"
                         size="small"
@@ -390,89 +401,100 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
                         Save
                     </Button>
                     <Box mx={1} /> */}
-                    <Button
-                        variant="contained"
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                    >
-                        {'Actions'}
-                    </Button>
-                    <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                    >
-                        <MenuItem
-                            disabled={!Boolean(selectedProducts && selectedProducts.length)}
-                            onClick={() => { setIsProductEdit({ open: true, isBulkedit: true }) }}
+                        {billData === null && <Button
+                            variant="outlined"
+                            color="default"
+                            size="small"
+                            onClick={openActions}
+                            aria-controls="action-menu"
+                            endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
                         >
-                            Bulk Edit
-                        </MenuItem>
-                    </Menu>
+                            {'Actions'}
+                        </Button>}
+                        <Menu
+                            anchorEl={anchorEl}
+                            keepMounted
+                            getContentAnchorEl={null}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'left'
+                            }}
+                            id="action-menu"
+                            open={Boolean(anchorEl)}
+                            onClose={closeActions}
+                        >
+                            <MenuItem
+                                disabled={!Boolean(selectedProducts && selectedProducts.length)}
+                                onClick={() => { setIsProductEdit({ open: true, isBulkedit: true }) }}
+                            >
+                                Bulk Edit
+                            </MenuItem>
+                        </Menu>
 
-                </Box>
-                {columns && rowsData ? (
-                    <Box
-                        zIndex={5}
-                        width={'100%'}
-                        height={"calc(100vh - 285px)"}
-                        p={2}
-                    >
-                        <CustomReactTable
+                    </Box>
+                    {columns && rowsData ? (
+                        <Box
+                            zIndex={5}
+                            width={'100%'}
                             height={"calc(100vh - 285px)"}
-                            columns={columns}
-                            data={rowsData}
-                            onSelect={setSelectedProducts}
-                            childrenProperty="subRows"
-                            uniqueKey="_id"
-                            hideSelection={false}
-                            renderedFrom="rental_management_create_billing"
-                            isClientSideGrid={true}
-                        />
-                    </Box>
-                ) : (
-                    <Box p={2} height={500} bgcolor="white">
-                        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                )}
-                <Box display="flex" justifyContent="flex-end" marginTop={10} marginRight={2}>
-                    <Button
-                        variant='contained'
-                        color="primary"
-                        size="small"
-                        onClick={() => { handleCreateBill() }}
-                    >
-                        Create Bill
-                    </Button>
-                </Box>
-                {isProductEdit.open && (
-                    <RentalJobQtyDialog
-                        calculatePrice={calculatePrice}
-                        onClose={() => {
-                            setIsProductEdit({ open: false, isBulkedit: false });
-                            setRecordToUpdate(null);
-                        }}
-                        isBulkedit={isProductEdit.isBulkedit}
-                        handleSaveData={handleSaveData}
-                        rentalManagementData={rentalManagementData}
-                        rowData={recordToUpdate}
-                        material={material}
-                        selectedProducts={selectedProducts}
-                        loading={isUpdating}
-                    />
-                )}
-            </Fragment>
-        </Dialog>
+                        >
+                            <CustomReactTable
+                                height={"calc(100vh - 285px)"}
+                                columns={columns}
+                                data={rowsData}
+                                onSelect={setSelectedProducts}
+                                childrenProperty="subRows"
+                                uniqueKey="_id"
+                                hideSelection={billData ? true : false}
+                                renderedFrom="rental_management_create_billing"
+                                isClientSideGrid={true}
+                            />
+                        </Box>
+                    ) : (
+                        <Box p={2} height={500} bgcolor="white">
+                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                        </Box>
+                    )}
+                </Fragment>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+                <Button
+                    type="button"
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() => { onClose() }}
+                >
+                    Cancel
+                </Button>
+                {billData === null && <Button
+                    type="button"
+                    variant='contained'
+                    color="primary"
+                    size="small"
+                    onClick={() => { handleCreateBill() }}
+                >
+                    Create Bill
+                </Button>}
+            </CustomDialogFooter>
+
+            {isProductEdit.open && (
+                <RentalJobQtyDialog
+                    calculatePrice={calculatePrice}
+                    onClose={() => {
+                        setIsProductEdit({ open: false, isBulkedit: false });
+                        setRecordToUpdate(null);
+                    }}
+                    isBulkedit={isProductEdit.isBulkedit}
+                    handleSaveData={handleSaveData}
+                    rentalManagementData={rentalManagementData}
+                    rowData={recordToUpdate}
+                    material={material}
+                    selectedProducts={selectedProducts}
+                    loading={isUpdating}
+                />
+            )}
+        </Dialog >
 
     </Fragment >
     );
