@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "../../../axios/axiosInstance";
-import { Box, Chip, CircularProgress, Dialog, IconButton } from "@material-ui/core";
+import { Box, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from "@material-ui/core";
 import { useData } from "src/StateProvider/Provider";
 import { fetch_rental_product_fields } from "src/components/RentalManagment/helper";
 import { isMobile } from "react-device-detect";
@@ -17,7 +17,7 @@ import { startCase } from "lodash";
 import CustomReactTable from "src/components/CustomReactTable/CustomReactTable";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import RentalJobQtyDialog from "../Productpackage/RentalJobQtyDialog";
-import { Edit } from "@material-ui/icons";
+import { Edit, ExpandMore } from "@material-ui/icons";
 
 const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, onSuccess }) => {
 
@@ -36,6 +36,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
     const [isRateRequired, setIsRateRequired] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
 
 
     useEffect(() => {
@@ -115,7 +116,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
                     Header: element.fieldLabel,
                     disableFilters: true,
                     Cell: ({ row }) =>
-                        row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+                        row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateFormat)}</p> : <NoDataCell />
                 });
             } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
                 if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
@@ -276,7 +277,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
         setIsProductEdit({ open: false, isBulkedit: false });
     };
 
-    const handleSave = async () => {
+    const handleSave = () => {
         rowsData.forEach((element) => {
             delete element.srno
             delete element.detail;
@@ -295,14 +296,13 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
             .then(() => {
                 setUpdating(false);
                 setIsProductEdit({ open: false, isBulkedit: false });
-                fetchProductInventory();
             })
             .catch((error) => {
                 setUpdating(false);
                 toastConfig.setToastConfig(error);
             });
     };
-    const handleCreateBill = async () => {
+    const handleCreateBill = () => {
         rowsData.forEach((element) => {
             delete element.srno
             delete element.detail;
@@ -363,6 +363,14 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
         }
     };
 
+    const openActions = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const closeActions = () => {
+        setAnchorEl(null);
+    };
+
     return (<Fragment>
         <Dialog
             fullScreen={true}
@@ -373,24 +381,45 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
             <CustomDialogHeader title={`Create Billing Dialog `} onClose={onClose} ></CustomDialogHeader>
             <Fragment>
                 <Box display="flex" justifyContent="flex-end" m={1}>
-                    <Button
+                    {/* <Button
                         variant='contained'
                         color="primary"
                         size="small"
-                        onClick={() => handleSave}
+                        onClick={() => { handleSave() }}
                     >
                         Save
                     </Button>
-                    <Box mx={1} />
+                    <Box mx={1} /> */}
                     <Button
-                        variant='contained'
-                        color="primary"
+                        variant="contained"
+                        color="default"
                         size="small"
-                        disabled={!Boolean(selectedProducts && selectedProducts.length)}
-                        onClick={() => { setIsProductEdit({ open: true, isBulkedit: true }) }}
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
                     >
-                        Bulk Edit
+                        {'Actions'}
                     </Button>
+                    <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                    >
+                        <MenuItem
+                            disabled={!Boolean(selectedProducts && selectedProducts.length)}
+                            onClick={() => { setIsProductEdit({ open: true, isBulkedit: true }) }}
+                        >
+                            Bulk Edit
+                        </MenuItem>
+                    </Menu>
+
                 </Box>
                 {columns && rowsData ? (
                     <Box
@@ -421,7 +450,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, onClose, on
                         variant='contained'
                         color="primary"
                         size="small"
-                        onClick={() => handleCreateBill}
+                        onClick={() => { handleCreateBill() }}
                     >
                         Create Bill
                     </Button>
