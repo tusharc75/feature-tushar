@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, CircularProgress, Chip, } from '@material-ui/core';
+import { Grid, Box, Button, CircularProgress, Chip } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -27,12 +27,10 @@ const Quotation = ({
   stepFullScreen,
   allowedToEdit
 }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [sendCustomerLoading, setSendCustomerLoading] = useState(false);
-  const [responseLoading, setResponseLoading] = useState({ accept: false, reject: false });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -188,7 +186,7 @@ const Quotation = ({
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
-    if (rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer) {
+    if (rentalManagementData?.quotationStatus || rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer) {
       setNextStep(true);
     }
     if (isOffline) {
@@ -207,7 +205,9 @@ const Quotation = ({
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+      parent.assetQty = parent.serializedProduct
+        ? inventory?.filter((e) => e._id === parent._id).length
+        : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
@@ -239,49 +239,51 @@ const Quotation = ({
 
   const sendToCustomer = () => {
     setSendCustomerLoading(true);
-    axiosInstance().get(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/send-to-customer`).then(() => {
-      setSendCustomerLoading(false);
-      fetchRentalData()
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: 'Sent to customer Sucessfully'
-      });
-    })
+    axiosInstance()
+      .get(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/send-to-customer`)
+      .then(() => {
+        setSendCustomerLoading(false);
+        fetchRentalData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Sent to customer Sucessfully'
+        });
+      })
       .catch((error) => {
         setSendCustomerLoading(false);
         toastConfig.setToastConfig(error);
       });
   };
 
-  const handleResponse = (res) => {
-    const data = { response: res };
-    if (res === QUOTATION_STATUS.acceptByCustomer) {
-      setResponseLoading({ accept: true, reject: false });
-    } else {
-      setResponseLoading({ accept: false, reject: true });
-    }
-    axiosInstance().put(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/response`, data).then(() => {
-      setResponseLoading({ accept: false, reject: false });
-      if (res === QUOTATION_STATUS.acceptByCustomer) {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'Accepted Quotation Sucessfully'
-        });
-      } else {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'info',
-          message: 'Quotation Rejected Sucessfully'
-        });
-      }
-    })
-      .catch((error) => {
-        setResponseLoading({ accept: false, reject: false });
-        toastConfig.setToastConfig(error);
-      });
-  };
+  // const handleResponse = (res) => {
+  //   const data = { response: res };
+  //   if (res === QUOTATION_STATUS.acceptByCustomer) {
+  //     setResponseLoading({ accept: true, reject: false });
+  //   } else {
+  //     setResponseLoading({ accept: false, reject: true });
+  //   }
+  //   axiosInstance().put(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/response`, data).then(() => {
+  //     setResponseLoading({ accept: false, reject: false });
+  //     if (res === QUOTATION_STATUS.acceptByCustomer) {
+  //       toastConfig.setToastConfig({
+  //         open: true,
+  //         type: 'success',
+  //         message: 'Accepted Quotation Sucessfully'
+  //       });
+  //     } else {
+  //       toastConfig.setToastConfig({
+  //         open: true,
+  //         type: 'info',
+  //         message: 'Quotation Rejected Sucessfully'
+  //       });
+  //     }
+  //   })
+  //     .catch((error) => {
+  //       setResponseLoading({ accept: false, reject: false });
+  //       toastConfig.setToastConfig(error);
+  //     });
+  // };
 
   return (
     <Fragment>
@@ -305,38 +307,6 @@ const Quotation = ({
                     Send To Customer
                   </Button>
                 )}
-                {rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer &&
-                  rentalManagementData?.quotationStatus !== QUOTATION_STATUS.acceptByCustomer &&
-                  rentalManagementData?.quotationStatus !== QUOTATION_STATUS.rejectByCustomer && (
-                    <Box display="flex">
-                      <Box mx={1} />
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        disabled={responseLoading.accept}
-                        endIcon={responseLoading.accept && <CircularProgress size={20} />}
-                        onClick={() => {
-                          handleResponse(QUOTATION_STATUS.acceptByCustomer);
-                        }}
-                      >
-                        {isMobile && !isTablet ? <MdDelete size={20} /> : 'Accept'}
-                      </Button>
-                      <Box mx={1} />
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        disabled={responseLoading.reject}
-                        endIcon={responseLoading.reject && <CircularProgress size={20} />}
-                        onClick={() => {
-                          handleResponse(QUOTATION_STATUS.rejectByCustomer);
-                        }}
-                      >
-                        {isMobile && !isTablet ? <MdDelete size={20} /> : 'Reject'}
-                      </Button>
-                    </Box>
-                  )}
               </Box>
             </Box>
           </Grid>
@@ -349,12 +319,12 @@ const Quotation = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -363,7 +333,7 @@ const Quotation = ({
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                onSelect={() => { }}
+                onSelect={() => {}}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
