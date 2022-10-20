@@ -9,6 +9,7 @@ import QuoteSupplierPrice from './QuoteSupplierPrice';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import QuotationSupplierPrice from './QuotationSupplierPrice';
 import QuotationCustomerAccept from './QuotationCustomer/QuotationCustomerAccept';
+import RJCustomerAccept from './RentalManagement/RentalCustomerAccept';
 
 const useStyles = makeStyles((theme) => ({
   header: {
@@ -119,7 +120,9 @@ const PublicRoutePage = () => {
         </Grid>
         <Grid item container xs={6} md={6} sm={6} justify={'flex-end'}>
           <h2 style={{ paddingTop: '10px', paddingRight: '10px', color: 'white', textAlign: 'right' }}>
-            {resourceData?.referenceIdType === 'QuotationCustomer' ? 'Customer Portal' : 'Supplier Portal'}
+            {resourceData?.referenceIdType === 'QuotationCustomer' || resourceData?.referenceIdType === 'RentalJob'
+              ? 'Customer Portal'
+              : 'Supplier Portal'}
           </h2>
         </Grid>
       </Grid>
@@ -168,6 +171,8 @@ const PublicRoutePage = () => {
           <QuotationSupplierPrice quotationData={resourceData} openAuthId={id} />
         ) : resourceData?.referenceIdType === 'QuotationCustomer' ? (
           <QuotationCustomerAccept openAuthId={id} />
+        ) : resourceData?.referenceIdType === 'RentalJob' ? (
+          <RJCustomerAccept openAuthId={id} />
         ) : (
           <Box p={2} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
