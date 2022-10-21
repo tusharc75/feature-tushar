@@ -19,7 +19,10 @@ import {
   RENTAL_STATUS,
   rentalManagementSteps,
   ACTIVITY_RESOURCE,
-  QUOTATION_STATUS
+  QUOTATION_STATUS,
+  deliveryTicket,
+  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_TICKET_TYPE
 } from '../../constants/helpers';
 import Steps from './Steps';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
@@ -91,6 +94,7 @@ const RentalManagementDetailsPage = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
+  const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState(
     user?.role?.selectedEntity?.policy?.isQuotationRentalManagement ? rentalManagementSteps : rentalManagementSteps?.filter((e) => e !== 'Quotation')
@@ -147,6 +151,17 @@ const RentalManagementDetailsPage = () => {
     }
     if (!isOffline) {
       fetchAssetStatusRights();
+    }
+
+    if (user?.role?.selectedEntity?.policy?.isProgressiveBillingRentalManagement) {
+      axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`).then(({ data: { data } }) => {
+        if (data.length > 0) {
+          setDisplayProgressiveBillingTab(true);
+        }
+      })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
     }
   }, [id]);
 
@@ -430,7 +445,7 @@ const RentalManagementDetailsPage = () => {
                   }
                   {...a11yProps(1)}
                 />
-                {user?.role?.selectedEntity?.policy?.isProgressiveBillingRentalManagement &&
+                {displayProgressiveBillingTab &&
                   <Tab
                     className={'tabLayout'}
                     style={{
@@ -571,7 +586,7 @@ const RentalManagementDetailsPage = () => {
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
                 <Box>
-                  {user?.role?.selectedEntity?.policy?.isProgressiveBillingRentalManagement ? <ProgressiveBilling
+                  {displayProgressiveBillingTab ? <ProgressiveBilling
                     rentalId={id}
                     rentalManagementData={rentalManagementData}
                     currencySymbol={currencySymbol}

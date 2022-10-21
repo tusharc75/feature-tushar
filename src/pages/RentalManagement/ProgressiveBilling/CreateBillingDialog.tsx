@@ -18,6 +18,13 @@ import RentalJobQtyDialog from "../Productpackage/RentalJobQtyDialog";
 import { Edit, ExpandMore } from "@material-ui/icons";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
+import {
+    MuiPickersUtilsProvider,
+    KeyboardDatePicker,
+    KeyboardTimePicker,
+} from "@material-ui/pickers";
+import MomentUtils from "@date-io/moment";
+import { autoCalculateSpecificFields } from "src/constants/formulaUtility";
 
 const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, onClose, onSuccess }) => {
 
@@ -27,16 +34,16 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
     const [isUpdating, setUpdating] = useState(false);
 
     const [selectedProducts, setSelectedProducts] = useState([]);
-    const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
-
-    const [recordToUpdate, setRecordToUpdate] = useState(null);
-
     const [material, setMaterial] = useState([]);
     const [productData, setProductData] = useState(null);
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
     const [isRateRequired, setIsRateRequired] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
+
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [allFields, setAllFields] = useState([]);
 
 
     useEffect(() => {
@@ -49,6 +56,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
 
     const fetchFields = async () => {
         var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, false);
+        setAllFields(allFields)
         const coloum: any = [
             {
                 accessor: 'srno',
@@ -71,13 +79,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
                         {(billData ? <p>
                             {row.original.detail}
                         </p> :
-                            <p
-                                onClick={() => {
-                                    handleOpen(row.original);
-                                }}
-                                className="link text-truncate"
-                                title={row.original.detail}
-                            >
+                            <p>
                                 {row.original.detail}
                             </p>
                         )}
@@ -185,25 +187,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
                 });
             }
         });
-        {
-            isMobile || billData ? <Box display={"none"} /> : coloum.push({
-                accessor: 'action',
-                Header: '',
-                minWidth: 50,
-                width: 50,
-                sticky: 'right',
-                disableFilters: true,
-                canDrag: false,
-                Cell: ({ row }) =>
-                    <IconButton
-                        size="small"
-                        aria-label="Details"
-                        onClick={() => { handleOpen(row.original); }}
-                    >
-                        <Edit fontSize="small" />
-                    </IconButton>
-            });
-        }
         coloum.forEach((element) => {
             if (element.accessor === 'qtyDisplay') {
                 element['Footer'] = (info) => {
@@ -274,42 +257,36 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
         }
     }
 
+    const handleApplyDate = async () => {
+        let values = {
+            "actualStartDate": startDate,
+            "estimateStartDate": startDate,
+            "actualEndDate": endDate,
+            "estimateEndDate": endDate,
+        }
 
-    const handleSaveData = (rows: any) => {
-        let tempRows = material.filter(d => !rows.map(ele => ele.materialId).includes(d.materialId))
-        let tempProduct = productData
-        tempProduct["material"] = [...tempRows, ...rows]
-        setProductData(tempProduct)
-        setMaterial([...tempRows, ...rows]);
-        initializeTable(tempProduct)
-        setIsProductEdit({ open: false, isBulkedit: false });
-    };
-
-    const handleSave = () => {
-        rowsData.forEach((element) => {
-            delete element.srno
-            delete element.detail;
-            delete element.serializedProduct;
-            delete element.qtyDisplay;
-            delete element.isValid;
-            delete element.hideSelection;
-            delete element.assetQty;
-            delete element.productDetail;
-            delete element.packageDetail;
-            delete element.subRows;
+        let rows: any = []
+        const fieldAll: any = allFields.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
+        selectedProducts.forEach(element => {
+            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, fieldAll)
+            if (element.type === "product") {
+                rows.push({ ...element, ...calValues })
+            }
+            else if (element.type === "package") {
+                rows.push({ ...element, ...calValues })
+                const product = material.filter((e) => e.parentId === element._id)
+                resetValueZero(product)
+                rows = [...rows, ...product]
+            }
         });
-        setUpdating(true);
-        axiosInstance()
-            .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, { material: rowsData })
-            .then(() => {
-                setUpdating(false);
-                setIsProductEdit({ open: false, isBulkedit: false });
-            })
-            .catch((error) => {
-                setUpdating(false);
-                toastConfig.setToastConfig(error);
-            });
+        let tempRows = material.map(obj => rows.find(o => o.materialId === obj.materialId) || obj);
+        let tempProduct = productData
+        tempProduct["material"] = tempRows
+        setProductData(tempProduct)
+        setMaterial(tempRows);
+        initializeTable(tempProduct)
     };
+
     const handleCreateBill = () => {
         rowsData.forEach((element) => {
             delete element.srno
@@ -335,50 +312,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
             });
     };
 
-
-    const handleOpen = (rowData) => {
-        setIsProductEdit({ open: true, isBulkedit: false });
-        setRecordToUpdate(rowData);
-    };
-
-    const calculatePrice = (arr: any[]) => {
-        //materialType can be =["product","packages","productCategory"]
-        //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
-        if (rentalManagementData) {
-            const data: any = {};
-            data.conditionType = ['Rent'];
-            data.material = arr.map((ele) => ({
-                materialId: ele?.materialId,
-                materialType: ele?.type,
-                qty: ele?.qty,
-                pricingMethod: ele?.pricingMethod,
-                unit: ele?.unit,
-                currency: rentalManagementData?.currency
-            }));
-            data.supplier = [];
-            data.customer = [rentalManagementData?.customerAccount?.optionValue];
-            data.warehouse = [rentalManagementData?.warehouse?.optionValue];
-            return new Promise((resolve, reject) => {
-                axiosInstance()
-                    .post(pricingCondition.api + `/calculatePrice`, data)
-                    .then(({ data: { data } }) => {
-                        resolve(data);
-                    })
-                    .catch((err) => {
-                        reject(err);
-                    });
-            });
-        }
-    };
-
-    const openActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const closeActions = () => {
-        setAnchorEl(null);
-    };
-
     return (<Fragment>
         <Dialog
             fullScreen={true}
@@ -389,47 +322,72 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
             <CustomDialogHeader title={billData ? `Bill Number : ${billData?.billNumber}` : `Create Billing `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
             <CustomDialogContent>
                 <Fragment>
-                    <Box display="flex" justifyContent="flex-end" mb={1}>
-                        {/* <Button
-                        variant='contained'
-                        color="primary"
-                        size="small"
-                        onClick={() => { handleSave() }}
+                    {billData === null && <Box
+                        pt={1}
+                        display="flex"
+                        flexDirection={isMobile ? "column" : "row"}
                     >
-                        Save
-                    </Button>
-                    <Box mx={1} /> */}
-                        {billData === null && <Button
-                            variant="outlined"
-                            color="default"
-                            size="small"
-                            onClick={openActions}
-                            aria-controls="action-menu"
-                            endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                        >
-                            {'Actions'}
-                        </Button>}
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left'
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}
-                        >
-                            <MenuItem
-                                disabled={!Boolean(selectedProducts && selectedProducts.length)}
-                                onClick={() => { setIsProductEdit({ open: true, isBulkedit: true }) }}
-                            >
-                                Bulk Edit
-                            </MenuItem>
-                        </Menu>
-
-                    </Box>
+                        <MuiPickersUtilsProvider utils={MomentUtils}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={5} sm={5} md={5}>
+                                    <KeyboardDatePicker
+                                        autoOk
+                                        fullWidth
+                                        size="small"
+                                        disablePast
+                                        variant="inline"
+                                        inputVariant="outlined"
+                                        value={startDate}
+                                        name="startDate"
+                                        label="Start Date"
+                                        onChange={(date: any) => {
+                                            setStartDate(date ? date : null);
+                                        }}
+                                        format={dateFormat}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        margin="dense"
+                                    />
+                                </Grid>
+                                <Grid item xs={5} sm={5} md={5}>
+                                    <KeyboardDatePicker
+                                        autoOk
+                                        fullWidth
+                                        size="small"
+                                        disablePast
+                                        variant="inline"
+                                        inputVariant="outlined"
+                                        minDate={startDate}
+                                        value={endDate}
+                                        name="endDate"
+                                        label="End Date"
+                                        onChange={(date: any) => {
+                                            setEndDate(date ? date : null);
+                                        }}
+                                        format={dateFormat}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        margin="dense"
+                                    />
+                                </Grid>
+                                <Grid item xs={2} sm={2} md={2}>
+                                    <Box display="flex" justifyContent="flex-end" m={1}>
+                                        <Button
+                                            variant='contained'
+                                            color="primary"
+                                            size="small"
+                                            disabled={startDate === null || endDate === null || !Boolean(selectedProducts && selectedProducts.length)}
+                                            onClick={() => { handleApplyDate() }}
+                                        >
+                                            Apply
+                                        </Button>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </MuiPickersUtilsProvider>
+                    </Box>}
                     {columns && rowsData ? (
                         <Box
                             zIndex={5}
@@ -475,23 +433,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
                     Create Bill
                 </Button>}
             </CustomDialogFooter>
-
-            {isProductEdit.open && (
-                <RentalJobQtyDialog
-                    calculatePrice={calculatePrice}
-                    onClose={() => {
-                        setIsProductEdit({ open: false, isBulkedit: false });
-                        setRecordToUpdate(null);
-                    }}
-                    isBulkedit={isProductEdit.isBulkedit}
-                    handleSaveData={handleSaveData}
-                    rentalManagementData={rentalManagementData}
-                    rowData={recordToUpdate}
-                    material={material}
-                    selectedProducts={selectedProducts}
-                    loading={isUpdating}
-                />
-            )}
         </Dialog >
 
     </Fragment >
@@ -499,3 +440,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
 }
 
 export default CreateBillingDialog;
+
+function resetValueZero(product: any[]) {
+    throw new Error("Function not implemented.");
+}
