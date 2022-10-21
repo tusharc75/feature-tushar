@@ -27,7 +27,6 @@ const Quotation = ({
   stepFullScreen,
   allowedToEdit
 }) => {
-  
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
@@ -267,7 +266,17 @@ const Quotation = ({
         {allowedToEdit && (
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1}>
-              <Box />
+              <div>
+                <Box display="flex">
+                  <Button variant={isMobile && !isTablet ? 'text' : 'outlined'} color="primary" size="small" onClick={() => {}}>
+                    Preview
+                  </Button>
+                  <Box mx={1} />
+                  <Button variant={isMobile && !isTablet ? 'text' : 'contained'} color="primary" size="small" onClick={() => {}}>
+                    Download
+                  </Button>
+                </Box>
+              </div>
               <div>
                 {rentalManagementData?.quotationStatus && rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer ? (
                   <div className="d-flex align-items-center justify-content-center flex-column m-1">
@@ -323,14 +332,16 @@ const Quotation = ({
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={stepFullScreen ? '100%'
-                : isTabletScreen
+              width={
+                stepFullScreen
+                  ? '100%'
+                  : isTabletScreen
                   ? 'calc(100vw)'
                   : isSmallScreen
-                    ? 'calc(100vw)'
-                    : showActivity
-                      ? '100%'
-                      : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -339,7 +350,7 @@ const Quotation = ({
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                onSelect={() => { }}
+                onSelect={() => {}}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
