@@ -86,7 +86,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                         fieldData?.formsData?.map((form, index1) => {
                           return form?.name ? (
                             <div key={index1}>
-                              <div className={`detail-box ${styles.formHead}`} style={{ color: 'gray', padding: '0' }}>
+                              <div className={`detail-box-content ${styles.formHead}`} style={{ color: 'white' }}>
                                 <FaDiceOne size={16} color={'inherit'} style={{ marginRight: '5px', float: 'left' }} />
                                 <h2>{form?.name}</h2>
                               </div>

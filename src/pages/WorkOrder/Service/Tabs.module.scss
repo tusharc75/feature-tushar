@@ -1,0 +1,56 @@
+.tabContainerPos {
+  --button-size: 36px;
+  overflow: hidden;
+  .tabContainer {
+    display: flex;
+    align-items: center;
+  }
+  .button {
+    background-color: transparent;
+    width: var(--button-size, 40px);
+    height: var(--button-size, 40px);
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s;
+    display: block;
+    border: 1px solid var(--new_theme_color);
+    color: var(--new_theme_color);
+    border-radius: 5px;
+    flex-shrink: 0;
+
+    &:active {
+      background-color: var(--new_theme_color);
+      color: white;
+    }
+    svg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+  .TabContents {
+    display: flex;
+    overflow-x: auto;
+    overflow: hidden;
+  }
+  .tabs {
+    display: flex;
+    white-space: nowrap;
+    overflow-x: auto;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    .sliderContainer {
+      display: flex;
+      white-space: nowrap;
+      transition: 0.3s;
+      gap: 10px;
+    }
+  }
+  .singleTab {
+    height: 100%;
+  }
+}
