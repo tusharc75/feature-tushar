@@ -11,7 +11,7 @@ const CostDetails = ({ product, productData }) => {
     useEffect(() => {
         axiosInstance().get(`product/${product}/cost`)
             .then(async ({ data: { data } }) => {
-                setAverageCost(data?.averageCost || 0)
+                setAverageCost(data?.averagePrice || 0)
             })
             .catch((err) => {
             });
