@@ -25,8 +25,10 @@ import {
 } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import { autoCalculateSpecificFields } from "src/constants/formulaUtility";
+import styles from '../../Leads/Header.module.scss';
+import HtmlTooltip from "src/components/CustomTooltipTitle";
 
-const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, onClose, onSuccess }) => {
+const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, estimateStartDate, onClose, onSuccess }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -211,6 +213,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
             data = response?.data?.data;
         }
         setMaterial(JSON.parse(JSON.stringify(data.material)));
+        if (estimateStartDate || data?.material[0]?.estimateStartDate) {
+            estimateStartDate ? setStartDate(estimateStartDate) : setStartDate(data?.material[0]?.estimateStartDate)
+        }
+        if (data?.material[0]?.estimateEndDate) {
+            setEndDate(data?.material[0]?.estimateEndDate)
+        }
         setProductData(data)
         initializeTable(data)
     };
@@ -266,9 +274,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
         }
 
         let rows: any = []
-        const fieldAll: any = allFields.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
         selectedProducts.forEach(element => {
-            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, fieldAll)
+            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
             if (element.type === "product") {
                 rows.push({ ...element, ...calValues })
             }
@@ -322,77 +329,78 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, o
             <CustomDialogHeader title={billData ? `Bill Number : ${billData?.billNumber}` : `Create Billing `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
             <CustomDialogContent>
                 <Fragment>
-                    {billData === null && <Box
-                        pt={1}
-                        display="flex"
-                        flexDirection={isMobile ? "column" : "row"}
-                    >
+                    {billData === null && <>
+
                         <MuiPickersUtilsProvider utils={MomentUtils}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={5} sm={5} md={5}>
-                                    <KeyboardDatePicker
-                                        autoOk
-                                        fullWidth
-                                        size="small"
-                                        disablePast
-                                        variant="inline"
-                                        inputVariant="outlined"
-                                        value={startDate}
-                                        name="startDate"
-                                        label="Start Date"
-                                        onChange={(date: any) => {
-                                            setStartDate(date ? date : null);
-                                        }}
-                                        format={dateFormat}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        margin="dense"
-                                    />
+                            <Grid container className={styles.rental_header_layout}>
+                                <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet">
                                 </Grid>
-                                <Grid item xs={5} sm={5} md={5}>
-                                    <KeyboardDatePicker
-                                        autoOk
-                                        fullWidth
-                                        size="small"
-                                        disablePast
-                                        variant="inline"
-                                        inputVariant="outlined"
-                                        minDate={startDate}
-                                        value={endDate}
-                                        name="endDate"
-                                        label="End Date"
-                                        onChange={(date: any) => {
-                                            setEndDate(date ? date : null);
-                                        }}
-                                        format={dateFormat}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        margin="dense"
-                                    />
-                                </Grid>
-                                <Grid item xs={2} sm={2} md={2}>
-                                    <Box display="flex" justifyContent="flex-end" m={1}>
-                                        <Button
-                                            variant='contained'
-                                            color="primary"
-                                            size="small"
-                                            disabled={startDate === null || endDate === null || !Boolean(selectedProducts && selectedProducts.length)}
-                                            onClick={() => { handleApplyDate() }}
-                                        >
-                                            Apply
-                                        </Button>
+                                <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
+                                    <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                                        <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
+                                            <KeyboardDatePicker
+                                                autoOk
+                                                fullWidth
+                                                size="small"
+                                                disablePast
+                                                variant="inline"
+                                                inputVariant="outlined"
+                                                value={startDate}
+                                                name="startDate"
+                                                label="Start Date"
+                                                onChange={(date: any) => {
+                                                    setStartDate(date ? date : null);
+                                                }}
+                                                format={dateFormat}
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                                margin="dense"
+                                            />
+                                            <KeyboardDatePicker
+                                                autoOk
+                                                fullWidth
+                                                size="small"
+                                                disablePast
+                                                variant="inline"
+                                                inputVariant="outlined"
+                                                minDate={startDate}
+                                                value={endDate}
+                                                name="endDate"
+                                                label="End Date"
+                                                onChange={(date: any) => {
+                                                    setEndDate(date ? date : null);
+                                                }}
+                                                format={dateFormat}
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                                margin="dense"
+                                            />
+                                            <Grid style={{ display: 'flex', gap: '5px', margin: '5px' }}>
+                                                <HtmlTooltip title={!Boolean(selectedProducts && selectedProducts.length) ? "Please select product to apply" : ""}>
+                                                    <Button
+                                                        variant='contained'
+                                                        color={Boolean(selectedProducts && selectedProducts.length) ? "primary" : "default"}
+                                                        size="small"
+                                                        onClick={() => { if (Boolean(selectedProducts && selectedProducts.length)) handleApplyDate() }}
+                                                    >
+                                                        Apply
+                                                    </Button>
+                                                </HtmlTooltip>
+                                            </Grid>
+                                        </Grid>
                                     </Box>
                                 </Grid>
                             </Grid>
                         </MuiPickersUtilsProvider>
-                    </Box>}
+                    </>}
                     {columns && rowsData ? (
                         <Box
                             zIndex={5}
                             width={'100%'}
                             height={"calc(100vh - 285px)"}
+                            p={1}
                         >
                             <CustomReactTable
                                 height={"calc(100vh - 285px)"}
