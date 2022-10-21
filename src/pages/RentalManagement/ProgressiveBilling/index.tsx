@@ -13,6 +13,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
     const renderedFrom = "ProgressiveBillingGrid";
     const toastConfig = useContext(CustomToastContext);
     const [createBillDialog, setCreateBillDialog] = useState({ open: false, billData: null });
+    const [estimateStartDate, setEstimateStartDate] = useState(null);
 
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
@@ -73,7 +74,9 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
                         ...finalObject,
                     };
                 });
-
+                if (data?.progressiveBilling.length > 0) {
+                    setEstimateStartDate(data?.progressiveBilling[0].material[0]?.estimateEndDate)
+                }
                 dispatch({ type: 'initialize', data: rows, count: count });
                 setTimeout(() => {
                     dispatch({ type: 'loading', loading: false });
@@ -124,6 +127,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
                 rentalManagementData={rentalManagementData}
                 currencySymbol={currencySymbol}
                 billData={createBillDialog.billData}
+                estimateStartDate={estimateStartDate}
                 onClose={() => { setCreateBillDialog({ open: false, billData: null }) }}
                 onSuccess={() => {
                     fetchBilling()

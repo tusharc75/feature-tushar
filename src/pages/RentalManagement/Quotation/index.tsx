@@ -14,6 +14,9 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import ResponseDialog from './ResponseDialog';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
+import { AiFillFilePdf } from 'react-icons/ai';
+import { IoMdDownload } from 'react-icons/io';
+import { useData } from 'src/StateProvider/Provider';
 
 const Quotation = ({
   fetchRentalData,
@@ -27,14 +30,18 @@ const Quotation = ({
   stepFullScreen,
   allowedToEdit
 }) => {
-  
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user, permissions }
+  }: any = useData();
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [sendCustomerLoading, setSendCustomerLoading] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
+  const [downlodingFile, setDownlodingFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setNextStep(false);
@@ -261,13 +268,121 @@ const Quotation = ({
       });
   };
 
+  const handlePDF = (type, PDFType) => {
+    setIsLoading(true);
+    axiosInstance()
+      .get(`${rentalManagement.api}/quotation/${rentalManagementData._id}/pdf`)
+      .then(({ data }) => {
+        axiosInstance()
+          .get(`user/download?fileName=${data.data.fileName}`, {
+            responseType: 'blob'
+          })
+          .then(({ data }) => {
+            if (type === 'Download') {
+              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `Rental-${rentalManagementData.rentalJobName}.pdf`);
+              document.body.appendChild(link);
+              link.click();
+              setIsLoading(false);
+              setDownlodingFile(null);
+            } else if (type === 'Preview') {
+              const file = new Blob([data], { type: 'application/pdf' });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+              setIsLoading(false);
+              setDownlodingFile(null);
+            } else {
+              const file = new Blob([data], { type: 'application/pdf' });
+              generateBase64forFile(file, 'pdf', PDFType);
+            }
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+            setIsLoading(false);
+            setDownlodingFile(null);
+          });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsLoading(false);
+        setDownlodingFile(null);
+      });
+  };
+
+  const generateBase64forFile = (blobData, type, PDFType) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data: any = reader.result;
+      if (type === 'pdf') {
+        const attachments = {
+          base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+          contentType: base64data.split(';')[0].split(':')[1],
+          name: `Rental-${PDFType}-${rentalManagementData.rentalJobName}`
+        };
+        return attachments;
+        // setEmailAttachments((prevState) => {
+        //   return [...prevState, attachments];
+        // });
+        // setSendEmail(true);
+      }
+    };
+  };
+
   return (
     <Fragment>
       <Grid container spacing={2}>
         {allowedToEdit && (
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1}>
-              <Box />
+              <div>
+                <Box display="flex">
+                  {permissions?.rentalManagement?.isRead && !isMobile && (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      color="primary"
+                      type="button"
+                      size="small"
+                      style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                      disabled={downlodingFile === 'Preview' && isLoading ? true : false || isOffline}
+                      startIcon={isMobile ? '' : <AiFillFilePdf />}
+                      onClick={(e) => {
+                        setDownlodingFile('Preview');
+                        handlePDF('Preview', 'Regular');
+                      }}
+                    >
+                      {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile === 'Preview' && isLoading ? 'Please wait...' : 'Preview'}
+                    </Button>
+                  )}
+                  <Box mx={1} />
+                  {permissions?.rentalManagement?.isRead && (
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      color="primary"
+                      type="button"
+                      size="small"
+                      style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
+                      disabled={downlodingFile === 'Download' && isLoading ? true : false || isOffline}
+                      startIcon={isMobile ? '' : <IoMdDownload />}
+                      onClick={(e) => {
+                        setDownlodingFile('Download');
+                        handlePDF('Download', 'Regular');
+                      }}
+                    >
+                      {isMobile && !isTablet ? (
+                        <IoMdDownload size={20} />
+                      ) : downlodingFile === 'Download' && isLoading ? (
+                        'Please wait...'
+                      ) : (
+                        'Download'
+                      )}
+                    </Button>
+                  )}
+                </Box>
+              </div>
               <div>
                 {rentalManagementData?.quotationStatus && rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer ? (
                   <div className="d-flex align-items-center justify-content-center flex-column m-1">
@@ -323,14 +438,16 @@ const Quotation = ({
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={stepFullScreen ? '100%'
-                : isTabletScreen
+              width={
+                stepFullScreen
+                  ? '100%'
+                  : isTabletScreen
                   ? 'calc(100vw)'
                   : isSmallScreen
-                    ? 'calc(100vw)'
-                    : showActivity
-                      ? '100%'
-                      : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -339,7 +456,7 @@ const Quotation = ({
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                onSelect={() => { }}
+                onSelect={() => {}}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
