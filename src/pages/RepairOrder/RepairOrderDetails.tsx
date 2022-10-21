@@ -287,6 +287,7 @@ const RepairOrderDetails = () => {
                         showActivity={showActivity}
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
+                        allowedToDelete={allowedToDelete}
                       />
                     )}
                     {/* {(currentStep === 2 || currentStep === 4) && repairOrderData && (

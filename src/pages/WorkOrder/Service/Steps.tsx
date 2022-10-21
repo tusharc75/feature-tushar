@@ -30,7 +30,13 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       width: '100%',
       height: 'calc(100vh - 290px)',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      ['@media (max-width:767px)']: {
+        height: 'calc(100vh - 349px)'
+      },
+      ['@media (max-width: 600px)']: {
+        height: 'calc(100vh - 299px)'
+      }
     },
     backButton: {
       marginRight: theme.spacing(1)

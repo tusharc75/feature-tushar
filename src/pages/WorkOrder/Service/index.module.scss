@@ -1,0 +1,40 @@
+.bottomBar {
+  position: fixed;
+  background: #ffffff;
+  padding: 10px 20px;
+  bottom: -60px;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  transition: bottom 0.3s;
+  border: 1px solid lightgray;
+  border-bottom: 0;
+  .control {
+    position: absolute;
+    top: -25px;
+    right: 20px;
+    button {
+      background-color: var(--primary-light);
+      border-radius: 6px 6px 0 0;
+      color: white;
+      border: 1px solid lightgray;
+      border-bottom: 0;
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+      position: relative;
+      transition: 0.3s;
+      outline: none;
+
+      &:active {
+        background-color: hsl(199deg, 49%, 29%);
+      }
+      & svg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+  }
+}
