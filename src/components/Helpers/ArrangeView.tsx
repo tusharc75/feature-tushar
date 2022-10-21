@@ -50,12 +50,13 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
   const moveItemPre = React.useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragCard = preRows[dragIndex];
-      const updatedIndexColumns = update(preRows, {
+      let updatedIndexColumns = update(preRows, {
         $splice: [
           [dragIndex, 1],
           [hoverIndex, 0, dragCard]
         ]
       });
+      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({...n, order: i + 1}))
       setPreRows(updatedIndexColumns);
     },
     [preRows]
@@ -70,12 +71,13 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading }) => {
   const moveItemPost = React.useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragCard = postRows[dragIndex];
-      const updatedIndexColumns = update(postRows, {
+      let updatedIndexColumns = update(postRows, {
         $splice: [
           [dragIndex, 1],
           [hoverIndex, 0, dragCard]
         ]
       });
+      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({...n, order: i + 1 + preRows.length}))
       setPostRows(updatedIndexColumns);
     },
     [postRows]
@@ -172,7 +174,7 @@ interface DragItem {
 
 const RenderListItem = ({ column, moveItem, id, index, onChangeValue }) => {
   const ref = React.useRef<HTMLDivElement>(null);
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId}, drop] = useDrop({
     accept: ItemTypes.CARD,
     collect(monitor) {
       return {
@@ -221,7 +223,7 @@ const RenderListItem = ({ column, moveItem, id, index, onChangeValue }) => {
     })
   });
 
-  const opacity = isDragging ? 0 : 1;
+  const opacity = isDragging ? 0.4 : 1;
   drag(drop(ref));
 
   return (

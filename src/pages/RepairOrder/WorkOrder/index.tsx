@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Menu, MenuItem, Chip } from '@material-ui/core';
+import { Grid, Box, Button, Menu, MenuItem, Chip, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -11,14 +11,16 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { repairOrder, workOrder, sidebarResource, getObjKeys, generateUniqueIdOnly, WORKORDER_SERVICE_STATUS } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import { ExpandMore } from '@material-ui/icons';
+import { Delete, ExpandMore } from '@material-ui/icons';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
 import RestoreIcon from '@material-ui/icons/Restore';
 import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen, allowedToEdit }) => {
+
+const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen, allowedToEdit,  allowedToDelete }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -27,7 +29,9 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
 
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-
+  const [deleteData, setDeleteData] = useState(null);
+  const [isDeleting, setDeleting] = useState(false);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addServicesDialog, setAddServicesDialog] = useState({ open: false });
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
@@ -148,8 +152,65 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
       //     )
       // },
     ];
-    setColumns(coloum);
+    setColumns([...coloum, {
+      accessor: 'action',
+      Header: '',
+      minWidth: 70,
+      width: 70,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => {
+        return row?.original?.type === 'service' && (
+        <>
+          <IconButton
+            disabled={!allowedToDelete}
+            size="small"
+            aria-label="Details"
+            onClick={() => {
+              setDeleteData([row.original]);
+              setShowConfirmBox(true)
+            }}
+          >
+            <Delete fontSize="small" color="error" />
+          </IconButton>
+        </>
+      )}
+    }]);
   };
+
+  const handleDelete = () => {
+    let ids = []
+    let workOrderId = ''
+    if(deleteData.length > 0) {
+      workOrderId = deleteData[0]?.workOrder?._id
+      deleteData.forEach((d) => {
+        ids.push(d.uniqueId);
+      })
+    }
+    setDeleting(true)
+    axiosInstance()
+    .put(`${workOrder.api}/service/${workOrderId}/remove`, {
+      uniqueIds: ids
+    })
+    .then(({ data }) => {
+        setDeleting(false)
+        setShowConfirmBox(false);
+        fetchData()
+        
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((err) => {
+        setShowConfirmBox(false);
+        setDeleting(false)
+
+        toastConfig.setToastConfig(err);
+      });
+  }
 
   const fetchData = async () => {
     setNextStep(false);
@@ -407,6 +468,16 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                 >
                   Arrange Services
                 </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setDeleteData(services)
+                    setShowConfirmBox(true)
+                    closeActions();
+                  }}
+                  disabled={services?.every((d) => d.workOrder?._id === services[0].workOrder?._id) ? false : true}
+                >
+                  Delete
+                </MenuItem>
               </Menu>
             </Box>
           )}
@@ -479,6 +550,17 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                 fetchData();
                 setUserAssignDialog(false);
               }}
+            />
+          )}
+          {showConfirmBox && (
+            <ConfirmationDialog
+              okBtnLoading={isDeleting}
+              open={showConfirmBox}
+              message={`Are you sure you want to delete this item(s)`}
+              onClose={() => {
+                setShowConfirmBox(false);
+              }}
+              onOk={handleDelete}
             />
           )}
           {arrangeView && (
