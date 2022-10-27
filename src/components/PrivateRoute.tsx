@@ -77,7 +77,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'custom-report',
         'inventory-cycle',
         'cycle-count-determination',
-        'quotation'
+        'quotation',
+        'invoice'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
