@@ -153,6 +153,8 @@ import RepairOrder from './pages/RepairOrder';
 import RepairOrderDetails from './pages/RepairOrder/RepairOrderDetails';
 import WorkOrder from './pages/WorkOrder';
 import WorkOrderDetails from './pages/WorkOrder/WorkOrderDetails';
+import Invoice from './pages/Invoice';
+import InvoiceDetails from './pages/Invoice/InvoiceDetails';
 
 var notificationInterval: any = null;
 
@@ -653,6 +655,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.salesOrderDetail.path}/:id`}>
               <SalesOrderDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.invoice.path}>
+              <Invoice />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.invoiceDetail.path}/:id`}>
+              <InvoiceDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.packages.path}>
               <PackageList />

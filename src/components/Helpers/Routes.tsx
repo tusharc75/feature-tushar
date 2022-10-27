@@ -638,6 +638,20 @@ const routes = {
         : RESOURCE_LABEL.workOrder,
     path: '/work-order/detail'
   },
+  invoice: {
+    title:
+      storedRoutes && storedRoutes.invoice && storedRoutes.invoice.title
+        ? storedRoutes.invoice?.title
+        : RESOURCE_LABEL.invoice,
+    path: '/invoice'
+  },
+  invoiceDetail: {
+    title:
+      storedRoutes && storedRoutes.invoice && storedRoutes.invoice.title
+        ? storedRoutes.invoice?.title
+        : RESOURCE_LABEL.invoice,
+    path: '/invoice/detail'
+  },
 };
 
 export default routes;
