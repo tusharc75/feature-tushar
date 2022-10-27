@@ -272,7 +272,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
-        borderColor: 'rgb(25, 24, 24)',
+        borderColor: 'rgba(25, 24, 24, 0.19)',
         cursor: 'not-allowed',
         PointerEvent: 'none',
         opacity: '.5'
@@ -320,7 +320,11 @@ const Service = ({ workOrderId, allowedToEdit }) => {
               sm={5}
               md={4}
               lg={3}
-              style={{ maxWidth: isColapsed ? '76px' : mobScreen ? '100%' : '', flexBasis: isColapsed ? '76px' : mobScreen ? '100%' : '' }}
+              style={{
+                maxWidth: isColapsed ? '76px' : mobScreen ? '100%' : '',
+                flexBasis: isColapsed ? '76px' : mobScreen ? '100%' : '',
+                transition: 'width 300ms ease 0s, max-width 300ms ease 0s, flex-basis 300ms ease 0s'
+              }}
             >
               <Box mb={1} display="flex" style={{ flexWrap: 'wrap', justifyContent: isColapsed ? 'space-around' : 'flex-end' }}>
                 {!isColapsed && (
@@ -394,7 +398,13 @@ const Service = ({ workOrderId, allowedToEdit }) => {
                             <Grid item xs={10}>
                               <Box
                                 display="flex"
-                                sx={{ flexWrap: 'wrap', alignItems: 'center', position: 'relative', paddingLeft: !isColapsed ? '20px' : '' }}
+                                style={{
+                                  flexWrap: 'wrap',
+                                  alignItems: 'center',
+                                  position: 'relative',
+                                  paddingLeft: !isColapsed ? '20px' : '',
+                                  gap: '5px'
+                                }}
                               >
                                 {data?.type === 'service' && (
                                   <Box
@@ -718,7 +728,8 @@ const Service = ({ workOrderId, allowedToEdit }) => {
             lg={9}
             style={{
               maxWidth: isColapsed ? 'calc(100% - 76px)' : mobScreen ? '100%' : '',
-              flexBasis: isColapsed ? 'calc(100% - 76px)' : mobScreen ? '100%' : ''
+              flexBasis: isColapsed ? 'calc(100% - 76px)' : mobScreen ? '100%' : '',
+              transition: 'width 300ms ease 0s, max-width 300ms ease 0s, flex-basis 300ms ease 0s'
             }}
           >
             {selectedService && (
