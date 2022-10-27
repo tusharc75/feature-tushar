@@ -136,7 +136,7 @@ const Service = ({
 
   const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
-  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: "", services: [], step: null, values: null });
+  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, values: null });
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
   const [stepState, setStepState] = useState(null);
@@ -148,13 +148,18 @@ const Service = ({
         setServiceDetails(data);
         const steps = data?.steps?.map((d) => d.stepName);
         setStepList(steps);
-        const completedSteps = serviceData.filter((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && [
-          WORKORDER_SERVICE_STEP_STATUS.passed,
-          WORKORDER_SERVICE_STEP_STATUS.completed,
-          WORKORDER_SERVICE_STEP_STATUS.failed,
-          WORKORDER_SERVICE_STEP_STATUS.skipped,
-          WORKORDER_SERVICE_STEP_STATUS.end
-        ].includes(d?.passFailStatus));
+        const completedSteps = serviceData.filter(
+          (d) =>
+            d.uniqueId === uniqueId &&
+            d.serviceId === serviceId &&
+            [
+              WORKORDER_SERVICE_STEP_STATUS.passed,
+              WORKORDER_SERVICE_STEP_STATUS.completed,
+              WORKORDER_SERVICE_STEP_STATUS.failed,
+              WORKORDER_SERVICE_STEP_STATUS.skipped,
+              WORKORDER_SERVICE_STEP_STATUS.end
+            ].includes(d?.passFailStatus)
+        );
 
         const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
         setDisableCompleteFail(!allStepsDone);
@@ -182,8 +187,8 @@ const Service = ({
           const type = automatePassFail(values, step);
           handlePassFail(type, step?._id);
         }
-        setAddServiceConfirmation({ open: false, services: [], status: "", step: null, values: null });
-        fetchService()
+        setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
+        fetchService();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -251,7 +256,7 @@ const Service = ({
           type: 'success',
           message: data.message
         });
-        setSelectedStep(null)
+        setSelectedStep(null);
 
         getServiceData();
 
@@ -261,7 +266,7 @@ const Service = ({
             return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
           });
           if (services.length > 0) {
-            setAddServiceConfirmation({ open: true, status: "", services, step, values });
+            setAddServiceConfirmation({ open: true, status: '', services, step, values });
           }
         } else if (step?.isPassFail) {
           const type = automatePassFail(values, step);
@@ -387,13 +392,15 @@ const Service = ({
                 backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
               }}
               className={`${classes.accordionHeading} 
-              ${Boolean(stepData?.passFailStatus)
-                  ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                    ? classes.green
-                    : ''
-                  } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+              ${
+                Boolean(stepData?.passFailStatus)
+                  ? `${
+                      Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                        ? classes.green
+                        : ''
+                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
                   : classes.white
-                }
+              }
               
               `}
               onClick={(e) => {
@@ -422,7 +429,7 @@ const Service = ({
                     </Typography>
                   </Box>
                 </Box>
-                <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px' }}>
+                <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto' }}>
                   {!stepData?.status ? (
                     <Box>
                       <Button
@@ -502,22 +509,26 @@ const Service = ({
       {addServiceConfirmation.open && (
         <ConfirmationDialog
           open={true}
-          message={addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed ?
-            `Since the previous step was failed, the service requested in the add-on service will then be added. ` + addServiceConfirmation.services?.map((e) => e.serviceName)?.toString() :
-            addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed ?
-              `On pass, a new service has been added in compliance with the configuration ` + addServiceConfirmation.services?.map((e) => e.serviceName)?.toString() :
-              `You have to add addional services based on your recent action`}
+          message={
+            addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
+              ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
+                addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+              : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
+              ? `On pass, a new service has been added in compliance with the configuration ` +
+                addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+              : `You have to add addional services based on your recent action`
+          }
           onClose={() => {
-            setAddServiceConfirmation({ open: false, services: [], status: "", step: null, values: null });
+            setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
           }}
           onOk={() => {
             handleAddService(
               addServiceConfirmation.services?.map((e) => e._id),
-              addServiceConfirmation.status === "" ? true : false,
+              addServiceConfirmation.status === '' ? true : false,
               addServiceConfirmation.step,
               addServiceConfirmation.values
             );
-            setAddServiceConfirmation({ open: false, services: [], status: "", step: null, values: null });
+            setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
           }}
         />
       )}
