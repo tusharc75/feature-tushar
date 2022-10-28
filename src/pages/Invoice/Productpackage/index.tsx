@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Productpackage = ({ invoiceData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen }) => {
+const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, updateJobStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
@@ -262,28 +262,16 @@ const Productpackage = ({ invoiceData, setNextStep, currencySymbol, showActivity
           canDrag: false,
           Cell: ({ row }) =>
             !row.original.hideSelection && (
-              <Grid container spacing={1}>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setLeadTimeDialog({ open: true, data: row.original });
-                  }}
-                >
-                  <DateRangeIcon fontSize="small" color="primary" />
-                </IconButton>
-                <Box ml={1} />
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    setDeleteData(obj);
-                  }}
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </Grid>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  setDeleteData(obj);
+                }}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
             )
         })
       );
@@ -443,6 +431,9 @@ const Productpackage = ({ invoiceData, setNextStep, currencySymbol, showActivity
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
         setAddingProducts(false);
+        if(currentStep === 0 && invoiceData?.status !== "In-Progress") {
+          updateJobStatus("In-Progress")
+        }
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
