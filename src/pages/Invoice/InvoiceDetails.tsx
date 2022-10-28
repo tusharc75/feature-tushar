@@ -21,9 +21,9 @@ import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import Steps from '../RentalManagement/Steps';
 import Productpackage from './Productpackage';
 import Invoice from './Invoice';
-import { isMobile } from "react-device-detect";
+import { isMobile } from 'react-device-detect';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { GrStatusInfo } from "react-icons/all";
+import { GrStatusInfo } from 'react-icons/all';
 import HideWhenOffline from '../../components/HideWhenOffline';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
@@ -32,7 +32,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.invoice.title)
+  const renderedFrom = camelCase(routes?.invoice.title);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -57,7 +57,7 @@ const InvoiceDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
-  const [statusOptions, setStatusOptions] = useState([])
+  const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
@@ -92,12 +92,11 @@ const InvoiceDetails = () => {
     }
   }, [isSmallScreen, tabValue]);
 
-
-  const handleStatusChange = o => {
+  const handleStatusChange = (o) => {
     if (o.optionValue && invoiceData?.status !== o.optionValue) {
-      updateJobStatus(o.optionValue)
+      updateJobStatus(o.optionValue);
     }
-  }
+  };
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -115,29 +114,30 @@ const InvoiceDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(invoiceProcessSteps[currentStep])
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 1) {
+      updateProcessStatus(invoiceProcessSteps[currentStep]);
     }
   }, [currentStep]);
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance().put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+    axiosInstance()
+      .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const getRessourceFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Invoice');
-      response?.data?.data.some(o => {
-        if (o?.fieldData?.fieldName === "status") {
-          setStatusOptions([...o.fieldData.option])
-          return true
+      response?.data?.data.some((o) => {
+        if (o?.fieldData?.fieldName === 'status') {
+          setStatusOptions([...o.fieldData.option]);
+          return true;
         }
-      })
+      });
       setInvoiceFields(response?.data?.data);
-
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -151,7 +151,6 @@ const InvoiceDetails = () => {
       const response: any = await axiosInstance().get(`${invoice.api}/${id}`);
       data = response?.data?.data;
 
-
       setCurrentStep(invoiceProcessSteps.indexOf(data?.processStatus) !== -1 ? invoiceProcessSteps.indexOf(data?.processStatus) : 0);
       setHeadingLabel(data.invoiceNumber);
       setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
@@ -160,7 +159,7 @@ const InvoiceDetails = () => {
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
 
-      setAllowedToEdit(isAllowedToEdit && ["Invoiced", "Closed"].indexOf(data.status) === -1);
+      setAllowedToEdit(isAllowedToEdit && ['Invoiced', 'Closed'].indexOf(data.status) === -1);
 
       if (isAllowedToEdit && openEdit === 'true') {
         setOpenUpdateDialog(true);
@@ -169,7 +168,6 @@ const InvoiceDetails = () => {
         history.push({ search: params.toString() });
       }
       setLoading(false);
-
     } catch (error) {
       setLoading(false);
       toastConfig.setToastConfig(error);
@@ -194,21 +192,20 @@ const InvoiceDetails = () => {
   };
 
   const updateJobStatus = (status) => {
-    // need to change the api
-    axiosInstance().patch(`${invoice.api}/status/${invoiceData._id}`, { status: status }).then(({ data: { data } }) => {
-      fetchInvoiceData();
-      if (status === "Invoiced") {
-        setCurrentStep(1)
-      }
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: `Status changed to ${status}`
+    axiosInstance()
+      .patch(`${invoice.api}/status/${invoiceData._id}`, { status: status })
+      .then(({ data: { data } }) => {
+        fetchInvoiceData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
-  }
+  };
 
   return (
     <>
@@ -232,16 +229,17 @@ const InvoiceDetails = () => {
                   </div>
                 ) : (
                   <DetailsPageHeader heading={headingLabel} mainPoints={[]} showHeading={true}>
-
-                    {(permissions?.invoice?.isUpdate && allowedToEdit) && (
+                    {permissions?.invoice?.isUpdate && allowedToEdit && (
                       <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                         Edit
                       </Button>
                     )}
 
-                    {permissions?.invoice?.isDelete && ["Invoiced", "Closed"].indexOf(invoiceData?.status) === -1 && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                    {permissions?.invoice?.isDelete && ['Invoiced', 'Closed'].indexOf(invoiceData?.status) === -1 && (
+                      <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                    )}
 
-                    {permissions?.invoice?.isUpdate && (["Ready to Invoice", "Invoiced"].includes(invoiceData?.status)) && (
+                    {permissions?.invoice?.isUpdate && ['Ready to Invoice', 'Invoiced'].includes(invoiceData?.status) && (
                       <>
                         <Button
                           variant="outlined"
@@ -249,9 +247,9 @@ const InvoiceDetails = () => {
                           size="small"
                           onClick={openActions}
                           aria-controls="action-menu"
-                          endIcon={isMobile ? <ExpandMore style={{ width: "12px", height: "12px" }} /> : <ExpandMore />}
+                          endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
                         >
-                          {isMobile ? <GrStatusInfo size={20} /> : "Change Status"}
+                          {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
                         </Button>
                         <Menu
                           anchorEl={anchorEl}
@@ -263,22 +261,27 @@ const InvoiceDetails = () => {
                           }}
                           id="action-menu"
                           open={Boolean(anchorEl)}
-                          onClose={closeActions}>
+                          onClose={closeActions}
+                        >
                           {statusOptions?.map((o, index) => {
-                            return <MenuItem
-                              disabled={index <= statusOptions.findIndex(d => d.optionLabel === invoiceData?.status)}
-                              onClick={() => {
-                                closeActions()
-                                handleStatusChange(o)
-                              }}
-                              value={o}>{o?.optionLabel}</MenuItem>
+                            return (
+                              <MenuItem
+                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)}
+                                onClick={() => {
+                                  closeActions();
+                                  handleStatusChange(o);
+                                }}
+                                value={o}
+                              >
+                                {o?.optionLabel}
+                              </MenuItem>
+                            );
                           })}
                         </Menu>
                       </>
                     )}
                   </DetailsPageHeader>
                 )}
-
 
                 <Tabs
                   className="quote-tab"
@@ -318,7 +321,6 @@ const InvoiceDetails = () => {
                     {...a11yProps(1)}
                   />
                   <div className={'uio'}> </div>
-
                 </Tabs>
 
                 <TabPanel value={tabValue} index={0}>
@@ -343,7 +345,7 @@ const InvoiceDetails = () => {
                       steps={invoiceProcessSteps}
                       currentStep={currentStep}
                       setCurrentStep={setCurrentStep}
-                      isStepEnded={["Invoiced", "Closed"].includes(invoiceData?.status)}
+                      isStepEnded={['Invoiced', 'Closed'].includes(invoiceData?.status)}
                     />
                     <ContentFullScreen title={invoiceProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                       {currentStep === 0 && invoiceData && (
@@ -354,8 +356,11 @@ const InvoiceDetails = () => {
                           renderedFrom={`${renderedFrom}_grid-1`}
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
-                        />)}
-                     
+                          updateJobStatus={updateJobStatus}
+                          currentStep={currentStep}
+                        />
+                      )}
+
                       {currentStep === 1 && invoiceData && (
                         <Invoice
                           invoiceData={invoiceData}
@@ -368,7 +373,6 @@ const InvoiceDetails = () => {
                     </ContentFullScreen>
                   </Paper>
                 </TabPanel>
-
               </Paper>
             </div>
             <Box my={1} />
@@ -439,7 +443,7 @@ const InvoiceDetails = () => {
                                 access: true
                               }
                             ]}
-                            handleActivityRefresh={() => { }}
+                            handleActivityRefresh={() => {}}
                             emails={[]}
                           />
                         </div>
@@ -451,7 +455,6 @@ const InvoiceDetails = () => {
             </HideWhenOffline>
           </div>
         </div>
-
       </Fragment>
       {showConfirmBox && (
         <ConfirmationDialog
