@@ -189,10 +189,9 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
           let data;
           const response: any = await axiosInstance().get(`${repairOrder.api}/` + repairOrderId);
           data = response?.data?.data;
-
+          setRepairOrderData(data)
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, repairOrderNumber, updatedBy, ...rest } = data
-            setRepairOrderData(data)
             setDisablePlantIfAssetAdded(false);
             rest.status = "New"
             rest.repairOrderNumber = `RO_${generateUniqueIdOnly()}`

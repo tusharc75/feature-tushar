@@ -78,7 +78,7 @@ const Productpackage = ({
       },
       {
         accessor: 'detail',
-        Header: 'Detail',
+        Header: 'Asset Detail',
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
@@ -414,11 +414,6 @@ const Productpackage = ({
                   open={Boolean(anchorActionEl)}
                   onClose={closeActions}
                 >
-                  {/* <MenuItem onClick={() => {
-                    closeActions()
-                    setIsProductEdit({ open: true, isBulkedit: true })
-                  }
-                  }>Bulk Edit</MenuItem> */}
                   <MenuItem
                     disabled={!allowedToDelete}
                     onClick={() => {
