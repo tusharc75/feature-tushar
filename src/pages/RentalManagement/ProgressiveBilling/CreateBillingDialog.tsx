@@ -377,16 +377,19 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, e
                                                 }}
                                                 margin="dense"
                                             />
-                                            <Grid style={{ display: 'flex', gap: '5px', margin: '5px' }}>
+                                            <Grid style={{ display: 'flex', gap: '5px', marginTop: '15px' }}>
                                                 <HtmlTooltip title={!Boolean(selectedProducts && selectedProducts.length) ? "Please select product to apply" : ""}>
-                                                    <Button
-                                                        variant='contained'
-                                                        color={Boolean(selectedProducts && selectedProducts.length) ? "primary" : "default"}
-                                                        size="small"
-                                                        onClick={() => { if (Boolean(selectedProducts && selectedProducts.length)) handleApplyDate() }}
-                                                    >
-                                                        Apply
-                                                    </Button>
+                                                    <span>
+                                                        <Button
+                                                            variant='contained'
+                                                            color="primary"
+                                                            disabled={!Boolean(selectedProducts && selectedProducts.length)}
+                                                            size="small"
+                                                            onClick={() => { handleApplyDate() }}
+                                                        >
+                                                            Apply
+                                                        </Button>
+                                                    </span>
                                                 </HtmlTooltip>
                                             </Grid>
                                         </Grid>
