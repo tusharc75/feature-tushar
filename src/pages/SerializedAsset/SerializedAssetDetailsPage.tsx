@@ -43,8 +43,7 @@ interface TabPanelProps {
 }
 
 function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+  const { children, value, index, ...other } = props
   return (
     <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
       {children}
@@ -52,9 +51,8 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-
-
 const SerializedAssetDetailsPage = () => {
+
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.serializedAsset.title)
   const { id } = useParams();
@@ -80,10 +78,8 @@ const SerializedAssetDetailsPage = () => {
   const [statusOptions, setStatusOptions] = useState([])
   const [showReasonDialog, setShowReasonDialog] = useState(false)
   const [updateLoading, setUpdateLoading] = useState(false)
-  const [loadingBOMData, setLoadingBOMData] = useState(false)
   const [customField, setCustomField] = useState(null)
   const [productInventoryHistoryData, setProductInventoryHistoryData] = useState(null)
-  const [BOMData, setBOMData] = useState([])
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
@@ -166,9 +162,6 @@ const SerializedAssetDetailsPage = () => {
     }
   }, [id]);
 
-  useEffect(() => {
-    getProductTree()
-  }, [productId])
 
   const fetchAllData = () => {
     fetchFields();
@@ -280,25 +273,6 @@ const SerializedAssetDetailsPage = () => {
       });
   };
 
-  const getProductTree = () => {
-    if (productId) {
-      setLoadingBOMData(true)
-      axiosInstance().get(`/product/${productId}/bom`).then(({ data: { data } }) => {
-        data = data.map((o) => {
-          return {
-            ...o,
-            productName: o.childProductDetail?.productName,
-            productId: o.childProductDetail?._id
-          };
-        });
-        setBOMData([...data])
-        setLoadingBOMData(false)
-      }).catch(err => {
-        setLoadingBOMData(false)
-      })
-    }
-  }
-
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -400,7 +374,7 @@ const SerializedAssetDetailsPage = () => {
         </Grid>
         <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
           <Grid container spacing={1}>
-            <Grid item xs={12} sm={12} md={8} lg={8}>
+            <Grid item xs={12} sm={12} md={12} lg={12}>
               <Paper>
                 {!productInventoryData ? (
                   <div>
@@ -656,66 +630,6 @@ const SerializedAssetDetailsPage = () => {
                     </Grid>
                   </Grid>
                 </TabPanel>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={12} md={4} lg={4}>
-              <Paper style={{ overflow: 'hidden' }}>
-                <Box
-                  padding={1}
-                  bgcolor="grey.200"
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography variant="subtitle2">
-                    Child Product
-                  </Typography>
-                </Box>
-                {(
-                  <Box>
-                    {loading || loadingBOMData ? (
-                      [1].map((i) => (
-                        <BoxWithBorder
-                          key={i}
-                          style={{
-                            margin: "8px",
-                          }}
-                        >
-                          <Box padding={1}>
-                            <Skeleton
-                              variant="text"
-                              width="100px"
-                              height="20px"
-                            />
-                            <Box marginTop={1} />
-                            <Skeleton variant="text" width="100%" height="15px" />
-                          </Box>
-                        </BoxWithBorder>
-                      ))
-                    ) : BOMData.length ? (
-                      <>
-                        <ProductHierarchy
-                          data={BOMData}
-                          permissions={permissions?.product}
-                          unassignProduct={() => { }}
-                        />
-                        <Box px={1} my={1} >
-                          <Button
-                            fullWidth
-                            variant="outlined"
-                            color='primary'
-                            onClick={() => history.push(`${routes.productDetail.path}/${productId}/bom`, { productName: productInventoryData?.product?.optionLabel })}>
-                            View All
-                          </Button>
-                        </Box>
-                      </>
-                    ) : (
-                      <Box textAlign="center" padding={2} minHeight={150}>
-                        <Typography>No parts available for this product</Typography>
-                      </Box>
-                    )}
-                  </Box>
-                )}
               </Paper>
             </Grid>
           </Grid>

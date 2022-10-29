@@ -59,6 +59,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
 //export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Ready To Invoice'];
+export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
 //export const purchaseOrderSteps = ['Add Products', 'Services and Consumables', 'Receive Products'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
@@ -74,7 +75,7 @@ export const rentalManagementSteps = [
 export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
-export const repairOrderSteps = ['Add Products', 'Work Order', 'Quotation', 'Invoice'];
+export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Invoice'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -179,6 +180,7 @@ export const sidebarResource = {
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
+  invoice: 'Invoice',
   eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
   supplierContact: 'Supplier Contact',
@@ -257,6 +259,7 @@ export const resourceNames = {
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
+  invoice: 'Invoice',
   eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
   supplierContact: 'Supplier Contact',
@@ -337,6 +340,7 @@ export const RESOURCE_LABEL = {
   pricingCondition: 'Pricing Setup',
   repairJob: 'Repair Jobs',
   salesOrder: 'Sales Order',
+  invoice: 'Invoices',
   eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
   purchaseOrder: 'Purchase Orders',
@@ -373,6 +377,7 @@ export const CHILD_RESOURCE = {
   purchaseOrderService: 'Purchase Order Service',
   bulkAssetCreationProduct: 'Bulk Asset Creation Product',
   repairJobAsset: 'Repair Job Asset',
+  invoiceProduct: 'Invoice Product',
   salesOrderProduct: 'Sales Order Product',
   salesOrderCost: 'Sales Order Cost',
   subleaseProduct: 'Sublease Product',
@@ -446,6 +451,11 @@ export const repairOrder = {
 export const salesOrder = {
   api: '/sales-order',
   resource: 'sales-order'
+};
+
+export const invoice = {
+  api: '/invoice',
+  resource: 'invoice'
 };
 
 export const quotation = {
@@ -1822,6 +1832,7 @@ export const ACTIVITY_RESOURCE = {
   deliveryTicket: 'deliveryTicket',
   sublease: 'sublease',
   salesOrder: 'salesOrder',
+  invoice: 'invoice',
   bulkAssetCreation: 'bulkAssetCreation',
   serializedAsset: 'serializedAsset',
   transferInventory: 'transferInventory',
@@ -1952,6 +1963,11 @@ export const getData = (resource: string, data: any) => {
     case 'sales-order':
       return {
         name: `${data.salesOrderNo}`,
+        id: data._id
+      };
+    case 'invoice':
+      return {
+        name: `${data.invoiceNumber}`,
         id: data._id
       };
     case 'serialized-asset':
