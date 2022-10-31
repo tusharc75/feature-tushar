@@ -29,7 +29,7 @@ import Consumables from './Consumables';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 
 const WorkOrderDetails = () => {
-  const renderedFrom = camelCase(routes?.workOrder.title);
+
   const toastConfig = useContext(CustomToastContext);
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
@@ -188,6 +188,7 @@ const WorkOrderDetails = () => {
                   className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
                   style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                   endIcon={previewPdf ? <CircularProgress size={20} /> : null}
+                  disabled={previewPdf}
                 >
                   {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
                 </Button>
