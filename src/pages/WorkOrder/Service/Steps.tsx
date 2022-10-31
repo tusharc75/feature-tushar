@@ -144,7 +144,7 @@ const Service = ({
 
   useEffect(() => {
     axiosInstance()
-      .get(`${workOrder.api}/service/detail/${serviceId}`)
+      .get(`${workOrder.api}/service/detail/${serviceId}/${workOrderId}`)
       .then(({ data: { data } }) => {
         setServiceDetails(data);
         const steps = data?.steps?.map((d) => d.stepName);
