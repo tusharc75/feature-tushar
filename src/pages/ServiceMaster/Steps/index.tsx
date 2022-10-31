@@ -48,6 +48,7 @@ const Steps = ({ serviceId }) => {
     { field: 'stepName', headerName: 'Step Name', show: true, cellRenderer: 'stepNameRenderer' },
     { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' },
     { field: 'leadDay', headerName: 'Lead Day', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'price', headerName: 'Price', show: true, cellRenderer: 'commonRenderer' },
     { field: 'fieldCount', headerName: 'Fields', show: true, cellRenderer: 'commonRenderer' }
   ];
 
