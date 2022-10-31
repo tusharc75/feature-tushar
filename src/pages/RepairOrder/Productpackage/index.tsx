@@ -149,7 +149,7 @@ const Productpackage = ({
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {!row.original.hideSelection && allowedToDelete && (
+          {!row.original.hideSelection && allowedToDelete && row.original?.allowedToDelete && (
             <IconButton
               size="small"
               aria-label="Details"
@@ -196,6 +196,7 @@ const Productpackage = ({
         parent.type === 'serializedAsset' ? parent.serializedAssetDetail.assetNumber : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
+      parent.allowedToDelete = parent.workOrder ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
     });
 
@@ -215,6 +216,7 @@ const Productpackage = ({
       _subRow.detail = _subRow?.productDetail?.productName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
+      _subRow.allowedToDelete = false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
