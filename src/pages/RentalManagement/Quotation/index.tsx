@@ -48,7 +48,7 @@ const Quotation = ({
     if (rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer) {
       setNextStep(true);
     }
-  }, []);
+  }, [rentalManagementData]);
 
   useEffect(() => {
     fetchFields();

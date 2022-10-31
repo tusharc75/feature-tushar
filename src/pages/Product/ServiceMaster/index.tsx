@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -15,12 +15,12 @@ import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwip
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteButton from 'src/components/Helpers/DeleteButton';
 import AddServiceMaster from './AddServiceMaster';
 import { HiBadgeCheck } from 'react-icons/hi';
 import { FcApproval } from 'react-icons/fc';
 import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
+import { ExpandMore } from '@material-ui/icons';
 
 interface Props {
   renderedFrom: string;
@@ -43,6 +43,7 @@ const ServiceMaster = (props: Props) => {
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const [state, dispatch] = useReducer(reducer, intialState);
   const [arrangeView, setArrangeView] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
 
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
@@ -61,7 +62,10 @@ const ServiceMaster = (props: Props) => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  const defaultColumns = [{ field: 'serviceName', headerName: 'Service Name', show: true, cellRenderer: 'serviceRenderer' }, { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
+  const defaultColumns = [
+    { field: 'serviceName', headerName: 'Service Name', show: true, cellRenderer: 'serviceRenderer' },
+    { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }
+  ];
 
   const fetchGridColumns = () => {
     setColumns(null);
@@ -71,7 +75,7 @@ const ServiceMaster = (props: Props) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.fieldName !== "serviceName") {
+          if (o?.fieldData?.fieldName !== 'serviceName') {
             let currentColumn = getColumnData(routes.serviceMaster?.title, o?.fieldData, routes.serviceMasterDetail.path);
             if (currentColumn !== null) {
               columns = [...columns, currentColumn?.columnData];
@@ -212,6 +216,7 @@ const ServiceMaster = (props: Props) => {
             onClick={() => {
               setDeleteRecord(params.data);
               setShowDeleteConfirmBox(true);
+              closeActions();
             }}
           >
             <DeleteIcon color="error" />
@@ -230,6 +235,7 @@ const ServiceMaster = (props: Props) => {
       ids = selectedRecords.map((d) => d._id);
     }
     setDeleting(true);
+    closeActions();
     axiosInstance()
       .put(`${routes.product.path}/${id}/service-master/remove`, { ids: ids })
       .then(() => {
@@ -300,6 +306,14 @@ const ServiceMaster = (props: Props) => {
       });
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Fragment>
       {permissions?.product?.isUpdate && (
@@ -308,7 +322,6 @@ const ServiceMaster = (props: Props) => {
             Add Services
           </Button>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <DeleteButton disabled={selectedRecords.length === 0} text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
             <Box ml={1} />
             {dataRows?.length ? (
               <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
@@ -316,6 +329,51 @@ const ServiceMaster = (props: Props) => {
                 Arrange
               </Button>
             ) : null}
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'contained'}
+              color="default"
+              size="small"
+              onClick={openActions}
+              disabled={selectedRecords.length ? false : true}
+              aria-controls="action-menu"
+              style={{marginLeft:'0.6rem'}}
+            >
+              {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
+                Delete
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleUpdate({
+                    ids: selectedRecords.map((d) => d._id),
+                    default:true,
+                  })
+                  closeActions()
+                }}
+              >Set Default</MenuItem>
+              <MenuItem
+              onClick={() => {
+                handleUpdate({
+                  ids: selectedRecords.map((d) => d._id),
+                  default: false,
+                })
+                closeActions()
+              }}
+              >Remove Default</MenuItem>
+            </Menu>
           </div>
         </Box>
       )}
@@ -332,9 +390,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => { }}
+            onEdit={() => {}}
             extraParamsToCheckDelete={false}
-            onDelete={() => { }}
+            onDelete={() => {}}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -342,7 +400,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -393,7 +451,11 @@ const ServiceMaster = (props: Props) => {
       )}
       {arrangeView && (
         <ArrangeView
-          data={dataRows?.map((d) => { return { _id: d?._id, name: d?.serviceName, order: d?.order, preWork: d?.preWork }; }) || []}
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.serviceName, order: d?.order, preWork: d?.preWork };
+            }) || []
+          }
           title={'Arrange'}
           handleClose={() => setArrangeView(false)}
           handleSubmit={handleArrangeUpdate}
