@@ -532,7 +532,7 @@ const Service = ({
           />
         )}
       </Box> : <Box p={2} height={500} bgcolor="rgba(242, 243, 247, 0.6)">
-        <Typography>No Steps Added!</Typography>
+        <Typography>There are no added steps.</Typography>
       </Box>
   ) : (
     <Box p={2} height={500} bgcolor="white">

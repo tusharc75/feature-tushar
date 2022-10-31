@@ -20,7 +20,7 @@ const CostDetails = ({ product, productData }) => {
     return (
         <Paper style={{ overflow: 'hidden' }}>
             <Box padding={1} bgcolor="grey.200" display="flex" justifyContent="space-between" alignItems="center">
-                <Typography variant="subtitle2">Cost Detail</Typography>
+                <Typography variant="subtitle2">Cost Details</Typography>
             </Box>
             {averageCost !== null ?
                 <>

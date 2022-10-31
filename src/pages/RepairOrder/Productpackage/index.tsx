@@ -71,14 +71,14 @@ const Productpackage = ({
     const coloum: any = [
       {
         accessor: 'srno',
-        Header: '#',
+        Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
       },
       {
         accessor: 'detail',
-        Header: 'Asset Detail',
+        Header: 'Asset Details',
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
