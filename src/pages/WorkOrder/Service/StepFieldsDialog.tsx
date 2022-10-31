@@ -13,7 +13,6 @@ import Details from 'src/components/Shared/DetailsPage';
 
 const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, stepData, isStepValid }) => {
   const [isEditing, setEditing] = React.useState(false);
-  console.log(stepData);
   function padTo2Digits(num) {
     return num.toString().padStart(2, '0');
   }
