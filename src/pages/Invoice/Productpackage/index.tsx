@@ -100,7 +100,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_invoice_product_fields(invoiceData?.currency);
+    let data = await fetch_invoice_product_fields(invoiceData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
       {
