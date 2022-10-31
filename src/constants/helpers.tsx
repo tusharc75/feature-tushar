@@ -21,19 +21,7 @@ import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { kebabCase, orderBy, uniqBy, camelCase } from 'lodash';
-
-// export const ORDER_TYPES =
-// {
-//   rent: {
-//     key: 'Rent',  //  Just to display in UI
-//     value: "Rent"
-//   },
-//   sale: {
-//     key: 'Buy',  //  Just to display in UI
-//     value: "Sale"
-//   }
-// };
+import { kebabCase, orderBy, uniqBy } from 'lodash';
 
 export const staticHiddenResource = ['Dashboard', 'Report'];
 
@@ -57,11 +45,9 @@ export const termsAndConditionDocumentUploadMaxSize = {
 };
 
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
-//export const salesOrderProcessSteps = ['Add Products', 'Add Services', 'Serialized Asset', 'Loading Ticket', 'Ready To Invoice'];
 export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Ready To Invoice'];
 export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
-//export const purchaseOrderSteps = ['Add Products', 'Services and Consumables', 'Receive Products'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
@@ -340,7 +326,7 @@ export const RESOURCE_LABEL = {
   pricingCondition: 'Pricing Setup',
   repairJob: 'Repair Jobs',
   salesOrder: 'Sales Order',
-  invoice: 'Invoices',
+  invoice: 'Invoice',
   eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
   purchaseOrder: 'Purchase Orders',
@@ -1874,7 +1860,8 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.transferInventory, value: resourceNames.transferInventory, key: 'transferInventory' },
   { title: sidebarResource.salesOrder, value: resourceNames.salesOrder, key: 'salesOrder' },
   { title: sidebarResource.repairOrder, value: resourceNames.repairOrder, key: 'repairOrder' },
-  { title: sidebarResource.workOrder, value: resourceNames.workOrder, key: 'workOrder' }
+  { title: sidebarResource.workOrder, value: resourceNames.workOrder, key: 'workOrder' },
+  { title: sidebarResource.invoice, value: resourceNames.invoice, key: 'invoice' }
 ];
 
 export const getApi = (resource: string) => {

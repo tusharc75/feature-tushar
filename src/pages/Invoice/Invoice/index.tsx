@@ -1,162 +1,318 @@
+import Box from '@material-ui/core/Box/Box';
+import React, { useState, useEffect, useReducer, useContext } from 'react';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer, DateRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import Grid from '@material-ui/core/Grid/Grid';
+import { Button, Dialog, useMediaQuery } from '@material-ui/core';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import {
+  CustomDialogTransition,
+  dateFormat,
+  formatAmountWithCurrency,
+  customerContact,
+  gridLoadingTimeout,
+  invoice,
+  purchaseOrder,
+  sidebarResource
+} from '../../../constants/helpers';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
+import { isMobile, isTablet } from 'react-device-detect';
+import { AiFillFilePdf } from 'react-icons/ai';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import moment from 'moment';
+import { BiPurchaseTagAlt, MdEmail } from 'react-icons/all';
+import { CURReplaceByCurrencySingle } from '../../../constants/formulaUtility';
+import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from '../../../constants/columns';
+import { prepareDataForGrid } from '../../../constants/helpers';
+import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgGridEditable';
+import { Link } from 'react-router-dom';
+import { startCase } from 'lodash';
+import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
-import Box from "@material-ui/core/Box/Box";
-import React, { useState, useEffect, useReducer, useContext } from "react";
-import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
-import CustomAgGrid, { intialState, reducer } from "../../../components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, DateRenderer, } from "../../../components/AgGridComponents/CustomAgGridCellRenderers";
-import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Dialog, IconButton } from "@material-ui/core";
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { CustomDialogTransition, customerContact, gridLoadingTimeout, invoice, purchaseOrder, sidebarResource } from "../../../constants/helpers";
-import { useData } from "../../../StateProvider/Provider";
-import axiosInstance from "../../../axios/axiosInstance";
-import { CreateEmail } from "../../../components/Activity/Email/CreateEmail";
-import { isMobile, isTablet } from "react-device-detect";
-import { AiFillFilePdf } from "react-icons/ai";
-import routes from "../../../components/Helpers/Routes";
-import { BiPurchaseTagAlt, MdEmail } from "react-icons/all";
-import { CURReplaceByCurrencySingle } from "../../../constants/formulaUtility";
-import { getColumnData, getStaticFields, getFrameworkComponents, genrateColoum } from "../../../constants/columns"
-import { prepareDataForGrid } from "../../../constants/helpers";
-import CustomAgGridEditable from "../../../components/AgGridComponents/CustomAgGridEditable";
-import { Link } from "react-router-dom";
-import { startCase } from "lodash";
-import { fetch_invoice_product_fields} from '../../../components/Invoice/helper';
-
-
-const Invoice = ({ invoiceData, setNextStep , updateJobStatus, statusOptions, renderedFrom }) => {
-
+const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, statusOptions, stepFullScreen, showActivity, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
-
+  const {
+    state: { user, permissions }
+  }: any = useData();
+  const isSmallScreen = useMediaQuery('(max-width:1300px)');
+  const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [sendEmail, setSendEmail] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [userEmails, setUserEmails] = useState({ to: [], cc: [] });
   const [generatingPdfFile, setGeneratingFile] = useState(false);
-
-  const [gridApi, setGridApi] = useState(null);
-  const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const [allFields, setAllFields] = useState([]);
+  const [rowsData, setRowsData] = useState(null);
   const [columns, setColumns] = useState([
-    { field: "type", headerName: "Type", show: true, disabled: true, cellRenderer: "commonRenderer" },
-    { field: "description", headerName: "Description", show: true, disabled: true, cellRenderer: "commonRenderer" }
-  ])
-  const [frameWorkComponent, setFrameWorkComponent] = useState(null)
+    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'description', headerName: 'Description', show: true, disabled: true, cellRenderer: 'commonRenderer' }
+  ]);
 
-  const [downlodingFile, setDownlodingFile] = useState(null)
+  const [downlodingFile, setDownlodingFile] = useState(null);
   const [emailAttachments, setEmailAttachments] = useState([]);
 
-  const NameRenderer = (params) => (
-    <Link
-      className="link"
-      title={params.value}
-      to={`${routes.productDetail.path}/${params.data.productId}`}
-    >
-      {params.value}
-    </Link>
-  );
-
   useEffect(() => {
-    if (statusOptions.findIndex(d => d.optionLabel === "Ready to Invoice") > statusOptions.findIndex(d => d.optionLabel === invoiceData?.status)) {
-      updateJobStatus("Ready to Invoice")
+    if (
+      statusOptions.findIndex((d) => d.optionLabel === 'Ready to Invoice') > statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)
+    ) {
+      updateJobStatus('Ready to Invoice');
     }
   }, []);
 
   useEffect(() => {
-    fetchFields()
+    fetchFields();
   }, []);
 
   const fetchFields = async () => {
     try {
-      let fields = await fetch_invoice_product_fields(invoiceData?.currency)
-      let rendererNames = [];
-      genrateColoum(fields, columns, rendererNames, false, renderedFrom);
-      let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
-      tempFrameworkComponent = {
-        commonRenderer: CommonRenderer,
-        nameRenderer: NameRenderer,
-        ...tempFrameworkComponent,
-      }
-      setFrameWorkComponent({ ...tempFrameworkComponent })
-      setColumns([...columns])
-      fetchData()
-    }
-    catch (error) {
-      toastConfig.setToastConfig(error)
-    }
-  }
-
-  const fetchData = async () => {
-    let combinedData: any = []
-    let material: any = []
-    try {
-      const resultMaterial = await axiosInstance().get(`${invoice.api}/productpackage/${invoiceData._id}`)
-      material = resultMaterial?.data?.data?.material;
-      material?.forEach((item) => {
-        if (!item.parentId) {
-          item.description = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageName}`
-          item.type = startCase(item.type);
-          combinedData.push(item);
+      let data = await fetch_invoice_product_fields(invoiceData?.currency);
+      setAllFields(JSON.parse(JSON.stringify(data)));
+      const coloum: any = [
+        {
+          accessor: 'detail',
+          Header: 'Detail',
+          minWidth: 300,
+          width: 300,
+          Cell: ({ row }) => (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {
+                <p className="text-truncate" title={row.original?.detail}>
+                  {row.original?.detail}
+                </p>
+              }
+            </div>
+          )
+        },
+      ];
+      data.forEach((element) => {
+        if (element.type === 'date') {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            disableFilters: true,
+            Cell: ({ row }) =>
+              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+          });
+        } else if (element.fieldName === 'supplierAccount') {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) =>
+              row.original[element.fieldName] ? (
+                <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
+              ) : (
+                <NoDataCell />
+              )
+          });
+        } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
+          if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              let fieldName = element.fieldName + '_' + _unit.toLowerCase();
+              let fieldLabel = element.fieldLabel + ' ' + _unit;
+              coloum.push({
+                accessor: fieldName,
+                Header: fieldLabel,
+                Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
+              });
+            });
+          } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              element.displayCurrency.forEach((_currency) => {
+                let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
+                let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
+                coloum.push({
+                  accessor: fieldName,
+                  Header: fieldLabel,
+                  Cell: ({ row }) =>
+                    row.original[fieldName] ? (
+                      <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                    ) : (
+                      <NoDataCell />
+                    )
+                });
+              });
+            });
+          } else if (element.type === 'currencyAmount') {
+            element.displayCurrency.forEach((_currency) => {
+              let fieldName = element.fieldName + '_' + _currency.toLowerCase();
+              let fieldLabel = element.fieldLabel + ' ' + _currency;
+              coloum.push({
+                accessor: fieldName,
+                Header: fieldLabel,
+                Cell: ({ row }) =>
+                  row.original[fieldName] ? (
+                    <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                  ) : (
+                    <NoDataCell />
+                  )
+              });
+            });
+          }
+        } else {
+          if (element.fieldName === 'qty') {
+            element.fieldName = 'qtyDisplay';
+          }
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          });
         }
       });
-      let rows = combinedData?.map((item) => {
-        let res: any = {
-          ...prepareDataForGrid(item),
-        };
-        return res;
+      coloum.forEach((element) => {
+        if (element.accessor.includes('detail')) {
+          element['Footer'] = () => {
+            return <>Total</>;
+          };
+        } else if (element.accessor === 'qtyDisplay') {
+          element['Footer'] = (info) => {
+            const qtyTotal = info.rows
+              .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+              .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+            return <>{qtyTotal}</>;
+          };
+        } else if (element.accessor.includes('finalPrice')) {
+          element['Footer'] = (info) => {
+            const total = info.rows
+              .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+              .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+            return (
+              <>
+                {currencySymbol} {formatAmountWithCurrency(invoiceData?.currency, total)?.amountWithouCurrencyCode ?? total}
+              </>
+            );
+          };
+        }
       });
-      dispatch({ type: "initialize", data: rows, count: rows.length });
-      dispatch({ type: "loading", loading: false });
+      setColumns(coloum);
+      fetchData();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
     }
-    catch (error) {
-      dispatch({ type: "loading", loading: false });
-      toastConfig.setToastConfig(error)
+  };
+
+  const fetchData = async () => {
+    var data: any = [];
+    var inventory: any = [];
+    const response = await axiosInstance().get(`${invoice.api}/productpackage/${invoiceData._id}`);
+    data = response?.data?.data;
+
+    inventory = data?.inventory ? data?.inventory : [];
+    const rows = data.material.filter((e) => e.parentId === null);
+    rows.forEach((parent, i) => {
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
+      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
+      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      parent.qtyDisplay = parent.qty;
+      parent.isValid = parent['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : false;
+      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
+      parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
+      parent.subRows = generateNestedData(data.material, inventory, parent);
+    });
+    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+      setNextStep(true);
+    } else {
+      setNextStep(true);
+    }
+    setRowsData(rows);
+  };
+
+  const generateNestedData = (material, inventory, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
+      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      _subRow.qtyDisplay = _subRow.qty;
+      _subRow.isValid = _subRow['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : false;
+      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
+      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
+      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+    });
+    if (subRows.length === 0 && parent.type === 'package') {
+      parent.isValid = false;
+    }
+    if (parent.type === 'package') {
+      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+    }
+    return subRows;
+  };
+
+  const getNestedSubRows = (obj, original) => {
+    if (original?.subRows?.length) {
+      original?.subRows.forEach((element) => {
+        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+        getNestedSubRows(obj, element);
+      });
     }
   };
 
   const handlePDF = (type) => {
     setDownlodingFile(type);
-    axiosInstance().get(`${invoice.api}/${invoiceData._id}/pdf`).then(({ data }) => {
-      axiosInstance().get(`user/download?fileName=${data.data.fileName}`, {
-        responseType: "blob",
+    axiosInstance()
+      .get(`${invoice.api}/${invoiceData._id}/pdf`)
+      .then(({ data }) => {
+        axiosInstance()
+          .get(`user/download?fileName=${data.data.fileName}`, {
+            responseType: 'blob'
+          })
+          .then(({ data }) => {
+            if (type === 'Download') {
+              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `Invoice-${invoiceData.invoiceNumber}.pdf`);
+              document.body.appendChild(link);
+              link.click();
+              setDownlodingFile(null);
+            } else if (type === 'Preview') {
+              const file = new Blob([data], { type: 'application/pdf' });
+              const fileURL = URL.createObjectURL(file);
+              const pdfWindow = window.open();
+              pdfWindow.location.href = fileURL;
+              setDownlodingFile(null);
+            } else {
+              const file = new Blob([data], { type: 'application/pdf' });
+              generateBase64forFile(file, 'pdf');
+            }
+          })
+          .catch((err) => {
+            if (type === 'Email') {
+              setSendEmail(true);
+            }
+            toastConfig.setToastConfig(err);
+            setDownlodingFile(null);
+          });
       })
-        .then(({ data }) => {
-          if (type === "Download") {
-            const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `Invoice-${invoiceData.invoiceNumber}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            setDownlodingFile(null);
-          }
-          else if (type === "Preview") {
-            const file = new Blob([data], { type: "application/pdf" });
-            const fileURL = URL.createObjectURL(file);
-            const pdfWindow = window.open();
-            pdfWindow.location.href = fileURL;
-            setDownlodingFile(null);
-          }
-          else {
-            const file = new Blob([data], { type: 'application/pdf' });
-            generateBase64forFile(file, 'pdf');
-          }
-        })
-        .catch((err) => {
-          if (type === "Email") {
-            setSendEmail(true)
-          }
-          toastConfig.setToastConfig(err);
-          setDownlodingFile(null);
-        });
-    }).catch((err) => {
-      if (type === "Email") {
-        setSendEmail(true)
-      }
-      toastConfig.setToastConfig(err);
-      setDownlodingFile(null);
-    })
-  }
+      .catch((err) => {
+        if (type === 'Email') {
+          setSendEmail(true);
+        }
+        toastConfig.setToastConfig(err);
+        setDownlodingFile(null);
+      });
+  };
 
   const generateBase64forFile = (blobData, type) => {
     let reader = new FileReader();
@@ -164,13 +320,15 @@ const Invoice = ({ invoiceData, setNextStep , updateJobStatus, statusOptions, re
     reader.onloadend = function () {
       let base64data: any = reader.result;
       if (type === 'pdf') {
-        const attachments = [{
-          base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-          contentType: base64data.split(';')[0].split(':')[1],
-          name: `Invoice-${invoiceData.invoiceNumber}`
-        }];
-        setEmailAttachments(attachments)
-        setSendEmail(true)
+        const attachments = [
+          {
+            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+            contentType: base64data.split(';')[0].split(':')[1],
+            name: `Invoice-${invoiceData.invoiceNumber}`
+          }
+        ];
+        setEmailAttachments(attachments);
+        setSendEmail(true);
       }
     };
   };
@@ -188,126 +346,142 @@ const Invoice = ({ invoiceData, setNextStep , updateJobStatus, statusOptions, re
       toEmails.push(invoiceData.customerAccount.email);
     }
     setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
-  }
+  };
 
-  return (<>
-    <Box display="flex" justifyContent="space-between" m={1}>
-      <Box display="flex" alignItems="center">
-        {permissions?.invoice?.isRead && (
-          <Button
-            variant="outlined"
-            color="primary"
-            type="button"
-            size="small"
-            disabled={downlodingFile === "Preview" ? true : false}
-            startIcon={isMobile ? '' : <AiFillFilePdf />}
-            onClick={() => handlePDF("Preview")}
-          >
-            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === "Preview" ? "Please wait..." : "Preview"}
-          </Button>
-        )}
-        <Box mx={1} />
-        {permissions?.invoice?.isRead && (
-          <Button
-            variant="outlined"
-            color="primary"
-            type="button"
-            size="small"
-            disabled={downlodingFile === "Download" ? true : false}
-            startIcon={isMobile ? '' : <AiFillFilePdf />}
-            onClick={() => handlePDF("Download")}
-          >
-            {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === "Download" ? "Please wait..." : "Download"}
-          </Button>
-        )}
-        <Box mx={1} />
-        {permissions?.invoice?.isRead && <Button
-          variant="outlined"
-          color="primary"
-          size="small"
-          disabled={downlodingFile === "Email" ? true : false}
-          startIcon={isMobile ? '' : <MdEmail />}
-          onClick={() => {
-            fetchEmailsData()
-            handlePDF("Email")
-          }}
-        >
-          {isMobile ? <MdEmail size={22} /> : downlodingFile === "Email" ? "Please wait..." : `Send Email`}
-        </Button>}
+  return (
+    <>
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex" alignItems="center">
+          {permissions?.invoice?.isRead && (
+            <Button
+              variant="outlined"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={downlodingFile === 'Preview' ? true : false}
+              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              onClick={() => handlePDF('Preview')}
+            >
+              {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === 'Preview' ? 'Please wait...' : 'Preview'}
+            </Button>
+          )}
+          <Box mx={1} />
+          {permissions?.invoice?.isRead && (
+            <Button
+              variant="outlined"
+              color="primary"
+              type="button"
+              size="small"
+              disabled={downlodingFile === 'Download' ? true : false}
+              startIcon={isMobile ? '' : <AiFillFilePdf />}
+              onClick={() => handlePDF('Download')}
+            >
+              {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === 'Download' ? 'Please wait...' : 'Download'}
+            </Button>
+          )}
+          <Box mx={1} />
+          {permissions?.invoice?.isRead && (
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              disabled={downlodingFile === 'Email' ? true : false}
+              startIcon={isMobile ? '' : <MdEmail />}
+              onClick={() => {
+                fetchEmailsData();
+                handlePDF('Email');
+              }}
+            >
+              {isMobile ? <MdEmail size={22} /> : downlodingFile === 'Email' ? 'Please wait...' : `Send Email`}
+            </Button>
+          )}
+        </Box>
       </Box>
-    </Box>
-    <Grid item xs={12} md={12} sm={12} className="mt-3">
-      {columns && frameWorkComponent ?
-        <CustomAgGridEditable
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameWorkComponent}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          allowAction={false}
-          loading={loading}
-          allowSelection={false}
-          isClientSideGrid={true}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchData}
-          fromPurchaseOrderGrid={true}
-          onCellValueChanged={(row) => {
-          }}
-          currency={invoiceData?.currency?.toLowerCase()}
-        />
-        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>
-      }
-    </Grid>
-    {sendEmail && (
-      <Dialog
-        open={sendEmail}
-        fullScreen={fullScreen || isMobile || isTablet}
-        TransitionComponent={CustomDialogTransition}
-        aria-labelledby="customized-dialog-title"
-        maxWidth="md"
-        onClose={() => {
-          setSendEmail(false);
-          setDownlodingFile(null);
-          setFullScreen(false);
-        }}
-        fullWidth
-      >
-        <CreateEmail
-          generatingFile={generatingPdfFile}
-          handleClose={() => {
+      <Grid item xs={12} md={12} sm={12} className="mt-3">
+        {columns && rowsData ? (
+          <>
+            <Box
+              p="6px"
+              zIndex={5}
+              width={
+                stepFullScreen
+                  ? '100%'
+                  : isTabletScreen
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 100px)'
+              }
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+            >
+              <CustomReactTable
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                columns={columns}
+                data={rowsData}
+                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+                hideSelection={true}
+                onSelect={() => {}}
+                childrenProperty="subRows"
+                uniqueKey="_id"
+                renderedFrom="invoice_product_package"
+                isClientSideGrid={true}
+              />
+            </Box>
+          </>
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </Grid>
+      {sendEmail && (
+        <Dialog
+          open={sendEmail}
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="md"
+          onClose={() => {
             setSendEmail(false);
             setDownlodingFile(null);
             setFullScreen(false);
           }}
-          fetchData={() => {
-            setSendEmail(false);
-            setDownlodingFile(null);
-            setFullScreen(false);
-          }}
-          id={invoiceData._id}
-          showESign={true}
-          isQuoteBuilder={true}
-          options={userEmails?.to}
-          cc={userEmails?.cc ?? []}
-          emailId={null}
-          qouteBuilderAttachments={emailAttachments}
-          subject={`${user?.user?.brandName ?? 'Brand'} Invoice - ${invoiceData?.invoiceNumber ?? ''}`}
-          fromQuote={true}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
-          showManimizeMaximize={true}
-          refrenceType="invoice"
-        />
-      </Dialog>
-    )}
-  </>
+          fullWidth
+        >
+          <CreateEmail
+            generatingFile={generatingPdfFile}
+            handleClose={() => {
+              setSendEmail(false);
+              setDownlodingFile(null);
+              setFullScreen(false);
+            }}
+            fetchData={() => {
+              setSendEmail(false);
+              setDownlodingFile(null);
+              setFullScreen(false);
+            }}
+            id={invoiceData._id}
+            showESign={true}
+            isQuoteBuilder={true}
+            options={userEmails?.to}
+            cc={userEmails?.cc ?? []}
+            emailId={null}
+            qouteBuilderAttachments={emailAttachments}
+            subject={`${user?.user?.brandName ?? 'Brand'} Invoice - ${invoiceData?.invoiceNumber ?? ''}`}
+            fromQuote={true}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+            refrenceType="invoice"
+          />
+        </Dialog>
+      )}
+    </>
   );
-}
+};
 
 export default Invoice;
