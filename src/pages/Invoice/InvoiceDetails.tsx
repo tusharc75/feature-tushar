@@ -214,7 +214,7 @@ const InvoiceDetails = () => {
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
 
-        <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+        <div className={`detail-container ${showActivity || isSmallScreen ? 'grid-with-activity' : 'grid-without-activity'}`}>
           <div>
             <div>
               <Paper>
@@ -365,8 +365,11 @@ const InvoiceDetails = () => {
                         <Invoice
                           invoiceData={invoiceData}
                           setNextStep={setNextStep}
+                          currencySymbol={currencySymbol}
                           updateJobStatus={updateJobStatus}
+                          stepFullScreen={stepFullScreen}
                           statusOptions={statusOptions}
+                          showActivity={showActivity}
                           renderedFrom={`${renderedFrom}_grid-5`}
                         />
                       )}
