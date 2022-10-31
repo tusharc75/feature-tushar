@@ -270,6 +270,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
 
   const handlePDF = (type) => {
     setDownlodingFile(type);
+    setGeneratingFile(true);
     axiosInstance()
       .get(`${invoice.api}/${invoiceData._id}/pdf`)
       .then(({ data }) => {
@@ -286,12 +287,14 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
               document.body.appendChild(link);
               link.click();
               setDownlodingFile(null);
+              setGeneratingFile(false);
             } else if (type === 'Preview') {
               const file = new Blob([data], { type: 'application/pdf' });
               const fileURL = URL.createObjectURL(file);
               const pdfWindow = window.open();
               pdfWindow.location.href = fileURL;
               setDownlodingFile(null);
+              setGeneratingFile(false);
             } else {
               const file = new Blob([data], { type: 'application/pdf' });
               generateBase64forFile(file, 'pdf');
@@ -303,6 +306,7 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
             }
             toastConfig.setToastConfig(err);
             setDownlodingFile(null);
+            setGeneratingFile(false);
           });
       })
       .catch((err) => {
