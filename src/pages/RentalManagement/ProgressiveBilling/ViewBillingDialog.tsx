@@ -184,10 +184,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
 
   const fetchProductInventory = async () => {
     var data: any = [];
-    console.log(invoiceData);
 
     const response = await axiosInstance().get(`${invoice.api}/productpackage/${invoiceData._id}`);
-    console.log(response);
     data = response?.data?.data;
 
     setMaterial(JSON.parse(JSON.stringify(data?.material || [])));
