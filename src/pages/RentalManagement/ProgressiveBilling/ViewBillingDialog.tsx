@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
@@ -15,7 +15,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
-import { Edit, ExpandMore } from '@material-ui/icons';
+import { Add, Edit, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { MuiPickersUtilsProvider, KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
@@ -23,6 +23,8 @@ import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
+import InvoiceFacility from 'src/pages/Invoice/Invoice/InvoiceFacility';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -53,139 +55,131 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
   }, [columns]);
 
   const fetchFields = async () => {
-    var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, false);
-    setAllFields(allFields);
-    const coloum: any = [
-      {
-        accessor: 'srno',
-        Header: '#',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
-      },
-      {
-        accessor: 'detail',
-        Header: 'Detail',
-        minWidth: 300,
-        width: 300,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {invoiceData ? <p>{row.original.detail}</p> : <p>{row.original.detail}</p>}
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-              </Box>
-            }
-            {
-              <Chip
-                className="ml-1"
-                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}
-                size="small"
-                color="primary"
-                onClick={() => {
-                  window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                  );
-                }}
-              />
-            }
-          </div>
-        ),
-        Footer: () => {
-          return <>Total</>;
+    try {
+      let data = await fetch_invoice_product_fields(invoiceData?.currency);
+      setAllFields(JSON.parse(JSON.stringify(data)));
+      const coloum: any = [
+        {
+          accessor: 'detail',
+          Header: 'Detail',
+          minWidth: 300,
+          width: 300,
+          Cell: ({ row }) => (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {
+                <p className="text-truncate" title={row.original?.detail}>
+                  {row.original?.detail}
+                </p>
+              }
+            </div>
+          )
         }
-      }
-    ];
-    data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateFormat)}</p> : <NoDataCell />)
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
+      ];
+      data.forEach((element) => {
+        if (element.type === 'date') {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            disableFilters: true,
+            Cell: ({ row }) =>
+              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
           });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
+        } else if (element.fieldName === 'supplierAccount') {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) =>
+              row.original[element.fieldName] ? (
+                <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
+              ) : (
+                <NoDataCell />
+              )
+          });
+        } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
+          if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              let fieldName = element.fieldName + '_' + _unit.toLowerCase();
+              let fieldLabel = element.fieldLabel + ' ' + _unit;
+              coloum.push({
+                accessor: fieldName,
+                Header: fieldLabel,
+                Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
+              });
+            });
+          } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              element.displayCurrency.forEach((_currency) => {
+                let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
+                let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
+                coloum.push({
+                  accessor: fieldName,
+                  Header: fieldLabel,
+                  Cell: ({ row }) =>
+                    row.original[fieldName] ? (
+                      <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                    ) : (
+                      <NoDataCell />
+                    )
+                });
+              });
+            });
+          } else if (element.type === 'currencyAmount') {
             element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
+              let fieldName = element.fieldName + '_' + _currency.toLowerCase();
+              let fieldLabel = element.fieldLabel + ' ' + _currency;
               coloum.push({
                 accessor: fieldName,
                 Header: fieldLabel,
                 Cell: ({ row }) =>
                   row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                    <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                   ) : (
                     <NoDataCell />
                   )
               });
             });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              Footer: (info) => {
-                const total = info?.rows
-                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                return (
-                  <>
-                    {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                  </>
-                );
-              }
-            });
+          }
+        } else {
+          if (element.fieldName === 'qty') {
+            element.fieldName = 'qtyDisplay';
+          }
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
           });
         }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
+      });
+      coloum.forEach((element) => {
+        if (element.accessor.includes('detail')) {
+          element['Footer'] = () => {
+            return <>Total</>;
+          };
+        } else if (element.accessor === 'qtyDisplay') {
+          element['Footer'] = (info) => {
+            const qtyTotal = info.rows
+              .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+              .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+            return <>{qtyTotal}</>;
+          };
+        } else if (element.accessor.includes('finalPrice')) {
+          element['Footer'] = (info) => {
+            const total = info.rows
+              .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+              .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+            return (
+              <>
+                {currencySymbol} {formatAmountWithCurrency(invoiceData?.currency, total)?.amountWithouCurrencyCode ?? total}
+              </>
+            );
+          };
         }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
-    coloum.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
-    setColumns(coloum);
+      });
+      setColumns(coloum);
+      fetchProductInventory();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchProductInventory = async () => {
@@ -316,77 +310,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         ></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            {invoiceData === null && (
-              <>
-                <MuiPickersUtilsProvider utils={MomentUtils}>
-                  <Grid container className={styles.rental_header_layout}>
-                    <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet"></Grid>
-                    <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-                      <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                        <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
-                          <KeyboardDatePicker
-                            autoOk
-                            fullWidth
-                            size="small"
-                            disablePast
-                            variant="inline"
-                            inputVariant="outlined"
-                            value={startDate}
-                            name="startDate"
-                            label="Start Date"
-                            onChange={(date: any) => {
-                              setStartDate(date ? date : null);
-                            }}
-                            format={dateFormat}
-                            InputLabelProps={{
-                              shrink: true
-                            }}
-                            margin="dense"
-                          />
-                          <KeyboardDatePicker
-                            autoOk
-                            fullWidth
-                            size="small"
-                            disablePast
-                            variant="inline"
-                            inputVariant="outlined"
-                            minDate={startDate}
-                            value={endDate}
-                            name="endDate"
-                            label="End Date"
-                            onChange={(date: any) => {
-                              setEndDate(date ? date : null);
-                            }}
-                            format={dateFormat}
-                            InputLabelProps={{
-                              shrink: true
-                            }}
-                            margin="dense"
-                          />
-                          <Grid style={{ display: 'flex', gap: '5px', marginTop: '15px' }}>
-                            <HtmlTooltip title={!Boolean(selectedProducts && selectedProducts.length) ? 'Please select product to apply' : ''}>
-                              <span>
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  disabled={!Boolean(selectedProducts && selectedProducts.length)}
-                                  size="small"
-                                  onClick={() => {
-                                    handleApplyDate();
-                                  }}
-                                >
-                                  Apply
-                                </Button>
-                              </span>
-                            </HtmlTooltip>
-                          </Grid>
-                        </Grid>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </MuiPickersUtilsProvider>
-              </>
-            )}
+            {invoiceData && <InvoiceFacility invoiceData={invoiceData} />}
             {columns && rowsData ? (
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
                 <CustomReactTable
