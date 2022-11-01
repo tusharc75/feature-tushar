@@ -197,9 +197,6 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
       ) : (
         <>
           <div className={styles.content}>
-            <Box className={styles.centeredText}>
-              <Typography>No fields..</Typography>
-            </Box>
             <Box mt={2} className={`${styles.dates} ${styles.fixedBottom}`}>
               <Grid container spacing={2}>
                 {stepData?.startDate ? (
