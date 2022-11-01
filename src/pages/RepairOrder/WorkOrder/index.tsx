@@ -20,12 +20,12 @@ import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { sortBy } from 'lodash';
 
+const alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
 const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen, allowedToEdit, allowedToDelete }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
+  const { state: { user, permissions } }: any = useData();
   const [selectedProducts, setSelectedProducts] = useState([]);
 
   const [columns, setColumns] = useState(null);
@@ -74,26 +74,12 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
             }
             <Chip
               className="ml-1"
-              label={`${row.original.type === 'service'
-                ? 'Service'
-                : row.original.type === 'product'
-                  ? 'Product'
-                  : row.original.type === 'serializedAsset'
-                    ? 'Asset'
-                    : 'Package'
-                }`}
+              label={`${row.original.type === 'service' ? 'Service' : row.original.type === 'product' ? 'Product' : row.original.type === 'serializedAsset' ? 'Asset' : 'Package'}`}
               size="small"
               color="primary"
               onClick={() => {
-                window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'serializedAsset'
-                        ? routes.serializedAsset.path
-                        : routes.packagesDetail.path
-                  }/${row.original.materialId}`
+                window.open(`${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path
+                  : row.original.type === 'serializedAsset' ? routes.serializedAsset.path : routes.packagesDetail.path}/${row.original.materialId}`
                 );
               }}
             />
@@ -227,7 +213,6 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
       parent.status = parent?.workOrder?.status;
       parent.subRows = generateNestedData(data.material, parent);
     });
-
     data?.material?.forEach((element) => {
       if (element?.services?.filter((e) => e?.preWork && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
         setNextStep(false);
@@ -239,7 +224,6 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     setSelectedProducts([]);
   };
 
-  const alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
@@ -247,13 +231,14 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : (productIndex + 1)}`;
-      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow.productDetail?.productName :
-        _subRow.type === 'serializedAsset' ? _subRow.serializedAsset.assetNumber : _subRow.packageDetail?.packageName}`;
+      _subRow.detail = _subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow.productDetail?.productName :
+        _subRow.type === 'serializedAsset' ? _subRow.serializedAsset.assetNumber : _subRow.packageDetail?.packageName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
-      _subRow.isValid = true;
-      _subRow.allowedToDelete = false;
+      _subRow.preWork = _subRow.type === 'service' ? _subRow?.serviceDetail?.preWork : false;
+      _subRow.workOrder = parent?.workOrder;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++
+      _subRow.isValid = true;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -264,40 +249,14 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     return sortBy(subRows, ['type']);
   };
 
-  const getPackageSubRows = (parent, subRowPackage: any) => {
-    const services = parent?.services
-      ?.filter((d) => d.packageId === subRowPackage._id)
-      ?.sort((a, b) => a?.order - b?.order)
-      ?.map((d) => {
-        return {
-          ...d,
-          materialId: d._id,
-          parentId: parent._id,
-          workOrder: parent.workOrder,
-          type: 'service'
-        };
-      });
-    services.forEach((_subRow, j) => {
-      _subRow.srno = subRowPackage.srno + '.' + (j + 1);
-      _subRow.detail = _subRow?.serviceName;
-      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.qty = _subRow?.qty;
-      _subRow.subRows = null;
-    });
-    return services;
-  };
-
   const handleAddService = (ids) => {
     const data: any = {};
     data.serviceIds = ids;
-    axiosInstance()
-      .post(`${workOrder.api}/service/${selectedProducts[0]['workOrder']?._id}`, data)
-      .then(() => {
-        fetchData();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    axiosInstance().post(`${workOrder.api}/service/${selectedProducts[0]['workOrder']?._id}`, data).then(() => {
+      fetchData();
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
   const createWorkorderService = (rows) => {
