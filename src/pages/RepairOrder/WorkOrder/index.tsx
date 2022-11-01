@@ -65,13 +65,11 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original.detail}</p>
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-              </Box>
-            }
+            <Box ml={1} className="d-flex align-items-center">
+              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+              </span>
+            </Box>
             <Chip
               className="ml-1"
               label={`${row.original.type === 'service' ? 'Service' : row.original.type === 'product' ? 'Product' : row.original.type === 'serializedAsset' ? 'Asset' : 'Package'}`}
@@ -120,7 +118,8 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         accessor: 'assignedUsers',
         Header: 'Assigned Users',
         Cell: ({ row }) =>
-          row.original['assignedUsers'] ? <p>{row?.original?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}</p> : <NoDataCell />
+          row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ?
+            <p>{row?.original?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}</p> : <NoDataCell />
       },
       {
         accessor: 'qty',
@@ -137,6 +136,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
       //     )
       // },
     ];
+
     setColumns([...coloum, {
       accessor: 'action',
       Header: '',
@@ -163,6 +163,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         )
       }
     }]);
+
   };
 
   const handleDelete = () => {
@@ -213,13 +214,12 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
       parent.status = parent?.workOrder?.status;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    data?.material?.forEach((element) => {
-      if (element?.services?.filter((e) => e?.preWork && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
-        setNextStep(false);
-      } else {
-        setNextStep(true);
-      }
-    });
+    if (data?.material?.filter((e) => e?.type === 'service' && e?.serviceDetail?.preWork
+      && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
+      setNextStep(false);
+    } else {
+      setNextStep(true);
+    }
     setRowsData(rows);
     setSelectedProducts([]);
   };
