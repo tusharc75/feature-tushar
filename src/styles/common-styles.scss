@@ -93,6 +93,16 @@
     color: var(--white) !important;
 }
 
+.spacing-1{
+    gap: 5px;
+    @media all and (max-width: 768px) {
+        gap: 2px;
+    }
+}
+.spacing-2{
+    gap: 10px;
+}
+
 // $offset: 1;
 // $max: 50;
 
