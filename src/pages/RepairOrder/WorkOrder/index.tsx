@@ -18,6 +18,7 @@ import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { sortBy } from 'lodash';
 
 
 const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen, allowedToEdit, allowedToDelete }) => {
@@ -90,7 +91,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                     : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
+                        ? routes.serializedAsset.path
                         : routes.packagesDetail.path
                   }/${row.original.materialId}`
                 );
@@ -220,12 +221,8 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product'
-        ? parent?.productDetail?.productName
-        : parent.type === 'serializedAsset'
-          ? parent?.serializedAsset?.assetNumber
-          : parent?.packageDetail?.packageName
-        }`;
+      parent.detail = `${parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.type === 'product' ? parent.productDetail?.productName :
+        parent.type === 'serializedAsset' ? parent.serializedAsset.assetNumber : parent.packageDetail?.packageName}`;
       parent.qty = parent.qty;
       parent.status = parent?.workOrder?.status;
       parent.subRows = generateNestedData(data.material, parent);
@@ -242,64 +239,29 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     setSelectedProducts([]);
   };
 
+  const alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+
   const generateNestedData = (material, parent) => {
-
-    const subRows = material.filter((e) => e.parentId === parent._id);
-
-    var services: any = [];
-
-    if (parent?.services && parent?.services?.length) {
-      services = parent?.services?.filter((d) => d.packageId === undefined || d.packageId === null || d.packageId === '')?.sort((a, b) => a?.order - b?.order)?.map((d) => {
-        return {
-          ...d,
-          materialId: d._id,
-          parentId: parent._id,
-          workOrder: parent.workOrder,
-          type: 'service'
-        };
-      });
-    }
-
-    var packages: any = [];
-    if (parent?.packages && parent?.packages?.length) {
-      packages = parent?.packages?.map((d) => {
-        return {
-          ...d,
-          materialId: d._id,
-          parentId: parent._id,
-          workOrder: parent.workOrder,
-          type: 'package'
-        };
-      });
-    }
-
-    var consumable: any = [];
-    if (parent?.consumable && parent?.consumable?.length) {
-      consumable = parent?.consumable?.map((d) => {
-        return {
-          ...d,
-          materialId: d?.product?.optionValue,
-          parentId: parent?._id,
-          workOrder: parent?.workOrder,
-          type: 'product'
-        };
-      });
-    }
-
-    let combinedData = [...subRows, ...packages, ...services, ...consumable];
-
-    combinedData.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail =
-        _subRow?.type === 'service'
-          ? _subRow?.serviceName
-          : _subRow?.type === 'package'
-            ? _subRow?.packageName
-            : _subRow?.productDetail?.productName || _subRow?.product?.optionLabel;
-      _subRow.qty = _subRow.qty;
-      _subRow.subRows = _subRow?.type === 'package' ? getPackageSubRows(parent, _subRow) : generateNestedData(material, _subRow);
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    let productIndex = 0;
+    let serviceIndex = 0;
+    subRows.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : (productIndex + 1)}`;
+      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow.productDetail?.productName :
+        _subRow.type === 'serializedAsset' ? _subRow.serializedAsset.assetNumber : _subRow.packageDetail?.packageName}`;
+      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.isValid = true;
+      _subRow.allowedToDelete = false;
+      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.type === 'service' ? serviceIndex++ : productIndex++
     });
-    return combinedData;
+    if (subRows.length === 0 && parent.type === 'package') {
+      parent.isValid = false;
+    }
+    if (parent.type === 'package') {
+      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+    }
+    return sortBy(subRows, ['type']);
   };
 
   const getPackageSubRows = (parent, subRowPackage: any) => {
