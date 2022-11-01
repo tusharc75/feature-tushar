@@ -25,6 +25,7 @@ const Quotation = ({
   currencySymbol,
   isTabletScreen,
   isSmallScreen,
+  isMobileScreen,
   showActivity,
   renderedFrom,
   stepFullScreen,
@@ -337,7 +338,13 @@ const Quotation = ({
       <Grid container spacing={2}>
         {allowedToEdit && (
           <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              m={1}
+              className={`flex-wrap`}
+              style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
+            >
               <div>
                 <Box display="flex">
                   {permissions?.rentalManagement?.isRead && !isMobile && (
@@ -383,24 +390,26 @@ const Quotation = ({
                   )}
                 </Box>
               </div>
-              <div>
-                {rentalManagementData?.quotationStatus && rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer ? (
-                  <div className="d-flex align-items-center justify-content-center flex-column m-1">
-                    <FcClock size={25} />
-                    <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-                  </div>
-                ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ? (
-                  <div className="d-flex align-items-center justify-content-center flex-column m-1">
-                    <FcOk size={25} />
-                    <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-                  </div>
-                ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.rejectByCustomer ? (
-                  <div className="d-flex align-items-center justify-content-center flex-column m-1">
-                    <FcCancel size={25} />
-                    <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-                  </div>
-                ) : null}
-              </div>
+              {!isMobileScreen && (
+                <div>
+                  {rentalManagementData?.quotationStatus && rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer ? (
+                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
+                      <FcClock size={25} />
+                      <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+                    </div>
+                  ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ? (
+                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
+                      <FcOk size={25} />
+                      <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+                    </div>
+                  ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.rejectByCustomer ? (
+                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
+                      <FcCancel size={25} />
+                      <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+                    </div>
+                  ) : null}
+                </div>
+              )}
               <div>
                 <Box display="flex">
                   {(!rentalManagementData?.quotationStatus || rentalManagementData?.quotationStatus === QUOTATION_STATUS.rejectByCustomer) && (
@@ -431,6 +440,26 @@ const Quotation = ({
                   )}
                 </Box>
               </div>
+              {isMobileScreen && (
+                <div>
+                  {rentalManagementData?.quotationStatus && rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer ? (
+                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
+                      <FcClock size={25} />
+                      <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+                    </div>
+                  ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ? (
+                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
+                      <FcOk size={25} />
+                      <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+                    </div>
+                  ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.rejectByCustomer ? (
+                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
+                      <FcCancel size={25} />
+                      <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </Box>
           </Grid>
         )}
