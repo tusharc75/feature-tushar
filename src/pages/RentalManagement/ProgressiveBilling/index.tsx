@@ -30,7 +30,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
 
   const [createBillDialog, setCreateBillDialog] = useState({ open: false, billData: null });
   const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
-  const [estimateStartDate, setEstimateStartDate] = useState(null);
+  const [latestInvoice, setLatestInvoice] = useState(null);
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -51,40 +51,6 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
 
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  // const columns = [
-  //     { field: 'billNumber', headerName: 'Bill Number', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-  //     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-  //     { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
-  // ];
-
-  // const NameRenderer = (params) => (
-  //     <span
-  //         className="link"
-  //         onClick={() => {
-  //             setCreateBillDialog({ open: true, billData: params.data });;
-  //         }}
-  //     >
-  //         <CustomRenderCell value={params?.value} />
-  //     </span>
-  // );
-
-  // const frameworkComponents = {
-  //     nameRenderer: NameRenderer,
-  //     commonRenderer: CommonRenderer,
-  //     createdByRenderer: CreatedByRenderer,
-  //     updatedByRenderer: UpdatedByRenderer,
-  // };
-  // const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-
-  // if (columnState) {
-  //     columns.forEach((item) => {
-  //         columnState.forEach((d) => {
-  //             if (d.colId === item.field) {
-  //                 item.show = !d.hide;
-  //             }
-  //         });
-  //     });
-  // }
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -130,7 +96,6 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
     staticFields.forEach((field) => {
       columns.push(checkStaticField(routes.projectSales.title, field));
     });
-    console.log(columns);
     setColumns([...columns]);
 
     if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
@@ -253,6 +218,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
           finalObject['isChecked'] = false;
           return finalObject;
         });
+        setLatestInvoice(data[0]?._id);
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -309,7 +275,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
           rentalManagementData={rentalManagementData}
           currencySymbol={currencySymbol}
           billData={createBillDialog.billData}
-          estimateStartDate={estimateStartDate}
+          latestInvoice={latestInvoice}
           onClose={() => {
             setCreateBillDialog({ open: false, billData: null });
           }}
@@ -324,7 +290,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
           rentalManagementData={rentalManagementData}
           invoiceData={viewBillDialog?.invoiceData}
           currencySymbol={currencySymbol}
-          estimateStartDate={estimateStartDate}
+          estimateStartDate={null}
           onClose={() => {
             setViewBillDialog({ open: false, invoiceData: null });
           }}
