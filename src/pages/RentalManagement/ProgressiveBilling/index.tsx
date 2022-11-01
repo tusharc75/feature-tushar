@@ -1,139 +1,340 @@
-import { Box, Button, Grid } from "@material-ui/core";
-import { useContext, useEffect, useReducer, useState } from "react";
-import axiosInstance from "src/axios/axiosInstance";
-import CustomAgGrid, { intialState, reducer } from "src/components/AgGridComponents/CustomAgGrid";
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from "src/components/AgGridComponents/CustomAgGridCellRenderers";
-import CustomRenderCell from "src/components/Helpers/CustomRenderCell";
-import { gridLoadingTimeout, prepareDataForGrid, rentalManagement } from "src/constants/helpers";
-import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import CreateBillingDialog from "./CreateBillingDialog";
+import { Box, Button, Grid } from '@material-ui/core';
+import { useContext, useEffect, useReducer, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
+import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
+import routes from 'src/components/Helpers/Routes';
+import { checkStaticField, getColumnData, getFrameworkComponents, getStaticFields } from 'src/constants/columns';
+import {
+  customerAccount,
+  gridLoadingTimeout,
+  invoice,
+  isObjectEmpty,
+  prepareDataForGrid,
+  rentalManagement,
+  supplierAccount
+} from 'src/constants/helpers';
+import useColumns from 'src/constants/useColumns';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import CreateBillingDialog from './CreateBillingDialog';
+import { Link, useHistory } from 'react-router-dom';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ViewBillingDialog from './ViewBillingDialog';
 
 const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) => {
+  const renderedFrom = 'ProgressiveBillingGrid';
+  const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
 
-    const renderedFrom = "ProgressiveBillingGrid";
-    const toastConfig = useContext(CustomToastContext);
-    const [createBillDialog, setCreateBillDialog] = useState({ open: false, billData: null });
-    const [estimateStartDate, setEstimateStartDate] = useState(null);
+  const [createBillDialog, setCreateBillDialog] = useState({ open: false, billData: null });
+  const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
+  const [estimateStartDate, setEstimateStartDate] = useState(null);
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-    const [gridApi, setGridApi] = useState(null);
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { getColumnData } = useColumns();
+  const [frameworkComponent, setFrameworkComponent] = useState({});
+  const [columns, setColumns] = useState(null);
+  const [renderCount, setRenderCount] = useState(0);
+  const [selectedType, setSelectedType] = useState(1);
+  const [accountDetails, setAccountDetails] = useState({
+    accountId: history.location?.state?.accountId,
+    accountName: history.location?.state?.accountName,
+    resource: history.location?.state?.resource
+  });
 
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-    const columns = [
-        { field: 'billNumber', headerName: 'Bill Number', show: true, disabled: true, cellRenderer: 'nameRenderer' },
-        { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
-        { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
-    ];
+  // const columns = [
+  //     { field: 'billNumber', headerName: 'Bill Number', show: true, disabled: true, cellRenderer: 'nameRenderer' },
+  //     { field: 'createdBy', headerName: 'Created By', show: true, cellRenderer: 'createdByRenderer' },
+  //     { field: 'updatedBy', headerName: 'Updated By', show: true, cellRenderer: 'updatedByRenderer' }
+  // ];
 
-    const NameRenderer = (params) => (
-        <span
-            className="link"
-            onClick={() => {
-                setCreateBillDialog({ open: true, billData: params.data });;
-            }}
-        >
-            <CustomRenderCell value={params?.value} />
-        </span>
-    );
+  // const NameRenderer = (params) => (
+  //     <span
+  //         className="link"
+  //         onClick={() => {
+  //             setCreateBillDialog({ open: true, billData: params.data });;
+  //         }}
+  //     >
+  //         <CustomRenderCell value={params?.value} />
+  //     </span>
+  // );
 
-    const frameworkComponents = {
-        nameRenderer: NameRenderer,
-        commonRenderer: CommonRenderer,
-        createdByRenderer: CreatedByRenderer,
-        updatedByRenderer: UpdatedByRenderer,
-    };
-    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  // const frameworkComponents = {
+  //     nameRenderer: NameRenderer,
+  //     commonRenderer: CommonRenderer,
+  //     createdByRenderer: CreatedByRenderer,
+  //     updatedByRenderer: UpdatedByRenderer,
+  // };
+  // const columnState = JSON.parse(localStorage.getItem(renderedFrom));
 
-    if (columnState) {
-        columns.forEach((item) => {
-            columnState.forEach((d) => {
-                if (d.colId === item.field) {
-                    item.show = !d.hide;
-                }
-            });
-        });
-    }
-    useEffect(() => {
-        fetchBilling()
-    }, []);
+  // if (columnState) {
+  //     columns.forEach((item) => {
+  //         columnState.forEach((d) => {
+  //             if (d.colId === item.field) {
+  //                 item.show = !d.hide;
+  //             }
+  //         });
+  //     });
+  // }
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
 
-    const fetchBilling = async () => {
-        dispatch({ type: 'loading', loading: true });
-
-        if (gridApi) {
-            gridApi.setRowData([]);
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=Invoice`);
+    data = response?.data?.data;
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      if (o?.fieldData?.fieldName === 'invoiceNumber') {
+        columns = [
+          ...columns,
+          {
+            ...o?.fieldData,
+            pivotIndex: 0,
+            field: o?.fieldData?.fieldName,
+            headerName: o?.fieldData?.fieldLabel,
+            show: true,
+            disabled: true,
+            cellRenderer: 'invoiceMaterialRenderer'
+          }
+        ];
+      } else {
+        let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.invoiceDetail.path);
+        if (currentColumn !== null) {
+          columns = [...columns, currentColumn?.columnData];
+          if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+            rendererNames.push(currentColumn?.rendererName);
+          }
         }
-
-        axiosInstance()
-            .get(`${rentalManagement.api}/${rentalId}/progressive-billing`)
-            .then(({ data: { data, count } }) => {
-                let rows = data?.progressiveBilling.map((u) => {
-                    let finalObject = prepareDataForGrid(u);
-                    return {
-                        ...finalObject,
-                    };
-                });
-                if (data?.progressiveBilling.length > 0) {
-                    setEstimateStartDate(data?.progressiveBilling[0].material[0]?.estimateEndDate)
-                }
-                dispatch({ type: 'initialize', data: rows, count: count });
-                setTimeout(() => {
-                    dispatch({ type: 'loading', loading: false });
-                }, gridLoadingTimeout);
-            })
-            .catch((err) => {
-                toastConfig.setToastConfig(err);
-                dispatch({ type: 'loading', loading: false });
-            });
-        // eslint-disable-next-line
+      }
+      return o?.fieldData;
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      invoiceMaterialRenderer: InvoiceMaterialRenderer
     };
+    setFrameworkComponent({ ...tempFrameworkComponent });
+    let staticFields = getStaticFields();
+    staticFields.forEach((field) => {
+      columns.push(checkStaticField(routes.projectSales.title, field));
+    });
+    console.log(columns);
+    setColumns([...columns]);
 
-    return (
-        <>
-            <Box display="flex" justifyContent="flex-end" >
-                <Box display="flex" alignItems="center" pt={2} pr={2}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => setCreateBillDialog({ open: true, billData: null })}
-                        aria-controls="action-menu"
-                    >
-                        Create Billing
-                    </Button>
-                </Box>
-            </Box>
-            <Grid item xs={12} md={12} sm={12} className="mt-3">
-                <CustomAgGrid
-                    columns={columns}
-                    dataRows={dataRows}
-                    frameworkComponents={frameworkComponents}
-                    setGridApi={setGridApi}
-                    dispatch={dispatch}
-                    rowCount={rowCount}
-                    limit={limit}
-                    pageSizes={pageSizes}
-                    page={page}
-                    actionWidth={100}
-                    loading={loading}
-                    renderedFrom={renderedFrom}
-                    allowSelection={false}
-                    allowAction={false}
-                    isClientSideGrid={true}
-                />
-            </Grid>
-            {createBillDialog.open && <CreateBillingDialog
-                rentalManagementData={rentalManagementData}
-                currencySymbol={currencySymbol}
-                billData={createBillDialog.billData}
-                estimateStartDate={estimateStartDate}
-                onClose={() => { setCreateBillDialog({ open: false, billData: null }) }}
-                onSuccess={() => {
-                    fetchBilling()
-                    setCreateBillDialog({ open: false, billData: null })
-                }} />}
-        </>
-    );
-}
+    if (JSON.parse(sessionStorage.getItem('filters')) !== null) {
+      let savedFilter = JSON.parse(sessionStorage.getItem('filters'));
+      dispatch({ type: 'filter', filters: savedFilter });
+    }
+  };
+
+  const InvoiceMaterialRenderer = (params) => (
+    <span
+      className="link"
+      onClick={() => {
+        setViewBillDialog({ open: true, invoiceData: params.data });
+      }}
+    >
+      <CustomRenderCell value={params?.value} />
+    </span>
+  );
+
+  useEffect(() => {
+    fetchBilling();
+  }, [page, limit, filters, sorting]);
+
+  const replaceFieldName = (field) => {
+    switch (field) {
+      case 'createdBy':
+        return 'createdBy.user.concatedName';
+
+      case 'updatedBy':
+        return 'updatedBy.user.concatedName';
+
+      default:
+        return field;
+    }
+  };
+
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case 'owner':
+        return 'owner.optionLabel';
+
+      case 'customerAccount':
+        return 'customerAccount.optionLabel';
+
+      case 'supplierAccountName':
+        return 'supplierAccountName.optionLabel';
+
+      default:
+        return field;
+    }
+  };
+
+  const getQueryString = (isExport = false) => {
+    let deepFilter = `?page=${page}&limit=${limit}&filterInvoice=${selectedType}&rentalJob=${rentalManagementData?._id}`;
+    if (isExport) {
+      deepFilter = `filterInvoice=${selectedType}`;
+    }
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
+    }
+    if (accountDetails.accountId) {
+      if (accountDetails.resource === customerAccount.accountResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          {
+            field: replaceFieldName('customerAccount'),
+            term: accountDetails.accountId
+          }
+        ])}`;
+      } else if (accountDetails.resource === supplierAccount.accountResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          {
+            field: replaceFieldName('supplierAccountName'),
+            term: { $in: [accountDetails.accountId] }
+          }
+        ])}`;
+      }
+    }
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).forEach((field) => {
+        updatedFilters.push({
+          field: replaceFieldName(field),
+          term: filters[field].filter
+        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
+    }
+
+    return deepFilter;
+  };
+
+  const fetchBilling = async () => {
+    dispatch({ type: 'loading', loading: true });
+    const queryString = getQueryString();
+
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+
+    await axiosInstance()
+      .get(`${invoice.api}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        dispatch({ type: 'loading', loading: false });
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  return (
+    <>
+      <Box display="flex" justifyContent="flex-end">
+        <Box display="flex" alignItems="center" pt={2} pr={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => setCreateBillDialog({ open: true, billData: null })}
+            aria-controls="action-menu"
+          >
+            Create Billing
+          </Button>
+        </Box>
+      </Box>
+      <Grid item xs={12} md={12} sm={12} className="mt-3">
+        {columns?.length ? (
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponent}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={100}
+            loading={loading}
+            renderedFrom={renderedFrom}
+            allowSelection={false}
+            allowAction={false}
+            isClientSideGrid={true}
+          />
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </Grid>
+      {createBillDialog.open && (
+        <CreateBillingDialog
+          rentalManagementData={rentalManagementData}
+          currencySymbol={currencySymbol}
+          billData={createBillDialog.billData}
+          estimateStartDate={estimateStartDate}
+          onClose={() => {
+            setCreateBillDialog({ open: false, billData: null });
+          }}
+          onSuccess={() => {
+            setCreateBillDialog({ open: false, billData: null });
+            fetchBilling();
+          }}
+        />
+      )}
+      {viewBillDialog.open && (
+        <ViewBillingDialog
+          rentalManagementData={rentalManagementData}
+          invoiceData={viewBillDialog?.invoiceData}
+          currencySymbol={currencySymbol}
+          estimateStartDate={estimateStartDate}
+          onClose={() => {
+            setViewBillDialog({ open: false, invoiceData: null });
+          }}
+          onSuccess={() => {
+            setViewBillDialog({ open: false, invoiceData: null });
+            fetchBilling();
+          }}
+        />
+      )}
+    </>
+  );
+};
 export default ProgressiveBilling;
