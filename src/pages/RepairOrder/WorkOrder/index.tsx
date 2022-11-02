@@ -487,10 +487,10 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                 services
                   ?.filter((e) => e.type === 'service')
                   ?.map((d) => {
-                    return { _id: d?.uniqueId, name: d?.serviceName, order: d?.order, preWork: d?.preWork };
+                    return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
                   }) || []
               }
-              title={'Arrange'}
+              title={'Arrange Services'}
               handleClose={() => setArrangeView(false)}
               handleSubmit={(data) => handleArrangeUpdate(data, services[0].workOrder?._id)}
               loading={false}
