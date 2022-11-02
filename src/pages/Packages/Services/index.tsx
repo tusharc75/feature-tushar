@@ -147,7 +147,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       delete e.name;
     });
     axiosInstance()
-      .put(`${packages.api}/material/${packageId}/order`, {
+      .put(`${packages.api}/${packageId}/services/order`, {
         packageType: packageData?.packageType,
         data: rows || []
       })
@@ -179,7 +179,7 @@ const ServiceTable = ({ packageId, packageData }) => {
           <ImportExportLinks
             permissions={permissions?.packages}
             module="packages-products"
-            api={`${packages.api}/material`}
+            api={`${packages.api}/${packageId}/services`}
             afterImportCompleted={() => {
               fetchData();
             }}
