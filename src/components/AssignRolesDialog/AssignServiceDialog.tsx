@@ -42,7 +42,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
   const [columns, setColumns] = useState([]);
 
   const defaultColumns = [
-    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
+    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true, filter: false, sortable: false }
   ];
   const { getColumnData } = useColumns();
 
