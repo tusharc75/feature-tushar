@@ -154,7 +154,6 @@ function Dashboard() {
   return (
     <Fragment>
       <div className={`content-wrapper ${styles.main} ${styles.gridLayout}`}>
-        {/* search section */}
         <div className={styles.searchContainer}>
           <div className={`${styles.search_section}`}>
             <div className={`${styles.search_input}`}>
@@ -185,8 +184,6 @@ function Dashboard() {
             Filter
           </Button> */}
         </div>
-
-        {/* Hero section */}
         {search.trim() === '' && (
           <div className={styles.heroContainer}>
             <div className={`d-flex flex-wrap align-items-center justify-content-center ${styles.heroContent}`}>
@@ -200,8 +197,6 @@ function Dashboard() {
             </div>
           </div>
         )}
-
-        {/* card and results section */}
         <div className={`${styles.cardsSection} ${search.trim() === '' ? styles.heroContainer : ''}`}>
           {search.trim() === '' ? (
             <div className={`${styles.cardsContainer}`}>
@@ -274,7 +269,6 @@ function Dashboard() {
             </div>
           )}
         </div>
-        {/* sidebar section */}
         <div className={styles.sidebarContent}>
           <div className={styles.iconContainer}>
             <img src={SVG(IconConst.SIDEBAR_COG_ICON)} alt="" aria-hidden />
@@ -284,10 +278,8 @@ function Dashboard() {
             <Typography variant="body2">List of all product and category setups</Typography>
           </div>
           <div className={styles.links}>
-            <Link to={'#'}>Product Master</Link>
-            <Link to={'#'}>Pricing Setup</Link>
-            <Link to={'#'}>Lead Time Master</Link>
-            <Link to={'#'}>Product Master</Link>
+            <Link to={'/product'}>Product Master</Link>
+            <Link to={'/product-category'}>Product Categories</Link>
           </div>
         </div>
       </div>
