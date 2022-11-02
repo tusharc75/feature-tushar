@@ -330,13 +330,13 @@ const ServiceMaster = (props: Props) => {
               </Button>
             ) : null}
             <Button
-              variant={isMobile && !isTablet ? 'text' : 'contained'}
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="default"
               size="small"
               onClick={openActions}
               disabled={selectedRecords.length ? false : true}
               aria-controls="action-menu"
-              style={{marginLeft:'0.6rem'}}
+              style={{ marginLeft: '0.6rem' }}
             >
               {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
             </Button>
@@ -359,19 +359,19 @@ const ServiceMaster = (props: Props) => {
                 onClick={() => {
                   handleUpdate({
                     ids: selectedRecords.map((d) => d._id),
-                    default:true,
+                    default: true,
                   })
                   closeActions()
                 }}
               >Set Default</MenuItem>
               <MenuItem
-              onClick={() => {
-                handleUpdate({
-                  ids: selectedRecords.map((d) => d._id),
-                  default: false,
-                })
-                closeActions()
-              }}
+                onClick={() => {
+                  handleUpdate({
+                    ids: selectedRecords.map((d) => d._id),
+                    default: false,
+                  })
+                  closeActions()
+                }}
               >Remove Default</MenuItem>
             </Menu>
           </div>
@@ -390,9 +390,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => {}}
+            onEdit={() => { }}
             extraParamsToCheckDelete={false}
-            onDelete={() => {}}
+            onDelete={() => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -400,7 +400,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (

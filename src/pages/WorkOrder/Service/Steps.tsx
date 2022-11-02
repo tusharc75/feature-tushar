@@ -129,7 +129,8 @@ const Service = ({
   setDisableCompleteFail,
   setOpenCompleteDialog,
   serviceIndex,
-  fetchService
+  fetchService,
+  addStep
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -143,7 +144,7 @@ const Service = ({
 
   useEffect(() => {
     axiosInstance()
-      .get(`${workOrder.api}/service/detail/${serviceId}`)
+      .get(`${workOrder.api}/service/detail/${serviceId}/${workOrderId}`)
       .then(({ data: { data } }) => {
         setServiceDetails(data);
         const steps = data?.steps?.map((d) => d.stepName);
@@ -377,8 +378,12 @@ const Service = ({
   };
 
   return stepList ? (
-    stepList?.length ?
-      <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}>
+    stepList?.length ? (
+      <Box
+        className={classes.mainContainer}
+        sx={{ position: 'relative', overflow: 'hidden' }}
+        style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}
+      >
         <div className={classes.root}>
           {serviceDetails?.steps?.map((step, index) => {
             const { stepData, isStepValid } = getFields(step);
@@ -393,13 +398,15 @@ const Service = ({
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
                 className={`${classes.accordionHeading} 
-              ${Boolean(stepData?.passFailStatus)
-                    ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                      ? classes.green
-                      : ''
+              ${
+                Boolean(stepData?.passFailStatus)
+                  ? `${
+                      Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                        ? classes.green
+                        : ''
                     } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                    : classes.white
-                  }
+                  : classes.white
+              }
               
               `}
                 onClick={(e) => {
@@ -511,11 +518,11 @@ const Service = ({
             message={
               addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
                 ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
-                addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
-                  ? `On pass, a new service has been added in compliance with the configuration ` +
                   addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                  : `You have to add addional services based on your recent action`
+                : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
+                ? `On pass, a new service has been added in compliance with the configuration ` +
+                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+                : `You have to add addional services based on your recent action`
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
@@ -531,9 +538,16 @@ const Service = ({
             }}
           />
         )}
-      </Box> : <Box p={2} height={500} bgcolor="rgba(242, 243, 247, 0.6)">
-        <Typography>There are no added steps.</Typography>
       </Box>
+    ) : (
+      <Box p={2} height={500} bgcolor="rgba(242, 243, 247, 0.6)" textAlign="center">
+        <Button variant="contained" color="primary" onClick={addStep}>
+          Add Step
+        </Button>
+
+        {/* <Typography>There are no added steps.</Typography> */}
+      </Box>
+    )
   ) : (
     <Box p={2} height={500} bgcolor="white">
       <CommonSkeleton lenArray={[...Array(10).keys()]} />

@@ -1,13 +1,13 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, ListItemText } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AddExistingProductInventory from './AddExistingProductInventory';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
@@ -15,7 +15,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import moment from 'moment';
 import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import RentalJobQtyDialog from './RentalJobQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
@@ -24,8 +23,10 @@ import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 
-const Productpackage = ({
+const Services = ({
   rentalManagementData,
   setNextStep,
   currencySymbol,
@@ -35,7 +36,7 @@ const Productpackage = ({
   renderedFrom,
   stepFullScreen,
   allowedToEdit
-}) => {
+}: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -107,9 +108,9 @@ const Productpackage = ({
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
                 {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title="Add Products">
+                  <HtmlTooltip title="Add Service">
                     <IconButton
-                      onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
+                      onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })}
                       size="small"
                       color="primary"
                     >
@@ -122,12 +123,28 @@ const Productpackage = ({
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}
+                label={`${
+                  row.original.type === 'product'
+                    ? !row.original.serializedProduct
+                      ? 'Non-Serialized Product'
+                      : 'Product'
+                    : row.original.type === 'service'
+                    ? 'Service'
+                    : 'Package'
+                }`}
                 size="small"
                 color="primary"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                    `${
+                      row.original.type === 'product'
+                        ? routes.productDetail.path
+                        : row.original.type === 'package'
+                        ? routes.packagesDetail.path
+                        : row.original.type === 'service'
+                        ? routes.serviceMasterDetail.path
+                        : routes.packagesDetail.path
+                    }/${row.original.materialId}`
                   );
                 }}
               />
@@ -260,7 +277,7 @@ const Productpackage = ({
   };
 
   const fetchProductInventory = async () => {
-    setNextStep(false);
+    // setNextStep(false);
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
@@ -275,21 +292,18 @@ const Productpackage = ({
       inventory = data.inventory;
       nonSerializeAsset = data.nonSerializeAsset;
     }
-    let rows = [];
-    data.material
-      .filter((e) => e.parentId === null)
-      .filter((e) => e.type !== 'service')
-      .forEach((e) => {
-        if (e.type !== 'package') {
-          rows.push(e);
-        } else if (e.packageDetail?.packageType !== 'Service') {
-          rows.push(e);
-        }
-      });
+    let rows = data.material.filter((e) => e.parentId === null);
+    rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -301,9 +315,9 @@ const Productpackage = ({
     });
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
+      // setNextStep(false);
     } else {
-      setNextStep(true);
+      // setNextStep(true);
     }
 
     setRowsData(rows);
@@ -314,7 +328,13 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow?.productDetail?.productName;
+      _subRow.detail =
+        _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName;
+
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -446,8 +466,6 @@ const Productpackage = ({
   };
 
   const calculatePrice = (arr: any[]) => {
-    //materialType can be =["product","packages","productCategory"]
-    //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
     if (rentalManagementData) {
       const data: any = {};
       data.conditionType = ['Rent'];
@@ -505,7 +523,7 @@ const Productpackage = ({
           <Grid item xs={12} md={12} sm={12}>
             <Box display="flex" justifyContent="space-between" m={1}>
               <Box display="flex">
-                {permissions?.product?.isRead && (
+                {permissions?.serviceMaster?.isRead && (
                   <Button
                     color="primary"
                     size="small"
@@ -513,10 +531,10 @@ const Productpackage = ({
                     variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                     style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
                     onClick={() => {
-                      setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
+                      setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
                     }}
                   >
-                    {isMobile && !isTablet ? 'Product' : `Add ${routes.product.title}`}
+                    {isMobile && !isTablet ? 'Service' : `Add ${routes.serviceMaster.title}`}
                   </Button>
                 )}
                 <Box mx={isMobile ? 0.5 : 1} />
@@ -535,12 +553,16 @@ const Productpackage = ({
                   </Button>
                 )}
               </Box>
+
               <Box display="flex">
                 <Button
-                  variant="outlined"
+                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                   color="primary"
                   size="small"
-                  id="demo-positioned-button"
+                  style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
+                  aria-controls={open ? 'demo-positioned-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? 'true' : undefined}
                   onClick={handleClick}
                   disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                   endIcon={<BiChevronDown />}
@@ -549,18 +571,14 @@ const Productpackage = ({
                 </Button>
                 <Menu
                   anchorEl={anchorEl}
-                  keepMounted
                   open={open}
-                  onClose={handleClose}
                   getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
-                    horizontal: 'right',
+                    horizontal: 'left'
                   }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
+                  // className={isMobile ? 'add-product-action-menu-mobile' : 'add-product-action-menu'}
+                  onClose={handleClose}
                 >
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                     <MenuItem
@@ -569,7 +587,7 @@ const Productpackage = ({
                         handleClose();
                       }}
                     >
-                      Bulk Edit
+                      Bulk edit
                     </MenuItem>
                   </HtmlTooltip>
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
@@ -596,12 +614,12 @@ const Productpackage = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -634,6 +652,20 @@ const Productpackage = ({
           okBtnLoading={isDeleting}
         />
       )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
+        <AssignPackageDialog
+          referenceType={renderedFrom}
+          onSuccess={(packages) => {
+            // console.log(packages)
+            handleAdd(packages.map((d) => ({ ...d, detail: d.packageName })));
+          }}
+          handleClose={() => {
+            setAddExistingProductDialog({ open: false, type: '', parentId: null });
+          }}
+          packageType="service"
+          ids={rowsData.filter((d) => d.type === 'pacakge').map((d) => d?.materialId)}
+        />
+      )}
       {isProductEdit.open && (
         <RentalJobQtyDialog
           calculatePrice={calculatePrice}
@@ -650,21 +682,21 @@ const Productpackage = ({
           loading={isUpdating}
         />
       )}
-      {addExistingProductDialog.open && (
-        <AddExistingProductInventory
-          renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAdd}
-          handleProductInventoryClose={() => {
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
+        <AssignServiceDialog
+          reference={'service'}
+          onSuccess={(services) => {
+            // console.log(services)
+            handleAdd(services.map((d) => ({ ...d, detail: d.serviceName })));
+          }}
+          handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          productInventory={[]}
-          type={addExistingProductDialog.type}
-          rentalManagementData={rentalManagementData}
+          ids={rowsData.filter((d) => d.type === 'service').map((d) => d?.materialId)}
         />
       )}
     </Fragment>
   );
 };
 
-export default Productpackage;
+export default Services;

@@ -42,7 +42,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
   const [columns, setColumns] = useState([]);
 
   const defaultColumns = [
-    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
+    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true, filter: false, sortable: false }
   ];
   const { getColumnData } = useColumns();
 
@@ -72,7 +72,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packages.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.serviceMasterDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -179,6 +179,8 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
           setAssigning(false);
           toastConfig.setToastConfig(err);
         });
+    } else if(reference === 'service'){
+      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
     } else {
       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) })));
     }
