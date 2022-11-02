@@ -553,14 +553,18 @@ const Productpackage = ({
                   Actions
                 </Button>
                 <Menu
-                  id="basic-menu"
                   anchorEl={anchorEl}
                   open={open}
                   onClose={handleClose}
                   MenuListProps={{
                     'aria-labelledby': 'basic-button'
                   }}
-                  className={isMobile ? 'add-product-action-menu-mobile' : 'add-product-action-menu'}
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  // className={isMobile ? 'add-product-action-menu-mobile' : 'add-product-action-menu'}
                 >
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                     <MenuItem
