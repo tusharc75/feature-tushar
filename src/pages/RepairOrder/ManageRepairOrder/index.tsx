@@ -597,7 +597,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        disabled={(!repairOrderId && field.disableOnEdit)}
+                                        disabled={(repairOrderId && field.disableOnEdit)}
                                         onOpen={() => {
                                           onOwnerDropdownOpen(
                                             values["collaborator"]
@@ -636,7 +636,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                       ? <FormTypes
                                         repairOrderId={repairOrderId}
                                         {...field}
-                                        disabled={(!repairOrderId && field.disableOnEdit)}
+                                        disabled={(repairOrderId && field.disableOnEdit)}
                                         values={values}
                                         fieldData={field}
                                         errors={errors}
@@ -659,7 +659,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                         ? <FormTypes
                                           repairOrderId={repairOrderId}
                                           {...field}
-                                          disabled={(!repairOrderId && field.disableOnEdit)}
+                                          disabled={(repairOrderId && field.disableOnEdit)}
                                           values={values}
                                           fieldData={field}
                                           errors={errors}
@@ -688,7 +688,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                   repairOrderId={repairOrderId}
                                                   {...field}
                                                   fieldData={field}
-                                                  disabled={disablePlantIfAssetAdded || (!repairOrderId && field.disableOnEdit)}
+                                                  disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
                                                   values={values}
                                                   errors={errors}
                                                   touched={touched}
@@ -717,10 +717,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                       onClick={() => {
                                                         setShowAddWarehouseDialog(true);
                                                       }}
-                                                      disabled={disablePlantIfAssetAdded || (!repairOrderId && field.disableOnEdit)}
+                                                      disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
                                                       size="small"
                                                     >
-                                                      <AddIcon color={disablePlantIfAssetAdded || (!repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                      <AddIcon color={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
                                                     </IconButton>
                                                   </Tooltip>
                                                 </Grid>
@@ -745,7 +745,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                               repairOrderId={repairOrderId}
                                               {...field}
                                               fieldData={field}
-                                              disabled={(!repairOrderId && field.disableOnEdit) || (field.fieldName === "repairOrderNumber")}
+                                              disabled={(repairOrderId && field.disableOnEdit) || (field.fieldName === "repairOrderNumber")}
                                               values={values}
                                               errors={errors}
                                               touched={touched}

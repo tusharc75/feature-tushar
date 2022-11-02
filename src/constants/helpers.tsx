@@ -51,7 +51,9 @@ export const quotationProcessSteps = ['Add Products', 'Services and Consumables'
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
-  'Services and Consumables',
+  'Add Services',
+  'Add Consumables',
+  // 'Consumables',
   'Quotation',
   'Serialized Asset',
   'Loading Ticket',
@@ -61,7 +63,7 @@ export const rentalManagementSteps = [
 export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
-export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Invoice'];
+export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Invoice'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -1689,6 +1691,27 @@ export const INVENTORY_STATUS = {
   needRepair: 'Need Repair',
   needRecert: 'Need Recert'
 };
+
+
+export const INVENTORY_HISTORY_TYPE = {
+  rental: 'Rental',
+  repair: 'Repair',
+  deliveryTicket: 'Delivery Ticket',
+  loadingTicket: 'Loading Ticket',
+  receivingTicket: 'Receiving Ticket',
+  returnTicket: 'Return Ticket',
+  purchaseOrder: 'Purchase Order',
+  inventory: 'Inventory',
+  serializedAssets: 'Serialized Assets',
+  transferAssets: 'Transfer Assets',
+  salesOrder: 'Sales Order',
+  sublease: 'Sublease',
+  bulkAssetCreation: 'Bulk Asset Creation',
+  transferInventory: 'Transfer Inventory',
+  inventoryToAsset: 'Inventory to Asset',
+  quotation: 'Quotation',
+  invoice: 'Invoice'
+}
 
 export const DELIVERY_TICKET_STATUS = {
   new: 'New',

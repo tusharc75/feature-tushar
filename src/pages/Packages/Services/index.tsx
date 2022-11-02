@@ -21,7 +21,7 @@ import { camelCase } from 'lodash';
 import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 
-const ProductsTable = ({ packageId, packageData }) => {
+const ServiceTable = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -31,10 +31,10 @@ const ProductsTable = ({ packageId, packageData }) => {
   }: any = useData();
 
   const [columns, setColumns] = useState([]);
-  const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
+  const [showServiceConfirmBox, setShowServiceConfirmBox] = useState(false);
   const [gridApi, setGridApi] = useState(null);
-  const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
-  const [isRemovingProducts, setRemovingProducts] = useState(false);
+  const [showServiceAssignDialog, setShowServiceAssignDialog] = useState(false);
+  const [isRemovingServices, setRemovingServices] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const { getColumnData } = useColumns();
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -53,7 +53,7 @@ const ProductsTable = ({ packageId, packageData }) => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${packages.api}/${packageId}/products`)
+      .get(`${packages.api}/${packageId}/services`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
@@ -78,12 +78,11 @@ const ProductsTable = ({ packageId, packageData }) => {
       });
   };
 
-  // needed in future
-  // const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
+  const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=Product`)
+      .get(`/field?resource=Service Master`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
@@ -108,13 +107,13 @@ const ProductsTable = ({ packageId, packageData }) => {
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer
         });
-        setColumns([...columns]);
+        setColumns([...defaultColumns, ...columns]);
       });
   };
 
   const handleUpdateQuantity = (row) => {
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products`, {
+      .put(`${packages.api}/${packageId}/services`, {
         ids: [row.data._id],
         qty: Number(row.data.qty)
       })
@@ -125,18 +124,41 @@ const ProductsTable = ({ packageId, packageData }) => {
   };
 
   const removeProducts = () => {
-    setRemovingProducts(true);
+    setRemovingServices(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products/remove`, { ids: Ids })
+      .put(`${packages.api}/${packageId}/services/remove`, { ids: Ids })
       .then(() => {
-        setRemovingProducts(false);
-        setShowProductConfirmBox(false);
+        setRemovingServices(false);
+        setShowServiceConfirmBox(false);
         fetchData();
       })
       .catch((err) => {
-        setRemovingProducts(false);
-        setShowProductConfirmBox(false);
+        setRemovingServices(false);
+        setShowServiceConfirmBox(false);
+        setToastConfig(err);
+      });
+  };
+
+  const handleArrangeUpdate = (rows: any) => {
+    setIsAssigning(true);
+    rows?.forEach((e: any) => {
+      delete e.preWork;
+      delete e.name;
+    });
+    axiosInstance()
+      .put(`${packages.api}/${packageId}/services/order`, {
+        packageType: packageData?.packageType,
+        data: rows || []
+      })
+      .then(() => {
+        fetchData();
+        setIsAssigning(false);
+        setArrangeView(false);
+      })
+      .catch((err) => {
+        setIsAssigning(false);
+        setArrangeView(false);
         setToastConfig(err);
       });
   };
@@ -148,8 +170,8 @@ const ProductsTable = ({ packageId, packageData }) => {
       <Box mb={1} p={1} display="flex" justifyContent="space-between">
         <Box display="flex">
           {permissions?.packages?.isUpdate && (
-            <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
-              {`Add Products`}
+            <Button variant="contained" color="primary" size="small" onClick={() => setShowServiceAssignDialog(true)}>
+              {`Add Services`}
             </Button>
           )}
         </Box>
@@ -157,7 +179,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           <ImportExportLinks
             permissions={permissions?.packages}
             module="packages-products"
-            api={`${packages.api}/${packageId}/products`}
+            api={`${packages.api}/${packageId}/services`}
             afterImportCompleted={() => {
               fetchData();
             }}
@@ -168,15 +190,21 @@ const ProductsTable = ({ packageId, packageData }) => {
             additionalParams={`refrenceId=${packageId}`}
             isBackgroundWhite={true}
           />
-          <Box ml={1} />
           {permissions?.packages?.isUpdate && (
-            <DeleteButton
-              disabled={selectedRecords.length === 0 || isRemovingProducts}
-              text={'Delete'}
-              onClick={() => {
-                setShowProductConfirmBox(true);
-              }}
-            />
+            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <DeleteButton
+                disabled={selectedRecords.length === 0 || isRemovingServices}
+                text={'Delete'}
+                onClick={() => {
+                  setShowServiceConfirmBox(true);
+                }}
+              />
+              <Box ml={1} />
+              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                <GrDrag fontSize="small" color="primary" className="mr-1" />
+                Arrange
+              </Button>
+            </Box>
           )}
         </Box>
       </Box>
@@ -207,7 +235,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           ]}
           owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
           onCreate={() => {
-            setShowProductAssignDialog(true);
+            setShowServiceAssignDialog(true);
           }}
           showClone={true}
           onClone={(data) => {}}
@@ -237,33 +265,44 @@ const ProductsTable = ({ packageId, packageData }) => {
       ) : (
         <Loader noLoader={false} minHeight={'400px'} text="Loading..." />
       )}
-      {showProductAssignDialog && (
-        <AssignProductDialog
+      {showServiceAssignDialog && (
+        <AssignServiceDialog
           reference="package"
-          productsDialogOpen={true}
-          productId={packageId}
-          handleCloseDialog={() => setShowProductAssignDialog(false)}
-          assignedProducts={[...dataRows?.map((e) => e._id)]}
-          renderedFrom={`${renderedFrom}_sub-1`}
+          referenceId={packageId}
+          handleClose={() => setShowServiceAssignDialog(false)}
+          ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={() => {
             fetchData();
-            setShowProductAssignDialog(false);
+            setShowServiceAssignDialog(false);
           }}
         />
       )}
-      {showProductConfirmBox && (
+      {showServiceConfirmBox && (
         <ConfirmationDialog
-          open={showProductConfirmBox}
-          message={`Are you sure you want to delete the product(s) ?`}
+          open={showServiceConfirmBox}
+          message={`Are you sure you want to delete the service(s) ?`}
           onClose={() => {
-            setShowProductConfirmBox(false);
+            setShowServiceConfirmBox(false);
           }}
-          okBtnLoading={isRemovingProducts}
+          okBtnLoading={isRemovingServices}
           onOk={removeProducts}
+        />
+      )}
+      {arrangeView && (
+        <ArrangeView
+          data={
+            dataRows?.map((d) => {
+              return { _id: d?._id, name: d?.serviceName || d?.productName, order: d?.order, preWork: d?.preWork };
+            }) || []
+          }
+          title={'Arrange'}
+          handleClose={() => setArrangeView(false)}
+          handleSubmit={handleArrangeUpdate}
+          loading={isAssigning}
         />
       )}
     </Box>
   );
 };
 
-export default ProductsTable;
+export default ServiceTable;

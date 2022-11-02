@@ -4,7 +4,7 @@ import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
+import { BiFoodMenu, BiPackage } from 'react-icons/bi';
 
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -19,7 +19,11 @@ import { packages } from 'src/constants/helpers';
 import ManagePackageDialog from './ManagePackageDialog';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Products from './Products';
+import Services from './Services';
+import Packages from './Packages';
 import LeadTimeMaster from '../../components/LeadTime';
+import { RiShoppingBag3Fill } from 'react-icons/ri';
+import { MdMiscellaneousServices } from 'react-icons/md';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -186,14 +190,40 @@ const PackageDetails = () => {
                       className={'tabLayout'}
                       style={{
                         background: tabValue === 2 ? 'white' : '',
-                        color: tabValue === 2 ? 'blue' : '#163340'
+                        color: '#163340'
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                          <MdMiscellaneousServices className="mr-1" fontSize="inherit" /> Services
                         </div>
                       }
                       {...a11yProps(1)}
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 2 ? 'white' : '',
+                        color: '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <RiShoppingBag3Fill className="mr-1" fontSize="inherit" /> Products
+                        </div>
+                      }
+                      {...a11yProps(2)}
+                    />
+                    <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 2 ? 'white' : '',
+                        color: '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <BiPackage className="mr-1" fontSize="inherit" /> Packages
+                        </div>
+                      }
+                      {...a11yProps(3)}
                     />
                     <div className={'uio'}> </div>
                   </Tabs>
@@ -202,10 +232,13 @@ const PackageDetails = () => {
                     <DetailsPage data={packageData} fields={packageFields} />
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
-                    {tabValue === 1 &&
-                      <Products
-                        packageData={packageData}
-                        packageId={id} />}
+                    {tabValue === 1 && <Services packageData={packageData} packageId={id} />}
+                  </TabPanel>
+                  <TabPanel value={tabValue} index={2}>
+                    {tabValue === 2 && <Products packageData={packageData} packageId={id} />}
+                  </TabPanel>
+                  <TabPanel value={tabValue} index={3}>
+                    {tabValue === 3 && <Packages packageData={packageData} packageId={id} />}
                   </TabPanel>
                 </>
               )}

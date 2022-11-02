@@ -54,6 +54,8 @@ import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import Quotation from './Quotation';
 import ProgressiveBilling from './ProgressiveBilling';
+import Services from './Services';
+import Consumables from './Consumables';
 
 const RentalManagementDetailsPage = () => {
 
@@ -71,7 +73,6 @@ const RentalManagementDetailsPage = () => {
   }: any = useData();
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
-  const isMobileScreen = useMediaQuery('(max-width: 767px)');
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -90,7 +91,7 @@ const RentalManagementDetailsPage = () => {
   const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
-
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [showCancelConfirmBox, setShowCancelConfirmBox] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
@@ -202,15 +203,13 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      if (!data?.currency) {
-        data.currency = "USD"
-      }
       setCurrentStep(rentalSteps.indexOf(data?.processStatus) !== -1 ? rentalSteps.indexOf(data?.processStatus) : 0);
       handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
+      setAllowedToDelete(data.owner.optionValue === user?.user?._id)
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
       setRentalManagementData(data);
@@ -511,27 +510,51 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {rentalSteps[currentStep] === 'Services and Consumables' && rentalManagementData && (
+                     {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
+                      <Services
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                     {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
+                      <Consumables
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-2`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                    {/* {rentalSteps[currentStep] === 'Consumables' && rentalManagementData && (
                       <AdditionalCost
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
                         allowedToEdit={allowedToEdit}
                       />
-                    )}
+                    )} */}
                     {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
                       <Quotation
-                        fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         currencySymbol={currencySymbol}
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
-                        isMobileScreen={isMobileScreen}
                         showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-6`}
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
+                        allowedToDelete={allowedToDelete}
                       />
                     )}
                     {rentalSteps[currentStep] === 'Serialized Asset' && rentalManagementData && (
