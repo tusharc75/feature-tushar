@@ -22,7 +22,7 @@ import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
-const PackagesTable = ({ packageId, packageData }) => {
+const PackagesTable = ({ packageId, packageData, packagetype }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -54,7 +54,7 @@ const PackagesTable = ({ packageId, packageData }) => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${packages.api}/${packageId}/package`)
+      .get(`${packages.api}/${packageId}/package?type=${packagetype}`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
@@ -178,7 +178,7 @@ const PackagesTable = ({ packageId, packageData }) => {
             total={rowCount}
             recordsToExport={selectedRecords.length}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
+            additionalParams={`refrenceId=${packageId}&type=${packagetype}`}
             isBackgroundWhite={true}
           />
           <Box ml={1} />
@@ -258,7 +258,7 @@ const PackagesTable = ({ packageId, packageData }) => {
           onSuccess={(ids) => {
             handleAssignPackage(ids);
           }}
-          packageType={'Product'}
+          packageType={packagetype}
         />
       )}
       {showProductConfirmBox && (
