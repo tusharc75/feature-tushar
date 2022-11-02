@@ -51,6 +51,7 @@ export const quotationProcessSteps = ['Add Products', 'Services and Consumables'
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
+  'Add Services',
   'Services and Consumables',
   'Quotation',
   'Serialized Asset',

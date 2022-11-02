@@ -54,6 +54,7 @@ import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import Quotation from './Quotation';
 import ProgressiveBilling from './ProgressiveBilling';
+import Services from './Services';
 
 const RentalManagementDetailsPage = () => {
 
@@ -98,7 +99,7 @@ const RentalManagementDetailsPage = () => {
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState(
-    user?.role?.selectedEntity?.policy?.isQuotationRentalManagement ? rentalManagementSteps : rentalManagementSteps?.filter((e) => e !== 'Quotation')
+    user?.role?.selectedEntity?.policy?.isQuotationRentalManagement ? rentalManagementSteps : rentalManagementSteps?.filter((e) => !['Quotation', "Add Services"].includes('e'))
   );
 
   useEffect(() => {
@@ -511,11 +512,19 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
+                    {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
+                      <Services
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-2`}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
                     {rentalSteps[currentStep] === 'Services and Consumables' && rentalManagementData && (
                       <AdditionalCost
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-2`}
+                        renderedFrom={`${renderedFrom}_grid-3`}
                         allowedToEdit={allowedToEdit}
                       />
                     )}
@@ -529,7 +538,7 @@ const RentalManagementDetailsPage = () => {
                         isTabletScreen={isTabletScreen}
                         isMobileScreen={isMobileScreen}
                         showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-6`}
+                        renderedFrom={`${renderedFrom}_grid-4`}
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
                       />
@@ -552,7 +561,7 @@ const RentalManagementDetailsPage = () => {
                         rentalManagementData={rentalManagementData}
                         currentStep={currentStep}
                         setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-3`}
+                        renderedFrom={`${renderedFrom}_grid-5`}
                         allowedToEdit={allowedToEdit}
                         isProcessor={isProcessor}
                         allowUpdateStatus={allowUpdateStatus}
@@ -564,7 +573,7 @@ const RentalManagementDetailsPage = () => {
                         rentalManagementData={rentalManagementData}
                         currentStep={currentStep}
                         setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-4`}
+                        renderedFrom={`${renderedFrom}_grid-6`}
                         allowedToEdit={allowedToEdit}
                         isProcessor={isProcessor}
                         allowUpdateStatus={allowUpdateStatus}
@@ -579,7 +588,7 @@ const RentalManagementDetailsPage = () => {
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
                         statusOptions={statusOptions}
-                        renderedFrom={`${renderedFrom}_grid-5`}
+                        renderedFrom={`${renderedFrom}_grid-7`}
                         showActivity={showActivity}
                         currencySymbol={currencySymbol}
                         stepFullScreen={stepFullScreen}
