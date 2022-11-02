@@ -108,9 +108,9 @@ const Services = ({
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
                 {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title="Add">
+                  <HtmlTooltip title="Add Service">
                     <IconButton
-                      onClick={() => setAddExistingProductDialog({ open: true, type: row.original.type, parentId: row.original?._id })}
+                      onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })}
                       size="small"
                       color="primary"
                     >
@@ -292,9 +292,8 @@ const Services = ({
       inventory = data.inventory;
       nonSerializeAsset = data.nonSerializeAsset;
     }
-    let rows = data.material.filter((e) => e.parentId === null)
-    rows = rows.filter((e) => e.type === 'service' ||  e.type === "package" && e.packageDetail?.packageType === 'Service')
-
+    let rows = data.material.filter((e) => e.parentId === null);
+    rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -563,7 +562,6 @@ const Services = ({
                   color="primary"
                   size="small"
                   style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                  id="demo-positioned-button"
                   aria-controls={open ? 'demo-positioned-menu' : undefined}
                   aria-haspopup="true"
                   aria-expanded={open ? 'true' : undefined}
@@ -574,19 +572,15 @@ const Services = ({
                   Actions
                 </Button>
                 <Menu
+                  anchorEl={anchorEl}
+                  open={open}
                   getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left'
                   }}
-                  id="basic-menu"
-                  anchorEl={anchorEl}
-                  open={open}
+                  // className={isMobile ? 'add-product-action-menu-mobile' : 'add-product-action-menu'}
                   onClose={handleClose}
-                  MenuListProps={{
-                    'aria-labelledby': 'basic-button'
-                  }}
-                  className={isMobile ? 'add-product-action-menu-mobile' : 'add-product-action-menu'}
                 >
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                     <MenuItem
@@ -671,7 +665,7 @@ const Services = ({
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           packageType="service"
-          ids={rowsData.filter(d => d.type === "pacakge").map(d => d?.materialId)}
+          ids={rowsData.filter((d) => d.type === 'pacakge').map((d) => d?.materialId)}
         />
       )}
       {isProductEdit.open && (
@@ -700,7 +694,7 @@ const Services = ({
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          ids={rowsData.filter(d => d.type === "service").map(d => d?.materialId)}
+          ids={rowsData.filter((d) => d.type === 'service').map((d) => d?.materialId)}
         />
       )}
     </Fragment>
