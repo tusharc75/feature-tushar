@@ -133,8 +133,8 @@ function Dashboard() {
   };
 
   // SEARCH FUNCTION
-  const handleSearch = () => {
-    const searchedValueInLowerCase = search?.toLowerCase();
+  const handleSearch = (value: string) => {
+    const searchedValueInLowerCase = value?.toLowerCase();
     const filteredItems = [];
     sections.forEach((section) => {
       const items = section.items.filter(
@@ -166,7 +166,7 @@ function Dashboard() {
                   const searchedValue = e.target.value;
                   searchedValue.length > 0 ? setShowCloseButton(true) : setShowCloseButton(false);
                   setSearch(searchedValue);
-                  handleSearch();
+                  handleSearch(e.target.value);
                 }}
               />
               <div className={styles.searchIcon}>
