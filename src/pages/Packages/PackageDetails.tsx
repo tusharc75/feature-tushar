@@ -4,7 +4,7 @@ import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import { camelCase } from 'lodash';
 import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
+import { BiFoodMenu, BiPackage } from 'react-icons/bi';
 
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -22,6 +22,8 @@ import Products from './Products';
 import Services from './Services';
 import Packages from './Packages';
 import LeadTimeMaster from '../../components/LeadTime';
+import { RiShoppingBag3Fill } from 'react-icons/ri';
+import { MdMiscellaneousServices } from 'react-icons/md';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -192,7 +194,7 @@ const PackageDetails = () => {
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
+                          <MdMiscellaneousServices className="mr-1" fontSize="inherit" />individual Services
                         </div>
                       }
                       {...a11yProps(1)}
@@ -205,7 +207,7 @@ const PackageDetails = () => {
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Products
+                          <RiShoppingBag3Fill className="mr-1" fontSize="inherit" />individual Products
                         </div>
                       }
                       {...a11yProps(2)}
@@ -218,7 +220,7 @@ const PackageDetails = () => {
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Packages
+                          <BiPackage className="mr-1" fontSize="inherit" />Sub Packages
                         </div>
                       }
                       {...a11yProps(3)}

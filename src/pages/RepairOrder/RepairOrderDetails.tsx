@@ -278,7 +278,7 @@ const RepairOrderDetails = () => {
                         allowedToDelete={allowedToDelete}
                       />
                     )}
-                    {currentStep === 1 && repairOrderData && (
+                    {(currentStep === 1 || currentStep === 3) && repairOrderData && (
                       <WorkOrder
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
@@ -288,6 +288,7 @@ const RepairOrderDetails = () => {
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
                         allowedToDelete={allowedToDelete}
+                        isPostWorkService={Boolean(currentStep === 3)}
                       />
                     )}
                     {/* {(currentStep === 2 || currentStep === 4) && repairOrderData && (
@@ -317,7 +318,7 @@ const RepairOrderDetails = () => {
                         allowedToDelete={allowedToDelete}
                       />
                     )}
-                    {currentStep === 3 && repairOrderData && (
+                    {currentStep === 4 && repairOrderData && (
                       <Quotation
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
