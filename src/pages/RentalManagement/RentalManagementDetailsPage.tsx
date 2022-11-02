@@ -54,6 +54,7 @@ import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import Quotation from './Quotation';
 import ProgressiveBilling from './ProgressiveBilling';
+import Services from './Services';
 
 const RentalManagementDetailsPage = () => {
 
@@ -497,6 +498,19 @@ const RentalManagementDetailsPage = () => {
                   <ContentFullScreen title={rentalSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {rentalSteps[currentStep] === 'Add Products' && rentalManagementData && (
                       <Productpackage
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                     {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
+                      <Services
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         currencySymbol={currencySymbol}

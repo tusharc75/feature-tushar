@@ -553,16 +553,11 @@ const Services = ({
                   </Button>
                 )}
               </Box>
-
               <Box display="flex">
                 <Button
-                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                  variant={'outlined'}
                   color="primary"
                   size="small"
-                  style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                  aria-controls={open ? 'demo-positioned-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? 'true' : undefined}
                   onClick={handleClick}
                   disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                   endIcon={<BiChevronDown />}
@@ -577,7 +572,6 @@ const Services = ({
                     vertical: 'bottom',
                     horizontal: 'left'
                   }}
-                  // className={isMobile ? 'add-product-action-menu-mobile' : 'add-product-action-menu'}
                   onClose={handleClose}
                 >
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
@@ -587,7 +581,7 @@ const Services = ({
                         handleClose();
                       }}
                     >
-                      Bulk edit
+                      Bulk Edit
                     </MenuItem>
                   </HtmlTooltip>
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
