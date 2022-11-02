@@ -535,17 +535,12 @@ const Productpackage = ({
                   </Button>
                 )}
               </Box>
-
               <Box display="flex">
                 <Button
-                  variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                  variant="outlined"
                   color="primary"
                   size="small"
-                  style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
                   id="demo-positioned-button"
-                  aria-controls={open ? 'demo-positioned-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? 'true' : undefined}
                   onClick={handleClick}
                   disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
                   endIcon={<BiChevronDown />}
@@ -554,17 +549,18 @@ const Productpackage = ({
                 </Button>
                 <Menu
                   anchorEl={anchorEl}
+                  keepMounted
                   open={open}
                   onClose={handleClose}
-                  MenuListProps={{
-                    'aria-labelledby': 'basic-button'
-                  }}
                   getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
-                    horizontal: 'left'
+                    horizontal: 'right',
                   }}
-                  // className={isMobile ? 'add-product-action-menu-mobile' : 'add-product-action-menu'}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
                 >
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                     <MenuItem
@@ -573,7 +569,7 @@ const Productpackage = ({
                         handleClose();
                       }}
                     >
-                      Bulk edit
+                      Bulk Edit
                     </MenuItem>
                   </HtmlTooltip>
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
@@ -600,12 +596,12 @@ const Productpackage = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >

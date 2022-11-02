@@ -466,8 +466,6 @@ const Services = ({
   };
 
   const calculatePrice = (arr: any[]) => {
-    //materialType can be =["product","packages","productCategory"]
-    //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
     if (rentalManagementData) {
       const data: any = {};
       data.conditionType = ['Rent'];
