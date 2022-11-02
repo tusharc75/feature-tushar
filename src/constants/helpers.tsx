@@ -51,7 +51,8 @@ export const quotationProcessSteps = ['Add Products', 'Services and Consumables'
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
-  'Services and Consumables',
+  'Add Services',
+  'Consumables',
   'Quotation',
   'Serialized Asset',
   'Loading Ticket',
@@ -1689,6 +1690,27 @@ export const INVENTORY_STATUS = {
   needRepair: 'Need Repair',
   needRecert: 'Need Recert'
 };
+
+
+export const INVENTORY_HISTORY_TYPE = {
+  rental: 'Rental',
+  repair: 'Repair',
+  deliveryTicket: 'Delivery Ticket',
+  loadingTicket: 'Loading Ticket',
+  receivingTicket: 'Receiving Ticket',
+  returnTicket: 'Return Ticket',
+  purchaseOrder: 'Purchase Order',
+  inventory: 'Inventory',
+  serializedAssets: 'Serialized Assets',
+  transferAssets: 'Transfer Assets',
+  salesOrder: 'Sales Order',
+  sublease: 'Sublease',
+  bulkAssetCreation: 'Bulk Asset Creation',
+  transferInventory: 'Transfer Inventory',
+  inventoryToAsset: 'Inventory to Asset',
+  quotation: 'Quotation',
+  invoice: 'Invoice'
+}
 
 export const DELIVERY_TICKET_STATUS = {
   new: 'New',
