@@ -72,6 +72,7 @@ const RentalManagementDetailsPage = () => {
   }: any = useData();
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
+  const isMobileScreen = useMediaQuery('(max-width: 767px)');
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -535,6 +536,7 @@ const RentalManagementDetailsPage = () => {
                         currencySymbol={currencySymbol}
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
+                        isMobileScreen={isMobileScreen}
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-4`}
                         stepFullScreen={stepFullScreen}

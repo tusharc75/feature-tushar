@@ -67,7 +67,7 @@ export default function AssignStepDialog({ handleClose, handleSucess, workOrderI
 
   return (
     <Dialog
-      maxWidth="md"
+      maxWidth="sm"
       fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       open={true}
@@ -96,7 +96,7 @@ export default function AssignStepDialog({ handleClose, handleSucess, workOrderI
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogContent>
                 <Grid container spacing={2}>
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <Field
                       component={TextFieldFormik}
                       margin="dense"
@@ -114,7 +114,7 @@ export default function AssignStepDialog({ handleClose, handleSucess, workOrderI
                       }}
                     />
                   </Grid>
-                  <Grid xs={12} sm={6} item>
+                  <Grid xs={12} item>
                     <Field
                       component={TextFieldFormik}
                       margin="dense"
