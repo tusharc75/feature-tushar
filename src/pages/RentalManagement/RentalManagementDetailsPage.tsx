@@ -55,6 +55,7 @@ import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import Quotation from './Quotation';
 import ProgressiveBilling from './ProgressiveBilling';
 import Services from './Services';
+import Consumables from './Consumables';
 
 const RentalManagementDetailsPage = () => {
 
@@ -522,14 +523,27 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {rentalSteps[currentStep] === 'Consumables' && rentalManagementData && (
+                     {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
+                      <Consumables
+                        rentalManagementData={rentalManagementData}
+                        setNextStep={setNextStep}
+                        currencySymbol={currencySymbol}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-2`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit}
+                      />
+                    )}
+                    {/* {rentalSteps[currentStep] === 'Consumables' && rentalManagementData && (
                       <AdditionalCost
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
                         allowedToEdit={allowedToEdit}
                       />
-                    )}
+                    )} */}
                     {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
                       <Quotation
                         rentalManagementData={rentalManagementData}
