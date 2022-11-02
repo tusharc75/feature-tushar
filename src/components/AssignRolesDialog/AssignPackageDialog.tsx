@@ -15,7 +15,7 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let searchTimeout;
 
-const AssignServiceDialog = ({ referenceType, onSuccess, handleClose, packageType, ids }) => {
+const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageType, ids }) => {
 
   const renderedFrom = `${routes.packages.title}_${referenceType}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
@@ -181,7 +181,13 @@ const AssignServiceDialog = ({ referenceType, onSuccess, handleClose, packageTyp
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                  onClick={() => { onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id)) }}
+                  onClick={() => { 
+                    if(packageType === 'service'){
+                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service')) 
+                    } else {
+                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id)) 
+                    }
+                  }}
                   color="primary"
                   size="small"
                   variant="contained"
@@ -224,4 +230,4 @@ const AssignServiceDialog = ({ referenceType, onSuccess, handleClose, packageTyp
   );
 };
 
-export default AssignServiceDialog;
+export default AssignPackageDialog;

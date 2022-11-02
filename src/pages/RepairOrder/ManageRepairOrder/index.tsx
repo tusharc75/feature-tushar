@@ -688,7 +688,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                   repairOrderId={repairOrderId}
                                                   {...field}
                                                   fieldData={field}
-                                                  disabled={disablePlantIfAssetAdded || (!repairOrderId && field.disableOnEdit)}
+                                                  disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
                                                   values={values}
                                                   errors={errors}
                                                   touched={touched}
@@ -745,7 +745,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                               repairOrderId={repairOrderId}
                                               {...field}
                                               fieldData={field}
-                                              disabled={(!repairOrderId && field.disableOnEdit) || (field.fieldName === "repairOrderNumber")}
+                                              disabled={(repairOrderId && field.disableOnEdit) || (field.fieldName === "repairOrderNumber")}
                                               values={values}
                                               errors={errors}
                                               touched={touched}

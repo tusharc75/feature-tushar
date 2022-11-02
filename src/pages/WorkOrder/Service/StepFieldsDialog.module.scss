@@ -86,6 +86,14 @@
     //   background-color: lightgray;
     // }
   }
+  .centerText{
+    position: absolute;
+    top: 30%;
+    text-align: center;
+    left: 10px;
+    right: 10px;
+    transform: translateY(-50%);
+  }
   .fixedBottom{
     position: absolute;
     bottom: 10px;

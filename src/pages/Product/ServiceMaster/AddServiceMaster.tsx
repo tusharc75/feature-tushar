@@ -59,7 +59,7 @@ const AddServiceMaster = (props: Props) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(routes.serviceMaster?.title, o?.fieldData, routes.serviceMaster.path);
+          let currentColumn = getColumnData(routes.serviceMaster?.title, o?.fieldData, routes.serviceMasterDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {

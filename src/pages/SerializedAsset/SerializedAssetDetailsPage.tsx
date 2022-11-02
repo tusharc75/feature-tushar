@@ -11,7 +11,7 @@ import DetailsPage from "../../components/Shared/DetailsPage";
 import { useData } from "../../StateProvider/Provider";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import { serializedAsset, getObjKeysWithValues, INVENTORY_STATUS, repairJob, INVENTORY_OWNER_TYPE } from "../../constants/helpers";
+import { serializedAsset, getObjKeysWithValues, INVENTORY_STATUS, repairJob, INVENTORY_OWNER_TYPE, INVENTORY_HISTORY_TYPE } from "../../constants/helpers";
 import ManageSerializedAsset from "./ManageSerializedAsset";
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from "@material-ui/core/MenuItem"
@@ -322,7 +322,7 @@ const SerializedAssetDetailsPage = () => {
         assets: [productInventoryData._id],
         status: obj?.status,
         comment: obj?.reason ? obj?.reason : "",
-        reference: { _id: productInventoryData._id, type: 'Inventory' }
+        reference: { _id: productInventoryData._id, type: INVENTORY_HISTORY_TYPE.serializedAssets }
       })
       .then(() => {
         setUpdateLoading(false)
