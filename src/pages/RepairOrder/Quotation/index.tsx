@@ -116,8 +116,10 @@ const Quotation = ({
         setQuotationData(data);
         fetchFields(data?.currency);
         let keys = Object.keys(data.versions);
-        setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
-        setVersionId(data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])]?._id || null);
+        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1])
+        setCurrentVersion(tempCurrentVersion);
+        setVersionId(data?.versions[tempCurrentVersion]?._id || null);
+        setNextStep(data?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false)
       });
   };
 
@@ -339,12 +341,12 @@ const Quotation = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.detail = `${parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'service'
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
         }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -367,12 +369,12 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${_subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'service'
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
         }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;

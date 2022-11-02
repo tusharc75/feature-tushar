@@ -20,8 +20,9 @@ import Loader from 'src/components/Loader';
 import { camelCase } from 'lodash';
 import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
-const ProductsTable = ({ packageId, packageData }) => {
+const PackagesTable = ({ packageId, packageData }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -53,7 +54,7 @@ const ProductsTable = ({ packageId, packageData }) => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${packages.api}/${packageId}/products`)
+      .get(`${packages.api}/${packageId}/package`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
@@ -79,20 +80,16 @@ const ProductsTable = ({ packageId, packageData }) => {
   };
 
   // needed in future
-  // const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
+  //   const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=Product`)
+      .get(`/field?resource=Packages`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(
-            packageData?.packageType === 'Service' ? routes.serviceMaster.title : routes.product.title,
-            o?.fieldData,
-            packageData?.packageType === 'Service' ? routes.serviceMasterDetail.path : routes.productDetail.path
-          );
+          let currentColumn = getColumnData(routes.packages.title, o?.fieldData, routes.packagesDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -114,7 +111,7 @@ const ProductsTable = ({ packageId, packageData }) => {
 
   const handleUpdateQuantity = (row) => {
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products`, {
+      .put(`${packages.api}/${packageId}/package`, {
         ids: [row.data._id],
         qty: Number(row.data.qty)
       })
@@ -128,7 +125,7 @@ const ProductsTable = ({ packageId, packageData }) => {
     setRemovingProducts(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products/remove`, { ids: Ids })
+      .put(`${packages.api}/${packageId}/package/remove`, { ids: Ids })
       .then(() => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
@@ -143,13 +140,29 @@ const ProductsTable = ({ packageId, packageData }) => {
 
   const ActionsRenderer = (params) => <span>{params?.data?.qty}</span>;
 
+  const handleAssignPackage = (ids) => {
+    axiosInstance()
+      .post(`${packages.api}/${packageId}/package`, {
+        ids: [packageId],
+        packages: [...ids].map((d: any) => ({ packageId: d, qty: Number(1) }))
+      })
+      .then(() => {
+        setShowProductAssignDialog(false);
+        fetchData();
+      })
+      .catch((err) => {
+        setShowProductAssignDialog(false);
+        setToastConfig(err);
+      });
+  };
+
   return (
     <Box mt={2} className="bg-white">
       <Box mb={1} p={1} display="flex" justifyContent="space-between">
         <Box display="flex">
           {permissions?.packages?.isUpdate && (
             <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
-              {`Add Products`}
+              {`Add Packages`}
             </Button>
           )}
         </Box>
@@ -223,17 +236,14 @@ const ProductsTable = ({ packageId, packageData }) => {
         <Loader noLoader={false} minHeight={'400px'} text="Loading..." />
       )}
       {showProductAssignDialog && (
-        <AssignProductDialog
-          reference="package"
-          productsDialogOpen={true}
-          productId={packageId}
-          handleCloseDialog={() => setShowProductAssignDialog(false)}
-          assignedProducts={[...dataRows?.map((e) => e._id)]}
-          renderedFrom={`${renderedFrom}_sub-1`}
-          onSuccess={() => {
-            fetchData();
-            setShowProductAssignDialog(false);
+        <AssignPackageDialog
+          referenceType="product"
+          handleClose={() => setShowProductAssignDialog(false)}
+          ids={[...dataRows?.map((e) => e._id), packageId]}
+          onSuccess={(ids) => {
+            handleAssignPackage(ids);
           }}
+          packageType={'Product'}
         />
       )}
       {showProductConfirmBox && (
@@ -251,4 +261,4 @@ const ProductsTable = ({ packageId, packageData }) => {
   );
 };
 
-export default ProductsTable;
+export default PackagesTable;
