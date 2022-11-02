@@ -89,7 +89,7 @@ const RentalManagementDetailsPage = () => {
   const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
-
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [showCancelConfirmBox, setShowCancelConfirmBox] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
@@ -207,6 +207,7 @@ const RentalManagementDetailsPage = () => {
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
+      setAllowedToDelete(data.owner.optionValue === user?.user?._id)
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
       setRentalManagementData(data);
@@ -517,16 +518,15 @@ const RentalManagementDetailsPage = () => {
                     )}
                     {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
                       <Quotation
-                        fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         currencySymbol={currencySymbol}
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-6`}
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
+                        allowedToDelete={allowedToDelete}
                       />
                     )}
                     {rentalSteps[currentStep] === 'Serialized Asset' && rentalManagementData && (
