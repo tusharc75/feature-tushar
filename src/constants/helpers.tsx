@@ -1691,6 +1691,27 @@ export const INVENTORY_STATUS = {
   needRecert: 'Need Recert'
 };
 
+
+export const INVENTORY_HISTORY_TYPE = {
+  rental: 'Rental',
+  repair: 'Repair',
+  deliveryTicket: 'Delivery Ticket',
+  loadingTicket: 'Loading Ticket',
+  receivingTicket: 'Receiving Ticket',
+  returnTicket: 'Return Ticket',
+  purchaseOrder: 'Purchase Order',
+  inventory: 'Inventory',
+  serializedAssets: 'Serialized Assets',
+  transferAssets: 'Transfer Assets',
+  salesOrder: 'Sales Order',
+  sublease: 'Sublease',
+  bulkAssetCreation: 'Bulk Asset Creation',
+  transferInventory: 'Transfer Inventory',
+  inventoryToAsset: 'Inventory to Asset',
+  quotation: 'Quotation',
+  invoice: 'Invoice'
+}
+
 export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
