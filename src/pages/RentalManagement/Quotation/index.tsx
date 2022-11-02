@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, CircularProgress, Chip, Typography } from '@material-ui/core';
+import { Grid, Box, Button, Chip, Typography, Menu, MenuItem, IconButton } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -7,29 +7,37 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
-import { rentalManagement, dateFormat, formatAmountWithCurrency, QUOTATION_STATUS } from '../../../constants/helpers';
+import { rentalManagement, dateFormat, formatAmountWithCurrency, QUOTATION_STATUS, pricingCondition } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
-import ResponseDialog from './ResponseDialog';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
-import { AiFillFilePdf } from 'react-icons/ai';
-import { IoMdDownload } from 'react-icons/io';
 import { useData } from 'src/StateProvider/Provider';
+import { GiReceiveMoney } from 'react-icons/gi';
+import { VscVersions } from 'react-icons/vsc';
+import contactClass from '../../Contact/contact.module.scss';
+import { quotation } from '../../../constants/helpers';
+import Versions from 'src/pages/Quotation/Versions';
+import { ExpandMore } from '@material-ui/icons';
+import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
+import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
+import DateRangeIcon from '@material-ui/icons/DateRange';
+import DeleteIcon from '@material-ui/icons/Delete';
+import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
+import { orderBy } from 'lodash';
 
 const Quotation = ({
-  fetchRentalData,
   rentalManagementData,
   setNextStep,
   currencySymbol,
   isTabletScreen,
   isSmallScreen,
-  isMobileScreen,
   showActivity,
-  renderedFrom,
   stepFullScreen,
-  allowedToEdit
+  allowedToEdit,
+  allowedToDelete
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -37,29 +45,53 @@ const Quotation = ({
   }: any = useData();
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [sendCustomerLoading, setSendCustomerLoading] = useState(false);
-
   const { isOffline } = useContext(CustomOfflineContext);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
-  const [downlodingFile, setDownlodingFile] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdating, setUpdating] = useState(false);
+  const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
+  const [currentVersion, setCurrentVersion] = useState(null);
+  const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
+  const [quotationData, setQuotationData] = useState(null);
+  const [material, setMaterial] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [recordToUpdate, setRecordToUpdate] = useState(null);
+  const [isDeleting, setDeleting] = useState(false);
+  const [deleteData, setDeleteData] = useState(null);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [versionId, setVersionId] = useState(null);
+  const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
 
   useEffect(() => {
-    setNextStep(false);
-    if (rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer) {
-      setNextStep(true);
-    }
-  }, [rentalManagementData]);
-
-  useEffect(() => {
-    fetchFields();
+    fetchQuotationData();
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
-  }, [columns]);
+    versionId && fetchProductInventory();
+    if (
+      quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+      quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice
+    ) {
+      setNextStep(false);
+    }
+    if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
+      setNextStep(true);
+    }
+  }, [versionId]);
 
-  const fetchFields = async () => {
+  const fetchQuotationData = (versionNumber = null) => {
+    axiosInstance()
+      .get(`${rentalManagement.api}/${rentalManagementData._id}/quotation`)
+      .then(({ data: { data } }) => {
+        setQuotationData(data);
+        fetchFields(data?.currency);
+        let keys = Object.keys(data.versions);
+        setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
+        setVersionId(data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])]?._id || null);
+      });
+  };
+
+  const fetchFields = async (currency) => {
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     const coloum: any = [
       {
@@ -94,12 +126,12 @@ const Quotation = ({
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : row.original.type === "service" ? "Service" : 'Package'}`}
+                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}
                 size="small"
                 color="primary"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : row.original.type === "service" ? routes.serviceMasterDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
                   );
                 }}
               />
@@ -185,6 +217,55 @@ const Quotation = ({
         });
       }
     });
+    // eslint-disable-next-line no-lone-blocks
+    {
+      isMobile ? (
+        <>
+          <Box display={'none'} />
+        </>
+      ) : (
+        coloum.push({
+          accessor: 'action',
+          Header: '',
+          minWidth: 100,
+          width: 100,
+          sticky: 'right',
+          disableFilters: true,
+          canDrag: false,
+          Cell: ({ row }) =>
+            !row.original.hideSelection && (
+              <>
+                <Grid container spacing={1}>
+                  {allowedToEdit && (
+                    <IconButton
+                      size="small"
+                      aria-label="Details"
+                      onClick={() => {
+                        setLeadTimeDialog({ open: true, data: row.original });
+                      }}
+                    >
+                      <DateRangeIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  )}
+                  <Box ml={1} />
+                  {allowedToDelete && (
+                    <IconButton
+                      size="small"
+                      aria-label="Details"
+                      onClick={() => {
+                        const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                        setDeleteData(obj);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" color="error" />
+                    </IconButton>
+                  )}
+                </Grid>
+              </>
+            )
+        })
+      );
+    }
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
@@ -198,52 +279,25 @@ const Quotation = ({
     setColumns(coloum);
   };
 
-  const fetchProductInventory = async () => {
-    var data: any = [];
-    var inventory: any = [];
-    var nonSerializeAsset: any = [];
-    if (isOffline) {
-      data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
-      inventory = data.productInventory;
-    } else {
-      const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
-      data = response?.data?.data;
-      inventory = data.inventory;
-      nonSerializeAsset = data.nonSerializeAsset;
-    }
-    const rows = data.material.filter((e) => e.parentId === null);
-    rows.forEach((parent, i) => {
-      parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName}`;
-      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
-      parent.qtyDisplay = parent.qty;
-      parent.isValid = true;
-      parent.assetQty = parent.serializedProduct
-        ? inventory?.filter((e) => e._id === parent._id).length
-        : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
-      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
-    });
-    setRowsData(rows);
-  };
-
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
+  const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail =  _subRow.type === 'product'
-      ? _subRow.productDetail?.productName
-      : _subRow.type === 'service'
-      ? _subRow.serviceDetail?.serviceName
-      : _subRow.packageDetail?.packageName;
-      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
-      _subRow.isValid = true;
-      _subRow.assetQty = _subRow.serializedProduct
-        ? inventory?.filter((e) => e._id === _subRow._id).length
-        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
+      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      _subRow.qtyDisplay = _subRow.qty;
+      _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
+      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
+      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
+      _subRow.subRows = generateNestedData(material, inventory, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -251,267 +305,397 @@ const Quotation = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return subRows;
+    return orderBy(subRows, ['order'], ['asc']);
   };
 
-  const sendToCustomer = () => {
-    setSendCustomerLoading(true);
+  const fetchProductInventory = async () => {
+    setNextStep(false);
+    var data: any = [];
+    var inventory: any = [];
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
+    data = response?.data?.data;
+    setMaterial(JSON.parse(JSON.stringify(data.material)));
+    inventory = data?.inventory ? data?.inventory : [];
+    const rows = data.material.filter((e) => e.parentId === null);
+    rows.forEach((parent, i) => {
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
+      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
+      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      parent.qtyDisplay = parent.qty;
+      parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
+      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
+      parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
+      parent.subRows = generateNestedData(data.material, inventory, parent);
+    });
+    setRowsData(rows);
+    setSelectedProducts([]);
+  };
+
+  const cloneVersion = () => {
+    const versionId = quotationData?.versions[currentVersion]?._id;
     axiosInstance()
-      .get(`${rentalManagement.api}/quotation/${rentalManagementData?._id}/send-to-customer`)
+      .post(`/quotation/clone-version/${quotationData._id}/${versionId}`)
       .then(() => {
-        setSendCustomerLoading(false);
-        fetchRentalData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'Sent to customer Sucessfully'
-        });
+        fetchQuotationData();
       })
       .catch((error) => {
-        setSendCustomerLoading(false);
         toastConfig.setToastConfig(error);
       });
   };
 
-  const handlePDF = (type, PDFType) => {
-    setIsLoading(true);
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const handleDelete = (rows) => {
+    setDeleting(true);
     axiosInstance()
-      .get(`${rentalManagement.api}/quotation/${rentalManagementData._id}/pdf`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            if (type === 'Download') {
-              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', `Rental-${rentalManagementData.rentalJobName}.pdf`);
-              document.body.appendChild(link);
-              link.click();
-              setIsLoading(false);
-              setDownlodingFile(null);
-            } else if (type === 'Preview') {
-              const file = new Blob([data], { type: 'application/pdf' });
-              const fileURL = URL.createObjectURL(file);
-              const pdfWindow = window.open();
-              pdfWindow.location.href = fileURL;
-              setIsLoading(false);
-              setDownlodingFile(null);
-            } else {
-              const file = new Blob([data], { type: 'application/pdf' });
-              generateBase64forFile(file, 'pdf', PDFType);
-            }
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-            setIsLoading(false);
-            setDownlodingFile(null);
-          });
+      .put(`${quotation.api}/productpackage/${quotationData?._id}/${versionId}/delete`, { ids: rows })
+      .then(() => {
+        setDeleting(false);
+        fetchProductInventory();
+        setDeleteData(null);
       })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setIsLoading(false);
-        setDownlodingFile(null);
+      .catch((error) => {
+        setDeleting(false);
+        toastConfig.setToastConfig(error);
+        setDeleteData(null);
       });
   };
 
-  const generateBase64forFile = (blobData, type, PDFType) => {
-    let reader = new FileReader();
-    reader.readAsDataURL(blobData);
-    reader.onloadend = function () {
-      let base64data: any = reader.result;
-      if (type === 'pdf') {
-        const attachments = {
-          base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-          contentType: base64data.split(';')[0].split(':')[1],
-          name: `Rental-${PDFType}-${rentalManagementData.rentalJobName}`
-        };
-        return attachments;
-        // setEmailAttachments((prevState) => {
-        //   return [...prevState, attachments];
-        // });
-        // setSendEmail(true);
-      }
-    };
+  const calculatePrice = (arr: any[]) => {
+    if (quotationData) {
+      const data: any = {};
+      data.conditionType = ['Rent'];
+      data.material = arr.map((ele) => ({
+        materialId: ele?.materialId,
+        materialType: ele?.type,
+        qty: ele?.qty,
+        pricingMethod: ele?.pricingMethod,
+        unit: ele?.unit,
+        currency: quotationData?.currency
+      }));
+      data.supplier = [];
+      data.customer = [quotationData?.customerAccount?.optionValue];
+      data.warehouse = [quotationData?.warehouse?.optionValue];
+      return new Promise((resolve, reject) => {
+        axiosInstance()
+          .post(pricingCondition.api + `/calculatePrice`, data)
+          .then(({ data: { data } }) => {
+            resolve(data);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    }
+  };
+
+  const handleSaveData = async (rows: any) => {
+    rows.forEach((element) => {
+      delete element.srno;
+      delete element.detail;
+      delete element.qtyDisplay;
+      delete element.isValid;
+      delete element.hideSelection;
+      delete element.assetQty;
+      delete element.productDetail;
+      delete element.packageDetail;
+      delete element.serviceDetail;
+      delete element.subRows;
+      delete element.leadTime;
+      delete element.leadTimeData;
+    });
+    setUpdating(true);
+    axiosInstance()
+      .put(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material: rows })
+      .then(() => {
+        setUpdating(false);
+        setIsProductEdit({ open: false, isBulkedit: false });
+        fetchProductInventory();
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleChangeVersion = (versionNumber) => {
+    setVersionId(quotationData?.versions[versionNumber]?._id || null);
+    setCurrentVersion(versionNumber);
+    setShowAllVersionStatus(false);
   };
 
   return (
     <Fragment>
-      <Grid container spacing={2}>
-        {allowedToEdit && (
-          <Grid item xs={12} md={12} sm={12}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              m={1}
-              className={`flex-wrap`}
-              style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
+      <Box display="flex" justifyContent="space-between" m={1}>
+        <Box display="flex">
+          <div>
+            <Button
+              onClick={() => {
+                setShowQuotationSummaryDialog(true);
+              }}
+              variant="outlined"
+              size="small"
+              className="mx-1"
+              startIcon={<GiReceiveMoney />}
+              color="primary"
             >
-              <div>
-                <Box display="flex">
-                  {permissions?.rentalManagement?.isRead && !isMobile && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="primary"
-                      type="button"
-                      size="small"
-                      style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                      disabled={downlodingFile === 'Preview' && isLoading ? true : false || isOffline}
-                      startIcon={isMobile ? '' : <AiFillFilePdf />}
-                      onClick={(e) => {
-                        setDownlodingFile('Preview');
-                        handlePDF('Preview', 'Regular');
-                      }}
-                    >
-                      {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : downlodingFile === 'Preview' && isLoading ? 'Please wait...' : 'Preview'}
-                    </Button>
-                  )}
-                  <Box mx={1} />
-                  {permissions?.rentalManagement?.isRead && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                      color="primary"
-                      type="button"
-                      size="small"
-                      style={isMobile && !isTablet ? { color: 'var(--warning-darken)' } : {}}
-                      disabled={downlodingFile === 'Download' && isLoading ? true : false || isOffline}
-                      startIcon={isMobile ? '' : <IoMdDownload />}
-                      onClick={(e) => {
-                        setDownlodingFile('Download');
-                        handlePDF('Download', 'Regular');
-                      }}
-                    >
-                      {isMobile && !isTablet ? (
-                        <IoMdDownload size={20} />
-                      ) : downlodingFile === 'Download' && isLoading ? (
-                        'Please wait...'
-                      ) : (
-                        'Download'
-                      )}
-                    </Button>
-                  )}
-                </Box>
-              </div>
-              {!isMobileScreen && (
-                <div>
-                  {rentalManagementData?.quotationStatus && rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
-                      <FcClock size={25} />
-                      <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-                    </div>
-                  ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
-                      <FcOk size={25} />
-                      <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-                    </div>
-                  ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.rejectByCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
-                      <FcCancel size={25} />
-                      <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-                    </div>
-                  ) : null}
-                </div>
-              )}
-              <div>
-                <Box display="flex">
-                  {(!rentalManagementData?.quotationStatus || rentalManagementData?.quotationStatus === QUOTATION_STATUS.rejectByCustomer) && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      disabled={sendCustomerLoading}
-                      endIcon={sendCustomerLoading && <CircularProgress size={20} />}
-                      onClick={() => {
-                        sendToCustomer();
-                      }}
-                    >
-                      Send To Customer
-                    </Button>
-                  )}
-                  {rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        setCustomerAcceptable(true);
-                      }}
-                    >
-                      Accept/Reject
-                    </Button>
-                  )}
-                </Box>
-              </div>
-              {isMobileScreen && (
-                <div>
-                  {rentalManagementData?.quotationStatus && rentalManagementData?.quotationStatus === QUOTATION_STATUS.sentToCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
-                      <FcClock size={25} />
-                      <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-                    </div>
-                  ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.acceptByCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
-                      <FcOk size={25} />
-                      <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-                    </div>
-                  ) : rentalManagementData?.quotationStatus === QUOTATION_STATUS.rejectByCustomer ? (
-                    <div className="d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center">
-                      <FcCancel size={25} />
-                      <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-                    </div>
-                  ) : null}
-                </div>
-              )}
-            </Box>
-          </Grid>
-        )}
-        <Grid item xs={12} md={12} sm={12}>
-          {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
-              }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              Summary
+            </Button>
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              color="primary"
+              size="small"
+              className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+              onClick={() => {
+                setShowAllVersionStatus(true);
+              }}
+              style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+              startIcon={isMobile && !isTablet ? null : <VscVersions />}
             >
-              <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-                columns={columns}
-                data={rowsData}
-                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
-                onSelect={() => {}}
-                childrenProperty="subRows"
-                uniqueKey="_id"
-                hideSelection={true}
-                renderedFrom="rental_management_product_package"
-                isClientSideGrid={true}
-              />
-            </Box>
-          ) : (
-            <Box p={2} height={500} bgcolor="white">
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
+              {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+            </Button>
+          </div>
+        </Box>
+        <Box display="flex">
+          {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+            <div className="d-flex align-items-center justify-content-center flex-column m-1">
+              <FcClock size={25} />
+              <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+            </div>
+          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+            <div className="d-flex align-items-center justify-content-center flex-column m-1">
+              <FcOk size={25} />
+              <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+            </div>
+          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+            <div className="d-flex align-items-center justify-content-center flex-column m-1">
+              <FcCancel size={25} />
+              <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+            </div>
+          ) : null}
+        </Box>
+        <Box display="flex">
+          {allowedToEdit && (
+            <div>
+              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                <Button
+                  disabled={material
+                    .filter((e) => e.parentId === null)
+                    .some(
+                      (d) =>
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                    )}
+                  onClick={() => {
+                    axiosInstance()
+                      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+                      .then(() => {
+                        fetchQuotationData(currentVersion);
+                        toastConfig.setToastConfig({
+                          open: true,
+                          type: 'success',
+                          message: 'Sent to customer Sucessfully'
+                        });
+                      })
+                      .catch((error) => {
+                        toastConfig.setToastConfig(error);
+                      });
+                  }}
+                  variant="outlined"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  Send to customer
+                </Button>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                <Button
+                  onClick={() => {
+                    setCustomerAcceptable(true);
+                  }}
+                  variant="outlined"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  Accept / Reject
+                </Button>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+                <Button
+                  onClick={() => {
+                    cloneVersion();
+                  }}
+                  variant="outlined"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  {`Clone Version-${currentVersion}`}
+                </Button>
+              ) : null}
+              <Button
+                variant="outlined"
+                color="default"
+                size="small"
+                onClick={openActions}
+                aria-controls="action-menu"
+                disabled={selectedProducts.length === 0}
+              >
+                Actions
+                <ExpandMore />
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    setIsProductEdit({ open: true, isBulkedit: true });
+                  }}
+                >
+                  Bulk Edit
+                </MenuItem>
+                {allowedToDelete && (
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      const dataToDelete =
+                        selectedProducts &&
+                        selectedProducts
+                          .filter((e) => !e.hideSelection)
+                          .map((rec: any) => {
+                            const obj: any = {};
+                            obj.id = rec._id;
+                            obj.type = rec?.type;
+                            obj.materialId = rec?.materialId;
+                            return obj;
+                          });
+                      setDeleteData(dataToDelete);
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                )}
+              </Menu>
+            </div>
           )}
-        </Grid>
-      </Grid>
-      {customerAcceptable && (
-        <ResponseDialog
-          rentalId={rentalManagementData?._id}
-          onSuccess={() => {
-            fetchRentalData();
-          }}
+        </Box>
+      </Box>
+      {columns && rowsData ? (
+        <>
+          <Box
+            p="6px"
+            zIndex={5}
+            width={
+              stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
+            }
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+          >
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              columns={columns}
+              data={rowsData}
+              setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
+              onSelect={setSelectedProducts}
+              childrenProperty="subRows"
+              uniqueKey="_id"
+              hideSelection={!allowedToEdit}
+              renderedFrom="quotation_product_package_quotation"
+              isClientSideGrid={true}
+            />
+          </Box>
+        </>
+      ) : (
+        <Box p={2} height={500} bgcolor="white">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+      {deleteData && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to delete the record(s)?`}
+          onClose={() => setDeleteData(null)}
+          onOk={() => handleDelete(deleteData)}
+          okBtnLoading={isDeleting}
+        />
+      )}
+      {isProductEdit.open && (
+        <QuotationQtyDialog
+          calculatePrice={calculatePrice}
           onClose={() => {
-            setCustomerAcceptable(false);
+            setIsProductEdit({ open: false, isBulkedit: false });
+            setRecordToUpdate(null);
+          }}
+          isBulkedit={isProductEdit.isBulkedit}
+          handleSaveData={handleSaveData}
+          quotationData={quotationData}
+          rowData={recordToUpdate}
+          material={material}
+          selectedProducts={selectedProducts}
+        />
+      )}
+      {leadTimeDialog.open && (
+        <LeadTimeDialog
+          quotationId={quotationData._id}
+          data={leadTimeDialog?.data}
+          versionId={versionId}
+          onClose={() => {
+            setLeadTimeDialog({ open: false, data: null });
+          }}
+          handleSucess={() => {
+            setLeadTimeDialog({ open: false, data: null });
+            fetchProductInventory();
+          }}
+        />
+      )}
+      {quotationData && showAllVersionStatus && (
+        <Versions onClose={() => setShowAllVersionStatus(false)} quotationId={quotationData?._id} handleChangeVersion={handleChangeVersion} />
+      )}
+      {customerAcceptable && (
+        <ManualReponseDialog
+          versionId={versionId}
+          quotationId={quotationData?._id}
+          setCurrentStep={() => {
+            fetchQuotationData(currentVersion);
+            setNextStep(true);
+          }}
+          updateStatus={() => {
+            fetchQuotationData(currentVersion);
+          }}
+          setCustomerAcceptable={setCustomerAcceptable}
+        />
+      )}
+      {showQuotationSummaryDialog && (
+        <QuotationSummeryDialog
+          quotationData={quotationData}
+          versionId={versionId}
+          onClose={() => {
+            setShowQuotationSummaryDialog(false);
           }}
         />
       )}

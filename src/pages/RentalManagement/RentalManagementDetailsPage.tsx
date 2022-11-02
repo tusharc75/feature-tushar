@@ -54,7 +54,6 @@ import { camelCase } from 'lodash';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import Quotation from './Quotation';
 import ProgressiveBilling from './ProgressiveBilling';
-import Services from './Services';
 
 const RentalManagementDetailsPage = () => {
 
@@ -72,7 +71,6 @@ const RentalManagementDetailsPage = () => {
   }: any = useData();
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
-  const isMobileScreen = useMediaQuery('(max-width: 767px)');
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -91,7 +89,7 @@ const RentalManagementDetailsPage = () => {
   const [nextStep, setNextStep] = useState(true);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
-
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [showCancelConfirmBox, setShowCancelConfirmBox] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
@@ -99,7 +97,7 @@ const RentalManagementDetailsPage = () => {
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState(
-    user?.role?.selectedEntity?.policy?.isQuotationRentalManagement ? rentalManagementSteps : rentalManagementSteps?.filter((e) => !['Quotation', "Add Services"].includes('e'))
+    user?.role?.selectedEntity?.policy?.isQuotationRentalManagement ? rentalManagementSteps : rentalManagementSteps?.filter((e) => e !== 'Quotation')
   );
 
   useEffect(() => {
@@ -203,15 +201,13 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      if (!data?.currency) {
-        data.currency = "USD"
-      }
       setCurrentStep(rentalSteps.indexOf(data?.processStatus) !== -1 ? rentalSteps.indexOf(data?.processStatus) : 0);
       handleMainPoints(data);
       setLoadingDetails(false);
       setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
+      setAllowedToDelete(data.owner.optionValue === user?.user?._id)
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
       setRentalManagementData(data);
@@ -512,35 +508,25 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
-                      <Services
+                    {rentalSteps[currentStep] === 'Services and Consumables' && rentalManagementData && (
+                      <AdditionalCost
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {rentalSteps[currentStep] === 'Services and Consumables' && rentalManagementData && (
-                      <AdditionalCost
-                        rentalManagementData={rentalManagementData}
-                        setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-3`}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
                     {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
                       <Quotation
-                        fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         currencySymbol={currencySymbol}
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
-                        isMobileScreen={isMobileScreen}
                         showActivity={showActivity}
-                        renderedFrom={`${renderedFrom}_grid-4`}
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
+                        allowedToDelete={allowedToDelete}
                       />
                     )}
                     {rentalSteps[currentStep] === 'Serialized Asset' && rentalManagementData && (
@@ -561,7 +547,7 @@ const RentalManagementDetailsPage = () => {
                         rentalManagementData={rentalManagementData}
                         currentStep={currentStep}
                         setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-5`}
+                        renderedFrom={`${renderedFrom}_grid-3`}
                         allowedToEdit={allowedToEdit}
                         isProcessor={isProcessor}
                         allowUpdateStatus={allowUpdateStatus}
@@ -573,7 +559,7 @@ const RentalManagementDetailsPage = () => {
                         rentalManagementData={rentalManagementData}
                         currentStep={currentStep}
                         setNextStep={setNextStep}
-                        renderedFrom={`${renderedFrom}_grid-6`}
+                        renderedFrom={`${renderedFrom}_grid-4`}
                         allowedToEdit={allowedToEdit}
                         isProcessor={isProcessor}
                         allowUpdateStatus={allowUpdateStatus}
@@ -588,7 +574,7 @@ const RentalManagementDetailsPage = () => {
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
                         statusOptions={statusOptions}
-                        renderedFrom={`${renderedFrom}_grid-7`}
+                        renderedFrom={`${renderedFrom}_grid-5`}
                         showActivity={showActivity}
                         currencySymbol={currencySymbol}
                         stepFullScreen={stepFullScreen}
