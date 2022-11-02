@@ -19,10 +19,11 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { sortBy } from 'lodash';
+import SendEmail from 'src/pages/Quotation/SendEmail';
 
 const alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
-const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen, allowedToEdit, allowedToDelete }) => {
+const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen, allowedToEdit, allowedToDelete, isPostWorkService }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state: { user, permissions } }: any = useData();
@@ -38,14 +39,24 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [services, setServices] = useState([]);
+  const [quotationData, setQuotationData] = useState(null);
+  const [currentVersion, setCurrentVersion] = useState(null);
 
   useEffect(() => {
     fetchFields();
+    fetchData();
+    fetchQuotationData();
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const fetchQuotationData = (versionNumber = null) => {
+    axiosInstance()
+      .get(`${repairOrder.api}/${repairOrderData._id}/repairorder/quotation`)
+      .then(({ data: { data } }) => {
+        setQuotationData(data);
+        let keys = Object.keys(data.versions);
+        setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
+      });
+  };
 
   const fetchFields = async () => {
     const coloum: any = [
@@ -214,11 +225,22 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
       parent.status = parent?.workOrder?.status;
       parent.subRows = generateNestedData(data.material, parent);
     });
-    if (data?.material?.filter((e) => e?.type === 'service' && e?.serviceDetail?.preWork
-      && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
-      setNextStep(false);
-    } else {
-      setNextStep(true);
+
+    if (isPostWorkService) {
+      if (data?.material?.filter((e) => e?.type === 'service' && !e?.serviceDetail?.preWork
+        && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
+        setNextStep(false);
+      } else {
+        setNextStep(true);
+      }
+    }
+    else {
+      if (data?.material?.filter((e) => e?.type === 'service' && e?.serviceDetail?.preWork
+        && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
+        setNextStep(false);
+      } else {
+        setNextStep(true);
+      }
     }
     setRowsData(rows);
     setSelectedProducts([]);
@@ -315,16 +337,18 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         <Box display="flex" alignItems="center" justifyContent={'flex-end'} paddingX={1} gridColumnGap={8} flex={1}>
           {allowedToEdit && (
             <Box display="flex" gridColumnGap={5}>
-              <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedProducts.length === 0}
-              >
-                Actions <ExpandMore />
-              </Button>
+              {isPostWorkService ?
+                <SendEmail versionData={quotationData?.versions[currentVersion]} quotationData={quotationData} isSendEmail={true} />
+                : <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedProducts.length === 0}
+                >
+                  Actions <ExpandMore />
+                </Button>}
               <Menu
                 anchorEl={anchorActionEl}
                 keepMounted
@@ -405,7 +429,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                 }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
-                hideSelection={!allowedToEdit}
+                hideSelection={!allowedToEdit || isPostWorkService}
                 renderedFrom="repair_order_workorder"
                 isClientSideGrid={true}
               />

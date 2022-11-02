@@ -11,7 +11,7 @@ import { AiFillFilePdf } from 'react-icons/ai';
 import { MdEmail } from 'react-icons/md';
 import { IoMdDownload } from 'react-icons/io';
 
-const SendEmail = ({ quotationData, versionData }) => {
+const SendEmail = ({ quotationData, versionData, isSendEmail = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -54,7 +54,7 @@ const SendEmail = ({ quotationData, versionData }) => {
 
   const fetchEmailAttachment = () => {
     axiosInstance()
-      .get(`${purchaseOrder.api}/${quotationData._id}/pdf`)
+      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -191,20 +191,20 @@ const SendEmail = ({ quotationData, versionData }) => {
             >
               {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
             </Button>
-            {/* <Box mx={1} />
-                    {permissions?.purchaseOrder?.isRead && <Button
-                        variant="outlined"
-                        color="primary"
-                        size="small"
-                        disabled={loading === "email"}
-                        startIcon={isMobile ? '' : <MdEmail />}
-                        onClick={() => {
-                            setLoading("email")
-                            fetchEmailAttachment()
-                        }}
-                    >
-                        {isMobile && !isTablet ? <MdEmail size={20} /> : loading === "email" ? "Please wait..." : `Send Email`}
-                    </Button>} */}
+            <Box mx={1} />
+            {isSendEmail && permissions?.purchaseOrder?.isRead && <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              disabled={loading === "email"}
+              startIcon={isMobile ? '' : <MdEmail />}
+              onClick={() => {
+                setLoading("email")
+                fetchEmailAttachment()
+              }}
+            >
+              {isMobile && !isTablet ? <MdEmail size={20} /> : loading === "email" ? "Please wait..." : `Send Email`}
+            </Button>}
           </Box>
         </Box>
       </Box>
