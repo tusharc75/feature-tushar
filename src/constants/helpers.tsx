@@ -52,7 +52,7 @@ export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
   'Add Services',
-  'Services and Consumables',
+  'Consumables',
   'Quotation',
   'Serialized Asset',
   'Loading Ticket',

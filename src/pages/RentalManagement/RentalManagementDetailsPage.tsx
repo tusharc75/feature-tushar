@@ -522,7 +522,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                    {rentalSteps[currentStep] === 'Services and Consumables' && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Consumables' && rentalManagementData && (
                       <AdditionalCost
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}

@@ -190,7 +190,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
                                 setSelectedCostData(null)
                             }}
                         >
-                            Add Services and Consumables
+                            Add Consumables
                         </Button>
                     </Box>
                     <Box display="flex-end">
