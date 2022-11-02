@@ -154,6 +154,21 @@ const ProductsTable = ({ packageId, packageData }) => {
           )}
         </Box>
         <Box display="flex">
+          <ImportExportLinks
+            permissions={permissions?.packages}
+            module="packages-products"
+            api={`${packages.api}/${packageId}/products`}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords.length}
+            ids={[]}
+            additionalParams={`refrenceId=${packageId}`}
+            isBackgroundWhite={true}
+          />
+          <Box ml={1} />
           {permissions?.packages?.isUpdate && (
             <DeleteButton
               disabled={selectedRecords.length === 0 || isRemovingProducts}

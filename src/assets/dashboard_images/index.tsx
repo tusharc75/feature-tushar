@@ -8,35 +8,54 @@ import adminPortal from './admin_portal.svg';
 import formIcon from './form_icon.svg';
 import genIcon from './gen_icon.svg';
 import invIcon from './inv_icon.svg';
+import heroTextIcon from './heroTextIcon.svg';
+import sidebarCogIcon from './sidebarCogIcon.svg';
 import { FcViewDetails } from 'react-icons/fc';
 
-import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL, FORM_ICON, INV_ICON, GEN_ICON } from './constants/imageTypes';
+export const IconConst = {
+  HERO: 'Hero',
+  CRM: 'ROM',
+  ROM: 'CRM',
+  ACCOUNTS: 'Accounts',
+  PRODUCT_SETUP: 'PorductSetup',
+  ACTIVITIES: 'Activities',
+  ADMIN_PORTAL: 'adminPortal',
+  FORM_ICON: 'FormIcon',
+  INV_ICON: 'InvIcon',
+  GEN_ICON: 'GenIcon',
+  HERO_TEXT_ICON: 'HeroTextIcon',
+  SIDEBAR_COG_ICON: 'SidebarCog'
+};
 
-export const IMAGE_HEIGHT = 56;
-export const IMAGE_WIDTH = 56;
+export const IMAGE_HEIGHT = 40;
+export const IMAGE_WIDTH = 40;
 
 export const SVG = (name) => {
   switch (name) {
-    case HERO:
+    case IconConst.HERO:
       return hero;
-    case CRM:
+    case IconConst.CRM:
       return crm;
-    case ROM:
+    case IconConst.ROM:
       return rom;
-    case ACCOUNTS:
+    case IconConst.ACCOUNTS:
       return accounts;
-    case PRODUCT_SETUP:
+    case IconConst.PRODUCT_SETUP:
       return productSetup;
-    case ACTIVITIES:
+    case IconConst.ACTIVITIES:
       return activities;
-    case ADMIN_PORTAL:
+    case IconConst.ADMIN_PORTAL:
       return adminPortal;
-    case FORM_ICON:
+    case IconConst.FORM_ICON:
       return formIcon;
-    case INV_ICON:
+    case IconConst.INV_ICON:
       return invIcon;
-    case GEN_ICON:
+    case IconConst.GEN_ICON:
       return genIcon;
+    case IconConst.HERO_TEXT_ICON:
+      return heroTextIcon;
+    case IconConst.SIDEBAR_COG_ICON:
+      return sidebarCogIcon;
     default:
       return;
   }
