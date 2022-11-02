@@ -316,7 +316,11 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
         }
       }
 
-      const rows = data.material.filter((e) => e.parentId === null)
+      let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service');
+      let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale)
+      let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service')
+      rows = [...products, ...packages]
+
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
         parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
