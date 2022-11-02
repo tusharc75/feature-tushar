@@ -194,7 +194,8 @@ const PackageDetails = () => {
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          <MdMiscellaneousServices className="mr-1" fontSize="inherit" /> Services
+                          <MdMiscellaneousServices className="mr-1" fontSize="inherit" />
+                          individual Services
                         </div>
                       }
                       {...a11yProps(1)}
@@ -207,7 +208,8 @@ const PackageDetails = () => {
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          <RiShoppingBag3Fill className="mr-1" fontSize="inherit" /> Products
+                          <RiShoppingBag3Fill className="mr-1" fontSize="inherit" />
+                          individual Products
                         </div>
                       }
                       {...a11yProps(2)}
