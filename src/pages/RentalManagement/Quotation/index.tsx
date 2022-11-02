@@ -95,13 +95,6 @@ const Quotation = ({
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     const coloum: any = [
       {
-        accessor: 'srno',
-        Header: '#',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
-      },
-      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -217,55 +210,6 @@ const Quotation = ({
         });
       }
     });
-    // eslint-disable-next-line no-lone-blocks
-    {
-      isMobile ? (
-        <>
-          <Box display={'none'} />
-        </>
-      ) : (
-        coloum.push({
-          accessor: 'action',
-          Header: '',
-          minWidth: 100,
-          width: 100,
-          sticky: 'right',
-          disableFilters: true,
-          canDrag: false,
-          Cell: ({ row }) =>
-            !row.original.hideSelection && (
-              <>
-                <Grid container spacing={1}>
-                  {allowedToEdit && (
-                    <IconButton
-                      size="small"
-                      aria-label="Details"
-                      onClick={() => {
-                        setLeadTimeDialog({ open: true, data: row.original });
-                      }}
-                    >
-                      <DateRangeIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  )}
-                  <Box ml={1} />
-                  {allowedToDelete && (
-                    <IconButton
-                      size="small"
-                      aria-label="Details"
-                      onClick={() => {
-                        const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                        setDeleteData(obj);
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" color="error" />
-                    </IconButton>
-                  )}
-                </Grid>
-              </>
-            )
-        })
-      );
-    }
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
@@ -282,15 +226,14 @@ const Quotation = ({
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -318,15 +261,14 @@ const Quotation = ({
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -492,7 +434,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)

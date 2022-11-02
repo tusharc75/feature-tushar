@@ -276,16 +276,13 @@ const Productpackage = ({
       nonSerializeAsset = data.nonSerializeAsset;
     }
     let rows = [];
-    data.material
-      .filter((e) => e.parentId === null)
-      .filter((e) => e.type !== 'service')
-      .forEach((e) => {
-        if (e.type !== 'package') {
-          rows.push(e);
-        } else if (e.packageDetail?.packageType !== 'Service') {
-          rows.push(e);
-        }
-      });
+    data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service').forEach((e) => {
+      if (e.type !== 'package') {
+        rows.push(e);
+      } else if (e.packageDetail?.packageType !== 'Service') {
+        rows.push(e);
+      }
+    });
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -503,7 +500,7 @@ const Productpackage = ({
       <Grid container spacing={2}>
         {allowedToEdit && (
           <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1}>
+            <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex">
                 {permissions?.product?.isRead && (
                   <Button
