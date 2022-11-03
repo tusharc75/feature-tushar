@@ -18,7 +18,9 @@
       --columns: repeat(auto-fill, minmax(230px, 1fr));
       --gap: 26px;
     }
-
+    @media all and (min-width: 1024px) and (max-width: 1920px) {
+      row-gap: 15px;
+    }
     display: grid;
     grid-template-columns: var(--columns, 1fr);
     gap: var(--gap, 15px);
@@ -127,9 +129,13 @@
     overflow-y: scroll;
     background-color: white;
   }
+
   .search_section {
     display: flex;
     margin-bottom: 15px;
+    @media all and (min-width: 1024px) and (max-width: 1920px) {
+      margin-bottom: 0px;
+    }
   }
   .search_input {
     background: #ffffff;
@@ -214,6 +220,10 @@
       --head-mb: 13px;
       --line-height: 2.09;
     }
+    @media all and (min-width: 1024px) and (max-width: 1920px) {
+      --padding: 15px;
+      --head-mb: 0px;
+    }
     @media all and (max-width: 767px) {
       text-align: center;
     }
@@ -241,6 +251,9 @@
         max-width: 98px;
         width: 100%;
         display: block;
+        @media all and (min-width: 1024px) and (max-width: 1920px) {
+          max-width: 80px;
+        }
       }
     }
   }
@@ -343,6 +356,9 @@
   @media all and (min-width: 1100px) {
     --gap: 26px;
     --main-padding: 41px 51px;
+  }
+  @media all and (min-width: 1024px) and (max-width: 1920px) {
+    row-gap: 15px;
   }
 
   display: grid;
