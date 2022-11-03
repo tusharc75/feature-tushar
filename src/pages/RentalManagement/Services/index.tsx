@@ -319,7 +319,7 @@ const Services = ({
     } else {
       // setNextStep(true);
     }
-
+    setNextStep(true);
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -549,7 +549,7 @@ const Services = ({
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                     }}
                   >
-                    {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
+                    {isMobile && !isTablet ? 'Package' : `Add Service ${routes.packages.title}`}
                   </Button>
                 )}
               </Box>
