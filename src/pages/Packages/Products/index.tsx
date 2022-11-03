@@ -88,11 +88,7 @@ const ProductsTable = ({ packageId, packageData }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(
-            packageData?.packageType === 'Service' ? routes.serviceMaster.title : routes.product.title,
-            o?.fieldData,
-            packageData?.packageType === 'Service' ? routes.serviceMasterDetail.path : routes.productDetail.path
-          );
+          let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.productDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
