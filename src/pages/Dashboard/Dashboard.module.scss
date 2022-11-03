@@ -5,10 +5,10 @@
   }
 
   .cardsContainer {
-    --card-height: 255px;
     --elevation: 50px;
     --speed: 0.5s;
-    --card-spacing: 19px 20px;
+    --card-height: 248px;
+    --card-spacing: 19px 23px;
 
     @media all and (min-width: 500px) {
       --columns: 1fr 1fr;
@@ -27,7 +27,7 @@
   }
   .singleCard {
     perspective: 1000px;
-    max-height: var(--card-height, 255px);
+    max-height: var(--card-height, 248px);
 
     &:hover {
       .cardInner {
