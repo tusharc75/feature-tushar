@@ -222,23 +222,10 @@ const PackageDetails = () => {
                       }}
                       label={
                         <div className="d-flex align-items-center tab-font">
-                          <BiPackage className="mr-1" fontSize="inherit" /> Product Packages
+                          <BiPackage className="mr-1" fontSize="inherit" /> Sub Packages
                         </div>
                       }
                       {...a11yProps(3)}
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      style={{
-                        background: tabValue === 2 ? 'white' : '',
-                        color: '#163340'
-                      }}
-                      label={
-                        <div className="d-flex align-items-center tab-font">
-                          <BiPackage className="mr-1" fontSize="inherit" /> Service Packages
-                        </div>
-                      }
-                      {...a11yProps(4)}
                     />
                     <div className={'uio'}> </div>
                   </Tabs>
@@ -253,10 +240,7 @@ const PackageDetails = () => {
                     {tabValue === 2 && <Products packageData={packageData} packageId={id} />}
                   </TabPanel>
                   <TabPanel value={tabValue} index={3}>
-                    {tabValue === 3 && <Packages packageData={packageData} packageId={id} packagetype={'Product'} />}
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={4}>
-                    {tabValue === 4 && <Packages packageData={packageData} packageId={id} packagetype={'Service'} />}
+                    {tabValue === 3 && <Packages packageData={packageData} packageId={id} />}
                   </TabPanel>
                 </>
               )}
