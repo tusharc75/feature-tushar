@@ -14,7 +14,8 @@ import ClearIcon from '@material-ui/icons/Clear';
 import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
 import routes from 'src/components/Helpers/Routes';
 import { staticHiddenResource } from '../../constants/helpers';
-import { CiFilter } from 'react-icons/ci';
+// import { CiFilter } from 'react-icons/ci';
+import FilterListIcon from '@material-ui/icons/FilterList';
 
 function Dashboard() {
   const history = useHistory();
@@ -133,8 +134,8 @@ function Dashboard() {
   };
 
   // SEARCH FUNCTION
-  const handleSearch = () => {
-    const searchedValueInLowerCase = search?.toLowerCase();
+  const handleSearch = (value: string) => {
+    const searchedValueInLowerCase = value?.toLowerCase();
     const filteredItems = [];
     sections.forEach((section) => {
       const items = section.items.filter(
@@ -154,7 +155,6 @@ function Dashboard() {
   return (
     <Fragment>
       <div className={`content-wrapper ${styles.main} ${styles.gridLayout}`}>
-        {/* search section */}
         <div className={styles.searchContainer}>
           <div className={`${styles.search_section}`}>
             <div className={`${styles.search_input}`}>
@@ -166,7 +166,7 @@ function Dashboard() {
                   const searchedValue = e.target.value;
                   searchedValue.length > 0 ? setShowCloseButton(true) : setShowCloseButton(false);
                   setSearch(searchedValue);
-                  handleSearch();
+                  handleSearch(e.target.value);
                 }}
               />
               <div className={styles.searchIcon}>
@@ -181,12 +181,10 @@ function Dashboard() {
           </div>
         </div>
         <div className={styles.filterContainer}>
-          <Button className={styles.filterContent} startIcon={<CiFilter className={styles.filterIcon} />}>
+          <Button className={styles.filterContent} startIcon={<FilterListIcon className={styles.filterIcon} />}>
             Filter
           </Button>
         </div>
-
-        {/* Hero section */}
         {search.trim() === '' && (
           <div className={styles.heroContainer}>
             <div className={`d-flex flex-wrap align-items-center justify-content-center ${styles.heroContent}`}>
@@ -200,8 +198,6 @@ function Dashboard() {
             </div>
           </div>
         )}
-
-        {/* card and results section */}
         <div className={`${styles.cardsSection} ${search.trim() === '' ? styles.heroContainer : ''}`}>
           {search.trim() === '' ? (
             <div className={`${styles.cardsContainer}`}>
@@ -274,7 +270,6 @@ function Dashboard() {
             </div>
           )}
         </div>
-        {/* sidebar section */}
         <div className={styles.sidebarContent}>
           <div className={styles.iconContainer}>
             <img src={SVG(IconConst.SIDEBAR_COG_ICON)} alt="" aria-hidden />
@@ -284,10 +279,8 @@ function Dashboard() {
             <Typography variant="body2">List of all product and category setups</Typography>
           </div>
           <div className={styles.links}>
-            <Link to={'#'}>Product Master</Link>
-            <Link to={'#'}>Pricing Setup</Link>
-            <Link to={'#'}>Lead Time Master</Link>
-            <Link to={'#'}>Product Master</Link>
+            <Link to={'/product'}>Product Master</Link>
+            <Link to={'/product-category'}>Product Categories</Link>
           </div>
         </div>
       </div>

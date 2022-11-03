@@ -35,6 +35,7 @@ const PackagesTable = ({ packageId, packageData }) => {
   const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
   const [gridApi, setGridApi] = useState(null);
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
+  const [showServiceAssignDialog, setShowServiceAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const { getColumnData } = useColumns();
@@ -148,10 +149,12 @@ const PackagesTable = ({ packageId, packageData }) => {
       })
       .then(() => {
         setShowProductAssignDialog(false);
+        setShowServiceAssignDialog(false);
         fetchData();
       })
       .catch((err) => {
         setShowProductAssignDialog(false);
+        setShowServiceAssignDialog(false);
         setToastConfig(err);
       });
   };
@@ -161,9 +164,15 @@ const PackagesTable = ({ packageId, packageData }) => {
       <Box mb={1} p={1} display="flex" justifyContent="space-between">
         <Box display="flex">
           {permissions?.packages?.isUpdate && (
-            <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
-              {`Add Packages`}
-            </Button>
+            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-start' }}>
+              <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
+                {`Add Product Packages`}
+              </Button>
+              <Box ml={1} />
+              <Button variant="contained" color="primary" size="small" onClick={() => setShowServiceAssignDialog(true)}>
+                {`Add Service Packages`}
+              </Button>
+            </Box>
           )}
         </Box>
         <Box display="flex">
@@ -259,6 +268,17 @@ const PackagesTable = ({ packageId, packageData }) => {
             handleAssignPackage(ids);
           }}
           packageType={'Product'}
+        />
+      )}
+      {showServiceAssignDialog && (
+        <AssignPackageDialog
+          referenceType="product"
+          handleClose={() => setShowServiceAssignDialog(false)}
+          ids={[...dataRows?.map((e) => e._id), packageId]}
+          onSuccess={(ids) => {
+            handleAssignPackage(ids);
+          }}
+          packageType={'Service'}
         />
       )}
       {showProductConfirmBox && (

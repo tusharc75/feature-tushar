@@ -514,7 +514,7 @@ const Productpackage = ({
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                     }}
                   >
-                    {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
+                    {isMobile && !isTablet ? 'Package' : `Add Product ${routes.packages.title}`}
                   </Button>
                 )}
               </Box>
