@@ -28,7 +28,6 @@ function Dashboard() {
   const [search, setSearch] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [availableResources, setAvailableResources] = useState([null]);
-  console.log(availableResources);
 
   useEffect(() => {
     let arr = [];
