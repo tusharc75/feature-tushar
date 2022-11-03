@@ -15,6 +15,7 @@ import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissa
 import routes from 'src/components/Helpers/Routes';
 import { staticHiddenResource } from '../../constants/helpers';
 // import { CiFilter } from 'react-icons/ci';
+import FilterListIcon from '@material-ui/icons/FilterList';
 
 function Dashboard() {
   const history = useHistory();
@@ -180,9 +181,9 @@ function Dashboard() {
           </div>
         </div>
         <div className={styles.filterContainer}>
-          {/* <Button className={styles.filterContent} startIcon={<CiFilter className={styles.filterIcon} />}>
+          <Button className={styles.filterContent} startIcon={<FilterListIcon className={styles.filterIcon} />}>
             Filter
-          </Button> */}
+          </Button>
         </div>
         {search.trim() === '' && (
           <div className={styles.heroContainer}>
