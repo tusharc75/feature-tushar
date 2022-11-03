@@ -39,24 +39,11 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [services, setServices] = useState([]);
-  const [quotationData, setQuotationData] = useState(null);
-  const [currentVersion, setCurrentVersion] = useState(null);
 
   useEffect(() => {
     fetchFields();
     fetchData();
-    fetchQuotationData();
   }, []);
-
-  const fetchQuotationData = (versionNumber = null) => {
-    axiosInstance()
-      .get(`${repairOrder.api}/${repairOrderData._id}/repairorder/quotation`)
-      .then(({ data: { data } }) => {
-        setQuotationData(data);
-        let keys = Object.keys(data.versions);
-        setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
-      });
-  };
 
   const fetchFields = async () => {
     const coloum: any = [
@@ -337,18 +324,16 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         <Box display="flex" alignItems="center" justifyContent={'flex-end'} paddingX={1} gridColumnGap={8} flex={1}>
           {allowedToEdit && (
             <Box display="flex" gridColumnGap={5}>
-              {isPostWorkService ?
-                <SendEmail versionData={quotationData?.versions[currentVersion]} quotationData={quotationData} isSendEmail={true} />
-                : <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedProducts.length === 0}
-                >
-                  Actions <ExpandMore />
-                </Button>}
+              {!isPostWorkService && <Button
+                variant="outlined"
+                color="default"
+                size="small"
+                onClick={openActions}
+                aria-controls="action-menu"
+                disabled={selectedProducts.length === 0}
+              >
+                Actions <ExpandMore />
+              </Button>}
               <Menu
                 anchorEl={anchorActionEl}
                 keepMounted
