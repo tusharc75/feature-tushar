@@ -11,7 +11,7 @@ import { FormBuilder } from '../../../components/FormBuilder';
 import { uniq, map } from 'lodash';
 import { CustomDialogTransition } from '../../../constants/helpers';
 
-const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds }) => {
+const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, reference='' }) => {
 
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
@@ -57,6 +57,10 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds }) =
         data.push(_field_data);
       });
     });
+    if(reference === "workOrder") {
+      handleSucess(data)
+      return
+    }
     axiosInstance().post(`${serviceMaster.api}/fields/${serviceId}`, { stepIds: stepIds, fields: data }).then(({ data }) => {
       handleSucess()
       toastConfig.setToastConfig({
