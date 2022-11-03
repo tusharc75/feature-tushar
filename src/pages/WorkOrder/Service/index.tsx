@@ -29,6 +29,8 @@ import { Tabs, Tab } from './Tabs';
 import styles from './index.module.scss';
 import { IoMdArrowDropup, IoMdArrowDropdown } from 'react-icons/io';
 import AssignStepDialog from './AssignStepDialog';
+import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
+import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
 
 const Service = ({ workOrderId, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -55,6 +57,8 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const [comment, setComment] = useState('');
   const [bottomBarOpen, setBottomBarOpen] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
+  const [openFieldDialog, setOpenFieldDialog] = useState(false);
+  const [addStepFields, setAddStepFields] = useState([])
 
   useEffect(() => {
     fetchService();
@@ -310,6 +314,10 @@ const Service = ({ workOrderId, allowedToEdit }) => {
       };
     }
   };
+
+  const handleAddStep = (fields: any[], values: any) => {
+    console.log({fields, values});
+  }
 
   return (
     <Box p={2}>
@@ -849,6 +857,40 @@ const Service = ({ workOrderId, allowedToEdit }) => {
         />
       )}
       {assignSteps && (
+        <StepDialog
+          handleClose={() => {
+            setAssignSteps(false);
+          }}
+          handleSucess={(values:any) => {
+            setAssignSteps(false);
+            handleAddStep(addStepFields, values)
+          }}
+          stepId={""}
+          steps={selectedService?.steps}
+          reference={'workOrder'}
+          workOrderId={workOrderId}
+          serviceId={selectedService?._id}
+          uniqueId={selectedService?.uniqueId}
+          setOpenFieldDialog={setOpenFieldDialog}
+        />
+      )}
+      {openFieldDialog && (
+        <FieldDialog
+          reference={'workOrder'}
+          serviceId={selectedService?._id}
+          stepIds={selectedService?.steps.map((d) => d?._id)}
+          steps={[]}
+          handleClose={() => {
+            setOpenFieldDialog(false);
+           
+          }}
+          handleSucess={(fieldsData:any) => {
+            setOpenFieldDialog(false);
+            setAddStepFields(fieldsData)
+          }}
+        />
+      )}
+      {/* {assignSteps && (
         <AssignStepDialog
           handleClose={() => {
             setAssignSteps(false);
@@ -861,7 +903,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           serviceId={selectedService?._id}
           uniqueId={selectedService?.uniqueId}
         />
-      )}
+      )} */}
     </Box>
   );
 };
