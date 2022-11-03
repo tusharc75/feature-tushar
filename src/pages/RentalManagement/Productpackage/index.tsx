@@ -297,7 +297,7 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow?.productDetail?.productName;
+      _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName}`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -346,10 +346,11 @@ const Productpackage = ({
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
       }
+      element.listPrice = d.listPrice ? d.listPrice : null;
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(material);
+    const priceData: any = await calculatePrice(material.filter(d => d.listPrice === null));
     material.forEach((element) => {
       const rateResult = priceData?.filter(
         (e) =>
@@ -358,7 +359,13 @@ const Productpackage = ({
           e.unit === element.unit &&
           e.pricingMethod === element.pricingMethod
       );
-      if (rateResult.length && rateResult[0].mrp) {
+      if (element.listPrice) {
+        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+        element[priceFieldName] = element.listPrice;
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+        Object.assign(element, calValues);
+      }
+      else if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
