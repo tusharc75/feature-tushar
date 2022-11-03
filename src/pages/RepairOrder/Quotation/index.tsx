@@ -511,7 +511,7 @@ const Quotation = ({
       {invoiceStep ? (
         <Box pb={2} display="flex" justifyContent="space-between">
           <Box display="flex">
-            <SendEmail versionData={quotationData?.versions[currentVersion]} quotationData={quotationData} />
+            <SendEmail versionData={quotationData?.versions[currentVersion]} quotationData={quotationData} isSendEmail={true} />
           </Box>
         </Box>
       ) : (
