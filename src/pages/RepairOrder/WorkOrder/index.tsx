@@ -101,12 +101,12 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
       },
       {
-        accessor: 'workOrder',
+        accessor: 'workOrderNumber',
         Header: 'Work Order',
         Cell: ({ row }) =>
           row.original['workOrder'] ? (
             <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`} target="_blank">
-              {row.original['workOrder'].workOrderNumber}
+              {row.original['workOrderNumber']}
             </a>
           ) : (
             <NoDataCell />
@@ -210,6 +210,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         parent.type === 'serializedAsset' ? parent.serializedAsset.assetNumber : parent.packageDetail?.packageName}`;
       parent.qty = parent.qty;
       parent.status = parent?.workOrder?.status;
+      parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.subRows = generateNestedData(data.material, parent);
     });
 
@@ -245,6 +246,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.preWork = _subRow.type === 'service' ? _subRow?.serviceDetail?.preWork : false;
       _subRow.workOrder = parent?.workOrder;
+      _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++
       _subRow.isValid = true;
