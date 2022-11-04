@@ -636,14 +636,13 @@ const Report = () => {
     }
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? `${productInventory.api}/report/purchase-order-product-wise-report`
-            : resourceCamelCase === 'productAveragePrice'
+        `${resourceCamelCase === 'purchaseOrderProduct'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report`
+          : resourceCamelCase === 'productAveragePrice'
             ? `${productInventory.api}/report/purchase-order-price`
             : resourceCamelCase === 'productInventoryHistory'
-            ? `${productInventory.api}/report/history-report`
-            : `${productInventory.api}/report/supplier-product-price`
+              ? `${productInventory.api}/report/history-report`
+              : `${productInventory.api}/report/supplier-product-price`
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -688,6 +687,8 @@ const Report = () => {
   const getFilter = (isExport = false) => {
     setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
     let filterQuery = ``;
+    let deepFilter = [];
+
     if (!isExport) {
       filterQuery = `page=${page}&limit=${limit}&`;
     }
@@ -698,7 +699,6 @@ const Report = () => {
       filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
     if (selectedResources.length > 0) {
-      let deepFilter = [];
       if (selectedData) {
         const keys = selectedData ? Object.keys(selectedData) : [];
         const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
@@ -750,21 +750,20 @@ const Report = () => {
         });
       }
 
-      if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
-      }
+
     }
     if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
+        deepFilter.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         });
       });
-      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&`;
     }
 
+    if (deepFilter && deepFilter.length > 0) {
+      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
+    }
     if (statusPeriod && statusPeriodDate) {
       const fields = Object.keys(statusPeriodDate);
       fields.forEach((field) => {
@@ -793,14 +792,13 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
-            : resourceCamelCase === 'productAveragePrice'
+        `${resourceCamelCase === 'purchaseOrderProduct'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
+          : resourceCamelCase === 'productAveragePrice'
             ? `${productInventory.api}/report/purchase-order-price/export`
             : resourceCamelCase === 'productInventoryHistory'
-            ? `${productInventory.api}/report/history-report/export`
-            : `${productInventory.api}/report/supplier-product-price/export`
+              ? `${productInventory.api}/report/history-report/export`
+              : `${productInventory.api}/report/supplier-product-price/export`
         }${filterQuery}&exportColumn=${JSON.stringify(columns)} `,
         {
           responseType: 'arraybuffer'
