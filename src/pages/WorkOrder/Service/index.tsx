@@ -58,7 +58,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const [bottomBarOpen, setBottomBarOpen] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
   const [openFieldDialog, setOpenFieldDialog] = useState(false);
-  const [addStepFields, setAddStepFields] = useState([])
+  const [addStepFields, setAddStepFields] = useState([]);
 
   useEffect(() => {
     fetchService();
@@ -316,8 +316,8 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   };
 
   const handleAddStep = (fields: any[], values: any) => {
-    console.log({fields, values});
-  }
+    console.log({ fields, values });
+  };
 
   return (
     <Box p={2}>
@@ -861,11 +861,11 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           handleClose={() => {
             setAssignSteps(false);
           }}
-          handleSucess={(values:any) => {
+          handleSucess={() => {
             setAssignSteps(false);
-            handleAddStep(addStepFields, values)
+            getServiceData();
           }}
-          stepId={""}
+          stepId={''}
           steps={selectedService?.steps}
           reference={'workOrder'}
           workOrderId={workOrderId}
@@ -882,11 +882,10 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           steps={[]}
           handleClose={() => {
             setOpenFieldDialog(false);
-           
           }}
-          handleSucess={(fieldsData:any) => {
+          handleSucess={(fieldsData: any) => {
             setOpenFieldDialog(false);
-            setAddStepFields(fieldsData)
+            setAddStepFields(fieldsData);
           }}
         />
       )}

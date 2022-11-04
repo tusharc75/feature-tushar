@@ -29,7 +29,21 @@ export default function AssignStepDialog({ handleClose, handleSucess, workOrderI
     setStepDetails({
       stepName: '',
       price: 0,
-      isPassFail: false
+      isPassFail: false,
+      leadDay: 0,
+      isFailAddon: false,
+      failAddon: [],
+      isPassAddon: false,
+      passAddon: [],
+      isJumpStepPass: false,
+      jumpStepsPass: [],
+      isJumpStepFail: false,
+      jumpStepsFail: [],
+      isQuoteRevisionOnFail: false,
+      isReturnToStepOnFail: false,
+      returnToStepOnFail: '',
+      isReturnToServiceOnFail: false,
+      returnToServiceOnFail: ''
     });
   }, []);
 
@@ -40,6 +54,7 @@ export default function AssignStepDialog({ handleClose, handleSucess, workOrderI
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/add-step`, values)
       .then(({ data }) => {
+        console.log('sdf');
         handleSucess();
         toastConfig.setToastConfig({
           open: true,
