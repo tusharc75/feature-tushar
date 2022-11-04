@@ -11,7 +11,7 @@ import { AiFillFilePdf } from 'react-icons/ai';
 import { MdEmail } from 'react-icons/md';
 import { IoMdDownload } from 'react-icons/io';
 
-const SendEmail = ({ quotationData, versionData, isSendEmail = false }) => {
+const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnly = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -178,7 +178,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false }) => {
               {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === 'view' ? 'Please wait...' : 'Preview'}
             </Button>
             <Box mx={1} />
-            <Button
+            {!previewOnly && <Button
               variant="outlined"
               color="primary"
               type="button"
@@ -190,7 +190,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false }) => {
               }}
             >
               {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
-            </Button>
+            </Button>}
             <Box mx={1} />
             {isSendEmail && permissions?.purchaseOrder?.isRead && <Button
               variant="outlined"
