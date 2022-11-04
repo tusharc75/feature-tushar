@@ -2,7 +2,7 @@ import { Fragment, useCallback, useContext, useEffect } from 'react';
 import { Box, Button, Dialog, FormControlLabel, TextField } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useState } from 'react';
-import { CustomDialogTransition, getUniqueCurrencies, workOrder } from 'src/constants/helpers';
+import { currencyCodeToSymbol, CustomDialogTransition, getUniqueCurrencies, workOrder } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -223,7 +223,7 @@ export default function StepDialog({
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogContent>
                 <Grid container spacing={2}>
-                  <Grid xs={12} md={4} sm={4} item>
+                  <Grid xs={12} md={6} sm={6} item>
                     <Field
                       component={TextFieldFormik}
                       margin="dense"
@@ -241,7 +241,7 @@ export default function StepDialog({
                       }}
                     />
                   </Grid>
-                  <Grid xs={12} md={4} sm={4} item>
+                  <Grid xs={12} md={6} sm={6} item>
                     <Field
                       component={TextFieldFormik}
                       margin="dense"
@@ -287,9 +287,14 @@ export default function StepDialog({
                       )}
                     />
                   </Grid>
-                  <Grid xs={12} md={6} sm={6} item>
+                  <Grid xs={12} md={4} sm={4} item>
                     <Field
                       component={TextFieldFormik}
+                      InputProps={{
+                        startAdornment: `${
+                          values['currency'] !== '' && currencyCodeToSymbol(values['currency']) ? currencyCodeToSymbol(values['currency']) : ''
+                        }   `
+                      }}
                       margin="dense"
                       type="number"
                       label="Cost Price"
@@ -304,9 +309,14 @@ export default function StepDialog({
                       }}
                     />
                   </Grid>
-                  <Grid xs={12} md={6} sm={6} item>
+                  <Grid xs={12} md={4} sm={4} item>
                     <Field
                       component={TextFieldFormik}
+                      InputProps={{
+                        startAdornment: `${
+                          values['currency'] !== '' && currencyCodeToSymbol(values['currency']) ? currencyCodeToSymbol(values['currency']) : ''
+                        }   `
+                      }}
                       margin="dense"
                       type="number"
                       label="List Price"
@@ -595,7 +605,7 @@ export default function StepDialog({
                   </Box>
                 )}
                 {reference === 'workOrder' && (
-                  <Button size="small" color="primary" onClick={() => setOpenFieldDialog(true)}>
+                  <Button size="small" color="primary" variant="contained" onClick={() => setOpenFieldDialog(true)}>
                     Configure Fields
                   </Button>
                 )}
