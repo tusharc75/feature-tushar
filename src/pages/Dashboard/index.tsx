@@ -27,10 +27,12 @@ function Dashboard() {
   const [sections, setSections] = useState([]);
   const [search, setSearch] = useState('');
   const [filteredData, setFilteredData] = useState([]);
+  const [availableResources, setAvailableResources] = useState([null]);
 
   useEffect(() => {
     let arr = [];
     let allData = [];
+
     // let allData = user && [...user?.role.sideBar];
     let entityData;
     if (user?.entity && user.entity.length) {
@@ -46,6 +48,7 @@ function Dashboard() {
       u['resourceLabelLowerCase'] = u.resourceLabel?.toLowerCase() ?? u.name?.toLowerCase();
       !arr.includes(u.sectionName) && arr.push(u.sectionName);
     });
+    setAvailableResources(allData);
 
     var data = arr.map((sec) => {
       const list = allData?.filter((u) => {
@@ -280,7 +283,9 @@ function Dashboard() {
           </div>
           <div className={styles.links}>
             <Link to={'/product'}>Product Master</Link>
-            <Link to={'/product-category'}>Product Categories</Link>
+            {availableResources?.findIndex((item) => item?.isRead && !item?.isHidden && item.name === 'Product Category') !== -1 && (
+              <Link to={'/product-category'}>Product Categories</Link>
+            )}
           </div>
         </div>
       </div>

@@ -17,7 +17,7 @@ import { Autocomplete } from '@material-ui/lab';
 import Grid from '@material-ui/core/Grid';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-export default function StepDialog({ handleClose, handleSucess, serviceId, stepId, steps }) {
+export default function StepDialog({ handleClose, handleSucess, serviceId, stepId, steps, reference=null, workOrderId=null,uniqueId=null, setOpenFieldDialog=null }) {
 
   const toastConfig = useContext(CustomToastContext);
   const [stepDetails, setStepDetails] = useState(null);
@@ -92,6 +92,11 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
     values.leadDay = parseInt(values.leadDay);
     values.price = parseFloat(values.price);
     setLoading(true);
+
+    if(reference === "workOrder") {
+      handleSucess(values);
+      return
+    }
     if (stepId != '') {
       axiosInstance()
         .put(`${serviceMaster.api}/steps/${serviceId}/${stepId}`, values)
@@ -171,6 +176,15 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogContent>
+              {reference === "workOrder" && (
+                <Button 
+                  size='small' 
+                  color='primary' 
+                  onClick={() => setOpenFieldDialog(true)}
+                >
+                  Configure Fields
+                </Button>
+              )}
                 <Grid container spacing={2}>
                   <Grid xs={12} sm={4} item>
                     <Field
