@@ -763,7 +763,7 @@ const Quotation = ({
                 axiosInstance().post(`${quotation.api}/template`, {
                   "id": quotationData._id,
                   "versionId": versionId,
-                  "columns": visibleColumnsExcel
+                  "columns": columns.filter(d => visibleColumnsExcel?.includes(d?.Header)).map(d => d?.accessor)
                 }, { responseType: 'blob', })
                   .then(({ data }) => {
                     const url = window.URL.createObjectURL(new Blob([data]));
