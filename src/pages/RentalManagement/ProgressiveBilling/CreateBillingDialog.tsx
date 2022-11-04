@@ -92,7 +92,15 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
             {
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}
+                label={`${
+                  row.original.type === 'product'
+                    ? !row.original.serializedProduct
+                      ? 'Non-Serialized Product'
+                      : 'Product'
+                    : row.original.type === 'service'
+                    ? 'Service'
+                    : 'Package'
+                }`}
                 size="small"
                 color="primary"
                 onClick={() => {
@@ -226,7 +234,13 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -243,7 +257,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow?.productDetail?.productName || _subRow?.packageDetail?.packageName;
+      _subRow.detail = _subRow?.productDetail?.productName || _subRow?.packageDetail?.packageName || _subRow?.serviceDetail?.serviceName;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -273,6 +287,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
     };
 
     let rows: any = [];
+    console.log('selectedProducts', selectedProducts);
     selectedProducts.forEach((element) => {
       const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
       if (element.type === 'product') {
@@ -282,6 +297,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
         const product = material.filter((e) => e.parentId === element._id);
         resetValueZero(product);
         rows = [...rows, ...product];
+      } else if (element.type === 'service') {
+        rows.push({ ...element, ...calValues });
       }
     });
     let tempRows = material.map((obj) => rows.find((o) => o.materialId === obj.materialId) || obj);

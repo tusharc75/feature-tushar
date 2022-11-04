@@ -523,7 +523,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                     {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
+                     {/* {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
                       <Consumables
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -535,15 +535,15 @@ const RentalManagementDetailsPage = () => {
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
                       />
-                    )}
-                    {/* {rentalSteps[currentStep] === 'Consumables' && rentalManagementData && (
+                    )} */}
+                    {rentalSteps[currentStep] === 'Extras Add-on' && rentalManagementData && (
                       <AdditionalCost
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
                         allowedToEdit={allowedToEdit}
                       />
-                    )} */}
+                    )}
                     {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
                       <Quotation
                         rentalManagementData={rentalManagementData}
@@ -593,7 +593,7 @@ const RentalManagementDetailsPage = () => {
                         allowUpdateStatus={allowUpdateStatus}
                       />
                     )}
-                    {rentalSteps[currentStep] === 'Packing Slip' && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Final Slip' && rentalManagementData && (
                       <Invoice
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
