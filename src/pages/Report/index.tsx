@@ -218,6 +218,8 @@ const Report = () => {
   // Create and return query for filters
   const getFilter = (isExport = false) => {
     let filterQuery = `page=${page}&`;
+    let deepFilter = [];
+
     if (!isExport) {
       filterQuery = `${filterQuery}limit=${limit}&`;
     }
@@ -228,7 +230,6 @@ const Report = () => {
       filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
     }
     if (selectedResources.length > 0) {
-      let deepFilter = [];
       if (selectedData) {
         const keys = selectedData ? Object.keys(selectedData) : [];
         const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
@@ -270,20 +271,18 @@ const Report = () => {
           }
         });
       }
-
-      if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
-      }
     }
     if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
+        deepFilter.push({
           field: replaceFieldName(field),
           term: encodeURI(filters[field].filter)
         });
       });
-      filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
+    }
+
+    if (deepFilter && deepFilter.length > 0) {
+      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
     }
 
     if (statusPeriod && statusPeriodDate) {
@@ -445,7 +444,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => {}}
+                      onEdit={() => { }}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -460,8 +459,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
