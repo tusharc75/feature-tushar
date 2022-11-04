@@ -760,6 +760,22 @@ const Quotation = ({
               onClick={(e) => {
                 e.preventDefault();
                 setShowExcelArrangeColumns(false);
+                axiosInstance().post(`${quotation.api}/template`, {
+                  "id": quotationData._id,
+                  "versionId": versionId,
+                  "columns": visibleColumnsExcel
+                }, { responseType: 'blob', })
+                  .then(({ data }) => {
+                    const url = window.URL.createObjectURL(new Blob([data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', quotationData.quotationNumber + "." + 'xlsx');
+                    document.body.appendChild(link);
+                    link.click();
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                  });
               }}
             >
               Download
