@@ -536,7 +536,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )} */}
-                    {rentalSteps[currentStep] === 'Extras Add-on' && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Extra Add-on' && rentalManagementData && (
                       <AdditionalCost
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
