@@ -453,7 +453,6 @@ const Quotation = ({
               <SendEmail versionData={quotationData?.versions[currentVersion]} quotationData={quotationData} previewOnly={true} />
             </Grid>
           </Grid>
-
         </Box>
         <Box display="flex">
           {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
