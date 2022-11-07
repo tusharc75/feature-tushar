@@ -26,7 +26,7 @@ import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import DeleteIcon from '@material-ui/icons/Delete';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
-import { orderBy } from 'lodash';
+import { orderBy, startCase } from 'lodash';
 import { AiOutlineFileExcel } from 'react-icons/ai';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { Autocomplete } from '@material-ui/lab';
@@ -118,6 +118,12 @@ const Quotation = ({
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     const coloum: any = [
       {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -142,7 +148,7 @@ const Quotation = ({
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}
+                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'N' : 'P') : 'P'}`}
                 size="small"
                 color="primary"
                 onClick={() => {
