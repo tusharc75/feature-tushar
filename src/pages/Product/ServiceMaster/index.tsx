@@ -63,7 +63,9 @@ const ServiceMaster = (props: Props) => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const defaultColumns = [
-    { field: 'serviceName', headerName: 'Service Name', show: true, cellRenderer: 'serviceRenderer' },
+    {
+      field: 'serviceName', headerName: 'Service Name', show: true, cellRenderer: 'serviceRenderer', disabled: true, lockPosition: true, primaryField: true
+    },
     { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }
   ];
 

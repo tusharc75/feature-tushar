@@ -4,7 +4,7 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, ButtonGroup } from "@material-ui/core";
+import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, ButtonGroup, Tooltip } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -29,6 +29,9 @@ import { ExpandMore } from '@material-ui/icons';
 import AddNonSerializeAssets from "./AddNonSerializeAssets";
 import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
+import LayersIcon from '@material-ui/icons/Layers';
+import CategoryIcon from '@material-ui/icons/Category';
+import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, stepFullScreen, allowedToEdit }) => {
 
@@ -80,6 +83,12 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           </p>),
       },
       {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         width: 300,
@@ -88,20 +97,48 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original.detail}  >
               {(!isOffline) ?
-                row.original?.type === "product" ?
-                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
-                  : row.original?.type === "package" ?
-                    <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
-                    : row.original?.type === "asset" && !row.original?.isNonSerializeAsset ?
-                      <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original.inventory}`} target="_blank">{row.original.detail}</a>
-                      : row.original.detail
+                row.original?.type === "service" ?
+                  <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
+                  : row.original?.type === "product" ?
+                    <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
+                    : row.original?.type === "package" ?
+                      <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
+                      : row.original?.type === "asset" && !row.original?.isNonSerializeAsset ?
+                        <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original.inventory}`} target="_blank">{row.original.detail}</a>
+                        : row.original.detail
                 : row.original.detail}
             </p>
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'product' ? !row.original.serializedProduct ? "Non-Serialized Product" : startCase(row.original?.type) : startCase(row.original?.type)}`}
-              size="small"
-              color="primary" />
+            <Tooltip
+                title={`${row.original.type === 'service' ? "Service" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}              >
+                <IconButton size='small'>
+                  {row.original.type === 'service' ?
+                    <LocalLaundryServiceIcon
+                      color="primary"
+                      onClick={() => {
+                        window.open(
+                          `${routes.serviceMasterDetail.path}/${row.original.materialId}`
+                        );
+                      }}
+                    />
+                    : row.original.type === 'product' ? <LayersIcon
+                      color="primary"
+                      onClick={() => {
+                        window.open(
+                          `${routes.productDetail.path}/${row.original.materialId}`
+                        );
+                      }}
+                    /> :
+                      <CategoryIcon
+                        color="primary"
+                        onClick={() => {
+                          window.open(
+                            `${routes.packagesDetail.path}/${row.original.materialId}`
+                          );
+                        }}
+                      />}
+
+                </IconButton>
+              </Tooltip>
             {row.original.isPurchaseOrder &&
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton size="small" onClick={() => {
@@ -323,7 +360,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
 
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
+        parent.detail = `${parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
         parent.serializedProduct = parent.type === "product" ? parent.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct ? data.inventory?.filter((e) => e._id === parent._id).length : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
@@ -404,7 +441,7 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
     var assetAssignedQtySUM = 0;
     childProduct.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow.productDetail?.productName;
+      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName}`;
       _subRow.serializedProduct = _subRow.type === "product" ? _subRow.productDetail?.serializedProduct : false;
       _subRow.assetQty = _subRow.type === "product" ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetAssignedQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
