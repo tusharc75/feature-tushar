@@ -66,7 +66,7 @@ export default function StepDialog({
             leadDay: data?.leadDay || 0,
             costPrice: data?.costPrice || 0,
             listPrice: data?.listPrice || 0,
-            currency: data?.currency,
+            currency: data?.currency || '',
             isPassFail: data?.isPassFail,
             isFailAddon: data?.isFailAddon,
             failAddon: data?.failAddon,
@@ -267,7 +267,9 @@ export default function StepDialog({
                           : ''
                       }
                       options={currencyData}
-                      getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
+                      getOptionLabel={(option: any) =>
+                        option ? `${option?.currencyCode} - ${option?.currencyName} - (${option?.symbolNative})` : ''
+                      }
                       getOptionSelected={(option: any, val) => option.currencyCode === val}
                       onChange={(event, newValue) => {
                         setFieldValue('currency', newValue && newValue.currencyCode ? newValue.currencyCode : '');
@@ -291,9 +293,7 @@ export default function StepDialog({
                     <Field
                       component={TextFieldFormik}
                       InputProps={{
-                        startAdornment: `${
-                          values['currency'] !== '' && currencyCodeToSymbol(values['currency']) ? currencyCodeToSymbol(values['currency']) : ''
-                        }   `
+                        startAdornment: `${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''}   `
                       }}
                       margin="dense"
                       type="number"
@@ -313,9 +313,7 @@ export default function StepDialog({
                     <Field
                       component={TextFieldFormik}
                       InputProps={{
-                        startAdornment: `${
-                          values['currency'] !== '' && currencyCodeToSymbol(values['currency']) ? currencyCodeToSymbol(values['currency']) : ''
-                        }   `
+                        startAdornment: `${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''}   `
                       }}
                       margin="dense"
                       type="number"
