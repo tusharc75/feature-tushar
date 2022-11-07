@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, ListItemText } from '@material-ui/core';
+import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, ListItemText, Tooltip } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -26,6 +26,9 @@ import { fetch_rental_product_fields } from '../../../components/RentalManagment
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
+import LayersIcon from '@material-ui/icons/Layers';
+import CategoryIcon from '@material-ui/icons/Category';
+import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
 
 const Services = ({
   rentalManagementData,
@@ -128,40 +131,37 @@ const Services = ({
               </Box>
             }
             {!isOffline && (
-              <Chip
-                className="ml-1"
-                // label={`${
-                //   row.original.type === 'product'
-                //     ? !row.original.serializedProduct
-                //       ? 'Non-Serialized Product'
-                //       : 'Product'
-                //     : row.original.type === 'service'
-                //     ? 'Service'
-                //     : 'Package'
-                // }`}
-                label={`${row.original.type === 'product'
-                    ? !row.original.serializedProduct
-                      ? 'N'
-                      : 'P'
-                    : row.original.type === 'service'
-                      ? 'S'
-                      : 'P'
-                  }`}
-                size="small"
-                color="primary"
-                onClick={() => {
-                  window.open(
-                    `${row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'package'
-                        ? routes.packagesDetail.path
-                        : row.original.type === 'service'
-                          ? routes.serviceMasterDetail.path
-                          : routes.packagesDetail.path
-                    }/${row.original.materialId}`
-                  );
-                }}
-              />
+              <Tooltip
+              title={`${row.original.type === 'service' ? "Service" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}              >
+              <IconButton size='small'>
+                {row.original.type === 'service' ?
+                  <LocalLaundryServiceIcon
+                    color="primary"
+                    onClick={() => {
+                      window.open(
+                        `${routes.serviceMasterDetail.path}/${row.original.materialId}`
+                      );
+                    }}
+                  />
+                  : row.original.type === 'product' ? <LayersIcon
+                    color="primary"
+                    onClick={() => {
+                      window.open(
+                        `${routes.productDetail.path}/${row.original.materialId}`
+                      );
+                    }}
+                  /> :
+                    <CategoryIcon
+                      color="primary"
+                      onClick={() => {
+                        window.open(
+                          `${routes.packagesDetail.path}/${row.original.materialId}`
+                        );
+                      }}
+                    />}
+
+              </IconButton>
+            </Tooltip>
             )}
           </div>
         ),

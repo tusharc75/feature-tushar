@@ -4,7 +4,7 @@ import CommonSkeleton from "../../../components/Helpers/CommonSkeleton";
 import NoDataCell from "../../../components/Helpers/NoDataCell";
 import routes from "../../../components/Helpers/Routes";
 import Grid from "@material-ui/core/Grid/Grid";
-import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, ButtonGroup } from "@material-ui/core";
+import { Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, ButtonGroup, Tooltip } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
 import axiosInstance from "../../../axios/axiosInstance";
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
@@ -29,6 +29,9 @@ import { ExpandMore } from '@material-ui/icons';
 import AddNonSerializeAssets from "./AddNonSerializeAssets";
 import { removeAssetsInRental } from '../rentalOfflineHelper';
 import WarningIcon from '@material-ui/icons/Warning';
+import LayersIcon from '@material-ui/icons/Layers';
+import CategoryIcon from '@material-ui/icons/Category';
+import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
 
 const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextStep, showActivity, currencySymbol, stepFullScreen, allowedToEdit }) => {
 
@@ -105,11 +108,37 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
                         : row.original.detail
                 : row.original.detail}
             </p>
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'service' ? "S" : row.original.type === 'product' ? !row.original.serializedProduct ? "N" : "P" : "P"}`}
-              size="small"
-              color="primary" />
+            <Tooltip
+                title={`${row.original.type === 'service' ? "Service" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}              >
+                <IconButton size='small'>
+                  {row.original.type === 'service' ?
+                    <LocalLaundryServiceIcon
+                      color="primary"
+                      onClick={() => {
+                        window.open(
+                          `${routes.serviceMasterDetail.path}/${row.original.materialId}`
+                        );
+                      }}
+                    />
+                    : row.original.type === 'product' ? <LayersIcon
+                      color="primary"
+                      onClick={() => {
+                        window.open(
+                          `${routes.productDetail.path}/${row.original.materialId}`
+                        );
+                      }}
+                    /> :
+                      <CategoryIcon
+                        color="primary"
+                        onClick={() => {
+                          window.open(
+                            `${routes.packagesDetail.path}/${row.original.materialId}`
+                          );
+                        }}
+                      />}
+
+                </IconButton>
+              </Tooltip>
             {row.original.isPurchaseOrder &&
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton size="small" onClick={() => {
