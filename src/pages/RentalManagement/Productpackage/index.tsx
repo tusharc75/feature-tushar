@@ -24,6 +24,7 @@ import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { startCase } from 'lodash';
 
 const Productpackage = ({
   rentalManagementData,
@@ -81,6 +82,12 @@ const Productpackage = ({
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
       },
       {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -111,7 +118,8 @@ const Productpackage = ({
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}
+                // label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}
+                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'P' : 'P') : 'P'}`}
                 size="small"
                 color="primary"
                 onClick={() => {

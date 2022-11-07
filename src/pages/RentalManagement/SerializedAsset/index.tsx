@@ -80,6 +80,12 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
           </p>),
       },
       {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         width: 300,
@@ -99,7 +105,8 @@ const SerializedAsset = ({ rentalManagementData, isTabletScreen, isSmallScreen, 
             </p>
             <Chip
               className="ml-1"
-              label={`${row.original.type === 'product' ? !row.original.serializedProduct ? "Non-Serialized Product" : startCase(row.original?.type) : startCase(row.original?.type)}`}
+              // label={`${row.original.type === 'product' ? !row.original.serializedProduct ? "Non-Serialized Product" : startCase(row.original?.type) : startCase(row.original?.type)}`}
+              label={`${row.original.type === 'product' ? !row.original.serializedProduct ? "N" : "P" : "P"}`}
               size="small"
               color="primary" />
             {row.original.isPurchaseOrder &&

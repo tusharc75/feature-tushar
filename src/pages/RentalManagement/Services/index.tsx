@@ -25,6 +25,7 @@ import { BiChevronDown } from 'react-icons/bi';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
+import { startCase } from 'lodash';
 
 const Services = ({
   rentalManagementData,
@@ -82,6 +83,12 @@ const Services = ({
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
       },
       {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -123,27 +130,34 @@ const Services = ({
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${
-                  row.original.type === 'product'
+                // label={`${
+                //   row.original.type === 'product'
+                //     ? !row.original.serializedProduct
+                //       ? 'Non-Serialized Product'
+                //       : 'Product'
+                //     : row.original.type === 'service'
+                //     ? 'Service'
+                //     : 'Package'
+                // }`}
+                label={`${row.original.type === 'product'
                     ? !row.original.serializedProduct
-                      ? 'Non-Serialized Product'
-                      : 'Product'
+                      ? 'N'
+                      : 'P'
                     : row.original.type === 'service'
-                    ? 'Service'
-                    : 'Package'
-                }`}
+                      ? 'S'
+                      : 'P'
+                  }`}
                 size="small"
                 color="primary"
                 onClick={() => {
                   window.open(
-                    `${
-                      row.original.type === 'product'
-                        ? routes.productDetail.path
-                        : row.original.type === 'package'
+                    `${row.original.type === 'product'
+                      ? routes.productDetail.path
+                      : row.original.type === 'package'
                         ? routes.packagesDetail.path
                         : row.original.type === 'service'
-                        ? routes.serviceMasterDetail.path
-                        : routes.packagesDetail.path
+                          ? routes.serviceMasterDetail.path
+                          : routes.packagesDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -297,13 +311,12 @@ const Services = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
+      parent.detail = `${parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -332,8 +345,8 @@ const Services = ({
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName;
 
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -608,12 +621,12 @@ const Services = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
