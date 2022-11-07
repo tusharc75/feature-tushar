@@ -148,12 +148,12 @@ const Quotation = ({
             {!isOffline && (
               <Chip
                 className="ml-1"
-                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'N' : 'P') : 'P'}`}
+                label={`${row.original.type === 'service' ? "S" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'N' : 'P') : 'P'}`}
                 size="small"
                 color="primary"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                    `${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
                   );
                 }}
               />
@@ -264,6 +264,7 @@ const Quotation = ({
             ? _subRow.serviceDetail?.serviceName
             : _subRow.packageDetail?.packageName
         }`;
+      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -299,6 +300,7 @@ const Quotation = ({
             ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
         }`;
+      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;

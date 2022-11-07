@@ -119,7 +119,7 @@ const Productpackage = ({
               <Chip
                 className="ml-1"
                 // label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}
-                label={`${row.original.type === 'service' ? "S" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'P' : 'P') : 'P'}`}
+                label={`${row.original.type === 'service' ? "S" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'NP' : 'P') : 'P'}`}
                 size="small"
                 color="primary"
                 onClick={() => {
