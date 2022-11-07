@@ -160,7 +160,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
         }
       })
 
-      products = uniqueProduct(material)
+      products = uniqueProduct(material?.filter((e) => e.consumableType !== "Internal"))
 
       products?.forEach((element) => {
         var qty = element.qty;
