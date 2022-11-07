@@ -184,7 +184,7 @@ const RentalManagementDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
       updateProcessStatus(rentalSteps[currentStep]);
     }
   }, [currentStep]);
@@ -510,7 +510,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                     {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
                       <Services
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -523,7 +523,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                       />
                     )}
-                     {/* {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
+                    {/* {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
                       <Consumables
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
