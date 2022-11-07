@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText, Tooltip } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -24,6 +24,10 @@ import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { startCase } from 'lodash';
+import LayersIcon from '@material-ui/icons/Layers';
+import CategoryIcon from '@material-ui/icons/Category';
+import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
 
 const Productpackage = ({
   rentalManagementData,
@@ -81,6 +85,12 @@ const Productpackage = ({
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
       },
       {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -109,17 +119,38 @@ const Productpackage = ({
               </Box>
             }
             {!isOffline && (
-              <Chip
-                className="ml-1"
-                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}
-                size="small"
-                color="primary"
-                onClick={() => {
-                  window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                  );
-                }}
-              />
+
+              <Tooltip
+                title={`${row.original.type === 'service' ? "Service" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}              >
+                <IconButton size='small'>
+                  {row.original.type === 'service' ?
+                    <LocalLaundryServiceIcon
+                      color="primary"
+                      onClick={() => {
+                        window.open(
+                          `${routes.serviceMasterDetail.path}/${row.original.materialId}`
+                        );
+                      }}
+                    />
+                    : row.original.type === 'product' ? <LayersIcon
+                      color="primary"
+                      onClick={() => {
+                        window.open(
+                          `${routes.productDetail.path}/${row.original.materialId}`
+                        );
+                      }}
+                    /> :
+                      <CategoryIcon
+                        color="primary"
+                        onClick={() => {
+                          window.open(
+                            `${routes.packagesDetail.path}/${row.original.materialId}`
+                          );
+                        }}
+                      />}
+
+                </IconButton>
+              </Tooltip>
             )}
           </div>
         ),
@@ -272,7 +303,7 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.detail = `${parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -297,7 +328,7 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName}`;
+      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName}`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
