@@ -637,6 +637,11 @@ const Productpackage = ({
                 hideSelection={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_product_package"
                 isClientSideGrid={true}
+                isEditable={true}
+                onSaveEdit={(newData) => {
+                  handleSaveData(newData)
+                }}
+                editableColumns={[`price_${rentalManagementData?.currency?.toLowerCase()}`]}
               />
             </Box>
           ) : (
