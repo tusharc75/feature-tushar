@@ -262,7 +262,8 @@ export default function CustomReactTable({
             initialState: {
                 // pageIndex: 0,
                 autoResetExpanded: false,
-                hiddenColumns: hideSelection ? ["selection", "action"] : []
+                hiddenColumns: hideSelection ? ["selection", "action"] : [],
+                expanded: false
             },
             getSubRows: (row: any) => row.subRows,
             sortTypes: {

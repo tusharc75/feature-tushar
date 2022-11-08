@@ -107,7 +107,7 @@ const Quotation = ({
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
-      .get(`${rentalManagement.api}/${rentalManagementData._id}/quotation`)
+      .get(`${rentalManagement.api}/${rentalManagementData._id}/quotation?createIfNotExits=1`)
       .then(({ data: { data } }) => {
         setQuotationData(data);
         fetchFields(data?.currency);
@@ -795,8 +795,12 @@ const Quotation = ({
                   "id": quotationData._id,
                   "versionId": versionId,
                   "columns": columns.filter(d => visibleColumnsExcel?.includes(d?.Header)).map(d => {
-                    if (d?.accessor === 'qtyDisplay') { return 'qty' }
-                    else return d?.accessor
+                    if (d?.accessor === 'qtyDisplay') {
+                      return 'qty'
+                    }
+                    else {
+                      return d?.accessor.split("_")[0]
+                    }
                   }
                   )
                 }, { responseType: 'blob', })
