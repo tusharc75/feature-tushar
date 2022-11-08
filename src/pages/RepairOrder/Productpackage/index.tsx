@@ -139,6 +139,19 @@ const Productpackage = ({
         Footer: () => {
           return <>Total</>;
         }
+      },
+      {
+        accessor: 'productDetail',
+        Header: 'Product Detail',
+        width: 200,
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
+            <p className="text-truncate" title={row.original?.productDetail?.productName}  >
+              {row.original?.productDetail?.productName ?
+                <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productDetail?._id}`} target="_blank">{row.original?.productDetail?.productName}</a>
+                : <NoDataCell />}
+            </p>
+          </div>),
       }
     ];
 

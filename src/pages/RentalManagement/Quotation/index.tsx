@@ -107,7 +107,7 @@ const Quotation = ({
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
-      .get(`${rentalManagement.api}/${rentalManagementData._id}/quotation`)
+      .get(`${rentalManagement.api}/${rentalManagementData._id}/quotation?createIfNotExits=1`)
       .then(({ data: { data } }) => {
         setQuotationData(data);
         fetchFields(data?.currency);
@@ -794,7 +794,15 @@ const Quotation = ({
                 axiosInstance().post(`${quotation.api}/template`, {
                   "id": quotationData._id,
                   "versionId": versionId,
-                  "columns": columns.filter(d => visibleColumnsExcel?.includes(d?.Header)).map(d => d?.accessor)
+                  "columns": columns.filter(d => visibleColumnsExcel?.includes(d?.Header)).map(d => {
+                    if (d?.accessor === 'qtyDisplay') {
+                      return 'qty'
+                    }
+                    else {
+                      return d?.accessor.split("_")[0]
+                    }
+                  }
+                  )
                 }, { responseType: 'blob', })
                   .then(({ data }) => {
                     const url = window.URL.createObjectURL(new Blob([data]));
