@@ -95,6 +95,9 @@ const RentalManagementDetailsPage = () => {
   const [showCancelConfirmBox, setShowCancelConfirmBox] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
+  const [quotationData, setQuotationData] = useState(null);
+  const [currentVersion, setCurrentVersion] = useState(null);
+
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
 
@@ -150,6 +153,7 @@ const RentalManagementDetailsPage = () => {
     if (id) {
       getRentalManagementFields();
       fetchRentalManagementData();
+      fetchQuotationData();
     }
     if (!isOffline) {
       fetchAssetStatusRights();
@@ -166,6 +170,18 @@ const RentalManagementDetailsPage = () => {
         });
     }
   }, [id]);
+
+  const fetchQuotationData = (versionNumber = null) => {
+    axiosInstance()
+      .get(`${rentalManagement.api}/${id}/quotation`)
+      .then(({ data: { data } }) => {
+        if (data?.versions) {
+          setQuotationData(data);
+          let keys = Object.keys(data.versions);
+          setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
+        }
+      });
+  };
 
   const fetchAssetStatusRights = () => {
     axiosInstance()
@@ -184,8 +200,9 @@ const RentalManagementDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
       updateProcessStatus(rentalSteps[currentStep]);
+      fetchQuotationData()
     }
   }, [currentStep]);
 
@@ -507,10 +524,10 @@ const RentalManagementDetailsPage = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
+                        allowedToEdit={quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? false : allowedToEdit}
                       />
                     )}
-                     {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
                       <Services
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -520,10 +537,10 @@ const RentalManagementDetailsPage = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
+                        allowedToEdit={quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? false : allowedToEdit}
                       />
                     )}
-                     {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
+                    {/* {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
                       <Consumables
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
@@ -535,15 +552,15 @@ const RentalManagementDetailsPage = () => {
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
                       />
-                    )}
-                    {/* {rentalSteps[currentStep] === 'Consumables' && rentalManagementData && (
+                    )} */}
+                    {rentalSteps[currentStep] === 'Extra Add-on' && rentalManagementData && (
                       <AdditionalCost
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
-                        allowedToEdit={allowedToEdit}
+                        allowedToEdit={quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? false : allowedToEdit}
                       />
-                    )} */}
+                    )}
                     {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
                       <Quotation
                         rentalManagementData={rentalManagementData}
@@ -593,7 +610,7 @@ const RentalManagementDetailsPage = () => {
                         allowUpdateStatus={allowUpdateStatus}
                       />
                     )}
-                    {rentalSteps[currentStep] === 'Packing Slip' && rentalManagementData && (
+                    {rentalSteps[currentStep] === 'Final Slip' && rentalManagementData && (
                       <Invoice
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}

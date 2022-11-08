@@ -147,9 +147,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
 
   const getTitle = () => {
     if (rowData) {
-      let editTitle = `Edit - [${rowData.detail}]`;
+      let editTitle = `Edit - ${rowData.detail}`;
       if (rowData.subRows && rowData.subRows?.length > 0) {
-        editTitle = `Edit - [${rowData.detail}(${rowData.subRows.length})]`;
+        editTitle = `Edit - ${rowData.detail}`;
       }
       return editTitle;
     } else {

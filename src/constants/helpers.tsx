@@ -52,13 +52,13 @@ export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
   'Add Services',
-  'Add Consumables',
-  // 'Consumables',
+  // 'Add Consumables',
+  'Extra Add-on',
   'Quotation',
   'Serialized Asset',
   'Loading Ticket',
   'Receiving Ticket',
-  'Packing Slip'
+  'Final Slip'
 ];
 export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];

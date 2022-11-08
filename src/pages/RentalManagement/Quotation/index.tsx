@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Chip, Typography, Menu, MenuItem, IconButton } from '@material-ui/core';
+import { Grid, Box, Button, Chip, Typography, Menu, MenuItem, IconButton, Dialog, FormControl, Checkbox, TextField, Tooltip } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -7,7 +7,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
-import { rentalManagement, dateFormat, formatAmountWithCurrency, QUOTATION_STATUS, pricingCondition } from '../../../constants/helpers';
+import { rentalManagement, dateFormat, formatAmountWithCurrency, QUOTATION_STATUS, pricingCondition, CustomDialogTransition } from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
@@ -26,7 +26,23 @@ import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import DeleteIcon from '@material-ui/icons/Delete';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
-import { orderBy } from 'lodash';
+import { orderBy, startCase } from 'lodash';
+import { AiOutlineFileExcel } from 'react-icons/ai';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import { Autocomplete } from '@material-ui/lab';
+import React from 'react';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@material-ui/icons/CheckBox';
+import SendEmail from 'src/pages/Quotation/SendEmail';
+import LayersIcon from '@material-ui/icons/Layers';
+import CategoryIcon from '@material-ui/icons/Category';
+import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
+
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const Quotation = ({
   rentalManagementData,
@@ -61,6 +77,16 @@ const Quotation = ({
   const [versionId, setVersionId] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [allColumn, setAllColumn] = useState([]);
+
+  const defaultSelectColumns = [
+    'Detail',
+    'Unit',
+    'Qty',
+  ];
+  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState(defaultSelectColumns);
+  const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
 
   useEffect(() => {
     fetchQuotationData();
@@ -81,7 +107,7 @@ const Quotation = ({
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
-      .get(`${rentalManagement.api}/${rentalManagementData._id}/quotation`)
+      .get(`${rentalManagement.api}/${rentalManagementData._id}/quotation?createIfNotExits=1`)
       .then(({ data: { data } }) => {
         setQuotationData(data);
         fetchFields(data?.currency);
@@ -94,6 +120,12 @@ const Quotation = ({
   const fetchFields = async (currency) => {
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     const coloum: any = [
+      {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+      },
       {
         accessor: 'detail',
         Header: 'Detail',
@@ -117,17 +149,38 @@ const Quotation = ({
               </Box>
             }
             {!isOffline && (
-              <Chip
-                className="ml-1"
-                label={`${row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}
-                size="small"
-                color="primary"
-                onClick={() => {
-                  window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                  );
-                }}
-              />
+
+              <Tooltip
+                title={`${row.original.type === 'service' ? "Service" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}              >
+                <IconButton size='small'>
+                  {row.original.type === 'service' ?
+                    <LocalLaundryServiceIcon
+                      color="primary"
+                      onClick={() => {
+                        window.open(
+                          `${routes.serviceMasterDetail.path}/${row.original.materialId}`
+                        );
+                      }}
+                    />
+                    : row.original.type === 'product' ? <LayersIcon
+                      color="primary"
+                      onClick={() => {
+                        window.open(
+                          `${routes.productDetail.path}/${row.original.materialId}`
+                        );
+                      }}
+                    /> :
+                      <CategoryIcon
+                        color="primary"
+                        onClick={() => {
+                          window.open(
+                            `${routes.packagesDetail.path}/${row.original.materialId}`
+                          );
+                        }}
+                      />}
+
+                </IconButton>
+              </Tooltip>
             )}
           </div>
         ),
@@ -221,6 +274,7 @@ const Quotation = ({
       }
     });
     setColumns(coloum);
+    setAllColumn(coloum.map(d => d.Header))
   };
 
   const generateNestedData = (material, inventory, parent) => {
@@ -234,6 +288,7 @@ const Quotation = ({
             ? _subRow.serviceDetail?.serviceName
             : _subRow.packageDetail?.packageName
         }`;
+      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -269,6 +324,7 @@ const Quotation = ({
             ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
         }`;
+      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -384,33 +440,51 @@ const Quotation = ({
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
-          <div>
-            <Button
-              onClick={() => {
-                setShowQuotationSummaryDialog(true);
-              }}
-              variant="outlined"
-              size="small"
-              className="mx-1"
-              startIcon={<GiReceiveMoney />}
-              color="primary"
-            >
-              Summary
-            </Button>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              size="small"
-              className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
-              onClick={() => {
-                setShowAllVersionStatus(true);
-              }}
-              style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-              startIcon={isMobile && !isTablet ? null : <VscVersions />}
-            >
-              {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-            </Button>
-          </div>
+          <Grid container >
+            <Grid item xs={10} md={10} sm={10}>
+              <Button
+                onClick={() => {
+                  setShowQuotationSummaryDialog(true);
+                }}
+                variant="outlined"
+                size="small"
+                className="mx-1"
+                startIcon={<GiReceiveMoney />}
+                color="primary"
+              >
+                Summary
+              </Button>
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                size="small"
+                className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+                onClick={() => {
+                  setShowAllVersionStatus(true);
+                }}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+              >
+                {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+              </Button>
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                size="small"
+                className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+                onClick={() => {
+                  setShowExcelArrangeColumns(true);
+                }}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                startIcon={isMobile && !isTablet ? null : <AiOutlineFileExcel />}
+              >
+                {isMobile && !isTablet ? <AiOutlineFileExcel size={20} /> : `Excel Download`}
+              </Button>
+            </Grid>
+            <Grid item xs={2} md={2} sm={2}>
+              <SendEmail versionData={quotationData?.versions[currentVersion]} quotationData={quotationData} previewOnly={true} />
+            </Grid>
+          </Grid>
         </Box>
         <Box display="flex">
           {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
@@ -640,6 +714,113 @@ const Quotation = ({
             setShowQuotationSummaryDialog(false);
           }}
         />
+      )}
+      {showExcelArrangeColumns && (
+        <Dialog
+          open={showExcelArrangeColumns}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="sm"
+          onClose={() => {
+            setShowExcelArrangeColumns(false);
+          }}
+          fullWidth
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+        >
+          <CustomDialogHeader
+            title={`View Columns Excel`}
+            onClose={() => {
+              setShowExcelArrangeColumns(false);
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+          />
+          <CustomDialogContent>
+            <Grid container justify="space-between" alignItems="center">
+              <Grid item xs={12} md={12} sm={12}>
+                <FormControl fullWidth >
+                  <Autocomplete
+                    id="demo-mutiple-chip"
+                    disabled={!allowedToEdit}
+                    fullWidth
+                    size="small"
+                    multiple
+                    value={visibleColumnsExcel}
+                    onChange={(e, val) => {
+                      if (val.includes("Select All") && ["Select All", ...allColumn].sort().toString() !== val.sort().toString()) {
+                        setVisibleColumnsExcel(allColumn);
+                      }
+                      else if (["Select All", ...allColumn].sort().toString() === val.sort().toString()) {
+                        setVisibleColumnsExcel([]);
+                      }
+                      else {
+                        setVisibleColumnsExcel(val);
+                      }
+                    }}
+                    options={["Select All", ...allColumn]}
+                    disableCloseOnSelect
+                    getOptionLabel={(option) => option}
+                    renderOption={(option, { selected }) => (
+                      <React.Fragment>
+                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={(showExcelArrangeColumns && ["Select All", ...allColumn].sort().toString() === ["Select All", ...visibleColumnsExcel].sort().toString()) ? true : selected} />
+                        {option}
+                      </React.Fragment>
+                    )}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="outlined"
+                        label={`Visible Columns in Quote Excel`}
+                        placeholder="Select "
+                      />
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+            </Grid>
+          </CustomDialogContent>
+          <CustomDialogFooter>
+            <CustomButton
+              variant="contained"
+              color="primary"
+              size="small"
+              disabled={visibleColumnsExcel.length === 0}
+              onClick={(e) => {
+                e.preventDefault();
+                setShowExcelArrangeColumns(false);
+                axiosInstance().post(`${quotation.api}/template`, {
+                  "id": quotationData._id,
+                  "versionId": versionId,
+                  "columns": columns.filter(d => visibleColumnsExcel?.includes(d?.Header)).map(d => {
+                    if (d?.accessor === 'qtyDisplay') {
+                      return 'qty'
+                    }
+                    else {
+                      return d?.accessor.split("_")[0]
+                    }
+                  }
+                  )
+                }, { responseType: 'blob', })
+                  .then(({ data }) => {
+                    const url = window.URL.createObjectURL(new Blob([data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', quotationData.quotationNumber + "." + 'xlsx');
+                    document.body.appendChild(link);
+                    link.click();
+                  })
+                  .catch((err) => {
+                    toastConfig.setToastConfig(err);
+                  });
+              }}
+            >
+              Download
+            </CustomButton>
+          </CustomDialogFooter>
+        </Dialog>
       )}
     </Fragment>
   );

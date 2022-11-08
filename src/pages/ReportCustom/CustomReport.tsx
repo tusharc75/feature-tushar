@@ -274,20 +274,20 @@ const Report = () => {
         });
       }
 
+      if (!isObjectEmpty(filters)) {
+        Object.keys(filters).forEach((field) => {
+          deepFilter.push({
+            field: replaceFieldName(field),
+            term: encodeURI(filters[field].filter)
+          });
+        });
+      }
+
       if (deepFilter && deepFilter.length > 0) {
         filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
       }
     }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: encodeURI(filters[field].filter)
-        });
-      });
-      filterQuery = `${filterQuery}deepFilter=${JSON.stringify(updatedFilters)}&`;
-    }
+   
 
     if (statusPeriod && statusPeriodDate) {
       const fields = Object.keys(statusPeriodDate);
