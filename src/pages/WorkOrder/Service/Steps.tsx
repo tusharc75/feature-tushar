@@ -180,6 +180,7 @@ const Service = ({
     data.serviceIds = ids;
     if (uniqueId) {
       data.aboveServiceUniqueId = uniqueId;
+      data.createdFrom = uniqueId;
     }
     axiosInstance()
       .post(`${workOrder.api}/service/${workOrderId}`, data)
@@ -398,15 +399,13 @@ const Service = ({
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
                 className={`${classes.accordionHeading} 
-              ${
-                Boolean(stepData?.passFailStatus)
-                  ? `${
-                      Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                        ? classes.green
-                        : ''
+              ${Boolean(stepData?.passFailStatus)
+                    ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                      ? classes.green
+                      : ''
                     } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                  : classes.white
-              }
+                    : classes.white
+                  }
               
               `}
                 onClick={(e) => {
@@ -518,11 +517,11 @@ const Service = ({
             message={
               addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
                 ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
-                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+                addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
                 : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
-                ? `On pass, a new service has been added in compliance with the configuration ` +
+                  ? `On pass, a new service has been added in compliance with the configuration ` +
                   addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : `You have to add addional services based on your recent action`
+                  : `You have to add addional services based on your recent action`
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
