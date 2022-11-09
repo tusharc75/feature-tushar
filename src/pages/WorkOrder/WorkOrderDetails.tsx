@@ -237,7 +237,7 @@ const WorkOrderDetails = () => {
               </Box>
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-              <Service workOrderId={id} allowedToEdit={allowedToEdit} />
+              <Service workOrderData={workOrderData} workOrderId={id} allowedToEdit={allowedToEdit} />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
               <Consumables allowedToEdit={allowedToEdit} workOrderId={id} />
