@@ -32,7 +32,7 @@ import AssignStepDialog from './AssignStepDialog';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
 
-const Service = ({ workOrderId, allowedToEdit }) => {
+const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -58,7 +58,7 @@ const Service = ({ workOrderId, allowedToEdit }) => {
   const [bottomBarOpen, setBottomBarOpen] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
   const [openFieldDialog, setOpenFieldDialog] = useState(false);
-  const [addStepFields, setAddStepFields] = useState([]);
+  const [addStepFields, setAddStepFields] = useState({fields: [], section: []});
 
   useEffect(() => {
     fetchService();
@@ -315,8 +315,19 @@ const Service = ({ workOrderId, allowedToEdit }) => {
     }
   };
 
-  const handleAddStep = (fields: any[], values: any) => {
-    console.log({ fields, values });
+  const handleAddStep = ( values: any) => {
+    values.fields = addStepFields?.fields
+
+    return new Promise((resolve ,reject) => {
+      axiosInstance()
+        .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
+        .then(({ data }) => {
+          resolve(data)
+        })
+        .catch((err) => {
+          reject(err)
+        });
+    })
   };
 
   return (
@@ -864,7 +875,9 @@ const Service = ({ workOrderId, allowedToEdit }) => {
           handleSucess={() => {
             setAssignSteps(false);
             getServiceData();
+            setAddStepFields({fields:[],section:[]})
           }}
+          handleAddStep={handleAddStep}
           stepId={''}
           steps={selectedService?.steps}
           reference={'workOrder'}
@@ -878,8 +891,9 @@ const Service = ({ workOrderId, allowedToEdit }) => {
         <FieldDialog
           reference={'workOrder'}
           serviceId={selectedService?._id}
-          stepIds={selectedService?.steps.map((d) => d?._id)}
+          stepIds={selectedService?.steps?.map((d) => d?._id)}
           steps={[]}
+          sectionData={addStepFields?.section}
           handleClose={() => {
             setOpenFieldDialog(false);
           }}
