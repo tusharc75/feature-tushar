@@ -6,11 +6,13 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { purchaseOrder } from '../../../constants/helpers';
 import { Formik, Form, FieldArray, Field } from 'formik';
-import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from "react-device-detect";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import { KeyboardDatePicker } from 'formik-material-ui-pickers';
+import { dateFormat, purchaseOrder } from '../../../constants/helpers';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import MomentUtils from '@date-io/moment';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrderData }) => {
 
@@ -18,7 +20,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
     const [isSubmitting, setIsSubmitting] = useState(false);
     const toastConfig = useContext(CustomToastContext);
 
-    const handleReject = (values) => {
+    const handleReject = (values, rejectDate) => {
         setIsSubmitting(true)
         const data = []
         values?.forEach(element => {
@@ -34,7 +36,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
             }
         });
         if (data?.length) {
-            axiosInstance().post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, data).then(({ data }) => {
+            axiosInstance().post(`${purchaseOrder.api}/reject-inventory/${purchaseOrderID}`, { products: data, rejectDate: rejectDate }).then(({ data }) => {
                 setIsSubmitting(false);
                 toastConfig.setToastConfig({
                     open: true,
@@ -86,154 +88,182 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                 }}
                 showManimizeMaximize={true}
             ></CustomDialogHeader>
-            <Formik
-                initialValues={{
-                    products: productList.map(d => ({
-                        "_id": d._id,
-                        "product": d.productName,
-                        "productId": d.productId,
-                        "rejectQuantity": 0,
-                        "comment": "",
-                        "row": d
-                    }))
-                }}
-                enableReinitialize={true}
-                onSubmit={() => { }}>
-                {({ values }) => (
-                    <>
-                        <CustomDialogContent>
-                            {(values.products && values.products.length) ?
-                                <Box p={2}>
-                                    <Form>
-                                        <Grid
-                                            direction="row"
-                                            justify="space-evenly"
-                                            alignItems="center"
-                                        >
-                                            <Grid item md={12}>
-                                                <Box>
-                                                    <FieldArray
-                                                        name="products"
-                                                        render={arrayHelpers => (
-                                                            <div>
-                                                                {(values.products.map((data, index) => (
-                                                                    <Box key={index}
-                                                                        border={'1px solid #dddddd'}
-                                                                        borderRadius={4} mb={2} p={2} pt={2}>
-                                                                        <Grid container spacing={2} alignItems='center'   >
-                                                                            <Grid item xs={12} md={1} >
-                                                                                <Chip color="primary" label={index + 1} />
-                                                                            </Grid>
-                                                                            <Grid item xs={12} md={11}>
-                                                                                <Grid container spacing={2} alignItems='center'>
-                                                                                    <Grid item xs={12} md={8}>
-                                                                                        <Autocomplete
-                                                                                            size="small"
-                                                                                            value={data.product}
-                                                                                            options={productList}
-                                                                                            disabled
-                                                                                            getOptionLabel={(option: any) => option ? option : ""}
-                                                                                            onChange={(_, newValue) => {
-                                                                                                arrayHelpers.replace(index, {
-                                                                                                    ...values.products[index],
-                                                                                                    ["product"]: newValue,
-                                                                                                });
-                                                                                            }}
-                                                                                            renderInput={(params) => <TextField
-                                                                                                {...params}
-                                                                                                variant="outlined"
-                                                                                                name="product"
-                                                                                                label="Product"
-                                                                                            />}
-                                                                                        />
-                                                                                    </Grid>
-                                                                                    <Grid item xs={12} md={4}>
-                                                                                        <span><b>Quantity: </b>{data?.row?.qty - (data?.row?.rejectQuantity || 0) - (data?.row?.assetQty || 0)}</span>
-                                                                                    </Grid>
+            <MuiPickersUtilsProvider utils={MomentUtils}>
+                <Formik
+                    initialValues={{
+                        rejectDate: new Date(),
+                        products: productList.map(d => ({
+                            "_id": d._id,
+                            "product": d.productName,
+                            "productId": d.productId,
+                            "rejectQuantity": 0,
+                            "comment": "",
+                            "row": d
+                        }))
+                    }}
+                    enableReinitialize={true}
+                    onSubmit={() => { }}>
+                    {({ values, setFieldValue }) => (
+                        <>
+                            <CustomDialogContent>
+                                {(values.products && values.products.length) ?
+                                    <Box p={2}>
+                                        <Form>
+                                            <Grid
+                                                direction="row"
+                                                justify="space-evenly"
+                                                alignItems="center"
+                                            >
+                                                <Grid item md={12}>
+                                                    <Box>
+                                                        <FieldArray
+                                                            name="products"
+                                                            render={arrayHelpers => (
+                                                                <div>
+                                                                    {(values.products.map((data, index) => (
+                                                                        <Box key={index}
+                                                                            border={'1px solid #dddddd'}
+                                                                            borderRadius={4} mb={2} p={2} pt={2}>
+                                                                            <Grid container spacing={2} alignItems='center'   >
+                                                                                <Grid item xs={12} md={1} >
+                                                                                    <Chip color="primary" label={index + 1} />
                                                                                 </Grid>
-                                                                                <Box mt={1}>
+                                                                                <Grid item xs={12} md={11}>
                                                                                     <Grid container spacing={2} alignItems='center'>
-                                                                                        <Grid item xs={12} md={4}>
-                                                                                            <Field
-                                                                                                fullWidth
-                                                                                                label="Reject Quantity"
-                                                                                                variant="outlined"
-                                                                                                type="number"
+                                                                                        <Grid item xs={12} md={8}>
+                                                                                            <Autocomplete
                                                                                                 size="small"
-                                                                                                component={TextField}
-                                                                                                name="rejectQuantity"
-                                                                                                placeholder="Reject Quantity"
-                                                                                                value={data.rejectQuantity}
-                                                                                                onChange={(e) => {
-                                                                                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                                                                                value={data.product}
+                                                                                                options={productList}
+                                                                                                disabled
+                                                                                                getOptionLabel={(option: any) => option ? option : ""}
+                                                                                                onChange={(_, newValue) => {
                                                                                                     arrayHelpers.replace(index, {
                                                                                                         ...values.products[index],
-                                                                                                        ["rejectQuantity"]: value,
-                                                                                                    })
+                                                                                                        ["product"]: newValue,
+                                                                                                    });
                                                                                                 }}
-                                                                                                error={validate([data])?.rejectQuantity}
-                                                                                                helperText={validate([data]).rejectQuantity ? "Reject quantity is more than quantity" : ""}
+                                                                                                renderInput={(params) => <TextField
+                                                                                                    {...params}
+                                                                                                    variant="outlined"
+                                                                                                    name="product"
+                                                                                                    label="Product"
+                                                                                                />}
                                                                                             />
                                                                                         </Grid>
-                                                                                        <Grid item xs={12} md={8}>
-                                                                                            <Field
-                                                                                                fullWidth
-                                                                                                label="Comment"
-                                                                                                variant="outlined"
-                                                                                                type="text"
-                                                                                                size="small"
-                                                                                                component={TextField}
-                                                                                                name="comment"
-                                                                                                placeholder="Comment"
-                                                                                                value={data.comment}
-                                                                                                onChange={(e) => {
-                                                                                                    arrayHelpers.replace(index, {
-                                                                                                        ...values.products[index],
-                                                                                                        ["comment"]: e.target.value,
-                                                                                                    })
-                                                                                                }}
-                                                                                            />
+                                                                                        <Grid item xs={12} md={4}>
+                                                                                            <span><b>Quantity: </b>{data?.row?.qty - (data?.row?.rejectQuantity || 0) - (data?.row?.assetQty || 0)}</span>
                                                                                         </Grid>
                                                                                     </Grid>
-                                                                                </Box>
+                                                                                    <Box mt={1}>
+                                                                                        <Grid container spacing={2} alignItems='center'>
+                                                                                            <Grid item xs={12} md={4}>
+                                                                                                <Field
+                                                                                                    fullWidth
+                                                                                                    label="Reject Quantity"
+                                                                                                    variant="outlined"
+                                                                                                    type="number"
+                                                                                                    size="small"
+                                                                                                    component={TextField}
+                                                                                                    name="rejectQuantity"
+                                                                                                    placeholder="Reject Quantity"
+                                                                                                    value={data.rejectQuantity}
+                                                                                                    onChange={(e) => {
+                                                                                                        const value = e.target.value.replace(/[^0-9]/g, '');
+                                                                                                        arrayHelpers.replace(index, {
+                                                                                                            ...values.products[index],
+                                                                                                            ["rejectQuantity"]: value,
+                                                                                                        })
+                                                                                                    }}
+                                                                                                    error={validate([data])?.rejectQuantity}
+                                                                                                    helperText={validate([data]).rejectQuantity ? "Reject quantity is more than quantity" : ""}
+                                                                                                />
+                                                                                            </Grid>
+                                                                                            <Grid item xs={12} md={8}>
+                                                                                                <Field
+                                                                                                    fullWidth
+                                                                                                    label="Comment"
+                                                                                                    variant="outlined"
+                                                                                                    type="text"
+                                                                                                    size="small"
+                                                                                                    component={TextField}
+                                                                                                    name="comment"
+                                                                                                    placeholder="Comment"
+                                                                                                    value={data.comment}
+                                                                                                    onChange={(e) => {
+                                                                                                        arrayHelpers.replace(index, {
+                                                                                                            ...values.products[index],
+                                                                                                            ["comment"]: e.target.value,
+                                                                                                        })
+                                                                                                    }}
+                                                                                                />
+                                                                                            </Grid>
+                                                                                        </Grid>
+                                                                                    </Box>
+                                                                                </Grid>
                                                                             </Grid>
-                                                                        </Grid>
-                                                                    </Box>
-                                                                )))}
-                                                            </div>
-                                                        )}
-                                                    />
-                                                </Box>
+                                                                        </Box>
+                                                                    )))}
+                                                                </div>
+                                                            )}
+                                                        />
+                                                    </Box>
+                                                </Grid>
                                             </Grid>
-                                        </Grid>
-                                    </Form>
-                                </Box>
-                                :
-                                <Box p={2} height={300} bgcolor="white">
-                                    <CommonSkeleton lenArray={[...Array(6).keys()]} />
-                                </Box>}
-                        </CustomDialogContent>
-                        <CustomDialogFooter>
-                            <Button variant="outlined"
-                                disabled={isSubmitting}
-                                color="primary" onClick={onClose}>
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    if (!validate(values.products).rejectQuantity)
-                                        handleReject(values.products)
-                                }}
-                                variant="contained"
-                                disabled={isSubmitting}
-                                color="primary"
-                            >
-                                Save
-                            </Button>
-                        </CustomDialogFooter>
-                    </>
-                )}
-            </Formik>
+                                            <Box pt={2}>
+                                                <Grid container>
+                                                    <Grid item xs={12} md={6}>
+                                                        <Field
+                                                            fullWidth
+                                                            label='Reject Date'
+                                                            variant="inline"
+                                                            inputVariant="outlined"
+                                                            autoOk
+                                                            size="small"
+                                                            margin="dense"
+                                                            component={KeyboardDatePicker}
+                                                            name="rejectDate"
+                                                            placeholder="Reject Date"
+                                                            value={values.rejectDate}
+                                                            format={dateFormat}
+                                                            minDate={purchaseOrderData?.purchaseOrderDate}
+                                                            maxDate={new Date()}
+                                                            onChange={(value) => {
+                                                                setFieldValue('rejectDate', value);
+                                                            }}
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                            </Box>
+                                        </Form>
+                                    </Box>
+                                    :
+                                    <Box p={2} height={300} bgcolor="white">
+                                        <CommonSkeleton lenArray={[...Array(6).keys()]} />
+                                    </Box>}
+                            </CustomDialogContent>
+                            <CustomDialogFooter>
+                                <Button variant="outlined"
+                                    disabled={isSubmitting}
+                                    color="primary" onClick={onClose}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        if (!validate(values.products).rejectQuantity)
+                                            handleReject(values.products, values.rejectDate)
+                                    }}
+                                    variant="contained"
+                                    disabled={isSubmitting}
+                                    color="primary"
+                                >
+                                    Save
+                                </Button>
+                            </CustomDialogFooter>
+                        </>
+                    )}
+                </Formik>
+            </MuiPickersUtilsProvider>
         </Dialog>
     );
 };

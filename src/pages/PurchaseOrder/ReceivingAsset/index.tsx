@@ -434,6 +434,7 @@ const ReceivingAsset = ({
             setRejectProductDialog(null);
             fetchProduct();
           }}
+          purchaseOrderData={purchaseOrderData}
           POId={purchaseOrderData?._id}
           product={rejectProductDialog}
           warehouse={purchaseOrderData?.warehouse.optionValue}
