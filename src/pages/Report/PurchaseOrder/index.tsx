@@ -77,7 +77,7 @@ const Report = () => {
       let rendererNames = [];
       let resourceFieldData = [];
 
-      if (resourceCamelCase === 'purchaseOrderProduct') {
+      if (resourceCamelCase === 'purchaseOrderDetails') {
         let {
           data: { data: POFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order`);
@@ -308,7 +308,7 @@ const Report = () => {
           }
         });
       }
-      if (resourceCamelCase === 'productInventoryHistory') {
+      if (resourceCamelCase === 'inventoryHistory') {
         let {
           data: { data: POFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order`);
@@ -389,7 +389,7 @@ const Report = () => {
           dateTimeRenderer: DateTimeRenderer
         });
       }
-      if (resourceCamelCase === 'supplierWiseAveragePrice') {
+      if (resourceCamelCase === 'averagePriceBySupplier') {
         let {
           data: { data: productFields }
         } = await axiosInstance().get(`/field?resource=Product`);
@@ -636,11 +636,11 @@ const Report = () => {
     }
     axiosInstance()
       .get(
-        `${resourceCamelCase === 'purchaseOrderProduct'
+        `${resourceCamelCase === 'purchaseOrderDetails'
           ? `${productInventory.api}/report/purchase-order-product-wise-report`
           : resourceCamelCase === 'productAveragePrice'
             ? `${productInventory.api}/report/purchase-order-price`
-            : resourceCamelCase === 'productInventoryHistory'
+            : resourceCamelCase === 'inventoryHistory'
               ? `${productInventory.api}/report/history-report`
               : `${productInventory.api}/report/supplier-product-price`
         }${filterQuery}`,
@@ -792,11 +792,11 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${resourceCamelCase === 'purchaseOrderProduct'
+        `${resourceCamelCase === 'purchaseOrderDetails'
           ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
           : resourceCamelCase === 'productAveragePrice'
             ? `${productInventory.api}/report/purchase-order-price/export`
-            : resourceCamelCase === 'productInventoryHistory'
+            : resourceCamelCase === 'inventoryHistory'
               ? `${productInventory.api}/report/history-report/export`
               : `${productInventory.api}/report/supplier-product-price/export`
         }${filterQuery}&exportColumn=${JSON.stringify(columns)} `,

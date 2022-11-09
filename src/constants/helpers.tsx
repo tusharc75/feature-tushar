@@ -1859,10 +1859,10 @@ export const REPORT_LIST = [
   { title: sidebarResource.quoteBuilder, permission: 'quoteBuilder', key: 'quoteBuilder', type: 'dynamic' },
   { title: sidebarResource.projectSales, permission: 'projectSales', key: 'projectSales', type: 'dynamic' },
   { title: sidebarResource.purchaseOrder, permission: 'purchaseOrder', key: 'purchaseOrder', type: 'dynamic' },
-  { title: 'Purchase Order Product', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'purchaseOrderProduct' },
+  { title: 'Purchase Order Details', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'purchaseOrderDetails' },
   { title: 'Product Average Price', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'productAveragePrice' },
-  { title: 'Product Inventory History', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'productInventoryHistory' },
-  { title: 'Supplier Wise Average Price', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'supplierWiseAveragePrice' }
+  { title: 'Inventory History', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'inventoryHistory' },
+  { title: 'Average Price By Supplier', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'averagePriceBySupplier' }
 ];
 
 export const RESOURCE_CALENDAR = [
