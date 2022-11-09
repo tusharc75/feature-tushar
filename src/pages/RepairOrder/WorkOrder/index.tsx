@@ -206,8 +206,8 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.type === 'product' ? parent.productDetail?.productName :
-        parent.type === 'serializedAsset' ? parent.serializedAsset.assetNumber : parent.packageDetail?.packageName}`;
+      parent.detail = `${parent.type === 'service' ? parent?.serviceDetail?.serviceName : parent.type === 'product' ? parent?.productDetail?.productName :
+        parent.type === 'serializedAsset' ? parent?.serializedAsset?.assetNumber : parent?.packageDetail?.packageName}`;
       parent.qty = parent.qty;
       parent.status = parent?.workOrder?.status;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -241,8 +241,8 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : (productIndex + 1)}`;
-      _subRow.detail = _subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow.productDetail?.productName :
-        _subRow.type === 'serializedAsset' ? _subRow.serializedAsset.assetNumber : _subRow.packageDetail?.packageName;
+      _subRow.detail = _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow?.productDetail?.productName :
+        _subRow.type === 'serializedAsset' ? _subRow?.serializedAsset?.assetNumber : _subRow?.packageDetail?.packageName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.preWork = _subRow.type === 'service' ? _subRow?.serviceDetail?.preWork : false;
       _subRow.workOrder = parent?.workOrder;
