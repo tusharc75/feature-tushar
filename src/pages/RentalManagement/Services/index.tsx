@@ -19,8 +19,6 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
-import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -29,6 +27,7 @@ import { startCase } from 'lodash';
 import LayersIcon from '@material-ui/icons/Layers';
 import CategoryIcon from '@material-ui/icons/Category';
 import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
+import StorageIcon from '@material-ui/icons/Storage';
 
 const Services = ({
   rentalManagementData,
@@ -131,37 +130,34 @@ const Services = ({
               </Box>
             }
             {!isOffline && (
-              <Tooltip
-              title={`${row.original.type === 'service' ? "Service" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}              >
-              <IconButton size='small'>
-                {row.original.type === 'service' ?
-                  <LocalLaundryServiceIcon
-                    color="primary"
-                    onClick={() => {
-                      window.open(
-                        `${routes.serviceMasterDetail.path}/${row.original.materialId}`
-                      );
-                    }}
-                  />
-                  : row.original.type === 'product' ? <LayersIcon
-                    color="primary"
-                    onClick={() => {
-                      window.open(
-                        `${routes.productDetail.path}/${row.original.materialId}`
-                      );
-                    }}
-                  /> :
-                    <CategoryIcon
+              <Tooltip title={row.original.type === 'service' ? "Service" :
+                row.original.type === 'asset' ? "Asset" : row.original.type === 'package' ? "Package" :
+                  row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Serialized Product') : ''}              >
+                <IconButton size='small'>
+                  {row.original.type === 'service' ?
+                    <LocalLaundryServiceIcon
                       color="primary"
-                      onClick={() => {
-                        window.open(
-                          `${routes.packagesDetail.path}/${row.original.materialId}`
-                        );
-                      }}
-                    />}
-
-              </IconButton>
-            </Tooltip>
+                      fontSize="small"
+                      onClick={() => { window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`); }}
+                    />
+                    : row.original.type === 'product' ?
+                      <LayersIcon
+                        color="primary"
+                        fontSize="small"
+                        onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
+                      /> : row.original.type === 'asset' ?
+                        <StorageIcon
+                          color="primary"
+                          fontSize="small"
+                          onClick={() => { window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`) }}
+                        /> :
+                        <CategoryIcon
+                          color="primary"
+                          fontSize="small"
+                          onClick={() => { window.open(`${routes.packagesDetail.path}/${row.original.materialId}`); }}
+                        />}
+                </IconButton>
+              </Tooltip>
             )}
           </div>
         ),
@@ -312,10 +308,10 @@ const Services = ({
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail = `${parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
+        ? parent.productDetail?.productName
+        : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
         }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
