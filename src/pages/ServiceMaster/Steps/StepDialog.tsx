@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useContext, useEffect } from 'react';
-import { Box, Button, Dialog, FormControlLabel, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, Divider, FormControlLabel, InputAdornment, TextField } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useState } from 'react';
 import { currencyCodeToSymbol, CustomDialogTransition, getUniqueCurrencies, workOrder } from 'src/constants/helpers';
@@ -26,7 +26,8 @@ export default function StepDialog({
   reference = null,
   workOrderId = null,
   uniqueId = null,
-  setOpenFieldDialog = null
+  setOpenFieldDialog = null,
+  handleAddStep = null
 }) {
   const toastConfig = useContext(CustomToastContext);
   const [stepDetails, setStepDetails] = useState(null);
@@ -109,7 +110,7 @@ export default function StepDialog({
     }
   }, []);
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     values.leadDay = parseInt(values.leadDay);
     values.costPrice = parseFloat(values.costPrice);
     values.listPrice = parseFloat(values.listPrice);
@@ -119,21 +120,21 @@ export default function StepDialog({
       if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
 
       values.serviceId = serviceId;
-      axiosInstance()
-        .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/add-step`, values)
-        .then(({ data }) => {
-          handleSucess();
-          toastConfig.setToastConfig({
-            open: true,
-            message: data.message,
-            severity: 'success'
-          });
-          setLoading(false);
-        })
-        .catch((err) => {
-          setLoading(false);
-          toastConfig.setToastConfig(err);
+      try {
+        const data = await handleAddStep(values);
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
         });
+        handleSucess();
+
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      }
+
       return;
     }
     if (stepId != '') {
@@ -290,10 +291,13 @@ export default function StepDialog({
                     />
                   </Grid>
                   <Grid xs={12} md={4} sm={4} item>
-                    <Field
-                      component={TextFieldFormik}
+                    <TextField
                       InputProps={{
-                        startAdornment: `${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''}   `
+                        startAdornment: (
+                          <InputAdornment position="start">{`${
+                            values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                          }`}</InputAdornment>
+                        )
                       }}
                       margin="dense"
                       type="number"
@@ -310,10 +314,13 @@ export default function StepDialog({
                     />
                   </Grid>
                   <Grid xs={12} md={4} sm={4} item>
-                    <Field
-                      component={TextFieldFormik}
+                    <TextField
                       InputProps={{
-                        startAdornment: `${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''}   `
+                        startAdornment: (
+                          <InputAdornment position="start">{`${
+                            values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                          }`}</InputAdornment>
+                        )
                       }}
                       margin="dense"
                       type="number"
@@ -603,9 +610,13 @@ export default function StepDialog({
                   </Box>
                 )}
                 {reference === 'workOrder' && (
-                  <Button size="small" color="primary" variant="contained" onClick={() => setOpenFieldDialog(true)}>
-                    Configure Fields
-                  </Button>
+                  <Box mt={2}>
+                    <Divider />
+                    <Box mb={2} />
+                    <Button size="small" color="primary" variant="contained" onClick={() => setOpenFieldDialog(true)}>
+                      Configure Fields
+                    </Button>
+                  </Box>
                 )}
               </CustomDialogContent>
               <CustomDialogFooter>

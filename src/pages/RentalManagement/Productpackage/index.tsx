@@ -28,6 +28,7 @@ import { startCase } from 'lodash';
 import LayersIcon from '@material-ui/icons/Layers';
 import CategoryIcon from '@material-ui/icons/Category';
 import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
+import StorageIcon from '@material-ui/icons/Storage';
 
 const Productpackage = ({
   rentalManagementData,
@@ -119,36 +120,32 @@ const Productpackage = ({
               </Box>
             }
             {!isOffline && (
-
-              <Tooltip
-                title={`${row.original.type === 'service' ? "Service" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}              >
+              <Tooltip title={row.original.type === 'service' ? "Service" :
+                row.original.type === 'asset' ? "Asset" : row.original.type === 'package' ? "Package" :
+                  row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Serialized Product') : ''}              >
                 <IconButton size='small'>
                   {row.original.type === 'service' ?
                     <LocalLaundryServiceIcon
                       color="primary"
-                      onClick={() => {
-                        window.open(
-                          `${routes.serviceMasterDetail.path}/${row.original.materialId}`
-                        );
-                      }}
+                      fontSize="small"
+                      onClick={() => { window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`); }}
                     />
-                    : row.original.type === 'product' ? <LayersIcon
-                      color="primary"
-                      onClick={() => {
-                        window.open(
-                          `${routes.productDetail.path}/${row.original.materialId}`
-                        );
-                      }}
-                    /> :
-                      <CategoryIcon
+                    : row.original.type === 'product' ?
+                      <LayersIcon
                         color="primary"
-                        onClick={() => {
-                          window.open(
-                            `${routes.packagesDetail.path}/${row.original.materialId}`
-                          );
-                        }}
-                      />}
-
+                        fontSize="small"
+                        onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
+                      /> : row.original.type === 'asset' ?
+                        <StorageIcon
+                          color="primary"
+                          fontSize="small"
+                          onClick={() => { window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`) }}
+                        /> :
+                        <CategoryIcon
+                          color="primary"
+                          fontSize="small"
+                          onClick={() => { window.open(`${routes.packagesDetail.path}/${row.original.materialId}`); }}
+                        />}
                 </IconButton>
               </Tooltip>
             )}
