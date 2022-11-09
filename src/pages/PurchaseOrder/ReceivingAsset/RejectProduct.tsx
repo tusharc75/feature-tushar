@@ -11,8 +11,13 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { productInventory } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
+import { KeyboardDatePicker } from 'formik-material-ui-pickers';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import MomentUtils from '@date-io/moment';
+import { dateFormat, purchaseOrder } from '../../../constants/helpers';
 
-const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse }) => {
+
+const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, purchaseOrderData }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
@@ -49,7 +54,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
       serialNumber: serialNumberIds?.map((item) => item?._id),
     }];
     setLoading(true);
-    axiosInstance().post(`/purchase-order/reject-inventory/${POId}`, data).then(() => {
+    axiosInstance().post(`/purchase-order/reject-inventory/${POId}`, { products: data, rejectDate: values?.rejectDate }).then(() => {
       setLoading(false);
       handleSuccess();
     })
@@ -88,110 +93,133 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse })
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      <Formik initialValues={{ qty: 1, comment: '' }} onSubmit={handleSubmit} validateOnMount validate={validate}>
-        {({ submitForm, touched, errors, setFieldValue, values }) => (
-          <Form autoComplete="off" autoCorrect="off" noValidate>
-            <CustomDialogHeader
-              title={`Reject Product`}
-              showRequiredLabel={true}
-              onClose={handleClose}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-              }}
-              showManimizeMaximize={true}
-            />
-            <CustomDialogContent>
-              <List style={{ padding: 0 }}>
-                <ListItem key={product.productId}>
-                  <ListItemText primary={product?.productName} secondary={`Quantity : ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`} />
+      <MuiPickersUtilsProvider utils={MomentUtils}>
+        <Formik initialValues={{ qty: 1, rejectDate: new Date(), comment: '' }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+          {({ submitForm, touched, errors, setFieldValue, values }) => (
+            <Form autoComplete="off" autoCorrect="off" noValidate>
+              <CustomDialogHeader
+                title={`Reject Product`}
+                showRequiredLabel={true}
+                onClose={handleClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              />
+              <CustomDialogContent>
+                <List style={{ padding: 0 }}>
+                  <ListItem key={product.productId}>
+                    <ListItemText primary={product?.productName} secondary={`Quantity : ${product?.qty - (product?.rejectQuantity || 0) - (product?.assetQty || 0)}`} />
+                    <Field
+                      component={TextFieldFormik}
+                      margin="dense"
+                      type="number"
+                      label="Qty"
+                      name="qty"
+                      variant="outlined"
+                      value={values['qty']}
+                      error={touched['qty'] && Boolean(errors['qty'])}
+                      helperText={touched['qty'] && errors['qty']}
+                      onChange={(e) => {
+                        setFieldValue('qty', e.target.value);
+                      }}
+                    />
+                  </ListItem>
+                </List>
+                <Box m={1}>
                   <Field
                     component={TextFieldFormik}
                     margin="dense"
-                    type="number"
-                    label="Qty"
-                    name="qty"
+                    type="text"
+                    label="Comment"
+                    name="comment"
                     variant="outlined"
-                    value={values['qty']}
-                    error={touched['qty'] && Boolean(errors['qty'])}
-                    helperText={touched['qty'] && errors['qty']}
+                    rows={3}
+                    multiline
+                    fullWidth
+                    value={values['comment']}
+                    error={touched['comment'] && Boolean(errors['comment'])}
+                    helperText={touched['comment'] && errors['comment']}
                     onChange={(e) => {
-                      setFieldValue('qty', e.target.value);
+                      setFieldValue('comment', e.target.value);
                     }}
                   />
-                </ListItem>
-              </List>
-              <Box m={1}>
-                <Field
-                  component={TextFieldFormik}
-                  margin="dense"
-                  type="text"
-                  label="Comment"
-                  name="comment"
-                  variant="outlined"
-                  rows={3}
-                  multiline
-                  fullWidth
-                  value={values['comment']}
-                  error={touched['comment'] && Boolean(errors['comment'])}
-                  helperText={touched['comment'] && errors['comment']}
-                  onChange={(e) => {
-                    setFieldValue('comment', e.target.value);
+                </Box>
+                {product?.serializedProduct ? (
+                  <Fragment>
+                    <Box my={2} mx={1}>
+                      <Divider />
+                    </Box>
+                    <Box m={1}>
+                      <Autocomplete
+                        size="small"
+                        options={serialNumbers.map((item: any) => item?.serialNumber.toString())}
+                        freeSolo={false}
+                        multiple={true}
+                        disableCloseOnSelect
+                        value={values['serialNumbers']}
+                        onChange={(_, val) => {
+                          setFieldValue('serialNumbers', val);
+                        }}
+                        getOptionSelected={(item, current) => item === current}
+                        getOptionLabel={(option) => option}
+                        renderInput={(props) => (
+                          <TextField
+                            {...props}
+                            placeholder={''}
+                            variant="outlined"
+                            name="serialNumbers"
+                            label={'Select Serial Numbers'}
+                            error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
+                            helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                          />
+                        )}
+                      />
+                    </Box>
+                  </Fragment>
+                ) : null}
+                <Box m={1}>
+                  <Field
+                    fullWidth
+                    label='Reject Date'
+                    variant="inline"
+                    inputVariant="outlined"
+                    autoOk
+                    size="small"
+                    margin="dense"
+                    component={KeyboardDatePicker}
+                    name="rejectDate"
+                    placeholder="Reject Date"
+                    value={values.rejectDate}
+                    format={dateFormat}
+                    minDate={purchaseOrderData?.purchaseOrderDate}
+                    maxDate={new Date()}
+                    onChange={(value) => {
+                      setFieldValue('rejectDate', value);
+                    }}
+                  />
+                </Box>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <CustomButton
+                  loading={loading}
+                  disabled={loading}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  onClick={() => {
+                    if (Object.keys(errors).length > 0) return;
+                    submitForm();
                   }}
-                />
-              </Box>
-              {product?.serializedProduct ? (
-                <Fragment>
-                  <Box my={2} mx={1}>
-                    <Divider />
-                  </Box>
-                  <Box m={1}>
-                    <Autocomplete
-                      size="small"
-                      options={serialNumbers.map((item: any) => item?.serialNumber.toString())}
-                      freeSolo={false}
-                      multiple={true}
-                      disableCloseOnSelect
-                      value={values['serialNumbers']}
-                      onChange={(_, val) => {
-                        setFieldValue('serialNumbers', val);
-                      }}
-                      getOptionSelected={(item, current) => item === current}
-                      getOptionLabel={(option) => option}
-                      renderInput={(props) => (
-                        <TextField
-                          {...props}
-                          placeholder={''}
-                          variant="outlined"
-                          name="serialNumbers"
-                          label={'Select Serial Numbers'}
-                          error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
-                          helperText={touched['serialNumbers'] && errors['serialNumbers']}
-                        />
-                      )}
-                    />
-                  </Box>
-                </Fragment>
-              ) : null}
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <CustomButton
-                loading={loading}
-                disabled={loading}
-                variant="contained"
-                color="primary"
-                type="submit"
-                onClick={() => {
-                  if (Object.keys(errors).length > 0) return;
-                  submitForm();
-                }}
-              >
-                Submit
-              </CustomButton>
-            </CustomDialogFooter>
-          </Form>
-        )}
-      </Formik>
+                >
+                  Submit
+                </CustomButton>
+              </CustomDialogFooter>
+            </Form>
+          )}
+        </Formik>
+      </MuiPickersUtilsProvider>
     </Dialog>
   );
 };

@@ -22,6 +22,7 @@ import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 
 const ServiceTable = ({ packageId, packageData }) => {
+  
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -87,11 +88,7 @@ const ServiceTable = ({ packageId, packageData }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(
-            packageData?.packageType === 'Service' ? routes.serviceMaster.title : routes.product.title,
-            o?.fieldData,
-            packageData?.packageType === 'Service' ? routes.serviceMasterDetail.path : routes.productDetail.path
-          );
+          let currentColumn = getColumnData(routes.serviceMaster.title, o?.fieldData, routes.serviceMasterDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -220,9 +217,9 @@ const ServiceTable = ({ packageId, packageData }) => {
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => {}}
+          onEdit={(data) => { }}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => {}}
+          onDelete={(data) => { }}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -238,7 +235,7 @@ const ServiceTable = ({ packageId, packageData }) => {
             setShowServiceAssignDialog(true);
           }}
           showClone={true}
-          onClone={(data) => {}}
+          onClone={(data) => { }}
           renderedFrom={renderedFrom}
         />
       ) : Object.keys(frameWorkComponent).length > 0 ? (
