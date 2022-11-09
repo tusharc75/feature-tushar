@@ -1,5 +1,19 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Chip, Typography, Menu, MenuItem, IconButton, Dialog, FormControl, Checkbox, TextField, Tooltip } from '@material-ui/core';
+import {
+  Grid,
+  Box,
+  Button,
+  Chip,
+  Typography,
+  Menu,
+  MenuItem,
+  IconButton,
+  Dialog,
+  FormControl,
+  Checkbox,
+  TextField,
+  Tooltip
+} from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -7,7 +21,14 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import moment from 'moment';
-import { rentalManagement, dateFormat, formatAmountWithCurrency, QUOTATION_STATUS, pricingCondition, CustomDialogTransition } from '../../../constants/helpers';
+import {
+  rentalManagement,
+  dateFormat,
+  formatAmountWithCurrency,
+  QUOTATION_STATUS,
+  pricingCondition,
+  CustomDialogTransition
+} from '../../../constants/helpers';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
@@ -80,13 +101,10 @@ const Quotation = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allColumn, setAllColumn] = useState([]);
 
-  const defaultSelectColumns = [
-    'Detail',
-    'Unit',
-    'Qty',
-  ];
+  const defaultSelectColumns = ['Detail', 'Unit', 'Qty'];
   const [visibleColumnsExcel, setVisibleColumnsExcel] = useState(defaultSelectColumns);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
+  const [excelArrangeColumnLoading, setExcelArrangeColumnLoading] = useState(false);
 
   useEffect(() => {
     fetchQuotationData();
@@ -149,36 +167,40 @@ const Quotation = ({
               </Box>
             }
             {!isOffline && (
-
               <Tooltip
-                title={`${row.original.type === 'service' ? "Service" : row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Product') : 'Package'}`}              >
-                <IconButton size='small'>
-                  {row.original.type === 'service' ?
+                title={`${
+                  row.original.type === 'service'
+                    ? 'Service'
+                    : row.original.type === 'product'
+                    ? !row.original.serializedProduct
+                      ? 'Non-Serialized Product'
+                      : 'Product'
+                    : 'Package'
+                }`}
+              >
+                <IconButton size="small">
+                  {row.original.type === 'service' ? (
                     <LocalLaundryServiceIcon
                       color="primary"
                       onClick={() => {
-                        window.open(
-                          `${routes.serviceMasterDetail.path}/${row.original.materialId}`
-                        );
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                       }}
                     />
-                    : row.original.type === 'product' ? <LayersIcon
+                  ) : row.original.type === 'product' ? (
+                    <LayersIcon
                       color="primary"
                       onClick={() => {
-                        window.open(
-                          `${routes.productDetail.path}/${row.original.materialId}`
-                        );
+                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                       }}
-                    /> :
-                      <CategoryIcon
-                        color="primary"
-                        onClick={() => {
-                          window.open(
-                            `${routes.packagesDetail.path}/${row.original.materialId}`
-                          );
-                        }}
-                      />}
-
+                    />
+                  ) : (
+                    <CategoryIcon
+                      color="primary"
+                      onClick={() => {
+                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                      }}
+                    />
+                  )}
                 </IconButton>
               </Tooltip>
             )}
@@ -274,20 +296,21 @@ const Quotation = ({
       }
     });
     setColumns(coloum);
-    setAllColumn(coloum.map(d => d.Header))
+    setAllColumn(coloum.map((d) => d.Header));
   };
 
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -316,14 +339,15 @@ const Quotation = ({
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -440,7 +464,7 @@ const Quotation = ({
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
-          <Grid container >
+          <Grid container spacing={1}>
             <Grid item xs={10} md={10} sm={10}>
               <Button
                 onClick={() => {
@@ -508,7 +532,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)
@@ -741,7 +765,7 @@ const Quotation = ({
           <CustomDialogContent>
             <Grid container justify="space-between" alignItems="center">
               <Grid item xs={12} md={12} sm={12}>
-                <FormControl fullWidth >
+                <FormControl fullWidth>
                   <Autocomplete
                     id="demo-mutiple-chip"
                     disabled={!allowedToEdit}
@@ -750,32 +774,35 @@ const Quotation = ({
                     multiple
                     value={visibleColumnsExcel}
                     onChange={(e, val) => {
-                      if (val.includes("Select All") && ["Select All", ...allColumn].sort().toString() !== val.sort().toString()) {
+                      if (val.includes('Select All') && ['Select All', ...allColumn].sort().toString() !== val.sort().toString()) {
                         setVisibleColumnsExcel(allColumn);
-                      }
-                      else if (["Select All", ...allColumn].sort().toString() === val.sort().toString()) {
+                      } else if (['Select All', ...allColumn].sort().toString() === val.sort().toString()) {
                         setVisibleColumnsExcel([]);
-                      }
-                      else {
+                      } else {
                         setVisibleColumnsExcel(val);
                       }
                     }}
-                    options={["Select All", ...allColumn]}
+                    options={['Select All', ...allColumn]}
                     disableCloseOnSelect
                     getOptionLabel={(option) => option}
                     renderOption={(option, { selected }) => (
                       <React.Fragment>
-                        <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={(showExcelArrangeColumns && ["Select All", ...allColumn].sort().toString() === ["Select All", ...visibleColumnsExcel].sort().toString()) ? true : selected} />
+                        <Checkbox
+                          icon={icon}
+                          checkedIcon={checkedIcon}
+                          style={{ marginRight: 8 }}
+                          checked={
+                            showExcelArrangeColumns &&
+                            ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
+                              ? true
+                              : selected
+                          }
+                        />
                         {option}
                       </React.Fragment>
                     )}
                     renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        label={`Visible Columns in Quote Excel`}
-                        placeholder="Select "
-                      />
+                      <TextField {...params} variant="outlined" label={`Visible Columns in Quote Excel`} placeholder="Select " />
                     )}
                   />
                 </FormControl>
@@ -787,32 +814,41 @@ const Quotation = ({
               variant="contained"
               color="primary"
               size="small"
+              loading={excelArrangeColumnLoading}
               disabled={visibleColumnsExcel.length === 0}
               onClick={(e) => {
                 e.preventDefault();
-                setShowExcelArrangeColumns(false);
-                axiosInstance().post(`${quotation.api}/template`, {
-                  "id": quotationData._id,
-                  "versionId": versionId,
-                  "columns": columns.filter(d => visibleColumnsExcel?.includes(d?.Header)).map(d => {
-                    if (d?.accessor === 'qtyDisplay') {
-                      return 'qty'
-                    }
-                    else {
-                      return d?.accessor.split("_")[0]
-                    }
-                  }
+                setExcelArrangeColumnLoading(true);
+                axiosInstance()
+                  .post(
+                    `${quotation.api}/template`,
+                    {
+                      id: quotationData._id,
+                      versionId: versionId,
+                      columns: columns
+                        .filter((d) => visibleColumnsExcel?.includes(d?.Header))
+                        .map((d) => {
+                          if (d?.accessor === 'qtyDisplay') {
+                            return 'qty';
+                          } else {
+                            return d?.accessor.split('_')[0];
+                          }
+                        })
+                    },
+                    { responseType: 'blob' }
                   )
-                }, { responseType: 'blob', })
                   .then(({ data }) => {
+                    setExcelArrangeColumnLoading(false);
+                    setShowExcelArrangeColumns(false);
                     const url = window.URL.createObjectURL(new Blob([data]));
                     const link = document.createElement('a');
                     link.href = url;
-                    link.setAttribute('download', quotationData.quotationNumber + "." + 'xlsx');
+                    link.setAttribute('download', quotationData.quotationNumber + '.' + 'xlsx');
                     document.body.appendChild(link);
                     link.click();
                   })
                   .catch((err) => {
+                    setExcelArrangeColumnLoading(false);
                     toastConfig.setToastConfig(err);
                   });
               }}
