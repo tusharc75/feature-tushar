@@ -11,7 +11,7 @@ import { FormBuilder } from '../../../components/FormBuilder';
 import { uniq, map } from 'lodash';
 import { CustomDialogTransition } from '../../../constants/helpers';
 
-const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, reference='' }) => {
+const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, reference='', sectionData = null }) => {
 
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
@@ -37,6 +37,9 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
           toastConfig.setToastConfig(err);
         });
     }
+    if(reference === "workOrder") {
+      setSection(sectionData && sectionData?.length  ? sectionData : [])
+    }
   }, []);
 
   const handleSave = async () => {
@@ -58,7 +61,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
       });
     });
     if(reference === "workOrder") {
-      handleSucess(data)
+      handleSucess({fields: data, section})
       return
     }
     axiosInstance().post(`${serviceMaster.api}/fields/${serviceId}`, { stepIds: stepIds, fields: data }).then(({ data }) => {
