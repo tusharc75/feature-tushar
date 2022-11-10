@@ -158,7 +158,10 @@ const RentalManagementDetailsPage = () => {
     if (!isOffline) {
       fetchAssetStatusRights();
     }
+    checkProgressiveBilling()
+  }, [id]);
 
+  const checkProgressiveBilling = () => {
     if (user?.role?.selectedEntity?.policy?.isProgressiveBillingRentalManagement) {
       axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`).then(({ data: { data } }) => {
         if (data.length > 0) {
@@ -169,7 +172,7 @@ const RentalManagementDetailsPage = () => {
           toastConfig.setToastConfig(err);
         });
     }
-  }, [id]);
+  }
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
@@ -596,6 +599,7 @@ const RentalManagementDetailsPage = () => {
                         allowedToEdit={allowedToEdit}
                         isProcessor={isProcessor}
                         allowUpdateStatus={allowUpdateStatus}
+                        checkProgressiveBilling={checkProgressiveBilling}
                       />
                     )}
                     {rentalSteps[currentStep] === 'Receiving Ticket' && rentalManagementData && (
