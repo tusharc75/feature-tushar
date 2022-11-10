@@ -109,7 +109,10 @@ const PublicRoutePage = () => {
   };
 
   useEffect(() => {
-    document.title = resourceData?.referenceIdType === 'QuotationCustomer' ? 'Equipt Customer Portal' : 'Equipt Supplier Portal';
+    document.title =
+      resourceData?.referenceIdType === 'QuotationCustomer' || resourceData?.referenceIdType === 'RentalJob'
+        ? 'Equipt Customer Portal'
+        : 'Equipt Supplier Portal';
   }, [resourceData?.referenceIdType]);
 
   return (
