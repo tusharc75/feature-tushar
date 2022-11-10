@@ -61,6 +61,8 @@ import SendEmail from 'src/pages/Quotation/SendEmail';
 import LayersIcon from '@material-ui/icons/Layers';
 import CategoryIcon from '@material-ui/icons/Category';
 import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
+import StorageIcon from '@material-ui/icons/Storage';
+import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit'
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -167,40 +169,39 @@ const Quotation = ({
               </Box>
             }
             {!isOffline && (
-              <Tooltip
-                title={`${
-                  row.original.type === 'service'
-                    ? 'Service'
-                    : row.original.type === 'product'
-                    ? !row.original.serializedProduct
-                      ? 'Non-Serialized Product'
-                      : 'Product'
-                    : 'Package'
-                }`}
-              >
-                <IconButton size="small">
-                  {row.original.type === 'service' ? (
+              <Tooltip title={row.original.type === 'service' ? "Service" :
+                row.original.type === 'asset' ? "Asset" : row.original.type === 'package' ? "Package" :
+                  row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Serialized Product') : ''}              >
+                <IconButton size='small'>
+                  {row.original.type === 'service' ?
                     <LocalLaundryServiceIcon
                       color="primary"
-                      onClick={() => {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      }}
+                      fontSize="small"
+                      onClick={() => { window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`); }}
                     />
-                  ) : row.original.type === 'product' ? (
-                    <LayersIcon
-                      color="primary"
-                      onClick={() => {
-                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      }}
-                    />
-                  ) : (
-                    <CategoryIcon
-                      color="primary"
-                      onClick={() => {
-                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                      }}
-                    />
-                  )}
+                    : row.original.type === 'product' ?
+                      row?.original?.serializedProduct ?
+                        <LayersIcon
+                          color="primary"
+                          fontSize="small"
+                          onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
+                        /> :
+                        <HorizontalSplitIcon
+                          color="primary"
+                          fontSize="small"
+                          onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
+                        />
+                      : row.original.type === 'asset' ?
+                        <StorageIcon
+                          color="primary"
+                          fontSize="small"
+                          onClick={() => { window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`) }}
+                        /> :
+                        <CategoryIcon
+                          color="primary"
+                          fontSize="small"
+                          onClick={() => { window.open(`${routes.packagesDetail.path}/${row.original.materialId}`); }}
+                        />}
                 </IconButton>
               </Tooltip>
             )}
@@ -302,15 +303,14 @@ const Quotation = ({
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'service'
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.packageDetail?.packageName
+        }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -339,15 +339,14 @@ const Quotation = ({
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${
-        parent.type === 'serializedAsset'
+      parent.detail = `${parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.productDetail?.productName
+            : parent.type === 'service'
+              ? parent.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName
+        }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -532,7 +531,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)
@@ -793,7 +792,7 @@ const Quotation = ({
                           style={{ marginRight: 8 }}
                           checked={
                             showExcelArrangeColumns &&
-                            ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
+                              ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
                               ? true
                               : selected
                           }

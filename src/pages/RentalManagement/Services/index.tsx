@@ -28,6 +28,7 @@ import LayersIcon from '@material-ui/icons/Layers';
 import CategoryIcon from '@material-ui/icons/Category';
 import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
 import StorageIcon from '@material-ui/icons/Storage';
+import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit'
 
 const Services = ({
   rentalManagementData,
@@ -141,11 +142,18 @@ const Services = ({
                       onClick={() => { window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`); }}
                     />
                     : row.original.type === 'product' ?
-                      <LayersIcon
-                        color="primary"
-                        fontSize="small"
-                        onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
-                      /> : row.original.type === 'asset' ?
+                      row?.original?.serializedProduct ?
+                        <LayersIcon
+                          color="primary"
+                          fontSize="small"
+                          onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
+                        /> :
+                        <HorizontalSplitIcon
+                          color="primary"
+                          fontSize="small"
+                          onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
+                        />
+                      : row.original.type === 'asset' ?
                         <StorageIcon
                           color="primary"
                           fontSize="small"
