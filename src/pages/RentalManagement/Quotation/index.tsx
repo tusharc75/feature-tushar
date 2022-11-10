@@ -34,8 +34,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 import { useData } from 'src/StateProvider/Provider';
-import { GiReceiveMoney } from 'react-icons/gi';
-import { VscVersions } from 'react-icons/vsc';
 import contactClass from '../../Contact/contact.module.scss';
 import { quotation } from '../../../constants/helpers';
 import Versions from 'src/pages/Quotation/Versions';
@@ -48,7 +46,6 @@ import DateRangeIcon from '@material-ui/icons/DateRange';
 import DeleteIcon from '@material-ui/icons/Delete';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import { orderBy, startCase } from 'lodash';
-import { AiOutlineFileExcel } from 'react-icons/ai';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { Autocomplete } from '@material-ui/lab';
 import React from 'react';
@@ -57,15 +54,13 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import SendEmail from 'src/pages/Quotation/SendEmail';
 import LayersIcon from '@material-ui/icons/Layers';
 import CategoryIcon from '@material-ui/icons/Category';
 import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
 import StorageIcon from '@material-ui/icons/Storage';
 import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit'
+import SendEmail from './SendEmail';
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const Quotation = ({
   rentalManagementData,
@@ -103,10 +98,6 @@ const Quotation = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allColumn, setAllColumn] = useState([]);
 
-  const defaultSelectColumns = ['Detail', 'Unit', 'Qty'];
-  const [visibleColumnsExcel, setVisibleColumnsExcel] = useState(defaultSelectColumns);
-  const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
-  const [excelArrangeColumnLoading, setExcelArrangeColumnLoading] = useState(false);
 
   useEffect(() => {
     fetchQuotationData();
@@ -304,12 +295,12 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${_subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'service'
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
         }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -340,12 +331,12 @@ const Quotation = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.detail = `${parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'service'
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
         }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
@@ -463,51 +454,17 @@ const Quotation = ({
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex">
-          <Grid container spacing={1}>
-            <Grid item xs={10} md={10} sm={10}>
-              <Button
-                onClick={() => {
-                  setShowQuotationSummaryDialog(true);
-                }}
-                variant="outlined"
-                size="small"
-                className="mx-1"
-                startIcon={<GiReceiveMoney />}
-                color="primary"
-              >
-                Summary
-              </Button>
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="primary"
-                size="small"
-                className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
-                onClick={() => {
-                  setShowAllVersionStatus(true);
-                }}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                startIcon={isMobile && !isTablet ? null : <VscVersions />}
-              >
-                {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-              </Button>
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="primary"
-                size="small"
-                className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
-                onClick={() => {
-                  setShowExcelArrangeColumns(true);
-                }}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                startIcon={isMobile && !isTablet ? null : <AiOutlineFileExcel />}
-              >
-                {isMobile && !isTablet ? <AiOutlineFileExcel size={20} /> : `Excel Download`}
-              </Button>
-            </Grid>
-            <Grid item xs={2} md={2} sm={2}>
-              <SendEmail versionData={quotationData?.versions[currentVersion]} quotationData={quotationData} previewOnly={true} />
-            </Grid>
-          </Grid>
+          <SendEmail
+            versionData={quotationData?.versions[currentVersion]}
+            quotationData={quotationData}
+            previewOnly={true}
+            allowedToEdit={allowedToEdit}
+            versionId={versionId}
+            columns={columns}
+            allColumn={allColumn}
+            setShowAllVersionStatus={setShowAllVersionStatus}
+            setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
+            currentVersion={currentVersion} />
         </Box>
         <Box display="flex">
           {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
@@ -738,125 +695,7 @@ const Quotation = ({
           }}
         />
       )}
-      {showExcelArrangeColumns && (
-        <Dialog
-          open={showExcelArrangeColumns}
-          aria-labelledby="customized-dialog-title"
-          maxWidth="sm"
-          onClose={() => {
-            setShowExcelArrangeColumns(false);
-          }}
-          fullWidth
-          fullScreen={fullScreen || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-        >
-          <CustomDialogHeader
-            title={`View Columns Excel`}
-            onClose={() => {
-              setShowExcelArrangeColumns(false);
-            }}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-          />
-          <CustomDialogContent>
-            <Grid container justify="space-between" alignItems="center">
-              <Grid item xs={12} md={12} sm={12}>
-                <FormControl fullWidth>
-                  <Autocomplete
-                    id="demo-mutiple-chip"
-                    disabled={!allowedToEdit}
-                    fullWidth
-                    size="small"
-                    multiple
-                    value={visibleColumnsExcel}
-                    onChange={(e, val) => {
-                      if (val.includes('Select All') && ['Select All', ...allColumn].sort().toString() !== val.sort().toString()) {
-                        setVisibleColumnsExcel(allColumn);
-                      } else if (['Select All', ...allColumn].sort().toString() === val.sort().toString()) {
-                        setVisibleColumnsExcel([]);
-                      } else {
-                        setVisibleColumnsExcel(val);
-                      }
-                    }}
-                    options={['Select All', ...allColumn]}
-                    disableCloseOnSelect
-                    getOptionLabel={(option) => option}
-                    renderOption={(option, { selected }) => (
-                      <React.Fragment>
-                        <Checkbox
-                          icon={icon}
-                          checkedIcon={checkedIcon}
-                          style={{ marginRight: 8 }}
-                          checked={
-                            showExcelArrangeColumns &&
-                              ['Select All', ...allColumn].sort().toString() === ['Select All', ...visibleColumnsExcel].sort().toString()
-                              ? true
-                              : selected
-                          }
-                        />
-                        {option}
-                      </React.Fragment>
-                    )}
-                    renderInput={(params) => (
-                      <TextField {...params} variant="outlined" label={`Visible Columns in Quote Excel`} placeholder="Select " />
-                    )}
-                  />
-                </FormControl>
-              </Grid>
-            </Grid>
-          </CustomDialogContent>
-          <CustomDialogFooter>
-            <CustomButton
-              variant="contained"
-              color="primary"
-              size="small"
-              loading={excelArrangeColumnLoading}
-              disabled={visibleColumnsExcel.length === 0}
-              onClick={(e) => {
-                e.preventDefault();
-                setExcelArrangeColumnLoading(true);
-                axiosInstance()
-                  .post(
-                    `${quotation.api}/template`,
-                    {
-                      id: quotationData._id,
-                      versionId: versionId,
-                      columns: columns
-                        .filter((d) => visibleColumnsExcel?.includes(d?.Header))
-                        .map((d) => {
-                          if (d?.accessor === 'qtyDisplay') {
-                            return 'qty';
-                          } else {
-                            return d?.accessor.split('_')[0];
-                          }
-                        })
-                    },
-                    { responseType: 'blob' }
-                  )
-                  .then(({ data }) => {
-                    setExcelArrangeColumnLoading(false);
-                    setShowExcelArrangeColumns(false);
-                    const url = window.URL.createObjectURL(new Blob([data]));
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.setAttribute('download', quotationData.quotationNumber + '.' + 'xlsx');
-                    document.body.appendChild(link);
-                    link.click();
-                  })
-                  .catch((err) => {
-                    setExcelArrangeColumnLoading(false);
-                    toastConfig.setToastConfig(err);
-                  });
-              }}
-            >
-              Download
-            </CustomButton>
-          </CustomDialogFooter>
-        </Dialog>
-      )}
+
     </Fragment>
   );
 };
