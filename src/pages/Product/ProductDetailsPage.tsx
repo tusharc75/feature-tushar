@@ -395,7 +395,7 @@ const ProductDetailsPage = () => {
                         }}
                         size="small"
                       >
-                        Convert Serialized Product
+                        Convert to Serialized Product
                       </Button>
                       {showConfirmBoxConvert && (
                         <ConfirmationDialog
@@ -483,7 +483,7 @@ const ProductDetailsPage = () => {
                                         interactive
                                         title={
                                           <>
-                                            <Typography>Inventory Status: </Typography>
+                                            <Typography>Asset Status: </Typography>
                                             {products.map((s) => (
                                               <Typography>{`(${s?.count}) ${s?.status}`}</Typography>
                                             ))}
