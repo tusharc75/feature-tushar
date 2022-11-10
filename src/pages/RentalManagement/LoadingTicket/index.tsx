@@ -67,7 +67,8 @@ const LoadingTicket = ({
   renderedFrom,
   allowedToEdit,
   isProcessor,
-  allowUpdateStatus
+  allowUpdateStatus,
+  checkProgressiveBilling
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -427,6 +428,7 @@ const LoadingTicket = ({
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
           fetchRecords();
+          checkProgressiveBilling();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -580,7 +582,7 @@ const LoadingTicket = ({
               </Menu>
               <Box mx={1} />
               {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Fragment>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -658,7 +660,7 @@ const LoadingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
