@@ -21,7 +21,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
-import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { calculatePrice, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import AddExistingProductInventory from '../Productpackage/AddExistingProductInventory';
@@ -357,7 +357,7 @@ const Consumables = ({
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(material);
+    const priceData: any = await calculatePrice(rentalManagementData, material);
     material.forEach((element) => {
       const rateResult = priceData?.filter(
         (e) =>
@@ -434,34 +434,6 @@ const Consumables = ({
   const handleOpen = (rowData) => {
     setIsProductEdit({ open: true, isBulkedit: false });
     setRecordToUpdate(rowData);
-  };
-
-  const calculatePrice = (arr: any[]) => {
-    if (rentalManagementData) {
-      const data: any = {};
-      data.conditionType = ['Rent'];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: rentalManagementData?.currency
-      }));
-      data.supplier = [];
-      data.customer = [rentalManagementData?.customerAccount?.optionValue];
-      data.warehouse = [rentalManagementData?.warehouse?.optionValue];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -564,12 +536,12 @@ const Consumables = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -604,7 +576,6 @@ const Consumables = ({
       )}
       {isProductEdit.open && (
         <RentalJobQtyDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);

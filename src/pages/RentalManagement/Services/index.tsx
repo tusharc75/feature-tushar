@@ -20,7 +20,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
-import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { startCase } from 'lodash';
@@ -395,7 +395,7 @@ const Services = ({
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(material);
+    const priceData: any = await calculatePrice(rentalManagementData, material);
     material.forEach((element) => {
       const rateResult = priceData?.filter(
         (e) =>
@@ -472,34 +472,6 @@ const Services = ({
   const handleOpen = (rowData) => {
     setIsProductEdit({ open: true, isBulkedit: false });
     setRecordToUpdate(rowData);
-  };
-
-  const calculatePrice = (arr: any[]) => {
-    if (rentalManagementData) {
-      const data: any = {};
-      data.conditionType = ['Rent'];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: rentalManagementData?.currency
-      }));
-      data.supplier = [];
-      data.customer = [rentalManagementData?.customerAccount?.optionValue];
-      data.warehouse = [rentalManagementData?.warehouse?.optionValue];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
   };
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -635,7 +607,14 @@ const Services = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
-                renderedFrom="rental_management_product_package"
+                renderedFrom="rental_management_sevices"
+                isEditable={true}
+                onSaveEdit={(inputField, updatedData) => {
+                  let rows = calculateRowsField(material, inputField, allFields, updatedData)
+                  handleSaveData(rows)
+                }}
+                editableColumns={[`price_${rentalManagementData?.currency?.toLowerCase()}`]}
+                material={material}
                 isClientSideGrid={true}
               />
             </Box>
@@ -671,7 +650,6 @@ const Services = ({
       )}
       {isProductEdit.open && (
         <RentalJobQtyDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);
