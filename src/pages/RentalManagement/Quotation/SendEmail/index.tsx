@@ -26,7 +26,7 @@ import { VscVersions } from 'react-icons/vsc';
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnly = false, allowedToEdit, versionId, allColumn, columns,setShowAllVersionStatus,setShowQuotationSummaryDialog,currentVersion }) => {
+const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnly = false, allowedToEdit, versionId, allColumn, columns, setShowAllVersionStatus, setShowQuotationSummaryDialog, currentVersion }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -181,31 +181,31 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center">
           <Box display="flex">
-          <Button
-            onClick={() => {
-              setShowQuotationSummaryDialog(true);
-            }}
-            variant="outlined"
-            size="small"
-            className="mx-1"
-            startIcon={<GiReceiveMoney />}
-            color="primary"
-          >
-            Summary
-          </Button>
-          <Button
-            variant={isMobile && !isTablet ? 'text' : 'outlined'}
-            color="primary"
-            size="small"
-            className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
-            onClick={() => {
-              setShowAllVersionStatus(true);
-            }}
-            style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-            startIcon={isMobile && !isTablet ? null : <VscVersions />}
-          >
-            {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-          </Button>
+            <Button
+              onClick={() => {
+                setShowQuotationSummaryDialog(true);
+              }}
+              variant="outlined"
+              size="small"
+              className="mx-1"
+              startIcon={<GiReceiveMoney />}
+              color="primary"
+            >
+              Summary
+            </Button>
+            <Button
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
+              color="primary"
+              size="small"
+              className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+              onClick={() => {
+                setShowAllVersionStatus(true);
+              }}
+              style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+              startIcon={isMobile && !isTablet ? null : <VscVersions />}
+            >
+              {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+            </Button>
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="primary"
@@ -219,6 +219,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
             >
               {isMobile && !isTablet ? <AiOutlineFileExcel size={20} /> : `Excel Download`}
             </Button>
+            <Box mx={0.5} />
             <Button
               variant="outlined"
               color="primary"
@@ -234,7 +235,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
             </Button>
             {!previewOnly &&
               <>
-                <Box mx={1} />
+                <Box mx={0.5} />
                 <Button
                   variant="outlined"
                   color="primary"
@@ -248,22 +249,24 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
                 >
                   {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
                 </Button>
-                <Box mx={1} />
               </>
             }
-            {isSendEmail && permissions?.purchaseOrder?.isRead && <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              disabled={loading === "email"}
-              startIcon={isMobile ? '' : <MdEmail />}
-              onClick={() => {
-                setLoading("email")
-                fetchEmailAttachment()
-              }}
-            >
-              {isMobile && !isTablet ? <MdEmail size={20} /> : loading === "email" ? "Please wait..." : `Send Email`}
-            </Button>}
+            {isSendEmail && <>
+              <Box mx={0.5} />
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                disabled={loading === "email"}
+                startIcon={isMobile ? '' : <MdEmail />}
+                onClick={() => {
+                  setLoading("email")
+                  fetchEmailAttachment()
+                }}
+              >
+                {isMobile && !isTablet ? <MdEmail size={20} /> : loading === "email" ? "Please wait..." : `Send Email`}
+              </Button>
+            </>}
           </Box>
         </Box>
       </Box>
