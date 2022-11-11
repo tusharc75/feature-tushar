@@ -428,7 +428,7 @@ const Productpackage = ({ subleaseData, setNextStep, fetchData, isIssued, render
                                                 setAddExistingProductDialog({ open: true, type: "product", parentId: null });
                                             }}
                                         >
-                                            {isMobile && !isTablet ? `${routes.product.title}` : `Add ${routes.product.title}`}
+                                            {isMobile && !isTablet ? `Products` : `Add Products`}
                                         </Button>
                                     }
                                     <Box mx={1} />
