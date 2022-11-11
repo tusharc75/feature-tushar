@@ -153,7 +153,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterInvoice=${selectedType}&rentalJob=${rentalManagementData?._id}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterInvoice=${selectedType}&rentalJob=${rentalId}`;
     if (isExport) {
       deepFilter = `filterInvoice=${selectedType}`;
     }
