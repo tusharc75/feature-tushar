@@ -153,6 +153,10 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrde
                                                                                         </Grid>
                                                                                         <Grid item xs={12} md={4}>
                                                                                             <span><b>Quantity: </b>{data?.row?.qty - (data?.row?.rejectQuantity || 0) - (data?.row?.assetQty || 0)}</span>
+                                                                                            <Box component='span' mx={1} />
+                                                                                            <span><b>Recieved: </b>{data?.row?.actualReceived || 0}</span>
+                                                                                            <Box component='span' mx={1} />
+                                                                                            <span><b>Rejected: </b>{data?.row?.rejectQuantity || 0}</span>
                                                                                         </Grid>
                                                                                     </Grid>
                                                                                     <Box mt={1}>

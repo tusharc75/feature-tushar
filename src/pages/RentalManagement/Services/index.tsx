@@ -28,7 +28,9 @@ import LayersIcon from '@material-ui/icons/Layers';
 import CategoryIcon from '@material-ui/icons/Category';
 import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
 import StorageIcon from '@material-ui/icons/Storage';
-import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit'
+import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
+import StorefrontIcon from '@material-ui/icons/Storefront';
+import AllOutIcon from '@material-ui/icons/AllOut';
 
 const Services = ({
   rentalManagementData,
@@ -131,41 +133,80 @@ const Services = ({
               </Box>
             }
             {!isOffline && (
-              <Tooltip title={row.original.type === 'service' ? "Service" :
-                row.original.type === 'asset' ? "Asset" : row.original.type === 'package' ? "Package" :
-                  row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Serialized Product') : ''}              >
-                <IconButton size='small'>
-                  {row.original.type === 'service' ?
-                    <LocalLaundryServiceIcon
-                      color="primary"
-                      fontSize="small"
-                      onClick={() => { window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`); }}
-                    />
-                    : row.original.type === 'product' ?
-                      row?.original?.serializedProduct ?
+              <>
+                <HtmlTooltip
+                  title={
+                    row.original.type === 'service'
+                      ? 'Service'
+                      : row.original.type === 'asset'
+                      ? 'Asset'
+                      : row.original.type === 'package'
+                      ? 'Package'
+                      : row.original.type === 'product'
+                      ? !row.original.serializedProduct
+                        ? 'Non-Serialized Product'
+                        : 'Serialized Product'
+                      : ''
+                  }
+                >
+                  <IconButton size="small">
+                    {row.original.type === 'service' ? (
+                      <LocalLaundryServiceIcon
+                        color="primary"
+                        fontSize="small"
+                        onClick={() => {
+                          window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                        }}
+                      />
+                    ) : row.original.type === 'product' ? (
+                      row?.original?.serializedProduct ? (
                         <LayersIcon
                           color="primary"
                           fontSize="small"
-                          onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
-                        /> :
+                          onClick={() => {
+                            window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                          }}
+                        />
+                      ) : (
                         <HorizontalSplitIcon
                           color="primary"
                           fontSize="small"
-                          onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
+                          onClick={() => {
+                            window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                          }}
                         />
-                      : row.original.type === 'asset' ?
+                      )
+                    ) : row.original.type === 'asset' ? (
+                      <>
                         <StorageIcon
                           color="primary"
                           fontSize="small"
-                          onClick={() => { window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`) }}
-                        /> :
-                        <CategoryIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => { window.open(`${routes.packagesDetail.path}/${row.original.materialId}`); }}
-                        />}
-                </IconButton>
-              </Tooltip>
+                          onClick={() => {
+                            window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <CategoryIcon
+                        color="primary"
+                        fontSize="small"
+                        onClick={() => {
+                          window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                        }}
+                      />
+                    )}
+                  </IconButton>
+                </HtmlTooltip>
+              </>
+            )}
+            {row.original.type === 'service' && row.original.serviceDetail?.serviceType && row.original.serviceDetail?.serviceType === 'Shop Service' ? (
+              <HtmlTooltip title="Shop Service">
+                <StorefrontIcon color="primary" fontSize="small" />
+              </HtmlTooltip>
+            ) : (
+              <HtmlTooltip title="Field Service">
+                <AllOutIcon color="primary" fontSize="small" />
+              </HtmlTooltip>
             )}
           </div>
         ),
@@ -315,12 +356,13 @@ const Services = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product'
-        ? parent.productDetail?.productName
-        : parent.type === 'service'
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
-        }`;
+      }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -349,8 +391,8 @@ const Services = ({
         _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName;
 
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -523,7 +565,7 @@ const Services = ({
                       setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
                     }}
                   >
-                    {isMobile && !isTablet ? 'Service' : `Add ${routes.serviceMaster.title}`}
+                    {isMobile && !isTablet ? 'Service' : `Add Services`}
                   </Button>
                 )}
                 <Box mx={isMobile ? 0.5 : 1} />
@@ -597,12 +639,12 @@ const Services = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -618,8 +660,8 @@ const Services = ({
                 renderedFrom="rental_management_sevices"
                 isEditable={true}
                 onSaveEdit={(inputField, updatedData) => {
-                  let rows = calculateRowsField(material, inputField, allFields, updatedData)
-                  handleSaveData(rows)
+                  let rows = calculateRowsField(material, inputField, allFields, updatedData);
+                  handleSaveData(rows);
                 }}
                 editableColumns={[`price_${rentalManagementData?.currency?.toLowerCase()}`]}
                 material={material}
