@@ -253,6 +253,8 @@ const ReceivingTicket = ({
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.status = element?.status;
+          obj.parentId = element?.parentId;
+          obj.parentName = element?.parentName;
           obj.rentalAssetStatus = element?.status;
           obj.startDate = element?.actualStartDate;
           obj.endDate = element?.actualEndDate;
@@ -270,6 +272,8 @@ const ReceivingTicket = ({
           obj.materialId = element?.materialId;
           obj.type = 'Product';
           obj.qty = qty;
+          obj.parentId = element?.parentId;
+          obj.parentName = element?.parentName;
           obj.consumeQty = consumeQty;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
@@ -412,7 +416,13 @@ const ReceivingTicket = ({
 
   const ProductNameRenderer = (params) => (
     <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.productId}`}>
-      {params.value}
+      {params?.value}
+    </Link>
+  );
+  
+  const ParentNameRenderer = (params) => (
+    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentId}`}>
+      {params?.data?.parentName || "- - - - - - -"}
     </Link>
   );
 
@@ -458,6 +468,7 @@ const ReceivingTicket = ({
     returnTicketRenderer: ReturnTicketRenderer,
     inventoryRenderer: InventoryRenderer,
     productNameRenderer: ProductNameRenderer,
+    parentNameRenderer: ParentNameRenderer,
     warehouseRenderer: WarehouseRenderer,
     commonRenderer: CommonRenderer,
     dateRenderer: DateRenderer
@@ -483,6 +494,7 @@ const ReceivingTicket = ({
       }
     },
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer:  'parentNameRenderer'},
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
     { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
