@@ -174,7 +174,6 @@ const LoadingTicket = ({
       products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
 
       products?.forEach((element) => {
-        console.log(element)
         var qty = element.qty;
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
@@ -315,7 +314,6 @@ const LoadingTicket = ({
 
   const ParentNameRenderer = (params) => (
     <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentId}`}>
-      {console.log(params?.data)}
       {params?.data?.parentName || "- - - - - - -"}
     </Link>
   );
