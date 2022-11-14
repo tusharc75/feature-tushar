@@ -82,11 +82,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             Header: element.fieldLabel,
             disableFilters: true,
             Cell: ({ row }) =>
-              row.original[element.fieldName] ? (
-                <p>{moment(row.original[element.fieldName]?.slice(0, 10) || '')?.format(dateFormat)}</p>
-              ) : (
-                <NoDataCell />
-              )
+              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName])?.format(dateFormat)}</p> : <NoDataCell />
           });
         } else if (element.fieldName === 'supplierAccount') {
           coloum.push({
@@ -120,7 +116,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   Header: fieldLabel,
                   Cell: ({ row }) =>
                     row.original[fieldName] ? (
-                      <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode || ''}</p>
+                      <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                     ) : (
                       <NoDataCell />
                     )
@@ -135,8 +131,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                 accessor: fieldName,
                 Header: fieldLabel,
                 Cell: ({ row }) =>
-                  row.original[fieldName]?.amountWithouCurrencyCode ? (
-                    <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                  row.original[fieldName] ? (
+                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                   ) : (
                     <NoDataCell />
                   )
@@ -259,34 +255,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         getNestedSubRows(obj, element);
       });
     }
-  };
-
-  const handleApplyDate = async () => {
-    let values = {
-      actualStartDate: startDate,
-      estimateStartDate: startDate,
-      actualEndDate: endDate,
-      estimateEndDate: endDate
-    };
-
-    let rows: any = [];
-    selectedProducts.forEach((element) => {
-      const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-      if (element.type === 'product') {
-        rows.push({ ...element, ...calValues });
-      } else if (element.type === 'package') {
-        rows.push({ ...element, ...calValues });
-        const product = material.filter((e) => e.parentId === element._id);
-        resetValueZero(product);
-        rows = [...rows, ...product];
-      }
-    });
-    let tempRows = material.map((obj) => rows.find((o) => o.materialId === obj.materialId) || obj);
-    let tempProduct = productData;
-    tempProduct['material'] = tempRows;
-    setProductData(tempProduct);
-    setMaterial(tempRows);
-    initializeTable(tempProduct);
   };
 
   const handleCreateBill = () => {

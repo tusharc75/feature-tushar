@@ -163,6 +163,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
           element.displayCurrency.forEach((_currency) => {
             let fieldName = element.fieldName + '_' + _currency.toLowerCase();
             let fieldLabel = element.fieldLabel + ' ' + _currency;
+            console.log(rentalManagementData?.currency);
             coloum.push({
               accessor: fieldName,
               Header: fieldLabel,
@@ -325,6 +326,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
     axiosInstance()
       .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, { material: rowsApplied })
       .then(() => {
+        setUpdating(false);
         onSuccess();
       })
       .catch((error) => {
