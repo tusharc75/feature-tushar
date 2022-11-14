@@ -1,6 +1,19 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText, Tooltip, Popover } from '@material-ui/core';
+import {
+  Grid,
+  Box,
+  Button,
+  IconButton,
+  CircularProgress,
+  Menu,
+  MenuItem,
+  Chip,
+  MenuList,
+  ListItemIcon,
+  ListItemText,
+  Tooltip, Popover
+} from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -29,7 +42,9 @@ import LayersIcon from '@material-ui/icons/Layers';
 import CategoryIcon from '@material-ui/icons/Category';
 import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
 import StorageIcon from '@material-ui/icons/Storage';
-import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit'
+import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
+import StorefrontIcon from '@material-ui/icons/Storefront';
+import AllOutIcon from '@material-ui/icons/AllOut';
 
 const Productpackage = ({
   rentalManagementData,
@@ -134,42 +149,79 @@ const Productpackage = ({
               </Box>
             }
             {!isOffline && (
-              <Tooltip title={row.original.type === 'service' ? "Service" :
-                row.original.type === 'asset' ? "Asset" : row.original.type === 'package' ? "Package" :
-                  row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Serialized Product') : ''}              >
-                <IconButton size='small'>
-                  {row.original.type === 'service' ?
+              <Tooltip
+                title={
+                  row.original.type === 'service'
+                    ? 'Service'
+                    : row.original.type === 'asset'
+                    ? 'Asset'
+                    : row.original.type === 'package'
+                    ? 'Package'
+                    : row.original.type === 'product'
+                    ? !row.original.serializedProduct
+                      ? 'Non-Serialized Product'
+                      : 'Serialized Product'
+                    : ''
+                }
+              >
+                <IconButton size="small">
+                  {row.original.type === 'service' ? (
                     <LocalLaundryServiceIcon
                       color="primary"
                       fontSize="small"
-                      onClick={() => { window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`); }}
+                      onClick={() => {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                      }}
                     />
-                    : row.original.type === 'product' ?
-                      row?.original?.serializedProduct ?
-                        <LayersIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
-                        /> :
-                        <HorizontalSplitIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
-                        />
-                      : row.original.type === 'asset' ?
-                        <StorageIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => { window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`) }}
-                        /> :
-                        <CategoryIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => { window.open(`${routes.packagesDetail.path}/${row.original.materialId}`); }}
-                        />}
+                  ) : row.original.type === 'product' ? (
+                    row?.original?.serializedProduct ? (
+                      <LayersIcon
+                        color="primary"
+                        fontSize="small"
+                        onClick={() => {
+                          window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                        }}
+                      />
+                    ) : (
+                      <HorizontalSplitIcon
+                        color="primary"
+                        fontSize="small"
+                        onClick={() => {
+                          window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                        }}
+                      />
+                    )
+                  ) : row.original.type === 'asset' ? (
+                    <StorageIcon
+                      color="primary"
+                      fontSize="small"
+                      onClick={() => {
+                        window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                      }}
+                    />
+                  ) : (
+                    <CategoryIcon
+                      color="primary"
+                      fontSize="small"
+                      onClick={() => {
+                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                      }}
+                    />
+                  )}
                 </IconButton>
               </Tooltip>
             )}
+            {row.original.type === 'service' &&
+              row.original.serviceDetail?.serviceType &&
+              (row.original.serviceDetail?.serviceType === 'Shop Service' ? (
+                <HtmlTooltip title="Shop Service">
+                  <StorefrontIcon color="primary" fontSize="small" />
+                </HtmlTooltip>
+              ) : (
+                <HtmlTooltip title="Field Service">
+                  <AllOutIcon color="primary" fontSize="small" />
+                </HtmlTooltip>
+              ))}
           </div>
         ),
         Footer: () => {
@@ -314,10 +366,10 @@ const Productpackage = ({
       nonSerializeAsset = data.nonSerializeAsset;
     }
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service');
-    let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale)
-    let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service')
+    let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale);
+    let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service');
 
-    rows = [...products, ...packages]
+    rows = [...products, ...packages];
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -399,7 +451,10 @@ const Productpackage = ({
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(rentalManagementData, material.filter(d => d.listPrice === null));
+    const priceData: any = await calculatePrice(
+      rentalManagementData,
+      material.filter((d) => d.listPrice === null)
+    );
     material.forEach((element) => {
       const rateResult = priceData?.filter(
         (e) =>
@@ -413,8 +468,7 @@ const Productpackage = ({
         element[priceFieldName] = element.listPrice;
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
         Object.assign(element, calValues);
-      }
-      else if (rateResult.length && rateResult[0].mrp) {
+      } else if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
@@ -484,8 +538,6 @@ const Productpackage = ({
     setRecordToUpdate(rowData);
   };
 
-
-
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -527,7 +579,7 @@ const Productpackage = ({
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                     }}
                   >
-                    {isMobile && !isTablet ? 'Product' : `Add ${routes.product.title}`}
+                    {isMobile && !isTablet ? 'Product' : `Add Products`}
                   </Button>
                 )}
                 <Box mx={isMobile ? 0.5 : 1} />
@@ -566,11 +618,11 @@ const Productpackage = ({
                   getContentAnchorEl={null}
                   anchorOrigin={{
                     vertical: 'bottom',
-                    horizontal: 'right',
+                    horizontal: 'right'
                   }}
                   transformOrigin={{
                     vertical: 'top',
-                    horizontal: 'right',
+                    horizontal: 'right'
                   }}
                 >
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
@@ -607,12 +659,12 @@ const Productpackage = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -629,8 +681,8 @@ const Productpackage = ({
                 isClientSideGrid={true}
                 isEditable={true}
                 onSaveEdit={(inputField, updatedData) => {
-                  let rows = calculateRowsField(material, inputField, allFields, updatedData)
-                  handleSaveData(rows)
+                  let rows = calculateRowsField(material, inputField, allFields, updatedData);
+                  handleSaveData(rows);
                 }}
                 editableColumns={[`price_${rentalManagementData?.currency?.toLowerCase()}`]}
                 material={material}
