@@ -454,7 +454,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
                 handleCreateBill();
               }}
             >
-              Create Bill
+              Select for Create Bill
             </Button>
           )}
         </CustomDialogFooter>
