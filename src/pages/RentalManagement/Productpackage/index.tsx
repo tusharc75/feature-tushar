@@ -12,7 +12,7 @@ import {
   MenuList,
   ListItemIcon,
   ListItemText,
-  Tooltip
+  Tooltip, Popover
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -79,6 +79,7 @@ const Productpackage = ({
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
+  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -133,6 +134,18 @@ const Productpackage = ({
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
+                {!isOffline && allowedToEdit && (
+                  <HtmlTooltip title="Add ">
+                    <IconButton
+                      onClick={(event) =>
+                        setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })
+                      }
+                      size="small"
+                    >
+                      <Add color="disabled" fontSize="small" />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
               </Box>
             }
             {!isOffline && (
@@ -360,13 +373,7 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName
-      }`;
+      parent.detail = `${parent.type === 'service' ? parent.serviceDetail ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName : parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -391,13 +398,7 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.packageDetail?.packageName
-      }`;
+      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail ? _subRow.serviceDetail?.serviceName : _subRow.packageDetail?.packageName : _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName}`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -731,6 +732,52 @@ const Productpackage = ({
           rentalManagementData={rentalManagementData}
         />
       )}
+      {addchildDialog.open &&
+        <Popover
+          anchorReference="anchorPosition"
+          anchorPosition={{ top: addchildDialog.top, left: addchildDialog.bottom }}
+          anchorOrigin={{
+            vertical: 'center',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          open={addchildDialog.open}
+          onClose={() => { setAddchildDialog({ open: false, parentId: null, top: null, bottom: null }) }}
+        >
+          <MenuList>
+            <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId })
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
+              }
+              }
+            >
+              Product
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId })
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
+              }
+              }
+            >
+              Package
+            </MenuItem>
+            {/* <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId })
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
+              }
+              }
+            >
+              Services
+            </MenuItem> */}
+          </MenuList>
+        </Popover>
+      }
     </Fragment>
   );
 };
