@@ -23,7 +23,7 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let searchTimeout;
 
-const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [] }) => {
+const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [], serviceType = '' }) => {
   const renderedFrom = `${routes.serviceMaster.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -42,7 +42,16 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
   const [columns, setColumns] = useState([]);
 
   const defaultColumns = [
-    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true, filter: false, sortable: false }
+    {
+      field: 'qty',
+      headerName: 'Qty',
+      show: true,
+      cellRenderer: 'commonRenderer',
+      cellEditor: 'numericCellEditor',
+      editable: true,
+      filter: false,
+      sortable: false
+    }
   ];
   const { getColumnData } = useColumns();
 
@@ -129,7 +138,8 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
 
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
-    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+    let serviceTypeQuery = serviceType != '' ? `&serviceType=${serviceType}` : '';
+    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}${serviceTypeQuery}`;
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -179,7 +189,7 @@ const AssignServiceDialog = ({ reference, referenceId = null, onSuccess, handleC
           setAssigning(false);
           toastConfig.setToastConfig(err);
         });
-    } else if(reference === 'service'){
+    } else if (reference === 'service') {
       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
     } else {
       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ service: d.id, qty: Number(d.qty) })));

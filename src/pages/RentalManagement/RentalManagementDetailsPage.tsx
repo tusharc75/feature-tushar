@@ -92,7 +92,7 @@ const RentalManagementDetailsPage = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [showCancelConfirmBox, setShowCancelConfirmBox] = useState(false);
+  const [showCancelConfirmBox, setShowCancelConfirmBox] = useState({ open: false, isQuote: false });
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   const [quotationData, setQuotationData] = useState(null);
@@ -174,9 +174,9 @@ const RentalManagementDetailsPage = () => {
     }
   }
 
-  const fetchQuotationData = (versionNumber = null) => {
+  const fetchQuotationData = (versionNumber = null, createIfNotExits = false) => {
     axiosInstance()
-      .get(`${rentalManagement.api}/${id}/quotation`)
+      .get(createIfNotExits ? `${rentalManagement.api}/${rentalManagementData._id}/quotation?createIfNotExits=1` : `${rentalManagement.api}/${id}/quotation`)
       .then(({ data: { data } }) => {
         if (data?.versions) {
           setQuotationData(data);
@@ -204,8 +204,8 @@ const RentalManagementDetailsPage = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
-      updateProcessStatus(rentalSteps[currentStep]);
       fetchQuotationData()
+      updateProcessStatus(rentalSteps[currentStep]);
     }
   }, [currentStep]);
 
@@ -277,7 +277,7 @@ const RentalManagementDetailsPage = () => {
         message: `${routes.rentalManagement.title} cancelled successfully`
       });
       fetchRentalManagementData();
-      setShowCancelConfirmBox(false);
+      setShowCancelConfirmBox({ open: false, isQuote: false });
     }).catch((error) => {
       toastConfig.setToastConfig(error);
     });
@@ -335,6 +335,19 @@ const RentalManagementDetailsPage = () => {
           type: 'success',
           message: `Status changed to ${status}`
         });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const cloneVersion = () => {
+    const versionId = quotationData?.versions[currentVersion]?._id;
+    axiosInstance()
+      .post(`/quotation/clone-version/${quotationData._id}/${versionId}`)
+      .then(() => {
+        fetchQuotationData();
+        setShowCancelConfirmBox({ open: false, isQuote: false });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -513,6 +526,17 @@ const RentalManagementDetailsPage = () => {
                     steps={rentalSteps}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
+                    handlePrev={() => {
+                      if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer && rentalSteps[currentStep] === 'Quotation') {
+                        setShowCancelConfirmBox({ open: true, isQuote: true });
+                      }
+                      else {
+                        setCurrentStep((prevStep) => {
+                          const newStep = prevStep - 1;
+                          return newStep;
+                        });
+                      }
+                    }}
                     isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
                     setStepFullScreen={() => setStepFullScreen(true)}
                   />
@@ -575,7 +599,10 @@ const RentalManagementDetailsPage = () => {
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
                         allowedToDelete={allowedToDelete}
-                      />
+                        fetchQuotationData={fetchQuotationData}
+                        quotationData={quotationData}
+                        currentVersion={currentVersion}
+                        setCurrentVersion={setCurrentVersion} />
                     )}
                     {rentalSteps[currentStep] === 'Serialized Asset' && rentalManagementData && (
                       <SerializedAsset
@@ -706,14 +733,14 @@ const RentalManagementDetailsPage = () => {
           onOk={handleDelete}
         />
       )}
-      {showCancelConfirmBox && (
+      {showCancelConfirmBox.open && (
         <ConfirmationDialog
-          open={showCancelConfirmBox}
-          message={`Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`}
+          open={showCancelConfirmBox.open}
+          message={showCancelConfirmBox.isQuote ? 'Are you sure you want to create new version of this quote ' : `Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`}
           onClose={() => {
-            setShowCancelConfirmBox(false);
+            setShowCancelConfirmBox({ open: false, isQuote: false });
           }}
-          onOk={handleCancelRentalJob}
+          onOk={() => showCancelConfirmBox.isQuote ? cloneVersion() : handleCancelRentalJob()}
         />
       )}
       {openUpdateDialog && (

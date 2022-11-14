@@ -276,7 +276,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                                     setIsAddNewProduct(true);
                                 }}
                             >
-                                {isMobile && !isTablet ? "Add" : `Add New ${routes.product.title}`}
+                                {isMobile && !isTablet ? "Add" : `Add New Product`}
                             </Button>
                             <Box mx={isMobile ? 0.5 : 1} />
                         </> : null}
@@ -288,7 +288,7 @@ const Product = ({ purchaseOrderData, setNextStep, setPurchaseOrderProduct, rend
                             setAddProductDialog(true);
                         }}
                     >
-                        {isMobile && !isTablet ? "Existing" : `Add Existing ${routes.product.title}`}
+                        {isMobile && !isTablet ? "Existing" : `Add Existing Product`}
                     </Button>
                 </Box>
                 <div className="d-flex gap-2">
