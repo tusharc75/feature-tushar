@@ -176,6 +176,7 @@ const LoadingTicket = ({
       products?.forEach((element) => {
         var qty = element.qty;
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+        const parentProduct = material.find((p) => p?._id === element?.parentId)?.productDetail
         ticketProduct?.forEach((ele) => {
           const obj: any = {};
           obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
@@ -186,6 +187,7 @@ const LoadingTicket = ({
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.parentId = element?.parentId;
+          obj.parentProductId = parentProduct ? parentProduct?._id : ''
           obj.parentName = element?.parentName;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.status = element?.status;
@@ -203,6 +205,7 @@ const LoadingTicket = ({
           obj.qty = qty;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
+          obj.parentProductId = parentProduct ? parentProduct?._id : ''
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -312,11 +315,11 @@ const LoadingTicket = ({
     </Link>
   );
 
-  const ParentNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentId}`}>
-      {params?.data?.parentName || "- - - - - - -"}
+  const ParentNameRenderer = (params) => params.data?.parentId ? (
+    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentProductId}`}>
+      {params?.data?.parentName}
     </Link>
-  );
+  ) : <span className="text-truncate">- - - - - - -</span>;
 
   const frameworkComponents = {
     ticketRenderer: TicketRenderer,
