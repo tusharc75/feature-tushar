@@ -68,7 +68,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             <div style={{ display: 'flex', alignItems: 'center' }}>
               {
                 <p className="text-truncate" title={row.original?.detail}>
-                  {row.original?.detail}
+                  {row.original?.detail || ''}
                 </p>
               }
             </div>
@@ -82,15 +82,19 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             Header: element.fieldLabel,
             disableFilters: true,
             Cell: ({ row }) =>
-              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+              row.original[element.fieldName] ? (
+                <p>{moment(row.original[element.fieldName]?.slice(0, 10) || '')?.format(dateFormat)}</p>
+              ) : (
+                <NoDataCell />
+              )
           });
         } else if (element.fieldName === 'supplierAccount') {
           coloum.push({
             accessor: element.fieldName,
             Header: element.fieldLabel,
             Cell: ({ row }) =>
-              row.original[element.fieldName] ? (
-                <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
+              row.original[element.fieldName]?.length ? (
+                <p className="text-truncate">{row.original[element.fieldName]?.map((d) => d?.optionLabel)?.toString()}</p>
               ) : (
                 <NoDataCell />
               )
@@ -116,7 +120,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   Header: fieldLabel,
                   Cell: ({ row }) =>
                     row.original[fieldName] ? (
-                      <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                      <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode || ''}</p>
                     ) : (
                       <NoDataCell />
                     )
@@ -131,7 +135,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                 accessor: fieldName,
                 Header: fieldLabel,
                 Cell: ({ row }) =>
-                  row.original[fieldName] ? (
+                  row.original[fieldName]?.amountWithouCurrencyCode ? (
                     <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                   ) : (
                     <NoDataCell />
@@ -207,7 +211,13 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'package'
+          ? parent.packageDetail?.packageName
+          : parent.serviceDetail?.serviceName
+      }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -224,7 +234,13 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow?.productDetail?.productName;
+      _subRow.detail = `${
+        _subRow?.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageName
+          : _subRow?.serviceDetail?.serviceName
+      }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -301,11 +317,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-        <CustomDialogHeader
-          title={invoiceData ? `Invoice Number : ${invoiceData?.invoiceNumber}` : `Create Billing `}
-          onClose={onClose}
-          showRequiredLabel={false}
-        ></CustomDialogHeader>
+        <CustomDialogHeader title={`Invoice Number : ${invoiceData?.invoiceNumber}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
             {invoiceData && <InvoiceFacility invoiceData={invoiceData} />}
