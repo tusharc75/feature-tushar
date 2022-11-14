@@ -51,14 +51,16 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
   }, []);
 
   useEffect(() => {
-    fetchInvoiceData();
+    latestInvoice && fetchInvoiceData();
     fetchProductInventory();
   }, [columns]);
   const fetchInvoiceData = async () => {
+    console.log(latestInvoice);
     const response: any = await axiosInstance().get(`${invoice.api}/${latestInvoice}`);
     const data = response?.data?.data;
     console.log(data);
     var date = new Date(data?.creationDate);
+    console.log(response);
     setEstimateStartDate(date.setDate(date.getDate() + 1));
   };
 

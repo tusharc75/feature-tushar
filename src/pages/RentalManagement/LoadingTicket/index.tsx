@@ -185,6 +185,8 @@ const LoadingTicket = ({
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
+          obj.parentId = element?.parentId;
+          obj.parentName = element?.parentName;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.status = element?.status;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
@@ -199,6 +201,8 @@ const LoadingTicket = ({
           obj._id = element.materialId;
           obj.type = 'Product';
           obj.qty = qty;
+          obj.parentId = element?.parentId;
+          obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -308,12 +312,19 @@ const LoadingTicket = ({
     </Link>
   );
 
+  const ParentNameRenderer = (params) => (
+    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentId}`}>
+      {params?.data?.parentName || "- - - - - - -"}
+    </Link>
+  );
+
   const frameworkComponents = {
     ticketRenderer: TicketRenderer,
     productNameRenderer: ProductNameRenderer,
     inventoryRenderer: InventoryRenderer,
     warehouseRenderer: WarehouseRenderer,
-    commonRenderer: CommonRenderer
+    commonRenderer: CommonRenderer,
+    parentNameRenderer: ParentNameRenderer,
   };
 
   const columns = [
@@ -336,6 +347,7 @@ const LoadingTicket = ({
       }
     },
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
     { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },

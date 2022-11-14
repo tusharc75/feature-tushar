@@ -426,7 +426,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, upd
         <ConfirmationDialog
           okBtnLoading={isLoading}
           open={showConfirmBoxReceive}
-          message={`Are you sure have been received ?`}
+          message={`Are you sure you have received the inventory?`}
           onClose={() => {
             setShowConfirmBoxReceive(false);
           }}

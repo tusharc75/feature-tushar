@@ -71,7 +71,11 @@ const Quotation = ({
   showActivity,
   stepFullScreen,
   allowedToEdit,
-  allowedToDelete
+  allowedToDelete,
+  fetchQuotationData,
+  quotationData,
+  currentVersion,
+  setCurrentVersion
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -83,16 +87,13 @@ const Quotation = ({
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
-  const [currentVersion, setCurrentVersion] = useState(null);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
-  const [quotationData, setQuotationData] = useState(null);
   const [material, setMaterial] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [recordToUpdate, setRecordToUpdate] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [versionId, setVersionId] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -100,11 +101,17 @@ const Quotation = ({
 
 
   useEffect(() => {
-    fetchQuotationData();
+    if (quotationData) {
+      fetchFields(quotationData?.currency);
+      let keys = Object.keys(quotationData.versions);
+    }
+    else {
+      fetchQuotationData(null, true);
+    }
   }, []);
 
   useEffect(() => {
-    versionId && fetchProductInventory();
+    quotationData?.versions[currentVersion]?._id && fetchProductInventory();
     if (
       quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
       quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice
@@ -114,19 +121,7 @@ const Quotation = ({
     if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
       setNextStep(true);
     }
-  }, [versionId]);
-
-  const fetchQuotationData = (versionNumber = null) => {
-    axiosInstance()
-      .get(`${rentalManagement.api}/${rentalManagementData._id}/quotation?createIfNotExits=1`)
-      .then(({ data: { data } }) => {
-        setQuotationData(data);
-        fetchFields(data?.currency);
-        let keys = Object.keys(data.versions);
-        setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
-        setVersionId(data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])]?._id || null);
-      });
-  };
+  }, [quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async (currency) => {
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
@@ -324,7 +319,7 @@ const Quotation = ({
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
@@ -374,7 +369,7 @@ const Quotation = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${versionId}/delete`, { ids: rows })
+      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
@@ -432,7 +427,7 @@ const Quotation = ({
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material: rows })
+      .put(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
@@ -445,7 +440,6 @@ const Quotation = ({
   };
 
   const handleChangeVersion = (versionNumber) => {
-    setVersionId(quotationData?.versions[versionNumber]?._id || null);
     setCurrentVersion(versionNumber);
     setShowAllVersionStatus(false);
   };
@@ -459,12 +453,13 @@ const Quotation = ({
             quotationData={quotationData}
             previewOnly={true}
             allowedToEdit={allowedToEdit}
-            versionId={versionId}
+            versionId={quotationData?.versions[currentVersion]?._id}
             columns={columns}
             allColumn={allColumn}
             setShowAllVersionStatus={setShowAllVersionStatus}
             setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
-            currentVersion={currentVersion} />
+            currentVersion={currentVersion}
+            isSendEmail={true} />
         </Box>
         <Box display="flex">
           {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
@@ -545,7 +540,7 @@ const Quotation = ({
                   {`Clone Version-${currentVersion}`}
                 </Button>
               ) : null}
-              <Button
+              {/* <Button
                 variant="outlined"
                 color="default"
                 size="small"
@@ -597,7 +592,7 @@ const Quotation = ({
                     Delete
                   </MenuItem>
                 )}
-              </Menu>
+              </Menu> */}
             </div>
           )}
         </Box>
@@ -620,7 +615,7 @@ const Quotation = ({
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
-              hideSelection={!allowedToEdit}
+              hideSelection={true}
               renderedFrom="quotation_product_package_quotation"
               isClientSideGrid={true}
             />
@@ -659,7 +654,7 @@ const Quotation = ({
         <LeadTimeDialog
           quotationId={quotationData._id}
           data={leadTimeDialog?.data}
-          versionId={versionId}
+          versionId={quotationData?.versions[currentVersion]?._id}
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });
           }}
@@ -674,7 +669,7 @@ const Quotation = ({
       )}
       {customerAcceptable && (
         <ManualReponseDialog
-          versionId={versionId}
+          versionId={quotationData?.versions[currentVersion]?._id}
           quotationId={quotationData?._id}
           setCurrentStep={() => {
             fetchQuotationData(currentVersion);
@@ -689,7 +684,7 @@ const Quotation = ({
       {showQuotationSummaryDialog && (
         <QuotationSummeryDialog
           quotationData={quotationData}
-          versionId={versionId}
+          versionId={quotationData?.versions[currentVersion]?._id}
           onClose={() => {
             setShowQuotationSummaryDialog(false);
           }}

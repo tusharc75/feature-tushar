@@ -275,7 +275,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, setBulkAssetCreationProdu
                                 setAddProductDialog(true);
                             }}
                         >
-                            {`Add  ${routes.product.title}`}
+                            {`Add Products`}
                         </Button>
                     </Box>
                     <div className="d-flex gap-2">
