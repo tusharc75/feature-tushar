@@ -231,6 +231,8 @@ const ReceivingTicket = ({
       products?.forEach((element) => {
         var qty = element.qty;
 
+        const parentProduct = material.find((p) => p?._id === element?.parentId)?.productDetail
+
         var consumeQty = 0;
 
         consumeProducts
@@ -253,6 +255,7 @@ const ReceivingTicket = ({
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.status = element?.status;
+          obj.parentProductId = parentProduct ? parentProduct?._id : ''
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.rentalAssetStatus = element?.status;
@@ -275,6 +278,7 @@ const ReceivingTicket = ({
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.consumeQty = consumeQty;
+          obj.parentProductId = parentProduct ? parentProduct?._id : ''
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -420,11 +424,11 @@ const ReceivingTicket = ({
     </Link>
   );
   
-  const ParentNameRenderer = (params) => (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentId}`}>
-      {params?.data?.parentName || "- - - - - - -"}
+  const ParentNameRenderer = (params) => params.data?.parentId ? (
+    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentProductId}`}>
+      {params?.data?.parentName}
     </Link>
-  );
+  ) : <span className="text-truncate">- - - - - - -</span>;
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
