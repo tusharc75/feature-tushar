@@ -257,31 +257,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     }
   };
 
-  const handleCreateBill = () => {
-    rowsData.forEach((element) => {
-      delete element.srno;
-      delete element.detail;
-      delete element.serializedProduct;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
-    });
-    setUpdating(true);
-    axiosInstance()
-      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, { material: rowsData })
-      .then(() => {
-        onSuccess();
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
@@ -322,19 +297,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           >
             Cancel
           </Button>
-          {invoiceData === null && (
-            <Button
-              type="button"
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => {
-                handleCreateBill();
-              }}
-            >
-              Create Bill
-            </Button>
-          )}
         </CustomDialogFooter>
       </Dialog>
     </Fragment>
