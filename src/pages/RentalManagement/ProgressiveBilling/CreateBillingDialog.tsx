@@ -45,6 +45,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [estimateStartDate, setEstimateStartDate] = useState(null);
+  const [rowsApplied, setRowsApplied] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -287,47 +288,42 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
       actualEndDate: endDate,
       estimateEndDate: endDate
     };
+    console.log(startDate);
+    console.log(endDate);
+    console.log(values);
 
     let rows: any = [];
-    console.log('selectedProducts', selectedProducts);
     selectedProducts.forEach((element) => {
       const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-      if (element.type === 'product') {
-        rows.push({ ...element, ...calValues });
-      } else if (element.type === 'package') {
-        rows.push({ ...element, ...calValues });
-        const product = material.filter((e) => e.parentId === element._id);
-        resetValueZero(product);
-        rows = [...rows, ...product];
-      } else if (element.type === 'service') {
-        rows.push({ ...element, ...calValues });
-      }
+      rows.push({ ...element, ...calValues });
     });
-    let tempRows = material.map((obj) => rows.find((o) => o.materialId === obj.materialId) || obj);
+    console.log(rows);
+    let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
     let tempProduct = productData;
     tempProduct['material'] = tempRows;
     setProductData(tempProduct);
     setMaterial(tempRows);
     initializeTable(tempProduct);
+    setRowsApplied(rows);
     setAppliedDate(true);
   };
 
   const handleCreateBill = () => {
-    rowsData.forEach((element) => {
-      delete element.srno;
-      delete element.detail;
-      delete element.serializedProduct;
-      delete element.qtyDisplay;
-      delete element.isValid;
-      delete element.hideSelection;
-      delete element.assetQty;
-      delete element.productDetail;
-      delete element.packageDetail;
-      delete element.subRows;
+    rowsApplied?.forEach((element) => {
+      delete element?.srno;
+      delete element?.detail;
+      delete element?.serializedProduct;
+      delete element?.qtyDisplay;
+      delete element?.isValid;
+      delete element?.hideSelection;
+      delete element?.assetQty;
+      delete element?.productDetail;
+      delete element?.packageDetail;
+      delete element?.subRows;
     });
     setUpdating(true);
     axiosInstance()
-      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, { material: rowsData })
+      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, { material: rowsApplied })
       .then(() => {
         onSuccess();
       })
@@ -340,11 +336,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-        <CustomDialogHeader
-          title={billData ? `Bill Number : ${billData?.billNumber}` : `Create Billing `}
-          onClose={onClose}
-          showRequiredLabel={false}
-        ></CustomDialogHeader>
+        <CustomDialogHeader title={`Create Billing `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
             {billData === null && (
