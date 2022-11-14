@@ -356,6 +356,7 @@ const ScheduleReport = () => {
                   page={page}
                   actionWidth={100}
                   loading={loading}
+                  isClientSideGrid={true}
                   renderedFrom={renderedFrom}
                   allowSelection={true}
                   allowAction={true}
