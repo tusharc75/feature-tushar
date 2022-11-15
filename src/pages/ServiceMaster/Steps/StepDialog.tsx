@@ -16,6 +16,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { Autocomplete } from '@material-ui/lab';
 import Grid from '@material-ui/core/Grid';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from 'src/StateProvider/Provider';
 
 export default function StepDialog({
   handleClose,
@@ -29,6 +30,7 @@ export default function StepDialog({
   setOpenFieldDialog = null,
   handleAddStep = null
 }) {
+  const {state: {user: {user}}} = useData()
   const toastConfig = useContext(CustomToastContext);
   const [stepDetails, setStepDetails] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -91,7 +93,7 @@ export default function StepDialog({
         leadDay: 0,
         costPrice: 0,
         listPrice: 0,
-        currency: '',
+        currency: reference === 'workOrder' ? user?.currency : '',
         isPassFail: false,
         isFailAddon: false,
         failAddon: [],

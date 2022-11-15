@@ -195,7 +195,7 @@ const ConsumablesDialog = ({ onSuccess, handleClose, workOrderId = null, from })
       onClose={handleClose}
       aria-labelledby="consume-dialog">
       <CustomDialogHeader
-        title={`Consumables`}
+        title={`Product/Consumables`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
