@@ -31,6 +31,8 @@ import { IoMdArrowDropup, IoMdArrowDropdown } from 'react-icons/io';
 import AssignStepDialog from './AssignStepDialog';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
+import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
+import FormatQuoteRoundedIcon from '@material-ui/icons/FormatQuoteRounded';
 
 const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -424,11 +426,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                     flexWrap: 'wrap',
                                     alignItems: 'center',
                                     position: 'relative',
-                                    paddingLeft: !isColapsed ? '20px' : '',
+                                    paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
                                     gap: '5px'
                                   }}
                                 >
-                                  {data?.type === 'service' && (
+                                  {data?.type === 'service' ? (
                                     <Box
                                       style={{
                                         backgroundColor: 'var(--primary)',
@@ -436,7 +438,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                         width: '20px',
                                         height: '20px',
                                         borderRadius: '50%',
-                                        lineHeight: '20px',
+                                        lineHeight: '21px',
                                         textAlign: 'center',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -448,8 +450,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                       }}
                                       sx={{ position: !isColapsed ? 'absolute' : '' }}
                                     >
-                                      {data?.order}
+                                      <span>{data?.order}</span>
                                     </Box>
+                                  ) : (
+                                    data?.type === 'quotation' && <FormatQuoteIcon />
                                   )}
                                   {!isColapsed && (
                                     <>
@@ -579,18 +583,20 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                       left: 0
                                     }}
                                   >
-                                    {data?.order}
+                                    <span>{data?.order}</span>
                                   </Box>
                                 ) : (
-                                  <div style={{ width: '18px', height: '18px' }}></div>
+                                  <div style={{ width: '18px', height: '18px' }}>{data?.type === 'quotation' && <FormatQuoteIcon />}</div>
                                 )}
                                 <Box>
-                                  <Typography style={{ fontSize: '12px', fontWeight: '600', lineHeight: '1.2' }}>{data?.serviceName}</Typography>
+                                  <Typography style={{ fontSize: '12px', fontWeight: '600', lineHeight: '1.2' }}> {data?.serviceName}</Typography>
                                   {data?.type === 'service' && (
                                     <Typography style={{ fontSize: '11px', lineHeight: '1.2' }}>{data?.status}</Typography>
                                   )}
                                   {data?.type === 'quotation' && quotationData && (
-                                    <Typography style={{ fontSize: '11px', lineHeight: '1.2' }}>{`Status : ${quotationData?.status}`}</Typography>
+                                    <>
+                                      <Typography style={{ fontSize: '11px', lineHeight: '1.2' }}>{`Status : ${quotationData?.status}`}</Typography>
+                                    </>
                                   )}
                                   <Box display={'flex'} style={{ gap: '10px', flexWrap: 'wrap' }}>
                                     {data?.type === 'service' &&
