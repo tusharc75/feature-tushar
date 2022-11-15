@@ -257,7 +257,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return sortBy(subRows, ['type']);
+    return sortBy(subRows.filter((e) => e.type !== 'product'), ['type']);
   };
 
   const handleAddService = (ids) => {
