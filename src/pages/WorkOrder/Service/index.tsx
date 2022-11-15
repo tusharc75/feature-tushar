@@ -15,8 +15,6 @@ import AssignUserDialog from './AssignUserDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { GrDrag } from 'react-icons/gr';
-import RestoreIcon from '@material-ui/icons/Restore';
-import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PeopleIcon from '@material-ui/icons/People';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
@@ -28,11 +26,11 @@ import CompleteDialog from './CompleteDialog';
 import { Tabs, Tab } from './Tabs';
 import styles from './index.module.scss';
 import { IoMdArrowDropup, IoMdArrowDropdown } from 'react-icons/io';
-import AssignStepDialog from './AssignStepDialog';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
+import RotateLeftOutlinedIcon from '@material-ui/icons/RotateLeftOutlined';
+import RotateRightOutlinedIcon from '@material-ui/icons/RotateRightOutlined';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
-import FormatQuoteRoundedIcon from '@material-ui/icons/FormatQuoteRounded';
 
 const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -467,11 +465,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                         <Box ml={1}>
                                           {data?.preWork ? (
                                             <HtmlTooltip title="Pre Work Service">
-                                              <RestoreIcon fontSize="small" />
+                                              <RotateLeftOutlinedIcon fontSize="small" />
                                             </HtmlTooltip>
                                           ) : (
                                             <HtmlTooltip title="Post Work Service">
-                                              <UpdateIcon fontSize="small" />
+                                              <RotateRightOutlinedIcon fontSize="small" />
                                             </HtmlTooltip>
                                           )}
                                         </Box>
@@ -605,11 +603,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                     {data?.type === 'service' &&
                                       (data?.preWork ? (
                                         <HtmlTooltip title="Pre Work Service">
-                                          <RestoreIcon fontSize="small" style={{ width: '15px', height: '15px' }} />
+                                          <RotateLeftOutlinedIcon fontSize="small" style={{ width: '15px', height: '15px' }} />
                                         </HtmlTooltip>
                                       ) : (
                                         <HtmlTooltip title="Post Work Service">
-                                          <UpdateIcon fontSize="small" />
+                                          <RotateRightOutlinedIcon fontSize="small" />
                                         </HtmlTooltip>
                                       ))}
                                     {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
