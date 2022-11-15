@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme: Theme) =>
         padding: '16px 40px'
       },
       ['@media (min-width:1150px)']: {
-        padding: '16px 60px'
+        padding: '16px 40px'
       },
       '& > div': {
         alignItems: 'center',
@@ -400,13 +400,15 @@ const Service = ({
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
                 className={`${classes.accordionHeading} 
-              ${Boolean(stepData?.passFailStatus)
-                    ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                      ? classes.green
-                      : ''
+              ${
+                Boolean(stepData?.passFailStatus)
+                  ? `${
+                      Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                        ? classes.green
+                        : ''
                     } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                    : classes.white
-                  }
+                  : classes.white
+              }
               
               `}
                 onClick={(e) => {
@@ -418,14 +420,14 @@ const Service = ({
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
                   <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px' }}>
-                    <Box sx={{ padding: '0 20px 0 0' }}>
+                    {/* <Box sx={{ padding: '0 20px 0 0' }}>
                       <Checkbox
                         disabled={!stepData?.status}
                         className={classes.checkbox}
                         aria-label="Step Selected checkbox"
                         checked={selectedStep?._id === step._id}
                       />
-                    </Box>
+                    </Box> */}
                     <Box>
                       <Chip color="primary" label={`${serviceIndex}.${index + 1}`} />
                     </Box>
@@ -518,11 +520,11 @@ const Service = ({
             message={
               addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
                 ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
-                addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
-                  ? `On pass, a new service has been added in compliance with the configuration ` +
                   addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                  : `You have to add addional services based on your recent action`
+                : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
+                ? `On pass, a new service has been added in compliance with the configuration ` +
+                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+                : `You have to add addional services based on your recent action`
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
