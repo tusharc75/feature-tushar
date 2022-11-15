@@ -101,9 +101,9 @@ const Quotation = ({
 
 
   useEffect(() => {
-    if (quotationData) {
+    if (quotationData && quotationData?.versions[currentVersion]?._id) {
       fetchFields(quotationData?.currency);
-      let keys = Object.keys(quotationData.versions);
+      fetchProductInventory();
     }
     else {
       fetchQuotationData(null, true);
@@ -111,7 +111,10 @@ const Quotation = ({
   }, []);
 
   useEffect(() => {
-    quotationData?.versions[currentVersion]?._id && fetchProductInventory();
+    if (quotationData && quotationData?.versions[currentVersion]?._id) {
+      fetchFields(quotationData?.currency);
+      fetchProductInventory();
+    }
     if (
       quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
       quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice
