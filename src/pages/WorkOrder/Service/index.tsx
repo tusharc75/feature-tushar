@@ -76,7 +76,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           });
           const preWorkService = data?.filter((e) => e.preWork);
           const postWorkService = data?.filter((e) => !e.preWork);
-          const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote' }];
+          const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
           const services = [...preWorkService, ...quote, ...postWorkService];
           setServiceSteps(services);
           if (services?.length) {
