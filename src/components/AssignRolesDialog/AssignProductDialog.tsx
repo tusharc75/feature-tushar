@@ -12,7 +12,8 @@ import {
   packages,
   prepareDataForGrid,
   getLocalStorageArrayData,
-  serviceMaster
+  serviceMaster,
+  workOrder
 } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
@@ -41,7 +42,8 @@ const AssignProductDialog = ({
   handleCloseDialog,
   assignedProducts,
   reference = 'product',
-  renderedFrom
+  renderedFrom,
+  serialized = null
 }) => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
   const {
@@ -156,6 +158,7 @@ const AssignProductDialog = ({
   const getQueryString = () => {
     const ignoreIds = assignedProducts && assignedProducts?.length > 0 ? assignedProducts : [];
     let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -169,6 +172,12 @@ const AssignProductDialog = ({
       updatedFilters.push({
         field: 'productType',
         term: 'Part'
+      });
+    }
+    if (serialized != null) {
+      updatedFilters.push({
+        field: 'serializedProduct',
+        term: `${serialized === 'true' ? 'Yes' : 'No'}`
       });
     }
     if (!isObjectEmpty(filters)) {
@@ -212,8 +221,7 @@ const AssignProductDialog = ({
           setAssigning(false);
           toastConfig.setToastConfig(error);
         });
-    }
-    else if (reference === 'serviceMaster') {
+    } else if (reference === 'serviceMaster') {
       const productObj = [...getLocalStorageArrayData(localStorageSelectedRecords)]
         .filter((d) => d.qty > 0)
         .map((d) => {
@@ -232,8 +240,7 @@ const AssignProductDialog = ({
           setAssigning(false);
           toastConfig.setToastConfig(error);
         });
-    }
-    else if (reference === 'package') {
+    } else if (reference === 'package') {
       axiosInstance()
         .post(`${packages.api}/material`, {
           ids: Array.isArray(productId) && productId.length ? productId : [productId],
@@ -246,6 +253,26 @@ const AssignProductDialog = ({
         .catch((err) => {
           setAssigning(false);
           toastConfig.setToastConfig(err);
+        });
+    } else if (reference === 'workOrder') {
+      let tempData = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((d) => {
+        return {
+          product: d.id,
+          qty: d.qty
+        };
+      });
+      axiosInstance()
+        .post(`${workOrder.api}/${productId}/consumable`, tempData)
+        .then(({ data }) => {
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
     }
   };

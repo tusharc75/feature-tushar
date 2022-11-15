@@ -146,10 +146,12 @@ const Productpackage = ({
         width: 200,
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
-            <p className="text-truncate" title={row.original?.productDetail?.productName}  >
+            <p className="text-truncate" title={row.original?.productDetail?.productName ? row.original?.productDetail?.productName : row.original?.serializedAssetDetail?.product?.optionLabel}  >
               {row.original?.productDetail?.productName ?
                 <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productDetail?._id}`} target="_blank">{row.original?.productDetail?.productName}</a>
-                : <NoDataCell />}
+                : row.original?.serializedAssetDetail?.product?.optionLabel ?
+                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.serializedAssetDetail?.product?.optionValue}`} target="_blank">{row.original?.serializedAssetDetail?.product?.optionLabel}</a>
+                  : <NoDataCell />}
             </p>
           </div>),
       }
@@ -165,7 +167,7 @@ const Productpackage = ({
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {!row.original.hideSelection && allowedToDelete && row.original?.allowedToDelete && (
+          {allowedToDelete && row.original?.allowedToDelete && (
             <IconButton
               size="small"
               aria-label="Details"
@@ -237,7 +239,7 @@ const Productpackage = ({
         _subRow.type === 'serializedAsset' ? _subRow.serializedAssetDetail.assetNumber : _subRow.packageDetail?.packageName}`;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
-      _subRow.allowedToDelete = false;
+      _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++
     });
