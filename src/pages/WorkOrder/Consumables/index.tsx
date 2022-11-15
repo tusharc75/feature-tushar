@@ -68,7 +68,7 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
                 size="small"
                 onClick={() => setConsumablesDialog(true)}
             >
-                Add Consumables
+                Add Product/Consumables
             </Button>}
         </Box>
         <Grid container spacing={2}>
