@@ -319,12 +319,6 @@ export default function CustomReactTable({
   );
 
   useEffect(() => {
-    rows.forEach((d) => {
-      if (d.subRows && d.subRows.length < 20) {
-        toggleAllRowsExpanded(true);
-        toggleRowExpanded(d.id, true);
-      }
-    });
     try {
       const storedColumns = localStorage.getItem(renderedFrom);
       if (storedColumns) {
