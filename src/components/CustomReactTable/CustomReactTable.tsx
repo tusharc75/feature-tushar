@@ -91,8 +91,6 @@ export default function CustomReactTable({
   // customPageSize = 20,
   displayCustomReactTableHeaderOptions = true,
   hideExpander = false,
-  editableColumns = [],
-  isEditable = false,
   onSaveEdit = null,
   material = []
 }) {
@@ -471,7 +469,7 @@ export default function CustomReactTable({
                           //   }
                           // });
 
-                          if (!isEditable || editableColumns.length === 0 || !editableColumns.includes(cell?.column.id)) return;
+                          if (!cell?.column?.editable) return;
 
                           setCellValue(cell?.value || '');
                           setIsCellEditing(true);
@@ -496,7 +494,16 @@ export default function CustomReactTable({
                           rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
                           <input
                             autoFocus
-                            onBlur={submitInput}
+                            onBlur={() => {
+                              Object.keys(rowState).forEach((rowId) => {
+                                Object.keys(rowState[rowId].cellState).forEach((colId) => {
+                                  setCellState(rowId, colId, { isEditing: false });
+                                });
+                              });
+                              setIsCellEditing(false);
+                              setCurrentRowEditing(null);
+                              setCellValue('');
+                            }}
                             style={{
                               borderLeft: '0',
                               borderTop: '0',
@@ -515,7 +522,7 @@ export default function CustomReactTable({
                             </IconButton>
                           </HtmlTooltip>
                         ) : (
-                          cell.render('Cell')
+                          cell.column?.editable ? <p style={{borderBottom: '1px dashed #8a8a8a', cursor: "pointer"}}>{cell?.value}</p>  : cell.render('Cell')
                         )}
                       </TableCell>
                     );
