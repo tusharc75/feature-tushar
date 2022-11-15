@@ -143,6 +143,7 @@ const Service = ({
   const [stepState, setStepState] = useState(null);
 
   useEffect(() => {
+    if(addServiceConfirmation.open) return
     axiosInstance()
       .get(`${workOrder.api}/service/detail/${serviceId}/${workOrderId}`)
       .then(({ data: { data } }) => {
@@ -173,7 +174,7 @@ const Service = ({
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }, [serviceId, serviceData]);
+  }, [addServiceConfirmation, serviceId, serviceData]);
 
   const handleAddService = (ids, forMinMax = false, step = null, values = null) => {
     const data: any = {};

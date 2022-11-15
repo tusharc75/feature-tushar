@@ -171,6 +171,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           message: data?.message
         });
         fetchService();
+        if(id === selectedService?.uniqueId) {
+          setSelectedService(null)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
