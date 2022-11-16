@@ -933,7 +933,7 @@ const ReceivingTicket = ({
                 handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
               }}
             >
-              Create Receiving Ticket
+              Create Receiving Ticket (Chargeable)
             </MenuItem>
 
             {selectedRecords.length &&
@@ -944,7 +944,7 @@ const ReceivingTicket = ({
                   setShowRemoveAssetFromReceivingTicketDialog(true);
                 }}
               >
-                Remove Receiving Ticket
+                Remove Receiving Ticket (Non-Chargeable)
               </MenuItem>
             ) : null}
 
