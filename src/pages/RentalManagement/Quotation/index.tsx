@@ -303,7 +303,7 @@ const Quotation = ({
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.qtyDisplay = _subRow.qty;
+      _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
       _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;

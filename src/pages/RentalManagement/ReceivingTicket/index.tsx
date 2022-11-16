@@ -933,7 +933,7 @@ const ReceivingTicket = ({
                 handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
               }}
             >
-              Create Receiving Ticket
+              Create Receiving Ticket (Chargeable)
             </MenuItem>
 
             {selectedRecords.length &&
@@ -964,7 +964,7 @@ const ReceivingTicket = ({
                 )
               }
             >
-              Create Return Ticket
+              Create Return Ticket (Non-Chargeable)
             </MenuItem>
 
             <MenuItem
