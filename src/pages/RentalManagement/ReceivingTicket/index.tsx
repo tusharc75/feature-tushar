@@ -944,7 +944,7 @@ const ReceivingTicket = ({
                   setShowRemoveAssetFromReceivingTicketDialog(true);
                 }}
               >
-                Remove Receiving Ticket (Non-Chargeable)
+                Remove Receiving Ticket
               </MenuItem>
             ) : null}
 
@@ -964,7 +964,7 @@ const ReceivingTicket = ({
                 )
               }
             >
-              Create Return Ticket
+              Create Return Ticket (Non-Chargeable)
             </MenuItem>
 
             <MenuItem
