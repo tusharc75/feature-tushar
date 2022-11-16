@@ -272,7 +272,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                                     helperText={validate([data]).inventoryQuantity ? "Receiving quantity is more than actual quantity" : ""}
                                                                                                 />
                                                                                             </Grid>
-                                                                                            {data?.serializedProduct &&
+                                                                                            {/* {data?.serializedProduct &&
                                                                                                 <Grid item xs={12} md={4}>
                                                                                                     <Field
                                                                                                         fullWidth
@@ -295,7 +295,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                                         helperText={validate([data]).assetQuantity ? "Receiving quantity is more than actual quantity" : ""}
                                                                                                     />
                                                                                                 </Grid>
-                                                                                            }
+                                                                                            } */}
                                                                                         </Grid>
                                                                                     </Box>
                                                                                     {data?.serializedProduct &&

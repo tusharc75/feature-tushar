@@ -98,6 +98,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion }) {
           pageSizes={pageSizes}
           page={page}
           actionWidth={150}
+          isClientSideGrid={true}
           allowSelection={false}
           loading={loading}
           refreshGrid={fetchData}

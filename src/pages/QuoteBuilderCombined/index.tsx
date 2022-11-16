@@ -279,12 +279,10 @@ const QuoteBuilders = () => {
 
         setVersionStatusData(newData);
         setLoadingVersions(false);
-        // setAllVersionStatusButtonText("All Version Status");
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setLoadingVersions(false);
-        // setAllVersionStatusButtonText("All Version Status");
       });
   };
 
@@ -1003,7 +1001,9 @@ const QuoteBuilders = () => {
             versionStatusData.length === 0 ?
               <CommonSkeleton lenArray={arr} />
               :
-              <VersionStatus handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion} versionStatusData={versionStatusData} />
+              <VersionStatus
+                handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
+                versionStatusData={versionStatusData} />
           }
         </CustomDialogComponent>
       )}
