@@ -42,6 +42,7 @@ const ServiceTable = ({ packageId, packageData }) => {
   const [isAssigning, setIsAssigning] = useState(false);
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
+  let canServiceAdd = packageData?.packageType === 'Product' && packageData?.products?.length ? true : false;
   useEffect(() => {
     fetchGridColumns();
     fetchData();
@@ -166,26 +167,28 @@ const ServiceTable = ({ packageId, packageData }) => {
       <Box mb={1} p={1} display="flex" justifyContent="space-between">
         <Box display="flex">
           {permissions?.packages?.isUpdate && (
-            <Button variant="contained" color="primary" size="small" onClick={() => setShowServiceAssignDialog(true)}>
+            <Button variant="contained" color="primary" size="small" disabled={!canServiceAdd} onClick={() => setShowServiceAssignDialog(true)}>
               {`Add Services`}
             </Button>
           )}
         </Box>
         <Box display="flex">
-          <ImportExportLinks
-            permissions={permissions?.packages}
-            module="packages-products"
-            api={`${packages.api}/${packageId}/services`}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length}
-            ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
-            isBackgroundWhite={true}
-          />
+          {canServiceAdd && (
+            <ImportExportLinks
+              permissions={permissions?.packages}
+              module="packages-products"
+              api={`${packages.api}/${packageId}/services`}
+              afterImportCompleted={() => {
+                fetchData();
+              }}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
+              recordsToExport={selectedRecords.length}
+              ids={[]}
+              additionalParams={`refrenceId=${packageId}`}
+              isBackgroundWhite={true}
+            />
+          )}
           {permissions?.packages?.isUpdate && (
             <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <DeleteButton
@@ -196,7 +199,7 @@ const ServiceTable = ({ packageId, packageData }) => {
                 }}
               />
               <Box ml={1} />
-              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+              <Button variant="outlined" color="primary" size="small" disabled={!canServiceAdd} onClick={() => setArrangeView(true)}>
                 <GrDrag fontSize="small" color="primary" className="mr-1" />
                 Arrange
               </Button>

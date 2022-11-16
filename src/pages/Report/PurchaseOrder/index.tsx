@@ -684,6 +684,49 @@ const Report = () => {
     }
   };
 
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case 'owner':
+        return 'owner.optionLabel';
+      case 'customerAccount':
+        return 'customerAccount.optionLabel';
+      case 'supplierAccount':
+        return 'supplierAccount.optionLabel';
+      case 'customerContact':
+        return 'customerContact.optionLabel';
+      case 'supplierContact':
+        return 'supplierContact.optionLabel';
+      case 'entity':
+        return 'entity.optionLabel';
+      case 'marketSegment':
+        return 'marketSegment.optionLabel';
+      case 'subMarketSegment':
+        return 'subMarketSegment.optionLabel';
+      case 'accountName':
+        return 'accountName.optionLabel';
+      case 'customerAccountName':
+        return 'customerAccountName.optionLabel';
+      case 'supplierAccountName':
+        return 'supplierAccountName.optionLabel';
+      case 'product':
+        return 'product.optionLabel';
+      case 'warehouse':
+        return 'warehouse.optionLabel';
+      case "projectManager":
+        return "projectManager.optionLabel";
+      case "rentalJob":
+        return "rentalJob.optionLabel";
+      case "pDFTemplate":
+        return "pDFTemplate.optionLabel";
+      default:
+        return field;
+    }
+  };
+
   const getFilter = (isExport = false) => {
     setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
     let filterQuery = ``;
@@ -693,10 +736,10 @@ const Report = () => {
       filterQuery = `page=${page}&limit=${limit}&`;
     }
     if (sorting.length > 0) {
-      filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
+      filterQuery = `${filterQuery}sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
+      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
     }
     if (selectedResources.length > 0) {
       if (selectedData) {
@@ -762,7 +805,7 @@ const Report = () => {
     }
 
     if (deepFilter && deepFilter.length > 0) {
-      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
+      filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
     }
     if (statusPeriod && statusPeriodDate) {
       const fields = Object.keys(statusPeriodDate);
