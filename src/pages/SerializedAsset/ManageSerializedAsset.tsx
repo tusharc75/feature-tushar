@@ -510,6 +510,7 @@ const ManageSerializedAsset = ({ isClone = false, productInventoryId = null, onC
                       open={productOpen?.open}
                       handleClose={() => setProductOpen({ open: false, isClone: false })}
                       isClone={productOpen?.isClone}
+                      openFrom={"serializedAsset"}
                       onSuccess={(data) => {
                         setProductOpen({ open: false, isClone: false });
                         if (data._id) {

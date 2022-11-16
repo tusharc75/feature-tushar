@@ -238,8 +238,10 @@ const Productpackage = ({
           accessor: element.fieldName,
           Header: element.fieldLabel,
           disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+          Cell: ({ row }) => {
+             return row.original[element.fieldName] && isNaN(row.original[element.fieldName]) ? <p>{moment(row.original[element.fieldName]?.slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+
+          }
         });
       } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
         if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
@@ -337,6 +339,9 @@ const Productpackage = ({
       );
     }
     coloum.forEach((element) => {
+      if(element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
+        element.editable = true
+      }
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
@@ -679,12 +684,10 @@ const Productpackage = ({
                 hideSelection={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_product_package"
                 isClientSideGrid={true}
-                isEditable={true}
                 onSaveEdit={(inputField, updatedData) => {
                   let rows = calculateRowsField(material, inputField, allFields, updatedData);
                   handleSaveData(rows);
                 }}
-                editableColumns={[`price_${rentalManagementData?.currency?.toLowerCase()}`]}
                 material={material}
               />
             </Box>
