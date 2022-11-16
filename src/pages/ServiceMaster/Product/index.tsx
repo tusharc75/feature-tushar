@@ -16,10 +16,11 @@ import useColumns, { getStaticFields, getFrameworkComponents } from '../../../co
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 function Product({ id }) {
-
   const renderedFrom = `${camelCase(routes?.product.title)}_product`;
 
-  const { state: { permissions, user, selectedEntity } }: any = useData();
+  const {
+    state: { permissions, user, selectedEntity }
+  }: any = useData();
 
   const { setToastConfig } = useContext(CustomToastContext);
 
@@ -247,6 +248,7 @@ function Product({ id }) {
             fetchBOMData();
             setOpenAssignProductDialog(false);
           }}
+          serialized={false}
         />
       )}
     </div>
