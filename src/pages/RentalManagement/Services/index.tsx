@@ -31,6 +31,7 @@ import StorageIcon from '@material-ui/icons/Storage';
 import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
 import StorefrontIcon from '@material-ui/icons/Storefront';
 import AllOutIcon from '@material-ui/icons/AllOut';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
 
 const Services = ({
   rentalManagementData,
@@ -91,7 +92,30 @@ const Services = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {startCase(row.original?.type)} (
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? 'Serialized'
+                  : 'Non-Serialized'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? 'Product'
+                  : 'Service'
+                : row.original?.type === 'asset'
+                ? 'Asset'
+                : row.original.type === 'service' &&
+                  row.original.serviceDetail?.serviceType &&
+                  row.original.serviceDetail?.serviceType === 'Shop Service'
+                ? 'Shop Service'
+                : 'Field Service'}
+              )
+            </p>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'detail',
@@ -134,23 +158,26 @@ const Services = ({
             }
             {!isOffline && (
               <>
-                <HtmlTooltip
-                  title={
-                    row.original.type === 'service'
-                      ? 'Service'
-                      : row.original.type === 'asset'
-                      ? 'Asset'
-                      : row.original.type === 'package'
-                      ? 'Package'
-                      : row.original.type === 'product'
-                      ? !row.original.serializedProduct
-                        ? 'Non-Serialized Product'
-                        : 'Serialized Product'
-                      : ''
-                  }
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === 'service') {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'product') {
+                      if (row?.original?.serializedProduct) {
+                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                      } else {
+                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                      }
+                    } else if (row.original.type === 'asset') {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
                 >
-                  <IconButton size="small">
-                    {row.original.type === 'service' ? (
+                  <InfoIcon fontSize="small" />
+                  {/* {row.original.type === 'service' ? (
                       <LocalLaundryServiceIcon
                         color="primary"
                         fontSize="small"
@@ -194,19 +221,9 @@ const Services = ({
                           window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                         }}
                       />
-                    )}
-                  </IconButton>
-                </HtmlTooltip>
+                    )} */}
+                </IconButton>
               </>
-            )}
-            {row.original.type === 'service' && row.original.serviceDetail?.serviceType && row.original.serviceDetail?.serviceType === 'Shop Service' ? (
-              <HtmlTooltip title="Shop Service">
-                <StorefrontIcon color="primary" fontSize="small" />
-              </HtmlTooltip>
-            ) : (
-              <HtmlTooltip title="Field Service">
-                <AllOutIcon color="primary" fontSize="small" />
-              </HtmlTooltip>
             )}
           </div>
         ),

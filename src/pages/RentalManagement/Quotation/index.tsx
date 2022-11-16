@@ -58,9 +58,9 @@ import LayersIcon from '@material-ui/icons/Layers';
 import CategoryIcon from '@material-ui/icons/Category';
 import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
 import StorageIcon from '@material-ui/icons/Storage';
-import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit'
+import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
 import SendEmail from './SendEmail';
-
+import InfoIcon from '@material-ui/icons/InfoOutlined';
 
 const Quotation = ({
   rentalManagementData,
@@ -99,13 +99,11 @@ const Quotation = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allColumn, setAllColumn] = useState([]);
 
-
   useEffect(() => {
     if (quotationData && quotationData?.versions[currentVersion]?._id) {
       fetchFields(quotationData?.currency);
       fetchProductInventory();
-    }
-    else {
+    } else {
       fetchQuotationData(null, true);
     }
   }, []);
@@ -133,7 +131,30 @@ const Quotation = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {startCase(row.original?.type)} (
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? 'Serialized'
+                  : 'Non-Serialized'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? 'Product'
+                  : 'Service'
+                : row.original?.type === 'asset'
+                ? 'Asset'
+                : row.original.type === 'service' &&
+                  row.original.serviceDetail?.serviceType &&
+                  row.original.serviceDetail?.serviceType === 'Shop Service'
+                ? 'Shop Service'
+                : 'Field Service'}
+              )
+            </p>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'detail',
@@ -158,11 +179,29 @@ const Quotation = ({
               </Box>
             }
             {!isOffline && (
-              <Tooltip title={row.original.type === 'service' ? "Service" :
-                row.original.type === 'asset' ? "Asset" : row.original.type === 'package' ? "Package" :
-                  row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Serialized Product') : ''}              >
-                <IconButton size='small'>
-                  {row.original.type === 'service' ?
+              // <Tooltip title={row.original.type === 'service' ? "Service" :
+              //   row.original.type === 'asset' ? "Asset" : row.original.type === 'package' ? "Package" :
+              //     row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Serialized Product') : ''}              >
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    if (row?.original?.serializedProduct) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    }
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <InfoIcon fontSize="small" />
+                {/* {row.original.type === 'service' ?
                     <LocalLaundryServiceIcon
                       color="primary"
                       fontSize="small"
@@ -190,9 +229,9 @@ const Quotation = ({
                           color="primary"
                           fontSize="small"
                           onClick={() => { window.open(`${routes.packagesDetail.path}/${row.original.materialId}`); }}
-                        />}
-                </IconButton>
-              </Tooltip>
+                        />} */}
+              </IconButton>
+              // </Tooltip>
             )}
           </div>
         ),
@@ -292,14 +331,15 @@ const Quotation = ({
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -322,20 +362,23 @@ const Quotation = ({
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
+    const response = await axiosInstance().get(
+      `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
+    );
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -462,7 +505,8 @@ const Quotation = ({
             setShowAllVersionStatus={setShowAllVersionStatus}
             setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
             currentVersion={currentVersion}
-            isSendEmail={true} />
+            isSendEmail={true}
+          />
         </Box>
         <Box display="flex">
           {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
@@ -486,7 +530,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)
@@ -693,7 +737,6 @@ const Quotation = ({
           }}
         />
       )}
-
     </Fragment>
   );
 };

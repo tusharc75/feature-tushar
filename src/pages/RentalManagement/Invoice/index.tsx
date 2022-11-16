@@ -76,7 +76,23 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
           width: 200,
           Cell: ({ row }) => (
             <p className="text-truncate"  >
-              {startCase(row.original.type)}
+              {startCase(row.original.type)} (
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? 'Serialized'
+                  : 'Non-Serialized'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? 'Product'
+                  : 'Service'
+                : row.original?.type === 'asset'
+                ? 'Asset'
+                : row.original.type === 'service' &&
+                  row.original.serviceDetail?.serviceType &&
+                  row.original.serviceDetail?.serviceType === 'Shop Service'
+                ? 'Shop Service'
+                : 'Field Service'}
+              )
             </p>),
         },
         {
