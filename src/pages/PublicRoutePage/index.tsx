@@ -90,7 +90,9 @@ const PublicRoutePage = () => {
     let tempData = {
       id: id
     };
+
     if (password) tempData['password'] = password;
+
     axios
       .post(backendApi + `/public/get-data`, tempData)
       .then(async ({ data }) => {
