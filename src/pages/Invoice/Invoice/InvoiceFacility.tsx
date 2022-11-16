@@ -80,6 +80,7 @@ const InvoiceFacility = ({ invoiceData }) => {
             } else {
               const file = new Blob([data], { type: 'application/pdf' });
               generateBase64forFile(file, 'pdf');
+              setGeneratingFile(false);
             }
           })
           .catch((err) => {
@@ -97,6 +98,7 @@ const InvoiceFacility = ({ invoiceData }) => {
         }
         toastConfig.setToastConfig(err);
         setDownlodingFile(null);
+        setGeneratingFile(false);
       });
   };
 
