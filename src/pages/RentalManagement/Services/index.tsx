@@ -340,6 +340,9 @@ const Services = ({
       );
     }
     coloum.forEach((element) => {
+      if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
+        element.editable = true;
+      }
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows

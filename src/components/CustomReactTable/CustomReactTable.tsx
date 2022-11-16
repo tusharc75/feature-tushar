@@ -366,8 +366,6 @@ export default function CustomReactTable({
     updatedData[rowData[0]] = parseFloat(cellValue.replace(/[^0-9\.]/g, '')) || 0;
     const inputField = { [`${rowData[0]}`]: parseFloat(cellValue.replace(/[^0-9\.]/g, '')) || 0 };
 
-    console.log(cellValue, updatedData[rowData[0]])
-
     if (onSaveEdit && cellValue && cellValue !== updatedData[rowData[0]]) {
       onSaveEdit(inputField, updatedData);
     }
