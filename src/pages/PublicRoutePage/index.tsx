@@ -109,10 +109,11 @@ const PublicRoutePage = () => {
   };
 
   useEffect(() => {
-    document.title =
-      resourceData?.referenceIdType === 'QuotationCustomer' || resourceData?.referenceIdType === 'RentalJob'
+    document.title = resourceData?.referenceIdType
+      ? resourceData?.referenceIdType === 'QuotationCustomer' || resourceData?.referenceIdType === 'RentalJob'
         ? 'Equipt Customer Portal'
-        : 'Equipt Supplier Portal';
+        : 'Equipt Supplier Portal'
+      : 'Equipt Portal';
   }, [resourceData?.referenceIdType]);
 
   return (
@@ -123,9 +124,11 @@ const PublicRoutePage = () => {
         </Grid>
         <Grid item container xs={6} md={6} sm={6} justify={'flex-end'}>
           <h2 style={{ paddingTop: '10px', paddingRight: '10px', color: 'white', textAlign: 'right' }}>
-            {resourceData?.referenceIdType === 'QuotationCustomer' || resourceData?.referenceIdType === 'RentalJob'
-              ? 'Customer Portal'
-              : 'Supplier Portal'}
+            {resourceData?.referenceIdType
+              ? resourceData?.referenceIdType === 'QuotationCustomer' || resourceData?.referenceIdType === 'RentalJob'
+                ? 'Customer Portal'
+                : 'Supplier Portal'
+              : 'Equipt Portal'}
           </h2>
         </Grid>
       </Grid>
