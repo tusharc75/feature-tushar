@@ -270,7 +270,7 @@ const Report = () => {
       filterQuery = `${filterQuery}sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
+      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
     }
     if (selectedResources.length > 0) {
       if (selectedData) {
@@ -325,7 +325,7 @@ const Report = () => {
     }
 
     if (deepFilter && deepFilter.length > 0) {
-      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
+      filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
     }
 
     if (statusPeriod && statusPeriodDate) {
