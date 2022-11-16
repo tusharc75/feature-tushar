@@ -12,7 +12,8 @@ import {
   MenuList,
   ListItemIcon,
   ListItemText,
-  Tooltip, Popover
+  Tooltip,
+  Popover
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -45,6 +46,7 @@ import StorageIcon from '@material-ui/icons/Storage';
 import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
 import StorefrontIcon from '@material-ui/icons/Storefront';
 import AllOutIcon from '@material-ui/icons/AllOut';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
 
 const Productpackage = ({
   rentalManagementData,
@@ -106,7 +108,30 @@ const Productpackage = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {startCase(row.original?.type)} (
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? 'Serialized'
+                  : 'Non-Serialized'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? 'Product'
+                  : 'Service'
+                : row.original?.type === 'asset'
+                ? 'Asset'
+                : row.original.type === 'service' &&
+                  row.original.serviceDetail?.serviceType &&
+                  row.original.serviceDetail?.serviceType === 'Shop Service'
+                ? 'Shop Service'
+                : 'Field Service'}
+              )
+            </p>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'detail',
@@ -137,9 +162,7 @@ const Productpackage = ({
                 {!isOffline && allowedToEdit && (
                   <HtmlTooltip title="Add ">
                     <IconButton
-                      onClick={(event) =>
-                        setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })
-                      }
+                      onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
                       size="small"
                     >
                       <Add color="disabled" fontSize="small" />
@@ -149,23 +172,26 @@ const Productpackage = ({
               </Box>
             }
             {!isOffline && (
-              <Tooltip
-                title={
-                  row.original.type === 'service'
-                    ? 'Service'
-                    : row.original.type === 'asset'
-                    ? 'Asset'
-                    : row.original.type === 'package'
-                    ? 'Package'
-                    : row.original.type === 'product'
-                    ? !row.original.serializedProduct
-                      ? 'Non-Serialized Product'
-                      : 'Serialized Product'
-                    : ''
-                }
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    if (row?.original?.serializedProduct) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    }
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
               >
-                <IconButton size="small">
-                  {row.original.type === 'service' ? (
+                <InfoIcon fontSize="small" />
+                {/* {row.original.type === 'service' ? (
                     <LocalLaundryServiceIcon
                       color="primary"
                       fontSize="small"
@@ -207,21 +233,9 @@ const Productpackage = ({
                         window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                       }}
                     />
-                  )}
-                </IconButton>
-              </Tooltip>
+                  )} */}
+              </IconButton>
             )}
-            {row.original.type === 'service' &&
-              row.original.serviceDetail?.serviceType &&
-              (row.original.serviceDetail?.serviceType === 'Shop Service' ? (
-                <HtmlTooltip title="Shop Service">
-                  <StorefrontIcon color="primary" fontSize="small" />
-                </HtmlTooltip>
-              ) : (
-                <HtmlTooltip title="Field Service">
-                  <AllOutIcon color="primary" fontSize="small" />
-                </HtmlTooltip>
-              ))}
           </div>
         ),
         Footer: () => {
@@ -239,8 +253,11 @@ const Productpackage = ({
           Header: element.fieldLabel,
           disableFilters: true,
           Cell: ({ row }) => {
-             return row.original[element.fieldName] && isNaN(row.original[element.fieldName]) ? <p>{moment(row.original[element.fieldName]?.slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-
+            return row.original[element.fieldName] && isNaN(row.original[element.fieldName]) ? (
+              <p>{moment(row.original[element.fieldName]?.slice(0, 10)).format(dateFormat)}</p>
+            ) : (
+              <NoDataCell />
+            );
           }
         });
       } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
@@ -339,8 +356,8 @@ const Productpackage = ({
       );
     }
     coloum.forEach((element) => {
-      if(element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
-        element.editable = true
+      if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
+        element.editable = true;
       }
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
@@ -378,7 +395,15 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service' ? parent.serviceDetail ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName : parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+          : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.packageDetail?.packageName
+      }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -403,7 +428,15 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail ? _subRow.serviceDetail?.serviceName : _subRow.packageDetail?.packageName : _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName}`;
+      _subRow.detail = `${
+        _subRow.type === 'service'
+          ? _subRow.serviceDetail
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+          : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -735,37 +768,37 @@ const Productpackage = ({
           rentalManagementData={rentalManagementData}
         />
       )}
-      {addchildDialog.open &&
+      {addchildDialog.open && (
         <Popover
           anchorReference="anchorPosition"
           anchorPosition={{ top: addchildDialog.top, left: addchildDialog.bottom }}
           anchorOrigin={{
             vertical: 'center',
-            horizontal: 'left',
+            horizontal: 'left'
           }}
           transformOrigin={{
             vertical: 'top',
-            horizontal: 'left',
+            horizontal: 'left'
           }}
           open={addchildDialog.open}
-          onClose={() => { setAddchildDialog({ open: false, parentId: null, top: null, bottom: null }) }}
+          onClose={() => {
+            setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+          }}
         >
           <MenuList>
             <MenuItem
               onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId })
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
-              }
-              }
+                setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              }}
             >
               Product
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId })
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
-              }
-              }
+                setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              }}
             >
               Package
             </MenuItem>
@@ -780,7 +813,7 @@ const Productpackage = ({
             </MenuItem> */}
           </MenuList>
         </Popover>
-      }
+      )}
     </Fragment>
   );
 };

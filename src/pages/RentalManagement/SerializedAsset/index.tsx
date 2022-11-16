@@ -104,7 +104,23 @@ const SerializedAsset = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)} (
+          {row.original['type'] === 'product'
+            ? row.original?.productDetail?.serializedProduct
+              ? 'Serialized'
+              : 'Non-Serialized'
+            : row.original?.type === 'package'
+            ? row.original?.packageDetail.packageType === 'Product'
+              ? 'Product'
+              : 'Service'
+            : row.original?.type === 'asset'
+            ? 'Asset'
+            : row.original.type === 'service' &&
+              row.original.serviceDetail?.serviceType &&
+              row.original.serviceDetail?.serviceType === 'Shop Service'
+            ? 'Shop Service'
+            : 'Field Service'}
+          )</p> : <NoDataCell />)
       },
       {
         accessor: 'detail',
@@ -138,7 +154,7 @@ const SerializedAsset = ({
                 row.original.detail
               )}
             </p>
-            <Tooltip
+            {/* <Tooltip
               title={
                 row.original.type === 'service'
                   ? 'Service'
@@ -152,9 +168,23 @@ const SerializedAsset = ({
                     : 'Serialized Product'
                   : ''
               }
-            >
-              <IconButton size="small">
-                {row.original.type === 'service' ? (
+            > */}
+              {/* <IconButton size="small"  onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    if (row?.original?.serializedProduct) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    }
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}> */}
+                {/* {row.original.type === 'service' ? (
                   <LocalLaundryServiceIcon
                     color="primary"
                     fontSize="small"
@@ -196,9 +226,9 @@ const SerializedAsset = ({
                       window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                     }}
                   />
-                )}
-              </IconButton>
-            </Tooltip>
+                )} */}
+              {/* </IconButton> */}
+            {/* </Tooltip> */}
             {row.original.isPurchaseOrder && (
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton
