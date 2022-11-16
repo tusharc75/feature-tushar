@@ -72,6 +72,7 @@ const PackageDetails = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+    newValue === 1 && fetchPackage();
   };
 
   useEffect(() => {

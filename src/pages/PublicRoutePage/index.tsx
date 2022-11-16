@@ -59,6 +59,7 @@ const PublicRoutePage = () => {
   const [passwordVerification, setPasswordVerification] = useState(false);
   const [password, setPassword] = useState(null);
   const [validPassword, setValidPassword] = useState(true);
+  const [referenceType, setReferenceType] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -71,6 +72,11 @@ const PublicRoutePage = () => {
     axios
       .get(backendApi + `/public/check-link/${id}`)
       .then(async ({ data }) => {
+        setReferenceType(data?.data?.referenceType);
+        document.title =
+          data?.data?.referenceType === 'QuotationCustomer' || data?.data?.referenceType === 'RentalJob'
+            ? 'Equipt Customer Portal'
+            : 'Equipt Supplier Portal';
         if (data?.data?.valid) {
           if (data?.data?.protected) {
             setPasswordVerification(true);
@@ -90,11 +96,14 @@ const PublicRoutePage = () => {
     let tempData = {
       id: id
     };
+
     if (password) tempData['password'] = password;
+
     axios
       .post(backendApi + `/public/get-data`, tempData)
       .then(async ({ data }) => {
         setResourceData(data.data);
+        setReferenceType(data?.data?.referenceIdType);
         setPasswordVerification(false);
         setLoading(false);
       })
@@ -109,10 +118,7 @@ const PublicRoutePage = () => {
   };
 
   useEffect(() => {
-    document.title =
-      resourceData?.referenceIdType === 'QuotationCustomer' || resourceData?.referenceIdType === 'RentalJob'
-        ? 'Equipt Customer Portal'
-        : 'Equipt Supplier Portal';
+    document.title = referenceType === 'QuotationCustomer' || referenceType === 'RentalJob' ? 'Equipt Customer Portal' : 'Equipt Supplier Portal';
   }, [resourceData?.referenceIdType]);
 
   return (
@@ -123,9 +129,7 @@ const PublicRoutePage = () => {
         </Grid>
         <Grid item container xs={6} md={6} sm={6} justify={'flex-end'}>
           <h2 style={{ paddingTop: '10px', paddingRight: '10px', color: 'white', textAlign: 'right' }}>
-            {resourceData?.referenceIdType === 'QuotationCustomer' || resourceData?.referenceIdType === 'RentalJob'
-              ? 'Customer Portal'
-              : 'Supplier Portal'}
+            {referenceType === 'QuotationCustomer' || referenceType === 'RentalJob' ? 'Customer Portal' : 'Supplier Portal'}
           </h2>
         </Grid>
       </Grid>
