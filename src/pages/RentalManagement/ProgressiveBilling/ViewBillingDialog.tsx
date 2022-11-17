@@ -305,6 +305,3 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
 
 export default ViewBillingDialog;
 
-function resetValueZero(product: any[]) {
-  throw new Error('Function not implemented.');
-}
