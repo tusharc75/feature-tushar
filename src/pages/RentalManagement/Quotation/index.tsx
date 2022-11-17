@@ -34,31 +34,14 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 import { useData } from 'src/StateProvider/Provider';
-import contactClass from '../../Contact/contact.module.scss';
 import { quotation } from '../../../constants/helpers';
 import Versions from 'src/pages/Quotation/Versions';
-import { ExpandMore } from '@material-ui/icons';
 import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import DeleteIcon from '@material-ui/icons/Delete';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import { orderBy, startCase } from 'lodash';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { Autocomplete } from '@material-ui/lab';
-import React from 'react';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import LayersIcon from '@material-ui/icons/Layers';
-import CategoryIcon from '@material-ui/icons/Category';
-import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
-import StorageIcon from '@material-ui/icons/Storage';
-import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
 import SendEmail from './SendEmail';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 
@@ -96,7 +79,6 @@ const Quotation = ({
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
   const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allColumn, setAllColumn] = useState([]);
 
   useEffect(() => {
@@ -131,26 +113,14 @@ const Quotation = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
+        width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
-              {startCase(row.original?.type)} (
-              {row.original['type'] === 'product'
-                ? row.original?.productDetail?.serializedProduct
-                  ? 'Serialized'
-                  : 'Non-Serialized'
-                : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? 'Product'
-                  : 'Service'
-                : row.original?.type === 'asset'
-                ? 'Asset'
-                : row.original.type === 'service' &&
-                  row.original.serviceDetail?.serviceType &&
-                  row.original.serviceDetail?.serviceType === 'Shop Service'
-                ? 'Shop Service'
-                : 'Field Service'}
-              )
+              {`${startCase(row.original?.type)} `}
+              {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
+                row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
+                  row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -158,81 +128,36 @@ const Quotation = ({
       },
       {
         accessor: 'detail',
-        Header: 'Detail',
+        Header: 'Details',
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {isOffline || !allowedToEdit ? (
-              <p> {row.original.detail}</p>
-            ) : (
-              <p className="link text-truncate" title={row.original.detail}>
-                {row.original.detail}
-              </p>
-            )}
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-              </Box>
-            }
-            {!isOffline && (
-              // <Tooltip title={row.original.type === 'service' ? "Service" :
-              //   row.original.type === 'asset' ? "Asset" : row.original.type === 'package' ? "Package" :
-              //     row.original.type === 'product' ? (!row.original.serializedProduct ? 'Non-Serialized Product' : 'Serialized Product') : ''}              >
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    if (row?.original?.serializedProduct) {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    }
-                  } else if (row.original.type === 'asset') {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <InfoIcon fontSize="small" />
-                {/* {row.original.type === 'service' ?
-                    <LocalLaundryServiceIcon
-                      color="primary"
-                      fontSize="small"
-                      onClick={() => { window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`); }}
-                    />
-                    : row.original.type === 'product' ?
-                      row?.original?.serializedProduct ?
-                        <LayersIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
-                        /> :
-                        <HorizontalSplitIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => { window.open(`${routes.productDetail.path}/${row.original.materialId}`); }}
-                        />
-                      : row.original.type === 'asset' ?
-                        <StorageIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => { window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`) }}
-                        /> :
-                        <CategoryIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => { window.open(`${routes.packagesDetail.path}/${row.original.materialId}`); }}
-                        />} */}
-              </IconButton>
-              // </Tooltip>
-            )}
+            <p title={row.original.detail}>
+              {row.original.detail}
+            </p>
+            <Box ml={1} mr={1} className="d-flex align-items-center">
+              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+              </span>
+            </Box>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === 'service') {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'product') {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'asset') {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <InfoIcon fontSize="small" color="primary" />
+            </IconButton>
           </div>
         ),
         Footer: () => {
@@ -240,6 +165,7 @@ const Quotation = ({
         }
       }
     ];
+
     data.forEach((element) => {
       if (element.type === 'date') {
         coloum.push({
@@ -331,18 +257,15 @@ const Quotation = ({
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow?.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName
+        }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
-      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
@@ -370,18 +293,15 @@ const Quotation = ({
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
-      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
-      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -468,8 +388,6 @@ const Quotation = ({
       delete element.packageDetail;
       delete element.serviceDetail;
       delete element.subRows;
-      delete element.leadTime;
-      delete element.leadTimeData;
     });
     setUpdating(true);
     axiosInstance()
@@ -530,7 +448,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)

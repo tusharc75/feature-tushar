@@ -231,7 +231,7 @@ const RJCustomerAccept = ({ openAuthId }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Your Response Submitted Successfully`
+          message: `Your response has been submitted successfully.`
         });
       })
       .catch((err) => {

@@ -169,6 +169,7 @@ export default function AllVersionStatus({ open, onClose, quoteId, quoteData, qu
                     pageSizes={pageSizes}
                     page={page}
                     actionWidth={150}
+                    isClientSideGrid={true}
                     allowSelection={false}
                     loading={loading}
                     refreshGrid={getVersionStatus}

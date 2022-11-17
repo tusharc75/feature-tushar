@@ -99,7 +99,7 @@ const Productpackage = ({
     const coloum: any = [
       {
         accessor: 'srno',
-        Header: '#',
+        Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
@@ -108,26 +108,14 @@ const Productpackage = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
+        width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
-              {startCase(row.original?.type)} (
-              {row.original['type'] === 'product'
-                ? row.original?.productDetail?.serializedProduct
-                  ? 'Serialized'
-                  : 'Non-Serialized'
-                : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? 'Product'
-                  : 'Service'
-                : row.original?.type === 'asset'
-                ? 'Asset'
-                : row.original.type === 'service' &&
-                  row.original.serviceDetail?.serviceType &&
-                  row.original.serviceDetail?.serviceType === 'Shop Service'
-                ? 'Shop Service'
-                : 'Field Service'}
-              )
+              {`${startCase(row.original?.type)} `}
+              {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
+                row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
+                  row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -135,7 +123,7 @@ const Productpackage = ({
       },
       {
         accessor: 'detail',
-        Header: 'Detail',
+        Header: 'Details',
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
@@ -178,11 +166,7 @@ const Productpackage = ({
                   if (row.original.type === 'service') {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'product') {
-                    if (row?.original?.serializedProduct) {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    }
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'asset') {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                   } else {
@@ -190,50 +174,7 @@ const Productpackage = ({
                   }
                 }}
               >
-                <InfoIcon fontSize="small" />
-                {/* {row.original.type === 'service' ? (
-                    <LocalLaundryServiceIcon
-                      color="primary"
-                      fontSize="small"
-                      onClick={() => {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      }}
-                    />
-                  ) : row.original.type === 'product' ? (
-                    row?.original?.serializedProduct ? (
-                      <LayersIcon
-                        color="primary"
-                        fontSize="small"
-                        onClick={() => {
-                          window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                        }}
-                      />
-                    ) : (
-                      <HorizontalSplitIcon
-                        color="primary"
-                        fontSize="small"
-                        onClick={() => {
-                          window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                        }}
-                      />
-                    )
-                  ) : row.original.type === 'asset' ? (
-                    <StorageIcon
-                      color="primary"
-                      fontSize="small"
-                      onClick={() => {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                      }}
-                    />
-                  ) : (
-                    <CategoryIcon
-                      color="primary"
-                      fontSize="small"
-                      onClick={() => {
-                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                      }}
-                    />
-                  )} */}
+                <InfoIcon fontSize="small" color="primary" />
               </IconButton>
             )}
           </div>
@@ -395,15 +336,14 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -428,15 +368,14 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.packageDetail?.packageName
-      }`;
+        }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -539,6 +478,8 @@ const Productpackage = ({
       delete element.assetQty;
       delete element.productDetail;
       delete element.packageDetail;
+      delete element.serviceDetail;
+      delete element.parentName;
       delete element.subRows;
     });
     setUpdating(true);
@@ -697,12 +638,12 @@ const Productpackage = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
