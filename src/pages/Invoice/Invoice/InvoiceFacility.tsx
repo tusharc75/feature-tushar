@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
 import { CommonRenderer, DateRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import Grid from '@material-ui/core/Grid/Grid';
-import { Button, Dialog, useMediaQuery } from '@material-ui/core';
+import { Button, Dialog, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   CustomDialogTransition,
@@ -49,12 +49,15 @@ const InvoiceFacility = ({ invoiceData }) => {
 
   const [downlodingFile, setDownlodingFile] = useState(null);
   const [emailAttachments, setEmailAttachments] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  const handlePDF = (type) => {
+  const handlePDF = (type, PDFType) => {
     setDownlodingFile(type);
     setGeneratingFile(true);
     axiosInstance()
-      .get(`${invoice.api}/${invoiceData._id}/pdf`)
+      .get(PDFType === "Detail" ?
+        `${invoice.api}/${invoiceData._id}/pdf/detail`
+        : `${invoice.api}/${invoiceData._id}/pdf`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -136,6 +139,14 @@ const InvoiceFacility = ({ invoiceData }) => {
     setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
   };
 
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <>
       <Box display="flex" justifyContent="space-between" m={1}>
@@ -148,7 +159,10 @@ const InvoiceFacility = ({ invoiceData }) => {
               size="small"
               disabled={downlodingFile === 'Preview' ? true : false}
               startIcon={isMobile ? '' : <AiFillFilePdf />}
-              onClick={() => handlePDF('Preview')}
+              onClick={(e) => {
+                setDownlodingFile("Preview");
+                handleClick(e);
+              }}
             >
               {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === 'Preview' ? 'Please wait...' : 'Preview'}
             </Button>
@@ -162,11 +176,39 @@ const InvoiceFacility = ({ invoiceData }) => {
               size="small"
               disabled={downlodingFile === 'Download' ? true : false}
               startIcon={isMobile ? '' : <AiFillFilePdf />}
-              onClick={() => handlePDF('Download')}
+              onClick={(e) => {
+                setDownlodingFile("Download");
+                handleClick(e)
+              }}
             >
               {isMobile ? <AiFillFilePdf size={22} /> : downlodingFile === 'Download' ? 'Please wait...' : 'Download'}
             </Button>
           )}
+          <Menu
+            id="simple-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+          >
+            <MenuItem onClick={() => {
+              setAnchorEl(null)
+              handlePDF(downlodingFile, "Regular")
+            }}>Regular</MenuItem>
+            <MenuItem onClick={() => {
+              setAnchorEl(null)
+              handlePDF(downlodingFile, "Detail")
+            }}>Detail</MenuItem>
+          </Menu>
           <Box mx={1} />
           {permissions?.invoice?.isRead && (
             <Button
@@ -177,7 +219,8 @@ const InvoiceFacility = ({ invoiceData }) => {
               startIcon={isMobile ? '' : <MdEmail />}
               onClick={() => {
                 fetchEmailsData();
-                handlePDF('Email');
+                handlePDF("Email", "Detail")
+                handlePDF("Email", "Regular")
               }}
             >
               {isMobile ? <MdEmail size={22} /> : downlodingFile === 'Email' ? 'Please wait...' : `Send Email`}
