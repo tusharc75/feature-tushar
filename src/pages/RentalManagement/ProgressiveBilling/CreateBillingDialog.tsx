@@ -58,9 +58,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
   const fetchInvoiceData = async () => {
     console.log(latestInvoice);
     const response: any = await axiosInstance().get(`${invoice.api}/${latestInvoice}`);
-    const data = response?.data?.data;
+    const data = response?.data?.data?.material[0];
     console.log(data);
-    var date = new Date(data?.creationDate);
+    var date = new Date(data?.estimateEndDate);
     console.log(response);
     setEstimateStartDate(date.setDate(date.getDate() + 1));
   };
@@ -356,6 +356,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
                             disablePast
                             variant="inline"
                             inputVariant="outlined"
+                            minDate={estimateStartDate}
                             value={startDate}
                             name="startDate"
                             label="Start Date"
