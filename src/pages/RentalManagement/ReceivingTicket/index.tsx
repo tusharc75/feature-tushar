@@ -481,7 +481,7 @@ const ReceivingTicket = ({
   const columns = [
     {
       field: 'assetNumber',
-      headerName: 'Asset Number',
+      headerName: 'Details',
       show: true,
       disabled: true,
       cellRenderer: 'inventoryRenderer',
@@ -501,7 +501,7 @@ const ReceivingTicket = ({
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer:  'parentNameRenderer'},
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
+    { field: 'productName', headerName: 'Product Number', show: true, cellRenderer: 'productNameRenderer' },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },

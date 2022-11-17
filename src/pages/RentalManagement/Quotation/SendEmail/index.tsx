@@ -1,6 +1,6 @@
 import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useContext } from 'react';
-import { Button, Checkbox, Chip, Dialog, FormControl, Grid, TextField } from '@material-ui/core';
+import { Button, Checkbox, Chip, Dialog, FormControl, Grid, Menu, MenuItem, TextField } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition, purchaseOrder, customerAccount, supplierAccount, quotation } from 'src/constants/helpers';
@@ -41,6 +41,8 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
   const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
   const [showExcelArrangeColumns, setShowExcelArrangeColumns] = useState(false);
   const [excelArrangeColumnLoading, setExcelArrangeColumnLoading] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [downlodingFile, setDownlodingFile] = useState(null);
 
   useEffect(() => {
     fetchEmailsData();
@@ -113,14 +115,16 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
     handleAttachments();
   };
 
-  const handleViewPdf = (download) => {
-    if (download) {
+  const handleViewPdf = (type, PDFType) => {
+    if (type === 'Download') {
       setLoading('download');
     } else {
       setLoading('view');
     }
     axiosInstance()
-      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}`)
+      .get(PDFType === "Detail" ?
+        `${quotation.api}/${quotationData._id}/pdf/detail/${versionData._id}`
+        : `${quotation.api}/${quotationData._id}/pdf/${versionData._id}`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -128,7 +132,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
           })
           .then(({ data }) => {
             setLoading(null);
-            if (download) {
+            if (type === 'Download') {
               const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
               const link = document.createElement('a');
               link.href = url;
@@ -174,6 +178,14 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
         }
       ]
     };
+  };
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -227,8 +239,9 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
               size="small"
               startIcon={isMobile && !isTablet ? '' : <AiFillFilePdf />}
               disabled={loading === 'view'}
-              onClick={() => {
-                handleViewPdf(false);
+              onClick={(e) => {
+                setDownlodingFile("Preview");
+                handleClick(e);
               }}
             >
               {isMobile && !isTablet ? <AiFillFilePdf size={18} /> : loading === 'view' ? 'Please wait...' : 'Preview'}
@@ -243,14 +256,40 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
                   size="small"
                   startIcon={isMobile && !isTablet ? '' : <IoMdDownload />}
                   disabled={loading === 'download'}
-                  onClick={() => {
-                    handleViewPdf(true);
+                  onClick={(e) => {
+                    setDownlodingFile("Download");
+                    handleClick(e)
                   }}
                 >
                   {isMobile && !isTablet ? <IoMdDownload size={20} /> : loading === 'download' ? 'Please wait...' : 'Download'}
                 </Button>
               </>
             }
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              getContentAnchorEl={null}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                handleViewPdf(downlodingFile, "Regular")
+              }}>Regular</MenuItem>
+              <MenuItem onClick={() => {
+                setAnchorEl(null)
+                handleViewPdf(downlodingFile, "Detail")
+              }}>Detail</MenuItem>
+            </Menu>
             {isSendEmail && <>
               <Box mx={0.5} />
               <Button
