@@ -174,6 +174,7 @@ const LoadingTicket = ({
       products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
 
       products?.forEach((element) => {
+        console.log(element)
         var qty = element.qty;
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         const parentProduct = material.find((p) => p?._id === element?.parentId)?.productDetail
@@ -333,7 +334,7 @@ const LoadingTicket = ({
   const columns = [
     {
       field: 'assetNumber',
-      headerName: 'Asset Number',
+      headerName: 'Details',
       show: true,
       disabled: true,
       cellRenderer: 'inventoryRenderer',
@@ -353,7 +354,7 @@ const LoadingTicket = ({
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
+    { field: 'productName', headerName: 'Product Number', show: true, cellRenderer: 'productNameRenderer' },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
