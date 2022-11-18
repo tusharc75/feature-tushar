@@ -25,6 +25,8 @@ import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import InvoiceFacility from 'src/pages/Invoice/Invoice/InvoiceFacility';
+import { startCase } from 'lodash';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -60,6 +62,32 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
       setAllFields(JSON.parse(JSON.stringify(data)));
       const coloum: any = [
         {
+          accessor: 'type',
+          Header: 'Type',
+          sticky: isMobile ? 'none' : 'left',
+          width: 200,
+          disableFilters: true,
+          Cell: ({ row }) =>
+            row.original['type'] ? (
+              <p>
+                {`${startCase(row.original?.type)} `}
+                {row.original['type'] === 'product'
+                  ? row.original?.productDetail?.serializedProduct
+                    ? '(Serialized)'
+                    : '(Non-Serialized)'
+                  : row.original?.type === 'package'
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                  : ''}
+              </p>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
           accessor: 'detail',
           Header: 'Detail',
           minWidth: 300,
@@ -70,6 +98,25 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                 <p className="text-truncate" title={row.original?.detail}>
                   {row.original?.detail || ''}
                 </p>
+              }
+              ,
+              {
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === 'service') {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'product') {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'asset') {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <InfoIcon fontSize="small" color="primary" />
+                </IconButton>
               }
             </div>
           )
@@ -304,4 +351,3 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
 };
 
 export default ViewBillingDialog;
-

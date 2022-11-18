@@ -23,6 +23,8 @@ import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { startCase } from 'lodash';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
 
 const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, latestInvoice, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -71,14 +73,40 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
     const coloum: any = [
       {
         accessor: 'srno',
-        Header: '#',
+        Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
       },
       {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        width: 200,
+        disableFilters: true,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
         accessor: 'detail',
-        Header: 'Detail',
+        Header: 'Details',
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
@@ -93,25 +121,22 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
               </Box>
             }
             {
-              <Chip
-                className="ml-1"
-                label={`${
-                  row.original.type === 'product'
-                    ? !row.original.serializedProduct
-                      ? 'Non-Serialized Product'
-                      : 'Product'
-                    : row.original.type === 'service'
-                    ? 'Service'
-                    : 'Package'
-                }`}
+              <IconButton
                 size="small"
-                color="primary"
                 onClick={() => {
-                  window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                  );
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
                 }}
-              />
+              >
+                <InfoIcon fontSize="small" color="primary" />
+              </IconButton>
             }
           </div>
         ),
@@ -218,15 +243,24 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
       data = response?.data?.data;
     }
-    let materials = data.material?.map((item) => {
-      delete item?.actualEndDate;
-      delete item?.estimateEndDate;
-      return {
-        ...item,
-        actualStartDate: initialStartDate || item.actualStartDate,
-        estimateStartDate: initialStartDate || item.estimateStartDate
-      };
-    });
+    let materials = data.material
+      ?.filter(
+        (item) =>
+          item?.pricingMethod === 'Per Day' ||
+          item?.pricingMethod === 'Per Hour' ||
+          item?.pricingMethod === 'Per Week' ||
+          item?.pricingMethod === 'Per Month'
+      )
+      ?.map((item) => {
+        console.log(item);
+        delete item?.actualEndDate;
+        delete item?.estimateEndDate;
+        return {
+          ...item,
+          actualStartDate: initialStartDate || item.actualStartDate,
+          estimateStartDate: initialStartDate || item.estimateStartDate
+        };
+      });
     data.material = materials || [];
     setMaterial(materials);
 
