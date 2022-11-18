@@ -23,6 +23,8 @@ import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { startCase } from 'lodash';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
 
 const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, latestInvoice, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -53,16 +55,16 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
 
   useEffect(() => {
     latestInvoice && fetchInvoiceData();
-    fetchProductInventory();
+    // fetchProductInventory();
   }, [columns]);
+
   const fetchInvoiceData = async () => {
-    console.log(latestInvoice);
     const response: any = await axiosInstance().get(`${invoice.api}/${latestInvoice}`);
     const data = response?.data?.data?.material[0];
-    console.log(data);
     var date = new Date(data?.estimateEndDate);
-    console.log(response);
     setEstimateStartDate(date.setDate(date.getDate() + 1));
+    let initialStartDate = new Date(date);
+    fetchProductInventory(initialStartDate);
   };
 
   const fetchFields = async () => {
@@ -71,14 +73,40 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
     const coloum: any = [
       {
         accessor: 'srno',
-        Header: '#',
+        Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
       },
       {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        width: 200,
+        disableFilters: true,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
         accessor: 'detail',
-        Header: 'Detail',
+        Header: 'Details',
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
@@ -93,25 +121,22 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
               </Box>
             }
             {
-              <Chip
-                className="ml-1"
-                label={`${
-                  row.original.type === 'product'
-                    ? !row.original.serializedProduct
-                      ? 'Non-Serialized Product'
-                      : 'Product'
-                    : row.original.type === 'service'
-                    ? 'Service'
-                    : 'Package'
-                }`}
+              <IconButton
                 size="small"
-                color="primary"
                 onClick={() => {
-                  window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                  );
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
                 }}
-              />
+              >
+                <InfoIcon fontSize="small" color="primary" />
+              </IconButton>
             }
           </div>
         ),
@@ -163,7 +188,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
           element.displayCurrency.forEach((_currency) => {
             let fieldName = element.fieldName + '_' + _currency.toLowerCase();
             let fieldLabel = element.fieldLabel + ' ' + _currency;
-            console.log(rentalManagementData?.currency);
             coloum.push({
               accessor: fieldName,
               Header: fieldLabel,
@@ -210,7 +234,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
     setColumns(coloum);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchProductInventory = async (initialStartDate) => {
     var data: any = [];
 
     if (billData) {
@@ -219,10 +243,27 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
       data = response?.data?.data;
     }
-    setMaterial(JSON.parse(JSON.stringify(data.material)));
-    if (estimateStartDate || data?.material[0]?.estimateStartDate) {
-      estimateStartDate ? setStartDate(estimateStartDate) : setStartDate(data?.material[0]?.estimateStartDate);
-    }
+    let materials = data.material
+      ?.filter(
+        (item) =>
+          item?.pricingMethod === 'Per Day' ||
+          item?.pricingMethod === 'Per Hour' ||
+          item?.pricingMethod === 'Per Week' ||
+          item?.pricingMethod === 'Per Month'
+      )
+      ?.map((item) => {
+        console.log(item);
+        delete item?.actualEndDate;
+        delete item?.estimateEndDate;
+        return {
+          ...item,
+          actualStartDate: initialStartDate || item.actualStartDate,
+          estimateStartDate: initialStartDate || item.estimateStartDate
+        };
+      });
+    data.material = materials || [];
+    setMaterial(materials);
+
     if (data?.material[0]?.estimateEndDate) {
       setEndDate(startDate);
     }
@@ -284,21 +325,15 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
 
   const handleApplyDate = async () => {
     let values = {
-      actualStartDate: startDate,
-      estimateStartDate: startDate,
       actualEndDate: endDate,
       estimateEndDate: endDate
     };
-    console.log(startDate);
-    console.log(endDate);
-    console.log(values);
 
     let rows: any = [];
     selectedProducts.forEach((element) => {
       const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
       rows.push({ ...element, ...calValues });
     });
-    console.log(rows);
     let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
     let tempProduct = productData;
     tempProduct['material'] = tempRows;
@@ -349,7 +384,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
                     <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
                       <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                         <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
-                          <KeyboardDatePicker
+                          {/* <KeyboardDatePicker
                             autoOk
                             fullWidth
                             size="small"
@@ -368,7 +403,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
                               shrink: true
                             }}
                             margin="dense"
-                          />
+                          /> */}
                           <KeyboardDatePicker
                             autoOk
                             fullWidth
@@ -376,8 +411,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
                             disablePast
                             variant="inline"
                             inputVariant="outlined"
-                            minDate={startDate}
-                            value={endDate}
+                            minDate={estimateStartDate}
+                            value={endDate || estimateStartDate}
                             name="endDate"
                             label="End Date"
                             onChange={(date: any) => {
