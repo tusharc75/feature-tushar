@@ -527,7 +527,7 @@ const RentalManagementDetailsPage = () => {
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
                     handlePrev={() => {
-                      if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer && rentalSteps[currentStep] === 'Quotation') {
+                      if ((quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer || quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer) && rentalSteps[currentStep] === 'Quotation') {
                         setShowCancelConfirmBox({ open: true, isQuote: true });
                       }
                       else {
