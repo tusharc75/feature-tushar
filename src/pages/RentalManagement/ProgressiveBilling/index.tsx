@@ -2,18 +2,14 @@ import { Box, Button, Grid } from '@material-ui/core';
 import { useContext, useEffect, useReducer, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomAgGrid, { intialState, reducer } from 'src/components/AgGridComponents/CustomAgGrid';
-import { CommonRenderer, CreatedByRenderer, UpdatedByRenderer } from 'src/components/AgGridComponents/CustomAgGridCellRenderers';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
 import routes from 'src/components/Helpers/Routes';
 import { checkStaticField, getColumnData, getFrameworkComponents, getStaticFields } from 'src/constants/columns';
 import {
-  customerAccount,
   gridLoadingTimeout,
   invoice,
   isObjectEmpty,
   prepareDataForGrid,
-  rentalManagement,
-  supplierAccount
 } from 'src/constants/helpers';
 import useColumns from 'src/constants/useColumns';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -22,18 +18,19 @@ import CreateBillingDialog from './CreateBillingDialog';
 import { Link, useHistory } from 'react-router-dom';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ViewBillingDialog from './ViewBillingDialog';
+import { camelCase } from 'lodash';
 
 const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) => {
-  const renderedFrom = 'ProgressiveBillingGrid';
-  const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
 
-  const [createBillDialog, setCreateBillDialog] = useState({ open: false, billData: null });
+  const renderedFrom = camelCase(routes?.invoice?.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
+  const toastConfig = useContext(CustomToastContext);
+
+  const [createBillDialog, setCreateBillDialog] = useState({ open: false });
   const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
   const [latestInvoice, setLatestInvoice] = useState(null);
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
+  const { state: { user, permissions, selectedEntity } }: any = useData();
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -41,15 +38,6 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
   const { getColumnData } = useColumns();
   const [frameworkComponent, setFrameworkComponent] = useState({});
   const [columns, setColumns] = useState(null);
-  const [renderCount, setRenderCount] = useState(0);
-  const [selectedType, setSelectedType] = useState(1);
-  const [accountDetails, setAccountDetails] = useState({
-    accountId: history.location?.state?.accountId,
-    accountName: history.location?.state?.accountName,
-    resource: history.location?.state?.resource
-  });
-
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   useEffect(() => {
     fetchGridColumns();
@@ -134,9 +122,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
 
   const replaceFieldNameForSorting = (field) => {
     const updatedField = replaceFieldName(field);
-
     if (field !== updatedField) return updatedField;
-
     switch (field) {
       case 'owner':
         return 'owner.optionLabel';
@@ -153,35 +139,13 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterInvoice=${selectedType}&rentalJob=${rentalId}`;
-    if (isExport) {
-      deepFilter = `filterInvoice=${selectedType}`;
-    }
+    let deepFilter = `?page=${page}&limit=${limit}&rentalJob=${rentalId}`;
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-    if (accountDetails.accountId) {
-      if (accountDetails.resource === customerAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('customerAccount'),
-            term: accountDetails.accountId
-          }
-        ])}`;
-      } else if (accountDetails.resource === supplierAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('supplierAccountName'),
-            term: { $in: [accountDetails.accountId] }
-          }
-        ])}`;
-      }
-    }
-
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
-
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
@@ -190,26 +154,21 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
       });
       deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
-
     return deepFilter;
   };
 
   const fetchBilling = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
     await axiosInstance()
       .get(`${invoice.api}${queryString}`)
       .then(({ data: { data, count } }) => {
@@ -218,7 +177,9 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
           finalObject['isChecked'] = false;
           return finalObject;
         });
-        setLatestInvoice(data[0]?._id);
+        if (data?.length) {
+          setLatestInvoice(data[0]?._id);
+        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -238,7 +199,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
             variant="contained"
             color="primary"
             size="small"
-            onClick={() => setCreateBillDialog({ open: true, billData: null })}
+            onClick={() => setCreateBillDialog({ open: true })}
             aria-controls="action-menu"
           >
             Create Billing
@@ -274,13 +235,12 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
         <CreateBillingDialog
           rentalManagementData={rentalManagementData}
           currencySymbol={currencySymbol}
-          billData={createBillDialog.billData}
           latestInvoice={latestInvoice}
           onClose={() => {
-            setCreateBillDialog({ open: false, billData: null });
+            setCreateBillDialog({ open: false });
           }}
           onSuccess={() => {
-            setCreateBillDialog({ open: false, billData: null });
+            setCreateBillDialog({ open: false });
             fetchBilling();
           }}
         />
