@@ -73,6 +73,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
         {
           accessor: 'type',
           Header: 'Type',
+          disableFilters: true,
           width: 200,
           Cell: ({ row }) =>
             row.original['type'] ? (
