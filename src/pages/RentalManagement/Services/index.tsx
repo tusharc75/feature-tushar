@@ -92,6 +92,7 @@ const Services = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
+        disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (

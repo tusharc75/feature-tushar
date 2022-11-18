@@ -320,7 +320,7 @@ const LoadingTicket = ({
     <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentProductId}`}>
       {params?.data?.parentName}
     </Link>
-  ) : <span className="text-truncate">- - - - - - -</span>;
+  ) : <NoDataCell />;
 
   const frameworkComponents = {
     ticketRenderer: TicketRenderer,
