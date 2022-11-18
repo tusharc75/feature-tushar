@@ -53,16 +53,16 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
 
   useEffect(() => {
     latestInvoice && fetchInvoiceData();
-    fetchProductInventory();
+    // fetchProductInventory();
   }, [columns]);
+
   const fetchInvoiceData = async () => {
-    console.log(latestInvoice);
     const response: any = await axiosInstance().get(`${invoice.api}/${latestInvoice}`);
     const data = response?.data?.data?.material[0];
-    console.log(data);
     var date = new Date(data?.estimateEndDate);
-    console.log(response);
     setEstimateStartDate(date.setDate(date.getDate() + 1));
+    let initialStartDate = new Date(date);
+    fetchProductInventory(initialStartDate);
   };
 
   const fetchFields = async () => {
@@ -163,7 +163,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
           element.displayCurrency.forEach((_currency) => {
             let fieldName = element.fieldName + '_' + _currency.toLowerCase();
             let fieldLabel = element.fieldLabel + ' ' + _currency;
-            console.log(rentalManagementData?.currency);
             coloum.push({
               accessor: fieldName,
               Header: fieldLabel,
@@ -210,7 +209,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
     setColumns(coloum);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchProductInventory = async (initialStartDate) => {
     var data: any = [];
 
     if (billData) {
@@ -219,10 +218,18 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
       data = response?.data?.data;
     }
-    setMaterial(JSON.parse(JSON.stringify(data.material)));
-    if (estimateStartDate || data?.material[0]?.estimateStartDate) {
-      estimateStartDate ? setStartDate(estimateStartDate) : setStartDate(data?.material[0]?.estimateStartDate);
-    }
+    let materials = data.material?.map((item) => {
+      delete item?.actualEndDate;
+      delete item?.estimateEndDate;
+      return {
+        ...item,
+        actualStartDate: initialStartDate || item.actualStartDate,
+        estimateStartDate: initialStartDate || item.estimateStartDate
+      };
+    });
+    data.material = materials || [];
+    setMaterial(materials);
+
     if (data?.material[0]?.estimateEndDate) {
       setEndDate(startDate);
     }
@@ -284,21 +291,15 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
 
   const handleApplyDate = async () => {
     let values = {
-      actualStartDate: startDate,
-      estimateStartDate: startDate,
       actualEndDate: endDate,
       estimateEndDate: endDate
     };
-    console.log(startDate);
-    console.log(endDate);
-    console.log(values);
 
     let rows: any = [];
     selectedProducts.forEach((element) => {
       const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
       rows.push({ ...element, ...calValues });
     });
-    console.log(rows);
     let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
     let tempProduct = productData;
     tempProduct['material'] = tempRows;
@@ -349,7 +350,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
                     <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
                       <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                         <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
-                          <KeyboardDatePicker
+                          {/* <KeyboardDatePicker
                             autoOk
                             fullWidth
                             size="small"
@@ -368,7 +369,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
                               shrink: true
                             }}
                             margin="dense"
-                          />
+                          /> */}
                           <KeyboardDatePicker
                             autoOk
                             fullWidth
@@ -376,8 +377,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, billData, l
                             disablePast
                             variant="inline"
                             inputVariant="outlined"
-                            minDate={startDate}
-                            value={endDate}
+                            minDate={estimateStartDate}
+                            value={endDate || estimateStartDate}
                             name="endDate"
                             label="End Date"
                             onChange={(date: any) => {
