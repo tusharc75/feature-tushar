@@ -123,7 +123,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
     }
     axiosInstance()
       .get(PDFType === "Detail" ?
-        `${quotation.api}/${quotationData._id}/pdf/detail/${versionData._id}`
+        `${quotation.api}/${quotationData._id}/pdf/${versionData._id}/detail`
         : `${quotation.api}/${quotationData._id}/pdf/${versionData._id}`)
       .then(({ data }) => {
         axiosInstance()
