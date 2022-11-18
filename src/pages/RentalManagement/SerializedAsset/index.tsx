@@ -97,11 +97,12 @@ const SerializedAsset = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
+        disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
-              {`${startCase(row.original?.type)} `}
+              {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? "Inventory" : `${startCase(row.original?.type)} `}
               {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
                 row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
                   row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
