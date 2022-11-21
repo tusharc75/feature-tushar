@@ -22,6 +22,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
 import moment from 'moment';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -377,6 +378,34 @@ const Service = ({
       });
   };
 
+  function convertMsToTime(milliseconds) {
+    function padTo2Digits(num) {
+      return num.toString().padStart(2, '0');
+    }
+    let seconds = Math.floor(milliseconds / 1000);
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+
+    seconds = seconds % 60;
+    minutes = minutes % 60;
+
+    let time = '';
+
+    if (hours === 0) {
+      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+    }
+    if (hours === 0 && minutes === 0) {
+      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+    }
+    if (hours > 0 && hours < 24) {
+      time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+    }
+    if (hours >= 24) {
+      time = `${padTo2Digits(hours / 24)}d`;
+    }
+    return time;
+  }
+
   return stepList ? (
     stepList?.length ? (
       <Box
@@ -438,16 +467,38 @@ const Service = ({
                   </Box>
                   <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
                     {stepData?.status === 'start' && (
-                      <div style={{ marginRight: '8px' }}>
-                        <Typography>Started: {moment(stepData?.startDate).fromNow()}</Typography>
-                      </div>
+                      <Box
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          alignItems: 'center',
+                          border: '1px solid rgba(0, 0, 0, 0.23)',
+                          backgroundColor: 'transparent',
+                          padding: '2px 7px',
+                          borderRadius: '8px',
+                          marginRight: '8px'
+                        }}
+                      >
+                        <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+                        {convertMsToTime(new Date().getTime() - new Date(stepData?.startDate).getTime())}
+                      </Box>
                     )}
                     {stepData?.status === 'end' && (
-                      <div>
-                        <Typography>
-                          Duration: {moment.duration(moment(stepData?.endDate).diff(moment(stepData?.startDate), 'seconds'), 'seconds').humanize()}
-                        </Typography>
-                      </div>
+                      <Box
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          alignItems: 'center',
+                          border: '1px solid rgba(0, 0, 0, 0.23)',
+                          backgroundColor: 'transparent',
+                          padding: '2px 7px',
+                          borderRadius: '8px'
+                        }}
+                      >
+                        <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+                        {/* Duration: {moment.duration(moment(stepData?.endDate).diff(moment(stepData?.startDate), 'seconds'), 'seconds').humanize()} */}
+                        {convertMsToTime(new Date(stepData?.endDate).getTime() - new Date(stepData?.startDate).getTime())}
+                      </Box>
                     )}
                     {!stepData?.status ? (
                       <Box>

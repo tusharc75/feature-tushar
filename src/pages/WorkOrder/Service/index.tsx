@@ -354,6 +354,34 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     return steps;
   };
 
+  function convertMsToTime(milliseconds) {
+    function padTo2Digits(num) {
+      return num.toString().padStart(2, '0');
+    }
+    let seconds = Math.floor(milliseconds / 1000);
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+
+    seconds = seconds % 60;
+    minutes = minutes % 60;
+
+    let time = '';
+
+    if (hours === 0) {
+      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+    }
+    if (hours === 0 && minutes === 0) {
+      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+    }
+    if (hours > 0 && hours < 24) {
+      time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+    }
+    if (hours >= 24) {
+      time = `${padTo2Digits(hours / 24)}d`;
+    }
+    return time;
+  }
+
   return (
     <Box p={2}>
       {serviceSteps ? (
@@ -425,10 +453,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                       if (item.status === 'end') {
                         const y = new Date(item?.startDate);
                         const x = new Date(item?.endDate);
-                        seconds += Math.abs(x.getTime() - y.getTime()) / 1000;
+                        seconds += Math.abs(x.getTime() - y.getTime());
                       }
                     });
-                    const duration = seconds !== 0 ? moment.duration(seconds, 'seconds').humanize() : null;
+                    const duration = seconds !== 0 ? convertMsToTime(seconds) : null;
 
                     return (
                       Boolean(allowedToEdit || data?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) && (
@@ -524,12 +552,29 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                           <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
                                         </Box>
                                       )}
-                                      {duration && (data?.status === 'Failed' || data?.status === 'Completed' || data?.status === 'Passed') && (
-                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+                                      {duration && (
+                                        <Box
+                                          style={{
+                                            display: 'flex',
+                                            flexWrap: 'wrap',
+                                            alignItems: 'center',
+                                            border: '1px solid rgba(0, 0, 0, 0.23)',
+                                            backgroundColor: 'transparent',
+                                            padding: '2px 7px',
+                                            borderRadius: '8px'
+                                          }}
+                                        >
                                           <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
                                           {duration}
                                         </Box>
                                       )}
+                                      {/* {duration && (
+                                        <Chip
+                                          label={duration}
+                                          icon={<AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />}
+                                          variant="outlined"
+                                        />
+                                      )} */}
                                     </>
                                   )}
                                 </Box>
