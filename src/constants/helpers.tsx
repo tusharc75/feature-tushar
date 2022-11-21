@@ -201,7 +201,8 @@ export const sidebarResource = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
-  workOrder: 'Work Order'
+  workOrder: 'Work Order',
+  workOrderTechnician: 'Work Order Technician'
 };
 
 export const resourceNames = {
@@ -270,7 +271,8 @@ export const resourceNames = {
   productAuction: 'Product Auction',
   quotation: 'Quotation',
   repairOrder: 'Repair Order',
-  workOrder: 'Work Order'
+  workOrder: 'Work Order',
+  workOrderTechnician: 'Work Order Technician'
 };
 
 export const primaryFields = {
@@ -355,7 +357,8 @@ export const RESOURCE_LABEL = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
-  workOrder: 'Work Order'
+  workOrder: 'Work Order',
+  workOrderTechnician: 'Work Order Technician'
 };
 
 export const CHILD_RESOURCE = {
