@@ -479,8 +479,8 @@ const InvoiceDetails = () => {
             setOpenUpdateDialog(false);
           }}
           onSuccess={() => {
-            invoiceData();
             setOpenUpdateDialog(false);
+            invoiceData();
           }}
         />
       )}

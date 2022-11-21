@@ -51,17 +51,19 @@ export const quotationProcessSteps = ['Add Products', 'Services and Consumables'
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
 export const rentalManagementSteps = [
   'Add Products',
-  'Services and Consumables',
+  'Add Services',
+  // 'Add Consumables',
+  'Extra Add-on',
   'Quotation',
   'Serialized Asset',
   'Loading Ticket',
   'Receiving Ticket',
-  'Packing Slip'
+  'Final Slip'
 ];
 export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
-export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Invoice'];
+export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Invoice'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -199,7 +201,8 @@ export const sidebarResource = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
-  workOrder: 'Work Order'
+  workOrder: 'Work Order',
+  workOrderTechnician: 'Work Order Technician'
 };
 
 export const resourceNames = {
@@ -268,7 +271,8 @@ export const resourceNames = {
   productAuction: 'Product Auction',
   quotation: 'Quotation',
   repairOrder: 'Repair Order',
-  workOrder: 'Work Order'
+  workOrder: 'Work Order',
+  workOrderTechnician: 'Work Order Technician'
 };
 
 export const primaryFields = {
@@ -354,7 +358,8 @@ export const RESOURCE_LABEL = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
-  workOrderSupervisor:'Work Order Supervisor'
+  workOrderSupervisor:'Work Order Supervisor',
+  workOrderTechnician: 'Work Order Technician'
 };
 
 export const CHILD_RESOURCE = {
@@ -1698,6 +1703,27 @@ export const INVENTORY_STATUS = {
   needRecert: 'Need Recert'
 };
 
+
+export const INVENTORY_HISTORY_TYPE = {
+  rental: 'Rental',
+  repair: 'Repair',
+  deliveryTicket: 'Delivery Ticket',
+  loadingTicket: 'Loading Ticket',
+  receivingTicket: 'Receiving Ticket',
+  returnTicket: 'Return Ticket',
+  purchaseOrder: 'Purchase Order',
+  inventory: 'Inventory',
+  serializedAssets: 'Serialized Assets',
+  transferAssets: 'Transfer Assets',
+  salesOrder: 'Sales Order',
+  sublease: 'Sublease',
+  bulkAssetCreation: 'Bulk Asset Creation',
+  transferInventory: 'Transfer Inventory',
+  inventoryToAsset: 'Inventory to Asset',
+  quotation: 'Quotation',
+  invoice: 'Invoice'
+}
+
 export const DELIVERY_TICKET_STATUS = {
   new: 'New',
   indTransit: 'In-Transit',
@@ -1844,10 +1870,10 @@ export const REPORT_LIST = [
   { title: sidebarResource.quoteBuilder, permission: 'quoteBuilder', key: 'quoteBuilder', type: 'dynamic' },
   { title: sidebarResource.projectSales, permission: 'projectSales', key: 'projectSales', type: 'dynamic' },
   { title: sidebarResource.purchaseOrder, permission: 'purchaseOrder', key: 'purchaseOrder', type: 'dynamic' },
-  { title: 'Purchase Order Product', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'purchaseOrderProduct' },
+  { title: 'Purchase Order Details', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'purchaseOrderDetails' },
   { title: 'Product Average Price', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'productAveragePrice' },
-  { title: 'Product Inventory History', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'productInventoryHistory' },
-  { title: 'Supplier Wise Average Price', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'supplierWiseAveragePrice' }
+  { title: 'Inventory History', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'inventoryHistory' },
+  { title: 'Average Price By Supplier', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'averagePriceBySupplier' }
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -2106,4 +2132,9 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   failed: 'Failed',
   skipped: 'Skipped',
   end: 'end',
+};
+
+export const REPAIR_ORDER_TYPE = {
+  internal: 'Asset Repair',
+  external: 'Customer Owned Asset Repair',
 };

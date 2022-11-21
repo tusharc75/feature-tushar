@@ -242,6 +242,10 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                             <span><b>Quantity: </b>{data?.row?.qty
                                                                                                 - (data?.row?.actualReceived || 0)
                                                                                             }</span>
+                                                                                             <Box component='span' mx={1} />
+                                                                                            <span><b>Recieved: </b>{data?.row?.actualReceived || 0}</span>
+                                                                                            <Box component='span' mx={1} />
+                                                                                            <span><b>Rejected: </b>{data?.row?.rejectQuantity || 0}</span>
                                                                                         </Grid>
                                                                                     </Grid>
                                                                                     <Box mt={1}>
@@ -268,17 +272,17 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                                     helperText={validate([data]).inventoryQuantity ? "Receiving quantity is more than actual quantity" : ""}
                                                                                                 />
                                                                                             </Grid>
-                                                                                            {data?.serializedProduct &&
+                                                                                            {/* {data?.serializedProduct &&
                                                                                                 <Grid item xs={12} md={4}>
                                                                                                     <Field
                                                                                                         fullWidth
-                                                                                                        label='Asset Quantity'
+                                                                                                        label='Asset Creation Quantity'
                                                                                                         variant="outlined"
                                                                                                         type="number"
                                                                                                         size="small"
                                                                                                         component={TextField}
                                                                                                         name="assetQuantity"
-                                                                                                        placeholder="Asset Quantity"
+                                                                                                        placeholder="Asset Creation Quantity"
                                                                                                         value={data.assetQuantity}
                                                                                                         onChange={(e) => {
                                                                                                             const value = e.target.value.replace(/[^0-9]/g, '');
@@ -291,7 +295,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                                         helperText={validate([data]).assetQuantity ? "Receiving quantity is more than actual quantity" : ""}
                                                                                                     />
                                                                                                 </Grid>
-                                                                                            }
+                                                                                            } */}
                                                                                         </Grid>
                                                                                     </Box>
                                                                                     {data?.serializedProduct &&

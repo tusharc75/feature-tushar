@@ -18,7 +18,7 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
-import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { calculatePrice, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 
 interface EditDialogProps {
@@ -26,7 +26,6 @@ interface EditDialogProps {
   handleSaveData: VoidFunction | any;
   rentalManagementData: any;
   rowData?: object | any;
-  calculatePrice?: VoidFunction | any;
   material: any[]
   selectedProducts: any[]
   isBulkedit: any
@@ -37,7 +36,6 @@ const rateChangeFields = ["unit", "pricingMethod"]
 
 const RentalJobQtyDialog: FC<EditDialogProps> = (
   {
-    calculatePrice,
     onClose,
     handleSaveData,
     rentalManagementData,
@@ -110,8 +108,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       if (rowData?.[`${rowData.type}Detail`]?.unit) {
         unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
       }
-      if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
-        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].pricingMethod);
+      if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
+        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       data.forEach(element => {
         if (element.fieldName === "unit") {
@@ -124,7 +122,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           element.isUneditable = true;
         }
       });
-      if (rowData.actualStartDate === "" || rowData.actualStartDate === "") {
+      if (rowData?.actualStartDate === "" || rowData?.actualStartDate === "") {
         data = data.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
       }
       setInitialData({
@@ -147,9 +145,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
 
   const getTitle = () => {
     if (rowData) {
-      let editTitle = `Edit - [${rowData.detail}]`;
+      let editTitle = `Edit - ${rowData.detail}`;
       if (rowData.subRows && rowData.subRows?.length > 0) {
-        editTitle = `Edit - [${rowData.detail}(${rowData.subRows.length})]`;
+        editTitle = `Edit - ${rowData.detail}`;
       }
       return editTitle;
     } else {
@@ -265,7 +263,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           element.qty = d.qty;
           material.push(element);
         });
-        priceData = await calculatePrice(material);
+        priceData = await calculatePrice(rentalManagementData, material);
       }
 
       selectedProducts.forEach(element => {
@@ -279,15 +277,23 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         }
 
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll)
-        if (element.type === "product") {
           rows.push({ ...element, ...calValues })
-        }
-        else if (element.type === "package") {
-          rows.push({ ...element, ...calValues })
-          const product = material.filter((e) => e.parentId === element._id)
-          resetValueZero(product)
-          rows = [...rows, ...product]
-        }
+
+          if (element.parentId) {
+            const parent: any = material.filter((e) => e._id === element.parentId)
+            const sameParent: any = material.filter((e) => e.parentId === element.parentId)
+            sameParent.forEach((element) => {
+              if (element._id === element._id) {
+                for (var key in values) {
+                  element[key] = values[key];
+                }
+              }
+            })
+  
+            sumOnParent(parent, sameParent)
+            rows = [...rows, ...parent]
+          }
+          
       });
 
       //Code for Bulk Update Only Product in Packages
@@ -313,7 +319,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       handleSaveData(rows)
     }
     else {
-      if (rowData.type === "package" && !showConfirmationDialog) {
+      if (rowData.parentId  && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       }
       else {
@@ -347,7 +353,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const getPricing = async (values: any) => {
     if (rowData) {
       if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
-        const priceData = await calculatePrice([{
+        const priceData: any = await calculatePrice(rentalManagementData, [{
           materialId: rowData.materialId,
           type: rowData.type,
           qty: values.qty,

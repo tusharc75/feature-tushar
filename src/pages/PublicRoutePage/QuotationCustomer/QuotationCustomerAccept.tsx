@@ -14,6 +14,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Skeleton } from '@material-ui/lab';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import QCcomment from './QCcomment';
+import { orderBy } from 'lodash';
 
 const QuotationCustomerAccept = ({ openAuthId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -198,54 +199,47 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
       }`;
-      parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
+      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
+      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + response?.data?.data?.quoteData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
+      parent.isValid = parent['finalPrice_' + response?.data?.data?.quoteData?.currency?.toLowerCase()] ? true : false;
+      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : !isRateRequired;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-
-      const subRows: any = data.material.filter((e) => e.parentId === parent._id);
-      subRows.forEach((_subRow, j) => {
-        _subRow.detail = `${
-          _subRow.type === 'serializedAsset'
-            ? _subRow.serializedAssetDetail?.assetNumber
-            : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
-        _subRow.leadTime = Array.isArray(_subRow?.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
-        _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
-        _subRow.isValid = _subRow['finalPrice_' + response?.data?.data?.quoteData?.currency?.toLowerCase()] ? true : !isRateRequired;
-        _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-        _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      });
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-      parent.subRows = subRows;
+      parent.subRows = generateNestedData(data.material, inventory, parent, response?.data?.data?.quoteData?.currency);
     });
-
-    let serviceRows = [];
-    if (response?.data?.data?.service.length) {
-      serviceRows = response?.data?.data?.service?.map((item) => {
-        let finalObject = prepareDataForGrid(item);
-        finalObject['detail'] = item?.serviceName;
-        finalObject['qtyDisplay'] = item?.qty;
-        finalObject['leadTime'] =
-          Array.isArray(item?.leadTime) && item?.leadTime?.length ? `${item?.leadTime?.reduce((acc, e) => acc + parseInt(e.days), 0) || 0}` : 0;
-        finalObject['parentId'] = null;
-        finalObject['isValid'] = true;
-        finalObject['hideSelection'] = false;
-        finalObject['assetQty'] = 0;
-        finalObject['type'] = 'Service';
-        let res: any = {
-          ...finalObject
-        };
-        return res;
-      });
-    }
-    setRowsData([...rows, ...serviceRows]);
+    setRowsData([...rows]);
     fetchFields(response?.data?.data?.quoteData);
+  };
+
+  const generateNestedData = (material, inventory, parent, currency) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
+      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
+      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      _subRow.qtyDisplay = _subRow.qty;
+      _subRow.isValid = true;
+      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : !isRateRequired;
+      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
+      _subRow.subRows = generateNestedData(material, inventory, _subRow, currency);
+    });
+    if (subRows.length === 0 && parent.type === 'package') {
+      parent.isValid = false;
+    }
+    if (parent.type === 'package') {
+      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+    }
+    return orderBy(subRows, ['order'], ['asc']);
   };
 
   const handleSubmit = (value: any, comment: string = '') => {
@@ -261,7 +255,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Your Response Submitted Successfully`
+          message: `Your response has been submitted successfully.`
         });
       })
       .catch((err) => {

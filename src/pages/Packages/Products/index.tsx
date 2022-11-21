@@ -53,7 +53,7 @@ const ProductsTable = ({ packageId, packageData }) => {
       gridApi.setRowData([]);
     }
     axiosInstance()
-      .get(`${packages.api}/material/${packageId}`)
+      .get(`${packages.api}/${packageId}/products`)
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
@@ -78,20 +78,17 @@ const ProductsTable = ({ packageId, packageData }) => {
       });
   };
 
-  const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
+  // needed in future
+  // const defaultColumns = [{ field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }];
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${packageData?.packageType === 'Service' ? 'Service Master' : 'Product'}`)
+      .get(`/field?resource=Product`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(
-            packageData?.packageType === 'Service' ? routes.serviceMaster.title : routes.product.title,
-            o?.fieldData,
-            packageData?.packageType === 'Service' ? routes.serviceMasterDetail.path : routes.productDetail.path
-          );
+          let currentColumn = getColumnData(routes.product.title, o?.fieldData, routes.productDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -107,13 +104,13 @@ const ProductsTable = ({ packageId, packageData }) => {
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer
         });
-        setColumns([...defaultColumns, ...columns]);
+        setColumns([...columns]);
       });
   };
 
   const handleUpdateQuantity = (row) => {
     axiosInstance()
-      .put(`${packages.api}/material/${packageId}`, {
+      .put(`${packages.api}/${packageId}/products`, {
         ids: [row.data._id],
         qty: Number(row.data.qty)
       })
@@ -127,7 +124,7 @@ const ProductsTable = ({ packageId, packageData }) => {
     setRemovingProducts(true);
     const Ids = selectedRecords.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/material/${packageId}/remove`, { ids: Ids })
+      .put(`${packages.api}/${packageId}/products/remove`, { ids: Ids })
       .then(() => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
@@ -136,29 +133,6 @@ const ProductsTable = ({ packageId, packageData }) => {
       .catch((err) => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
-        setToastConfig(err);
-      });
-  };
-
-  const handleArrangeUpdate = (rows: any) => {
-    setIsAssigning(true);
-    rows?.forEach((e: any) => {
-      delete e.preWork
-      delete e.name;
-    });
-    axiosInstance()
-      .put(`${packages.api}/material/${packageId}/order`, {
-        packageType: packageData?.packageType,
-        data: rows || []
-      })
-      .then(() => {
-        fetchData();
-        setIsAssigning(false);
-        setArrangeView(false);
-      })
-      .catch((err) => {
-        setIsAssigning(false);
-        setArrangeView(false);
         setToastConfig(err);
       });
   };
@@ -171,7 +145,7 @@ const ProductsTable = ({ packageId, packageData }) => {
         <Box display="flex">
           {permissions?.packages?.isUpdate && (
             <Button variant="contained" color="primary" size="small" onClick={() => setShowProductAssignDialog(true)}>
-              {`Add ${packageData?.packageType === 'Service' ? 'Services' : 'Products'}`}
+              {`Add Products`}
             </Button>
           )}
         </Box>
@@ -179,7 +153,7 @@ const ProductsTable = ({ packageId, packageData }) => {
           <ImportExportLinks
             permissions={permissions?.packages}
             module="packages-products"
-            api={`${packages.api}/material`}
+            api={`${packages.api}/${packageId}/products`}
             afterImportCompleted={() => {
               fetchData();
             }}
@@ -190,21 +164,15 @@ const ProductsTable = ({ packageId, packageData }) => {
             additionalParams={`refrenceId=${packageId}`}
             isBackgroundWhite={true}
           />
+          <Box ml={1} />
           {permissions?.packages?.isUpdate && (
-            <Box ml={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <DeleteButton
-                disabled={selectedRecords.length === 0 || isRemovingProducts}
-                text={'Delete'}
-                onClick={() => {
-                  setShowProductConfirmBox(true);
-                }}
-              />
-              <Box ml={1} />
-              <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-                <GrDrag fontSize="small" color="primary" className="mr-1" />
-                Arrange
-              </Button>
-            </Box>
+            <DeleteButton
+              disabled={selectedRecords.length === 0 || isRemovingProducts}
+              text={'Delete'}
+              onClick={() => {
+                setShowProductConfirmBox(true);
+              }}
+            />
           )}
         </Box>
       </Box>
@@ -220,9 +188,9 @@ const ProductsTable = ({ packageId, packageData }) => {
           dataRows={dataRows}
           selectedRecords={[]}
           dispatch={dispatch}
-          onEdit={(data) => { }}
+          onEdit={(data) => {}}
           extraParamsToCheckDelete={true}
-          onDelete={(data) => { }}
+          onDelete={(data) => {}}
           rowCount={rowCount}
           page={page}
           loading={loading}
@@ -238,7 +206,7 @@ const ProductsTable = ({ packageId, packageData }) => {
             setShowProductAssignDialog(true);
           }}
           showClone={true}
-          onClone={(data) => { }}
+          onClone={(data) => {}}
           renderedFrom={renderedFrom}
         />
       ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -265,32 +233,21 @@ const ProductsTable = ({ packageId, packageData }) => {
       ) : (
         <Loader noLoader={false} minHeight={'400px'} text="Loading..." />
       )}
-      {showProductAssignDialog &&
-        (packageData?.packageType === 'Service' ? (
-          <AssignServiceDialog
-            reference="package"
-            referenceId={packageId}
-            handleClose={() => setShowProductAssignDialog(false)}
-            ids={[...dataRows?.map((e) => e._id)]}
-            onSuccess={() => {
-              fetchData();
-              setShowProductAssignDialog(false);
-            }}
-          />
-        ) : (
-          <AssignProductDialog
-            reference="package"
-            productsDialogOpen={true}
-            productId={packageId}
-            handleCloseDialog={() => setShowProductAssignDialog(false)}
-            assignedProducts={[...dataRows?.map((e) => e._id)]}
-            renderedFrom={`${renderedFrom}_sub-1`}
-            onSuccess={() => {
-              fetchData();
-              setShowProductAssignDialog(false);
-            }}
-          />
-        ))}
+      {showProductAssignDialog && (
+        <AssignProductDialog
+          reference="package"
+          serialized={packageData?.packageType === 'Service' ? false : null}
+          productsDialogOpen={true}
+          productId={packageId}
+          handleCloseDialog={() => setShowProductAssignDialog(false)}
+          assignedProducts={[...dataRows?.map((e) => e._id)]}
+          renderedFrom={`${renderedFrom}_sub-1`}
+          onSuccess={() => {
+            fetchData();
+            setShowProductAssignDialog(false);
+          }}
+        />
+      )}
       {showProductConfirmBox && (
         <ConfirmationDialog
           open={showProductConfirmBox}
@@ -300,19 +257,6 @@ const ProductsTable = ({ packageId, packageData }) => {
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}
-        />
-      )}
-      {arrangeView && (
-        <ArrangeView
-          data={
-            dataRows?.map((d) => {
-              return { _id: d?._id, name: d?.serviceName || d?.productName, order: d?.order, preWork: d?.preWork };
-            }) || []
-          }
-          title={'Arrange'}
-          handleClose={() => setArrangeView(false)}
-          handleSubmit={handleArrangeUpdate}
-          loading={isAssigning}
         />
       )}
     </Box>

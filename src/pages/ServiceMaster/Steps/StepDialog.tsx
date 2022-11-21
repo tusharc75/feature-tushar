@@ -1,8 +1,8 @@
 import { Fragment, useCallback, useContext, useEffect } from 'react';
-import { Box, Button, Dialog, FormControlLabel, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, Divider, FormControlLabel, InputAdornment, TextField } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useState } from 'react';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { currencyCodeToSymbol, CustomDialogTransition, getUniqueCurrencies, workOrder } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -16,15 +16,28 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { Autocomplete } from '@material-ui/lab';
 import Grid from '@material-ui/core/Grid';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from 'src/StateProvider/Provider';
 
-export default function StepDialog({ handleClose, handleSucess, serviceId, stepId, steps }) {
-
+export default function StepDialog({
+  handleClose,
+  handleSucess,
+  serviceId,
+  stepId,
+  steps,
+  reference = null,
+  workOrderId = null,
+  uniqueId = null,
+  setOpenFieldDialog = null,
+  handleAddStep = null
+}) {
+  const {state: {user: {user}}} = useData()
   const toastConfig = useContext(CustomToastContext);
   const [stepDetails, setStepDetails] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [services, setServices] = useState([]);
   const [stepOption, setStepOption] = useState([]);
+  const [currencyData, setCurrencyData] = useState([]);
 
   useEffect(() => {
     axiosInstance()
@@ -40,6 +53,13 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
   }, []);
 
   useEffect(() => {
+    const sortedArr = getUniqueCurrencies().sort((a, b) =>
+      a.name.toUpperCase() < b.name.toUpperCase() ? -1 : a.name.toUpperCase() > b.name.toUpperCase() ? 1 : 0
+    );
+    setCurrencyData(sortedArr);
+  }, []);
+
+  useEffect(() => {
     if (stepId != '') {
       axiosInstance()
         .get(`${serviceMaster.api}/steps/${serviceId}/${stepId}`)
@@ -47,7 +67,9 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
           setStepDetails({
             stepName: data?.stepName,
             leadDay: data?.leadDay || 0,
-            price: data?.price || 0,
+            costPrice: data?.costPrice || 0,
+            listPrice: data?.listPrice || 0,
+            currency: data?.currency || '',
             isPassFail: data?.isPassFail,
             isFailAddon: data?.isFailAddon,
             failAddon: data?.failAddon,
@@ -64,12 +86,14 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
             returnToServiceOnFail: data?.returnToServiceOnFail
           });
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setStepDetails({
         stepName: '',
         leadDay: 0,
-        price: 0,
+        costPrice: 0,
+        listPrice: 0,
+        currency: reference === 'workOrder' ? user?.currency : '',
         isPassFail: false,
         isFailAddon: false,
         failAddon: [],
@@ -88,10 +112,33 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
     }
   }, []);
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     values.leadDay = parseInt(values.leadDay);
-    values.price = parseFloat(values.price);
+    values.costPrice = parseFloat(values.costPrice);
+    values.listPrice = parseFloat(values.listPrice);
     setLoading(true);
+
+    if (reference === 'workOrder') {
+      if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
+
+      values.serviceId = serviceId;
+      try {
+        const data = await handleAddStep(values);
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
+        handleSucess();
+
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      }
+
+      return;
+    }
     if (stepId != '') {
       axiosInstance()
         .put(`${serviceMaster.api}/steps/${serviceId}/${stepId}`, values)
@@ -135,8 +182,15 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
     if (values.leadDay === '' || parseInt(values.leadDay) < 0) {
       errors['leadDay'] = 'Please enter valid lead day';
     }
-    if (values.price === '' || parseInt(values.price) < 0) {
-      errors['price'] = 'Please enter valid price';
+
+    if (values.costPrice === '' || parseInt(values.costPrice) < 0) {
+      errors['costPrice'] = 'Please enter valid cost price';
+    }
+    if (values.listPrice === '' || parseInt(values.listPrice) < 0) {
+      errors['listPrice'] = 'Please enter valid list price';
+    }
+    if (values.currency === '') {
+      errors['currency'] = 'Please select currency';
     }
     return errors;
   }
@@ -172,7 +226,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogContent>
                 <Grid container spacing={2}>
-                  <Grid xs={12} sm={4} item>
+                  <Grid xs={12} md={6} sm={6} item>
                     <Field
                       component={TextFieldFormik}
                       margin="dense"
@@ -190,7 +244,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                       }}
                     />
                   </Grid>
-                  <Grid xs={12} sm={4} item>
+                  <Grid xs={12} md={6} sm={6} item>
                     <Field
                       component={TextFieldFormik}
                       margin="dense"
@@ -207,20 +261,80 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                       }}
                     />
                   </Grid>
-                  <Grid xs={12} sm={4} item>
-                    <Field
-                      component={TextFieldFormik}
+                  <Grid xs={12} md={4} sm={4} item>
+                    <Autocomplete
+                      id="currency"
+                      value={
+                        currencyData.filter((data) => data.currencyCode === values['currency']).length
+                          ? currencyData.filter((data) => data.currencyCode === values['currency'])[0]
+                          : ''
+                      }
+                      options={currencyData}
+                      getOptionLabel={(option: any) =>
+                        option ? `${option?.currencyCode} - ${option?.currencyName} - (${option?.symbolNative})` : ''
+                      }
+                      getOptionSelected={(option: any, val) => option.currencyCode === val}
+                      onChange={(event, newValue) => {
+                        setFieldValue('currency', newValue && newValue.currencyCode ? newValue.currencyCode : '');
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          margin="dense"
+                          size="small"
+                          variant="outlined"
+                          name="currency"
+                          label="Currency"
+                          error={touched['currency'] && Boolean(errors['currency'])}
+                          helperText={touched['currency'] && errors['currency']}
+                          required
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid xs={12} md={4} sm={4} item>
+                    <TextField
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">{`${
+                            values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                          }`}</InputAdornment>
+                        )
+                      }}
                       margin="dense"
                       type="number"
-                      label="Price"
-                      name="price"
+                      label="Cost Price"
+                      name="costPrice"
                       variant="outlined"
                       fullWidth
-                      value={values['price']}
-                      error={touched['price'] && Boolean(errors['price'])}
-                      helperText={touched['price'] && errors['price']}
+                      value={values['costPrice']}
+                      error={touched['costPrice'] && Boolean(errors['costPrice'])}
+                      helperText={touched['costPrice'] && errors['costPrice']}
                       onChange={(e) => {
-                        setFieldValue('price', e.target.value);
+                        setFieldValue('costPrice', e.target.value);
+                      }}
+                    />
+                  </Grid>
+                  <Grid xs={12} md={4} sm={4} item>
+                    <TextField
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">{`${
+                            values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                          }`}</InputAdornment>
+                        )
+                      }}
+                      margin="dense"
+                      type="number"
+                      label="List Price"
+                      name="listPrice"
+                      variant="outlined"
+                      fullWidth
+                      value={values['listPrice']}
+                      error={touched['listPrice'] && Boolean(errors['listPrice'])}
+                      helperText={touched['listPrice'] && errors['listPrice']}
+                      onChange={(e) => {
+                        setFieldValue('listPrice', e.target.value);
                       }}
                     />
                   </Grid>
@@ -262,7 +376,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                         <Grid item xs={6}>
                           {values['isPassAddon'] && (
                             <Autocomplete
-                              options={[{ optionValue: 'all', optionLabel: "Select All" }, ...services]}
+                              options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...services]}
                               fullWidth
                               multiple
                               size="small"
@@ -271,11 +385,8 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                               getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                               onChange={(_, newVal: any) => {
                                 const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
-                                const values = isAll ? services.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue)
-                                setFieldValue(
-                                  'passAddon',
-                                  values
-                                );
+                                const values = isAll ? services.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
+                                setFieldValue('passAddon', values);
                               }}
                               renderInput={(params) => <TextField {...params} label="Pass Addon Services" name="passAddon" variant="outlined" />}
                             />
@@ -303,7 +414,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                         <Grid item xs={6}>
                           {values['isFailAddon'] && (
                             <Autocomplete
-                              options={[{ optionValue: "all", optionLabel: "Select All" }, ...services,]}
+                              options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...services]}
                               fullWidth
                               multiple
                               size="small"
@@ -312,12 +423,9 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                               getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                               onChange={(_, newVal: any) => {
                                 const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
-                                const values = isAll ? services.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue)
+                                const values = isAll ? services.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
 
-                                setFieldValue(
-                                  'failAddon',
-                                  values
-                                );
+                                setFieldValue('failAddon', values);
                               }}
                               renderInput={(params) => <TextField {...params} label="Fail Addon Services" name="failAddon" variant="outlined" />}
                             />
@@ -345,7 +453,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                         <Grid item xs={6}>
                           {values['isJumpStepPass'] && (
                             <Autocomplete
-                              options={[{ optionValue: "all", optionLabel: "Select All" }, ...stepOption,]}
+                              options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...stepOption]}
                               fullWidth
                               multiple
                               size="small"
@@ -356,12 +464,9 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                               getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                               onChange={(_, newVal: any) => {
                                 const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
-                                const values = isAll ? stepOption.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue)
+                                const values = isAll ? stepOption.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
 
-                                setFieldValue(
-                                  'jumpStepsPass',
-                                  values
-                                );
+                                setFieldValue('jumpStepsPass', values);
                               }}
                               renderInput={(params) => <TextField {...params} label="Jump Steps On Pass" name="jumpStepsPass" variant="outlined" />}
                             />
@@ -389,7 +494,7 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                         <Grid item xs={6}>
                           {values['isJumpStepFail'] && (
                             <Autocomplete
-                              options={[{ optionValue: "all", optionLabel: "Select All" }, ...stepOption,]}
+                              options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...stepOption]}
                               fullWidth
                               multiple
                               size="small"
@@ -400,12 +505,9 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                               getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                               onChange={(_, newVal: any[]) => {
                                 const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
-                                const values = isAll ? stepOption.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue)
+                                const values = isAll ? stepOption.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
 
-                                setFieldValue(
-                                  'jumpStepsFail',
-                                  values
-                                );
+                                setFieldValue('jumpStepsFail', values);
                               }}
                               renderInput={(params) => <TextField {...params} label="Jump Steps On Fail" name="jumpStepsFail" variant="outlined" />}
                             />
@@ -509,6 +611,15 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
                     </Box>
                   </Box>
                 )}
+                {reference === 'workOrder' && (
+                  <Box mt={2}>
+                    <Divider />
+                    <Box mb={2} />
+                    <Button size="small" color="primary" variant="contained" onClick={() => setOpenFieldDialog(true)}>
+                      Configure Fields
+                    </Button>
+                  </Box>
+                )}
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
@@ -527,25 +638,21 @@ export default function StepDialog({ handleClose, handleSucess, serviceId, stepI
             </Form>
           )}
         </Formik>
-      ) :
+      ) : (
         <>
           <CustomDialogContent>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </CustomDialogContent>
           <CustomDialogFooter>
-            <Button
-              size="small"
-              color="primary"
-              disabled
-            >
+            <Button size="small" color="primary" disabled>
               Cancel
             </Button>
-            <CustomButton disabled variant="contained" color="primary" >
+            <CustomButton disabled variant="contained" color="primary">
               Save
             </CustomButton>
           </CustomDialogFooter>
         </>
-      }
+      )}
     </Dialog>
   );
 }

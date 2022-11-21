@@ -63,7 +63,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
       const coloum: any = [
         {
           accessor: 'srno',
-          Header: '#',
+          Header: 'Index',
           width: 70,
           Cell: ({ row }) => (
             <p className="text-truncate"  >
@@ -73,25 +73,35 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
         {
           accessor: 'type',
           Header: 'Type',
+          disableFilters: true,
           width: 200,
-          Cell: ({ row }) => (
-            <p className="text-truncate"  >
-              {startCase(row.original.type)}
-            </p>),
+          Cell: ({ row }) =>
+            row.original['type'] ? (
+              <p>
+                {`${startCase(row.original?.type)} `}
+                {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
+                  row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
+                    row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
+              </p>
+            ) : (
+              <NoDataCell />
+            )
         },
         {
           accessor: 'detail',
-          Header: 'Detail',
+          Header: 'Details',
           width: 300,
           Cell: ({ row }) => (
             <div className="d-flex gap-2 align-items-center">
               <p className="text-truncate" title={row.original.detail}  >
                 {!isOffline ?
                   row.original?.type === "product" ?
-                    <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
-                    : row.original?.type === "package" ?
-                      <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
-                      : <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original._id}`} target="_blank">{row.original.detail}</a>
+                    <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a> :
+                    row.original?.type === "service" ?
+                      <a className="link text-truncate" href={`${routes.serviceMasterDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
+                      : row.original?.type === "package" ?
+                        <a className="link text-truncate" href={`${routes.packagesDetail.path}/${row.original.materialId}`} target="_blank">{row.original.detail}</a>
+                        : <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original._id}`} target="_blank">{row.original.detail}</a>
                   : row.original.detail}
               </p>
             </div>),
@@ -212,13 +222,15 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
       }
       material?.forEach((item) => {
         if (!item.parentId) {
-          item.detail = `${item.type === "product" ? item.productDetail?.productName : item.packageDetail?.packageName}`
+          item.detail = item.type === "product" ? item.productDetail?.productName :
+            item.type === "service" ? item.serviceDetail?.serviceName :
+              item.type === "package" ? item.packageDetail?.packageName : ""
           item.type = item.type;
           combinedData.push(item);
         }
       });
       additionalcost?.forEach((e) => {
-        e.type = "Services and Consumables";
+        e.type = "Extra Add-on";
         e.detail = e.description
         e.parentId = null;
       })
@@ -226,7 +238,10 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
       const rows = combinedData.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === "Services and Consumables" ? parent.detail : parent.type === "product" ? parent.productDetail?.productName : parent.packageDetail?.packageName}`
+        parent.detail = `${parent.type === "Extra Add-on" ? parent.detail :
+          parent.type === "product" ? parent?.productDetail?.productName :
+            parent.type === "service" ? parent?.serviceDetail?.serviceName :
+              parent.packageDetail?.packageName}`
         parent.qty = parent.qty;
         parent.subRows = generateNestedData(material, inventory, parent);
       });
@@ -238,8 +253,10 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
   };
 
   const generateNestedData = (material, inventory, parent) => {
+
     const subRows: any = [];
     const inventory_result = inventory?.filter((e) => e._id === parent._id);
+
     inventory_result?.forEach((_inventory, k) => {
       subRows.push({
         _id: _inventory.inventoryDetail?._id,
@@ -256,7 +273,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
     childProduct.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow.productDetail?.productName;
+      _subRow.detail = _subRow?.type === "product" ? _subRow?.productDetail?.productName : _subRow?.type === "service" ? _subRow?.serviceDetail?.serviceName : _subRow?.packageDetail?.packageName;
       _subRow.qty = `${parent.qty * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
       subRows.push(_subRow)
@@ -384,7 +401,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
                 setShowCostDialog(true);
               }}
             >
-              Add Services and Consumables
+              Add Extra Add-on
             </Button>
             <Box mx={1} />
           </Fragment>

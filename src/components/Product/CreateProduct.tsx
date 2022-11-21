@@ -146,6 +146,9 @@ const CreateProduct = (props) => {
             }
             else {
                 let values = getObjKeys('', _fields)
+                if (openFrom === "serializedAsset") {
+                    values["serializedProduct"] = true
+                }
                 _fields.some((_f) => {
                     if (_f.fieldName == "currency") {
                         setCurrencySymbol(
@@ -870,7 +873,7 @@ const CreateProduct = (props) => {
                                                                                         <Box flexGrow={1}  >
                                                                                             <FormTypes
                                                                                                 isNew={Boolean(productId)}
-                                                                                                disabled={(Boolean(productId) && field.disableOnEdit)}
+                                                                                                disabled={(Boolean(productId) && field.disableOnEdit) || (openFrom === "serializedAsset" && field.fieldName === "serializedProduct")}
                                                                                                 {...field}
                                                                                                 productTemplateId={values?.productTemplate}
                                                                                                 priceTemplateId={values?.priceTemplate}

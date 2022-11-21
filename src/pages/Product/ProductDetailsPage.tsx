@@ -306,7 +306,7 @@ const ProductDetailsPage = () => {
                 {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && (
                   <Tab value={4} label="Product Images" aria-controls="a11y-tabpanel-3" id="a11y-tab-3" />
                 )}
-                {permissions?.packages && <Tab label="Packages" value={5} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />}
+                {permissions?.packages && <Tab label="Product Packages" value={5} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />}
                 {permissions?.serializedAsset && <Tab label="Parent Product" value={6} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
                 {permissions?.productInventory?.isRead && <Tab label="History" value={7} aria-controls="a11y-tabpanel-7" id="a11y-tab-7" />}
               </Tabs>
@@ -395,7 +395,7 @@ const ProductDetailsPage = () => {
                         }}
                         size="small"
                       >
-                        Convert Serialized Product
+                        Convert to Serialized Product
                       </Button>
                       {showConfirmBoxConvert && (
                         <ConfirmationDialog
@@ -483,7 +483,7 @@ const ProductDetailsPage = () => {
                                         interactive
                                         title={
                                           <>
-                                            <Typography>Inventory Status: </Typography>
+                                            <Typography>Asset Status: </Typography>
                                             {products.map((s) => (
                                               <Typography>{`(${s?.count}) ${s?.status}`}</Typography>
                                             ))}

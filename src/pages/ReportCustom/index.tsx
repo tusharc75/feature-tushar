@@ -297,6 +297,7 @@ const CustomReport = () => {
                   limit={limit}
                   pageSizes={pageSizes}
                   page={page}
+                  isClientSideGrid={true}
                   actionWidth={100}
                   loading={loading}
                   renderedFrom={renderedFrom}

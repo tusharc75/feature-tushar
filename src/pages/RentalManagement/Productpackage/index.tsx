@@ -1,6 +1,20 @@
 import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
+import {
+  Grid,
+  Box,
+  Button,
+  IconButton,
+  CircularProgress,
+  Menu,
+  MenuItem,
+  Chip,
+  MenuList,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
+  Popover
+} from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -23,12 +37,32 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
 import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
-import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { startCase } from 'lodash';
+import LayersIcon from '@material-ui/icons/Layers';
+import CategoryIcon from '@material-ui/icons/Category';
+import LocalLaundryServiceIcon from '@material-ui/icons/LocalLaundryService';
+import StorageIcon from '@material-ui/icons/Storage';
+import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
+import StorefrontIcon from '@material-ui/icons/Storefront';
+import AllOutIcon from '@material-ui/icons/AllOut';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
 
-const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isTabletScreen, isSmallScreen, showActivity, renderedFrom, stepFullScreen, allowedToEdit }) => {
-
+const Productpackage = ({
+  rentalManagementData,
+  setNextStep,
+  currencySymbol,
+  isTabletScreen,
+  isSmallScreen,
+  showActivity,
+  renderedFrom,
+  stepFullScreen,
+  allowedToEdit
+}) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
 
@@ -47,6 +81,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
+  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -64,17 +99,32 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     const coloum: any = [
       {
         accessor: 'srno',
-        Header: '#',
+        Header: 'Index',
         width: 70,
-        sticky: isMobile ? "none" : "left",
-        Cell: ({ row }) => (
-          <p className="text-truncate"  >
-            {row.original.srno}
-          </p>),
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        disableFilters: true,
+        sticky: isMobile ? 'none' : 'left',
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+              {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
+                row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
+                  row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'detail',
-        Header: 'Detail',
+        Header: 'Details',
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
@@ -93,45 +143,66 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
                 {row.original.detail}
               </p>
             )}
-            {<Box ml={1} className="d-flex align-items-center">
-              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-              </span>
-              {!isOffline &&
-                allowedToEdit &&
-                <HtmlTooltip title="Add Products">
-                  <IconButton
-                    onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id })}
-                    size="small"
-                    color="primary"
-                  >
-                    <Add color="disabled" fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>}
-            </Box>}
+            {
+              <Box ml={1} className="d-flex align-items-center">
+                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+                </span>
+                {!isOffline && allowedToEdit && (
+                  <HtmlTooltip title="Add ">
+                    <IconButton
+                      onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
+                      size="small"
+                    >
+                      <Add color="disabled" fontSize="small" />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+              </Box>
+            }
             {!isOffline && (
-              <Chip
-                className="ml-1"
-                label={`${row.original.type === 'product' ?
-                  !row.original.serializedProduct ? "Non-Serialized Product" : "Product" : "Package"}`}
+              <IconButton
                 size="small"
-                color="primary"
                 onClick={() => {
-                  window.open(
-                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                  );
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
                 }}
-              />
+              >
+                <InfoIcon fontSize="small" color="primary" />
+              </IconButton>
             )}
           </div>
         ),
         Footer: () => {
           return <>Total</>;
         }
-      }
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            row.original['type'] === 'product' && row.original?.productDetail?.productDesc ?
+              <p>{row.original?.productDetail?.productDesc}</p>
+              : row.original?.type === 'package' && row.original?.packageDetail.packageDescription ?
+                <p>{row.original?.packageDetail.packageDescription}</p>
+                : row.original.type === 'service' && row?.original?.serviceDetail?.serviceDescription ?
+                  <p>{row?.original?.serviceDetail?.serviceDescription}</p> : <NoDataCell />
+          ) : (
+            <NoDataCell />
+          )
+      },
     ];
     data.forEach((element) => {
-      if (element.fieldName === "price" && element.required) {
+      if (element.fieldName === 'price' && element.required) {
         setIsRateRequired(true);
       }
       if (element.type === 'date') {
@@ -139,8 +210,13 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
           accessor: element.fieldName,
           Header: element.fieldLabel,
           disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+          Cell: ({ row }) => {
+            return row.original[element.fieldName] && isNaN(row.original[element.fieldName]) ? (
+              <p>{moment(row.original[element.fieldName]?.slice(0, 10)).format(dateFormat)}</p>
+            ) : (
+              <NoDataCell />
+            );
+          }
         });
       } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
         if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
@@ -208,31 +284,39 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       }
     });
     {
-      isMobile ? <Box display={"none"} /> : coloum.push({
-        accessor: 'action',
-        Header: '',
-        minWidth: 50,
-        width: 50,
-        sticky: 'right',
-        disableFilters: true,
-        canDrag: false,
-        Cell: ({ row }) =>
-          !row.original.hideSelection && allowedToEdit && (
-            <IconButton
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                getNestedSubRows(obj, row.original)
-                setDeleteData(obj);
-              }}
-            >
-              <DeleteIcon fontSize="small" color="error" />
-            </IconButton>
-          )
-      });
+      isMobile ? (
+        <Box display={'none'} />
+      ) : (
+        coloum.push({
+          accessor: 'action',
+          Header: '',
+          minWidth: 50,
+          width: 50,
+          sticky: 'right',
+          disableFilters: true,
+          canDrag: false,
+          Cell: ({ row }) =>
+            !row.original.hideSelection &&
+            allowedToEdit && (
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  getNestedSubRows(obj, row.original);
+                  setDeleteData(obj);
+                }}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            )
+        })
+      );
     }
     coloum.forEach((element) => {
+      if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
+        element.editable = true;
+      }
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
@@ -261,15 +345,28 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       inventory = data.inventory;
       nonSerializeAsset = data.nonSerializeAsset;
     }
-    const rows = data.material.filter((e) => e.parentId === null);
+    let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service');
+    let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale);
+    let packages = rows.filter((e) => e.type === 'package' && e.packageDetail?.packageType !== 'Service');
+
+    rows = [...products, ...packages];
 
     rows.forEach((parent, i) => {
-      parent.srno = (i + 1);
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.srno = i + 1;
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.packageDetail?.packageName
+        }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+      parent.assetQty = parent.serializedProduct
+        ? inventory?.filter((e) => e._id === parent._id).length
+        : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
@@ -288,22 +385,31 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow?.productDetail?.productName;
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+        : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.packageDetail?.packageName
+        }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;;
+      _subRow.assetQty = _subRow.serializedProduct
+        ? inventory?.filter((e) => e._id === _subRow._id).length
+        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
-    if (subRows.length === 0 && parent.type === "package") {
+    if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
     }
-    if (parent.type === "package") {
+    if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
-  }
+  };
 
   const getNestedSubRows = (obj, original) => {
     if (original?.subRows?.length) {
@@ -312,7 +418,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
         getNestedSubRows(obj, element);
       });
     }
-  }
+  };
 
   const handleAdd = async (rows) => {
     setAddingProducts(true);
@@ -326,19 +432,23 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
       element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
-      element.actualStartDate = "";
-      element.actualEndDate = "";
-      element.actualJobDuration = "";
+      element.actualStartDate = '';
+      element.actualEndDate = '';
+      element.actualJobDuration = '';
       element.parentId = addExistingProductDialog.parentId;
       const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
       element.estimateJobDuration = 1;
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
       }
+      element.listPrice = d.listPrice ? d.listPrice : null;
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(material);
+    const priceData: any = await calculatePrice(
+      rentalManagementData,
+      material.filter((d) => d.listPrice === null)
+    );
     material.forEach((element) => {
       const rateResult = priceData?.filter(
         (e) =>
@@ -347,7 +457,12 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
           e.unit === element.unit &&
           e.pricingMethod === element.pricingMethod
       );
-      if (rateResult.length && rateResult[0].mrp) {
+      if (element.listPrice) {
+        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+        element[priceFieldName] = element.listPrice;
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+        Object.assign(element, calValues);
+      } else if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
@@ -371,7 +486,7 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
 
   const handleSaveData = async (rows: any) => {
     rows.forEach((element) => {
-      delete element.srno
+      delete element.srno;
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;
@@ -380,6 +495,8 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       delete element.assetQty;
       delete element.productDetail;
       delete element.packageDetail;
+      delete element.serviceDetail;
+      delete element.parentName;
       delete element.subRows;
     });
     setUpdating(true);
@@ -417,36 +534,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     setRecordToUpdate(rowData);
   };
 
-  const calculatePrice = (arr: any[]) => {
-    //materialType can be =["product","packages","productCategory"]
-    //conditionType can be =["Price","Rent","Discount","Charge","Tax"]
-    if (rentalManagementData) {
-      const data: any = {};
-      data.conditionType = ['Rent'];
-      data.material = arr.map((ele) => ({
-        materialId: ele?.materialId,
-        materialType: ele?.type,
-        qty: ele?.qty,
-        pricingMethod: ele?.pricingMethod,
-        unit: ele?.unit,
-        currency: rentalManagementData?.currency
-      }));
-      data.supplier = [];
-      data.customer = [rentalManagementData?.customerAccount?.optionValue];
-      data.warehouse = [rentalManagementData?.warehouse?.optionValue];
-      return new Promise((resolve, reject) => {
-        axiosInstance()
-          .post(pricingCondition.api + `/calculatePrice`, data)
-          .then(({ data: { data } }) => {
-            resolve(data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-    }
-  };
-
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -463,143 +550,136 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
     const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
-    })
+    });
     dataToDelete?.forEach((ele) => {
-      getNestedSubRows(obj, ele)
-    })
+      getNestedSubRows(obj, ele);
+    });
     setDeleteData(obj);
-  }
+  };
 
   return (
     <Fragment>
       <Grid container spacing={2}>
-        {allowedToEdit &&
+        {allowedToEdit && (
           <Grid item xs={12} md={12} sm={12}>
-            <Box display="flex" justifyContent="space-between" m={1}>
+            <Box display="flex" justifyContent="space-between" m={1} mb={0}>
               <Box display="flex">
-                {permissions?.product?.isRead &&
+                {permissions?.product?.isRead && (
                   <Button
                     color="primary"
                     size="small"
                     disabled={isOffline}
-                    variant={isMobile && !isTablet ? "outlined" : "contained"}
-                    style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
                     }}
                   >
-                    {isMobile && !isTablet ? 'Product' : `Add ${routes.product.title}`}
+                    {isMobile && !isTablet ? 'Product' : `Add Products`}
                   </Button>
-                }
+                )}
                 <Box mx={isMobile ? 0.5 : 1} />
-                {permissions?.packages?.isRead &&
+                {permissions?.packages?.isRead && (
                   <Button
                     color="primary"
                     size="small"
-                    variant={isMobile && !isTablet ? "outlined" : "contained"}
-                    style={isMobile && !isTablet ? { color: "var(--info-dark)" } : {}}
+                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
+                    style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
                     disabled={isOffline}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                     }}
                   >
-                    {isMobile && !isTablet ? 'Package' : `Add ${routes.packages.title}`}
+                    {isMobile && !isTablet ? 'Package' : `Add Product ${routes.packages.title}`}
                   </Button>
-                }
+                )}
               </Box>
-              {isMobile ? (
-                <Box display="flex">
-                  <Button
-                    variant={isMobile && !isTablet ? 'outlined' : 'contained'}
-                    color="primary"
-                    size="small"
-                    style={!isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                    id="demo-positioned-button"
-                    aria-controls={open ? 'demo-positioned-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={handleClick}
-                    endIcon={<BiChevronDown />}
-                  >
-                    Actions
-                  </Button>
-                  <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{
-                      'aria-labelledby': 'basic-button'
-                    }}
-                    className={isMobile ? "add-product-action-menu-mobile" : "add-product-action-menu"}
-                  >
-                    <HtmlTooltip
-                      title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}
-                    >
-                      <MenuItem onClick={() => setIsProductEdit({ open: true, isBulkedit: true })} disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}>
-                        <ListItemText>Bulk edit</ListItemText>
-                      </MenuItem>
-                    </HtmlTooltip>
-                    <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                      <MenuItem disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                        onClick={() => { handleDeleteMultiple() }}>
-                        <ListItemText>Delete</ListItemText>
-                      </MenuItem>
-                    </HtmlTooltip>
-                  </Menu>
-                </Box>
-              ) : (
-                <Box display="flex">
+              <Box display="flex">
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  id="demo-positioned-button"
+                  onClick={handleClick}
+                  disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                  endIcon={<BiChevronDown />}
+                >
+                  Actions
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  open={open}
+                  onClose={handleClose}
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right'
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right'
+                  }}
+                >
                   <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-                    <span>
-                      <Button
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        color="primary"
-                        size="small"
-                        style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                        disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                        onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
-                      >
-                        {isMobile && !isTablet ? <RiEditCircleLine size={20} /> : 'Bulk Edit'}
-                      </Button>
-                    </span>
-                  </HtmlTooltip>
-                  <Box mx={1} />
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-                      onClick={() => { handleDeleteMultiple() }}
-                      endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
+                    <MenuItem
+                      onClick={() => {
+                        setIsProductEdit({ open: true, isBulkedit: true });
+                        handleClose();
+                      }}
                     >
-                      {isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
-                    </Button>
+                      Bulk Edit
+                    </MenuItem>
                   </HtmlTooltip>
-                </Box>
-              )}
+                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+                    <MenuItem
+                      disabled={isDeleting}
+                      onClick={() => {
+                        handleDeleteMultiple();
+                        handleClose();
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                  </HtmlTooltip>
+                </Menu>
+              </Box>
             </Box>
           </Grid>
-        }
+        )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 103px)'}
-              height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
+              width={
+                stepFullScreen
+                  ? '100%'
+                  : isTabletScreen
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
+              }
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
               <CustomReactTable
-                height={stepFullScreen ? "calc(100vh - 150px)" : "calc(100vh - 345px)"}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
                 columns={columns}
                 data={rowsData}
-                setWholeRowsCellColor={(rowData) => !rowData.isValid ? "error" : ""}
+                setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_product_package"
                 isClientSideGrid={true}
+                onSaveEdit={(inputField, updatedData) => {
+                  let rows = calculateRowsField(material, inputField, allFields, updatedData);
+                  handleSaveData(rows);
+                }}
+                material={material}
               />
             </Box>
           ) : (
@@ -620,7 +700,6 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
       )}
       {isProductEdit.open && (
         <RentalJobQtyDialog
-          calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);
@@ -646,6 +725,52 @@ const Productpackage = ({ rentalManagementData, setNextStep, currencySymbol, isT
           type={addExistingProductDialog.type}
           rentalManagementData={rentalManagementData}
         />
+      )}
+      {addchildDialog.open && (
+        <Popover
+          anchorReference="anchorPosition"
+          anchorPosition={{ top: addchildDialog.top, left: addchildDialog.bottom }}
+          anchorOrigin={{
+            vertical: 'center',
+            horizontal: 'left'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left'
+          }}
+          open={addchildDialog.open}
+          onClose={() => {
+            setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+          }}
+        >
+          <MenuList>
+            <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              }}
+            >
+              Product
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              }}
+            >
+              Package
+            </MenuItem>
+            {/* <MenuItem
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId })
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
+              }
+              }
+            >
+              Services
+            </MenuItem> */}
+          </MenuList>
+        </Popover>
       )}
     </Fragment>
   );

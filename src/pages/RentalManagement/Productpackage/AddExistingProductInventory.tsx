@@ -21,7 +21,7 @@ import { reducer, intialState, } from "../../../components/AgGridComponents/Cust
 
 
 let searchTimeout;
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData, renderedFrom }) => {
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, rentalManagementData, renderedFrom, fromConsumable = false }) => {
 
     const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
@@ -90,6 +90,9 @@ const AddExistingProductInventory = ({ addProductInventory, handleProductInvento
                     ...finalObject
                 };
             });
+            if(fromConsumable) {
+                rows = rows.filter((d:any) => !d?.serializedProduct)
+            }
             dispatch({ type: "initialize", data: rows, count: count });
             setTimeout(() => { dispatch({ type: "loading", loading: false }); }, gridLoadingTimeout);
         }).catch((error) => {

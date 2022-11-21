@@ -1,0 +1,304 @@
+import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { useData } from 'src/StateProvider/Provider';
+import { fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
+import { isMobile } from 'react-device-detect';
+import routes from 'src/components/Helpers/Routes';
+import moment from 'moment';
+import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement } from 'src/constants/helpers';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
+import { Add, Edit, ExpandMore } from '@material-ui/icons';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import { MuiPickersUtilsProvider, KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
+import MomentUtils from '@date-io/moment';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import styles from '../../Leads/Header.module.scss';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
+import InvoiceFacility from 'src/pages/Invoice/Invoice/InvoiceFacility';
+import { startCase } from 'lodash';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
+
+const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
+
+  const toastConfig = useContext(CustomToastContext);
+
+
+
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [material, setMaterial] = useState([]);
+  const [columns, setColumns] = useState(null);
+  const [rowsData, setRowsData] = useState(null);
+  const [isRateRequired, setIsRateRequired] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [allFields, setAllFields] = useState([]);
+
+  useEffect(() => {
+    fetchFields();
+  }, []);
+
+  useEffect(() => {
+    fetchProductInventory();
+  }, [columns]);
+
+  const fetchFields = async () => {
+    try {
+      let data = await fetch_invoice_product_fields(invoiceData?.currency);
+      setAllFields(JSON.parse(JSON.stringify(data)));
+      const coloum: any = [
+        {
+          accessor: 'srno',
+          Header: 'Index',
+          width: 70,
+          sticky: isMobile ? 'none' : 'left',
+          Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        },
+        {
+          accessor: 'type',
+          Header: 'Type',
+          sticky: isMobile ? 'none' : 'left',
+          width: 200,
+          disableFilters: true,
+          Cell: ({ row }) =>
+            row.original['type'] ? (
+              <p>
+                {`${startCase(row.original?.type)} `}
+                {row.original['type'] === 'product'
+                  ? row.original?.productDetail?.serializedProduct
+                    ? '(Serialized)'
+                    : '(Non-Serialized)'
+                  : row.original?.type === 'package'
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
+              </p>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'detail',
+          Header: 'Details',
+          minWidth: 300,
+          width: 300,
+          Cell: ({ row }) => (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p className="text-truncate" title={row.original?.detail}>
+                {row.original?.detail}
+              </p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <InfoIcon fontSize="small" color="primary" />
+              </IconButton>
+            </div>
+          )
+        }
+      ];
+      data.forEach((element) => {
+        if (element.type === 'date') {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            disableFilters: true,
+            Cell: ({ row }) =>
+              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName])?.format(dateFormat)}</p> : <NoDataCell />
+          });
+        } else if (element.fieldName === 'supplierAccount') {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) =>
+              row.original[element.fieldName]?.length ? (
+                <p className="text-truncate">{row.original[element.fieldName]?.map((d) => d?.optionLabel)?.toString()}</p>
+              ) : (
+                <NoDataCell />
+              )
+          });
+        } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
+          if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              let fieldName = element.fieldName + '_' + _unit.toLowerCase();
+              let fieldLabel = element.fieldLabel + ' ' + _unit;
+              coloum.push({
+                accessor: fieldName,
+                Header: fieldLabel,
+                Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
+              });
+            });
+          } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              element.displayCurrency.forEach((_currency) => {
+                let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
+                let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
+                coloum.push({
+                  accessor: fieldName,
+                  Header: fieldLabel,
+                  Cell: ({ row }) =>
+                    row.original[fieldName] ? (
+                      <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                    ) : (
+                      <NoDataCell />
+                    )
+                });
+              });
+            });
+          } else if (element.type === 'currencyAmount') {
+            element.displayCurrency.forEach((_currency) => {
+              let fieldName = element.fieldName + '_' + _currency.toLowerCase();
+              let fieldLabel = element.fieldLabel + ' ' + _currency;
+              coloum.push({
+                accessor: fieldName,
+                Header: fieldLabel,
+                Cell: ({ row }) =>
+                  row.original[fieldName] ? (
+                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                  ) : (
+                    <NoDataCell />
+                  )
+              });
+            });
+          }
+        } else {
+          if (element.fieldName === 'qty') {
+            element.fieldName = 'qtyDisplay';
+          }
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          });
+        }
+      });
+      coloum.forEach((element) => {
+        if (element.accessor.includes('detail')) {
+          element['Footer'] = () => {
+            return <>Total</>;
+          };
+        } else if (element.accessor === 'qtyDisplay') {
+          element['Footer'] = (info) => {
+            const qtyTotal = info.rows
+              .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+              .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+            return <>{qtyTotal}</>;
+          };
+        } else if (element.accessor.includes('finalPrice')) {
+          element['Footer'] = (info) => {
+            const total = info.rows
+              .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+              .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+            return (
+              <>
+                {currencySymbol} {formatAmountWithCurrency(invoiceData?.currency, total)?.amountWithouCurrencyCode ?? total}
+              </>
+            );
+          };
+        }
+      });
+      setColumns(coloum);
+      fetchProductInventory();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchProductInventory = async () => {
+    var data: any = [];
+    const response = await axiosInstance().get(`${invoice.api}/productpackage/${invoiceData._id}`);
+    data = response?.data?.data;
+
+    const rows = data.material.filter((e) => e.parentId === null);
+    rows.forEach((parent, i) => {
+      parent.srno = i + 1;
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'package' ? parent.packageDetail?.packageName : parent.serviceDetail?.serviceName}`;
+      parent.qtyDisplay = parent.qty;
+      parent.subRows = generateNestedData(data.material, parent);
+    });
+    setRowsData(rows);
+    setSelectedProducts([]);
+  };
+
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.detail = `${_subRow?.type === 'product' ? _subRow?.productDetail?.productName : _subRow?.type === 'package' ? _subRow?.packageDetail?.packageName : _subRow?.serviceDetail?.serviceName}`;
+      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    return subRows;
+  };
+
+  return (
+    <Fragment>
+      <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
+        <CustomDialogHeader title={`Invoice Number : ${invoiceData?.invoiceNumber}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
+        <CustomDialogContent>
+          <Fragment>
+            {invoiceData && <InvoiceFacility invoiceData={invoiceData} />}
+            {columns && rowsData ? (
+              <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
+                <CustomReactTable
+                  height={'calc(100vh - 285px)'}
+                  columns={columns}
+                  data={rowsData}
+                  onSelect={setSelectedProducts}
+                  childrenProperty="subRows"
+                  uniqueKey="_id"
+                  hideSelection={invoiceData ? true : false}
+                  renderedFrom="rental_management_create_billing"
+                  isClientSideGrid={true}
+                />
+              </Box>
+            ) : (
+              <Box p={2} height={500} bgcolor="white">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            )}
+          </Fragment>
+        </CustomDialogContent>
+        <CustomDialogFooter>
+          <Button
+            type="button"
+            variant="outlined"
+            color="primary"
+            size="small"
+            onClick={() => {
+              onClose();
+            }}
+          >
+            Cancel
+          </Button>
+        </CustomDialogFooter>
+      </Dialog>
+    </Fragment>
+  );
+};
+
+export default ViewBillingDialog;

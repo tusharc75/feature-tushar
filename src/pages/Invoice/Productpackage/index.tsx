@@ -157,17 +157,6 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
             />
           </div>
         )
-      },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-        Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-          return <>{total}</>;
-        }
       }
     ];
     data.forEach((element) => {
@@ -431,8 +420,8 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
         setAddingProducts(false);
-        if(currentStep === 0 && invoiceData?.status !== "In-Progress") {
-          updateJobStatus("In-Progress")
+        if (currentStep === 0 && invoiceData?.status !== 'In-Progress') {
+          updateJobStatus('In-Progress');
         }
       })
       .catch((error) => {
@@ -527,7 +516,17 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
           <Button variant="contained" color="primary" size="small" onClick={openAddMenu} endIcon={<KeyboardArrowDown fontSize="small" />}>
             Add
           </Button>
-          <Menu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={closeAddMenu}>
+          <Menu
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={closeAddMenu}
+          >
             {permissions?.product?.isRead && (
               <MenuItem
                 color="primary"
@@ -579,7 +578,17 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
               </Button>
             </span>
           </HtmlTooltip>
-          <Menu anchorEl={anchorActionEl} keepMounted open={Boolean(anchorActionEl)} onClose={closeActions}>
+          <Menu
+            anchorEl={anchorActionEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            open={Boolean(anchorActionEl)}
+            onClose={closeActions}
+          >
             <MenuItem
               onClick={() => {
                 setIsProductEdit({ open: true, isBulkedit: true });

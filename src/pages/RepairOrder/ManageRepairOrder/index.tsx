@@ -13,7 +13,8 @@ import {
   CustomDialogTransition, customerAccount, customerContact, getCollaboratorDropdownDataSource, getObjKeys,
   getObjKeysWithValues, getOwnerDropdownDataSource, isFieldNotTouched, setFieldsInAscendingOrder, yupSchema,
   generateUniqueIdOnly,
-  repairOrder
+  repairOrder,
+  REPAIR_ORDER_TYPE
 } from "../../../constants/helpers";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
@@ -411,7 +412,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountData}
-                                            disabled={!isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={
@@ -451,10 +452,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                     true
                                                   );
                                                 }}
-                                                disabled={!isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                                disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                                 size="small"
                                               >
-                                                <AddIcon color={isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
+                                                <AddIcon color={values["type"] === REPAIR_ORDER_TYPE.internal ? "disabled" : isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
                                               </IconButton>
                                             </Tooltip>
                                           </Grid>
@@ -492,7 +493,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                               handleValuesChange({ [name]: value })
                                               setFieldValue(name, value)
                                             }}
-                                            disabled={!isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={false}
@@ -520,10 +521,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                     true
                                                   );
                                                 }}
-                                                disabled={!isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                                disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                                 size="small"
                                               >
-                                                <AddIcon color={isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                <AddIcon color={values["type"] === REPAIR_ORDER_TYPE.internal ? "disabled" : isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
                                               </IconButton>
                                             </Tooltip>
                                           </Grid>
@@ -597,7 +598,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        disabled={(!repairOrderId && field.disableOnEdit)}
+                                        disabled={(repairOrderId && field.disableOnEdit)}
                                         onOpen={() => {
                                           onOwnerDropdownOpen(
                                             values["collaborator"]
@@ -636,7 +637,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                       ? <FormTypes
                                         repairOrderId={repairOrderId}
                                         {...field}
-                                        disabled={(!repairOrderId && field.disableOnEdit)}
+                                        disabled={(repairOrderId && field.disableOnEdit)}
                                         values={values}
                                         fieldData={field}
                                         errors={errors}
@@ -659,7 +660,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                         ? <FormTypes
                                           repairOrderId={repairOrderId}
                                           {...field}
-                                          disabled={(!repairOrderId && field.disableOnEdit)}
+                                          disabled={(repairOrderId && field.disableOnEdit)}
                                           values={values}
                                           fieldData={field}
                                           errors={errors}
@@ -688,7 +689,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                   repairOrderId={repairOrderId}
                                                   {...field}
                                                   fieldData={field}
-                                                  disabled={disablePlantIfAssetAdded || (!repairOrderId && field.disableOnEdit)}
+                                                  disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
                                                   values={values}
                                                   errors={errors}
                                                   touched={touched}
@@ -717,10 +718,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                       onClick={() => {
                                                         setShowAddWarehouseDialog(true);
                                                       }}
-                                                      disabled={disablePlantIfAssetAdded || (!repairOrderId && field.disableOnEdit)}
+                                                      disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
                                                       size="small"
                                                     >
-                                                      <AddIcon color={disablePlantIfAssetAdded || (!repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                      <AddIcon color={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
                                                     </IconButton>
                                                   </Tooltip>
                                                 </Grid>
@@ -745,7 +746,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                               repairOrderId={repairOrderId}
                                               {...field}
                                               fieldData={field}
-                                              disabled={(!repairOrderId && field.disableOnEdit) || (field.fieldName === "repairOrderNumber")}
+                                              disabled={(repairOrderId && field.disableOnEdit) || (field.fieldName === "repairOrderNumber")}
                                               values={values}
                                               errors={errors}
                                               touched={touched}

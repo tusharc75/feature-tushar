@@ -63,7 +63,9 @@ const ServiceMaster = (props: Props) => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const defaultColumns = [
-    { field: 'serviceName', headerName: 'Service Name', show: true, cellRenderer: 'serviceRenderer' },
+    {
+      field: 'serviceName', headerName: 'Service Name', show: true, cellRenderer: 'serviceRenderer', disabled: true, lockPosition: true, primaryField: true
+    },
     { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }
   ];
 
@@ -101,9 +103,8 @@ const ServiceMaster = (props: Props) => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes.product.path}/${id}/service-master${queryString}`)
+      .get(`${routes.product.path}/${id}/service-master`)
       .then(({ data: { data } }) => {
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -126,35 +127,6 @@ const ServiceMaster = (props: Props) => {
         toastConfig.setToastConfig(error);
         dispatch({ type: 'loading', loading: false });
       });
-  };
-
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-    let filterById = [];
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
-    }
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: replaceFieldName(field),
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
-    }
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
-    if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
-    }
-    if (showFilteredRecordsOnly) {
-      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
-    }
-    return deepFilter;
   };
 
   const replaceFieldName = (field) => {
@@ -330,13 +302,13 @@ const ServiceMaster = (props: Props) => {
               </Button>
             ) : null}
             <Button
-              variant={isMobile && !isTablet ? 'text' : 'contained'}
+              variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="default"
               size="small"
               onClick={openActions}
               disabled={selectedRecords.length ? false : true}
               aria-controls="action-menu"
-              style={{marginLeft:'0.6rem'}}
+              style={{ marginLeft: '0.6rem' }}
             >
               {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
             </Button>
@@ -359,19 +331,19 @@ const ServiceMaster = (props: Props) => {
                 onClick={() => {
                   handleUpdate({
                     ids: selectedRecords.map((d) => d._id),
-                    default:true,
+                    default: true,
                   })
                   closeActions()
                 }}
               >Set Default</MenuItem>
               <MenuItem
-              onClick={() => {
-                handleUpdate({
-                  ids: selectedRecords.map((d) => d._id),
-                  default: false,
-                })
-                closeActions()
-              }}
+                onClick={() => {
+                  handleUpdate({
+                    ids: selectedRecords.map((d) => d._id),
+                    default: false,
+                  })
+                  closeActions()
+                }}
               >Remove Default</MenuItem>
             </Menu>
           </div>
@@ -390,9 +362,9 @@ const ServiceMaster = (props: Props) => {
             dataRows={dataRows}
             selectedRecords={selectedRecords}
             dispatch={dispatch}
-            onEdit={() => {}}
+            onEdit={() => { }}
             extraParamsToCheckDelete={false}
-            onDelete={() => {}}
+            onDelete={() => { }}
             rowCount={rowCount}
             page={page}
             loading={loading}
@@ -400,7 +372,7 @@ const ServiceMaster = (props: Props) => {
             chips={[]}
             onCreate={false}
             showClone={true}
-            onClone={() => {}}
+            onClone={() => { }}
             renderedFrom={renderedFrom}
           />
         ) : (
@@ -419,8 +391,7 @@ const ServiceMaster = (props: Props) => {
             actionWidth={100}
             loading={loading}
             renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
+            isClientSideGrid={true}
           />
         )
       ) : (

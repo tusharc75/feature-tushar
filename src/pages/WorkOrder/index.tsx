@@ -37,11 +37,11 @@ const WorkOrder = () => {
 
   const WorkOrderType = [
     {
-      key: `All ${routes.workOrder.title}`,
+      key: `My ${routes.workOrder.title}`,
       value: 1,
     },
     {
-      key: `My ${routes.workOrder.title}`,
+      key: `All ${routes.workOrder.title}`,
       value: 2,
     },
   ];
@@ -207,7 +207,7 @@ const WorkOrder = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let deepFilter = `?page=${page}&limit=${limit}&filterWorkOrders=${selectedType}`;
+    let deepFilter = `?page=${page}&limit=${limit}&filterWorkOrders=${WorkOrderType[selectedType - 1].key === `My ${routes.workOrder.title}` ? 2 : 1}`;
     if (isExport) {
       deepFilter = `filterWorkOrders=${selectedType}`;
     }

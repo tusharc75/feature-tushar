@@ -77,7 +77,7 @@ const Report = () => {
       let rendererNames = [];
       let resourceFieldData = [];
 
-      if (resourceCamelCase === 'purchaseOrderProduct') {
+      if (resourceCamelCase === 'purchaseOrderDetails') {
         let {
           data: { data: POFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order`);
@@ -308,7 +308,7 @@ const Report = () => {
           }
         });
       }
-      if (resourceCamelCase === 'productInventoryHistory') {
+      if (resourceCamelCase === 'inventoryHistory') {
         let {
           data: { data: POFields }
         } = await axiosInstance().get(`/field?resource=Purchase Order`);
@@ -389,7 +389,7 @@ const Report = () => {
           dateTimeRenderer: DateTimeRenderer
         });
       }
-      if (resourceCamelCase === 'supplierWiseAveragePrice') {
+      if (resourceCamelCase === 'averagePriceBySupplier') {
         let {
           data: { data: productFields }
         } = await axiosInstance().get(`/field?resource=Product`);
@@ -636,14 +636,13 @@ const Report = () => {
     }
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? `${productInventory.api}/report/purchase-order-product-wise-report`
-            : resourceCamelCase === 'productAveragePrice'
+        `${resourceCamelCase === 'purchaseOrderDetails'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report`
+          : resourceCamelCase === 'productAveragePrice'
             ? `${productInventory.api}/report/purchase-order-price`
-            : resourceCamelCase === 'productInventoryHistory'
-            ? `${productInventory.api}/report/history-report`
-            : `${productInventory.api}/report/supplier-product-price`
+            : resourceCamelCase === 'inventoryHistory'
+              ? `${productInventory.api}/report/history-report`
+              : `${productInventory.api}/report/supplier-product-price`
         }${filterQuery}`,
         {
           cancelToken: cancelTokenSource.token
@@ -685,20 +684,64 @@ const Report = () => {
     }
   };
 
+  const replaceFieldNameForSorting = (field) => {
+    const updatedField = replaceFieldName(field);
+
+    if (field !== updatedField) return updatedField;
+
+    switch (field) {
+      case 'owner':
+        return 'owner.optionLabel';
+      case 'customerAccount':
+        return 'customerAccount.optionLabel';
+      case 'supplierAccount':
+        return 'supplierAccount.optionLabel';
+      case 'customerContact':
+        return 'customerContact.optionLabel';
+      case 'supplierContact':
+        return 'supplierContact.optionLabel';
+      case 'entity':
+        return 'entity.optionLabel';
+      case 'marketSegment':
+        return 'marketSegment.optionLabel';
+      case 'subMarketSegment':
+        return 'subMarketSegment.optionLabel';
+      case 'accountName':
+        return 'accountName.optionLabel';
+      case 'customerAccountName':
+        return 'customerAccountName.optionLabel';
+      case 'supplierAccountName':
+        return 'supplierAccountName.optionLabel';
+      case 'product':
+        return 'product.optionLabel';
+      case 'warehouse':
+        return 'warehouse.optionLabel';
+      case "projectManager":
+        return "projectManager.optionLabel";
+      case "rentalJob":
+        return "rentalJob.optionLabel";
+      case "pDFTemplate":
+        return "pDFTemplate.optionLabel";
+      default:
+        return field;
+    }
+  };
+
   const getFilter = (isExport = false) => {
     setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
     let filterQuery = ``;
+    let deepFilter = [];
+
     if (!isExport) {
       filterQuery = `page=${page}&limit=${limit}&`;
     }
     if (sorting.length > 0) {
-      filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
+      filterQuery = `${filterQuery}sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}&`;
     }
     if (search) {
-      filterQuery = `${filterQuery}search=${encodeURI(search)}&`;
+      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
     }
     if (selectedResources.length > 0) {
-      let deepFilter = [];
       if (selectedData) {
         const keys = selectedData ? Object.keys(selectedData) : [];
         const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
@@ -750,21 +793,20 @@ const Report = () => {
         });
       }
 
-      if (deepFilter && deepFilter.length > 0) {
-        filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(deepFilter))}&`;
-      }
+
     }
     if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
+        deepFilter.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         });
       });
-      filterQuery = `${filterQuery}deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&`;
     }
 
+    if (deepFilter && deepFilter.length > 0) {
+      filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
+    }
     if (statusPeriod && statusPeriodDate) {
       const fields = Object.keys(statusPeriodDate);
       fields.forEach((field) => {
@@ -793,14 +835,13 @@ const Report = () => {
     let filterQuery = getFilter(true);
     axiosInstance()
       .get(
-        `${
-          resourceCamelCase === 'purchaseOrderProduct'
-            ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
-            : resourceCamelCase === 'productAveragePrice'
+        `${resourceCamelCase === 'purchaseOrderDetails'
+          ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
+          : resourceCamelCase === 'productAveragePrice'
             ? `${productInventory.api}/report/purchase-order-price/export`
-            : resourceCamelCase === 'productInventoryHistory'
-            ? `${productInventory.api}/report/history-report/export`
-            : `${productInventory.api}/report/supplier-product-price/export`
+            : resourceCamelCase === 'inventoryHistory'
+              ? `${productInventory.api}/report/history-report/export`
+              : `${productInventory.api}/report/supplier-product-price/export`
         }${filterQuery}&exportColumn=${JSON.stringify(columns)} `,
         {
           responseType: 'arraybuffer'

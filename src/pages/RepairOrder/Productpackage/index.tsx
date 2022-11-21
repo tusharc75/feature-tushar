@@ -21,6 +21,7 @@ import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/he
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';
+import { sortBy } from 'lodash';
 
 const Productpackage = ({
   repairOrderData,
@@ -117,16 +118,18 @@ const Productpackage = ({
             }
             <Chip
               className="ml-1"
-              label={`${row.original.type === 'product' ? 'Product' : row.original.type === 'serializedAsset' ? 'Asset' : 'Package'}`}
+              label={`${row.original.type === 'service' ? 'Service' : row.original.type === 'product' ? 'Product' : row.original.type === 'serializedAsset' ? 'Asset' : 'Package'}`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'product'
-                    ? routes.productDetail.path
-                    : row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : routes.packagesDetail.path
+                  `${row.original.type === 'service'
+                    ? routes.serviceMasterDetail.path
+                    : row.original.type === 'product'
+                      ? routes.productDetail.path
+                      : row.original.type === 'serializedAsset'
+                        ? routes.serializedAssetDetail.path
+                        : routes.packagesDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -136,6 +139,21 @@ const Productpackage = ({
         Footer: () => {
           return <>Total</>;
         }
+      },
+      {
+        accessor: 'productDetail',
+        Header: 'Product Detail',
+        width: 200,
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
+            <p className="text-truncate" title={row.original?.productDetail?.productName ? row.original?.productDetail?.productName : row.original?.serializedAssetDetail?.product?.optionLabel}  >
+              {row.original?.productDetail?.productName ?
+                <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productDetail?._id}`} target="_blank">{row.original?.productDetail?.productName}</a>
+                : row.original?.serializedAssetDetail?.product?.optionLabel ?
+                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.serializedAssetDetail?.product?.optionValue}`} target="_blank">{row.original?.serializedAssetDetail?.product?.optionLabel}</a>
+                  : <NoDataCell />}
+            </p>
+          </div>),
       }
     ];
 
@@ -149,7 +167,7 @@ const Productpackage = ({
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {!row.original.hideSelection && allowedToDelete && row.original?.allowedToDelete && (
+          {allowedToDelete && row.original?.allowedToDelete && (
             <IconButton
               size="small"
               aria-label="Details"
@@ -192,7 +210,7 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName :
+      parent.detail = `${parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.type === 'product' ? parent.productDetail?.productName :
         parent.type === 'serializedAsset' ? parent.serializedAssetDetail.assetNumber : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
@@ -209,15 +227,21 @@ const Productpackage = ({
     setSelectedProducts([]);
   };
 
+  const alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
+    let productIndex = 0;
+    let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow?.productDetail?.productName;
+      _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : (productIndex + 1)}`;
+      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow.productDetail?.productName :
+        _subRow.type === 'serializedAsset' ? _subRow.serializedAssetDetail.assetNumber : _subRow.packageDetail?.packageName}`;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = true;
-      _subRow.allowedToDelete = false;
+      _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.type === 'service' ? serviceIndex++ : productIndex++
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -225,7 +249,7 @@ const Productpackage = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return subRows;
+    return sortBy(subRows, ['type']);
   };
 
   const getNestedSubRows = (obj, original) => {

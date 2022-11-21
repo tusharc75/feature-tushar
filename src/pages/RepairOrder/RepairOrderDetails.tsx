@@ -11,7 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { repairOrder, sidebarResource, ACTIVITY_RESOURCE, repairOrderSteps, REPAIR_ORDER_STATUS } from 'src/constants/helpers';
+import { repairOrder, sidebarResource, ACTIVITY_RESOURCE, REPAIR_ORDER_STATUS, repairOrderSteps, REPAIR_ORDER_TYPE, QUOTATION_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairOrder from './ManageRepairOrder';
@@ -67,6 +67,10 @@ const RepairOrderDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [repairOrderProcessSteps, setRepairOrderProcessSteps] = useState(repairOrderSteps);
+
+  const [quotationData, setQuotationData] = useState(null);
+  const [currentVersion, setCurrentVersion] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -99,8 +103,8 @@ const RepairOrderDetails = () => {
   }, []);
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= repairOrderSteps.length) {
-      updateProcessStatus(repairOrderSteps[currentStep]);
+    if (currentStep !== null && currentStep >= 0 && currentStep <= repairOrderProcessSteps.length) {
+      updateProcessStatus(repairOrderProcessSteps[currentStep]);
     }
   }, [currentStep]);
 
@@ -115,14 +119,32 @@ const RepairOrderDetails = () => {
       });
   };
 
+  const fetchQuotationData = (versionNumber = null) => {
+    axiosInstance()
+      .get(`${repairOrder.api}/${id}/repairorder/quotation`)
+      .then(({ data: { data } }) => {
+        setQuotationData(data);
+        let keys = Object.keys(data.versions);
+        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1])
+        setCurrentVersion(tempCurrentVersion);
+        setNextStep(data?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false)
+      });
+  };
+
   const fetchRepairOrderData = () => {
     axiosInstance()
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         setRepairOrderData({ ...data });
-        setCurrentStep(repairOrderSteps.indexOf(data?.processStatus) !== -1 ? repairOrderSteps.indexOf(data?.processStatus) : 0);
+        setCurrentStep(repairOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? repairOrderProcessSteps.indexOf(data?.processStatus) : 0);
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
+        if (data?.type === REPAIR_ORDER_TYPE.internal) {
+          setRepairOrderProcessSteps(repairOrderSteps.filter(d => d !== 'Quotation'))
+        }
+        else {
+          fetchQuotationData()
+        }
         setAllowedToDelete(data.owner.optionValue === user?.user?._id)
         if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
@@ -257,14 +279,14 @@ const RepairOrderDetails = () => {
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}
-                    steps={repairOrderSteps}
+                    steps={repairOrderProcessSteps}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
                     isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
                     setStepFullScreen={() => setStepFullScreen(true)}
                   />
-                  <ContentFullScreen title={repairOrderSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
-                    {currentStep === 0 && repairOrderData && (
+                  <ContentFullScreen title={repairOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                    {repairOrderProcessSteps[currentStep] === 'Add Assets' && repairOrderData && (
                       <Productpackage
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
@@ -274,11 +296,11 @@ const RepairOrderDetails = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
-                        allowedToDelete={allowedToDelete}
+                        allowedToEdit={quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? false : allowedToEdit}
+                        allowedToDelete={quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? false : allowedToDelete}
                       />
                     )}
-                    {currentStep === 1 && repairOrderData && (
+                    {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') && repairOrderData && (
                       <WorkOrder
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
@@ -286,8 +308,9 @@ const RepairOrderDetails = () => {
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
-                        allowedToDelete={allowedToDelete}
+                        allowedToEdit={currentStep !== 3 && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? false : allowedToEdit}
+                        allowedToDelete={currentStep !== 3 && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? false : allowedToDelete}
+                        isPostWorkService={Boolean(currentStep === 3)}
                       />
                     )}
                     {/* {(currentStep === 2 || currentStep === 4) && repairOrderData && (
@@ -305,7 +328,7 @@ const RepairOrderDetails = () => {
                       // allowedToEdit={allowedToEdit}
                       />
                     )} */}
-                    {currentStep === 2 && repairOrderData && (
+                    {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (
                       <Quotation
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
@@ -315,9 +338,13 @@ const RepairOrderDetails = () => {
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
                         allowedToDelete={allowedToDelete}
+                        fetchQuotationData={fetchQuotationData}
+                        quotationData={quotationData}
+                        currentVersion={currentVersion}
+                        setCurrentVersion={currentVersion}
                       />
                     )}
-                    {currentStep === 3 && repairOrderData && (
+                    {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (
                       <Quotation
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
@@ -328,7 +355,10 @@ const RepairOrderDetails = () => {
                         allowedToEdit={false}
                         allowedToDelete={false}
                         invoiceStep={true}
-                      />
+                        fetchQuotationData={fetchQuotationData}
+                        quotationData={quotationData}
+                        currentVersion={currentVersion}
+                        setCurrentVersion={currentVersion} />
                     )}
                   </ContentFullScreen>
                 </Paper>

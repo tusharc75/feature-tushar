@@ -6,8 +6,8 @@ import { camelCase, kebabCase, sortBy } from 'lodash';
 import styles from './Dashboard.module.scss';
 
 import './style.scss';
-import { SVG, IMAGE_WIDTH, IMAGE_HEIGHT } from '../../assets/dashboard_images';
-import { HERO, CRM, ROM, ACCOUNTS, PRODUCT_SETUP, ACTIVITIES, ADMIN_PORTAL, FORM_ICON, GEN_ICON, INV_ICON } from '../../assets/dashboard_images/constants/imageTypes';
+import { SVG, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
+
 import Icon from '@material-ui/core/Icon';
 import { SiCivicrm } from 'react-icons/si';
 import { MdNavigateNext, MdLocalActivity } from 'react-icons/md';
@@ -69,76 +69,40 @@ function Dashboard() {
 
       switch (sec) {
         case 'CRM +':
-          icon = (
-            <Icon>
-              <img src={SVG(CRM)} alt="Crm Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            </Icon>
-          );
+          icon = <img src={SVG(IconConst.CRM)} alt="Crm Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Convert leads and close sales deals faster.';
           break;
         case 'Accounts':
-          icon = (
-            <Icon>
-              <img src={SVG(ACCOUNTS)} alt="Accounts Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            </Icon>
-          );
+          icon = <img src={SVG(IconConst.ACCOUNTS)} alt="Accounts Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Customer and Supplier Account Management at your fingertips.';
           break;
         case 'Activities':
-          icon = (
-            <Icon>
-              <img src={SVG(ACTIVITIES)} alt="Activities Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            </Icon>
-          );
+          icon = <img src={SVG(IconConst.ACTIVITIES)} alt="Activities Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Assign and Access Activities related to an Order.';
           break;
         case 'Product Setup':
-          icon = (
-            <Icon>
-              <img src={SVG(PRODUCT_SETUP)} alt="Product Setup Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            </Icon>
-          );
+          icon = <img src={SVG(IconConst.PRODUCT_SETUP)} alt="Product Setup Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Product and Category Setup.';
           break;
         case 'Admin Portal':
-          icon = (
-            <Icon>
-              <img src={SVG(ADMIN_PORTAL)} alt="Admin Portal Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            </Icon>
-          );
+          icon = <img src={SVG(IconConst.ADMIN_PORTAL)} alt="Admin Portal Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Build your own Template, Manage Roles and Entities.';
           break;
         case 'ROM':
-          icon = (
-            <Icon>
-              <img src={SVG(ROM)} alt="ROM Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            </Icon>
-          );
+          icon = <img src={SVG(IconConst.ROM)} alt="ROM Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Fulfill Rental Orders Faster.';
           break;
         case 'Dynamic Forms':
-          icon = (
-            <Icon>
-              <img src={SVG(FORM_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            </Icon>
-          );
+          icon = <img src={SVG(IconConst.FORM_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Setup Dynamic Forms & Templates';
           break;
         case 'Inventory Management':
-          icon = (
-            <Icon>
-              <img src={SVG(INV_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            </Icon>
-          );
+          icon = <img src={SVG(IconConst.INV_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Manage Inventory and Purchases Smartly.';
           break;
         default:
-          icon = (
-            <Icon>
-              <img src={SVG(GEN_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />
-            </Icon>
-          );
-          text = ""
+          icon = <img src={SVG(IconConst.GEN_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+          text = '';
       }
 
       return {
@@ -200,7 +164,7 @@ function Dashboard() {
           <div className={styles.hero_container}>
             <h1 className={styles.hero_heading}>Raising resiliency in a rapidly transforming business environment</h1>
             <p className={styles.hero_paragraph}>Simplify and accelerate your B2B transactions.</p>
-            <img src={SVG(HERO)} alt="Dashboard Hero Image" className={styles.crm_hero_image} />
+            <img src={SVG(IconConst.HERO)} alt="Dashboard Hero Image" className={styles.crm_hero_image} />
           </div>
           <div className="card_container">
             <div className={`${styles.search_section}`}>

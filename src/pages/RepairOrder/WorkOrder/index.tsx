@@ -13,18 +13,19 @@ import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
-import RestoreIcon from '@material-ui/icons/Restore';
-import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { sortBy } from 'lodash';
+import RotateLeftOutlinedIcon from '@material-ui/icons/RotateLeftOutlined';
+import RotateRightOutlinedIcon from '@material-ui/icons/RotateRightOutlined';
 
+const alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
-const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen, allowedToEdit, allowedToDelete }) => {
+const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen, showActivity, stepFullScreen, allowedToEdit, allowedToDelete, isPostWorkService }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
+  const { state: { user, permissions } }: any = useData();
   const [selectedProducts, setSelectedProducts] = useState([]);
 
   const [columns, setColumns] = useState(null);
@@ -40,9 +41,6 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
 
   useEffect(() => {
     fetchFields();
-  }, []);
-
-  useEffect(() => {
     fetchData();
   }, []);
 
@@ -64,35 +62,19 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p>{row.original.detail}</p>
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-              </Box>
-            }
+            <Box ml={1} className="d-flex align-items-center">
+              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+              </span>
+            </Box>
             <Chip
               className="ml-1"
-              label={`${row.original.type === 'service'
-                ? 'Service'
-                : row.original.type === 'product'
-                  ? 'Product'
-                  : row.original.type === 'serializedAsset'
-                    ? 'Asset'
-                    : 'Package'
-                }`}
+              label={`${row.original.type === 'service' ? 'Service' : row.original.type === 'product' ? 'Product' : row.original.type === 'serializedAsset' ? 'Asset' : 'Package'}`}
               size="small"
               color="primary"
               onClick={() => {
-                window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : routes.packagesDetail.path
-                  }/${row.original.materialId}`
+                window.open(`${row.original.type === 'service' ? routes.serviceMasterDetail.path : row.original.type === 'product' ? routes.productDetail.path
+                  : row.original.type === 'serializedAsset' ? routes.serializedAsset.path : routes.packagesDetail.path}/${row.original.materialId}`
                 );
               }}
             />
@@ -100,11 +82,11 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
               <Box ml={1}>
                 {row?.original?.preWork ? (
                   <HtmlTooltip title="Pre Work Service">
-                    <RestoreIcon fontSize="small" />
+                    <RotateLeftOutlinedIcon fontSize="small" />
                   </HtmlTooltip>
                 ) : (
                   <HtmlTooltip title="Post Work Service">
-                    <UpdateIcon fontSize="small" />
+                    <RotateRightOutlinedIcon fontSize="small" />
                   </HtmlTooltip>
                 )}
               </Box>
@@ -118,12 +100,12 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
       },
       {
-        accessor: 'workOrder',
+        accessor: 'workOrderNumber',
         Header: 'Work Order',
         Cell: ({ row }) =>
           row.original['workOrder'] ? (
             <a className="link text-truncate" href={`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`} target="_blank">
-              {row.original['workOrder'].workOrderNumber}
+              {row.original['workOrderNumber']}
             </a>
           ) : (
             <NoDataCell />
@@ -133,7 +115,8 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         accessor: 'assignedUsers',
         Header: 'Assigned Users',
         Cell: ({ row }) =>
-          row.original['assignedUsers'] ? <p>{row?.original?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}</p> : <NoDataCell />
+          row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ?
+            <p>{row?.original?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}</p> : <NoDataCell />
       },
       {
         accessor: 'qty',
@@ -150,6 +133,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
       //     )
       // },
     ];
+
     setColumns([...coloum, {
       accessor: 'action',
       Header: '',
@@ -176,6 +160,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         )
       }
     }]);
+
   };
 
   const handleDelete = () => {
@@ -220,122 +205,68 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product'
-        ? parent?.productDetail?.productName
-        : parent.type === 'serializedAsset'
-          ? parent?.serializedAsset?.assetNumber
-          : parent?.packageDetail?.packageName
-        }`;
+      parent.detail = `${parent.type === 'service' ? parent?.serviceDetail?.serviceName : parent.type === 'product' ? parent?.productDetail?.productName :
+        parent.type === 'serializedAsset' ? parent?.serializedAsset?.assetNumber : parent?.packageDetail?.packageName}`;
       parent.qty = parent.qty;
       parent.status = parent?.workOrder?.status;
+      parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.subRows = generateNestedData(data.material, parent);
     });
 
-    data?.material?.forEach((element) => {
-      if (element?.services?.filter((e) => e?.preWork && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
+    if (isPostWorkService) {
+      if (data?.material?.filter((e) => e?.type === 'service' && !e?.serviceDetail?.preWork
+        && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
         setNextStep(false);
       } else {
         setNextStep(true);
       }
-    });
+    }
+    else {
+      if (data?.material?.filter((e) => e?.type === 'service' && e?.serviceDetail?.preWork
+        && [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
+        setNextStep(false);
+      } else {
+        setNextStep(true);
+      }
+    }
     setRowsData(rows);
     setSelectedProducts([]);
   };
 
+
   const generateNestedData = (material, parent) => {
-
-    const subRows = material.filter((e) => e.parentId === parent._id);
-
-    var services: any = [];
-
-    if (parent?.services && parent?.services?.length) {
-      services = parent?.services?.filter((d) => d.packageId === undefined || d.packageId === null || d.packageId === '')?.sort((a, b) => a?.order - b?.order)?.map((d) => {
-        return {
-          ...d,
-          materialId: d._id,
-          parentId: parent._id,
-          workOrder: parent.workOrder,
-          type: 'service'
-        };
-      });
-    }
-
-    var packages: any = [];
-    if (parent?.packages && parent?.packages?.length) {
-      packages = parent?.packages?.map((d) => {
-        return {
-          ...d,
-          materialId: d._id,
-          parentId: parent._id,
-          workOrder: parent.workOrder,
-          type: 'package'
-        };
-      });
-    }
-
-    var consumable: any = [];
-    if (parent?.consumable && parent?.consumable?.length) {
-      consumable = parent?.consumable?.map((d) => {
-        return {
-          ...d,
-          materialId: d?.product?.optionValue,
-          parentId: parent?._id,
-          workOrder: parent?.workOrder,
-          type: 'product'
-        };
-      });
-    }
-
-    let combinedData = [...subRows, ...packages, ...services, ...consumable];
-
-    combinedData.forEach((_subRow, j) => {
-      _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail =
-        _subRow?.type === 'service'
-          ? _subRow?.serviceName
-          : _subRow?.type === 'package'
-            ? _subRow?.packageName
-            : _subRow?.productDetail?.productName || _subRow?.product?.optionLabel;
-      _subRow.qty = _subRow.qty;
-      _subRow.subRows = _subRow?.type === 'package' ? getPackageSubRows(parent, _subRow) : generateNestedData(material, _subRow);
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    let productIndex = 0;
+    let serviceIndex = 0;
+    subRows.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : (productIndex + 1)}`;
+      _subRow.detail = _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow?.productDetail?.productName :
+        _subRow.type === 'serializedAsset' ? _subRow?.serializedAsset?.assetNumber : _subRow?.packageDetail?.packageName;
+      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.preWork = _subRow.type === 'service' ? _subRow?.serviceDetail?.preWork : false;
+      _subRow.workOrder = parent?.workOrder;
+      _subRow.workOrderNumber = parent?.workOrder?.workOrderNumber;
+      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.type === 'service' ? serviceIndex++ : productIndex++
+      _subRow.isValid = true;
     });
-    return combinedData;
-  };
-
-  const getPackageSubRows = (parent, subRowPackage: any) => {
-    const services = parent?.services
-      ?.filter((d) => d.packageId === subRowPackage._id)
-      ?.sort((a, b) => a?.order - b?.order)
-      ?.map((d) => {
-        return {
-          ...d,
-          materialId: d._id,
-          parentId: parent._id,
-          workOrder: parent.workOrder,
-          type: 'service'
-        };
-      });
-    services.forEach((_subRow, j) => {
-      _subRow.srno = subRowPackage.srno + '.' + (j + 1);
-      _subRow.detail = _subRow?.serviceName;
-      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.qty = _subRow?.qty;
-      _subRow.subRows = null;
-    });
-    return services;
+    if (subRows.length === 0 && parent.type === 'package') {
+      parent.isValid = false;
+    }
+    if (parent.type === 'package') {
+      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
+    }
+    return sortBy(subRows.filter((e) => e.type !== 'product'), ['type']);
   };
 
   const handleAddService = (ids) => {
     const data: any = {};
     data.serviceIds = ids;
-    axiosInstance()
-      .post(`${workOrder.api}/service/${selectedProducts[0]['workOrder']?._id}`, data)
-      .then(() => {
-        fetchData();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    axiosInstance().post(`${workOrder.api}/service/${selectedProducts[0]['workOrder']?._id}`, data).then(() => {
+      fetchData();
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
   const createWorkorderService = (rows) => {
@@ -394,7 +325,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
         <Box display="flex" alignItems="center" justifyContent={'flex-end'} paddingX={1} gridColumnGap={8} flex={1}>
           {allowedToEdit && (
             <Box display="flex" gridColumnGap={5}>
-              <Button
+              {!isPostWorkService && <Button
                 variant="outlined"
                 color="default"
                 size="small"
@@ -403,7 +334,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                 disabled={selectedProducts.length === 0}
               >
                 Actions <ExpandMore />
-              </Button>
+              </Button>}
               <Menu
                 anchorEl={anchorActionEl}
                 keepMounted
@@ -484,7 +415,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                 }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
-                hideSelection={!allowedToEdit}
+                hideSelection={!allowedToEdit || isPostWorkService}
                 renderedFrom="repair_order_workorder"
                 isClientSideGrid={true}
               />
@@ -542,10 +473,10 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                 services
                   ?.filter((e) => e.type === 'service')
                   ?.map((d) => {
-                    return { _id: d?.uniqueId, name: d?.serviceName, order: d?.order, preWork: d?.preWork };
+                    return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
                   }) || []
               }
-              title={'Arrange'}
+              title={'Arrange Services'}
               handleClose={() => setArrangeView(false)}
               handleSubmit={(data) => handleArrangeUpdate(data, services[0].workOrder?._id)}
               loading={false}

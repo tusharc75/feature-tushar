@@ -657,7 +657,14 @@ const routes = {
     ? storedRoutes.workOrderSupervisor?.title
     : RESOURCE_LABEL.workOrderSupervisor,
     path:'/work-order-supervisor'
-  }
+  },
+  workOrderTechnician: {
+    title:
+      storedRoutes && storedRoutes.workOrderTechnician && storedRoutes.workOrderTechnician.title
+        ? storedRoutes.workOrderTechnician?.title
+        : RESOURCE_LABEL.workOrderTechnician,
+    path: '/work-order-technician'
+  },
 };
 
 export default routes;
