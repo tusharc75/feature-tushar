@@ -85,7 +85,7 @@ const ReceivingTicket = ({
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
 
-  const [showConformationConsume, setShowConformationConsume] = useState(false);
+  const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: "add" });
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
@@ -113,6 +113,8 @@ const ReceivingTicket = ({
 
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
   const [seletedProducts, setSeletedProducts] = useState([]);
+  const [columnHeader, setColumnHeader] = useState(null);
+
 
   const {
     state: { user, permissions, selectedEntity }
@@ -135,6 +137,7 @@ const ReceivingTicket = ({
   };
 
   useEffect(() => {
+    getColumn()
     fetchRecords();
     if (!isOffline) {
       if (permissions?.repairJob?.isRead) {
@@ -235,11 +238,7 @@ const ReceivingTicket = ({
 
         var consumeQty = 0;
 
-        consumeProducts
-          ?.filter((e) => e.product === element.materialId)
-          ?.forEach((e) => {
-            consumeQty = consumeQty + e.qty;
-          });
+        consumeProducts?.filter((e) => e.product === element.materialId)?.forEach((e) => { consumeQty = consumeQty + e.qty; });
 
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
@@ -335,35 +334,26 @@ const ReceivingTicket = ({
 
       productAssets.forEach((d) => {
         d['isChecked'] = false;
-        d['hideSelection'] =
-          [INVENTORY_STATUS.lost].includes(d.status) ||
-          d?.manualStatus === INVENTORY_STATUS.reserved ||
-          (d?.status === RENTAL_INTERNAL_ASSET_STATUS.consumed && d?.qty === d?.consumeQty);
+        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
       });
 
-      if (
-        productAssets.filter(
-          (e) =>
-            [
-              INVENTORY_STATUS.underReview,
-              INVENTORY_STATUS.available,
-              INVENTORY_STATUS.repair,
-              INVENTORY_STATUS.scrap,
-              INVENTORY_STATUS.lost
-            ].includes(e.status) ||
-            [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
-              e.rentalAssetStatus
-            )
-        ).length === productAssets.length
+      if (productAssets.filter((e) => [
+        INVENTORY_STATUS.underReview,
+        INVENTORY_STATUS.available,
+        INVENTORY_STATUS.repair,
+        INVENTORY_STATUS.scrap,
+        INVENTORY_STATUS.lost
+      ].includes(e.status) ||
+        [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
+          e.rentalAssetStatus
+        )).length === productAssets.length
       ) {
         setNextStep(true);
       }
 
       setUniqueReceivingTicket([...new Set(productAssets.filter((d) => d.receivingTicketId !== undefined).map((d) => d.receivingTicketId))]);
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
+      setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
@@ -379,7 +369,7 @@ const ReceivingTicket = ({
       .then(({ data: { data } }) => {
         setRepairJobCount(data.length);
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const InventoryRenderer = (params) => (
@@ -423,7 +413,7 @@ const ReceivingTicket = ({
       {params?.value}
     </Link>
   );
-  
+
   const ParentNameRenderer = (params) => params.data?.parentId ? (
     <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentProductId}`}>
       {params?.data?.parentName}
@@ -478,6 +468,32 @@ const ReceivingTicket = ({
     dateRenderer: DateRenderer
   };
 
+  const getColumn = async () => {
+    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+
+          fieldNames: ['productName']
+        },
+
+        {
+          resource: 'Serialized Asset',
+
+          fieldNames: ['serialNumber']
+        }
+      ]
+    });
+    const productFields = data?.find((d) => d.resource === 'Product');
+    const assetFields = data?.find((d) => d.resource === 'Serialized Asset');
+    setColumnHeader({ productFields, assetFields });
+  };
+
+  const findHeader = (resource, fieldName) => {
+    const field = resource?.fieldNames?.find((f) => f.fieldName === fieldName);
+    return field?.fieldLabel || '';
+  };
+
   const columns = [
     {
       field: 'assetNumber',
@@ -498,10 +514,10 @@ const ReceivingTicket = ({
       }
     },
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer:  'parentNameRenderer'},
+    { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'productName', headerName: 'Product Number', show: true, cellRenderer: 'productNameRenderer' },
+    { field: 'serialNumber', headerName: findHeader(columnHeader?.assetFields, 'serialNumber'), show: true, cellRenderer: 'commonRenderer' },
+    { field: 'productName', headerName: findHeader(columnHeader?.productFields, 'productName'), show: true, cellRenderer: 'productNameRenderer' },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },
@@ -509,7 +525,8 @@ const ReceivingTicket = ({
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'startDate', headerName: 'Actual Start Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'Actual End Date', show: true, cellRenderer: 'dateRenderer' },
-    { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -561,7 +578,7 @@ const ReceivingTicket = ({
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => {})
+          .then(({ data: { data } }) => { })
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
@@ -692,17 +709,29 @@ const ReceivingTicket = ({
       });
     }
     setOkBtnLoading(true);
-    axiosInstance()
-      .post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { products: products })
-      .then(({ data }) => {
+
+    if (showConformationConsume?.type === "revert") {
+      axiosInstance().post(`${rentalManagement.api}/revert-consume-product/${rentalManagementData._id}`, { products: products }).then(({ data }) => {
         setOkBtnLoading(false);
-        setShowConformationConsume(false);
+        setShowConformationConsume({ open: false, type: "" });
         setShowConformationConsumeMultiple(false);
         fetchRecords();
       })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+    else {
+      axiosInstance().post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { products: products }).then(({ data }) => {
+        setOkBtnLoading(false);
+        setShowConformationConsume({ open: false, type: "" });
+        setShowConformationConsumeMultiple(false);
+        fetchRecords();
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleChangeStatus = () => {
@@ -832,17 +861,17 @@ const ReceivingTicket = ({
                       (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
                     [INVENTORY_STATUS.underReview].includes(f.status)
                 )?.length === selectedRecords?.length && (
-                  <Fragment>
-                    <MenuItem
-                      onClick={() => {
-                        setAnchorEl(null);
-                        setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: '' });
-                      }}
-                    >
-                      {INVENTORY_STATUS.available}
-                    </MenuItem>
-                  </Fragment>
-                )}
+                    <Fragment>
+                      <MenuItem
+                        onClick={() => {
+                          setAnchorEl(null);
+                          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: '' });
+                        }}
+                      >
+                        {INVENTORY_STATUS.available}
+                      </MenuItem>
+                    </Fragment>
+                  )}
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
@@ -876,22 +905,6 @@ const ReceivingTicket = ({
                   {INVENTORY_STATUS.needRecert}
                 </MenuItem>
               </Fragment>
-            )}
-            {selectedRecords?.filter(
-              (f) => f.type === 'Product' && f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
-            ).length === selectedRecords.length && (
-              <MenuItem
-                onClick={() => {
-                  setAnchorEl(null);
-                  if (selectedRecords?.length === 1) {
-                    setShowConformationConsume(true);
-                  } else {
-                    setShowConformationConsumeMultiple(true);
-                  }
-                }}
-              >
-                {RENTAL_INTERNAL_ASSET_STATUS.consumed}
-              </MenuItem>
             )}
           </Menu>
           <Box mx={1} />
@@ -937,8 +950,8 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {selectedRecords.length &&
-            selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
-              ?.length === selectedRecords?.length ? (
+              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                ?.length === selectedRecords?.length ? (
               <MenuItem
                 onClick={() => {
                   setShowRemoveAssetFromReceivingTicketDialog(true);
@@ -1013,23 +1026,22 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {permissions?.repairJob?.isCreate &&
-            selectedRecords.length &&
-            selectedRecords?.filter(
-              (f) =>
-                ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                  (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                  f.status === INVENTORY_STATUS.scrap) &&
-                [
-                  INVENTORY_STATUS.underReview,
-                  INVENTORY_STATUS.scrap,
-                  INVENTORY_STATUS.available,
-                  INVENTORY_STATUS.needRecert,
-                  INVENTORY_STATUS.needRepair
-                ].includes(f.status) &&
-                !f.subleaseAsset &&
-                checkUniqWarehouse()
-            )?.length === selectedRecords?.length &&
-            !isOffline ? (
+              selectedRecords.length &&
+              selectedRecords?.filter(
+                (f) =>
+                  ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                    (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                    f.status === INVENTORY_STATUS.scrap) &&
+                  [
+                    INVENTORY_STATUS.underReview,
+                    INVENTORY_STATUS.scrap,
+                    INVENTORY_STATUS.available,
+                    INVENTORY_STATUS.needRecert,
+                    INVENTORY_STATUS.needRepair
+                  ].includes(f.status) &&
+                  !f.subleaseAsset &&
+                  checkUniqWarehouse()
+              )?.length === selectedRecords?.length && !isOffline ? (
               <MenuItem onClick={() => setShowRepairJobDialog(true)}>Create Repair Job</MenuItem>
             ) : null}
 
@@ -1066,6 +1078,35 @@ const ReceivingTicket = ({
             >
               Replace Assets
             </MenuItem>
+
+            {selectedRecords?.filter((f) => f.type === 'Product' && f.hasOwnProperty('loadingTicketId')
+              && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length && (
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    if (selectedRecords?.length === 1) {
+                      setShowConformationConsume({ open: true, type: "add" });
+                    } else {
+                      setShowConformationConsumeMultiple(true);
+                    }
+                  }}
+                >
+                  {RENTAL_INTERNAL_ASSET_STATUS.consumed}
+                </MenuItem>
+              )}
+
+            {selectedRecords.length === 1 && selectedRecords?.filter((f) => f.type === 'Product' && f.hasOwnProperty('loadingTicketId')
+              && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && f?.consumeQty > 0).length === selectedRecords.length && (
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    setShowConformationConsume({ open: true, type: "revert" });
+                  }}
+                >
+                  {`Revert Consumed Qty`}
+                </MenuItem>
+              )}
+              
           </Menu>
           <Box mx={1} />
           {showProcessDeliveryTicket && !isOffline && (
@@ -1149,7 +1190,7 @@ const ReceivingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -1207,7 +1248,7 @@ const ReceivingTicket = ({
       {showRemoveAssetFromReceivingTicketDialog && (
         <ConfirmationDialog
           open={showRemoveAssetFromReceivingTicketDialog}
-          message={`Are you sure you want to remove selected records from Receiving Ticket?`}
+          message={`Are you sure you want to revert selected records from Receiving Ticket?`}
           onClose={() => {
             setShowRemoveAssetFromReceivingTicketDialog(false);
           }}
@@ -1338,11 +1379,12 @@ const ReceivingTicket = ({
           }}
         />
       )}
-      {showConformationConsume && (
+      {showConformationConsume?.open && (
         <ConsumeProduct
           products={selectedRecords}
-          handleClose={() => setShowConformationConsume(false)}
+          handleClose={() => setShowConformationConsume({ open: false, type: '' })}
           loading={okBtnLoading}
+          type={showConformationConsume.type}
           handleSucess={(data) => {
             handleConsumProduct(data);
           }}

@@ -13,7 +13,8 @@ import {
   CustomDialogTransition, customerAccount, customerContact, getCollaboratorDropdownDataSource, getObjKeys,
   getObjKeysWithValues, getOwnerDropdownDataSource, isFieldNotTouched, setFieldsInAscendingOrder, yupSchema,
   generateUniqueIdOnly,
-  repairOrder
+  repairOrder,
+  REPAIR_ORDER_TYPE
 } from "../../../constants/helpers";
 import axiosInstance from '../../../axios/axiosInstance'
 import Dialog from "@material-ui/core/Dialog";
@@ -411,7 +412,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountData}
-                                            disabled={values["type"] === "Asset Repair" ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={
@@ -451,10 +452,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                     true
                                                   );
                                                 }}
-                                                disabled={values["type"] === "Asset Repair" ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                                disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                                 size="small"
                                               >
-                                                <AddIcon color={values["type"] === "Asset Repair" ? "disabled" : isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
+                                                <AddIcon color={values["type"] === REPAIR_ORDER_TYPE.internal ? "disabled" : isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
                                               </IconButton>
                                             </Tooltip>
                                           </Grid>
@@ -492,7 +493,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                               handleValuesChange({ [name]: value })
                                               setFieldValue(name, value)
                                             }}
-                                            disabled={values["type"] === "Asset Repair" ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={false}
@@ -520,10 +521,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                     true
                                                   );
                                                 }}
-                                                disabled={values["type"] === "Asset Repair" ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                                disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                                 size="small"
                                               >
-                                                <AddIcon color={values["type"] === "Asset Repair" ? "disabled" : isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                <AddIcon color={values["type"] === REPAIR_ORDER_TYPE.internal ? "disabled" : isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
                                               </IconButton>
                                             </Tooltip>
                                           </Grid>

@@ -23,11 +23,13 @@ import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import QuantityDialog from './QtyDialog';
 
 const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoice, onClose, onSuccess }) => {
-
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
 
@@ -42,6 +44,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
+  const [openQtyEdit, setOpenQtyEdit] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -77,12 +80,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -217,24 +220,24 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
 
     if (latestInvoice) {
       prevInvoiceData = await axiosInstance().get(`${invoice.api}/${latestInvoice}`);
-      prevInvoiceData = prevInvoiceData?.data?.data
+      prevInvoiceData = prevInvoiceData?.data?.data;
     }
 
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
     data = response?.data?.data;
 
     if (prevInvoiceData) {
-      data.material = data.material?.filter((item) => ['Per Day', 'Per Week', 'Per Month'].includes(item?.pricingMethod));
+      data.material = data.material?.filter((item) => ['Per Day', 'Per Week', 'Per Month', 'Per Job'].includes(item?.pricingMethod));
       data?.material?.forEach((e) => {
         const row: any = prevInvoiceData?.material?.find((ele) => ele._id === e._id);
         if (row) {
-          console.log(row)
-          const actualEndDate = new Date(row?.actualEndDate)?.setDate((new Date(row?.actualEndDate))?.getDate() + 1)
-          e.estimateStartDate = actualEndDate
-          e.actualStartDate = actualEndDate
+          console.log(row);
+          const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
+          e.estimateStartDate = actualEndDate;
+          e.actualStartDate = actualEndDate;
           setEndDate(actualEndDate);
         }
-      })
+      });
     }
     setMaterial(data?.material);
     setProductData(data);
@@ -249,8 +252,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName :
-        parent.type === 'service' ? parent?.serviceDetail?.serviceName : parent.packageDetail?.packageName
+      parent.detail =
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
@@ -262,8 +269,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow.type === 'product' ? _subRow?.productDetail?.productName :
-        _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow?.packageDetail?.packageName
+      _subRow.detail =
+        _subRow.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
@@ -301,9 +312,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
       delete element?.serviceDetail;
       delete element?.serviceDetail;
       delete element?.subRows;
-      delete element?.estimateStartDate
-      delete element?.estimateEndDate
-      delete element?.estimateJobDuration
+      delete element?.estimateStartDate;
+      delete element?.estimateEndDate;
+      delete element?.estimateJobDuration;
     });
     setUpdating(true);
     axiosInstance()
@@ -370,7 +381,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
                         }}
                         margin="dense"
                       />
-                      <Grid style={{ display: 'flex', gap: '5px', marginTop: '15px' }}>
+                      <Box style={{ display: 'flex', gap: '5px', marginTop: '15px' }}>
                         <HtmlTooltip title={!Boolean(selectedProducts && selectedProducts.length) ? 'Please select product to apply' : ''}>
                           <span>
                             <Button
@@ -386,7 +397,21 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
                             </Button>
                           </span>
                         </HtmlTooltip>
-                      </Grid>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          disabled={
+                            selectedProducts.filter((d) => !['Per Day', 'Per Week', 'Per Month'].includes(d.pricingMethod)).length === 0 ||
+                            selectedProducts.length !== 1
+                          }
+                          size="small"
+                          onClick={() => {
+                            setOpenQtyEdit(true);
+                          }}
+                        >
+                          Edit Qty
+                        </Button>
+                      </Box>
                     </Grid>
                   </Box>
                 </Grid>
@@ -438,6 +463,23 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
           </Button>
         </CustomDialogFooter>
       </Dialog>
+      {openQtyEdit && (
+        <QuantityDialog
+          onSave={(newQty) => {
+            // const updatedRows = rowsData.map((row) => {
+            //   if (row?._id === selectedProducts[0]?._id) {
+            //     row.qty = parseInt(newQty);
+            //     row.qtyDisplay = parseInt(newQty);
+            //   }
+            //   return row;
+            // });
+
+            // setRowsData(updatedRows);
+            setOpenQtyEdit(false)
+          }}
+          onClose={() => setOpenQtyEdit(false)}
+        />
+      )}
     </Fragment>
   );
 };
