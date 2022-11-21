@@ -495,7 +495,7 @@ const ReceivingTicket = ({
         {
           resource: 'Serialized Asset',
 
-          fieldNames: ['assetNumber']
+          fieldNames: ['serialNumber']
         }
       ]
     });
@@ -514,7 +514,7 @@ const ReceivingTicket = ({
   const columns = [
     {
       field: 'assetNumber',
-      headerName: findHeader(columnHeader?.assetFields, 'assetNumber'),
+      headerName: 'Details',
       show: true,
       disabled: true,
       cellRenderer: 'inventoryRenderer',
@@ -533,7 +533,7 @@ const ReceivingTicket = ({
     { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer:  'parentNameRenderer'},
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
-    { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'serialNumber', headerName: findHeader(columnHeader?.assetFields, 'serialNumber'), show: true, cellRenderer: 'commonRenderer' },
     { field: 'productName', headerName: findHeader(columnHeader?.productFields, 'productName'), show: true, cellRenderer: 'productNameRenderer' },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
