@@ -213,7 +213,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
 
   const fetchProductInventory = async () => {
     var data: any = [];
-    var prevInvoiceData: any = [];
+    var prevInvoiceData: any = null;
 
     if (latestInvoice) {
       prevInvoiceData = await axiosInstance().get(`${invoice.api}/${latestInvoice}`);
@@ -228,7 +228,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
       data?.material?.forEach((e) => {
         const row: any = prevInvoiceData?.material?.find((ele) => ele._id === e._id);
         if (row) {
-          console.log(row)
           const actualEndDate = new Date(row?.actualEndDate)?.setDate((new Date(row?.actualEndDate))?.getDate() + 1)
           e.estimateStartDate = actualEndDate
           e.actualStartDate = actualEndDate
