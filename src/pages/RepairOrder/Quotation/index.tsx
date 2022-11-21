@@ -111,10 +111,10 @@ const Quotation = ({
   }, []);
 
   useEffect(() => {
-    if(quotationData.versions[currentVersion]?._id){
+    if (quotationData.versions[currentVersion]?._id) {
       fetchFields(quotationData?.currency);
       fetchProductInventory();
-    } 
+    }
   }, [quotationData.versions[currentVersion]?._id]);
 
   const fetchFields = async (currency) => {
@@ -248,50 +248,44 @@ const Quotation = ({
         });
       }
     });
-    {
-      isMobile ? (
-        <Box display={'none'} />
-      ) : (
-        coloum.push({
-          accessor: 'action',
-          Header: '',
-          minWidth: 100,
-          width: 100,
-          sticky: 'right',
-          disableFilters: true,
-          canDrag: false,
-          Cell: ({ row }) =>
-            !row.original.hideSelection && (
-              <Grid container spacing={1}>
-                {allowedToEdit && (
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      setLeadTimeDialog({ open: true, data: row.original });
-                    }}
-                  >
-                    <DateRangeIcon fontSize="small" color="primary" />
-                  </IconButton>
-                )}
-                <Box ml={1} />
-                {allowedToDelete && (
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                      setDeleteData(obj);
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" color="error" />
-                  </IconButton>
-                )}
-              </Grid>
-            )
-        })
-      );
-    }
+    // coloum.push({
+    //   accessor: 'action',
+    //   Header: '',
+    //   minWidth: 100,
+    //   width: 100,
+    //   sticky: 'right',
+    //   disableFilters: true,
+    //   canDrag: false,
+    //   Cell: ({ row }) =>
+    //     !row.original.hideSelection && (
+    //       <Grid container spacing={1}>
+    //         {allowedToEdit && (
+    //           <IconButton
+    //             size="small"
+    //             aria-label="Details"
+    //             onClick={() => {
+    //               setLeadTimeDialog({ open: true, data: row.original });
+    //             }}
+    //           >
+    //             <DateRangeIcon fontSize="small" color="primary" />
+    //           </IconButton>
+    //         )}
+    //         <Box ml={1} />
+    //         {allowedToDelete && (
+    //           <IconButton
+    //             size="small"
+    //             aria-label="Details"
+    //             onClick={() => {
+    //               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+    //               setDeleteData(obj);
+    //             }}
+    //           >
+    //             <DeleteIcon fontSize="small" color="error" />
+    //           </IconButton>
+    //         )}
+    //       </Grid>
+    //     )
+    // })
     coloum.forEach((element) => {
       if (element.accessor.includes('detail')) {
         element['Footer'] = () => {
@@ -652,7 +646,7 @@ const Quotation = ({
                   >
                     Bulk Edit
                   </MenuItem>
-                  {allowedToDelete && (
+                  {/* {allowedToDelete && (
                     <MenuItem
                       onClick={() => {
                         closeActions();
@@ -672,7 +666,7 @@ const Quotation = ({
                     >
                       Delete
                     </MenuItem>
-                  )}
+                  )} */}
                 </Menu>
               </div>
             )}
