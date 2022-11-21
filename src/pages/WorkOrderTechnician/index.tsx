@@ -1,11 +1,8 @@
 import { Box, Chip, Grid, IconButton, makeStyles, Paper, Tooltip, Typography } from "@material-ui/core";
-import { capitalize } from "lodash";
-import { type } from "os";
 import { Fragment, useEffect, useState } from "react";
 import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
 import CustomContainer from "src/components/CustomContainer";
 import routes from "src/components/Helpers/Routes";
-import { MoreHoriz, DateRange } from '@material-ui/icons';
 import axiosInstance from "src/axios/axiosInstance";
 import { WORKORDER_SERVICE_STATUS } from "src/constants/helpers";
 
@@ -64,23 +61,23 @@ const useStyles = makeStyles(() => ({
 }));
 
 const WorkOrderTechnician = () => {
+
     const classes = useStyles();
-    const [technician, setTechnician] = useState([]);
+    const [serviceDate, setServiceDate] = useState([]);
 
     useEffect(() => {
         axiosInstance()
             .get(`/work-order-technician`)
             .then(({ data: { data } }) => {
-                setTechnician(data)
+                setServiceDate(data)
             })
     }, []);
-
 
     return (
         <Fragment>
             <Grid container className="headerbox">
                 <Grid item xs={12}>
-                    <CustomBreadCrumbs routes={[{ title: capitalize(routes.workOrderTechnician.title) }]} />
+                    <CustomBreadCrumbs routes={[{ title: routes.workOrderTechnician.title }]} />
                 </Grid>
             </Grid>
             <CustomContainer >
@@ -94,45 +91,37 @@ const WorkOrderTechnician = () => {
                                             <Box p={1} className="fixedBoardHeader">
                                                 <Typography variant="subtitle2" style={{ width: '50%' }}>
                                                     {WORKORDER_SERVICE_STATUS[key]}
-                                                    {' (' + technician.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
+                                                    {' (' + serviceDate?.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
                                                 </Typography>
                                             </Box>
-                                            {technician.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).map((data, index) => {
-                                                return (<Box
-                                                    onClick={() => { }}
-                                                    className={` ${classes.activitybox}`}
-                                                >
-                                                    <Box>
-                                                        <Grid container>
-                                                            <Grid item xs={11}>
-                                                                <Box display="flex" mr="10px">
-                                                                    <Typography
-                                                                        style={{
-                                                                            textOverflow: 'ellipsis',
-                                                                            overflow: 'hidden',
-                                                                            whiteSpace: 'nowrap',
-                                                                            marginRight: '5px'
-                                                                        }}
-                                                                        variant="subtitle2"
-                                                                    >
-                                                                        {data?.service?.optionLabel}
-                                                                    </Typography>
-                                                                    <Chip
-                                                                        size="small"
-                                                                        label={data?.type}
-                                                                    />
-                                                                </Box>
+                                            {serviceDate?.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).map((data, index) => {
+                                                return (
+                                                    <Box key={index} onClick={() => { }} className={` ${classes.activitybox}`} >
+                                                        <Box>
+                                                            <Grid container>
+                                                                <Grid item xs={11}>
+                                                                    <Box display="flex" mr="10px">
+                                                                        <Typography
+                                                                            style={{
+                                                                                textOverflow: 'ellipsis',
+                                                                                overflow: 'hidden',
+                                                                                whiteSpace: 'nowrap',
+                                                                                marginRight: '5px'
+                                                                            }}
+                                                                            variant="subtitle2"
+                                                                        >
+                                                                            {data?.service?.optionLabel}
+                                                                        </Typography>
+                                                                        <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
+                                                                    </Box>
+                                                                </Grid>
+                                                                <Grid item xs={1}>
+                                                                </Grid>
                                                             </Grid>
-                                                            <Grid item xs={1}>
-                                                                <IconButton size="small" aria-label="delete" onClick={() => { }}>
-                                                                    <MoreHoriz />
-                                                                </IconButton>
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Box>
-                                                    <Box pt={2}>
-                                                    </Box>
-                                                </Box>)
+                                                        </Box>
+                                                        <Box pt={2}>
+                                                        </Box>
+                                                    </Box>)
                                             })}
                                         </div>
                                     </Grid>
