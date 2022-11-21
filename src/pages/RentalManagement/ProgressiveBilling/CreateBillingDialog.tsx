@@ -80,12 +80,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -216,7 +216,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
 
   const fetchProductInventory = async () => {
     var data: any = [];
-    var prevInvoiceData: any = [];
+    var prevInvoiceData: any = null;
 
     if (latestInvoice) {
       prevInvoiceData = await axiosInstance().get(`${invoice.api}/${latestInvoice}`);
@@ -227,11 +227,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
     data = response?.data?.data;
 
     if (prevInvoiceData) {
-      data.material = data.material?.filter((item) => ['Per Day', 'Per Week', 'Per Month', 'Per Job'].includes(item?.pricingMethod));
+      data.material = data.material?.filter((item) => ['Per Day', 'Per Week', 'Per Month'].includes(item?.pricingMethod));
       data?.material?.forEach((e) => {
         const row: any = prevInvoiceData?.material?.find((ele) => ele._id === e._id);
         if (row) {
-          console.log(row);
           const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
           e.estimateStartDate = actualEndDate;
           e.actualStartDate = actualEndDate;
@@ -239,6 +238,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
         }
       });
     }
+
     setMaterial(data?.material);
     setProductData(data);
     initializeTable(data);
@@ -256,8 +256,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
@@ -273,8 +273,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
@@ -397,21 +397,21 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
                             </Button>
                           </span>
                         </HtmlTooltip>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          disabled={
-                            selectedProducts.filter((d) => !['Per Day', 'Per Week', 'Per Month'].includes(d.pricingMethod)).length === 0 ||
-                            selectedProducts.length !== 1
-                          }
-                          size="small"
-                          onClick={() => {
-                            setOpenQtyEdit(true);
-                          }}
-                        >
-                          Edit Qty
-                        </Button>
                       </Box>
+                      {/* <Button
+                        variant="contained"
+                        color="primary"
+                        disabled={
+                          selectedProducts.filter((d) => !['Per Day', 'Per Week', 'Per Month'].includes(d.pricingMethod)).length === 0 ||
+                          selectedProducts.length !== 1
+                        }
+                        size="small"
+                        onClick={() => {
+                          setOpenQtyEdit(true);
+                        }}
+                      >
+                        Edit Qty
+                      </Button> */}
                     </Grid>
                   </Box>
                 </Grid>
