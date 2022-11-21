@@ -113,6 +113,8 @@ const ReceivingTicket = ({
 
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
   const [seletedProducts, setSeletedProducts] = useState([]);
+  const [columnHeader, setColumnHeader] = useState(null);
+
 
   const {
     state: { user, permissions, selectedEntity }
@@ -135,6 +137,7 @@ const ReceivingTicket = ({
   };
 
   useEffect(() => {
+    getColumn()
     fetchRecords();
     if (!isOffline) {
       if (permissions?.repairJob?.isRead) {
@@ -478,10 +481,40 @@ const ReceivingTicket = ({
     dateRenderer: DateRenderer
   };
 
+  const getColumn = async () => {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+
+          fieldNames: ['productName']
+        },
+
+        {
+          resource: 'Serialized Asset',
+
+          fieldNames: ['assetNumber']
+        }
+      ]
+    });
+    const productFields = data?.find((d) => d.resource === 'Product');
+    const assetFields = data?.find((d) => d.resource === 'Serialized Asset');
+
+    setColumnHeader({ productFields, assetFields });
+  };
+
+  const findHeader = (resource, fieldName) => {
+    const field = resource?.fieldNames?.find((f) => f.fieldName === fieldName);
+
+    return field?.fieldLabel || '';
+  };
+
   const columns = [
     {
       field: 'assetNumber',
-      headerName: 'Details',
+      headerName: findHeader(columnHeader?.assetFields, 'assetNumber'),
       show: true,
       disabled: true,
       cellRenderer: 'inventoryRenderer',
@@ -501,7 +534,7 @@ const ReceivingTicket = ({
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer:  'parentNameRenderer'},
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'productName', headerName: 'Product Number', show: true, cellRenderer: 'productNameRenderer' },
+    { field: 'productName', headerName: findHeader(columnHeader?.productFields, 'productName'), show: true, cellRenderer: 'productNameRenderer' },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },
