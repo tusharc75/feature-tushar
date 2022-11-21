@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { QUOTATION_STATUS, repairOrder, workOrder, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
+import { QUOTATION_STATUS, repairOrder, REPAIR_ORDER_TYPE, workOrder, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -74,7 +74,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           axiosInstance()
             .get(`${repairOrder.api}/${data?.repairOrder?.optionValue}`)
             .then(({ data: { data } }) => {
-              if (data.type !== "Asset Repair") {
+              if (data.type !== REPAIR_ORDER_TYPE.internal) {
                 setIsQuotationStep(true)
                 axiosInstance()
                   .get(`${repairOrder.api}/${data?.repairOrder?.optionValue}/workorder/quotation`)
@@ -87,10 +87,15 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                       }
                     }
                   });
+                fetchService(true);
               }
-              fetchService();
+              else {
+                fetchService(false);
+              }
             });
-
+        }
+        else {
+          fetchService(false);
         }
       })
       .catch((err) => {
@@ -98,7 +103,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       });
   };
 
-  const fetchService = () => {
+  const fetchService = (isQuote: any = isQuotationStep) => {
     axiosInstance()
       .get(`${routes.workOrder.path}/service/${workOrderId}`)
       .then(({ data: { data } }) => {
@@ -109,7 +114,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           const preWorkService = data?.filter((e) => e.preWork);
           const postWorkService = data?.filter((e) => !e.preWork);
           const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
-          const services = isQuotationStep ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
+          const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
           setServiceSteps(services);
           if (services?.length) {
             let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
@@ -137,7 +142,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
             preWorkService?.length &&
             postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
           ) {
-            if (isQuotationStep && services.findIndex((d) => d.type === 'quotation') > -1) {
+            if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
               setSelectedService(services[services.findIndex((d) => d.type === 'quotation')]);
             }
           }

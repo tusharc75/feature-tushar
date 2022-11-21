@@ -11,7 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { repairOrder, sidebarResource, ACTIVITY_RESOURCE, REPAIR_ORDER_STATUS, repairOrderSteps } from 'src/constants/helpers';
+import { repairOrder, sidebarResource, ACTIVITY_RESOURCE, REPAIR_ORDER_STATUS, repairOrderSteps, REPAIR_ORDER_TYPE } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairOrder from './ManageRepairOrder';
@@ -124,7 +124,7 @@ const RepairOrderDetails = () => {
         setCurrentStep(repairOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? repairOrderProcessSteps.indexOf(data?.processStatus) : 0);
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
-        if (data?.type === 'Asset Repair') {
+        if (data?.type === REPAIR_ORDER_TYPE.internal) {
           setRepairOrderProcessSteps(repairOrderSteps.filter(d => d !== 'Quotation'))
         }
         setAllowedToDelete(data.owner.optionValue === user?.user?._id)
