@@ -2125,3 +2125,8 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   skipped: 'Skipped',
   end: 'end',
 };
+
+export const REPAIR_ORDER_TYPE = {
+  internal: 'Asset Repair',
+  external: 'Customer Owned Asset Repair',
+};
