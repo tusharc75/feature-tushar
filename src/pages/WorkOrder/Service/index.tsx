@@ -31,6 +31,8 @@ import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
 import RotateLeftOutlinedIcon from '@material-ui/icons/RotateLeftOutlined';
 import RotateRightOutlinedIcon from '@material-ui/icons/RotateRightOutlined';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
+import moment from 'moment';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -70,7 +72,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     axiosInstance()
       .get(`${routes.workOrder.path}/${workOrderId}`)
       .then(({ data: { data } }) => {
-        if (data.type === "Repair Order") {
+        if (data.type === 'Repair Order') {
           axiosInstance()
             .get(`${repairOrder.api}/${data?.repairOrder?.optionValue}`)
             .then(({ data: { data } }) => {
@@ -132,8 +134,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
             tempServiceSortedArray[tempServiceIndex - 1]
               ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
               : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
-          }
-          else {
+          } else {
             setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
           }
 
@@ -189,7 +190,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         });
         fetchService();
         if (id === selectedService?.uniqueId) {
-          setSelectedService(null)
+          setSelectedService(null);
         }
       })
       .catch((err) => {
@@ -294,7 +295,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
       };
-    } else if (data?.order > disabledServicesOrder || (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)) {
+    } else if (
+      data?.order > disabledServicesOrder ||
+      (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
+    ) {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
@@ -348,6 +352,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           reject(err);
         });
     });
+  };
+
+  const getFields = (step: any, serviceData) => {
+    const id = step?._id;
+    const steps = serviceData?.filter((item: any) => item.serviceId === id);
+    return steps;
   };
 
   return (
@@ -415,6 +425,17 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 >
                   {serviceSteps?.map((data, index) => {
                     const style = stylesForEveryTab(selectedService, data);
+                    const stepsWithTime = getFields(data, serviceData);
+                    let seconds = 0;
+                    stepsWithTime?.forEach((item) => {
+                      if (item.status === 'end') {
+                        const y = new Date(item?.startDate);
+                        const x = new Date(item?.endDate);
+                        seconds += Math.abs(x.getTime() - y.getTime()) / 1000;
+                      }
+                    });
+                    const duration = seconds !== 0 ? moment.duration(seconds, 'seconds').humanize() : null;
+
                     return (
                       Boolean(allowedToEdit || data?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) && (
                         <Grid item xs={12} key={index}>
@@ -478,6 +499,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                       <Box ml={'10px'}>
                                         <Typography>{data?.serviceName}</Typography>
                                       </Box>
+
                                       {data?.type === 'service' && (
                                         <Box ml={1}>
                                           {data?.preWork ? (
@@ -506,6 +528,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                       {data?.type === 'quotation' && quotationData && (
                                         <Box ml={1}>
                                           <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
+                                        </Box>
+                                      )}
+                                      {duration && (data?.status === 'Failed' || data?.status === 'Completed' || data?.status === 'Passed') && (
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+                                          <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+                                          {duration}
                                         </Box>
                                       )}
                                     </>
