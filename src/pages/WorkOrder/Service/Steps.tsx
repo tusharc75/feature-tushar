@@ -21,6 +21,9 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
+import CompleteDialog from './CompleteDialog';
+import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
+import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -115,19 +118,12 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Service = ({
   workOrderId,
-  uniqueId,
-  serviceId,
-  serviceData,
-  getServiceData,
+  selectedService,
   serviceSteps,
-  selectedServiceStatus,
-  updateServiceStatus,
   allowedToEdit,
   setDisableCompleteFail,
-  setOpenCompleteDialog,
-  serviceIndex,
   fetchService,
-  addStep
+  referencType = ""
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -138,19 +134,25 @@ const Service = ({
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
   const [stepState, setStepState] = useState(null);
+  const [serviceData, setServiceData] = useState([]);
+  const [comment, setComment] = useState('');
+  const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
+  const [assignSteps, setAssignSteps] = useState(false);
+  const [openFieldDialog, setOpenFieldDialog] = useState(false);
+  const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
 
   useEffect(() => {
-    if(addServiceConfirmation.open) return
+    if (addServiceConfirmation.open) return
     axiosInstance()
-      .get(`${workOrder.api}/service/detail/${serviceId}/${workOrderId}`)
+      .get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`)
       .then(({ data: { data } }) => {
         setServiceDetails(data);
         const steps = data?.steps?.map((d) => d.stepName);
         setStepList(steps);
         const completedSteps = serviceData.filter(
           (d) =>
-            d.uniqueId === uniqueId &&
-            d.serviceId === serviceId &&
+            d.uniqueId === selectedService?.uniqueId &&
+            d.serviceId === selectedService._id &&
             [
               WORKORDER_SERVICE_STEP_STATUS.passed,
               WORKORDER_SERVICE_STEP_STATUS.completed,
@@ -163,7 +165,7 @@ const Service = ({
         const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
         setDisableCompleteFail(!allStepsDone);
 
-        if (inSteps && allStepsDone && selectedServiceStatus === WORKORDER_SERVICE_STATUS.inProgress) {
+        if (inSteps && allStepsDone && selectedService.status === WORKORDER_SERVICE_STATUS.inProgress) {
           setOpenCompleteDialog(true);
           setInSteps(false);
         }
@@ -171,14 +173,58 @@ const Service = ({
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }, [addServiceConfirmation, serviceId, serviceData]);
+  }, [addServiceConfirmation, selectedService._id, serviceData]);
+
+  const getServiceData = () => {
+    axiosInstance()
+      .get(`${workOrder.api}/${workOrderId}/steps-data`)
+      .then(({ data: { data } }) => {
+        setServiceData(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const updateServiceStatus = (uniqueId, status) => {
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/${uniqueId}/status`, { status, comment })
+      .then(({ data: { data } }) => {
+        fetchService();
+        if (openCompleteDialog) {
+          setOpenCompleteDialog(false);
+        }
+        setComment('');
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        if (openCompleteDialog) {
+          setOpenCompleteDialog(false);
+        }
+      });
+  };
+
+  const handleAddStep = (values: any) => {
+    values.fields = addStepFields?.fields;
+
+    return new Promise((resolve, reject) => {
+      axiosInstance()
+        .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
+        .then(({ data }) => {
+          resolve(data);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  };
 
   const handleAddService = (ids, forMinMax = false, step = null, values = null) => {
     const data: any = {};
     data.serviceIds = ids;
-    if (uniqueId) {
-      data.aboveServiceUniqueId = uniqueId;
-      data.createdFrom = uniqueId;
+    if (selectedService?.uniqueId) {
+      data.aboveServiceUniqueId = selectedService?.uniqueId;
+      data.createdFrom = selectedService?.uniqueId;
     }
     axiosInstance()
       .post(`${workOrder.api}/service/${workOrderId}`, data)
@@ -200,7 +246,7 @@ const Service = ({
     let fieldData = { fields: [], formsData: [], values: {} };
 
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
-    let tempServiceData = serviceData.find((d) => d.uniqueId === uniqueId && d.serviceId === serviceId && d.stepId === step?._id);
+    let tempServiceData = serviceData.find((d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === step?._id);
 
     if (tempServiceData) {
       stepData = tempServiceData;
@@ -244,8 +290,8 @@ const Service = ({
 
   const handleSubmit = async (values, step) => {
     let tempData = {
-      uniqueId: uniqueId,
-      serviceId: serviceId,
+      uniqueId: selectedService?.uniqueId,
+      serviceId: selectedService._id,
       stepId: step?._id
     };
     axiosInstance()
@@ -319,8 +365,8 @@ const Service = ({
   const handleStartEnd = (type, stepId) => {
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/${type}`, {
-        uniqueId: uniqueId,
-        serviceId: serviceId,
+        uniqueId: selectedService?.uniqueId,
+        serviceId: selectedService._id,
         stepId: stepId
       })
       .then(({ data }) => {
@@ -340,8 +386,8 @@ const Service = ({
     setInSteps(true);
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/pass-fail`, {
-        uniqueId: uniqueId,
-        serviceId: serviceId,
+        uniqueId: selectedService?.uniqueId,
+        serviceId: selectedService._id,
         stepId: stepId,
         passFailStatus: type
       })
@@ -397,15 +443,13 @@ const Service = ({
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
                 className={`${classes.accordionHeading} 
-              ${
-                Boolean(stepData?.passFailStatus)
-                  ? `${
-                      Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                        ? classes.green
-                        : ''
+              ${Boolean(stepData?.passFailStatus)
+                    ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                      ? classes.green
+                      : ''
                     } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                  : classes.white
-              }
+                    : classes.white
+                  }
               
               `}
                 onClick={(e) => {
@@ -426,7 +470,7 @@ const Service = ({
                       />
                     </Box> */}
                     <Box>
-                      <Chip color="primary" label={`${serviceIndex}.${index + 1}`} />
+                      <Chip color="primary" label={referencType === "workOrderTechnician" ? index + 1 : `${serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}.${index + 1}`} />
                     </Box>
                     <Box ml={1}>
                       <Typography className={classes.heading} style={{ fontWeight: '600' }}>
@@ -444,8 +488,8 @@ const Service = ({
                           disabled={!allowedToEdit}
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (selectedServiceStatus === WORKORDER_SERVICE_STATUS.pending) {
-                              updateServiceStatus(uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
+                            if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
+                              updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
                             }
                             handleStartEnd('start', step._id);
                           }}
@@ -511,17 +555,29 @@ const Service = ({
           step={selectedStep}
           stepData={stepState}
         />
+        {openCompleteDialog && (
+          <CompleteDialog
+            serviceName={selectedService?.serviceName}
+            comment={comment}
+            setComment={setComment}
+            updateStatus={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed)}
+            handleClose={() => {
+              setComment('');
+              setOpenCompleteDialog(false);
+            }}
+          />
+        )}
         {addServiceConfirmation.open && (
           <ConfirmationDialog
             open={true}
             message={
               addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
                 ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
-                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+                addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
                 : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
-                ? `On pass, a new service has been added in compliance with the configuration ` +
+                  ? `On pass, a new service has been added in compliance with the configuration ` +
                   addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : `You have to add addional services based on your recent action`
+                  : `You have to add addional services based on your recent action`
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
@@ -539,18 +595,57 @@ const Service = ({
         )}
       </Box>
     ) : (
-      <Box p={2} height={500} bgcolor="rgba(242, 243, 247, 0.6)" textAlign="center">
-        <Button variant="contained" color="primary" onClick={addStep}>
-          Add Step
-        </Button>
+      <>
+        <Box p={2} height={500} bgcolor="rgba(242, 243, 247, 0.6)" textAlign="center">
+          <Button variant="contained" color="primary" onClick={() => setAssignSteps(true)}>
+            Add Step
+          </Button>
 
-        {/* <Typography>There are no added steps.</Typography> */}
-      </Box>
+          {/* <Typography>There are no added steps.</Typography> */}
+        </Box>
+
+        {assignSteps && (
+          <StepDialog
+            handleClose={() => {
+              setAssignSteps(false);
+            }}
+            handleSucess={() => {
+              setAssignSteps(false);
+              getServiceData();
+              setAddStepFields({ fields: [], section: [] });
+            }}
+            handleAddStep={handleAddStep}
+            stepId={''}
+            steps={selectedService?.steps}
+            reference={'workOrder'}
+            workOrderId={workOrderId}
+            serviceId={selectedService?._id}
+            uniqueId={selectedService?.uniqueId}
+            setOpenFieldDialog={setOpenFieldDialog}
+          />
+        )}
+        {openFieldDialog && (
+          <FieldDialog
+            reference={'workOrder'}
+            serviceId={selectedService?._id}
+            stepIds={selectedService?.steps?.map((d) => d?._id)}
+            steps={[]}
+            sectionData={addStepFields?.section}
+            handleClose={() => {
+              setOpenFieldDialog(false);
+            }}
+            handleSucess={(fieldsData: any) => {
+              setOpenFieldDialog(false);
+              setAddStepFields(fieldsData);
+            }}
+          />
+        )}</>
     )
   ) : (
     <Box p={2} height={500} bgcolor="white">
       <CommonSkeleton lenArray={[...Array(10).keys()]} />
     </Box>
   );
+
 };
 export default Service;

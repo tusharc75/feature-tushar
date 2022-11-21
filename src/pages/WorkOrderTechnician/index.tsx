@@ -1,10 +1,12 @@
-import { Box, Chip, Grid, IconButton, makeStyles, Paper, Tooltip, Typography } from "@material-ui/core";
+import { Box, Chip, Dialog, Grid, IconButton, makeStyles, Paper, Tooltip, Typography } from "@material-ui/core";
 import { Fragment, useEffect, useState } from "react";
 import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
 import CustomContainer from "src/components/CustomContainer";
 import routes from "src/components/Helpers/Routes";
 import axiosInstance from "src/axios/axiosInstance";
-import { WORKORDER_SERVICE_STATUS } from "src/constants/helpers";
+import { CustomDialogTransition, WORKORDER_SERVICE_STATUS } from "src/constants/helpers";
+import Steps from "../WorkOrder/Service/Steps";
+import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 
 const useStyles = makeStyles(() => ({
     activityContainer: {
@@ -63,15 +65,22 @@ const useStyles = makeStyles(() => ({
 const WorkOrderTechnician = () => {
 
     const classes = useStyles();
-    const [serviceDate, setServiceDate] = useState([]);
+    const [workOrderId, setWorkOrderId] = useState(null);
+    const [service, setService] = useState(null);
+    const [serviceData, setServiceData] = useState([]);
+    const [serviceDetailsShow, setServiceDetailsShow] = useState(false);
 
     useEffect(() => {
+        fetchWorkOrderTechnician()
+    }, []);
+
+    const fetchWorkOrderTechnician = () => {
         axiosInstance()
             .get(`/work-order-technician`)
             .then(({ data: { data } }) => {
-                setServiceDate(data)
+                setServiceData(data)
             })
-    }, []);
+    }
 
     return (
         <Fragment>
@@ -91,12 +100,20 @@ const WorkOrderTechnician = () => {
                                             <Box p={1} className="fixedBoardHeader">
                                                 <Typography variant="subtitle2" style={{ width: '50%' }}>
                                                     {WORKORDER_SERVICE_STATUS[key]}
-                                                    {' (' + serviceDate?.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
+                                                    {' (' + serviceData?.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
                                                 </Typography>
                                             </Box>
-                                            {serviceDate?.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).map((data, index) => {
+                                            {serviceData?.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).map((data, index) => {
                                                 return (
-                                                    <Box key={index} onClick={() => { }} className={` ${classes.activitybox}`} >
+                                                    <Box key={index}
+                                                        onClick={() => {
+                                                            let tempServiceData = data?.service
+                                                            tempServiceData["uniqueId"] = data?.service?._id
+                                                            setService(tempServiceData)
+                                                            setWorkOrderId(data?.workOrderDetail?._id)
+                                                            setServiceDetailsShow(true)
+                                                        }}
+                                                        className={` ${classes.activitybox}`} >
                                                         <Box>
                                                             <Grid container>
                                                                 <Grid item xs={11}>
@@ -110,7 +127,7 @@ const WorkOrderTechnician = () => {
                                                                             }}
                                                                             variant="subtitle2"
                                                                         >
-                                                                            {data?.service?.optionLabel}
+                                                                            {data?.service?.serviceName}
                                                                         </Typography>
                                                                         <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
                                                                     </Box>
@@ -131,6 +148,20 @@ const WorkOrderTechnician = () => {
                     </Box>
                 </Fragment>
             </CustomContainer>
+            {serviceDetailsShow &&
+                <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={serviceDetailsShow}>
+                    <CustomDialogHeader title={`${service?.serviceName} Steps`} onClose={() => { setServiceDetailsShow(false) }}></CustomDialogHeader>
+                    <Steps
+                        workOrderId={workOrderId}
+                        selectedService={service}
+                        serviceSteps={[]}
+                        allowedToEdit={true}
+                        setDisableCompleteFail={() => { }}
+                        fetchService={fetchWorkOrderTechnician}
+                        referencType={"workOrderTechnician"}
+                    />
+                </Dialog>
+            }
         </Fragment>
     );
 };
