@@ -73,13 +73,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       .get(`${routes.workOrder.path}/${workOrderId}`)
       .then(({ data: { data } }) => {
         if (data.type === 'Repair Order') {
+          let tempRepairOrderId = data?.repairOrder?.optionValue
           axiosInstance()
-            .get(`${repairOrder.api}/${data?.repairOrder?.optionValue}`)
+            .get(`${repairOrder.api}/${tempRepairOrderId}`)
             .then(({ data: { data } }) => {
               if (data.type !== REPAIR_ORDER_TYPE.internal) {
                 setIsQuotationStep(true)
                 axiosInstance()
-                  .get(`${repairOrder.api}/${data?.repairOrder?.optionValue}/workorder/quotation`)
+                  .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
                   .then(({ data: { data } }) => {
                     if (data) {
                       let keys = Object.keys(data?.versions);
@@ -863,21 +864,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                     (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                     <Steps
                       workOrderId={workOrderId}
-                      serviceId={selectedService?._id}
-                      uniqueId={selectedService?.uniqueId}
-                      getServiceData={getServiceData}
-                      serviceData={serviceData}
+                      selectedService={selectedService}
                       serviceSteps={serviceSteps}
-                      serviceIndex={serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}
-                      selectedServiceStatus={selectedService.status}
-                      updateServiceStatus={updateServiceStatus}
                       allowedToEdit={isAllowedToServiceEdit}
                       setDisableCompleteFail={setDisableCompleteFail}
-                      setOpenCompleteDialog={setOpenCompleteDialog}
                       fetchService={fetchService}
-                      addStep={() => {
-                        setAssignSteps(true);
-                      }}
                     />
                   ) : (
                     <Box textAlign="center">

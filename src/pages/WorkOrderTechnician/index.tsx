@@ -1,16 +1,20 @@
-import { Box, Chip, Grid, IconButton, makeStyles, Paper, Tooltip, Typography } from "@material-ui/core";
+import { Box, Chip, Dialog, Grid, IconButton, makeStyles, Paper, TextField, Tooltip, Typography } from "@material-ui/core";
 import { Fragment, useEffect, useState } from "react";
 import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
 import CustomContainer from "src/components/CustomContainer";
 import routes from "src/components/Helpers/Routes";
 import axiosInstance from "src/axios/axiosInstance";
-import { WORKORDER_SERVICE_STATUS } from "src/constants/helpers";
+import { CustomDialogTransition, WORKORDER_SERVICE_STATUS } from "src/constants/helpers";
+import Steps from "../WorkOrder/Service/Steps";
+import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
+import { Autocomplete } from "@material-ui/lab";
 
 const useStyles = makeStyles(() => ({
     activityContainer: {
         padding: "20px 20px 10px 10px",
     },
     activityMainBlock: {
+        marginTop: "20Px",
         height: 'calc(100vh - 32vh)',
         overflow: 'auto'
     },
@@ -63,15 +67,38 @@ const useStyles = makeStyles(() => ({
 const WorkOrderTechnician = () => {
 
     const classes = useStyles();
-    const [serviceDate, setServiceDate] = useState([]);
+    const [workOrderId, setWorkOrderId] = useState(null);
+    const [service, setService] = useState(null);
+    const [serviceData, setServiceData] = useState([]);
+    const [workOrderOptions, setWorkOrderOptions] = useState([]);
+    const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
+    const [repairOrderOptions, setRepairOrderOptions] = useState([]);
+    const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
+    const [serviceDetailsShow, setServiceDetailsShow] = useState(false);
 
     useEffect(() => {
         axiosInstance()
-            .get(`/work-order-technician`)
+            .get(`/sa-formbuilder/lookup?lookupResource=Work Order,Repair Order`)
             .then(({ data: { data } }) => {
-                setServiceDate(data)
-            })
+                setWorkOrderOptions(data['Work Order']);
+                setRepairOrderOptions(data['Repair Order']);
+            });
     }, []);
+    useEffect(() => {
+        fetchWorkOrderTechnician()
+    }, [selectedWorkOrder, selectedRepairOrder]);
+
+    const fetchWorkOrderTechnician = () => {
+        let api = selectedWorkOrder && selectedRepairOrder ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}&repairOrder=${selectedRepairOrder.optionValue}`
+            : selectedWorkOrder ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}`
+                : selectedRepairOrder ? `/work-order-technician?repairOrder=${selectedRepairOrder.optionValue}`
+                    : `/work-order-technician`
+        axiosInstance()
+            .get(api)
+            .then(({ data: { data } }) => {
+                setServiceData(data)
+            })
+    }
 
     return (
         <Fragment>
@@ -83,6 +110,41 @@ const WorkOrderTechnician = () => {
             <CustomContainer >
                 <Fragment>
                     <Box className={classes.activityContainer}>
+                        <Grid container spacing={2} >
+                            <Grid item xs={12} sm={6} md={3}>
+                                {workOrderOptions && workOrderOptions && (
+                                    <Autocomplete
+                                        options={workOrderOptions}
+                                        fullWidth
+                                        getOptionLabel={(option: any) => option.optionLabel}
+                                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                                        value={selectedWorkOrder}
+                                        onChange={(event, newValue) => {
+                                            setSelectedWorkOrder(newValue);
+                                        }}
+                                        size="small"
+                                        renderInput={(params) => <TextField {...params} label={`Select Work Order`} variant="outlined" />}
+                                    />
+                                )}
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                                {repairOrderOptions && repairOrderOptions && (
+                                    <Autocomplete
+                                        options={repairOrderOptions}
+                                        fullWidth
+                                        getOptionLabel={(option: any) => option.optionLabel}
+                                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                                        value={selectedRepairOrder}
+                                        onChange={(event, newValue) => {
+                                            setSelectedRepairOrder(newValue);
+                                        }}
+                                        size="small"
+                                        renderInput={(params) => <TextField {...params} label={`Select Repair Order`} variant="outlined" />}
+                                    />
+                                )}
+                            </Grid>
+                        </Grid>
+
                         <Grid container spacing={2} className={` ${classes.activityMainBlock}`}>
                             {Object.keys(WORKORDER_SERVICE_STATUS).map((key, i) => {
                                 return (
@@ -91,12 +153,20 @@ const WorkOrderTechnician = () => {
                                             <Box p={1} className="fixedBoardHeader">
                                                 <Typography variant="subtitle2" style={{ width: '50%' }}>
                                                     {WORKORDER_SERVICE_STATUS[key]}
-                                                    {' (' + serviceDate?.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
+                                                    {' (' + serviceData?.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
                                                 </Typography>
                                             </Box>
-                                            {serviceDate?.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).map((data, index) => {
+                                            {serviceData?.filter(d => d.status === WORKORDER_SERVICE_STATUS[key]).map((data, index) => {
                                                 return (
-                                                    <Box key={index} onClick={() => { }} className={` ${classes.activitybox}`} >
+                                                    <Box key={index}
+                                                        onClick={() => {
+                                                            let tempServiceData = data?.service
+                                                            tempServiceData["uniqueId"] = data?.service?._id
+                                                            setService(tempServiceData)
+                                                            setWorkOrderId(data?.workOrderDetail?._id)
+                                                            setServiceDetailsShow(true)
+                                                        }}
+                                                        className={` ${classes.activitybox}`} >
                                                         <Box>
                                                             <Grid container>
                                                                 <Grid item xs={11}>
@@ -110,7 +180,7 @@ const WorkOrderTechnician = () => {
                                                                             }}
                                                                             variant="subtitle2"
                                                                         >
-                                                                            {data?.service?.optionLabel}
+                                                                            {data?.service?.serviceName}
                                                                         </Typography>
                                                                         <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
                                                                     </Box>
@@ -130,8 +200,22 @@ const WorkOrderTechnician = () => {
                         </Grid>
                     </Box>
                 </Fragment>
-            </CustomContainer>
-        </Fragment>
+            </CustomContainer >
+            {serviceDetailsShow &&
+                <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={serviceDetailsShow}>
+                    <CustomDialogHeader title={`${service?.serviceName} Steps`} onClose={() => { setServiceDetailsShow(false) }}></CustomDialogHeader>
+                    <Steps
+                        workOrderId={workOrderId}
+                        selectedService={service}
+                        serviceSteps={[]}
+                        allowedToEdit={true}
+                        setDisableCompleteFail={() => { }}
+                        fetchService={fetchWorkOrderTechnician}
+                        referencType={"workOrderTechnician"}
+                    />
+                </Dialog>
+            }
+        </Fragment >
     );
 };
 
