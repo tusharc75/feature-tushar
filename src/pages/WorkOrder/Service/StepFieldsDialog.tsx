@@ -10,17 +10,19 @@ import { isMobile, isTablet } from 'react-device-detect';
 import styles from './StepFieldsDialog.module.scss';
 import CloseIcon from '@material-ui/icons/Close';
 import Details from 'src/components/Shared/DetailsPage';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, stepData, isStepValid }) => {
   const [isEditing, setEditing] = React.useState(false);
+
   function padTo2Digits(num) {
     return num.toString().padStart(2, '0');
   }
 
-  function convertMsToTime(stepData) {
-    let startTime = new Date(stepData?.startDate);
-    let endTime = new Date(stepData?.endDate);
-    let milliseconds = endTime.getTime() - startTime.getTime();
+  function convertMsToTime(milliseconds) {
+    function padTo2Digits(num) {
+      return num.toString().padStart(2, '0');
+    }
     let seconds = Math.floor(milliseconds / 1000);
     let minutes = Math.floor(seconds / 60);
     let hours = Math.floor(minutes / 60);
@@ -31,22 +33,23 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
     let time = '';
 
     if (hours === 0) {
-      time = `${padTo2Digits(minutes)} minutes`;
+      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
     }
-
+    if (hours === 0 && minutes === 0) {
+      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+    }
     if (hours > 0 && hours < 24) {
-      time = `${padTo2Digits(hours)} hours, ${padTo2Digits(minutes)} minutes`;
+      time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
     }
-
     if (hours >= 24) {
-      time = `${padTo2Digits(hours / 24)} days`;
+      time = `${padTo2Digits(hours / 24)}d`;
     }
     return time;
   }
 
   const RenderStepData = () => {
     return (
-      <Grid container spacing={2}>
+      <Grid container spacing={2} alignItems="center">
         {stepData?.startDate ? (
           <Grid item style={{ paddingRight: '20px', flexGrow: 1 }}>
             <Typography variant="caption">Clock In</Typography>
@@ -63,8 +66,21 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
         ) : null}
         {stepData?.startDate && stepData?.endDate ? (
           <Grid item style={{ flexGrow: 1 }}>
-            <Typography variant="caption">Duration</Typography>
-            <Typography variant="body2">{convertMsToTime(stepData)}</Typography>
+            <Box
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                border: '1px solid rgba(0, 0, 0, 0.23)',
+                backgroundColor: 'transparent',
+                padding: '2px 7px',
+                borderRadius: '8px'
+              }}
+            >
+              <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+              {convertMsToTime(new Date(stepData?.endDate).getTime() - new Date(stepData?.startDate).getTime())}
+            </Box>
+            {/* <Typography variant="body2">{convertMsToTime(stepData)}</Typography> */}
           </Grid>
         ) : null}
       </Grid>
