@@ -19,9 +19,9 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
       <CustomDialogHeader title="Confirmation" onClose={handleClose} />
       <CustomDialogContent>
         <Box>
-          <Typography>  All steps are done for{' '}
-            <Box component="span" fontWeight="bold">   {serviceName}   </Box>
-            , Do you want to complete it?
+          <Typography>  All steps are performed for{' '}
+            <Box component="span" fontWeight="bold">{serviceName}</Box>
+            , do you want to mark it complete?
           </Typography>
           <Box mt={2}>
             <TextField

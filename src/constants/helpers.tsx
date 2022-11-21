@@ -201,7 +201,8 @@ export const sidebarResource = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
-  workOrder: 'Work Order'
+  workOrder: 'Work Order',
+  workOrderTechnician: 'Work Order Technician'
 };
 
 export const resourceNames = {
@@ -270,7 +271,8 @@ export const resourceNames = {
   productAuction: 'Product Auction',
   quotation: 'Quotation',
   repairOrder: 'Repair Order',
-  workOrder: 'Work Order'
+  workOrder: 'Work Order',
+  workOrderTechnician: 'Work Order Technician'
 };
 
 export const primaryFields = {
@@ -355,7 +357,9 @@ export const RESOURCE_LABEL = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
-  workOrder: 'Work Order'
+  workOrder: 'Work Order',
+  workOrderSupervisor:'Work Order Supervisor',
+  workOrderTechnician: 'Work Order Technician'
 };
 
 export const CHILD_RESOURCE = {
@@ -537,6 +541,13 @@ export const serializedAsset = {
   permission: 'serializedAsset',
   resource: 'Serialized Asset'
 };
+
+export const workOrderSupervisor = {
+  api:'/work-order-supervisor',
+  route:'/work-order-supervisor',
+  permission:'workOrderSupervisor',
+  resource:'Work Order Supervisor'
+}
 
 export const convertInventory = {
   api: '/convert-inventory-to-asset',
@@ -2121,4 +2132,9 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   failed: 'Failed',
   skipped: 'Skipped',
   end: 'end',
+};
+
+export const REPAIR_ORDER_TYPE = {
+  internal: 'Asset Repair',
+  external: 'Customer Owned Asset Repair',
 };

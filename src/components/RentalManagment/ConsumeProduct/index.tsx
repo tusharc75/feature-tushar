@@ -10,14 +10,16 @@ import {
 import Dialog from "@material-ui/core/Dialog";
 import { Formik, Form, Field } from "formik";
 
-const ConsumeProduct = ({ handleClose, loading, handleSucess, products }) => {
+const ConsumeProduct = ({ handleClose, type, loading, handleSucess, products }) => {
 
- 
-  const [initialValues, setInitialValues] = useState({ qty: products?.length ? (products[0].qty - products[0].consumeQty) : 0 });
+
+  const [initialValues, setInitialValues] = useState({
+    qty: products?.length ? type === "revert" ? (products[0].consumeQty) : (products[0].qty - products[0].consumeQty) : 0
+  });
 
   function validate(values) {
     const errors = {};
-    var qty = products?.length ? (products[0].qty - products[0].consumeQty) : 0
+    var qty = products?.length ? type === "revert" ? (products[0].consumeQty) : (products[0].qty - products[0].consumeQty) : 0
     if (!values.qty || values.qty === "") {
       errors['qty'] = 'Please enter qty';
     }
@@ -36,7 +38,7 @@ const ConsumeProduct = ({ handleClose, loading, handleSucess, products }) => {
     open={true}
   >
     <CustomDialogHeader
-      title="Consume Qty"
+      title={type === "revert" ? "Revert Consumed Qty" : "Consume Qty"}
       showRequiredLabel={false}
       onClose={handleClose}
     />

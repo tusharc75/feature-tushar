@@ -71,7 +71,11 @@ const Quotation = ({
   stepFullScreen,
   allowedToEdit,
   allowedToDelete,
-  invoiceStep = false
+  invoiceStep = false,
+  fetchQuotationData,
+  quotationData,
+  currentVersion,
+  setCurrentVersion
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -98,9 +102,6 @@ const Quotation = ({
   const [allFields, setAllFields] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
-  const [quotationData, setQuotationData] = useState(null);
-  const [currentVersion, setCurrentVersion] = useState(null);
-  const [versionId, setVersionId] = useState(null);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
@@ -109,23 +110,12 @@ const Quotation = ({
     fetchQuotationData();
   }, []);
 
-  const fetchQuotationData = (versionNumber = null) => {
-    axiosInstance()
-      .get(`${repairOrder.api}/${repairOrderData._id}/repairorder/quotation`)
-      .then(({ data: { data } }) => {
-        setQuotationData(data);
-        fetchFields(data?.currency);
-        let keys = Object.keys(data.versions);
-        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1])
-        setCurrentVersion(tempCurrentVersion);
-        setVersionId(data?.versions[tempCurrentVersion]?._id || null);
-        setNextStep(data?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false)
-      });
-  };
-
   useEffect(() => {
-    versionId && fetchProductInventory();
-  }, [versionId]);
+    if (quotationData.versions[currentVersion]?._id) {
+      fetchFields(quotationData?.currency);
+      fetchProductInventory();
+    }
+  }, [quotationData.versions[currentVersion]?._id]);
 
   const fetchFields = async (currency) => {
     var data = await fetch_quotation_product_fields(currency);
@@ -258,50 +248,44 @@ const Quotation = ({
         });
       }
     });
-    {
-      isMobile ? (
-        <Box display={'none'} />
-      ) : (
-        coloum.push({
-          accessor: 'action',
-          Header: '',
-          minWidth: 100,
-          width: 100,
-          sticky: 'right',
-          disableFilters: true,
-          canDrag: false,
-          Cell: ({ row }) =>
-            !row.original.hideSelection && (
-              <Grid container spacing={1}>
-                {allowedToEdit && (
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      setLeadTimeDialog({ open: true, data: row.original });
-                    }}
-                  >
-                    <DateRangeIcon fontSize="small" color="primary" />
-                  </IconButton>
-                )}
-                <Box ml={1} />
-                {allowedToDelete && (
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                      setDeleteData(obj);
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" color="error" />
-                  </IconButton>
-                )}
-              </Grid>
-            )
-        })
-      );
-    }
+    // coloum.push({
+    //   accessor: 'action',
+    //   Header: '',
+    //   minWidth: 100,
+    //   width: 100,
+    //   sticky: 'right',
+    //   disableFilters: true,
+    //   canDrag: false,
+    //   Cell: ({ row }) =>
+    //     !row.original.hideSelection && (
+    //       <Grid container spacing={1}>
+    //         {allowedToEdit && (
+    //           <IconButton
+    //             size="small"
+    //             aria-label="Details"
+    //             onClick={() => {
+    //               setLeadTimeDialog({ open: true, data: row.original });
+    //             }}
+    //           >
+    //             <DateRangeIcon fontSize="small" color="primary" />
+    //           </IconButton>
+    //         )}
+    //         <Box ml={1} />
+    //         {allowedToDelete && (
+    //           <IconButton
+    //             size="small"
+    //             aria-label="Details"
+    //             onClick={() => {
+    //               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+    //               setDeleteData(obj);
+    //             }}
+    //           >
+    //             <DeleteIcon fontSize="small" color="error" />
+    //           </IconButton>
+    //         )}
+    //       </Grid>
+    //     )
+    // })
     coloum.forEach((element) => {
       if (element.accessor.includes('detail')) {
         element['Footer'] = () => {
@@ -334,7 +318,7 @@ const Quotation = ({
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${quotationData.versions[currentVersion]?._id}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
@@ -427,7 +411,7 @@ const Quotation = ({
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`, { material: rows })
+      .put(`${quotation.api}/productpackage/${quotationData._id}/${quotationData.versions[currentVersion]?._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
@@ -442,7 +426,7 @@ const Quotation = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${versionId}/delete`, { ids: rows })
+      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData.versions[currentVersion]?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
@@ -489,7 +473,6 @@ const Quotation = ({
   };
 
   const handleChangeVersion = (versionNumber) => {
-    setVersionId(quotationData?.versions[versionNumber]?._id || null);
     setCurrentVersion(versionNumber);
     setShowAllVersionStatus(false);
   };
@@ -663,7 +646,7 @@ const Quotation = ({
                   >
                     Bulk Edit
                   </MenuItem>
-                  {allowedToDelete && (
+                  {/* {allowedToDelete && (
                     <MenuItem
                       onClick={() => {
                         closeActions();
@@ -683,7 +666,7 @@ const Quotation = ({
                     >
                       Delete
                     </MenuItem>
-                  )}
+                  )} */}
                 </Menu>
               </div>
             )}
@@ -768,7 +751,7 @@ const Quotation = ({
         <LeadTimeDialog
           quotationId={quotationData._id}
           data={leadTimeDialog?.data}
-          versionId={versionId}
+          versionId={quotationData.versions[currentVersion]?._id}
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });
           }}
@@ -783,7 +766,7 @@ const Quotation = ({
       )}
       {customerAcceptable && (
         <ManualReponseDialog
-          versionId={versionId}
+          versionId={quotationData.versions[currentVersion]?._id}
           quotationId={quotationData?._id}
           setCurrentStep={() => {
             fetchQuotationData(currentVersion);
@@ -797,7 +780,7 @@ const Quotation = ({
       {showQuotationSummaryDialog && (
         <QuotationSummeryDialog
           quotationData={quotationData}
-          versionId={versionId}
+          versionId={quotationData.versions[currentVersion]?._id}
           onClose={() => {
             setShowQuotationSummaryDialog(false);
           }}

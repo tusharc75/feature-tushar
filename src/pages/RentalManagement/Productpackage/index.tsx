@@ -183,7 +183,23 @@ const Productpackage = ({
         Footer: () => {
           return <>Total</>;
         }
-      }
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            row.original['type'] === 'product' && row.original?.productDetail?.productDesc ?
+              <p>{row.original?.productDetail?.productDesc}</p>
+              : row.original?.type === 'package' && row.original?.packageDetail.packageDescription ?
+                <p>{row.original?.packageDetail.packageDescription}</p>
+                : row.original.type === 'service' && row?.original?.serviceDetail?.serviceDescription ?
+                  <p>{row?.original?.serviceDetail?.serviceDescription}</p> : <NoDataCell />
+          ) : (
+            <NoDataCell />
+          )
+      },
     ];
     data.forEach((element) => {
       if (element.fieldName === 'price' && element.required) {
