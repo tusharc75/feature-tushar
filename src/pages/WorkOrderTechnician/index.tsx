@@ -1,4 +1,4 @@
-import { Box, Chip, Dialog, Grid, IconButton, makeStyles, Paper, Tooltip, Typography } from "@material-ui/core";
+import { Box, Chip, Dialog, Grid, IconButton, makeStyles, Paper, TextField, Tooltip, Typography } from "@material-ui/core";
 import { Fragment, useEffect, useState } from "react";
 import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
 import CustomContainer from "src/components/CustomContainer";
@@ -7,12 +7,14 @@ import axiosInstance from "src/axios/axiosInstance";
 import { CustomDialogTransition, WORKORDER_SERVICE_STATUS } from "src/constants/helpers";
 import Steps from "../WorkOrder/Service/Steps";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
+import { Autocomplete } from "@material-ui/lab";
 
 const useStyles = makeStyles(() => ({
     activityContainer: {
         padding: "20px 20px 10px 10px",
     },
     activityMainBlock: {
+        marginTop: "20Px",
         height: 'calc(100vh - 32vh)',
         overflow: 'auto'
     },
@@ -68,15 +70,31 @@ const WorkOrderTechnician = () => {
     const [workOrderId, setWorkOrderId] = useState(null);
     const [service, setService] = useState(null);
     const [serviceData, setServiceData] = useState([]);
+    const [workOrderOptions, setWorkOrderOptions] = useState([]);
+    const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
+    const [repairOrderOptions, setRepairOrderOptions] = useState([]);
+    const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
     const [serviceDetailsShow, setServiceDetailsShow] = useState(false);
 
     useEffect(() => {
-        fetchWorkOrderTechnician()
+        axiosInstance()
+            .get(`/sa-formbuilder/lookup?lookupResource=Work Order,Repair Order`)
+            .then(({ data: { data } }) => {
+                setWorkOrderOptions(data['Work Order']);
+                setRepairOrderOptions(data['Repair Order']);
+            });
     }, []);
+    useEffect(() => {
+        fetchWorkOrderTechnician()
+    }, [selectedWorkOrder, selectedRepairOrder]);
 
     const fetchWorkOrderTechnician = () => {
+        let api = selectedWorkOrder && selectedRepairOrder ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}&repairOrder=${selectedRepairOrder.optionValue}`
+            : selectedWorkOrder ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}`
+                : selectedRepairOrder ? `/work-order-technician?repairOrder=${selectedRepairOrder.optionValue}`
+                    : `/work-order-technician`
         axiosInstance()
-            .get(`/work-order-technician`)
+            .get(api)
             .then(({ data: { data } }) => {
                 setServiceData(data)
             })
@@ -92,6 +110,41 @@ const WorkOrderTechnician = () => {
             <CustomContainer >
                 <Fragment>
                     <Box className={classes.activityContainer}>
+                        <Grid container spacing={2} >
+                            <Grid item xs={12} sm={6} md={3}>
+                                {workOrderOptions && workOrderOptions && (
+                                    <Autocomplete
+                                        options={workOrderOptions}
+                                        fullWidth
+                                        getOptionLabel={(option: any) => option.optionLabel}
+                                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                                        value={selectedWorkOrder}
+                                        onChange={(event, newValue) => {
+                                            setSelectedWorkOrder(newValue);
+                                        }}
+                                        size="small"
+                                        renderInput={(params) => <TextField {...params} label={`Select Work Order`} variant="outlined" />}
+                                    />
+                                )}
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                                {repairOrderOptions && repairOrderOptions && (
+                                    <Autocomplete
+                                        options={repairOrderOptions}
+                                        fullWidth
+                                        getOptionLabel={(option: any) => option.optionLabel}
+                                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                                        value={selectedRepairOrder}
+                                        onChange={(event, newValue) => {
+                                            setSelectedRepairOrder(newValue);
+                                        }}
+                                        size="small"
+                                        renderInput={(params) => <TextField {...params} label={`Select Repair Order`} variant="outlined" />}
+                                    />
+                                )}
+                            </Grid>
+                        </Grid>
+
                         <Grid container spacing={2} className={` ${classes.activityMainBlock}`}>
                             {Object.keys(WORKORDER_SERVICE_STATUS).map((key, i) => {
                                 return (
@@ -147,7 +200,7 @@ const WorkOrderTechnician = () => {
                         </Grid>
                     </Box>
                 </Fragment>
-            </CustomContainer>
+            </CustomContainer >
             {serviceDetailsShow &&
                 <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={serviceDetailsShow}>
                     <CustomDialogHeader title={`${service?.serviceName} Steps`} onClose={() => { setServiceDetailsShow(false) }}></CustomDialogHeader>
@@ -162,7 +215,7 @@ const WorkOrderTechnician = () => {
                     />
                 </Dialog>
             }
-        </Fragment>
+        </Fragment >
     );
 };
 
