@@ -141,7 +141,7 @@ const Service = ({
   const [stepState, setStepState] = useState(null);
 
   useEffect(() => {
-    if(addServiceConfirmation.open) return
+    if (addServiceConfirmation.open) return;
     axiosInstance()
       .get(`${workOrder.api}/service/detail/${serviceId}/${workOrderId}`)
       .then(({ data: { data } }) => {
