@@ -91,7 +91,7 @@ export const MinMax = ({ values, setFieldValue, handleValuesChange }) => {
                                     minValueServiceAdd: newVal?.optionValue
                                 });
                             }}
-                            renderInput={(params) => <TextField {...params} margin="dense" label="Value Exceed Min  Service Add" name="passAddon" variant="outlined" />}
+                            renderInput={(params) => <TextField {...params} margin="dense" label="Add Service, if value less than min." name="passAddon" variant="outlined" />}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
@@ -107,7 +107,7 @@ export const MinMax = ({ values, setFieldValue, handleValuesChange }) => {
                                     maxValueServiceAdd: newVal?.optionValue
                                 });
                             }}
-                            renderInput={(params) => <TextField {...params} margin="dense" label="Value Exceed Max Service Add" name="passAddon" variant="outlined" />}
+                            renderInput={(params) => <TextField {...params} margin="dense" label="Add Service, if value more than max." name="passAddon" variant="outlined" />}
                         />
                     </Grid>
                 </>}

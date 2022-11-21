@@ -21,6 +21,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
+import moment from 'moment';
 import CompleteDialog from './CompleteDialog';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
@@ -142,7 +143,7 @@ const Service = ({
   const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
 
   useEffect(() => {
-    if (addServiceConfirmation.open) return
+    if (addServiceConfirmation.open) return;
     axiosInstance()
       .get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`)
       .then(({ data: { data } }) => {
@@ -432,6 +433,7 @@ const Service = ({
         <div className={classes.root}>
           {serviceDetails?.steps?.map((step, index) => {
             const { stepData, isStepValid } = getFields(step);
+
             return (
               <Box
                 key={step._id}
@@ -478,7 +480,19 @@ const Service = ({
                       </Typography>
                     </Box>
                   </Box>
-                  <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto' }}>
+                  <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
+                    {stepData?.status === 'start' && (
+                      <div style={{ marginRight: '8px' }}>
+                        <Typography>Started: {moment(stepData?.startDate).fromNow()}</Typography>
+                      </div>
+                    )}
+                    {stepData?.status === 'end' && (
+                      <div>
+                        <Typography>
+                          Duration: {moment.duration(moment(stepData?.endDate).diff(moment(stepData?.startDate), 'seconds'), 'seconds').humanize()}
+                        </Typography>
+                      </div>
+                    )}
                     {!stepData?.status ? (
                       <Box>
                         <Button
