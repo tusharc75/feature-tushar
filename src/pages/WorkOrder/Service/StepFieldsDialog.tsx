@@ -44,6 +44,33 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
     return time;
   }
 
+  const RenderStepData = () => {
+    return (
+      <Grid container spacing={2}>
+        {stepData?.startDate ? (
+          <Grid item style={{ paddingRight: '20px', flexGrow: 1 }}>
+            <Typography variant="caption">Clock In</Typography>
+            <Typography variant="body2"> {stepData?.startedBy?.optionLabel}</Typography>
+            <Typography variant="caption"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
+          </Grid>
+        ) : null}
+        {stepData?.endDate ? (
+          <Grid item style={{ paddingRight: '20px', flexGrow: 1 }}>
+            <Typography variant="caption">Clock Out</Typography>
+            <Typography variant="body2"> {stepData?.endedBy?.optionLabel}</Typography>
+            <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
+          </Grid>
+        ) : null}
+        {stepData?.startDate && stepData?.endDate ? (
+          <Grid item style={{ flexGrow: 1 }}>
+            <Typography variant="caption">Duration</Typography>
+            <Typography variant="body2">{convertMsToTime(stepData)}</Typography>
+          </Grid>
+        ) : null}
+      </Grid>
+    );
+  };
+
   return (
     <div className={`${styles.sidebarContainer} ${isOpen && styles.active}`}>
       <div className={styles.headersection}>
@@ -138,28 +165,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                   </Form>
                 )}
                 <Box mt={2} className={styles.dates}>
-                  <Grid container spacing={2}>
-                    {stepData?.startDate ? (
-                      <Grid item style={{ paddingRight: '20px', flexGrow: 1 }}>
-                        <Typography variant="caption">Clock In</Typography>
-                        <Typography variant="body2"> {stepData?.startedBy?.optionLabel}</Typography>
-                        <Typography variant="caption"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
-                      </Grid>
-                    ) : null}
-                    {stepData?.endDate ? (
-                      <Grid item style={{ paddingRight: '20px', flexGrow: 1 }}>
-                        <Typography variant="caption">Clock Out</Typography>
-                        <Typography variant="body2"> {stepData?.endedBy?.optionLabel}</Typography>
-                        <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
-                      </Grid>
-                    ) : null}
-                    {stepData?.startDate && stepData?.endDate ? (
-                      <Grid item style={{ flexGrow: 1 }}>
-                        <Typography variant="caption">Duration</Typography>
-                        <Typography variant="body2">{convertMsToTime(stepData)}</Typography>
-                      </Grid>
-                    ) : null}
-                  </Grid>
+                  <RenderStepData />
                 </Box>
               </div>
               <div className={styles.footerSection}>
@@ -203,28 +209,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
               </Typography>
             </div>
             <Box mt={2} className={`${styles.dates} ${styles.fixedBottom}`}>
-              <Grid container spacing={2}>
-                {stepData?.startDate ? (
-                  <Grid item style={{ paddingRight: '20px', flexGrow: 1 }}>
-                    <Typography variant="caption">Start By</Typography>
-                    <Typography variant="body2"> {stepData?.startedBy?.optionLabel}</Typography>
-                    <Typography variant="caption"> {moment(stepData?.startDate).format(dateTimeFormat)}</Typography>
-                  </Grid>
-                ) : null}
-                {stepData?.endDate ? (
-                  <Grid item style={{ paddingRight: '20px', flexGrow: 1 }}>
-                    <Typography variant="caption">End By</Typography>
-                    <Typography variant="body2"> {stepData?.endedBy?.optionLabel}</Typography>
-                    <Typography variant="caption"> {moment(stepData?.endDate).format(dateTimeFormat)}</Typography>
-                  </Grid>
-                ) : null}
-                {stepData?.startDate && stepData?.endDate ? (
-                  <Grid item style={{ flexGrow: 1 }}>
-                    <Typography variant="caption">Duration</Typography>
-                    <Typography variant="body2">{convertMsToTime(stepData)}</Typography>
-                  </Grid>
-                ) : null}
-              </Grid>
+              <RenderStepData />
             </Box>
           </div>
           <div className={styles.footerSection}>
