@@ -108,8 +108,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       if (rowData?.[`${rowData.type}Detail`]?.unit) {
         unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
       }
-      if (rowData?.[`${rowData.type}Detail`].pricingMethod) {
-        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].pricingMethod);
+      if (rowData?.[`${rowData.type}Detail`]?.pricingMethod) {
+        pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       data.forEach(element => {
         if (element.fieldName === "unit") {
@@ -122,7 +122,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           element.isUneditable = true;
         }
       });
-      if (rowData.actualStartDate === "" || rowData.actualStartDate === "") {
+      if (rowData?.actualStartDate === "" || rowData?.actualStartDate === "") {
         data = data.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
       }
       setInitialData({

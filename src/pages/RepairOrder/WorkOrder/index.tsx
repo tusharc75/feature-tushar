@@ -13,13 +13,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';
-import RestoreIcon from '@material-ui/icons/Restore';
-import UpdateIcon from '@material-ui/icons/Update';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { sortBy } from 'lodash';
-import SendEmail from 'src/pages/Quotation/SendEmail';
+import RotateLeftOutlinedIcon from '@material-ui/icons/RotateLeftOutlined';
+import RotateRightOutlinedIcon from '@material-ui/icons/RotateRightOutlined';
 
 const alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 
@@ -83,11 +82,11 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
               <Box ml={1}>
                 {row?.original?.preWork ? (
                   <HtmlTooltip title="Pre Work Service">
-                    <RestoreIcon fontSize="small" />
+                    <RotateLeftOutlinedIcon fontSize="small" />
                   </HtmlTooltip>
                 ) : (
                   <HtmlTooltip title="Post Work Service">
-                    <UpdateIcon fontSize="small" />
+                    <RotateRightOutlinedIcon fontSize="small" />
                   </HtmlTooltip>
                 )}
               </Box>

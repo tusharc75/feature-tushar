@@ -1,8 +1,5 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import Stepper from '@material-ui/core/Stepper';
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import {
@@ -144,6 +141,7 @@ const Service = ({
   const [stepState, setStepState] = useState(null);
 
   useEffect(() => {
+    if(addServiceConfirmation.open) return
     axiosInstance()
       .get(`${workOrder.api}/service/detail/${serviceId}/${workOrderId}`)
       .then(({ data: { data } }) => {
@@ -174,7 +172,7 @@ const Service = ({
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }, [serviceId, serviceData]);
+  }, [addServiceConfirmation, serviceId, serviceData]);
 
   const handleAddService = (ids, forMinMax = false, step = null, values = null) => {
     const data: any = {};

@@ -22,7 +22,6 @@ import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 
 const ProductsTable = ({ packageId, packageData }) => {
-  
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -237,6 +236,7 @@ const ProductsTable = ({ packageId, packageData }) => {
       {showProductAssignDialog && (
         <AssignProductDialog
           reference="package"
+          serialized={packageData?.packageType === 'Service' ? false : null}
           productsDialogOpen={true}
           productId={packageId}
           handleCloseDialog={() => setShowProductAssignDialog(false)}

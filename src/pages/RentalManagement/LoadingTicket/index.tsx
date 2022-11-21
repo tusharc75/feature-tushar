@@ -90,12 +90,14 @@ const LoadingTicket = ({
   const [uniqueLoadingTicket, setUniqueLoadingTicket] = useState([]);
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
+  const [columnHeader, setColumnHeader] = useState(null);
 
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   useEffect(() => {
     fetchRecords();
+    getColumn();
   }, []);
 
   const fetchRecords = async () => {
@@ -176,7 +178,7 @@ const LoadingTicket = ({
       products?.forEach((element) => {
         var qty = element.qty;
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
-        const parentProduct = material.find((p) => p?._id === element?.parentId)?.productDetail
+        const parentProduct = material.find((p) => p?._id === element?.parentId)?.productDetail;
         ticketProduct?.forEach((ele) => {
           const obj: any = {};
           obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
@@ -187,7 +189,7 @@ const LoadingTicket = ({
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.parentId = element?.parentId;
-          obj.parentProductId = parentProduct ? parentProduct?._id : ''
+          obj.parentProductId = parentProduct ? parentProduct?._id : '';
           obj.parentName = element?.parentName;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.status = element?.status;
@@ -205,7 +207,7 @@ const LoadingTicket = ({
           obj.qty = qty;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
-          obj.parentProductId = parentProduct ? parentProduct?._id : ''
+          obj.parentProductId = parentProduct ? parentProduct?._id : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -315,11 +317,14 @@ const LoadingTicket = ({
     </Link>
   );
 
-  const ParentNameRenderer = (params) => params.data?.parentId ? (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentProductId}`}>
-      {params?.data?.parentName}
-    </Link>
-  ) : <span className="text-truncate">- - - - - - -</span>;
+  const ParentNameRenderer = (params) =>
+    params.data?.parentId ? (
+      <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentProductId}`}>
+        {params?.data?.parentName}
+      </Link>
+    ) : (
+      <NoDataCell />
+    );
 
   const frameworkComponents = {
     ticketRenderer: TicketRenderer,
@@ -327,13 +332,43 @@ const LoadingTicket = ({
     inventoryRenderer: InventoryRenderer,
     warehouseRenderer: WarehouseRenderer,
     commonRenderer: CommonRenderer,
-    parentNameRenderer: ParentNameRenderer,
+    parentNameRenderer: ParentNameRenderer
+  };
+
+  const getColumn = async () => {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+
+          fieldNames: ['productName']
+        },
+
+        {
+          resource: 'Serialized Asset',
+
+          fieldNames: ['assetNumber']
+        }
+      ]
+    });
+    const productFields = data?.find((d) => d.resource === 'Product');
+    const assetFields = data?.find((d) => d.resource === 'Serialized Asset');
+
+    setColumnHeader({ productFields, assetFields });
+  };
+
+  const findHeader = (resource, fieldName) => {
+    const field = resource?.fieldNames?.find((f) => f.fieldName === fieldName);
+
+    return field?.fieldLabel || '';
   };
 
   const columns = [
     {
       field: 'assetNumber',
-      headerName: 'Asset Number',
+      headerName: findHeader(columnHeader?.assetFields, 'assetNumber'),
       show: true,
       disabled: true,
       cellRenderer: 'inventoryRenderer',
@@ -353,7 +388,7 @@ const LoadingTicket = ({
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: 'Serial Number', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'productName', headerName: 'Product Type', show: true, cellRenderer: 'productNameRenderer' },
+    { field: 'productName', headerName: findHeader(columnHeader?.productFields, 'productName'), show: true, cellRenderer: 'productNameRenderer' },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
@@ -597,7 +632,7 @@ const LoadingTicket = ({
               </Menu>
               <Box mx={1} />
               {selectedRecords.length &&
-                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Fragment>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -675,7 +710,7 @@ const LoadingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (

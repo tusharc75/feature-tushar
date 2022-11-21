@@ -31,6 +31,7 @@ import StorageIcon from '@material-ui/icons/Storage';
 import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
 import StorefrontIcon from '@material-ui/icons/Storefront';
 import AllOutIcon from '@material-ui/icons/AllOut';
+import InfoIcon from '@material-ui/icons/InfoOutlined';
 
 const Services = ({
   rentalManagementData,
@@ -82,7 +83,7 @@ const Services = ({
     const coloum: any = [
       {
         accessor: 'srno',
-        Header: '#',
+        Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
@@ -91,11 +92,23 @@ const Services = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
+        disableFilters: true,
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+              {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
+                row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
+                  row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'detail',
-        Header: 'Detail',
+        Header: 'Details',
         minWidth: 300,
         width: 300,
         sticky: isMobile ? 'none' : 'left',
@@ -134,79 +147,23 @@ const Services = ({
             }
             {!isOffline && (
               <>
-                <HtmlTooltip
-                  title={
-                    row.original.type === 'service'
-                      ? 'Service'
-                      : row.original.type === 'asset'
-                      ? 'Asset'
-                      : row.original.type === 'package'
-                      ? 'Package'
-                      : row.original.type === 'product'
-                      ? !row.original.serializedProduct
-                        ? 'Non-Serialized Product'
-                        : 'Serialized Product'
-                      : ''
-                  }
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === 'service') {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'product') {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'asset') {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
                 >
-                  <IconButton size="small">
-                    {row.original.type === 'service' ? (
-                      <LocalLaundryServiceIcon
-                        color="primary"
-                        fontSize="small"
-                        onClick={() => {
-                          window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                        }}
-                      />
-                    ) : row.original.type === 'product' ? (
-                      row?.original?.serializedProduct ? (
-                        <LayersIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => {
-                            window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                          }}
-                        />
-                      ) : (
-                        <HorizontalSplitIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => {
-                            window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                          }}
-                        />
-                      )
-                    ) : row.original.type === 'asset' ? (
-                      <>
-                        <StorageIcon
-                          color="primary"
-                          fontSize="small"
-                          onClick={() => {
-                            window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <CategoryIcon
-                        color="primary"
-                        fontSize="small"
-                        onClick={() => {
-                          window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                        }}
-                      />
-                    )}
-                  </IconButton>
-                </HtmlTooltip>
+                  <InfoIcon fontSize="small" color="primary" />
+                </IconButton>
               </>
-            )}
-            {row.original.type === 'service' && row.original.serviceDetail?.serviceType && row.original.serviceDetail?.serviceType === 'Shop Service' ? (
-              <HtmlTooltip title="Shop Service">
-                <StorefrontIcon color="primary" fontSize="small" />
-              </HtmlTooltip>
-            ) : (
-              <HtmlTooltip title="Field Service">
-                <AllOutIcon color="primary" fontSize="small" />
-              </HtmlTooltip>
             )}
           </div>
         ),
@@ -323,6 +280,9 @@ const Services = ({
       );
     }
     coloum.forEach((element) => {
+      if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
+        element.editable = true;
+      }
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
@@ -356,27 +316,19 @@ const Services = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
-      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
+      parent.detail = parent.type === 'product' ? parent?.productDetail?.productName : parent.type === 'service' ? parent?.serviceDetail?.serviceName : parent?.packageDetail?.packageName;
+      parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty = parent.serializedProduct
-        ? inventory?.filter((e) => e._id === parent._id).length
-        : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+      parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      // setNextStep(false);
+      setNextStep(false);
     } else {
-      // setNextStep(true);
+      setNextStep(true);
     }
     setNextStep(true);
     setRowsData(rows);
@@ -387,19 +339,11 @@ const Services = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail =
-        _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName;
-
+      _subRow.detail = _subRow.type === 'product' ? _subRow?.productDetail?.productName : _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow?.packageDetail?.packageName;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      _subRow.assetQty = _subRow.serializedProduct
-        ? inventory?.filter((e) => e._id === _subRow._id).length
-        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+      _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
@@ -487,6 +431,8 @@ const Services = ({
       delete element.assetQty;
       delete element.productDetail;
       delete element.packageDetail;
+      delete element.serviceDetail;
+      delete element.parentName;
       delete element.subRows;
     });
     setUpdating(true);
@@ -639,12 +585,12 @@ const Services = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -658,12 +604,10 @@ const Services = ({
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_sevices"
-                isEditable={true}
                 onSaveEdit={(inputField, updatedData) => {
                   let rows = calculateRowsField(material, inputField, allFields, updatedData);
                   handleSaveData(rows);
                 }}
-                editableColumns={[`price_${rentalManagementData?.currency?.toLowerCase()}`]}
                 material={material}
                 isClientSideGrid={true}
               />

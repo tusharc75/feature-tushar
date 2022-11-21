@@ -63,7 +63,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
       const coloum: any = [
         {
           accessor: 'srno',
-          Header: '#',
+          Header: 'Index',
           width: 70,
           Cell: ({ row }) => (
             <p className="text-truncate"  >
@@ -73,15 +73,23 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
         {
           accessor: 'type',
           Header: 'Type',
+          disableFilters: true,
           width: 200,
-          Cell: ({ row }) => (
-            <p className="text-truncate"  >
-              {startCase(row.original.type)}
-            </p>),
+          Cell: ({ row }) =>
+            row.original['type'] ? (
+              <p>
+                {`${startCase(row.original?.type)} `}
+                {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
+                  row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
+                    row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
+              </p>
+            ) : (
+              <NoDataCell />
+            )
         },
         {
           accessor: 'detail',
-          Header: 'Detail',
+          Header: 'Details',
           width: 300,
           Cell: ({ row }) => (
             <div className="d-flex gap-2 align-items-center">
@@ -230,10 +238,10 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
       const rows = combinedData.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === "Extra Add-on" ? parent.detail : 
-        parent.type === "product" ? parent?.productDetail?.productName : 
-        parent.type === "service" ? parent?.serviceDetail?.serviceName :
-        parent.packageDetail?.packageName}`
+        parent.detail = `${parent.type === "Extra Add-on" ? parent.detail :
+          parent.type === "product" ? parent?.productDetail?.productName :
+            parent.type === "service" ? parent?.serviceDetail?.serviceName :
+              parent.packageDetail?.packageName}`
         parent.qty = parent.qty;
         parent.subRows = generateNestedData(material, inventory, parent);
       });
@@ -245,8 +253,10 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
   };
 
   const generateNestedData = (material, inventory, parent) => {
+
     const subRows: any = [];
     const inventory_result = inventory?.filter((e) => e._id === parent._id);
+
     inventory_result?.forEach((_inventory, k) => {
       subRows.push({
         _id: _inventory.inventoryDetail?._id,
@@ -263,7 +273,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
     childProduct.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow.productDetail?.productName;
+      _subRow.detail = _subRow?.type === "product" ? _subRow?.productDetail?.productName : _subRow?.type === "service" ? _subRow?.serviceDetail?.serviceName : _subRow?.packageDetail?.packageName;
       _subRow.qty = `${parent.qty * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
       subRows.push(_subRow)

@@ -411,7 +411,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                             name={field.fieldName}
                                             type={field.type}
                                             options={accountData}
-                                            disabled={!isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            disabled={values["type"] === "Asset Repair" ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={
@@ -451,10 +451,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                     true
                                                   );
                                                 }}
-                                                disabled={!isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                                disabled={values["type"] === "Asset Repair" ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                                 size="small"
                                               >
-                                                <AddIcon color={isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
+                                                <AddIcon color={values["type"] === "Asset Repair" ? "disabled" : isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
                                               </IconButton>
                                             </Tooltip>
                                           </Grid>
@@ -492,7 +492,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                               handleValuesChange({ [name]: value })
                                               setFieldValue(name, value)
                                             }}
-                                            disabled={!isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            disabled={values["type"] === "Asset Repair" ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                             required={field.required}
                                             fullWidth
                                             isTooltip={false}
@@ -520,10 +520,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                     true
                                                   );
                                                 }}
-                                                disabled={!isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                                disabled={values["type"] === "Asset Repair" ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                                 size="small"
                                               >
-                                                <AddIcon color={isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                <AddIcon color={values["type"] === "Asset Repair" ? "disabled" : isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
                                               </IconButton>
                                             </Tooltip>
                                           </Grid>
