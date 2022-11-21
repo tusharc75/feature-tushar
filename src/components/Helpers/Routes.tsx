@@ -652,6 +652,12 @@ const routes = {
         : RESOURCE_LABEL.invoice,
     path: '/invoice/detail'
   },
+  workOrderSupervisor:{
+    title:  storedRoutes && storedRoutes.workOrderSupervisor && storedRoutes.workOrderSupervisor.title
+    ? storedRoutes.workOrderSupervisor?.title
+    : RESOURCE_LABEL.workOrderSupervisor,
+    path:'/work-order-supervisor'
+  }
 };
 
 export default routes;

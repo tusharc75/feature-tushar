@@ -155,6 +155,7 @@ import WorkOrder from './pages/WorkOrder';
 import WorkOrderDetails from './pages/WorkOrder/WorkOrderDetails';
 import Invoice from './pages/Invoice';
 import InvoiceDetails from './pages/Invoice/InvoiceDetails';
+import WorkOrderSupervisor from './pages/WorkOrderSupervisor';
 
 var notificationInterval: any = null;
 
@@ -809,6 +810,10 @@ function App() {
             <PrivateRoute exact path={`${routes.workOrderDetail.path}/:id`}>
               <WorkOrderDetails />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.workOrderSupervisor.path}>
+              <WorkOrderSupervisor />
+            </PrivateRoute>
+
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
             </Route>
