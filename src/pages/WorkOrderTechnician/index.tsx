@@ -202,8 +202,15 @@ const WorkOrderTechnician = () => {
                 </Fragment>
             </CustomContainer >
             {serviceDetailsShow &&
-                <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={serviceDetailsShow}>
-                    <CustomDialogHeader title={`${service?.serviceName} Steps`} onClose={() => { setServiceDetailsShow(false) }}></CustomDialogHeader>
+                <Dialog
+                    fullScreen={true}
+                    TransitionComponent={CustomDialogTransition}
+                    aria-labelledby="customized-dialog-title"
+                    open={serviceDetailsShow}>
+                    <CustomDialogHeader
+                        showRequiredLabel={false}
+                        title={`${service?.serviceName} Steps`}
+                        onClose={() => { setServiceDetailsShow(false) }}></CustomDialogHeader>
                     <Steps
                         workOrderId={workOrderId}
                         selectedService={service}
