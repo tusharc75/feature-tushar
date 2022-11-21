@@ -358,6 +358,7 @@ export const RESOURCE_LABEL = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
+  workOrderSupervisor:'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician'
 };
 
@@ -540,6 +541,13 @@ export const serializedAsset = {
   permission: 'serializedAsset',
   resource: 'Serialized Asset'
 };
+
+export const workOrderSupervisor = {
+  api:'/work-order-supervisor',
+  route:'/work-order-supervisor',
+  permission:'workOrderSupervisor',
+  resource:'Work Order Supervisor'
+}
 
 export const convertInventory = {
   api: '/convert-inventory-to-asset',
