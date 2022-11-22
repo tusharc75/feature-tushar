@@ -238,7 +238,7 @@ const PurchaseOrder = () => {
                     </IconButton>
                 </HtmlTooltip>
             }
-            {/* {permissions?.purchaseOrder?.isDelete &&
+            {permissions?.purchaseOrder?.isDelete && params?.data?.canDelete && !params?.data?.deleted &&
                 <HtmlTooltip title="Delete">
                     <IconButton size="small" aria-label="Delete" onClick={() => {
                         setDeleteRecord(params.data);
@@ -247,7 +247,7 @@ const PurchaseOrder = () => {
                         <DeleteIcon color="error" />
                     </IconButton>
                 </HtmlTooltip >
-            } */}
+            }
         </>
     )
 
@@ -356,7 +356,6 @@ const PurchaseOrder = () => {
                                         columns={columns}
                                         dispatch={dispatch}
                                     />
-
                                     <Button
                                         id="demo-customized-button"
                                         aria-controls="demo-customized-menu"
@@ -371,7 +370,6 @@ const PurchaseOrder = () => {
                                     >
                                         Filter
                                     </Button>
-
                                     <MobileFilterDialog
                                         isOpen={isOpenDialog}
                                         handleClose={handleFilterClose}
@@ -439,10 +437,10 @@ const PurchaseOrder = () => {
                                     }} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary" className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
                                         startIcon={isMobile && !isTablet ? null : <AddOutlined />}> {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}</Button>
                                 }
-                                {/* <HtmlTooltip title="Please select some purchase orders">
+                                <HtmlTooltip title="Please select some purchase orders">
                                     <span>
                                         <Button
-                                            variant={isMobile ? "text" : "contained"}
+                                            variant={isMobile ? "text" : "outlined"}
                                             color="default"
                                             size="small"
                                             onClick={openActions}
@@ -451,10 +449,9 @@ const PurchaseOrder = () => {
                                             className={isMobile ? "mobile_button" : styles.add_submit_btn}
                                         >
                                             {isMobile ? "" : "Actions"} <ExpandMore />
-
                                         </Button>
                                     </span>
-                                </HtmlTooltip> */}
+                                </HtmlTooltip>
                                 <Menu
                                     anchorEl={anchorEl}
                                     keepMounted
@@ -467,10 +464,14 @@ const PurchaseOrder = () => {
                                     open={Boolean(anchorEl)}
                                     onClose={closeActions}
                                 >
-                                    {permissions?.purchaseOrder?.isDelete && <MenuItem onClick={() => {
-                                        closeActions()
-                                        setShowDeleteConfirmBox(true)
-                                    }}>Delete</MenuItem>}
+                                    <MenuItem
+                                        disabled={permissions?.purchaseOrder?.isDelete
+                                            && selectedRecords?.filter((e) => e.canDelete && !e.deleted)?.length === selectedRecords?.length ? false : true}
+                                        onClick={() => {
+                                            closeActions()
+                                            setShowDeleteConfirmBox(true)
+                                        }}>
+                                        Delete</MenuItem>
                                 </Menu>
                             </Grid>
                         </Box>
@@ -548,6 +549,12 @@ const PurchaseOrder = () => {
                             actionWidth={150}
                             loading={loading}
                             renderedFrom={renderedFrom}
+                            rowClassRules={{
+                                "red-data-row":
+                                    function (params) {
+                                        return params.data.deleted;
+                                    },
+                            }}
                             refreshGrid={fetchPurchaseOrder}
                             showOnlyShowFilteredRecordSwitch={true}
                         /> : null
@@ -565,11 +572,10 @@ const PurchaseOrder = () => {
                 currency={user?.entity?.find(d => d._id === selectedEntity)?.currency}
             />
         }
-        {
-            showDeleteConfirmBox &&
+        {showDeleteConfirmBox &&
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
-                message={`Are you sure you want to delete the ${routes?.purchaseOrder.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ? `}
+                message={`Are you sure you want to delete the ${routes?.purchaseOrder.title?.toLowerCase()} ${deleteRecord?.purchaseOrderNumber || ''} ? `}
                 onClose={() => {
                     setDeleteRecord(null)
                     setShowDeleteConfirmBox(false)

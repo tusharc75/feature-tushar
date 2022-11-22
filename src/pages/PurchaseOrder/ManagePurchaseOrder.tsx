@@ -28,6 +28,7 @@ import ManageContactDialog from "../Contact/ManageContact";
 const ManagePurchaseOrder = ({ isClone = false, purchaseOrderId = null, onClose, onSuccess, productId = null, productCategory = null,
     productsToSave = [], isFromSerializedAssetStepFromRental = false, currency = null, rentalManagementId = null, warehouseId = null, currencyDisable = false
     , deliveryDateMax = null, isFromSerializedAssetStepFromSalesOrder = false, salesOrderId = null, refrenceData = null }) => {
+
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext)
     const {

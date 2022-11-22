@@ -4,17 +4,11 @@ import {
   Box,
   Button,
   Paper,
-  Typography,
-  IconButton,
   useMediaQuery,
   Tab,
   Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
-  TextField
 } from '@material-ui/core';
-import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
 import routes from '../../components/Helpers/Routes';
@@ -27,18 +21,15 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
   purchaseOrder,
-  getObjKeysWithValues,
-  supplierAccount,
-  customerAccount,
   purchaseOrderSteps,
   PURCHASE_ORDER_STATUS,
-  ACTIVITY_RESOURCE
+  ACTIVITY_RESOURCE,
 } from '../../constants/helpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
-import { FaCartArrowDown, FaCartPlus, FaSuitcase, FaWpforms } from 'react-icons/fa';
+import { FaWpforms } from 'react-icons/fa';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
@@ -58,7 +49,7 @@ import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
 import PurchaseOrderViews from './RoadMapViews';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
-
+import Invoice from './Invoice';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
@@ -88,7 +79,6 @@ const PurchaseOrderDetailsPage = () => {
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [nextStep, setNextStep] = useState(true);
-  const [isShowIssue, seIsShowIssue] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
   function a11yProps(index: any) {
@@ -125,9 +115,7 @@ const PurchaseOrderDetailsPage = () => {
   const fetchPurchaseOrderData = async () => {
     setLoadingPurchaseOrder(true);
     try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
+      const { data: { data } } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
       setPurchaseOrderData(data);
@@ -272,79 +260,81 @@ const PurchaseOrderDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={purchaseOrderData?.purchaseOrderNumber} mainPoints={null} showHeading={true}>
-                  {![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ?
-                    <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`}>
-                      <span>
+                  {purchaseOrderData?.deleted ? null :
+                    ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ?
+                      <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`}>
+                        <span>
+                          <Button
+                            variant={isMobile && !isTablet ? 'text' : 'contained'}
+                            color="primary"
+                            size="small"
+                            onClick={handleOpenUpdateDialog}
+                            className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                            style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                            disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
+                          >
+                            {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                          </Button>
+                        </span>
+                      </HtmlTooltip>
+                      :
+                      <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can reopen ${routes.purchaseOrder.title}`}>
+                        <span>
+                          <Button
+                            variant={isMobile && !isTablet ? 'text' : 'contained'}
+                            color="primary"
+                            size="small"
+                            onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
+                            className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                            style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                            disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
+                          >
+                            {isMobile && !isTablet ? <BiEdit size={20} /> : 'Reopen'}
+                          </Button>
+                        </span>
+                      </HtmlTooltip>}
+                  {permissions?.purchaseOrder?.isUpdate && allowedToEdit && !purchaseOrderData?.deleted &&
+                    [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
+                      <Fragment>
                         <Button
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          variant={'outlined'}
                           color="primary"
                           size="small"
-                          onClick={handleOpenUpdateDialog}
-                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                          style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                          disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
+                          onClick={openActions}
+                          aria-controls="action-menu"
+                          endIcon={<ExpandMore />}
                         >
-                          {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                          {'Change Status'}
                         </Button>
-                      </span>
-                    </HtmlTooltip>
-                    :
-                    <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can reopen ${routes.purchaseOrder.title}`}>
-                      <span>
-                        <Button
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          color="primary"
-                          size="small"
-                          onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
-                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                          style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                          disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
+                        <Menu
+                          anchorEl={anchorEl}
+                          keepMounted
+                          getContentAnchorEl={null}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                          }}
+                          id="action-menu"
+                          open={Boolean(anchorEl)}
+                          onClose={closeActions}
                         >
-                          {isMobile && !isTablet ? <BiEdit size={20} /> : 'Reopen'}
-                        </Button>
-                      </span>
-                    </HtmlTooltip>}
-                  {permissions?.purchaseOrder?.isUpdate && allowedToEdit && [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
-                    <>
-                      <Button
-                        variant={'outlined'}
-                        color="primary"
-                        size="small"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        endIcon={<ExpandMore />}
-                      >
-                        {'Change Status'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        {statusOptions.map((o, index) => {
-                          return (
-                            <MenuItem
-                              disabled={index <= statusOptions.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
-                              onClick={() => {
-                                closeActions();
-                                handleStatusChange(o);
-                              }}
-                              value={o}
-                            >
-                              {o?.optionLabel}
-                            </MenuItem>
-                          );
-                        })}
-                      </Menu>
-                    </>
-                  )}
+                          {statusOptions.map((o, index) => {
+                            return (
+                              <MenuItem
+                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === purchaseOrderData?.status)}
+                                onClick={() => {
+                                  closeActions();
+                                  handleStatusChange(o);
+                                }}
+                                value={o}
+                              >
+                                {o?.optionLabel}
+                              </MenuItem>
+                            );
+                          })}
+                        </Menu>
+                      </Fragment>
+                    )}
                 </DetailsPageHeader>
               )}
               <Fragment>
@@ -361,10 +351,6 @@ const PurchaseOrderDetailsPage = () => {
                 >
                   <Tab
                     className={'tabLayout'}
-                    style={{
-                      background: tabValue === 1 ? 'white' : '',
-                      color: tabValue === 1 ? '#163340' : '#163340'
-                    }}
                     label={
                       <div className="d-flex align-items-center tab-font">
                         <FaWpforms className="mr-1" fontSize="inherit" /> Header
@@ -372,26 +358,31 @@ const PurchaseOrderDetailsPage = () => {
                     }
                     {...a11yProps(0)}
                   />
-                  <Tab
-                    className={'tabLayout'}
-                    style={{
-                      background: tabValue === 2 ? 'white' : '',
-                      color: '#163340'
-                    }}
-                    label={
-                      <div className="d-flex align-items-center tab-font">
-                        <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                      </div>
-                    }
-                    {...a11yProps(1)}
-                  />
-                  {
+                  {purchaseOrderData?.deleted ? null :
                     <Tab
                       className={'tabLayout'}
-                      style={{
-                        background: tabValue === 3 ? 'white' : '',
-                        color: tabValue === 3 ? 'blue' : '#163340'
-                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+                        </div>
+                      }
+                      {...a11yProps(1)}
+                    />
+                  }
+                  {purchaseOrderData?.deleted ? null :
+                    <Tab
+                      className={'tabLayout'}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
+                        </div>
+                      }
+                      {...a11yProps(3)}
+                    />
+                  }
+                  {purchaseOrderData?.deleted ? null :
+                    <Tab
+                      className={'tabLayout'}
                       label={
                         <div className="d-flex align-items-center tab-font">
                           <RiFlowChart className="mr-1" fontSize="inherit" /> Views
@@ -439,7 +430,6 @@ const PurchaseOrderDetailsPage = () => {
                                 setPurchaseOrderProduct={setPurchaseOrderProduct}
                                 renderedFrom={`${renderedFrom}_grid-1`}
                                 allowedToEdit={allowedToEdit}
-                                seIsShowIssue={seIsShowIssue}
                                 updateStatus={updateStatus}
                                 checkReceivedProduct={checkReceivedProduct}
                               />
@@ -449,7 +439,6 @@ const PurchaseOrderDetailsPage = () => {
                                 purchaseOrderData={purchaseOrderData}
                                 renderedFrom={`${renderedFrom}_grid-2`}
                                 setNextStep={setNextStep}
-                                seIsShowIssue={seIsShowIssue}
                               />} */}
                             {/* {currentStep === 2 && (
                             <IssuePo
@@ -482,6 +471,12 @@ const PurchaseOrderDetailsPage = () => {
                   </Grid>
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
+                  <Invoice
+                    allowedToEdit={allowedToEdit}
+                    purchaseOrderData={purchaseOrderData}
+                  />
+                </TabPanel>
+                <TabPanel value={tabValue} index={3}>
                   <Box>
                     <PurchaseOrderViews pName={purchaseOrderData?.purchaseOrderNumber} pId={id} pStatus={purchaseOrderData?.status} />
                   </Box>

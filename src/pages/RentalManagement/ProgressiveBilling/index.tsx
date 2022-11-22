@@ -29,7 +29,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
 
   const [createBillDialog, setCreateBillDialog] = useState({ open: false });
   const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
-  const [latestInvoice, setLatestInvoice] = useState(null);
+  const [invoiceData, setInvoiceData] = useState(null);
   const { state: { user, permissions, selectedEntity } }: any = useData();
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -178,7 +178,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
           return finalObject;
         });
         if (data?.length) {
-          setLatestInvoice(data[0]?._id);
+          setInvoiceData(data);
         }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
@@ -235,7 +235,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
         <CreateBillingDialog
           rentalManagementData={rentalManagementData}
           currencySymbol={currencySymbol}
-          latestInvoice={latestInvoice}
+          invoiceData={invoiceData}
           onClose={() => {
             setCreateBillDialog({ open: false });
           }}
