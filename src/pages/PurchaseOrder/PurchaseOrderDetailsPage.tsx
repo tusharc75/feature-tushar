@@ -32,8 +32,11 @@ import {
   customerAccount,
   purchaseOrderSteps,
   PURCHASE_ORDER_STATUS,
-  ACTIVITY_RESOURCE
+  ACTIVITY_RESOURCE,
+  prepareDataForGrid,
+  gridLoadingTimeout
 } from '../../constants/helpers';
+import useColumns, { getStaticFields, getFrameworkComponents } from 'src/constants/useColumns';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -58,7 +61,10 @@ import { camelCase } from 'lodash';
 import ContentFullScreen from '../../components/ContentFullScreen';
 import PurchaseOrderViews from './RoadMapViews';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
-
+import AddInvoice from './AddInvoice';
+import { TbFileInvoice } from 'react-icons/tb';
+import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
+import axios from 'axios';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
@@ -80,8 +86,12 @@ const PurchaseOrderDetailsPage = () => {
   const [purchaseOrderProduct, setPurchaseOrderProduct] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
-
+  const [addOpen, setAddOpen] = useState(false);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const [anchorEl, setAnchorEl] = useState(null);
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
 
@@ -90,6 +100,7 @@ const PurchaseOrderDetailsPage = () => {
   const [nextStep, setNextStep] = useState(true);
   const [isShowIssue, seIsShowIssue] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [gridApi, setGridApi] = useState(null);
 
   function a11yProps(index: any) {
     return {
@@ -107,6 +118,7 @@ const PurchaseOrderDetailsPage = () => {
     if (parsed) {
       history.replace(`?tab=${tabValue}`);
     }
+    fetchInvoiceData();
   }, []);
 
   useEffect(() => {
@@ -203,8 +215,8 @@ const PurchaseOrderDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const updateStatus = (status) => {
@@ -231,6 +243,10 @@ const PurchaseOrderDetailsPage = () => {
     setActivityShow(!showActivity);
   };
 
+  const handleClose = () => {
+    setAddOpen(false);
+  };
+
   const checkReceivedProduct = (products) => {
     if (products?.length && purchaseOrderData?.status !== PURCHASE_ORDER_STATUS.closed) {
       var isCompleteReceived = false;
@@ -250,6 +266,49 @@ const PurchaseOrderDetailsPage = () => {
         updateStatus(PURCHASE_ORDER_STATUS.open);
       }
     }
+  };
+
+  let columns = [
+    {
+      disabled: true,
+      field: 'InvoiceNumber',
+      headerName: 'Invoice Number',
+      pivotIndex: 0,
+      show: true,
+      cellRenderer: 'commonRenderer',
+      primaryField: true
+    },
+    {
+      disabled: true,
+      field: 'date',
+      headerName: 'Date',
+      pivotIndex: 0,
+      show: true,
+      cellRenderer: 'commonRenderer',
+      primaryField: true
+    }
+  ];
+  let rendererNames = [];
+
+
+  const fetchInvoiceData = async () => {
+    let res = await axiosInstance().get(`${purchaseOrder.api}/invoice/${id}/`);
+    let data = res?.data;
+    let count = data.count;
+    let rows = data.map((u) => {
+      let finalObject = prepareDataForGrid(u, user);
+      finalObject['date'] = u?.createdBy?.date;
+      return finalObject;
+    });
+    dispatch({ type: 'initialize', data: rows, count: count });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    setTimeout(() => {
+      dispatch({ type: 'loading', loading: false });
+    }, gridLoadingTimeout);
   };
 
   return (
@@ -272,8 +331,12 @@ const PurchaseOrderDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={purchaseOrderData?.purchaseOrderNumber} mainPoints={null} showHeading={true}>
-                  {![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ?
-                    <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`}>
+                  {![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ? (
+                    <HtmlTooltip
+                      title={
+                        permissions?.purchaseOrder?.isUpdate && allowedToEdit ? '' : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`
+                      }
+                    >
                       <span>
                         <Button
                           variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -282,14 +345,18 @@ const PurchaseOrderDetailsPage = () => {
                           onClick={handleOpenUpdateDialog}
                           className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
                           style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                          disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
+                          disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
                         >
                           {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                         </Button>
                       </span>
                     </HtmlTooltip>
-                    :
-                    <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can reopen ${routes.purchaseOrder.title}`}>
+                  ) : (
+                    <HtmlTooltip
+                      title={
+                        permissions?.purchaseOrder?.isUpdate && allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.purchaseOrder.title}`
+                      }
+                    >
                       <span>
                         <Button
                           variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -298,12 +365,13 @@ const PurchaseOrderDetailsPage = () => {
                           onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
                           className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
                           style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                          disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
+                          disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
                         >
                           {isMobile && !isTablet ? <BiEdit size={20} /> : 'Reopen'}
                         </Button>
                       </span>
-                    </HtmlTooltip>}
+                    </HtmlTooltip>
+                  )}
                   {permissions?.purchaseOrder?.isUpdate && allowedToEdit && [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                     <>
                       <Button
@@ -400,6 +468,21 @@ const PurchaseOrderDetailsPage = () => {
                       {...a11yProps(2)}
                     />
                   }
+                  {
+                    <Tab
+                      className={'tabLayout'}
+                      style={{
+                        background: tabValue === 4 ? 'white' : '',
+                        color: tabValue === 4 ? 'blue' : '#163340'
+                      }}
+                      label={
+                        <div className="d-flex align-items-center tab-font">
+                          <TbFileInvoice className="mr-1" fontSize="inherit" /> Invoice
+                        </div>
+                      }
+                      {...a11yProps(3)}
+                    />
+                  }
                   <div className={'uio'}> </div>
                 </Tabs>
                 <TabPanel value={tabValue} index={0}>
@@ -486,6 +569,40 @@ const PurchaseOrderDetailsPage = () => {
                     <PurchaseOrderViews pName={purchaseOrderData?.purchaseOrderNumber} pId={id} pStatus={purchaseOrderData?.status} />
                   </Box>
                 </TabPanel>
+                <TabPanel value={tabValue} index={3}>
+                  <Box m={2}>
+                    <Button
+                      color="primary"
+                      size="medium"
+                      variant="contained"
+                      onClick={() => {
+                        setAddOpen(true);
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </Box>
+
+                  <Box>
+                    <CustomAgGrid
+                      columns={columns}
+                      dataRows={dataRows}
+                      frameworkComponents={frameWorkComponent}
+                      setGridApi={setGridApi}
+                      dispatch={dispatch}
+                      rowCount={rowCount}
+                      limit={limit}
+                      pageSizes={pageSizes}
+                      page={page}
+                      actionWidth={150}
+                      allowAction={false}
+                      loading={loading}
+                      renderedFrom={renderedFrom}
+                      refreshGrid={fetchInvoiceData}
+                      showOnlyShowFilteredRecordSwitch={true}
+                    />
+                  </Box>
+                </TabPanel>
               </Fragment>
             </Paper>
           </div>
@@ -509,8 +626,8 @@ const PurchaseOrderDetailsPage = () => {
                           resource={ACTIVITY_RESOURCE.purchaseOrder}
                           restrictedAddActivities={
                             permissions &&
-                              permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`] &&
-                              permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`].isUpdate
+                            permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`] &&
+                            permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }
@@ -521,7 +638,7 @@ const PurchaseOrderDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>
@@ -555,6 +672,7 @@ const PurchaseOrderDetailsPage = () => {
           currencyDisable={Boolean(purchaseOrderProduct.length > 0) || Boolean(currentStep > 0)}
         />
       )}
+      {addOpen && <AddInvoice purchaseOrderId={id} handleClose={handleClose} />}
     </>
   );
 };
