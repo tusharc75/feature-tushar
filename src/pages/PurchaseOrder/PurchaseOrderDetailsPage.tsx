@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
-import {
-  Grid,
-  Box,
-  Button,
-  Paper,
-  useMediaQuery,
-  Tab,
-  Tabs,
-} from '@material-ui/core';
+import { Grid, Box, Button, Paper, useMediaQuery, Tab, Tabs } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from '../../axios/axiosInstance';
@@ -19,12 +11,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  purchaseOrder,
-  purchaseOrderSteps,
-  PURCHASE_ORDER_STATUS,
-  ACTIVITY_RESOURCE,
-} from '../../constants/helpers';
+import { purchaseOrder, purchaseOrderSteps, PURCHASE_ORDER_STATUS, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -115,7 +102,9 @@ const PurchaseOrderDetailsPage = () => {
   const fetchPurchaseOrderData = async () => {
     setLoadingPurchaseOrder(true);
     try {
-      const { data: { data } } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
+      const {
+        data: { data }
+      } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
       const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
       setAllowedToEdit(isAllowedToEdit);
       setPurchaseOrderData(data);
@@ -191,8 +180,8 @@ const PurchaseOrderDetailsPage = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const updateStatus = (status) => {
@@ -260,40 +249,50 @@ const PurchaseOrderDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={purchaseOrderData?.purchaseOrderNumber} mainPoints={null} showHeading={true}>
-                  {purchaseOrderData?.deleted ? null :
-                    ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ?
-                      <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`}>
-                        <span>
-                          <Button
-                            variant={isMobile && !isTablet ? 'text' : 'contained'}
-                            color="primary"
-                            size="small"
-                            onClick={handleOpenUpdateDialog}
-                            className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                            style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                            disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
-                          >
-                            {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                          </Button>
-                        </span>
-                      </HtmlTooltip>
-                      :
-                      <HtmlTooltip title={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? "" : `Owner or Collaborator can reopen ${routes.purchaseOrder.title}`}>
-                        <span>
-                          <Button
-                            variant={isMobile && !isTablet ? 'text' : 'contained'}
-                            color="primary"
-                            size="small"
-                            onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
-                            className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                            style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                            disabled={(permissions?.purchaseOrder?.isUpdate && allowedToEdit) ? false : true}
-                          >
-                            {isMobile && !isTablet ? <BiEdit size={20} /> : 'Reopen'}
-                          </Button>
-                        </span>
-                      </HtmlTooltip>}
-                  {permissions?.purchaseOrder?.isUpdate && allowedToEdit && !purchaseOrderData?.deleted &&
+                  {purchaseOrderData?.deleted ? null : ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ? (
+                    <HtmlTooltip
+                      title={
+                        permissions?.purchaseOrder?.isUpdate && allowedToEdit ? '' : `Owner or Collaborator can edit ${routes.purchaseOrder.title}`
+                      }
+                    >
+                      <span>
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenUpdateDialog}
+                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                          style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                          disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
+                        >
+                          {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                        </Button>
+                      </span>
+                    </HtmlTooltip>
+                  ) : (
+                    <HtmlTooltip
+                      title={
+                        permissions?.purchaseOrder?.isUpdate && allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.purchaseOrder.title}`
+                      }
+                    >
+                      <span>
+                        <Button
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          color="primary"
+                          size="small"
+                          onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
+                          className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                          style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                          disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
+                        >
+                          {isMobile && !isTablet ? <BiEdit size={20} /> : 'Reopen'}
+                        </Button>
+                      </span>
+                    </HtmlTooltip>
+                  )}
+                  {permissions?.purchaseOrder?.isUpdate &&
+                    allowedToEdit &&
+                    !purchaseOrderData?.deleted &&
                     [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                       <Fragment>
                         <Button
@@ -358,7 +357,7 @@ const PurchaseOrderDetailsPage = () => {
                     }
                     {...a11yProps(0)}
                   />
-                  {purchaseOrderData?.deleted ? null :
+                  {purchaseOrderData?.deleted ? null : (
                     <Tab
                       className={'tabLayout'}
                       label={
@@ -368,8 +367,8 @@ const PurchaseOrderDetailsPage = () => {
                       }
                       {...a11yProps(1)}
                     />
-                  }
-                  {purchaseOrderData?.deleted ? null :
+                  )}
+                  {purchaseOrderData?.deleted ? null : (
                     <Tab
                       className={'tabLayout'}
                       label={
@@ -379,8 +378,8 @@ const PurchaseOrderDetailsPage = () => {
                       }
                       {...a11yProps(3)}
                     />
-                  }
-                  {purchaseOrderData?.deleted ? null :
+                  )}
+                  {purchaseOrderData?.deleted ? null : (
                     <Tab
                       className={'tabLayout'}
                       label={
@@ -390,7 +389,7 @@ const PurchaseOrderDetailsPage = () => {
                       }
                       {...a11yProps(2)}
                     />
-                  }
+                  )}
                   <div className={'uio'}> </div>
                 </Tabs>
                 <TabPanel value={tabValue} index={0}>
@@ -471,10 +470,7 @@ const PurchaseOrderDetailsPage = () => {
                   </Grid>
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
-                  <Invoice
-                    allowedToEdit={allowedToEdit}
-                    purchaseOrderData={purchaseOrderData}
-                  />
+                  <Box>{purchaseOrderData && <Invoice allowedToEdit={allowedToEdit} purchaseOrderData={purchaseOrderData} />}</Box>
                 </TabPanel>
                 <TabPanel value={tabValue} index={3}>
                   <Box>
@@ -504,8 +500,8 @@ const PurchaseOrderDetailsPage = () => {
                           resource={ACTIVITY_RESOURCE.purchaseOrder}
                           restrictedAddActivities={
                             permissions &&
-                              permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`] &&
-                              permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`].isUpdate
+                            permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`] &&
+                            permissions[`${ACTIVITY_RESOURCE.purchaseOrder}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }
@@ -516,7 +512,7 @@ const PurchaseOrderDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>
