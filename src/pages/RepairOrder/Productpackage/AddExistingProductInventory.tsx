@@ -18,10 +18,9 @@ import routes from "../../../components/Helpers/Routes";
 import { useData } from "../../../StateProvider/Provider";
 import { reducer, intialState, } from "../../../components/AgGridComponents/CustomAgGrid";
 
-
-
 let searchTimeout;
-const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, productInventory, isAddingProducts, repairOrderData, renderedFrom }) => {
+
+const AddExistingProductInventory = ({ addProductInventory, handleProductInventoryClose, type, isAddingProducts, repairOrderData, renderedFrom }) => {
 
     const localStorageSelectedRecords = `${renderedFrom}_selected`
     const toastConfig = useContext(CustomToastContext)
