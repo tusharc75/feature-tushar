@@ -12,30 +12,49 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
 import { TextField as TextFieldFormik } from 'formik-material-ui';
 import { Formik, Form, Field } from 'formik';
-import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
-import { dateFormat } from "../../../constants/helpers";
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { dateFormat } from '../../../constants/helpers';
 
-const AddInvoice = ({ purchaseOrderId, handleClose, handleSucess }) => {
-
+const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSucess }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (values) => {
-    axiosInstance().post(`${purchaseOrder.api}/invoice/${purchaseOrderId}`, values).then(({ data }) => {
-      handleSucess()
-      toastConfig.setToastConfig({
-        open: true,
-        message: data.message,
-        severity: 'success'
-      });
-    })
-      .catch((err) => {
-        setLoading(false);
-        toastConfig.setToastConfig(err);
-      });
-  }
+    if (invoiceData) {
+      delete values?._id;
+      axiosInstance()
+        .put(`${purchaseOrder.api}/invoice/${purchaseOrderId}/${invoiceData?._id}`, values)
+        .then(({ data }) => {
+          handleSucess();
+          toastConfig.setToastConfig({
+            open: true,
+            message: data.message,
+            severity: 'success'
+          });
+        })
+        .catch((err) => {
+          setLoading(false);
+          toastConfig.setToastConfig(err);
+        });
+    } else {
+      axiosInstance()
+        .post(`${purchaseOrder.api}/invoice/${purchaseOrderId}`, values)
+        .then(({ data }) => {
+          handleSucess();
+          toastConfig.setToastConfig({
+            open: true,
+            message: data.message,
+            severity: 'success'
+          });
+        })
+        .catch((err) => {
+          setLoading(false);
+          toastConfig.setToastConfig(err);
+        });
+    }
+  };
 
   function validate(values) {
     const errors = {};
@@ -71,7 +90,12 @@ const AddInvoice = ({ purchaseOrderId, handleClose, handleSucess }) => {
         showManimizeMaximize={true}
       ></CustomDialogHeader>
       <MuiPickersUtilsProvider utils={MomentUtils}>
-        <Formik initialValues={{ invoiceNumber: "", invoiceDate: new Date() }} onSubmit={handleSubmit} validateOnMount validate={validate}>
+        <Formik
+          initialValues={{ invoiceNumber: invoiceData?.invoiceNumber || '', invoiceDate: invoiceData?.invoiceDate || new Date() }}
+          onSubmit={handleSubmit}
+          validateOnMount
+          validate={validate}
+        >
           {({ submitForm, touched, errors, setFieldValue, values }) => (
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <CustomDialogContent>
@@ -105,19 +129,13 @@ const AddInvoice = ({ purchaseOrderId, handleClose, handleSucess }) => {
                       name="invoiceDate"
                       label="Invoice Date"
                       onChange={(date: any) => {
-                        setFieldValue("invoiceDate", date ? date : null);
+                        setFieldValue('invoiceDate', date ? date : null);
                       }}
                       format={dateFormat}
-                      error={
-                        Boolean(touched["invoiceDate"]) &&
-                        Boolean(errors["invoiceDate"])
-                      }
-                      helperText={
-                        Boolean(touched["invoiceDate"]) &&
-                        errors["invoiceDate"]
-                      }
+                      error={Boolean(touched['invoiceDate']) && Boolean(errors['invoiceDate'])}
+                      helperText={Boolean(touched['invoiceDate']) && errors['invoiceDate']}
                       InputLabelProps={{
-                        shrink: true,
+                        shrink: true
                       }}
                       margin="dense"
                     />
@@ -134,7 +152,7 @@ const AddInvoice = ({ purchaseOrderId, handleClose, handleSucess }) => {
                 >
                   Cancel
                 </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" >
+                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
                   Save
                 </CustomButton>
               </CustomDialogFooter>
