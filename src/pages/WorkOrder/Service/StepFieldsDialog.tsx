@@ -48,6 +48,17 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
   }
 
   const RenderStepData = () => {
+    const [time, setTime] = React.useState(convertMsToTime(new Date().getTime() - new Date(stepData?.startDate).getTime()));
+
+    React.useEffect(() => {
+      const interval = setInterval(() => {
+        setTime(convertMsToTime(new Date().getTime() - new Date(stepData?.startDate).getTime()));
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      };
+    }, [stepData]);
+
     return (
       <Grid container spacing={2} alignItems="center">
         {stepData?.startDate ? (
@@ -80,9 +91,25 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
               <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
               {convertMsToTime(new Date(stepData?.endDate).getTime() - new Date(stepData?.startDate).getTime())}
             </Box>
-            {/* <Typography variant="body2">{convertMsToTime(stepData)}</Typography> */}
           </Grid>
-        ) : null}
+        ) : (
+          <Grid item style={{ flexGrow: 1 }}>
+            <Box
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                border: '1px solid rgba(0, 0, 0, 0.23)',
+                backgroundColor: 'transparent',
+                padding: '2px 7px',
+                borderRadius: '8px',
+                maxWidth: 'max-content',
+                marginLeft: 'auto'
+              }}
+            >
+              <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />{time}</Box>
+          </Grid>
+        )}
       </Grid>
     );
   };

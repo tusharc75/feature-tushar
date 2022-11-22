@@ -27,6 +27,67 @@ import CompleteDialog from './CompleteDialog';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
 
+function convertMsToTime(milliseconds) {
+  milliseconds = Math.abs(milliseconds);
+  function padTo2Digits(num) {
+    return num.toString().padStart(2, '0');
+  }
+  let seconds = Math.floor(milliseconds / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+
+  let time = '';
+
+  if (hours === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours === 0 && minutes === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours > 0 && hours < 24) {
+    time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours >= 24) {
+    time = `${padTo2Digits(hours / 24)}d`;
+  }
+  return time;
+}
+
+const TimerComponent = ({ stepData, updateTime = true }) => {
+  const [time, setTime] = useState(null);
+
+  useEffect(() => {
+    if (!updateTime) setTime(convertMsToTime(new Date(stepData?.endDate).getTime() - new Date(stepData?.startDate).getTime()));
+    else setTime(convertMsToTime(new Date().getTime() - new Date(stepData?.startDate).getTime()));
+    const interval = setInterval(() => {
+      if (updateTime) setTime(convertMsToTime(new Date(stepData?.startDate).getTime() - new Date().getTime()));
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  return (
+    <Box
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        border: '1px solid rgba(0, 0, 0, 0.23)',
+        backgroundColor: 'transparent',
+        padding: '2px 7px',
+        borderRadius: '8px',
+        marginRight: '8px'
+      }}
+    >
+      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+      {time}
+    </Box>
+  );
+};
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -119,15 +180,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({
-  workOrderId,
-  selectedService,
-  serviceSteps,
-  allowedToEdit,
-  setDisableCompleteFail,
-  fetchService,
-  referencType = ""
-}) => {
+const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '' }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -143,6 +196,10 @@ const Service = ({
   const [assignSteps, setAssignSteps] = useState(false);
   const [openFieldDialog, setOpenFieldDialog] = useState(false);
   const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
+
+  useEffect(() => {
+    getServiceData();
+  }, []);
 
   useEffect(() => {
     if (addServiceConfirmation.open) return;
@@ -209,7 +266,6 @@ const Service = ({
 
   const handleAddStep = (values: any) => {
     values.fields = addStepFields?.fields;
-
     return new Promise((resolve, reject) => {
       axiosInstance()
         .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
@@ -249,7 +305,9 @@ const Service = ({
     let fieldData = { fields: [], formsData: [], values: {} };
 
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
-    let tempServiceData = serviceData.find((d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === step?._id);
+    let tempServiceData = serviceData.find(
+      (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === step?._id
+    );
 
     if (tempServiceData) {
       stepData = tempServiceData;
@@ -306,9 +364,8 @@ const Service = ({
           message: data.message
         });
         setSelectedStep(null);
-
         getServiceData();
-
+        fetchService();
         const serviceIds = determinServiceDialog(values, step);
         if (serviceIds.length > 0) {
           const services = serviceIds.filter((s) => {
@@ -379,6 +436,7 @@ const Service = ({
           message: data.message
         });
         getServiceData();
+        fetchService();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -419,39 +477,12 @@ const Service = ({
           message: data.message
         });
         getServiceData();
+        fetchService();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
-
-  function convertMsToTime(milliseconds) {
-    function padTo2Digits(num) {
-      return num.toString().padStart(2, '0');
-    }
-    let seconds = Math.floor(milliseconds / 1000);
-    let minutes = Math.floor(seconds / 60);
-    let hours = Math.floor(minutes / 60);
-
-    seconds = seconds % 60;
-    minutes = minutes % 60;
-
-    let time = '';
-
-    if (hours === 0) {
-      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-    }
-    if (hours === 0 && minutes === 0) {
-      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-    }
-    if (hours > 0 && hours < 24) {
-      time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-    }
-    if (hours >= 24) {
-      time = `${padTo2Digits(hours / 24)}d`;
-    }
-    return time;
-  }
 
   return stepList ? (
     stepList?.length ? (
@@ -463,7 +494,6 @@ const Service = ({
         <div className={classes.root}>
           {serviceDetails?.steps?.map((step, index) => {
             const { stepData, isStepValid } = getFields(step);
-
             return (
               <Box
                 key={step._id}
@@ -474,16 +504,15 @@ const Service = ({
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
-                className={`${classes.accordionHeading} 
-              ${Boolean(stepData?.passFailStatus)
-                    ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                      ? classes.green
-                      : ''
-                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                className={`${classes.accordionHeading}  ${
+                  Boolean(stepData?.passFailStatus)
+                    ? `${
+                        Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                          ? classes.green
+                          : ''
+                      } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
                     : classes.white
-                  }
-              
-              `}
+                }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!stepData?.status) return;
@@ -493,16 +522,15 @@ const Service = ({
               >
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
                   <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px' }}>
-                    {/* <Box sx={{ padding: '0 20px 0 0' }}>
-                      <Checkbox
-                        disabled={!stepData?.status}
-                        className={classes.checkbox}
-                        aria-label="Step Selected checkbox"
-                        checked={selectedStep?._id === step._id}
-                      />
-                    </Box> */}
                     <Box>
-                      <Chip color="primary" label={referencType === "workOrderTechnician" ? index + 1 : `${serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}.${index + 1}`} />
+                      <Chip
+                        color="primary"
+                        label={
+                          referencType === 'workOrderTechnician'
+                            ? index + 1
+                            : `${serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}.${index + 1}`
+                        }
+                      />
                     </Box>
                     <Box ml={1}>
                       <Typography className={classes.heading} style={{ fontWeight: '600' }}>
@@ -511,41 +539,10 @@ const Service = ({
                     </Box>
                   </Box>
                   <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
-                    {stepData?.status === 'start' && (
-                      <Box
-                        style={{
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          alignItems: 'center',
-                          border: '1px solid rgba(0, 0, 0, 0.23)',
-                          backgroundColor: 'transparent',
-                          padding: '2px 7px',
-                          borderRadius: '8px',
-                          marginRight: '8px'
-                        }}
-                      >
-                        <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
-                        {convertMsToTime(new Date().getTime() - new Date(stepData?.startDate).getTime())}
-                      </Box>
-                    )}
-                    {stepData?.status === 'end' && (
-                      <Box
-                        style={{
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          alignItems: 'center',
-                          border: '1px solid rgba(0, 0, 0, 0.23)',
-                          backgroundColor: 'transparent',
-                          padding: '2px 7px',
-                          borderRadius: '8px'
-                        }}
-                      >
-                        <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
-                        {/* Duration: {moment.duration(moment(stepData?.endDate).diff(moment(stepData?.startDate), 'seconds'), 'seconds').humanize()} */}
-                        {convertMsToTime(new Date(stepData?.endDate).getTime() - new Date(stepData?.startDate).getTime())}
-                      </Box>
-                    )}
-                    {!stepData?.status ? (
+                    {stepData?.startDate && !stepData?.endDate && <TimerComponent stepData={stepData} />}
+                    {stepData?.startDate && stepData?.endDate && <TimerComponent stepData={stepData} updateTime={false} />}
+
+                    {!stepData?.startDate ? (
                       <Box>
                         <Button
                           variant="outlined"
@@ -639,11 +636,11 @@ const Service = ({
             message={
               addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
                 ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
-                addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
-                  ? `On pass, a new service has been added in compliance with the configuration ` +
                   addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                  : `You have to add addional services based on your recent action`
+                : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
+                ? `On pass, a new service has been added in compliance with the configuration ` +
+                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+                : `You have to add addional services based on your recent action`
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
@@ -666,10 +663,7 @@ const Service = ({
           <Button variant="contained" color="primary" onClick={() => setAssignSteps(true)}>
             Add Step
           </Button>
-
-          {/* <Typography>There are no added steps.</Typography> */}
         </Box>
-
         {assignSteps && (
           <StepDialog
             handleClose={() => {
@@ -705,13 +699,13 @@ const Service = ({
               setAddStepFields(fieldsData);
             }}
           />
-        )}</>
+        )}
+      </>
     )
   ) : (
     <Box p={2} height={500} bgcolor="white">
       <CommonSkeleton lenArray={[...Array(10).keys()]} />
     </Box>
   );
-
 };
 export default Service;

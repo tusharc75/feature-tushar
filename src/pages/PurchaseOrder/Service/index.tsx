@@ -21,7 +21,7 @@ import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import { fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
 import SendEmail from './../SendEmail';
 
-const Product = ({ purchaseOrderData, setNextStep, renderedFrom, seIsShowIssue }) => {
+const Product = ({ purchaseOrderData, setNextStep, renderedFrom }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const { state: { user, permissions } }: any = useData();
@@ -39,7 +39,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, seIsShowIssue }
     const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false)
 
     useEffect(() => {
-        seIsShowIssue(true)
         fetchPurchaseOrderService();
     }, [purchaseOrderData]);
 
