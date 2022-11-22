@@ -593,7 +593,7 @@ const QuotationDetails = () => {
                             fetchQuotationData={fetchQuotationData}
                             version={currentVersion}
                             currentStep={currentStep}
-                            versionData={quotationData.versions[currentVersion]}
+                            versionData={quotationData?.versions[currentVersion]}
                           />
                         )}
                         {currentStep === 3 && quotationData && (
@@ -607,7 +607,7 @@ const QuotationDetails = () => {
                             fetchQuotationData={fetchQuotationData}
                             version={currentVersion}
                             currentStep={currentStep}
-                            versionData={quotationData.versions[currentVersion]}
+                            versionData={quotationData?.versions[currentVersion]}
                           />
                         )}
                         {currentStep === 4 && quotationData && (
@@ -620,7 +620,7 @@ const QuotationDetails = () => {
                             fetchQuotationData={fetchQuotationData}
                             version={currentVersion}
                             currentStep={currentStep}
-                            versionData={quotationData.versions[currentVersion]}
+                            versionData={quotationData?.versions[currentVersion]}
                           />
                         )}
                       </ContentFullScreen>

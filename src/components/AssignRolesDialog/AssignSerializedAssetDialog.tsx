@@ -119,7 +119,13 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceD
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
     if (reference === "repairOrder") {
-      deepFilter = `${deepFilter}&owner=${referenceData?.customerAccount}&entityWise=0&plant=${referenceData?.warehouse}`;
+      deepFilter = `${deepFilter}&entityWise=0`;
+      if (referenceData?.customerAccount) {
+        deepFilter = `${deepFilter}&owner=${referenceData?.customerAccount}`;
+      }
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
