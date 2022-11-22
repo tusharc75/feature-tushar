@@ -1,7 +1,14 @@
 import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { QUOTATION_STATUS, repairOrder, REPAIR_ORDER_TYPE, workOrder, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
+import {
+  QUOTATION_STATUS,
+  repairOrder,
+  REPAIR_ORDER_TYPE,
+  workOrder,
+  WORKORDER_SERVICE_STATUS,
+  WORKORDER_SERVICE_STEP_STATUS
+} from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -33,6 +40,77 @@ import RotateRightOutlinedIcon from '@material-ui/icons/RotateRightOutlined';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import moment from 'moment';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
+
+function convertMsToTime(milliseconds) {
+  milliseconds = Math.abs(milliseconds);
+
+  function padTo2Digits(num) {
+    return num.toString().padStart(2, '0');
+  }
+  let seconds = Math.floor(milliseconds / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+
+  let time = '';
+
+  if (hours === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours === 0 && minutes === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours > 0 && hours < 24) {
+    time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours >= 24) {
+    time = `${padTo2Digits(hours / 24)}d`;
+  }
+  return time;
+}
+
+const RenderTotalTime = ({ steps, startTimes, endTimes }) => {
+  const [time, setTime] = useState(null);
+
+  useEffect(() => {
+    startTimes = startTimes.filter((item) => !isNaN(item));
+    endTimes = endTimes.filter((item) => !isNaN(item));
+
+    const min = Math.min(...startTimes);
+    const max = Math.max(...endTimes);
+    if (startTimes.length !== endTimes.length) {
+      const interval = setInterval(() => {
+        setTime(convertMsToTime(new Date().getTime() - min));
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      };
+    } else {
+      setTime(convertMsToTime(max - min));
+    }
+  }, [startTimes, endTimes]);
+
+  if (startTimes.length === 0) return <></>;
+
+  return (
+    <Box
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        border: '1px solid rgba(0, 0, 0, 0.23)',
+        backgroundColor: 'transparent',
+        padding: '2px 7px',
+        borderRadius: '8px'
+      }}
+    >
+      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+      {time}
+    </Box>
+  );
+};
 
 const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -72,29 +150,29 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       .get(`${routes.workOrder.path}/${workOrderId}`)
       .then(({ data: { data } }) => {
         if (data.type === 'Repair Order') {
-          let tempRepairOrderId = data?.repairOrder?.optionValue
-          axiosInstance().get(`${repairOrder.api}/${tempRepairOrderId}`).then(({ data: { data } }) => {
-            if (data.type !== REPAIR_ORDER_TYPE.internal) {
-              setIsQuotationStep(true)
-              axiosInstance()
-                .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
-                .then(({ data: { data } }) => {
-                  if (data) {
-                    let keys = Object.keys(data?.versions);
-                    if (keys?.length) {
-                      const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
-                      setQuotationData({ quotationNumber: data?.quotationNumber, status: status });
+          let tempRepairOrderId = data?.repairOrder?.optionValue;
+          axiosInstance()
+            .get(`${repairOrder.api}/${tempRepairOrderId}`)
+            .then(({ data: { data } }) => {
+              if (data.type !== REPAIR_ORDER_TYPE.internal) {
+                setIsQuotationStep(true);
+                axiosInstance()
+                  .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
+                  .then(({ data: { data } }) => {
+                    if (data) {
+                      let keys = Object.keys(data?.versions);
+                      if (keys?.length) {
+                        const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
+                        setQuotationData({ quotationNumber: data?.quotationNumber, status: status });
+                      }
                     }
-                  }
-                });
-              fetchService(true);
-            }
-            else {
-              fetchService(false);
-            }
-          });
-        }
-        else {
+                  });
+                fetchService(true);
+              } else {
+                fetchService(false);
+              }
+            });
+        } else {
           fetchService(false);
         }
       })
@@ -104,48 +182,52 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const fetchService = (isQuote: any = isQuotationStep) => {
-    getServiceData()
-    axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`).then(({ data: { data } }) => {
-      if (data?.length) {
-        data?.forEach((e) => { e.type = 'service' });
-        const preWorkService = data?.filter((e) => e.preWork);
-        const postWorkService = data?.filter((e) => !e.preWork);
-        const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
-        const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
-        setServiceSteps(services);
-        if (services?.length) {
-          let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
-          if (pendingServiceIndex === -1) {
-            pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
+    getServiceData();
+    axiosInstance()
+      .get(`${routes.workOrder.path}/service/${workOrderId}`)
+      .then(({ data: { data } }) => {
+        if (data?.length) {
+          data?.forEach((e) => {
+            e.type = 'service';
+          });
+          const preWorkService = data?.filter((e) => e.preWork);
+          const postWorkService = data?.filter((e) => !e.preWork);
+          const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
+          const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
+          setServiceSteps(services);
+          if (services?.length) {
+            let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
+            if (pendingServiceIndex === -1) {
+              pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
+            }
+            setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
           }
-          setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
-        }
 
-        let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
-        let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
-          [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
-        );
-        if (tempServiceIndex > -1) {
-          tempServiceSortedArray[tempServiceIndex - 1]
-            ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
-            : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
+          let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
+          let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
+            [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
+          );
+          if (tempServiceIndex > -1) {
+            tempServiceSortedArray[tempServiceIndex - 1]
+              ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
+              : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
+          } else {
+            setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
+          }
+
+          if (
+            preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
+              preWorkService?.length &&
+            postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
+          ) {
+            if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
+              setSelectedService(services[services.findIndex((d) => d.type === 'quotation')]);
+            }
+          }
         } else {
-          setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
+          setServiceSteps([]);
         }
-
-        if (
-          preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
-          preWorkService?.length &&
-          postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
-        ) {
-          if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
-            setSelectedService(services[services.findIndex((d) => d.type === 'quotation')]);
-          }
-        }
-      } else {
-        setServiceSteps([]);
-      }
-    })
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -270,8 +352,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-              ? '#FFE9EA'
-              : 'white',
+            ? '#FFE9EA'
+            : 'white',
         cursor: 'pointer',
         borderRadius: '3px'
       };
@@ -284,8 +366,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-              ? '#FFE9EA'
-              : 'white',
+            ? '#FFE9EA'
+            : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -312,8 +394,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
             ? '#E9FFE8'
             : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-              ? '#FFE9EA'
-              : 'white',
+            ? '#FFE9EA'
+            : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -326,8 +408,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
             ? '#E9FFE8'
             : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-              ? '#FFE9EA'
-              : 'white',
+            ? '#FFE9EA'
+            : 'white',
         borderColor: 'rgb(224, 224, 224)',
         cursor: 'pointer'
       };
@@ -353,6 +435,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     const id = step?._id;
     const steps = serviceData?.filter((item: any) => item.serviceId === id);
     return steps;
+  };
+  const getFieldsWithOtherDetails = (step: any, serviceData) => {
+    const id = step?._id;
+    const steps = serviceData?.filter((item: any) => item.serviceId === id);
+    let startTimes = steps.map((item) => new Date(item?.startDate).getTime());
+    let endTimes = steps.map((item) => new Date(item?.endDate).getTime());
+    return { steps, startTimes, endTimes };
   };
 
   function convertMsToTime(milliseconds) {
@@ -448,16 +537,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 >
                   {serviceSteps?.map((data, index) => {
                     const style = stylesForEveryTab(selectedService, data);
-                    const stepsWithTime = getFields(data, serviceData);
-                    let seconds = 0;
-                    stepsWithTime?.forEach((item) => {
-                      if (item.status === 'end') {
-                        const y = new Date(item?.startDate);
-                        const x = new Date(item?.endDate);
-                        seconds += Math.abs(x.getTime() - y.getTime());
-                      }
-                    });
-                    const duration = seconds !== 0 ? convertMsToTime(seconds) : null;
+
+                    const { steps, startTimes, endTimes } = getFieldsWithOtherDetails(data, serviceData);
+
                     return (
                       Boolean(allowedToEdit || data?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) && (
                         <Grid item xs={12} key={index}>
@@ -468,7 +550,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                             }}
                             p={2}
                             onClick={() => {
-                              if (!(data?.type !== 'service' || data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer))) {
+                              if (
+                                !(
+                                  data?.type !== 'service' ||
+                                  data?.order > disabledServicesOrder ||
+                                  (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
+                                )
+                              ) {
                                 setSelectedService(data);
                               }
                             }}
@@ -546,29 +634,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                           <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
                                         </Box>
                                       )}
-                                      {duration && (
-                                        <Box
-                                          style={{
-                                            display: 'flex',
-                                            flexWrap: 'wrap',
-                                            alignItems: 'center',
-                                            border: '1px solid rgba(0, 0, 0, 0.23)',
-                                            backgroundColor: 'transparent',
-                                            padding: '2px 7px',
-                                            borderRadius: '8px'
-                                          }}
-                                        >
-                                          <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
-                                          {duration}
-                                        </Box>
-                                      )}
-                                      {/* {duration && (
-                                        <Chip
-                                          label={duration}
-                                          icon={<AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />}
-                                          variant="outlined"
-                                        />
-                                      )} */}
+                                      <RenderTotalTime steps={steps} startTimes={startTimes} endTimes={endTimes} />
                                     </>
                                   )}
                                 </Box>
@@ -580,21 +646,21 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                     data?.order > disabledServicesOrder ||
                                     (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
                                   ) && (
-                                      <Grid item xs={2} container justify="flex-end">
-                                        <IconButton
-                                          size="small"
-                                          color="primary"
-                                          aria-label="delete"
-                                          disabled={!isAllowedToServiceEdit}
-                                          onClick={(event) => {
-                                            handleOpenMenu(event);
-                                            setSelectedService(data);
-                                          }}
-                                        >
-                                          <MoreHorizIcon />
-                                        </IconButton>
-                                      </Grid>
-                                    )}
+                                    <Grid item xs={2} container justify="flex-end">
+                                      <IconButton
+                                        size="small"
+                                        color="primary"
+                                        aria-label="delete"
+                                        disabled={!isAllowedToServiceEdit}
+                                        onClick={(event) => {
+                                          handleOpenMenu(event);
+                                          setSelectedService(data);
+                                        }}
+                                      >
+                                        <MoreHorizIcon />
+                                      </IconButton>
+                                    </Grid>
+                                  )}
                                 </>
                               )}
                             </Grid>
@@ -848,7 +914,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               <Box>
                 {selectedService?.type === 'service' ? (
                   allowedToEdit ||
-                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                  (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                     <Steps
                       workOrderId={workOrderId}
                       selectedService={selectedService}
