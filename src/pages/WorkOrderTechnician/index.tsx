@@ -84,6 +84,7 @@ const WorkOrderTechnician = () => {
                 setRepairOrderOptions(data['Repair Order']);
             });
     }, []);
+
     useEffect(() => {
         fetchWorkOrderTechnician()
     }, [selectedWorkOrder, selectedRepairOrder]);
@@ -112,7 +113,7 @@ const WorkOrderTechnician = () => {
                     <Box className={classes.activityContainer}>
                         <Grid container spacing={2} >
                             <Grid item xs={12} sm={6} md={3}>
-                                {workOrderOptions && workOrderOptions && (
+                                {workOrderOptions && (
                                     <Autocomplete
                                         options={workOrderOptions}
                                         fullWidth
@@ -128,7 +129,7 @@ const WorkOrderTechnician = () => {
                                 )}
                             </Grid>
                             <Grid item xs={12} sm={6} md={3}>
-                                {repairOrderOptions && repairOrderOptions && (
+                                {repairOrderOptions && (
                                     <Autocomplete
                                         options={repairOrderOptions}
                                         fullWidth

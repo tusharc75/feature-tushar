@@ -342,26 +342,21 @@ const LoadingTicket = ({
       fields: [
         {
           resource: 'Product',
-
           fieldNames: ['productName']
         },
-
         {
           resource: 'Serialized Asset',
-
           fieldNames: ['serialNumber']
         }
       ]
     });
     const productFields = data?.find((d) => d.resource === 'Product');
     const assetFields = data?.find((d) => d.resource === 'Serialized Asset');
-
     setColumnHeader({ productFields, assetFields });
   };
 
   const findHeader = (resource, fieldName) => {
     const field = resource?.fieldNames?.find((f) => f.fieldName === fieldName);
-
     return field?.fieldLabel || '';
   };
 
@@ -632,7 +627,7 @@ const LoadingTicket = ({
               </Menu>
               <Box mx={1} />
               {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Fragment>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -710,7 +705,7 @@ const LoadingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
