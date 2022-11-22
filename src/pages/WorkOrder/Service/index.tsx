@@ -64,7 +64,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const [isQuotationStep, setIsQuotationStep] = useState(false);
 
   useEffect(() => {
-    getServiceData();
     fetchRepairOrderData();
   }, []);
 
@@ -74,28 +73,26 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       .then(({ data: { data } }) => {
         if (data.type === 'Repair Order') {
           let tempRepairOrderId = data?.repairOrder?.optionValue
-          axiosInstance()
-            .get(`${repairOrder.api}/${tempRepairOrderId}`)
-            .then(({ data: { data } }) => {
-              if (data.type !== REPAIR_ORDER_TYPE.internal) {
-                setIsQuotationStep(true)
-                axiosInstance()
-                  .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
-                  .then(({ data: { data } }) => {
-                    if (data) {
-                      let keys = Object.keys(data?.versions);
-                      if (keys?.length) {
-                        const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
-                        setQuotationData({ quotationNumber: data?.quotationNumber, status: status });
-                      }
+          axiosInstance().get(`${repairOrder.api}/${tempRepairOrderId}`).then(({ data: { data } }) => {
+            if (data.type !== REPAIR_ORDER_TYPE.internal) {
+              setIsQuotationStep(true)
+              axiosInstance()
+                .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
+                .then(({ data: { data } }) => {
+                  if (data) {
+                    let keys = Object.keys(data?.versions);
+                    if (keys?.length) {
+                      const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
+                      setQuotationData({ quotationNumber: data?.quotationNumber, status: status });
                     }
-                  });
-                fetchService(true);
-              }
-              else {
-                fetchService(false);
-              }
-            });
+                  }
+                });
+              fetchService(true);
+            }
+            else {
+              fetchService(false);
+            }
+          });
         }
         else {
           fetchService(false);
@@ -107,51 +104,48 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const fetchService = (isQuote: any = isQuotationStep) => {
-    axiosInstance()
-      .get(`${routes.workOrder.path}/service/${workOrderId}`)
-      .then(({ data: { data } }) => {
-        if (data?.length) {
-          data?.forEach((e) => {
-            e.type = 'service';
-          });
-          const preWorkService = data?.filter((e) => e.preWork);
-          const postWorkService = data?.filter((e) => !e.preWork);
-          const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
-          const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
-          setServiceSteps(services);
-          if (services?.length) {
-            let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
-            if (pendingServiceIndex === -1) {
-              pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
-            }
-            setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
+    getServiceData()
+    axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`).then(({ data: { data } }) => {
+      if (data?.length) {
+        data?.forEach((e) => { e.type = 'service' });
+        const preWorkService = data?.filter((e) => e.preWork);
+        const postWorkService = data?.filter((e) => !e.preWork);
+        const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
+        const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
+        setServiceSteps(services);
+        if (services?.length) {
+          let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
+          if (pendingServiceIndex === -1) {
+            pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
           }
-
-          let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
-          let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
-            [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
-          );
-          if (tempServiceIndex > -1) {
-            tempServiceSortedArray[tempServiceIndex - 1]
-              ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
-              : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
-          } else {
-            setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
-          }
-
-          if (
-            preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
-            preWorkService?.length &&
-            postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
-          ) {
-            if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
-              setSelectedService(services[services.findIndex((d) => d.type === 'quotation')]);
-            }
-          }
-        } else {
-          setServiceSteps([]);
+          setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
         }
-      })
+
+        let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
+        let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
+          [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
+        );
+        if (tempServiceIndex > -1) {
+          tempServiceSortedArray[tempServiceIndex - 1]
+            ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
+            : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
+        } else {
+          setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
+        }
+
+        if (
+          preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
+          preWorkService?.length &&
+          postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
+        ) {
+          if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
+            setSelectedService(services[services.findIndex((d) => d.type === 'quotation')]);
+          }
+        }
+      } else {
+        setServiceSteps([]);
+      }
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -464,7 +458,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                       }
                     });
                     const duration = seconds !== 0 ? convertMsToTime(seconds) : null;
-
                     return (
                       Boolean(allowedToEdit || data?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) && (
                         <Grid item xs={12} key={index}>
@@ -475,13 +468,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                             }}
                             p={2}
                             onClick={() => {
-                              if (
-                                !(
-                                  data?.type !== 'service' ||
-                                  data?.order > disabledServicesOrder ||
-                                  (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-                                )
-                              ) {
+                              if (!(data?.type !== 'service' || data?.order > disabledServicesOrder || (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer))) {
                                 setSelectedService(data);
                               }
                             }}
@@ -1004,20 +991,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           }}
         />
       )}
-      {/* {assignSteps && (
-        <AssignStepDialog
-          handleClose={() => {
-            setAssignSteps(false);
-          }}
-          handleSucess={() => {
-            setAssignSteps(false);
-            getServiceData();
-          }}
-          workOrderId={workOrderId}
-          serviceId={selectedService?._id}
-          uniqueId={selectedService?.uniqueId}
-        />
-      )} */}
     </Box>
   );
 };

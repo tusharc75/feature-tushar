@@ -22,9 +22,7 @@ import TabPanel from 'src/components/TabPanel';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { defaultActivityShow } from 'src/constants/helpers';
 import Steps from '../RentalManagement/Steps';
-import { GiAbstract055 } from 'react-icons/gi';
 import { camelCase } from 'lodash';
-import { RiFlowChart } from 'react-icons/ri';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
 import accountClass from '../Account/account.module.scss';
@@ -140,7 +138,7 @@ const RepairOrderDetails = () => {
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
-          setRepairOrderProcessSteps(repairOrderSteps.filter(d => d !== 'Quotation'))
+          setRepairOrderProcessSteps(repairOrderSteps.filter(d => !['Quotation', `Post Work Service`, `Invoice`]?.includes(d)))
         }
         else {
           fetchQuotationData()

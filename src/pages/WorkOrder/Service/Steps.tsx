@@ -306,6 +306,7 @@ const Service = ({
         });
         setSelectedStep(null);
         getServiceData();
+        fetchService();
         const serviceIds = determinServiceDialog(values, step);
         if (serviceIds.length > 0) {
           const services = serviceIds.filter((s) => {
@@ -376,6 +377,7 @@ const Service = ({
           message: data.message
         });
         getServiceData();
+        fetchService();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -416,6 +418,7 @@ const Service = ({
           message: data.message
         });
         getServiceData();
+        fetchService();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
