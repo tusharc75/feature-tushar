@@ -23,9 +23,10 @@ import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
-import QuantityDialog from './QtyDialog';
+import EditIcon from "@material-ui/icons/Edit";
+import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 
-const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoice, onClose, onSuccess }) => {
+const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -44,19 +45,21 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
-  const [openQtyEdit, setOpenQtyEdit] = useState(false);
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
 
   useEffect(() => {
     fetchFields();
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
+    if (columns) {
+      fetchProductInventory();
+    }
   }, [columns]);
 
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, false);
-    setAllFields(allFields);
+    setAllFields(JSON.parse(JSON.stringify(allFields)));
     const coloum: any = [
       {
         accessor: 'srno',
@@ -201,6 +204,33 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
         });
       }
     });
+    {
+      isMobile ? (
+        <Box display={'none'} />
+      ) : (
+        coloum.push({
+          accessor: 'action',
+          Header: '',
+          minWidth: 50,
+          width: 50,
+          sticky: 'right',
+          disableFilters: true,
+          canDrag: false,
+          Cell: ({ row }) =>
+            row.original.isEditable && (
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  setIsProductEdit({ open: true, rowData: row.original })
+                }}
+              >
+                <EditIcon color="primary" />
+              </IconButton>
+            )
+        })
+      );
+    }
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
@@ -216,29 +246,35 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
 
   const fetchProductInventory = async () => {
     var data: any = [];
-    var prevInvoiceData: any = null;
-
-    if (latestInvoice) {
-      prevInvoiceData = await axiosInstance().get(`${invoice.api}/${latestInvoice}`);
-      prevInvoiceData = prevInvoiceData?.data?.data;
-    }
 
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
     data = response?.data?.data;
 
-    if (prevInvoiceData) {
-      data.material = data.material?.filter((item) => ['Per Day', 'Per Week', 'Per Month'].includes(item?.pricingMethod));
-      data?.material?.forEach((e) => {
-        const row: any = prevInvoiceData?.material?.find((ele) => ele._id === e._id);
+    if (invoiceData) {
+      // data.material = data.material?.filter((item) => ['Per Day', 'Per Week', 'Per Month'].includes(item?.pricingMethod));
+      data.material = data?.material?.map((e) => {
+        const row: any = invoiceData[0]?.material?.find((ele) => ele._id === e._id);
         if (row) {
           const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
           e.estimateStartDate = actualEndDate;
           e.actualStartDate = actualEndDate;
           setEndDate(actualEndDate);
+          if (!['Per Day', 'Per Week', 'Per Month'].includes(e?.pricingMethod)) {
+            let tempTotalPrevQty = invoiceData.map(obj => {
+              let tempQty = obj.material?.find((ele) => ele._id === e._id)?.qty
+              if (tempQty) return tempQty;
+            }).reduce((a, b) => a + b, 0)
+            if (e.qty - tempTotalPrevQty > 0) {
+              let values = { qty: e.qty - tempTotalPrevQty }
+              const calValues = autoCalculateSpecificFields(values, { ...e, ...values }, allFields);
+              e = { ...e, ...calValues }
+            }
+          }
         }
+        return e;
       });
     }
-
+    //fiter qty > 0 in material
     setMaterial(data?.material);
     setProductData(data);
     initializeTable(data);
@@ -259,6 +295,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
             ? parent?.serviceDetail?.serviceName
             : parent.packageDetail?.packageName;
       parent.qtyDisplay = parent.qty;
+      parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
     setRowsData(rows);
@@ -276,6 +313,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
             ? _subRow?.serviceDetail?.serviceName
             : _subRow?.packageDetail?.packageName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
     return subRows;
@@ -298,6 +336,21 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
     setMaterial(tempRows);
     initializeTable(tempProduct);
     setRowsApplied(rows);
+    setAppliedDate(true);
+  };
+
+  const handleSaveData = async (rows: any) => {
+    let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
+    let tempProduct = productData;
+    tempProduct['material'] = tempRows;
+    setProductData(tempProduct);
+    setMaterial(tempRows);
+    initializeTable(tempProduct);
+    setRowsApplied((prevState) => {
+      let prevRowsApplied = prevState.filter(obj => rows.map(d => d._id).includes(e => e !== obj._id))
+      return [...prevRowsApplied, ...rows];
+    });
+    setIsProductEdit({ open: false, rowData: null })
     setAppliedDate(true);
   };
 
@@ -463,21 +516,18 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, latestInvoi
           </Button>
         </CustomDialogFooter>
       </Dialog>
-      {openQtyEdit && (
-        <QuantityDialog
-          onSave={(newQty) => {
-            // const updatedRows = rowsData.map((row) => {
-            //   if (row?._id === selectedProducts[0]?._id) {
-            //     row.qty = parseInt(newQty);
-            //     row.qtyDisplay = parseInt(newQty);
-            //   }
-            //   return row;
-            // });
-
-            // setRowsData(updatedRows);
-            setOpenQtyEdit(false)
+      {isProductEdit.open && (
+        <RentalJobQtyDialog
+          onClose={() => {
+            setIsProductEdit({ open: false, rowData: null });
           }}
-          onClose={() => setOpenQtyEdit(false)}
+          isBulkedit={false}
+          handleSaveData={handleSaveData}
+          rentalManagementData={rentalManagementData}
+          rowData={isProductEdit.rowData}
+          material={material}
+          selectedProducts={[]}
+          loading={isUpdating}
         />
       )}
     </Fragment>
