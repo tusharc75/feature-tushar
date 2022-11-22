@@ -4,18 +4,14 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { useData } from '../../StateProvider/Provider';
-import styles from '../Leads/Header.module.scss';
 import { MdOutlineSupervisorAccount } from 'react-icons/md';
 import { Autocomplete } from '@material-ui/lab';
-import { isMobile, isTablet } from 'react-device-detect';
 import { FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
 import { workOrderSupervisor, isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData } from '../../constants/helpers';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
 import axiosInstance from 'src/axios/axiosInstance';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -23,41 +19,26 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import moment from 'moment';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { dateFormatForInputControl } from '../../constants/helpers';
+import { CommonRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
 
 const WorkOrderSupervisor = () => {
-  const renderedFrom = camelCase(routes?.workOrderSupervisor.title);
+
+  const renderedFrom = camelCase(routes?.workOrderSupervisor?.title);
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
   const [gridApi, setGridApi] = useState(null);
   const toastConfig = useContext(CustomToastContext);
-  const { getColumnData } = useColumns();
-  const [frameWorkComponent, setFrameWorkComponent] = useState({});
-  const [columns, setColumns] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([]);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
-    state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
   const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
   const [workOrderData, setWorkOrderData] = useState([]);
   const [repairOrderData, setRepairOrderData] = useState([]);
   const [usersData, setUsersData] = useState([]);
-  const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
-  const [globalFilters, setGlobalFilters] = useState({
-    from: new Date(moment().subtract(1, 'year').calendar()),
-    to: new Date()
-  });
-  const {
-    state: { permissions }
-  }: any = useData();
-  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
-  useEffect(() => {
-    fetchGridColumns();
-    fetchUsers();
-    fetchWorkOrder();
-    fetchRepairOrder();
-  }, []);
+  const [timeFrame, setTimeFrame] = React.useState<any>('1-year');
+  const [globalFilters, setGlobalFilters] = useState({ from: new Date(moment().subtract(1, 'year').calendar()), to: new Date() });
 
   React.useEffect(() => {
     switch (timeFrame) {
@@ -67,96 +48,40 @@ const WorkOrderSupervisor = () => {
           to: new Date()
         });
         break;
-
       case '3-months':
         setGlobalFilters({
           from: new Date(moment().subtract('3', 'months').calendar()),
           to: new Date()
         });
         break;
-
       case '6-months':
         setGlobalFilters({
           from: new Date(moment().subtract('6', 'months').calendar()),
           to: new Date()
         });
         break;
-
       case '1-year':
         setGlobalFilters({
           from: new Date(moment().subtract('1', 'year').calendar()),
           to: new Date()
         });
         break;
-
       default:
         break;
     }
   }, [timeFrame]);
 
-  const fetchUsers = async () => {
-    await axiosInstance()
-      .get('/user')
-      .then(({ data: { data } }) => {
-        setUsersData(data);
-      })
-      .catch(() => {});
-  };
-
-  const fetchWorkOrder = async () => {
-    await axiosInstance()
-      .get('/work-order')
-      .then(({ data: { data } }) => {
-        setWorkOrderData(data);
-      })
-      .catch(() => {});
-  };
-  const fetchRepairOrder = async () => {
-    await axiosInstance()
-      .get('/repair-order')
-      .then(({ data: { data } }) => {
-        setRepairOrderData(data);
-      })
-      .catch(() => {});
-  };
-  const fetchGridColumns = () => {
+  useEffect(() => {
     axiosInstance()
-      .get(`/field?resource=${workOrderSupervisor.resource}`)
+      .get(`/sa-formbuilder/lookup?lookupResource=User,Work Order,Repair Order`)
       .then(({ data: { data } }) => {
-        let columns = [];
-        let rendererNames = [];
-        data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.workOrderSupervisor.path);
-          if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData];
-            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName);
-            }
-          }
-        });
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent });
-        setColumns([...columns]);
+        setUsersData(data['User']);
+        setWorkOrderData(data['Work Order']);
+        setRepairOrderData(data['Repair Order']);
       });
-  };
+  }, []);
 
-  const replaceFieldName = (field) => {
-    switch (field) {
-      case 'createdBy':
-        return 'createdBy.user.concatedName';
-
-      case 'updatedBy':
-        return 'updatedBy.user.concatedName';
-
-      default:
-        return field;
-    }
-  };
-
-  const fetchWorkOrderSuperVisorData = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     if (gridApi) {
       gridApi.setRowData([]);
@@ -165,43 +90,20 @@ const WorkOrderSupervisor = () => {
     try {
       let data, count;
       let response = await axiosInstance().get(`${workOrderSupervisor.api}${queryString}`);
-
       data = response?.data?.data;
       count = response?.data?.count;
-
       data = data?.map((u) => {
         let finalObject = prepareDataForGrid(u);
-        finalObject['canDelete'] = permissions?.workOrderSupervisor?.isDelete;
-        finalObject['isChecked'] = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((s) => s._id === u._id);
-        finalObject['allowedToEdit'] = permissions?.workOrderSupervisor?.isUpdate;
         finalObject['user'] = u?.assignedUsers[0]?.optionLabel;
-        finalObject['date'] = moment(u?.workOrderDetail?.createDate).format('DD/MM/YYYY');
         finalObject['workOrder'] = u?.workOrderDetail?.workOrderNumber;
-        finalObject['repairOrder'] = u?.workorderDetail?.repairOrder?.optionValue;
+        finalObject['serviceName'] = u?.service?.optionLabel;
+        finalObject['assignedUser'] = u?.assignedUsers?.map((e) => e?.optionLabel)?.toString()
         return {
           ...finalObject
         };
       });
-      setIsAllChecked(false);
-      setClonedData(data);
-      if (appendRows) {
-        dispatch({
-          type: 'initialize',
-          data: [...dataRows, ...data],
-          count: count,
-          selectedRecords: [...dataRows, ...data].filter((f) => f.isChecked === true)
-        });
-      } else {
-        dispatch({
-          type: 'initialize',
-          data: data,
-          count: count
-        });
-      }
       dispatch({ type: 'initialize', data: data, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
+      setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
@@ -214,7 +116,7 @@ const WorkOrderSupervisor = () => {
       const updatedFilters = [];
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
-          field: replaceFieldName(field),
+          field: field,
           term: filters[field].filter
         });
       });
@@ -239,15 +141,37 @@ const WorkOrderSupervisor = () => {
       const savedRecords = [...getLocalStorageArrayData(localStorageSelectedRecords)];
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
-    if(globalFilters){
-        deepFilter=`${deepFilter}&from=${moment(globalFilters.from).format("YYYY/MM/DD")}&to=${moment(globalFilters.to).format("YYYY/MM/DD")}`
+    if (globalFilters) {
+      deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format("YYYY/MM/DD")}&to=${moment(globalFilters.to).format("YYYY/MM/DD")}`
     }
     return `${deepFilter}&filterType=and&filterByIdType=and`;
   };
 
   const handleShow = () => {
-    fetchWorkOrderSuperVisorData();
+    fetchData();
   };
+
+  const frameworkComponents = {
+    commonRenderer: CommonRenderer,
+  };
+
+  const columns = [
+    { field: 'workOrder', headerName: 'Work Order', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'serviceName', headerName: 'Service Name', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'assignedUser', headerName: 'Technician', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'status', headerName: 'Status', show: true, disabled: true, cellRenderer: 'commonRenderer' }
+  ];
+
+  const columnState = JSON.parse(localStorage.getItem(renderedFrom));
+  if (columnState) {
+    columns.forEach((item) => {
+      columnState.forEach((d) => {
+        if (d.colId === item.field) {
+          item.show = !d.hide;
+        }
+      });
+    });
+  }
 
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -257,7 +181,7 @@ const WorkOrderSupervisor = () => {
             <CustomBreadCrumbs routes={[routes.workOrderSupervisor]} />
           </Grid>
           <Grid item md={8} sm={1} xs={2}>
-            <ImportExportLinks
+            {/* <ImportExportLinks
               permissions={permissions?.workOrderSupervisor}
               module="product inventory"
               api={'workordersupervisor'}
@@ -277,7 +201,7 @@ const WorkOrderSupervisor = () => {
                 else fetchWorkOrderSuperVisorData();
               }}
               additionalParams={getQueryString(true)}
-            />
+            /> */}
           </Grid>
         </Grid>
         <div className="main-container">
@@ -289,90 +213,68 @@ const WorkOrderSupervisor = () => {
                 <Autocomplete
                   style={{ width: '200px' }}
                   options={usersData}
-                  getOptionLabel={(option: any) => (option ? option.firstName + ' ' + option.lastName : '')}
-                  getOptionSelected={(option: any, val) => {
-                    return option._id === val._id;
-                  }}
-                  value={usersData.filter((data) => data._id === selectedUser).length ? usersData.filter((data) => data._id === selectedUser)[0] : ''}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => { return option.optionValue === val.optionValue }}
+                  value={usersData.filter((data) => data.optionValue === selectedUser).length ? usersData.filter((data) => data.optionValue === selectedUser)[0] : ''}
                   onChange={(e, val) => {
-                    setSelectedUser(val && val._id ? val._id : '');
+                    setSelectedUser(val && val.optionValue ? val.optionValue : '');
                   }}
                   renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name=""
-                        placeholder="User"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="user" label="User" variant="outlined" fullWidth />
-                    )
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      name="user"
+                      placeholder="Technician"
+                      label="Technician"
+                      variant="outlined"
+                      fullWidth
+                    />
                   }
                 />
                 <Autocomplete
                   style={{ width: '200px' }}
                   options={workOrderData}
-                  getOptionLabel={(option: any) => (option ? option.workOrderNumber : '')}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => {
-                    return option._id === val._id;
+                    return option.optionValue === val.optionValue;
                   }}
-                  value={
-                    workOrderData.filter((data) => data._id === selectedWorkOrder).length
-                      ? workOrderData.filter((data) => data._id === selectedWorkOrder)[0]
-                      : ''
-                  }
+                  value={workOrderData.filter((data) => data.optionValue === selectedWorkOrder).length ? workOrderData.filter((data) => data.optionValue === selectedWorkOrder)[0] : ''}
                   onChange={(e, val) => {
-                    setSelectedWorkOrder(val && val._id ? val._id : '');
+                    setSelectedWorkOrder(val && val.optionValue ? val.optionValue : '');
                   }}
                   renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name=""
-                        placeholder="Work Order"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="workOrder" label="Work Order" variant="outlined" fullWidth />
-                    )
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      name="workOrder"
+                      placeholder="Work Order"
+                      label="Work Order"
+                      variant="outlined"
+                      fullWidth
+                    />
                   }
                 />
                 <Autocomplete
                   style={{ width: '200px' }}
                   options={repairOrderData}
-                  getOptionLabel={(option: any) => (option ? option.repairOrderNumber : '')}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => {
-                    return option._id === val._id;
+                    return option.optionValue === val.optionValue;
                   }}
-                  value={
-                    repairOrderData.filter((data) => data._id === selectedRepairOrder).length
-                      ? repairOrderData.filter((data) => data._id === selectedRepairOrder)[0]
-                      : ''
-                  }
+                  value={repairOrderData.filter((data) => data.optionValue === selectedRepairOrder).length ? repairOrderData.filter((data) => data.optionValue === selectedRepairOrder)[0] : ''}
                   onChange={(e, val) => {
-                    setSelectedRepairOrder(val && val._id ? val._id : '');
+                    setSelectedRepairOrder(val && val.optionValue ? val.optionValue : '');
                   }}
                   renderInput={(params) =>
-                    isMobile && !isTablet ? (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        name=""
-                        placeholder="Repair Order"
-                        variant="standard"
-                        fullWidth
-                        className={isMobile ? 'serchBox' : ''}
-                      />
-                    ) : (
-                      <TextField {...params} margin="dense" name="repairOrder" label="Repair Order" variant="outlined" fullWidth />
-                    )
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      name="repairOrder"
+                      placeholder="Repair Order"
+                      label="Repair Order"
+                      variant="outlined"
+                      fullWidth
+                    />
                   }
                 />
                 <FormControl style={{ width: '150px' }} size="medium" margin="dense" variant="outlined">
@@ -420,16 +322,13 @@ const WorkOrderSupervisor = () => {
                   }}
                 />
                 <Button
-                  onClick={ handleShow}
+                  onClick={handleShow}
                   style={{
                     marginLeft: '1rem',
-                    marginTop: '5px'
                   }}
-                  disabled={!selectedUser || !selectedWorkOrder || !selectedRepairOrder}
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="medium"
+                  variant={'contained'}
+                  size="small"
                   color="primary"
-                  className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                 >
                   Show
                 </Button>
@@ -437,59 +336,28 @@ const WorkOrderSupervisor = () => {
             </Grid>
           </div>
           {columns ? (
-            isMobile && !isTablet ? (
-              <CustomSwipableList
-                allowSelection={true}
-                allowSwipe={true}
-                permissions={permissions?.serializedAsset}
-                primaryField={columns?.find((d) => d.field === 'assetNumber')}
-                onClick={(d) => {}}
-                dataRows={dataRows}
-                selectedRecords={selectedRecords}
-                dispatch={dispatch}
-                onEdit={(d) => {}}
-                extraParamsToCheckDelete={false}
-                onDelete={(d) => {}}
-                rowCount={rowCount}
-                page={page}
-                loading={loading}
-                additionalDetails={[]}
-                chips={[
-                  {
-                    label: 'Serial Number : ',
-                    field: 'serialNumber'
-                  }
-                ]}
-                owerCollaboratorInitialsOrImages=""
-                onCreate={false}
-                showClone={true}
-                onClone={(data) => {}}
-                renderedFrom={renderedFrom}
-              />
-            ) : Object.keys(frameWorkComponent).length > 0 && columns ? (
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                allowAction={false}
-                loading={loading}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchWorkOrderSuperVisorData}
-                showOnlyShowFilteredRecordSwitch={true}
-              />
-            ) : null
-          ) : (
-            <Box p={2} height={500} bgcolor="white">
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameworkComponents}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              allowAction={false}
+              loading={loading}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              showOnlyShowFilteredRecordSwitch={true}
+            />)
+            : (
+              <Box p={2} height={500} bgcolor="white">
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            )}
         </div>
       </Fragment>
     </MuiPickersUtilsProvider>
