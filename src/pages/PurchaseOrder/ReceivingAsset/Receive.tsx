@@ -158,7 +158,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                             "product": d.productName,
                             "productId": d.productId,
                             "warehouse": defaultWareHouse || "",
-                            "inventoryQuantity": d.qty - (d.actualReceived || 0),
+                            "inventoryQuantity": d.qty - (d.actualReceived || 0) - (d.rejectQuantity || 0),
                             "assetQuantity": 0,
                             "serializedProduct": d.serializedProduct || false,
                             "serialNumber": [],
@@ -239,12 +239,11 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, productList, purchaseOrd
                                                                                             />
                                                                                         </Grid>
                                                                                         <Grid item xs={12} md={4}>
-                                                                                            <span><b>Quantity: </b>{data?.row?.qty
-                                                                                                - (data?.row?.actualReceived || 0)
-                                                                                            }</span>
-                                                                                             <Box component='span' mx={1} />
+                                                                                            <span><b>PO Quantity: </b>{data?.row?.qty}</span>
+                                                                                            <br />
+                                                                                            {/* <span><b>Quantity: </b>{data?.row?.qty - (data?.row?.actualReceived || 0)}</span> */}
                                                                                             <span><b>Recieved: </b>{data?.row?.actualReceived || 0}</span>
-                                                                                            <Box component='span' mx={1} />
+                                                                                            <br />
                                                                                             <span><b>Rejected: </b>{data?.row?.rejectQuantity || 0}</span>
                                                                                         </Grid>
                                                                                     </Grid>
