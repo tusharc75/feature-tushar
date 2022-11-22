@@ -1871,7 +1871,7 @@ export const REPORT_LIST = [
   { title: sidebarResource.projectSales, permission: 'projectSales', key: 'projectSales', type: 'dynamic' },
   { title: sidebarResource.purchaseOrder, permission: 'purchaseOrder', key: 'purchaseOrder', type: 'dynamic' },
   { title: 'Purchase Order Details', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'purchaseOrderDetails' },
-  { title: 'Product Average Price', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'productAveragePrice' },
+  { title: 'Inventory Evaluation', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'inventoryEvaluation' },
   { title: 'Inventory History', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'inventoryHistory' },
   { title: 'Average Price By Supplier', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'averagePriceBySupplier' }
 ];

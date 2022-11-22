@@ -130,19 +130,19 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
       (d) => d.fieldName === "customerContact"
     );
     if (customerContactOptions) {
-      setContactData(customerContactOptions.option);
+      setContactData(customerContactOptions?.option);
     }
     const customerContactDropdownData = repairOrderInitialData.fields.find(
       (d) => d.fieldName === "customerContact"
     );
 
     if (customerContactDropdownData) {
-      setCustomerContactMainDataSource(customerContactDropdownData.option);
+      setCustomerContactMainDataSource(customerContactDropdownData?.option);
       if (repairOrderId) {
         setCustomerContactDataSource(
           customerContactDropdownData.option.filter(
             (d) =>
-              d.parentAccount === repairOrderData?.customerAccount.optionValue
+              d.parentAccount === repairOrderData?.customerAccount?.optionValue
           )
         );
       }

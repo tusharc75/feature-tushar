@@ -42,6 +42,8 @@ import moment from 'moment';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 function convertMsToTime(milliseconds) {
+  milliseconds = Math.abs(milliseconds);
+
   function padTo2Digits(num) {
     return num.toString().padStart(2, '0');
   }
@@ -88,7 +90,7 @@ const RenderTotalTime = ({ steps, startTimes, endTimes }) => {
     } else {
       setTime(convertMsToTime(max - min));
     }
-  }, [startTimes, endTimes, steps]);
+  }, [startTimes, endTimes]);
 
   if (startTimes.length === 0) return <></>;
 
@@ -140,7 +142,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const [isQuotationStep, setIsQuotationStep] = useState(false);
 
   useEffect(() => {
-    getServiceData();
     fetchRepairOrderData();
   }, []);
 
@@ -181,6 +182,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const fetchService = (isQuote: any = isQuotationStep) => {
+    getServiceData();
     axiosInstance()
       .get(`${routes.workOrder.path}/service/${workOrderId}`)
       .then(({ data: { data } }) => {
@@ -442,6 +444,34 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     return { steps, startTimes, endTimes };
   };
 
+  function convertMsToTime(milliseconds) {
+    function padTo2Digits(num) {
+      return num.toString().padStart(2, '0');
+    }
+    let seconds = Math.floor(milliseconds / 1000);
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+
+    seconds = seconds % 60;
+    minutes = minutes % 60;
+
+    let time = '';
+
+    if (hours === 0) {
+      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+    }
+    if (hours === 0 && minutes === 0) {
+      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+    }
+    if (hours > 0 && hours < 24) {
+      time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+    }
+    if (hours >= 24) {
+      time = `${padTo2Digits(hours / 24)}d`;
+    }
+    return time;
+  }
+
   return (
     <Box p={2}>
       {serviceSteps ? (
@@ -507,6 +537,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 >
                   {serviceSteps?.map((data, index) => {
                     const style = stylesForEveryTab(selectedService, data);
+
                     const { steps, startTimes, endTimes } = getFieldsWithOtherDetails(data, serviceData);
 
                     return (
@@ -604,13 +635,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                         </Box>
                                       )}
                                       <RenderTotalTime steps={steps} startTimes={startTimes} endTimes={endTimes} />
-                                      {/* {duration && (
-                                        <Chip
-                                          label={duration}
-                                          icon={<AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />}
-                                          variant="outlined"
-                                        />
-                                      )} */}
                                     </>
                                   )}
                                 </Box>
@@ -1033,20 +1057,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           }}
         />
       )}
-      {/* {assignSteps && (
-        <AssignStepDialog
-          handleClose={() => {
-            setAssignSteps(false);
-          }}
-          handleSucess={() => {
-            setAssignSteps(false);
-            getServiceData();
-          }}
-          workOrderId={workOrderId}
-          serviceId={selectedService?._id}
-          uniqueId={selectedService?.uniqueId}
-        />
-      )} */}
     </Box>
   );
 };
