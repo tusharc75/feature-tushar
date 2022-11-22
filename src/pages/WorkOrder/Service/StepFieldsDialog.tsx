@@ -89,7 +89,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
               }}
             >
               <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
-              {convertMsToTime(new Date(stepData?.startDate).getTime() - new Date(stepData?.endDate).getTime())}
+              {convertMsToTime(new Date(stepData?.endDate).getTime() - new Date(stepData?.startDate).getTime())}
             </Box>
           </Grid>
         ) : (
@@ -107,9 +107,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                 marginLeft: 'auto'
               }}
             >
-              <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
-              {time}
-            </Box>
+              <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />{time}</Box>
           </Grid>
         )}
       </Grid>
