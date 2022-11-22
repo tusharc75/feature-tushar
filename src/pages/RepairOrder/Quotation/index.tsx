@@ -111,11 +111,11 @@ const Quotation = ({
   }, []);
 
   useEffect(() => {
-    if (quotationData.versions[currentVersion]?._id) {
+    if (quotationData?.versions[currentVersion] && quotationData?.versions[currentVersion]?._id) {
       fetchFields(quotationData?.currency);
       fetchProductInventory();
     }
-  }, [quotationData.versions[currentVersion]?._id]);
+  }, [quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async (currency) => {
     var data = await fetch_quotation_product_fields(currency);
@@ -318,7 +318,7 @@ const Quotation = ({
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${quotationData.versions[currentVersion]?._id}`);
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
@@ -411,7 +411,7 @@ const Quotation = ({
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData._id}/${quotationData.versions[currentVersion]?._id}`, { material: rows })
+      .put(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
@@ -426,7 +426,7 @@ const Quotation = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData.versions[currentVersion]?._id}/delete`, { ids: rows })
+      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
@@ -751,7 +751,7 @@ const Quotation = ({
         <LeadTimeDialog
           quotationId={quotationData._id}
           data={leadTimeDialog?.data}
-          versionId={quotationData.versions[currentVersion]?._id}
+          versionId={quotationData?.versions[currentVersion]?._id}
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });
           }}
@@ -766,7 +766,7 @@ const Quotation = ({
       )}
       {customerAcceptable && (
         <ManualReponseDialog
-          versionId={quotationData.versions[currentVersion]?._id}
+          versionId={quotationData?.versions[currentVersion]?._id}
           quotationId={quotationData?._id}
           setCurrentStep={() => {
             fetchQuotationData(currentVersion);
@@ -780,7 +780,7 @@ const Quotation = ({
       {showQuotationSummaryDialog && (
         <QuotationSummeryDialog
           quotationData={quotationData}
-          versionId={quotationData.versions[currentVersion]?._id}
+          versionId={quotationData?.versions[currentVersion]?._id}
           onClose={() => {
             setShowQuotationSummaryDialog(false);
           }}

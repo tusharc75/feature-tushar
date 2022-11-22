@@ -89,10 +89,6 @@ const Productpackage = ({
               <p>{row.original.detail}</p>
             ) : (
               <p
-                // onClick={() => {
-                //   handleOpen(row.original);
-                // }}
-                //className="link text-truncate"
                 title={row.original.detail}
               >
                 {row.original.detail}
@@ -103,17 +99,6 @@ const Productpackage = ({
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
-                {/* {allowedToEdit && (
-                  <HtmlTooltip title="Add Products">
-                    <IconButton
-                      onClick={() => setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id, existing: true })}
-                      size="small"
-                      color="primary"
-                    >
-                      <Add color="disabled" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )} */}
               </Box>
             }
             <Chip
@@ -523,7 +508,6 @@ const Productpackage = ({
           handleProductInventoryClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
           }}
-          productInventory={[]}
           type={addExistingProductDialog.type}
           repairOrderData={repairOrderData}
         />

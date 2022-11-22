@@ -189,7 +189,7 @@ const Report = () => {
           }
         ];
       }
-      if (resourceCamelCase === 'productAveragePrice') {
+      if (resourceCamelCase === 'inventoryEvaluation') {
         let {
           data: { data: productFields }
         } = await axiosInstance().get(`/field?resource=Product`);
@@ -638,7 +638,7 @@ const Report = () => {
       .get(
         `${resourceCamelCase === 'purchaseOrderDetails'
           ? `${productInventory.api}/report/purchase-order-product-wise-report`
-          : resourceCamelCase === 'productAveragePrice'
+          : resourceCamelCase === 'inventoryEvaluation'
             ? `${productInventory.api}/report/purchase-order-price`
             : resourceCamelCase === 'inventoryHistory'
               ? `${productInventory.api}/report/history-report`
@@ -837,7 +837,7 @@ const Report = () => {
       .get(
         `${resourceCamelCase === 'purchaseOrderDetails'
           ? `${productInventory.api}/report/purchase-order-product-wise-report/export`
-          : resourceCamelCase === 'productAveragePrice'
+          : resourceCamelCase === 'inventoryEvaluation'
             ? `${productInventory.api}/report/purchase-order-price/export`
             : resourceCamelCase === 'inventoryHistory'
               ? `${productInventory.api}/report/history-report/export`
@@ -976,7 +976,7 @@ const Report = () => {
                     loading={loading}
                     renderedFrom={renderedFrom}
                     allowSelection={false}
-                    allowAction={resourceCamelCase === 'productAveragePrice'}
+                    allowAction={resourceCamelCase === 'inventoryEvaluation'}
                     refreshGrid={fetchResourceData}
                     showOnlyShowFilteredRecordSwitch={false}
                   />
