@@ -841,7 +841,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 Add Services
               </MenuItem>
               <MenuItem
-                disabled={!allowedToEdit}
+                disabled={!allowedToEdit || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)}
                 onClick={() => {
                   setAssignSteps(true);
                   setAnchorEl(null);

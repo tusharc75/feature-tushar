@@ -21,7 +21,6 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
-import moment from 'moment';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import CompleteDialog from './CompleteDialog';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
@@ -58,7 +57,6 @@ function convertMsToTime(milliseconds) {
 
 const TimerComponent = ({ stepData, updateTime = true }) => {
   const [time, setTime] = useState(null);
-
   useEffect(() => {
     if (!updateTime) setTime(convertMsToTime(new Date(stepData?.endDate).getTime() - new Date(stepData?.startDate).getTime()));
     else setTime(convertMsToTime(new Date().getTime() - new Date(stepData?.startDate).getTime()));
@@ -181,6 +179,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '' }) => {
+  
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -504,15 +503,13 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
-                className={`${classes.accordionHeading}  ${
-                  Boolean(stepData?.passFailStatus)
-                    ? `${
-                        Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                          ? classes.green
-                          : ''
-                      } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                className={`${classes.accordionHeading}  ${Boolean(stepData?.passFailStatus)
+                    ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                      ? classes.green
+                      : ''
+                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
                     : classes.white
-                }`}
+                  }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!stepData?.status) return;
@@ -636,11 +633,11 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             message={
               addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
                 ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
-                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+                addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
                 : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
-                ? `On pass, a new service has been added in compliance with the configuration ` +
+                  ? `On pass, a new service has been added in compliance with the configuration ` +
                   addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : `You have to add addional services based on your recent action`
+                  : `You have to add addional services based on your recent action`
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
@@ -672,6 +669,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             handleSucess={() => {
               setAssignSteps(false);
               getServiceData();
+              fetchService();
               setAddStepFields({ fields: [], section: [] });
             }}
             handleAddStep={handleAddStep}

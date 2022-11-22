@@ -151,36 +151,37 @@ const Logs = ({ handleClose, workOrderId = null }) => {
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="logs-dialog">
       <CustomDialogHeader title={`Logs`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent>
-        {keys?.length > 0 ? (
-          <Box className={styles.main}>
-            {keys?.map((key: string) => {
-              return (
-                <div className={styles.singleGroup}>
-                  <Box key={key}>
-                    <p className={styles.date}>{moment(key).format('MMM Do YYYY')}</p>
-                  </Box>
-                  <div className={styles.logContainer}>
-                    {rows[key]?.map((row: any) => {
-                      const colors = getIconColor(row.operation);
-                      return (
-                        <div className={styles.singleLog} key={row._id}>
-                          <div className={styles.iconContainer} style={colors}>
-                            {getIcon(row.operation)}
+        {keys ? (
+          keys?.length > 0 ?
+            <Box className={styles.main}>
+              {keys?.map((key: string) => {
+                return (
+                  <div className={styles.singleGroup}>
+                    <Box key={key}>
+                      <p className={styles.date}>{moment(key).format('MMM Do YYYY')}</p>
+                    </Box>
+                    <div className={styles.logContainer}>
+                      {rows[key]?.map((row: any) => {
+                        const colors = getIconColor(row.operation);
+                        return (
+                          <div className={styles.singleLog} key={row._id}>
+                            <div className={styles.iconContainer} style={colors}>
+                              {getIcon(row.operation)}
+                            </div>
+                            <div className={styles.textContainer}>
+                              <h4 className={styles.logHead} dangerouslySetInnerHTML={{ __html: getHeadMessage(row) }} />
+                              <p className={styles.logDetails}>
+                                {moment(row?.date).format('LT')} <span className={styles.timePassedBadge}>{moment(row?.date).fromNow()}</span>
+                              </p>
+                            </div>
                           </div>
-                          <div className={styles.textContainer}>
-                            <h4 className={styles.logHead} dangerouslySetInnerHTML={{ __html: getHeadMessage(row) }} />
-                            <p className={styles.logDetails}>
-                              {moment(row?.date).format('LT')} <span className={styles.timePassedBadge}>{moment(row?.date).fromNow()}</span>
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </Box>
+                );
+              })}
+            </Box> : <h5>No log found.</h5>
         ) : (
           <Box p={2} height={500} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
