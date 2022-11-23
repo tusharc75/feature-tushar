@@ -10,6 +10,7 @@ import genIcon from './gen_icon.svg';
 import invIcon from './inv_icon.svg';
 import heroTextIcon from './heroTextIcon.svg';
 import sidebarCogIcon from './sidebarCogIcon.svg';
+import colabIcon from './colab.svg';
 import { FcViewDetails } from 'react-icons/fc';
 
 export const IconConst = {
@@ -24,7 +25,8 @@ export const IconConst = {
   INV_ICON: 'InvIcon',
   GEN_ICON: 'GenIcon',
   HERO_TEXT_ICON: 'HeroTextIcon',
-  SIDEBAR_COG_ICON: 'SidebarCog'
+  SIDEBAR_COG_ICON: 'SidebarCog',
+  COLABORATION_TOOL: 'Colab'
 };
 
 export const IMAGE_HEIGHT = 40;
@@ -56,6 +58,8 @@ export const SVG = (name) => {
       return heroTextIcon;
     case IconConst.SIDEBAR_COG_ICON:
       return sidebarCogIcon;
+    case IconConst.COLABORATION_TOOL:
+      return colabIcon;
     default:
       return;
   }

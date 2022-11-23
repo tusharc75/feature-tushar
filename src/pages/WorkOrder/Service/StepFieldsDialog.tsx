@@ -11,9 +11,16 @@ import styles from './StepFieldsDialog.module.scss';
 import CloseIcon from '@material-ui/icons/Close';
 import Details from 'src/components/Shared/DetailsPage';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import SettingsIcon from '@material-ui/icons/Settings';
+import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
+import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
 
-const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, stepData, isStepValid }) => {
+const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, stepData, isStepValid, selectedService = null }) => {
   const [isEditing, setEditing] = React.useState(false);
+  const [viewStep, setViewStep] = React.useState(false);
+  const [openFieldDialog, setOpenFieldDialog] = React.useState(false);
+
+  const steps = selectedService?.steps || [];
 
   function padTo2Digits(num) {
     return num.toString().padStart(2, '0');
@@ -107,7 +114,9 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                 marginLeft: 'auto'
               }}
             >
-              <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />{time}</Box>
+              <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+              {time}
+            </Box>
           </Grid>
         )}
       </Grid>
@@ -115,108 +124,206 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
   };
 
   return (
-    <div className={`${styles.sidebarContainer} ${isOpen && styles.active}`}>
-      <div className={styles.headersection}>
-        <Typography variant="h6" color="inherit" style={{ fontSize: '1rem' }}>
-          {step?.stepName}
-        </Typography>
-        <div className={styles.headerControls}>
-          <IconButton aria-label="close" onClick={handleClose} size="small" color="inherit">
-            <CloseIcon color="inherit" />
-          </IconButton>
+    <>
+      <div className={`${styles.sidebarContainer} ${isOpen && styles.active}`}>
+        <div className={styles.headersection}>
+          <Typography variant="h6" color="inherit" style={{ fontSize: '1rem' }}>
+            {step?.stepName}
+          </Typography>
+          <div className={styles.headerControls}>
+            <IconButton aria-label="close" onClick={handleClose} size="small" color="inherit">
+              <CloseIcon color="inherit" />
+            </IconButton>
+          </div>
         </div>
-      </div>
-      {fieldData?.fields.length ? (
-        <Formik
-          initialValues={fieldData?.values}
-          validationSchema={yupSchema(fieldData?.fields)}
-          onSubmit={(values) => handleSubmit(values, step)}
-          enableReinitialize
-        >
-          {({ values, errors, setFieldValue, touched, submitForm }) => (
-            <>
-              <div className={styles.content}>
-                {isStepValid && !isEditing ? (
-                  <Details containerPadding={'0px'} gridSize={12} data={fieldData.values} fields={fieldData.fields.map((f) => ({ fieldData: f }))} />
-                ) : (
-                  <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {fieldData?.formsData.length > 0 &&
-                      fieldData?.formsData?.map((form, index1) => {
-                        return form?.name ? (
-                          <div key={index1}>
-                            <div className={`detail-box-content ${styles.formHead}`} style={{ color: 'white' }}>
-                              <FaDiceOne size={16} color={'inherit'} style={{ marginRight: '5px', float: 'left' }} />
-                              <h2>{form?.name}</h2>
+        {fieldData?.fields.length ? (
+          <Formik
+            initialValues={fieldData?.values}
+            validationSchema={yupSchema(fieldData?.fields)}
+            onSubmit={(values) => handleSubmit(values, step)}
+            enableReinitialize
+          >
+            {({ values, errors, setFieldValue, touched, submitForm }) => (
+              <>
+                <div className={styles.content}>
+                  {isStepValid && !isEditing ? (
+                    <Details
+                      containerPadding={'0px'}
+                      gridSize={12}
+                      data={fieldData.values}
+                      fields={fieldData.fields.map((f) => ({ fieldData: f }))}
+                    />
+                  ) : (
+                    <Form autoComplete="off" autoCorrect="off" noValidate>
+                      {fieldData?.formsData.length > 0 &&
+                        fieldData?.formsData?.map((form, index1) => {
+                          return form?.name ? (
+                            <div key={index1}>
+                              <div className={`detail-box-content ${styles.formHead}`} style={{ color: 'white' }}>
+                                <FaDiceOne size={16} color={'inherit'} style={{ marginRight: '5px', float: 'left' }} />
+                                <h2>{form?.name}</h2>
+                              </div>
+                              <Box marginY={2}>
+                                <Grid spacing={2} container>
+                                  {form?.sectionFields?.map((field, index2) => (
+                                    <Grid key={index2} item xs={12}>
+                                      <FormTypes
+                                        {...field}
+                                        row={field.type === 'radio'}
+                                        fieldData={field}
+                                        disabled={field.disableOnEdit}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={null}
+                                      />
+                                    </Grid>
+                                  ))}
+                                </Grid>
+                              </Box>
                             </div>
-                            <Box marginY={2}>
-                              <Grid spacing={2} container>
-                                {form?.sectionFields?.map((field, index2) => (
-                                  <Grid key={index2} item xs={12}>
-                                    <FormTypes
-                                      {...field}
-                                      row={field.type === 'radio'}
-                                      fieldData={field}
-                                      disabled={field.disableOnEdit}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                    />
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        ) : (
-                          form?.sectionFields.map((field) => (
-                            <FormTypes
-                              {...field}
-                              fieldData={field}
-                              disabled={field.disableOnEdit}
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldLabel}
-                              name={field.fieldName}
-                              type={field.type}
-                              options={field.option}
-                              setFieldValue={(name, value) => {
-                                setFieldValue(name, value);
-                              }}
-                              required={field.required}
-                              fullWidth
-                              isTooltip={field?.isTooltip || false}
-                              tooltipMessage={field?.tooltipMessage}
-                              size="small"
-                              style={{ visibility: 'hidden' }}
-                            />
-                          ))
-                        );
-                      })}
-                  </Form>
-                )}
-                <Box mt={2} className={styles.dates}>
-                  <RenderStepData />
-                </Box>
+                          ) : (
+                            form?.sectionFields.map((field) => (
+                              <FormTypes
+                                {...field}
+                                fieldData={field}
+                                disabled={field.disableOnEdit}
+                                values={values}
+                                errors={errors}
+                                touched={touched}
+                                label={field.fieldLabel}
+                                name={field.fieldName}
+                                type={field.type}
+                                options={field.option}
+                                setFieldValue={(name, value) => {
+                                  setFieldValue(name, value);
+                                }}
+                                required={field.required}
+                                fullWidth
+                                isTooltip={field?.isTooltip || false}
+                                tooltipMessage={field?.tooltipMessage}
+                                size="small"
+                                style={{ visibility: 'hidden' }}
+                              />
+                            ))
+                          );
+                        })}
+                    </Form>
+                  )}
+                  <Box mt={2} className={styles.dates}>
+                    <RenderStepData />
+                  </Box>
+                </div>
+                <div
+                  className={styles.footerSection}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <IconButton
+                    aria-label="close"
+                    onClick={() => {
+                      console.log(step);
+                      setViewStep(true);
+                    }}
+                    size="small"
+                    color="inherit"
+                  >
+                    <SettingsIcon color="inherit" />
+                  </IconButton>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'right'
+                    }}
+                  >
+                    {isStepValid && !isEditing ? (
+                      <>
+                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
+                          Close
+                        </Button>
+                        <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
+                          Edit
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="outlined" size="small" onClick={handleClose} color="primary">
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => {
+                            submitForm();
+                            setEditing(false);
+                          }}
+                          color="primary"
+                        >
+                          Save
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </Formik>
+        ) : (
+          <>
+            <div className={styles.content}>
+              <div className={styles.centerText}>
+                <Typography variant={'body1'} style={{ color: 'var(--new_theme_color)' }}>
+                  No Fields...
+                </Typography>
               </div>
-              <div className={styles.footerSection}>
+              <Box mt={2} className={`${styles.dates} ${styles.fixedBottom}`}>
+                <RenderStepData />
+              </Box>
+            </div>
+            <div
+              className={styles.footerSection}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between'
+              }}
+            >
+              <IconButton
+                aria-label="close"
+                onClick={() => {
+                  console.log(step);
+                  setViewStep(true);
+                }}
+                size="small"
+                color="inherit"
+              >
+                <SettingsIcon color="inherit" />
+              </IconButton>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'right'
+                }}
+              >
                 {isStepValid && !isEditing ? (
                   <>
                     <Button variant="outlined" size="small" onClick={handleClose} color="primary">
                       Close
                     </Button>
+                    <Box ml={1} />
                     <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
                       Edit
                     </Button>
@@ -226,56 +333,49 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                     <Button variant="outlined" size="small" onClick={handleClose} color="primary">
                       Cancel
                     </Button>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => {
-                        submitForm();
-                        setEditing(false);
-                      }}
-                      color="primary"
-                    >
-                      Save
-                    </Button>
                   </>
                 )}
               </div>
-            </>
-          )}
-        </Formik>
-      ) : (
-        <>
-          <div className={styles.content}>
-            <div className={styles.centerText}>
-              <Typography variant={'body1'} style={{ color: 'var(--new_theme_color)' }}>
-                No Fields...
-              </Typography>
             </div>
-            <Box mt={2} className={`${styles.dates} ${styles.fixedBottom}`}>
-              <RenderStepData />
-            </Box>
-          </div>
-          <div className={styles.footerSection}>
-            {isStepValid && !isEditing ? (
-              <>
-                <Button variant="outlined" size="small" onClick={handleClose} color="primary">
-                  Close
-                </Button>
-                <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
-                  Edit
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outlined" size="small" onClick={handleClose} color="primary">
-                  Cancel
-                </Button>
-              </>
-            )}
-          </div>
-        </>
+          </>
+        )}
+      </div>
+      {viewStep && (
+        <StepDialog
+          handleClose={() => {
+            setViewStep(false);
+          }}
+          handleSucess={() => {
+            setViewStep(false);
+          }}
+          stepId={''}
+          stepData={step}
+          notEditable={true}
+          steps={steps}
+          reference={'workOrder'}
+          workOrderId={null}
+          serviceId={null}
+          uniqueId={null}
+          setOpenFieldDialog={setOpenFieldDialog}
+        />
       )}
-    </div>
+      {openFieldDialog && (
+        <FieldDialog
+          reference={'workOrder'}
+          serviceId={selectedService?._id}
+          stepIds={selectedService?.steps?.map((d) => d?._id)}
+          steps={[]}
+          sectionData={step?.fields}
+          notEditableField={true}
+          handleClose={() => {
+            setOpenFieldDialog(false);
+          }}
+          handleSucess={(fieldsData: any) => {
+            setOpenFieldDialog(false);
+          }}
+        />
+      )}
+    </>
   );
 };
 

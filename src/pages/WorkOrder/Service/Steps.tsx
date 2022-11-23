@@ -179,7 +179,6 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '' }) => {
-  
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -503,13 +502,15 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
-                className={`${classes.accordionHeading}  ${Boolean(stepData?.passFailStatus)
-                    ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                      ? classes.green
-                      : ''
-                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                className={`${classes.accordionHeading}  ${
+                  Boolean(stepData?.passFailStatus)
+                    ? `${
+                        Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                          ? classes.green
+                          : ''
+                      } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
                     : classes.white
-                  }`}
+                }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!stepData?.status) return;
@@ -612,6 +613,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           isStepValid={getFields(selectedStep)?.isStepValid}
           handleClose={() => setSelectedStep(null)}
           handleSubmit={handleSubmit}
+          selectedService={selectedService}
           step={selectedStep}
           stepData={stepState}
         />
@@ -633,11 +635,11 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             message={
               addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
                 ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
-                addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
-                  ? `On pass, a new service has been added in compliance with the configuration ` +
                   addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                  : `You have to add addional services based on your recent action`
+                : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
+                ? `On pass, a new service has been added in compliance with the configuration ` +
+                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+                : `You have to add addional services based on your recent action`
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
