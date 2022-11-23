@@ -325,7 +325,7 @@ export default Dashboard;
 const SearchResult = ({ filteredData, history, handleRoutes }) => {
   return (
     <div className={styles.searchResult}>
-      <div className={`${styles.filtered_data}`}>
+      <div className={`${styles.filtered_data} `} style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll' }}>
         {filteredData.length !== 0 ? (
           filteredData.map((section) => {
             return (
