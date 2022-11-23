@@ -233,7 +233,17 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                     justifyContent: 'space-between'
                   }}
                 >
-                  <div>sdfsd</div>
+                  <IconButton
+                    aria-label="close"
+                    onClick={() => {
+                      console.log(step);
+                      setViewStep(true);
+                    }}
+                    size="small"
+                    color="inherit"
+                  >
+                    <SettingsIcon color="inherit" />
+                  </IconButton>
                   <div
                     style={{
                       display: 'flex',
@@ -352,11 +362,11 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
       {openFieldDialog && (
         <FieldDialog
           reference={'workOrder'}
-          serviceId={null}
-          stepIds={null}
+          serviceId={selectedService?._id}
+          stepIds={selectedService?.steps?.map((d) => d?._id)}
           steps={[]}
-          // notEditableField={true}
           sectionData={step?.fields}
+          notEditableField={true}
           handleClose={() => {
             setOpenFieldDialog(false);
           }}

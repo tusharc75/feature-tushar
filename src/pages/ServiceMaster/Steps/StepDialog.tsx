@@ -55,7 +55,6 @@ export default function StepDialog({
     steps?.forEach((e: any) => {
       options.push({ optionValue: e._id, optionLabel: e.stepName });
     });
-    console.log('options', options);
     setStepOption(options);
   }, []);
 
