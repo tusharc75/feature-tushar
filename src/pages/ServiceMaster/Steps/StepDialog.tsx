@@ -19,18 +19,24 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 
 export default function StepDialog({
-  handleClose,
-  handleSucess,
-  serviceId,
-  stepId,
-  steps,
+  handleClose, // function to close the dialog
+  handleSucess, // function to handle success
+  serviceId, // service id
+  stepId, // step id
+  steps, // steps
   reference = null,
   workOrderId = null,
   uniqueId = null,
   setOpenFieldDialog = null,
-  handleAddStep = null
+  handleAddStep = null,
+  notEditable = false,
+  stepData = null
 }) {
-  const {state: {user: {user}}} = useData()
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
   const toastConfig = useContext(CustomToastContext);
   const [stepDetails, setStepDetails] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -60,7 +66,29 @@ export default function StepDialog({
   }, []);
 
   useEffect(() => {
-    if (stepId != '') {
+    if (notEditable) {
+      setStepDetails({
+        stepName: stepData?.stepName,
+        leadDay: stepData?.leadDay || 0,
+        costPrice: stepData?.costPrice || 0,
+        listPrice: stepData?.listPrice || 0,
+        currency: stepData?.currency || '',
+        isPassFail: stepData?.isPassFail,
+        isFailAddon: stepData?.isFailAddon,
+        failAddon: stepData?.failAddon,
+        isPassAddon: stepData?.isPassAddon,
+        passAddon: stepData?.passAddon,
+        isJumpStepPass: stepData?.isJumpStepPass,
+        jumpStepsPass: stepData?.jumpStepsPass,
+        isJumpStepFail: stepData?.isJumpStepFail,
+        jumpStepsFail: stepData?.jumpStepsFail,
+        isQuoteRevisionOnFail: stepData?.isQuoteRevisionOnFail,
+        isReturnToStepOnFail: stepData?.isReturnToStepOnFail,
+        returnToStepOnFail: stepData?.returnToStepOnFail,
+        isReturnToServiceOnFail: stepData?.isReturnToServiceOnFail,
+        returnToServiceOnFail: stepData?.returnToServiceOnFail
+      });
+    } else if (stepId != '') {
       axiosInstance()
         .get(`${serviceMaster.api}/steps/${serviceId}/${stepId}`)
         .then(({ data: { data } }) => {
@@ -236,6 +264,7 @@ export default function StepDialog({
                       variant="outlined"
                       required
                       fullWidth
+                      disabled={notEditable}
                       value={values['stepName']}
                       error={touched['stepName'] && Boolean(errors['stepName'])}
                       helperText={touched['stepName'] && errors['stepName']}
@@ -253,6 +282,7 @@ export default function StepDialog({
                       name="leadDay"
                       variant="outlined"
                       fullWidth
+                      disabled={notEditable}
                       value={values['leadDay']}
                       error={touched['leadDay'] && Boolean(errors['leadDay'])}
                       helperText={touched['leadDay'] && errors['leadDay']}
@@ -270,6 +300,7 @@ export default function StepDialog({
                           : ''
                       }
                       options={currencyData}
+                      disabled={notEditable}
                       getOptionLabel={(option: any) =>
                         option ? `${option?.currencyCode} - ${option?.currencyName} - (${option?.symbolNative})` : ''
                       }
@@ -285,6 +316,7 @@ export default function StepDialog({
                           variant="outlined"
                           name="currency"
                           label="Currency"
+                          disabled={notEditable}
                           error={touched['currency'] && Boolean(errors['currency'])}
                           helperText={touched['currency'] && errors['currency']}
                           required
@@ -307,6 +339,7 @@ export default function StepDialog({
                       name="costPrice"
                       variant="outlined"
                       fullWidth
+                      disabled={notEditable}
                       value={values['costPrice']}
                       error={touched['costPrice'] && Boolean(errors['costPrice'])}
                       helperText={touched['costPrice'] && errors['costPrice']}
@@ -330,6 +363,7 @@ export default function StepDialog({
                       name="listPrice"
                       variant="outlined"
                       fullWidth
+                      disabled={notEditable}
                       value={values['listPrice']}
                       error={touched['listPrice'] && Boolean(errors['listPrice'])}
                       helperText={touched['listPrice'] && errors['listPrice']}
@@ -341,9 +375,11 @@ export default function StepDialog({
                 </Grid>
                 <Box pt={2}>
                   <FormControlLabel
+                    disabled={notEditable}
                     control={
                       <Checkbox
                         name="isPassFail"
+                        disabled={notEditable}
                         checked={values['isPassFail']}
                         onChange={(e) => {
                           setFieldValue('isPassFail', e.target.checked);
@@ -360,9 +396,11 @@ export default function StepDialog({
                       <Grid container>
                         <Grid item xs={6}>
                           <FormControlLabel
+                            disabled={notEditable}
                             control={
                               <Checkbox
                                 name="isPassAddon"
+                                disabled={notEditable}
                                 checked={values['isPassAddon']}
                                 onChange={(e) => {
                                   setFieldValue('isPassAddon', e.target.checked);
@@ -379,6 +417,7 @@ export default function StepDialog({
                               options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...services]}
                               fullWidth
                               multiple
+                              disabled={notEditable}
                               size="small"
                               value={values?.passAddon ? services?.filter((data: any) => values?.passAddon?.includes(data.optionValue)) : []}
                               getOptionLabel={(option) => option.optionLabel}
@@ -388,7 +427,9 @@ export default function StepDialog({
                                 const values = isAll ? services.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
                                 setFieldValue('passAddon', values);
                               }}
-                              renderInput={(params) => <TextField {...params} label="Pass Addon Services" name="passAddon" variant="outlined" />}
+                              renderInput={(params) => (
+                                <TextField {...params} label="Pass Addon Services" name="passAddon" disabled={notEditable} variant="outlined" />
+                              )}
                             />
                           )}
                         </Grid>
@@ -398,9 +439,11 @@ export default function StepDialog({
                       <Grid container>
                         <Grid item xs={6}>
                           <FormControlLabel
+                            disabled={notEditable}
                             control={
                               <Checkbox
                                 name="isFailAddon"
+                                disabled={notEditable}
                                 checked={values['isFailAddon']}
                                 onChange={(e) => {
                                   setFieldValue('isFailAddon', e.target.checked);
@@ -417,6 +460,7 @@ export default function StepDialog({
                               options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...services]}
                               fullWidth
                               multiple
+                              disabled={notEditable}
                               size="small"
                               value={values?.failAddon ? services?.filter((data: any) => values?.failAddon?.includes(data.optionValue)) : []}
                               getOptionLabel={(option) => option.optionLabel}
@@ -427,7 +471,9 @@ export default function StepDialog({
 
                                 setFieldValue('failAddon', values);
                               }}
-                              renderInput={(params) => <TextField {...params} label="Fail Addon Services" name="failAddon" variant="outlined" />}
+                              renderInput={(params) => (
+                                <TextField {...params} label="Fail Addon Services" name="failAddon" disabled={notEditable} variant="outlined" />
+                              )}
                             />
                           )}
                         </Grid>
@@ -437,9 +483,11 @@ export default function StepDialog({
                       <Grid container>
                         <Grid item xs={6}>
                           <FormControlLabel
+                            disabled={notEditable}
                             control={
                               <Checkbox
                                 name="isJumpStepPass"
+                                disabled={notEditable}
                                 checked={values?.isJumpStepPass}
                                 onChange={(e) => {
                                   setFieldValue('isJumpStepPass', e.target.checked);
@@ -456,6 +504,7 @@ export default function StepDialog({
                               options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...stepOption]}
                               fullWidth
                               multiple
+                              disabled={notEditable}
                               size="small"
                               value={
                                 values?.jumpStepsPass ? stepOption?.filter((data: any) => values?.jumpStepsPass?.includes(data.optionValue)) : []
@@ -468,7 +517,9 @@ export default function StepDialog({
 
                                 setFieldValue('jumpStepsPass', values);
                               }}
-                              renderInput={(params) => <TextField {...params} label="Jump Steps On Pass" name="jumpStepsPass" variant="outlined" />}
+                              renderInput={(params) => (
+                                <TextField {...params} label="Jump Steps On Pass" name="jumpStepsPass" disabled={notEditable} variant="outlined" />
+                              )}
                             />
                           )}
                         </Grid>
@@ -478,9 +529,11 @@ export default function StepDialog({
                       <Grid container>
                         <Grid item xs={6}>
                           <FormControlLabel
+                            disabled={notEditable}
                             control={
                               <Checkbox
                                 name="isJumpStepFail"
+                                disabled={notEditable}
                                 checked={values?.isJumpStepFail}
                                 onChange={(e) => {
                                   setFieldValue('isJumpStepFail', e.target.checked);
@@ -497,6 +550,7 @@ export default function StepDialog({
                               options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...stepOption]}
                               fullWidth
                               multiple
+                              disabled={notEditable}
                               size="small"
                               value={
                                 values?.jumpStepsFail ? stepOption?.filter((data: any) => values?.jumpStepsFail?.includes(data.optionValue)) : []
@@ -509,7 +563,9 @@ export default function StepDialog({
 
                                 setFieldValue('jumpStepsFail', values);
                               }}
-                              renderInput={(params) => <TextField {...params} label="Jump Steps On Fail" name="jumpStepsFail" variant="outlined" />}
+                              renderInput={(params) => (
+                                <TextField {...params} label="Jump Steps On Fail" name="jumpStepsFail" disabled={notEditable} variant="outlined" />
+                              )}
                             />
                           )}
                         </Grid>
@@ -522,6 +578,7 @@ export default function StepDialog({
                             control={
                               <Checkbox
                                 name="isQuoteRevisionOnFail"
+                                disabled={notEditable}
                                 checked={values?.isQuoteRevisionOnFail}
                                 onChange={(e) => {
                                   setFieldValue('isQuoteRevisionOnFail', e.target.checked);
@@ -538,9 +595,11 @@ export default function StepDialog({
                       <Grid container>
                         <Grid item xs={6}>
                           <FormControlLabel
+                            disabled={notEditable}
                             control={
                               <Checkbox
                                 name="isReturnToStepOnFail"
+                                disabled={notEditable}
                                 checked={values?.isReturnToStepOnFail}
                                 onChange={(e) => {
                                   setFieldValue('isReturnToStepOnFail', e.target.checked);
@@ -556,6 +615,7 @@ export default function StepDialog({
                             <Autocomplete
                               options={stepOption}
                               fullWidth
+                              disabled={notEditable}
                               size="small"
                               value={values?.returnToStepOnFail ? stepOption?.find((data) => data?.optionValue === values?.returnToStepOnFail) : ''}
                               getOptionLabel={(option) => option.optionLabel}
@@ -564,7 +624,13 @@ export default function StepDialog({
                                 setFieldValue('returnToStepOnFail', newVal ? newVal?.optionValue : '');
                               }}
                               renderInput={(params) => (
-                                <TextField {...params} label="Return To Step On Fail" name="returnToStepOnFail" variant="outlined" />
+                                <TextField
+                                  {...params}
+                                  label="Return To Step On Fail"
+                                  name="returnToStepOnFail"
+                                  disabled={notEditable}
+                                  variant="outlined"
+                                />
                               )}
                             />
                           )}
@@ -575,9 +641,11 @@ export default function StepDialog({
                       <Grid container>
                         <Grid item xs={6}>
                           <FormControlLabel
+                            disabled={notEditable}
                             control={
                               <Checkbox
                                 name="isReturnToServiceOnFail"
+                                disabled={notEditable}
                                 checked={values?.isReturnToServiceOnFail}
                                 onChange={(e) => {
                                   setFieldValue('isReturnToServiceOnFail', e.target.checked);
@@ -594,6 +662,7 @@ export default function StepDialog({
                               options={services}
                               fullWidth
                               size="small"
+                              disabled={notEditable}
                               value={services?.find((data) => data?.optionValue === values?.returnToServiceOnFail) ?? ''}
                               getOptionLabel={(option) => option?.optionLabel}
                               renderOption={(option) => option?.optionLabel}
@@ -602,7 +671,13 @@ export default function StepDialog({
                                 setFieldValue('returnToServiceOnFail', newVal?.optionValue ?? '');
                               }}
                               renderInput={(params) => (
-                                <TextField {...params} label="Return To Service On Fail" name="returnToServiceOnFail" variant="outlined" />
+                                <TextField
+                                  {...params}
+                                  label="Return To Service On Fail"
+                                  name="returnToServiceOnFail"
+                                  disabled={notEditable}
+                                  variant="outlined"
+                                />
                               )}
                             />
                           )}
@@ -621,20 +696,22 @@ export default function StepDialog({
                   </Box>
                 )}
               </CustomDialogContent>
-              <CustomDialogFooter>
-                <Button
-                  size="small"
-                  color="primary"
-                  onClick={() => {
-                    handleClose();
-                  }}
-                >
-                  Cancel
-                </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
-                  Save
-                </CustomButton>
-              </CustomDialogFooter>
+              {!notEditable && (
+                <CustomDialogFooter>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => {
+                      handleClose();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                    Save
+                  </CustomButton>
+                </CustomDialogFooter>
+              )}
             </Form>
           )}
         </Formik>

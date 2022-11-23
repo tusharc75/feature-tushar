@@ -79,11 +79,11 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
         {
           optionValue: data._id,
           optionLabel: data.accountName,
-          order: entityFields[customerAccountNameFieldIndex].option.length,
+          order: entityFields[customerAccountNameFieldIndex]?.option?.length,
           default: false,
         },
       ];
-      setAccountData(entityFields[customerAccountNameFieldIndex].option);
+      setAccountData(entityFields[customerAccountNameFieldIndex]?.option);
     }
   };
 
@@ -96,7 +96,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
       const newCustomer = {
         optionValue: data._id,
         optionLabel: `${data.firstName} ${data.lastName}`,
-        order: entityFields[customerContactNameFieldIndex].option.length,
+        order: entityFields[customerContactNameFieldIndex]?.option?.length,
         default: false,
         parentAccount: data.accountName,
       };
@@ -115,7 +115,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
     const ownerCollabOptions = repairOrderInitialData.fields.filter(
       (d) => ["owner", "collaborator"].indexOf(d.fieldName) !== -1
     );
-    if (ownerCollabOptions.length > 0) {
+    if (ownerCollabOptions?.length > 0) {
       setOwnerCollaboratorData(ownerCollabOptions[0].option);
       setOwnerData(ownerCollabOptions[0].option);
       setCollaboratorData(ownerCollabOptions[0].option);
@@ -239,7 +239,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
     setValues,
     setErrors
   ) => {
-    if (Object.keys(errors).length) {
+    if (Object.keys(errors)?.length) {
       repairOrderInitialData.fields.forEach((input) => {
         if (input.required || values[input.fieldName]) {
           setTouched(input.fieldName, true);
@@ -293,7 +293,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
 
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
-    if (err.length) {
+    if (err?.length) {
       const input = document.querySelector(
         `input[name=${err[0]}]`,
       );
@@ -312,357 +312,516 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
     }))
   }
 
-  return (
-    <>
-      <Dialog
-        maxWidth="md"
-        fullWidth
-        fullScreen={fullScreen || (isMobile || isTablet)}
-        TransitionComponent={CustomDialogTransition}
-        aria-labelledby="customized-dialog-title"
-        onClose={(e, reason) => {
-          if (reason !== 'backdropClick') {
-            setShowConfirmDialog(true)
-          }
-        }}
-        open={true}
+  useEffect(() => {
+
+  }, []);
+
+  return (<Dialog
+    maxWidth="md"
+    fullWidth
+    fullScreen={fullScreen || (isMobile || isTablet)}
+    TransitionComponent={CustomDialogTransition}
+    aria-labelledby="customized-dialog-title"
+    onClose={(e, reason) => {
+      if (reason !== 'backdropClick') {
+        setShowConfirmDialog(true)
+      }
+    }}
+    open={true}
+  >
+    <CustomDialogHeader
+      title={
+        !repairOrderId
+          ? `Create ${routes.repairOrder.title}`
+          : `${isClone ? `Clone - ${cloneHeading}` : `Update ${repairOrderData?.repairOrderNumber}`}`
+      }
+      onClose={(e, reason) => {
+        if (isFieldNotTouched(repairOrderInitialData, formValues)) onClose()
+        else setShowConfirmDialog(true)
+      }}
+      isMinimized={!fullScreen}
+      onMinimizeMaximize={() => {
+        setFullScreen(prevState => !prevState)
+      }}
+      showManimizeMaximize={true}
+    />
+    {!repairOrderInitialData?.fields?.length ? (
+      <>
+        <CustomDialogContent>
+          <Skeleton width="100%" height="70px" />
+          <Grid container spacing={2}>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
+              <Grid key={i} item xs={12} sm={6} md={6}>
+                <Skeleton width="100%" height="60px" />
+              </Grid>
+            ))}
+          </Grid>
+        </CustomDialogContent>
+        <CustomDialogFooter>
+          <Button variant="outlined" size="small" color="primary" disabled>
+            Cancel
+          </Button>
+          <Button variant="contained" size="small" color="primary" disabled>
+            Submit
+          </Button>
+        </CustomDialogFooter>
+      </>
+    ) : (
+      <Formik
+        initialValues={repairOrderInitialData.initialValues}
+        validationSchema={yupSchema(repairOrderInitialData.fields)}
+        validateOnMount
+        onSubmit={() => { }}
       >
-        <CustomDialogHeader
-          title={
-            !repairOrderId
-              ? `Create ${routes.repairOrder.title}`
-              : `${isClone ? `Clone - ${cloneHeading}` : `Update ${repairOrderData?.repairOrderNumber}`}`
-          }
-          onClose={(e, reason) => {
-            if (isFieldNotTouched(repairOrderInitialData, formValues)) onClose()
-            else setShowConfirmDialog(true)
-          }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
-          }}
-          showManimizeMaximize={true}
-        />
-        {!repairOrderInitialData.fields.length ? (
+        {({
+          values,
+          errors,
+          touched,
+          setFieldValue,
+          setFieldTouched,
+          setErrors,
+          setValues,
+        }) => (
           <>
             <CustomDialogContent>
-              <Skeleton width="100%" height="70px" />
-              <Grid container spacing={2}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                  <Grid key={i} item xs={12} sm={6} md={6}>
-                    <Skeleton width="100%" height="60px" />
-                  </Grid>
-                ))}
-              </Grid>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button variant="outlined" size="small" color="primary" disabled
-              >
-                Cancel
-              </Button>
-              <Button variant="contained" size="small" color="primary" disabled>
-                Submit
-              </Button>
-            </CustomDialogFooter>
-          </>
-        ) : (
-          <Formik
-            initialValues={repairOrderInitialData.initialValues}
-            validationSchema={yupSchema(repairOrderInitialData.fields)}
-            validateOnMount
-            onSubmit={() => { }}
-          >
-            {({
-              values,
-              errors,
-              touched,
-              setFieldValue,
-              setFieldTouched,
-              setErrors,
-              setValues,
-            }) => (
-              <>
-                <CustomDialogContent>
-                  <Form>
-                    {formsData && formsData.map((form, i) => {
-                      return (
-                        form.name && (
-                          <div key={i}>
-                            <div className={"detail-box-content"}>
-                              <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                              <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
-                                    {field.fieldName == "customerAccount" ? (
-                                      <Grid container spacing={1}>
-                                        <Grid item xs={permissions.customerAccount?.isCreate ? 11 : 11}
-                                          sm={permissions.customerAccount?.isCreate ? 11 : 11}
-                                          md={permissions.customerAccount?.isCreate ? 11 : 11}
-                                        >
-                                          <FormTypes
-                                            {...field}
-                                            isNew={!repairOrderId}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={accountData}
-                                            disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={
-                                              field?.isTooltip || false
-                                            }
-                                            tooltipMessage={
-                                              field?.tooltipMessage
-                                            }
-                                            size="small"
-                                            doNotShowInfoTooltip={true}
-                                            onChange={(e, value) => {
-                                              setFieldValue(
-                                                field.fieldName,
-                                                value && value.optionValue
-                                                  ? value.optionValue
-                                                  : ""
-                                              );
-                                              if (repairOrderInitialData.fields.find((d) => d.fieldName === "customerContact")) {
-                                                setFieldValue("customerContact", "");
-                                                handleValuesChange({
-                                                  [field.fieldName]: value && value.optionValue ? value.optionValue : "",
-                                                  "customerContact": "",
-                                                })
-                                              }
-                                            }}
-                                          />
-                                        </Grid>
-                                        {permissions.customerAccount?.isCreate &&
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip
-                                              title="Create Account"
-                                              className="mt-1"
-                                            >
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddCustomerAccountDialog(
-                                                    true
-                                                  );
-                                                }}
-                                                disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
-                                                size="small"
-                                              >
-                                                <AddIcon color={values["type"] === REPAIR_ORDER_TYPE.internal ? "disabled" : isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        }
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip
-                                              title={
-                                                field?.tooltipMessage ?? ""
-                                              }
-                                            >
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    ) : field.fieldName === "customerContact" ? (
-                                      <Grid container spacing={1}>
-                                        <Grid item xs={permissions.customerContact?.isCreate ? 11 : 11}
-                                          sm={permissions.customerContact?.isCreate ? 11 : 11}
-                                          md={permissions.customerContact?.isCreate ? 11 : 11}
-                                        >
-                                          <FormTypes
-                                            {...field}
-                                            isNew={!repairOrderId}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={customerContactDataSource}
-                                            doNotShowInfoTooltip={true}
-                                            setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value })
-                                              setFieldValue(name, value)
-                                            }}
-                                            disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={false}
-                                            size="small"
-                                            onOpen={() =>
-                                              onCustomerContactDropdownOpen(
-                                                values["customerAccount"]
-                                              )
-                                            }
-                                          // onChange={(e, value) => {
-                                          //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-
-                                          // }}
-                                          />
-                                        </Grid>
-                                        {permissions.customerContact?.isCreate &&
-                                          <Grid item xs={1} sm={1} md={1} >
-                                            <Tooltip
-                                              title="Create Contact"
-                                              className="mt-1"
-                                            >
-                                              <IconButton
-                                                onClick={() => {
-                                                  setShowAddCustomerContactDialog(
-                                                    true
-                                                  );
-                                                }}
-                                                disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
-                                                size="small"
-                                              >
-                                                <AddIcon color={values["type"] === REPAIR_ORDER_TYPE.internal ? "disabled" : isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
-                                              </IconButton>
-                                            </Tooltip>
-                                          </Grid>
-                                        }
-                                        {field?.tooltipMessage ? (
-                                          <Grid item xs={1} sm={1} md={1}>
-                                            <Tooltip
-                                              className="mt-2"
-                                              title={
-                                                field?.tooltipMessage ?? ""
-                                              }
-                                            >
-                                              <InfoIcon color="disabled" />
-                                            </Tooltip>
-                                          </Grid>
-                                        ) : null}
-                                      </Grid>
-                                    ) : field.fieldName === "owner" ? (
+              <Form>
+                {formsData && formsData.map((form, i) => {
+                  return (
+                    form.name && (
+                      <div key={i}>
+                        <div className={"detail-box-content"}>
+                          <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                          <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                        </div>
+                        <Box marginY={2}>
+                          <Grid spacing={3} container>
+                            {form.sectionFields.map((field) => (
+                              <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
+                                {field.fieldName == "customerAccount" ? (
+                                  <Grid container spacing={1}>
+                                    <Grid item xs={permissions.customerAccount?.isCreate ? 11 : 11}
+                                      sm={permissions.customerAccount?.isCreate ? 11 : 11}
+                                      md={permissions.customerAccount?.isCreate ? 11 : 11}
+                                    >
                                       <FormTypes
-                                        repairOrderId={repairOrderId}
                                         {...field}
+                                        isNew={!repairOrderId}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        options={ownerData}
-                                        onChange={(e, val) => {
-                                          setFieldValue(
-                                            field.fieldName,
-                                            val && val.optionValue
-                                              ? val.optionValue
-                                              : ""
-                                          );
-                                          handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
-
-                                          if (
-                                            val &&
-                                            val.optionValue !== user?.user?._id
-                                          ) {
-                                            const checkOwnerAddedInCollaborator =
-                                              values["collaborator"].find(
-                                                (d) =>
-                                                  d?.optionValue ===
-                                                  user?.user?._id
-                                              );
-                                            if (
-                                              !checkOwnerAddedInCollaborator
-                                            ) {
-                                              setFieldValue("collaborator", [
-                                                ...values["collaborator"],
-                                                collaboratorData.find(
-                                                  (d) =>
-                                                    d?.optionValue ===
-                                                    user?.user?._id
-                                                ).optionValue,
-                                              ]);
-                                              handleValuesChange({
-                                                collaborator: collaboratorData.find(
-                                                  (d) =>
-                                                    d?.optionValue ===
-                                                    user?.user?._id
-                                                ).optionValue
-                                              })
-                                            }
-                                          }
-                                        }}
+                                        options={accountData}
+                                        disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                         required={field.required}
                                         fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
+                                        isTooltip={
+                                          field?.isTooltip || false
+                                        }
+                                        tooltipMessage={
+                                          field?.tooltipMessage
+                                        }
                                         size="small"
-                                        disabled={(repairOrderId && field.disableOnEdit)}
-                                        onOpen={() => {
-                                          onOwnerDropdownOpen(
-                                            values["collaborator"]
+                                        doNotShowInfoTooltip={true}
+                                        onChange={(e, value) => {
+                                          setFieldValue(
+                                            field.fieldName,
+                                            value && value.optionValue
+                                              ? value.optionValue
+                                              : ""
                                           );
+                                          if (repairOrderInitialData.fields.find((d) => d.fieldName === "customerContact")) {
+                                            setFieldValue("customerContact", "");
+                                            handleValuesChange({
+                                              [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                              "customerContact": "",
+                                            })
+                                          }
                                         }}
                                       />
-                                    ) : field.fieldName === "collaborator" ? (
+                                    </Grid>
+                                    {permissions.customerAccount?.isCreate &&
+                                      <Grid item xs={1} sm={1} md={1}>
+                                        <Tooltip
+                                          title="Create Account"
+                                          className="mt-1"
+                                        >
+                                          <IconButton
+                                            onClick={() => {
+                                              setShowAddCustomerAccountDialog(
+                                                true
+                                              );
+                                            }}
+                                            disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            size="small"
+                                          >
+                                            <AddIcon color={values["type"] === REPAIR_ORDER_TYPE.internal ? "disabled" : isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
+                                          </IconButton>
+                                        </Tooltip>
+                                      </Grid>
+                                    }
+                                    {field?.tooltipMessage ? (
+                                      <Grid item xs={1} sm={1} md={1}>
+                                        <Tooltip
+                                          title={
+                                            field?.tooltipMessage ?? ""
+                                          }
+                                        >
+                                          <InfoIcon color="disabled" />
+                                        </Tooltip>
+                                      </Grid>
+                                    ) : null}
+                                  </Grid>
+                                ) : field.fieldName === "customerContact" ? (
+                                  <Grid container spacing={1}>
+                                    <Grid item xs={permissions.customerContact?.isCreate ? 11 : 11}
+                                      sm={permissions.customerContact?.isCreate ? 11 : 11}
+                                      md={permissions.customerContact?.isCreate ? 11 : 11}
+                                    >
                                       <FormTypes
-                                        repairOrderId={repairOrderId}
                                         {...field}
-                                        disabled={!repairOrderId && field.disableOnEdit}
+                                        isNew={!repairOrderId}
                                         values={values}
                                         errors={errors}
                                         touched={touched}
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        options={collaboratorData}
+                                        options={customerContactDataSource}
+                                        doNotShowInfoTooltip={true}
                                         setFieldValue={(name, value) => {
                                           handleValuesChange({ [name]: value })
                                           setFieldValue(name, value)
                                         }}
+                                        disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={false}
+                                        size="small"
+                                        onOpen={() =>
+                                          onCustomerContactDropdownOpen(
+                                            values["customerAccount"]
+                                          )
+                                        }
+                                      // onChange={(e, value) => {
+                                      //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
 
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        onOpen={() => {
-                                          onCollabOwnerMultiselectOpen(
-                                            values["owner"]
-                                          );
-                                        }}
+                                      // }}
                                       />
-                                    ) : field.fieldName === "startDate"
-                                      ? <FormTypes
-                                        repairOrderId={repairOrderId}
-                                        {...field}
-                                        disabled={(repairOrderId && field.disableOnEdit)}
-                                        values={values}
-                                        fieldData={field}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        minDate={new Date()}
-                                        maxDate={values["expectedCompletionDate"] ? moment(values["expectedCompletionDate"]) : moment().add(5, "years")}
-                                      /> : field.fieldName === "expectedCompletionDate"
-                                        ? <FormTypes
+                                    </Grid>
+                                    {permissions.customerContact?.isCreate &&
+                                      <Grid item xs={1} sm={1} md={1} >
+                                        <Tooltip
+                                          title="Create Contact"
+                                          className="mt-1"
+                                        >
+                                          <IconButton
+                                            onClick={() => {
+                                              setShowAddCustomerContactDialog(
+                                                true
+                                              );
+                                            }}
+                                            disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            size="small"
+                                          >
+                                            <AddIcon color={values["type"] === REPAIR_ORDER_TYPE.internal ? "disabled" : isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                          </IconButton>
+                                        </Tooltip>
+                                      </Grid>
+                                    }
+                                    {field?.tooltipMessage ? (
+                                      <Grid item xs={1} sm={1} md={1}>
+                                        <Tooltip
+                                          className="mt-2"
+                                          title={
+                                            field?.tooltipMessage ?? ""
+                                          }
+                                        >
+                                          <InfoIcon color="disabled" />
+                                        </Tooltip>
+                                      </Grid>
+                                    ) : null}
+                                  </Grid>
+                                ) : field.fieldName === "owner" ? (
+                                  <FormTypes
+                                    repairOrderId={repairOrderId}
+                                    {...field}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={ownerData}
+                                    onChange={(e, val) => {
+                                      setFieldValue(
+                                        field.fieldName,
+                                        val && val.optionValue
+                                          ? val.optionValue
+                                          : ""
+                                      );
+                                      handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : "" })
+
+                                      if (
+                                        val &&
+                                        val.optionValue !== user?.user?._id
+                                      ) {
+                                        const checkOwnerAddedInCollaborator =
+                                          values["collaborator"].find(
+                                            (d) =>
+                                              d?.optionValue ===
+                                              user?.user?._id
+                                          );
+                                        if (
+                                          !checkOwnerAddedInCollaborator
+                                        ) {
+                                          setFieldValue("collaborator", [
+                                            ...values["collaborator"],
+                                            collaboratorData.find(
+                                              (d) =>
+                                                d?.optionValue ===
+                                                user?.user?._id
+                                            ).optionValue,
+                                          ]);
+                                          handleValuesChange({
+                                            collaborator: collaboratorData.find(
+                                              (d) =>
+                                                d?.optionValue ===
+                                                user?.user?._id
+                                            ).optionValue
+                                          })
+                                        }
+                                      }
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    disabled={(repairOrderId && field.disableOnEdit)}
+                                    onOpen={() => {
+                                      onOwnerDropdownOpen(
+                                        values["collaborator"]
+                                      );
+                                    }}
+                                  />
+                                ) : field.fieldName === "collaborator" ? (
+                                  <FormTypes
+                                    repairOrderId={repairOrderId}
+                                    {...field}
+                                    disabled={!repairOrderId && field.disableOnEdit}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={collaboratorData}
+                                    setFieldValue={(name, value) => {
+                                      handleValuesChange({ [name]: value })
+                                      setFieldValue(name, value)
+                                    }}
+
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    onOpen={() => {
+                                      onCollabOwnerMultiselectOpen(
+                                        values["owner"]
+                                      );
+                                    }}
+                                  />
+                                ) : field.fieldName === "startDate"
+                                  ? <FormTypes
+                                    repairOrderId={repairOrderId}
+                                    {...field}
+                                    disabled={(repairOrderId && field.disableOnEdit)}
+                                    values={values}
+                                    fieldData={field}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    minDate={new Date()}
+                                    maxDate={values["expectedCompletionDate"] ? moment(values["expectedCompletionDate"]) : moment().add(5, "years")}
+                                  /> : field.fieldName === "expectedCompletionDate"
+                                    ? <FormTypes
+                                      repairOrderId={repairOrderId}
+                                      {...field}
+                                      disabled={(repairOrderId && field.disableOnEdit)}
+                                      values={values}
+                                      fieldData={field}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      minDate={values["startDate"]}
+                                    /> : (field.fieldName === "plant" || field.fieldName === "warehouse") ? (
+                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                        <Grid container spacing={1}>
+                                          <Grid item xs={permissions?.warehouse?.isCreate ? 11 : 11}
+                                            sm={permissions?.warehouse?.isCreate ? 11 : 11}
+                                            md={permissions?.warehouse?.isCreate ? 11 : 11}
+                                          >
+                                            <FormTypes
+                                              repairOrderId={repairOrderId}
+                                              {...field}
+                                              fieldData={field}
+                                              disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={optionsPlantsEntity}
+                                              setFieldValue={(name, value) => {
+                                                setFieldValue(name, value);
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                            />
+                                          </Grid>
+                                          {permissions?.warehouse?.isCreate && (
+                                            <Grid item xs={1} sm={1} md={1} >
+                                              <Tooltip
+
+                                                title="Create Plant"
+                                                className="mt-1"
+                                              >
+                                                <IconButton
+                                                  onClick={() => {
+                                                    setShowAddWarehouseDialog(true);
+                                                  }}
+                                                  disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
+                                                  size="small"
+                                                >
+                                                  <AddIcon color={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </Grid>
+                                          )}
+                                          {field?.tooltipMessage ? (
+                                            <Grid item xs={1} sm={1} md={1}>
+                                              <Tooltip
+                                                className="mt-2"
+                                                title={
+                                                  field?.tooltipMessage ?? ""
+                                                }
+                                              >
+                                                <InfoIcon color="disabled" />
+                                              </Tooltip>
+                                            </Grid>
+                                          ) : null}
+                                        </Grid>
+                                      </Grid>
+                                    ) : field.fieldName === "type" ?
+                                      (
+                                        <FormTypes
                                           repairOrderId={repairOrderId}
                                           {...field}
+                                          fieldData={field}
                                           disabled={(repairOrderId && field.disableOnEdit)}
                                           values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          onChange={(e, value) => {
+                                            setFieldValue(
+                                              field.fieldName,
+                                              value && value.optionValue
+                                                ? value.optionValue
+                                                : ""
+                                            );
+                                            if (repairOrderInitialData.fields.find((d) => d.fieldName === "customerContact") && repairOrderInitialData.fields.find((d) => d.fieldName === "customerAccount")) {
+                                              setFieldValue("customerContact", "");
+                                              setFieldValue("customerAccount", "");
+                                              handleValuesChange({
+                                                [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                "customerContact": "",
+                                                "customerAccount": "",
+                                              })
+                                            }
+                                            else if (repairOrderInitialData.fields.find((d) => d.fieldName === "customerAccount")) {
+                                              setFieldValue("customerAccount", "");
+                                              handleValuesChange({
+                                                [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                "customerAccount": "",
+                                              })
+                                            }
+                                            else if (repairOrderInitialData.fields.find((d) => d.fieldName === "customerContact")) {
+                                              setFieldValue("customerContact", "");
+                                              handleValuesChange({
+                                                [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                "customerContact": "",
+                                              })
+                                            }
+                                            setRepairOrderInitialData((prevState: any) => ({
+                                              ...prevState,
+                                              fields: [...prevState?.fields?.map((e) => {
+                                                if (value?.optionValue === REPAIR_ORDER_TYPE.internal) {
+                                                  if (e?.fieldName === "customerAccount") {
+                                                    e.required = false
+                                                  }
+                                                  if (e?.fieldName === "customerContact") {
+                                                    e.required = false
+                                                  }
+                                                }
+                                                if (value?.optionValue === REPAIR_ORDER_TYPE.external) {
+                                                  if (e?.fieldName === "customerAccount") {
+                                                    e.required = true
+                                                  }
+                                                  if (e?.fieldName === "customerContact") {
+                                                    e.required = true
+                                                  }
+                                                }
+                                                return e;
+                                              })],
+                                            }));
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                        />
+                                      )
+                                      : (
+                                        <FormTypes
+                                          repairOrderId={repairOrderId}
+                                          {...field}
                                           fieldData={field}
+                                          disabled={(repairOrderId && field.disableOnEdit) || (field.fieldName === "repairOrderNumber")}
+                                          values={values}
                                           errors={errors}
                                           touched={touched}
                                           label={field.fieldLabel}
@@ -670,256 +829,167 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
+                                            handleValuesChange({ [name]: value })
+                                            setFieldValue(name, value)
                                           }}
                                           required={field.required}
                                           fullWidth
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          minDate={values["startDate"]}
-                                        /> : (field.fieldName === "plant" || field.fieldName === "warehouse") ? (
-                                          <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                            <Grid container spacing={1}>
-                                              <Grid item xs={permissions?.warehouse?.isCreate ? 11 : 11}
-                                                sm={permissions?.warehouse?.isCreate ? 11 : 11}
-                                                md={permissions?.warehouse?.isCreate ? 11 : 11}
-                                              >
-                                                <FormTypes
-                                                  repairOrderId={repairOrderId}
-                                                  {...field}
-                                                  fieldData={field}
-                                                  disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
-                                                  values={values}
-                                                  errors={errors}
-                                                  touched={touched}
-                                                  label={field.fieldLabel}
-                                                  name={field.fieldName}
-                                                  type={field.type}
-                                                  options={optionsPlantsEntity}
-                                                  setFieldValue={(name, value) => {
-                                                    setFieldValue(name, value);
-                                                  }}
-                                                  required={field.required}
-                                                  fullWidth
-                                                  isTooltip={field?.isTooltip || false}
-                                                  tooltipMessage={field?.tooltipMessage}
-                                                  size="small"
-                                                />
-                                              </Grid>
-                                              {permissions?.warehouse?.isCreate && (
-                                                <Grid item xs={1} sm={1} md={1} >
-                                                  <Tooltip
-
-                                                    title="Create Plant"
-                                                    className="mt-1"
-                                                  >
-                                                    <IconButton
-                                                      onClick={() => {
-                                                        setShowAddWarehouseDialog(true);
-                                                      }}
-                                                      disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
-                                                      size="small"
-                                                    >
-                                                      <AddIcon color={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
-                                                    </IconButton>
-                                                  </Tooltip>
-                                                </Grid>
-                                              )}
-                                              {field?.tooltipMessage ? (
-                                                <Grid item xs={1} sm={1} md={1}>
-                                                  <Tooltip
-                                                    className="mt-2"
-                                                    title={
-                                                      field?.tooltipMessage ?? ""
-                                                    }
-                                                  >
-                                                    <InfoIcon color="disabled" />
-                                                  </Tooltip>
-                                                </Grid>
-                                              ) : null}
-                                            </Grid>
-                                          </Grid>
-                                        )
-                                          : (
-                                            <FormTypes
-                                              repairOrderId={repairOrderId}
-                                              {...field}
-                                              fieldData={field}
-                                              disabled={(repairOrderId && field.disableOnEdit) || (field.fieldName === "repairOrderNumber")}
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={field.option}
-                                              setFieldValue={(name, value) => {
-                                                handleValuesChange({ [name]: value })
-                                                setFieldValue(name, value)
-                                              }}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field?.isTooltip || false}
-                                              tooltipMessage={field?.tooltipMessage}
-                                              size="small"
-                                              imageOrFileUploadCompletePercentage={
-                                                ["imageUpload", "fileUpload"].some(
-                                                  (s) => s === field.type
-                                                )
-                                                  ? (completePercentage) => {
-                                                    setUploadingImageOrFileProgress(
-                                                      completePercentage
-                                                    );
-                                                  }
-                                                  : null
+                                          imageOrFileUploadCompletePercentage={
+                                            ["imageUpload", "fileUpload"].some(
+                                              (s) => s === field.type
+                                            )
+                                              ? (completePercentage) => {
+                                                setUploadingImageOrFileProgress(
+                                                  completePercentage
+                                                );
                                               }
-                                            />
-                                          )}
-                                  </Grid>
-                                ))}
+                                              : null
+                                          }
+                                        />
+                                      )}
                               </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
-                  </Form>
-                </CustomDialogContent>
-                <CustomDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    onClick={() => {
-                      if (isFieldNotTouched(repairOrderInitialData, values)) onClose()
-                      else setShowConfirmDialog(true)
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <CustomButton
-                    loading={loading}
-                    variant="contained"
-                    color="primary"
-                    disabled={
-                      // loading || Object.keys(errors).length > 0 ? true : false
-                      uploadingImageOrFileProgress > 0 ||
-                      // isFieldNotTouched(repairOrderInitialData, values) ||
-                      loading
-                    }
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleScroll(errors)
-                      handleSubmit(
-                        errors,
-                        setFieldTouched,
-                        values,
-                        setValues,
-                        setErrors
-                      );
-                    }}
-                  >
-                    Save
-                  </CustomButton>
-                </CustomDialogFooter>
-                {
-                  showConfirmDialog ?
-                    <ConfirmCancelDialog
-                      open={showConfirmDialog}
-                      onSave={() => {
-                        setShowConfirmDialog(false)
-                        handleScroll(errors)
-
-                        handleSubmit(
-                          errors,
-                          setFieldTouched,
-                          values,
-                          setValues,
-                          setErrors
-                        );
-                      }}
-                      onClose={() => {
-                        setShowConfirmDialog(false)
-                        onClose()
-                      }}
-                    /> : null
+                            ))}
+                          </Grid>
+                        </Box>
+                      </div>
+                    )
+                  );
+                })}
+              </Form>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <Button
+                type="button"
+                variant="outlined"
+                color="primary"
+                size="small"
+                onClick={() => {
+                  if (isFieldNotTouched(repairOrderInitialData, values)) onClose()
+                  else setShowConfirmDialog(true)
+                }}
+              >
+                Cancel
+              </Button>
+              <CustomButton
+                loading={loading}
+                variant="contained"
+                color="primary"
+                disabled={
+                  // loading || Object.keys(errors).length > 0 ? true : false
+                  uploadingImageOrFileProgress > 0 ||
+                  // isFieldNotTouched(repairOrderInitialData, values) ||
+                  loading
                 }
-                {showAddCustomerAccountDialog && (
-                  <ManageAccountDialog
-                    open={showAddCustomerAccountDialog}
-                    onClose={() => {
-                      setShowAddCustomerAccountDialog(false);
-                    }}
-                    id={null}
-                    accountResource={customerAccount.accountResource}
-                    accountApi={customerAccount.accountApi}
-                    isGetAccountData={true}
-                    onGetAddedAccount={({ data }) => {
-                      setNewAddedAccountId(data._id);
-                      updateAccountDropdown(data);
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleScroll(errors)
+                  handleSubmit(
+                    errors,
+                    setFieldTouched,
+                    values,
+                    setValues,
+                    setErrors
+                  );
+                }}
+              >
+                Save
+              </CustomButton>
+            </CustomDialogFooter>
+            {
+              showConfirmDialog ?
+                <ConfirmCancelDialog
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false)
+                    handleScroll(errors)
 
-                      setFieldValue("customerAccount", data._id);
-                      setFieldValue("customerContact", "");
-                    }}
-                    isRedirectToDetailPage={false}
-                  />
-                )}
-                {showAddCustomerContactDialog && (
-                  <ManageContactDialog
-                    open={showAddCustomerContactDialog}
-                    onClose={() => setShowAddCustomerContactDialog(false)}
-                    onSuccess={(obj) => {
-                      if (obj) {
-                        setShowAddCustomerContactDialog(false);
-                        updateContactDropdown(obj.data.data);
+                    handleSubmit(
+                      errors,
+                      setFieldTouched,
+                      values,
+                      setValues,
+                      setErrors
+                    );
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false)
+                    onClose()
+                  }}
+                /> : null
+            }
+            {showAddCustomerAccountDialog && (
+              <ManageAccountDialog
+                open={showAddCustomerAccountDialog}
+                onClose={() => {
+                  setShowAddCustomerAccountDialog(false);
+                }}
+                id={null}
+                accountResource={customerAccount.accountResource}
+                accountApi={customerAccount.accountApi}
+                isGetAccountData={true}
+                onGetAddedAccount={({ data }) => {
+                  setNewAddedAccountId(data._id);
+                  updateAccountDropdown(data);
 
-                        setFieldValue("customerContact", obj.id);
-                      }
-                    }}
-                    accountId={values["customerAccount"]}
-                    contactResource={customerContact.contactResource}
-                    contactApi={customerContact.contactApi}
-                    isRedirectToDetailPage={false}
-                    collaborators={collaboratorData}
-                    owner={ownerData}
-                    account={customerAccount}
-                    isAccountFieldDisable={true}
-                  />
-                )}
-                {showAddWarehouseDialog &&
-                  <ManageWarehouse
-                    open={showAddWarehouseDialog}
-                    close={() => setShowAddWarehouseDialog(false)}
-                    isClone={false}
-                    onSuccess={({ data }) => {
-                      if (data._id) {
-                        setShowAddWarehouseDialog(false)
-                        setOptionsPlantsEntity((prevState) => {
-                          return [
-                            ...prevState,
-                            {
-                              optionValue: data._id,
-                              optionLabel: data.warehouseName,
-                              order: optionsPlantsEntity.length,
-                              default: false
-                            },
-                          ];
-                        });
-                        setFieldValue("warehouse", data._id);
-                      }
-                    }}
-                  />}
-              </>
+                  setFieldValue("customerAccount", data._id);
+                  setFieldValue("customerContact", "");
+                }}
+                isRedirectToDetailPage={false}
+              />
             )}
-          </Formik>
+            {showAddCustomerContactDialog && (
+              <ManageContactDialog
+                open={showAddCustomerContactDialog}
+                onClose={() => setShowAddCustomerContactDialog(false)}
+                onSuccess={(obj) => {
+                  if (obj) {
+                    setShowAddCustomerContactDialog(false);
+                    updateContactDropdown(obj.data.data);
+
+                    setFieldValue("customerContact", obj.id);
+                  }
+                }}
+                accountId={values["customerAccount"]}
+                contactResource={customerContact.contactResource}
+                contactApi={customerContact.contactApi}
+                isRedirectToDetailPage={false}
+                collaborators={collaboratorData}
+                owner={ownerData}
+                account={customerAccount}
+                isAccountFieldDisable={true}
+              />
+            )}
+            {showAddWarehouseDialog &&
+              <ManageWarehouse
+                open={showAddWarehouseDialog}
+                close={() => setShowAddWarehouseDialog(false)}
+                isClone={false}
+                onSuccess={({ data }) => {
+                  if (data._id) {
+                    setShowAddWarehouseDialog(false)
+                    setOptionsPlantsEntity((prevState) => {
+                      return [
+                        ...prevState,
+                        {
+                          optionValue: data._id,
+                          optionLabel: data.warehouseName,
+                          order: optionsPlantsEntity?.length,
+                          default: false
+                        },
+                      ];
+                    });
+                    setFieldValue("warehouse", data._id);
+                  }
+                }}
+              />}
+          </>
         )}
-      </Dialog>
-
-
-
-    </>
+      </Formik>
+    )}
+  </Dialog>
   );
 
 }

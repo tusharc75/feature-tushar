@@ -426,7 +426,7 @@ const Productpackage = ({
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={!allowedToDelete}
+                    disabled={allowedToDelete && selectedProducts?.filter((e) => e.allowedToDelete)?.length === selectedProducts?.length ? false : true}
                     onClick={() => {
                       closeActions()
                       handleDeleteMultiple();

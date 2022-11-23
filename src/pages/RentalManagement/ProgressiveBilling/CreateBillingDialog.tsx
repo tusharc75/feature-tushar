@@ -36,6 +36,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [material, setMaterial] = useState([]);
+  const [orginalMaterial, setOrginalMaterial] = useState([]);
 
   const [productData, setProductData] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -264,18 +265,16 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
               let tempQty = obj.material?.find((ele) => ele._id === e._id)?.qty
               if (tempQty) return tempQty;
             }).reduce((a, b) => a + b, 0)
-            if (e.qty - tempTotalPrevQty > 0) {
-              let values = { qty: e.qty - tempTotalPrevQty }
-              const calValues = autoCalculateSpecificFields(values, { ...e, ...values }, allFields);
-              e = { ...e, ...calValues }
-            }
+            let values = { qty: e.qty - tempTotalPrevQty }
+            const calValues = autoCalculateSpecificFields(values, { ...e, ...values }, allFields);
+            e = { ...e, ...calValues }
           }
         }
         return e;
-      });
+      }).filter(d => d.qty > 0);
     }
-    //fiter qty > 0 in material
     setMaterial(data?.material);
+    setOrginalMaterial(data?.material);
     setProductData(data);
     initializeTable(data);
   };
@@ -524,10 +523,11 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           isBulkedit={false}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
-          rowData={isProductEdit.rowData}
+          rowData={orginalMaterial.find(d => d._id === isProductEdit.rowData._id)}
           material={material}
           selectedProducts={[]}
           loading={isUpdating}
+          isQtyOnly={true}
         />
       )}
     </Fragment>
