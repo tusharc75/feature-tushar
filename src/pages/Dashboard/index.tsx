@@ -103,12 +103,12 @@ function Dashboard() {
           text = 'Customer and Supplier Account Management at your fingertips.';
           color = '#FFFAEC';
           break;
-
         case 'Activities':
           icon = <img src={SVG(IconConst.ACTIVITIES)} alt="Activities Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Assign and Access Activities related to an Order.';
-          color = '#FFF7F2';
+          color = '#F6F1FF';
           break;
+
         case 'Dynamic Forms':
           icon = <img src={SVG(IconConst.FORM_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Setup Dynamic Forms & Templates';
@@ -122,7 +122,7 @@ function Dashboard() {
         default:
           icon = <img src={SVG(IconConst.GEN_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = '';
-          color = '#FFEFEE';
+          color = '#FFF7F2';
       }
 
       return {
