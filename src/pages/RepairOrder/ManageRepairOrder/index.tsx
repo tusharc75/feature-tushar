@@ -740,7 +740,58 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                               ) : null}
                                             </Grid>
                                           </Grid>
-                                        )
+                                        ) : field.fieldName === "type" ?
+                                          (
+                                            <FormTypes
+                                              repairOrderId={repairOrderId}
+                                              {...field}
+                                              fieldData={field}
+                                              disabled={(repairOrderId && field.disableOnEdit)}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              onChange={(e, value) => {
+                                                setFieldValue(
+                                                  field.fieldName,
+                                                  value && value.optionValue
+                                                    ? value.optionValue
+                                                    : ""
+                                                );
+                                                if (repairOrderInitialData.fields.find((d) => d.fieldName === "customerContact") && repairOrderInitialData.fields.find((d) => d.fieldName === "customerAccount")) {
+                                                  setFieldValue("customerContact", "");
+                                                  setFieldValue("customerAccount", "");
+                                                  handleValuesChange({
+                                                    [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                    "customerContact": "",
+                                                    "customerAccount": "",
+                                                  })
+                                                }
+                                                else if (repairOrderInitialData.fields.find((d) => d.fieldName === "customerAccount")) {
+                                                  setFieldValue("customerAccount", "");
+                                                  handleValuesChange({
+                                                    [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                    "customerAccount": "",
+                                                  })
+                                                }
+                                                else if (repairOrderInitialData.fields.find((d) => d.fieldName === "customerContact")) {
+                                                  setFieldValue("customerContact", "");
+                                                  handleValuesChange({
+                                                    [field.fieldName]: value && value.optionValue ? value.optionValue : "",
+                                                    "customerContact": "",
+                                                  })
+                                                }
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                            />
+                                          )
                                           : (
                                             <FormTypes
                                               repairOrderId={repairOrderId}
