@@ -329,15 +329,15 @@
   }
 }
 .rightInner {
-  @media all and (min-width: 1024px) {
-    --padding: 37px 34px 44px;
-    --image-mb: 31px;
-    --button-mt: 61px;
-  }
   @media all and (min-width: 768px) {
     --padding: 37px;
     --image-mb: 25px;
     --button-mt: 30px;
+  }
+  @media all and (min-width: 1024px) {
+    --padding: 37px 34px 44px;
+    --image-mb: 31px;
+    --button-mt: 61px;
   }
 
   background: #fffaee;
