@@ -20,6 +20,7 @@ import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../con
 import moment from "moment";
 import { calculatePrice, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
+import { object, number } from 'yup';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -30,6 +31,7 @@ interface EditDialogProps {
   selectedProducts: any[]
   isBulkedit: any
   loading: any
+  isQtyOnly?: Boolean
 }
 
 const rateChangeFields = ["unit", "pricingMethod"]
@@ -43,7 +45,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     material,
     selectedProducts,
     isBulkedit,
-    loading
+    loading,
+    isQtyOnly = false
   }) => {
 
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
@@ -54,7 +57,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const ref = useRef(null);
   const { isOffline } = useContext(CustomOfflineContext);
-
   useEffect(() => {
     fetchData()
   }, []);
@@ -134,6 +136,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   }
 
   const EvaluteproductFields = (fields) => {
+    if (isQtyOnly) {
+      fields = fields.filter(d => d.fieldName === "qty")
+    }
     const sections = uniq(map(fields, 'sectionName'));
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name);
@@ -277,23 +282,23 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         }
 
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll)
-          rows.push({ ...element, ...calValues })
+        rows.push({ ...element, ...calValues })
 
-          if (element.parentId) {
-            const parent: any = material.filter((e) => e._id === element.parentId)
-            const sameParent: any = material.filter((e) => e.parentId === element.parentId)
-            sameParent.forEach((element) => {
-              if (element._id === element._id) {
-                for (var key in values) {
-                  element[key] = values[key];
-                }
+        if (element.parentId) {
+          const parent: any = material.filter((e) => e._id === element.parentId)
+          const sameParent: any = material.filter((e) => e.parentId === element.parentId)
+          sameParent.forEach((element) => {
+            if (element._id === element._id) {
+              for (var key in values) {
+                element[key] = values[key];
               }
-            })
-  
-            sumOnParent(parent, sameParent)
-            rows = [...rows, ...parent]
-          }
-          
+            }
+          })
+
+          sumOnParent(parent, sameParent)
+          rows = [...rows, ...parent]
+        }
+
       });
 
       //Code for Bulk Update Only Product in Packages
@@ -319,7 +324,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       handleSaveData(rows)
     }
     else {
-      if (rowData.parentId  && !showConfirmationDialog) {
+      if (rowData.parentId && !showConfirmationDialog) {
         setShowConfirmationDialog(true);
       }
       else {
@@ -394,6 +399,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           errors['qty'] = 'Quantity is less than that which has been assigned.';
         }
       }
+    }
+    if (isQtyOnly && rowData && values.qty > rowData.qty) {
+      errors['qty'] = `Quantity can not be greater than ${rowData?.qty}`;
     }
     return errors;
   }
@@ -601,7 +609,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               >{"Close"}</Button>
               <CustomButton
                 loading={loading}
-                disabled={loading || isEqual(ref?.current?.values, initialData.values)}
+                disabled={loading || (isQtyOnly ? false : isEqual(ref?.current?.values, initialData.values))}
                 variant="contained"
                 color="primary"
                 type="submit"
