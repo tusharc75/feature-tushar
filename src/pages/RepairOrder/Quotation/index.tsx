@@ -324,7 +324,6 @@ const Quotation = ({
   };
 
   const fetchProductInventory = async () => {
-    setNextStep(false);
     var data: any = [];
     var inventory: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
@@ -349,11 +348,6 @@ const Quotation = ({
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
       parent.subRows = generateNestedData(data.material, inventory, parent);
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(true);
-    } else {
-      setNextStep(true);
-    }
     setRowsData(rows);
     setSelectedProducts([]);
   };
