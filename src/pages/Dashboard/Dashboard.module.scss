@@ -152,7 +152,7 @@
 }
 
 .filtered_data {
-  max-height: 600px;
+  max-height: Max(calc(100vh - 252px), 500px);
   overflow-y: scroll;
   background-color: white;
 
