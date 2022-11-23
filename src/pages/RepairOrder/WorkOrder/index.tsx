@@ -368,7 +368,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                     closeActions();
                     setArrangeView(true);
                   }}
-                  disabled={services?.every((d) => d.workOrder?._id === services[0].workOrder?._id) ? false : true}
+                  disabled={services?.length && services?.every((d) => d.workOrder?._id === services[0].workOrder?._id) ? false : true}
                 >
                   Arrange Services
                 </MenuItem>
@@ -378,7 +378,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
                     setShowConfirmBox(true)
                     closeActions();
                   }}
-                  disabled={services?.every((d) => d.workOrder?._id === services[0].workOrder?._id) ? false : true}
+                  disabled={services?.length && services?.every((d) => d.type === 'service' && d.workOrder?._id === services[0].workOrder?._id) ? false : true}
                 >
                   Delete
                 </MenuItem>
@@ -469,13 +469,7 @@ const WorkOrder = ({ repairOrderData, setNextStep, isTabletScreen, isSmallScreen
           )}
           {arrangeView && (
             <ArrangeView
-              data={
-                services
-                  ?.filter((e) => e.type === 'service')
-                  ?.map((d) => {
-                    return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
-                  }) || []
-              }
+              data={services?.filter((e) => e.type === 'service')?.map((d) => { return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork }; }) || []}
               title={'Arrange Services'}
               handleClose={() => setArrangeView(false)}
               handleSubmit={(data) => handleArrangeUpdate(data, services[0].workOrder?._id)}
