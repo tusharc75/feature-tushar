@@ -609,7 +609,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               >{"Close"}</Button>
               <CustomButton
                 loading={loading}
-                disabled={loading || isEqual(ref?.current?.values, initialData.values)}
+                disabled={loading || (isQtyOnly ? false : isEqual(ref?.current?.values, initialData.values))}
                 variant="contained"
                 color="primary"
                 type="submit"
