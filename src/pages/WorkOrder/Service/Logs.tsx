@@ -11,6 +11,7 @@ import styles from './logs.module.scss';
 import { BiRefresh, BiMinus } from 'react-icons/bi';
 import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-icons/bs';
 import moment from 'moment';
+import { FaUser as UserIcon } from 'react-icons/fa';
 
 const Logs = ({ handleClose, workOrderId = null }) => {
   const {
@@ -63,7 +64,8 @@ const Logs = ({ handleClose, workOrderId = null }) => {
     passed: 'Passed',
     failed: 'Failed',
     valueAdded: 'valueAdded',
-    valueUpdated: 'valueUpdated'
+    valueUpdated: 'valueUpdated',
+    consumed: 'consumed'
   };
 
   const getIcon = (type: string = 'Fail') => {
@@ -124,25 +126,29 @@ const Logs = ({ handleClose, workOrderId = null }) => {
     let message;
     switch (row?.operation) {
       default:
-        message = `<strong>${row.user?.optionLabel}</strong> updated <strong>${row?.service?.optionLabel}</strong> `;
+        message = `Updated value <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> `;
         break;
       case operations.completed:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>Completed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeComplete}>${operations.completed}</span>`;
+        message = `<span>Completed</span> <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> <span class='${styles.badgeComplete} ${styles.badge}'>${operations.completed}</span>`;
         break;
       case operations.start:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>started</span> <strong>${row?.service?.optionLabel}</strong> `;
+        message = `<span>Started</span> <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> `;
         break;
       case operations.passed:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>Passed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgePass}>${operations.passed}</span>`;
+        message = `<span>Passed</span> <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> <span class='${styles.badgePass}  ${styles.badge}'>${operations.passed}</span>`;
         break;
       case operations.failed:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>Failed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeFail}>${operations.failed}</span>`;
+        message = `<span>Failed</span> <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> <span class='${styles.badgeFail}   ${styles.badge}'>${operations.failed}</span>`;
         break;
       case operations.valueAdded:
-        message = `<strong>${row.user?.optionLabel}</strong> added new <strong>${row?.service?.optionLabel}</strong> `;
+        message = `Added value <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> `;
+        break;
+      case operations.consumed:
+        message = `Consumed <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> `;
         break;
       case operations.valueUpdated:
-        message = `<strong>${row.user?.optionLabel}</strong> updated <strong>${row?.service?.optionLabel}</strong> `;
+        message = `Updated value <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> `;
+        break;
     }
     return message;
   };
@@ -152,7 +158,7 @@ const Logs = ({ handleClose, workOrderId = null }) => {
       <CustomDialogHeader title={`Logs`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent>
         {keys ? (
-          keys?.length > 0 ?
+          keys?.length > 0 ? (
             <Box className={styles.main}>
               {keys?.map((key: string) => {
                 return (
@@ -172,6 +178,10 @@ const Logs = ({ handleClose, workOrderId = null }) => {
                               <h4 className={styles.logHead} dangerouslySetInnerHTML={{ __html: getHeadMessage(row) }} />
                               <p className={styles.logDetails}>
                                 {moment(row?.date).format('LT')} <span className={styles.timePassedBadge}>{moment(row?.date).fromNow()}</span>
+                                <span className={styles.timePassedBadge}>
+                                  <UserIcon style={{ marginRight: '5px' }} />
+                                  {row?.user?.optionLabel}
+                                </span>
                               </p>
                             </div>
                           </div>
@@ -181,7 +191,10 @@ const Logs = ({ handleClose, workOrderId = null }) => {
                   </div>
                 );
               })}
-            </Box> : <h5>No log found.</h5>
+            </Box>
+          ) : (
+            <h5>No log found.</h5>
+          )
         ) : (
           <Box p={2} height={500} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

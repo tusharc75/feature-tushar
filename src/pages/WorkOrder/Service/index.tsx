@@ -45,6 +45,7 @@ function convertMsToTime(milliseconds) {
   milliseconds = Math.abs(milliseconds);
 
   function padTo2Digits(num) {
+    num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
     return num.toString().padStart(2, '0');
   }
   let seconds = Math.floor(milliseconds / 1000);
