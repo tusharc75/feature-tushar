@@ -621,7 +621,7 @@ const Productpackage = ({
                     horizontal: 'right'
                   }}
                 >
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) ? 'Bulk edit selected records' : 'Select records to edit'}>
                     <MenuItem
                       onClick={() => {
                         setIsProductEdit({ open: true, isBulkedit: true });
@@ -631,7 +631,7 @@ const Productpackage = ({
                       Bulk Edit
                     </MenuItem>
                   </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) ? 'Delete selected records' : 'Select records to delete'}>
                     <MenuItem
                       disabled={isDeleting}
                       onClick={() => {
@@ -709,7 +709,7 @@ const Productpackage = ({
           rentalManagementData={rentalManagementData}
           rowData={recordToUpdate}
           material={material}
-          selectedProducts={selectedProducts}
+          selectedProducts={selectedProducts.filter((e) => !e.hideSelection)}
           loading={isUpdating}
         />
       )}
