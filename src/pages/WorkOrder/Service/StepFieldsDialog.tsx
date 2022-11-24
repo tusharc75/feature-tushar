@@ -232,7 +232,6 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                   <IconButton
                     aria-label="close"
                     onClick={() => {
-                      console.log(step);
                       setViewStep(true);
                     }}
                     size="small"
@@ -302,7 +301,6 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
               <IconButton
                 aria-label="close"
                 onClick={() => {
-                  console.log(step);
                   setViewStep(true);
                 }}
                 size="small"
