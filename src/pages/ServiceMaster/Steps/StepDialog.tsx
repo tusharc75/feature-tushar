@@ -30,7 +30,8 @@ export default function StepDialog({
   setOpenFieldDialog = null,
   handleAddStep = null,
   notEditable = false,
-  stepData = null
+  stepData = null,
+  isCustom = false
 }) {
   const {
     state: {
@@ -67,6 +68,28 @@ export default function StepDialog({
 
   useEffect(() => {
     if (notEditable) {
+      setStepDetails({
+        stepName: stepData?.stepName,
+        leadDay: stepData?.leadDay || 0,
+        costPrice: stepData?.costPrice || 0,
+        listPrice: stepData?.listPrice || 0,
+        currency: stepData?.currency || '',
+        isPassFail: stepData?.isPassFail,
+        isFailAddon: stepData?.isFailAddon,
+        failAddon: stepData?.failAddon,
+        isPassAddon: stepData?.isPassAddon,
+        passAddon: stepData?.passAddon,
+        isJumpStepPass: stepData?.isJumpStepPass,
+        jumpStepsPass: stepData?.jumpStepsPass,
+        isJumpStepFail: stepData?.isJumpStepFail,
+        jumpStepsFail: stepData?.jumpStepsFail,
+        isQuoteRevisionOnFail: stepData?.isQuoteRevisionOnFail,
+        isReturnToStepOnFail: stepData?.isReturnToStepOnFail,
+        returnToStepOnFail: stepData?.returnToStepOnFail,
+        isReturnToServiceOnFail: stepData?.isReturnToServiceOnFail,
+        returnToServiceOnFail: stepData?.returnToServiceOnFail
+      });
+    } else if (stepData && isCustom) {
       setStepDetails({
         stepName: stepData?.stepName,
         leadDay: stepData?.leadDay || 0,
@@ -141,13 +164,35 @@ export default function StepDialog({
   }, []);
 
   const handleSubmit = async (values) => {
+    console.log(reference, isCustom);
     values.leadDay = parseInt(values.leadDay);
     values.costPrice = parseFloat(values.costPrice);
     values.listPrice = parseFloat(values.listPrice);
     setLoading(true);
-    if (reference === 'workOrder') {
+    if (reference === 'workOrder' && !isCustom) {
       if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
       values.serviceId = serviceId;
+      try {
+        const data = await handleAddStep(values);
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
+        });
+        handleSucess();
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      }
+      return;
+    }
+    if (reference === 'workOrder' && isCustom) {
+      console.log('custom step');
+      if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
+      values.serviceId = serviceId;
+      console.log(stepData);
+      values.stepId = stepData?._id;
       try {
         const data = await handleAddStep(values);
         toastConfig.setToastConfig({
