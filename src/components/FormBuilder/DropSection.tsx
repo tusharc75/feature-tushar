@@ -46,7 +46,7 @@ export const DropSection = ({ module, fieldHoverId, setFieldHoverId, setSectionH
                     option = [{ optionLabel: "Option 1", optionValue: "Option 1" }]
                 }
                 let insert_object: any = {
-                    _id: (parseInt((Math.random() * 100000).toString())), fieldLabel: FieldList[type.toUpperCase()].label + " " + (count + 1), type: type, option: option,
+                    _id: (parseInt((Math.random() * 100000).toString())), fieldLabel: FieldList[type?.toUpperCase()]?.label + " " + (count + 1), type: type, option: option,
                     required: false, isTooltip: false, tooltipMessage: "", editAble: true, deletAble: true, order: 0
                 }
                 if (type === FieldList.FORMULA.type) {

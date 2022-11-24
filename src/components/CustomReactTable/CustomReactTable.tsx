@@ -298,7 +298,7 @@ export default function CustomReactTable({
           const rowOneColumn = row1.values[columnName];
           const rowTwoColumn = row2.values[columnName];
           if (isString(rowOneColumn)) {
-            return rowOneColumn.toUpperCase() > rowTwoColumn.toUpperCase() ? 1 : -1;
+            return rowOneColumn?.toUpperCase() > rowTwoColumn?.toUpperCase() ? 1 : -1;
           }
           return Number(rowOneColumn) > Number(rowTwoColumn) ? 1 : -1;
         }

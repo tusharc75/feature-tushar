@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const capitalize = (string) => {
-  return string && typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : string;
+  return string && typeof string === 'string' ? string?.charAt(0)?.toUpperCase() + string.slice(1) : string;
 };
 
 export const SearchFilter = ({ handleChangeFilter, filter, chip, dontShowMyActivity = false, activityName }) => {

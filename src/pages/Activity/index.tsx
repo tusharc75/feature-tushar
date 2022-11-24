@@ -15,7 +15,7 @@ import "./style.scss";
 import { isMobile } from "react-device-detect";
 
 const capitalize = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+  return string?.charAt(0)?.toUpperCase() + string?.slice(1);
 };
 
 const useStyles = makeStyles((theme) => ({

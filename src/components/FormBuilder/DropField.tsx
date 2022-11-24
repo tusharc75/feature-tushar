@@ -228,7 +228,7 @@ export const DropField = ({
               </Grid>
               <Grid item xs={5}>
                 <Box pt={1} color="text.secondary">
-                  <Typography variant="body2">{FieldList[data.type.toUpperCase()].label}</Typography>
+                  <Typography variant="body2">{FieldList[data?.type?.toUpperCase()]?.label}</Typography>
                 </Box>
               </Grid>
               <Grid item xs={2} container justify="flex-end">
