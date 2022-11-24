@@ -3,7 +3,7 @@ import { Dialog, Box, Grid, Button, Typography, IconButton } from '@material-ui/
 import { Form, Formik } from 'formik';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { yupSchema } from 'src/constants/helpers';
+import { workOrder, yupSchema } from 'src/constants/helpers';
 import { dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -14,11 +14,14 @@ import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import SettingsIcon from '@material-ui/icons/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
+import axiosInstance from 'src/axios/axiosInstance';
 
-const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, stepData, isStepValid, selectedService = null }) => {
+const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, workOrderId, stepData, isStepValid, selectedService = null }) => {
   const [isEditing, setEditing] = React.useState(false);
   const [viewStep, setViewStep] = React.useState(false);
   const [openFieldDialog, setOpenFieldDialog] = React.useState(false);
+
+  const [stepFields, setStepFields] = React.useState(step?.fields || []);
 
   const steps = selectedService?.steps || [];
 
@@ -117,6 +120,20 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
         )}
       </Grid>
     );
+  };
+
+  const handleUpdateStep = (values: any) => {
+    values.fields = stepFields?.fields;
+    return new Promise((resolve, reject) => {
+      axiosInstance()
+        .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`, values)
+        .then(({ data }) => {
+          resolve(data);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   };
 
   return (
@@ -344,14 +361,16 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
           handleSucess={() => {
             setViewStep(false);
           }}
+          handleAddStep={handleUpdateStep}
           stepId={''}
           stepData={step}
-          notEditable={true}
+          notEditable={step?.customStep === true ? false : true}
           steps={steps}
+          isCustom={step?.customStep === true ? true : false}
           reference={'workOrder'}
-          workOrderId={null}
-          serviceId={null}
-          uniqueId={null}
+          workOrderId={workOrderId}
+          serviceId={selectedService?._id}
+          uniqueId={selectedService?.uniqueId}
           setOpenFieldDialog={setOpenFieldDialog}
         />
       )}
@@ -362,12 +381,14 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
           stepIds={selectedService?.steps?.map((d) => d?._id)}
           steps={[]}
           sectionData={step?.fields}
-          notEditableField={true}
+          notEditableField={step?.customStep === true ? false : true}
+          isCustom={step?.customStep === true ? true : false}
           handleClose={() => {
             setOpenFieldDialog(false);
           }}
           handleSucess={(fieldsData: any) => {
             setOpenFieldDialog(false);
+            setStepFields(fieldsData);
           }}
         />
       )}
