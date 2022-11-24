@@ -39,6 +39,7 @@ import RotateLeftOutlinedIcon from '@material-ui/icons/RotateLeftOutlined';
 import RotateRightOutlinedIcon from '@material-ui/icons/RotateRightOutlined';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 
 function convertMsToTime(milliseconds) {
   milliseconds = Math.abs(milliseconds);
@@ -585,11 +586,15 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                         <Box ml={1}>
                                           {data?.preWork ? (
                                             <HtmlTooltip title="Pre Work Service">
-                                              <RotateLeftOutlinedIcon fontSize="small" />
+                                              <span>
+                                                <PreWorkIcon style={{ verticalAlign: 'middle' }} />
+                                              </span>
                                             </HtmlTooltip>
                                           ) : (
                                             <HtmlTooltip title="Post Work Service">
-                                              <RotateRightOutlinedIcon fontSize="small" />
+                                              <span>
+                                                <PostWorkIcon style={{ verticalAlign: 'middle' }} />
+                                              </span>
                                             </HtmlTooltip>
                                           )}
                                         </Box>
@@ -724,11 +729,15 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                     {data?.type === 'service' &&
                                       (data?.preWork ? (
                                         <HtmlTooltip title="Pre Work Service">
-                                          <RotateLeftOutlinedIcon fontSize="small" style={{ width: '15px', height: '15px' }} />
+                                          <span>
+                                            <PreWorkIcon style={{ verticalAlign: 'middle' }} />
+                                          </span>
                                         </HtmlTooltip>
                                       ) : (
                                         <HtmlTooltip title="Post Work Service">
-                                          <RotateRightOutlinedIcon fontSize="small" />
+                                          <span>
+                                            <PostWorkIcon style={{ verticalAlign: 'middle' }} />
+                                          </span>
                                         </HtmlTooltip>
                                       ))}
                                     {data?.type === 'service' && data?.assignedUsers?.length > 0 && (

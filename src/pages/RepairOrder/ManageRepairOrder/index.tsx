@@ -216,8 +216,17 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
         }
       }
       else {
+
         let initialData = { ...getObjKeys("", fieldsDataForCreate) };
         initialData['repairOrderNumber'] = `RO_${generateUniqueIdOnly()}`
+        if("Rental Job") {
+          initialData["warehouse"] = refrenceData?.warehouse;
+          // initialData["rentalJob"] = refrenceData?._id;
+          initialData["customerAccount"] = refrenceData?.customerAccount;
+          initialData["customerContact"] = refrenceData?.customerContact;
+          initialData["type"] = REPAIR_ORDER_TYPE.external;
+          
+        }
         setDisablePlantIfAssetAdded(false);
         setRepairOrderInitialData({
           fields: fieldsDataForCreate,
