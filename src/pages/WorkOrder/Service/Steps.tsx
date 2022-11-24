@@ -610,9 +610,13 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
         </div>
         <StepFieldsDialog
           isOpen={Boolean(selectedStep)}
+          workOrderId={workOrderId}
           fieldData={getFields(selectedStep)?.fieldData}
           isStepValid={getFields(selectedStep)?.isStepValid}
-          handleClose={() => setSelectedStep(null)}
+          handleClose={() => {
+            setSelectedStep(null);
+            getServiceData();
+          }}
           handleSubmit={handleSubmit}
           selectedService={selectedService}
           step={selectedStep}
