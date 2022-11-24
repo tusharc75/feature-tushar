@@ -332,8 +332,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const createNewVersionQuote = () => {
-    axiosInstance()
-      .post(`/quotation/clone-version/${quotationData._id}/${quotationData.versionId}`)
+    axiosInstance().put(`/repair-order/${workOrderData?.repairOrder?.optionValue}/quotation/clone-version`)
       .then(() => {
         fetchRepairOrderData();
       })

@@ -418,6 +418,18 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       errors['warningTooltipMessage'] = 'Please enter warning message.';
     }
 
+    if (values?.isMinMaxValue) {
+      if (!values?.minValue) {
+        errors["minValue"] = "Please enter min value";
+      }
+      if (!values?.maxValue) {
+        errors["maxValue"] = "Please enter max value";
+      }
+      if (values?.minValue >= values?.maxValue) {
+        errors["minValue"] = "Please enter valid min value";
+      }
+    }
+
     return errors;
   }
 
@@ -1224,9 +1236,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       values={values}
                       setFieldValue={setFieldValue}
                       handleValuesChange={handleValuesChange}
+                      errors={errors}
+                      touched={touched}
                     />
                   )}
-
                   {module === "form-builder-master" &&
                     <Box>
                       <hr />
