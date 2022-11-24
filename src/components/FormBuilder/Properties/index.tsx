@@ -453,7 +453,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
             <CustomDialogHeader
-              title={`${values['fieldLabel']} - ${FieldList[fieldData.type.toUpperCase()].label} Properties`}
+              title={`${values['fieldLabel']} - ${FieldList[fieldData?.type?.toUpperCase()]?.label} Properties`}
               onClose={() => {
                 if (Object.keys(formValues).length > 0) {
                   setShowConfirmDialog(true);

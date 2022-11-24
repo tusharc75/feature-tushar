@@ -22,12 +22,9 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
 
   const steps = selectedService?.steps || [];
 
-  function padTo2Digits(num) {
-    return num.toString().padStart(2, '0');
-  }
-
   function convertMsToTime(milliseconds) {
     function padTo2Digits(num) {
+      num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
       return num.toString().padStart(2, '0');
     }
     let seconds = Math.floor(milliseconds / 1000);
@@ -56,7 +53,6 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
 
   const RenderStepData = () => {
     const [time, setTime] = React.useState(convertMsToTime(new Date().getTime() - new Date(stepData?.startDate).getTime()));
-
     React.useEffect(() => {
       const interval = setInterval(() => {
         setTime(convertMsToTime(new Date().getTime() - new Date(stepData?.startDate).getTime()));
@@ -236,7 +232,6 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                   <IconButton
                     aria-label="close"
                     onClick={() => {
-                      console.log(step);
                       setViewStep(true);
                     }}
                     size="small"
@@ -255,6 +250,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                         <Button variant="outlined" size="small" onClick={handleClose} color="primary">
                           Close
                         </Button>
+                        <Box ml={1} />
                         <Button variant="contained" size="small" onClick={() => setEditing(true)} color="primary">
                           Edit
                         </Button>
@@ -264,6 +260,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                         <Button variant="outlined" size="small" onClick={handleClose} color="primary">
                           Cancel
                         </Button>
+                        <Box ml={1} />
                         <Button
                           variant="contained"
                           size="small"
@@ -304,7 +301,6 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
               <IconButton
                 aria-label="close"
                 onClick={() => {
-                  console.log(step);
                   setViewStep(true);
                 }}
                 size="small"
