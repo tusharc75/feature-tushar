@@ -13,7 +13,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 
-export default function Version({ onClose, quotationId, handleChangeVersion }) {
+export default function Version({ onClose, quotationId, handleChangeVersion, refrenceType = "" }) {
+
   const renderedFrom = `${camelCase(routes?.quotation.title)}_versions`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -35,14 +36,16 @@ export default function Version({ onClose, quotationId, handleChangeVersion }) {
   }, [quotationId]);
 
   const NameRenderer = (params) => (
-    <span
-      className="link"
-      onClick={() => {
-        handleChangeVersion(params.data.version);
-      }}
-    >
-      <CustomRenderCell value={params?.value} />
-    </span>
+    refrenceType === "rentalJob" || refrenceType === "repairOrder" ?
+      <span>{params.data.version}</span> :
+      <span
+        className="link"
+        onClick={() => {
+          handleChangeVersion(params.data.version);
+        }}
+      >
+        <CustomRenderCell value={params?.value} />
+      </span>
   );
 
   const frameworkComponents = {

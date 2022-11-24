@@ -209,6 +209,7 @@ export const AddField = (props) => {
         errors["vlookupInputFields"] = "Please select input parameters";
       }
     }
+ 
     return errors;
   }
 

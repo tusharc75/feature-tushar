@@ -170,6 +170,7 @@ const ReceivingTicket = ({
         productAssets = productAssets?.map((u) => ({
           ...u,
           type: 'Asset',
+          displayType: 'Asset',
           qty: 1,
           productName: u?.product?.optionLabel,
           warehouse: u?.warehouse?.optionLabel,
@@ -199,6 +200,7 @@ const ReceivingTicket = ({
           .map((u) => ({
             ...u,
             type: 'Asset',
+            displayType: 'Asset',
             qty: 1,
             productName: u?.product?.optionLabel,
             productId: u?.product?.optionValue,
@@ -237,23 +239,15 @@ const ReceivingTicket = ({
 
       products?.forEach((element) => {
         var qty = element.qty;
-
-        const parentProduct = material.find((p) => p?._id === element?.parentId)?.productDetail;
-
         var consumeQty = 0;
-
-        consumeProducts
-          ?.filter((e) => e.product === element.materialId)
-          ?.forEach((e) => {
-            consumeQty = consumeQty + e.qty;
-          });
-
+        consumeProducts?.filter((e) => e.product === element.materialId)?.forEach((e) => { consumeQty = consumeQty + e.qty; });
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
           const obj: any = {};
           obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
           obj.materialId = element?.productDetail?._id;
           obj.type = 'Product';
+          obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = ele.qty;
           obj.consumeQty = consumeQty;
           obj.assetNumber = element?.productDetail?.productName;
@@ -262,7 +256,6 @@ const ReceivingTicket = ({
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.status = element?.status;
-          obj.parentProductId = parentProduct ? parentProduct?._id : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.rentalAssetStatus = element?.status;
@@ -281,11 +274,11 @@ const ReceivingTicket = ({
           obj._id = element.materialId;
           obj.materialId = element?.materialId;
           obj.type = 'Product';
+          obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = qty;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.consumeQty = consumeQty;
-          obj.parentProductId = parentProduct ? parentProduct?._id : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -430,12 +423,11 @@ const ReceivingTicket = ({
 
   const ParentNameRenderer = (params) =>
     params.data?.parentId ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentProductId}`}>
-        {params?.data?.parentName}
-      </Link>
+      <span>{params?.data?.parentName}</span>
     ) : (
       <NoDataCell />
     );
+
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
@@ -532,7 +524,7 @@ const ReceivingTicket = ({
         return null;
       }
     },
-    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'displayType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: findHeader(columnHeader?.assetFields, 'serialNumber'), show: true, cellRenderer: 'commonRenderer' },
