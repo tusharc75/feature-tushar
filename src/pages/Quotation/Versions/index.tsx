@@ -36,7 +36,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
   }, [quotationId]);
 
   const NameRenderer = (params) => (
-    refrenceType === "rentalJob" ?
+    refrenceType === "rentalJob" || refrenceType === "repairOrder" ?
       <span>{params.data.version}</span> :
       <span
         className="link"
