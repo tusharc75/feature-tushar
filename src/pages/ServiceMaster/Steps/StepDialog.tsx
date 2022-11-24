@@ -60,7 +60,7 @@ export default function StepDialog({
 
   useEffect(() => {
     const sortedArr = getUniqueCurrencies().sort((a, b) =>
-      a.name.toUpperCase() < b.name.toUpperCase() ? -1 : a.name.toUpperCase() > b.name.toUpperCase() ? 1 : 0
+      a?.name?.toUpperCase() < b?.name?.toUpperCase() ? -1 : a?.name?.toUpperCase() > b?.name?.toUpperCase() ? 1 : 0
     );
     setCurrencyData(sortedArr);
   }, []);
