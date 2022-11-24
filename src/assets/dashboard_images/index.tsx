@@ -29,8 +29,8 @@ export const IconConst = {
   COLABORATION_TOOL: 'Colab'
 };
 
-export const IMAGE_HEIGHT = 40;
-export const IMAGE_WIDTH = 40;
+export const IMAGE_HEIGHT = 56;
+export const IMAGE_WIDTH = 56;
 
 export const SVG = (name) => {
   switch (name) {

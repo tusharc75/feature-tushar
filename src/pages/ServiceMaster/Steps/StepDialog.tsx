@@ -60,7 +60,7 @@ export default function StepDialog({
 
   useEffect(() => {
     const sortedArr = getUniqueCurrencies().sort((a, b) =>
-      a.name.toUpperCase() < b.name.toUpperCase() ? -1 : a.name.toUpperCase() > b.name.toUpperCase() ? 1 : 0
+      a?.name?.toUpperCase() < b?.name?.toUpperCase() ? -1 : a?.name?.toUpperCase() > b?.name?.toUpperCase() ? 1 : 0
     );
     setCurrencyData(sortedArr);
   }, []);
@@ -145,10 +145,8 @@ export default function StepDialog({
     values.costPrice = parseFloat(values.costPrice);
     values.listPrice = parseFloat(values.listPrice);
     setLoading(true);
-
     if (reference === 'workOrder') {
       if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
-
       values.serviceId = serviceId;
       try {
         const data = await handleAddStep(values);
@@ -158,13 +156,11 @@ export default function StepDialog({
           severity: 'success'
         });
         handleSucess();
-
         setLoading(false);
       } catch (error) {
         setLoading(false);
         toastConfig.setToastConfig(error);
       }
-
       return;
     }
     if (stepId != '') {

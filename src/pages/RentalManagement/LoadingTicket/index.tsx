@@ -120,6 +120,7 @@ const LoadingTicket = ({
         productAssets = productAssets?.map((u) => ({
           ...u,
           type: 'Asset',
+          displayType: 'Asset',
           qty: 1,
           productName: u?.product?.optionLabel,
           warehouse: u?.warehouse?.optionLabel,
@@ -140,6 +141,7 @@ const LoadingTicket = ({
           .map((u) => ({
             ...u,
             type: 'Asset',
+            displayType: 'Asset',
             qty: 1,
             productName: u?.product?.optionLabel,
             productId: u?.product?.optionValue,
@@ -178,18 +180,17 @@ const LoadingTicket = ({
       products?.forEach((element) => {
         var qty = element.qty;
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
-        const parentProduct = material.find((p) => p?._id === element?.parentId)?.productDetail;
         ticketProduct?.forEach((ele) => {
           const obj: any = {};
           obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
           obj.type = 'Product';
+          obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = ele.qty;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.parentId = element?.parentId;
-          obj.parentProductId = parentProduct ? parentProduct?._id : '';
           obj.parentName = element?.parentName;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.status = element?.status;
@@ -204,10 +205,10 @@ const LoadingTicket = ({
           const obj: any = {};
           obj._id = element.materialId;
           obj.type = 'Product';
+          obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = qty;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
-          obj.parentProductId = parentProduct ? parentProduct?._id : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -319,9 +320,7 @@ const LoadingTicket = ({
 
   const ParentNameRenderer = (params) =>
     params.data?.parentId ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentProductId}`}>
-        {params?.data?.parentName}
-      </Link>
+      <span>{params?.data?.parentName}</span>
     ) : (
       <NoDataCell />
     );
@@ -379,7 +378,7 @@ const LoadingTicket = ({
         return null;
       }
     },
-    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'displayType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: findHeader(columnHeader?.assetFields, 'serialNumber'), show: true, cellRenderer: 'commonRenderer' },

@@ -397,6 +397,9 @@
     --columns: 7fr 3fr;
     --gap: 36px;
     --seciton_padding: 47px 0 71px;
+    .rightContainer {
+      margin-top: 78px;
+    }
   }
   padding: var(--seciton_padding, 40px 0);
   display: grid;
