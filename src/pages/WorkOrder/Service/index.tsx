@@ -38,7 +38,6 @@ import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
 import RotateLeftOutlinedIcon from '@material-ui/icons/RotateLeftOutlined';
 import RotateRightOutlinedIcon from '@material-ui/icons/RotateRightOutlined';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
-import moment from 'moment';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 function convertMsToTime(milliseconds) {
@@ -74,11 +73,9 @@ function convertMsToTime(milliseconds) {
 
 const RenderTotalTime = ({ steps, startTimes, endTimes }) => {
   const [time, setTime] = useState(null);
-
   useEffect(() => {
     startTimes = startTimes.filter((item) => !isNaN(item));
     endTimes = endTimes.filter((item) => !isNaN(item));
-
     const min = Math.min(...startTimes);
     const max = Math.max(...endTimes);
     if (startTimes.length !== endTimes.length) {
@@ -92,9 +89,7 @@ const RenderTotalTime = ({ steps, startTimes, endTimes }) => {
       setTime(convertMsToTime(max - min));
     }
   }, [startTimes, endTimes]);
-
   if (startTimes.length === 0) return <></>;
-
   return (
     <Box
       style={{
@@ -114,12 +109,9 @@ const RenderTotalTime = ({ steps, startTimes, endTimes }) => {
 };
 
 const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
+  const { state: { user: { user } } } = useData();
   const [serviceSteps, setServiceSteps] = useState(null);
   const [disabledServicesOrder, setDisabledServicesOrder] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
@@ -152,27 +144,25 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       .then(({ data: { data } }) => {
         if (data.type === 'Repair Order') {
           let tempRepairOrderId = data?.repairOrder?.optionValue;
-          axiosInstance()
-            .get(`${repairOrder.api}/${tempRepairOrderId}`)
-            .then(({ data: { data } }) => {
-              if (data.type !== REPAIR_ORDER_TYPE.internal) {
-                setIsQuotationStep(true);
-                axiosInstance()
-                  .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
-                  .then(({ data: { data } }) => {
-                    if (data) {
-                      let keys = Object.keys(data?.versions);
-                      if (keys?.length) {
-                        const status = data.versions[parseInt(keys[keys.length - 1])]?.status;
-                        setQuotationData({ quotationNumber: data?.quotationNumber, status: status });
-                      }
+          axiosInstance().get(`${repairOrder.api}/${tempRepairOrderId}`).then(({ data: { data } }) => {
+            if (data.type !== REPAIR_ORDER_TYPE.internal) {
+              setIsQuotationStep(true);
+              axiosInstance()
+                .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
+                .then(({ data: { data } }) => {
+                  if (data) {
+                    let keys = Object.keys(data?.versions);
+                    if (keys?.length) {
+                      const version = data.versions[parseInt(keys[keys.length - 1])];
+                      setQuotationData({ _id: data?._id, versionId: version?._id, quotationNumber: data?.quotationNumber, status: version?.status });
                     }
-                  });
-                fetchService(true);
-              } else {
-                fetchService(false);
-              }
-            });
+                  }
+                });
+              fetchService(true);
+            } else {
+              fetchService(false);
+            }
+          });
         } else {
           fetchService(false);
         }
@@ -218,7 +208,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 
           if (
             preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
-              preWorkService?.length &&
+            preWorkService?.length &&
             postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
           ) {
             if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
@@ -253,27 +243,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const handleCloseMenu = (event) => {
     event.stopPropagation();
     setAnchorEl(null);
-  };
-
-  const handleRemoveService = (id) => {
-    axiosInstance()
-      .put(`${workOrder.api}/service/${workOrderId}/remove`, {
-        uniqueIds: [id]
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        fetchService();
-        if (id === selectedService?.uniqueId) {
-          setSelectedService(null);
-        }
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
   };
 
   const handleArrangeUpdate = (rows: any[]) => {
@@ -324,10 +293,52 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     axiosInstance()
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
-        fetchService();
+        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData.status)) {
+          createNewVersionQuote()
+        }
+        else {
+          fetchService();
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleRemoveService = (id) => {
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/remove`, {
+        uniqueIds: [id]
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData.status)) {
+          createNewVersionQuote()
+        }
+        else {
+          fetchService();
+        }
+        if (id === selectedService?.uniqueId) {
+          setSelectedService(null);
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const createNewVersionQuote = () => {
+    axiosInstance()
+      .post(`/quotation/clone-version/${quotationData._id}/${quotationData.versionId}`)
+      .then(() => {
+        fetchRepairOrderData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -353,8 +364,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         borderRadius: '3px'
       };
@@ -367,8 +378,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -395,8 +406,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
             ? '#E9FFE8'
             : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -409,8 +420,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
             ? '#E9FFE8'
             : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         borderColor: 'rgb(224, 224, 224)',
         cursor: 'pointer'
       };
@@ -419,7 +430,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 
   const handleAddStep = (values: any) => {
     values.fields = addStepFields?.fields;
-
     return new Promise((resolve, reject) => {
       axiosInstance()
         .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
@@ -432,11 +442,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     });
   };
 
-  const getFields = (step: any, serviceData) => {
-    const id = step?._id;
-    const steps = serviceData?.filter((item: any) => item.serviceId === id);
-    return steps;
-  };
   const getFieldsWithOtherDetails = (step: any, serviceData) => {
     const id = step?._id;
     const steps = serviceData?.filter((item: any) => item.serviceId === id);
@@ -444,34 +449,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     let endTimes = steps.map((item) => new Date(item?.endDate).getTime());
     return { steps, startTimes, endTimes };
   };
-
-  function convertMsToTime(milliseconds) {
-    function padTo2Digits(num) {
-      return num.toString().padStart(2, '0');
-    }
-    let seconds = Math.floor(milliseconds / 1000);
-    let minutes = Math.floor(seconds / 60);
-    let hours = Math.floor(minutes / 60);
-
-    seconds = seconds % 60;
-    minutes = minutes % 60;
-
-    let time = '';
-
-    if (hours === 0) {
-      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-    }
-    if (hours === 0 && minutes === 0) {
-      time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-    }
-    if (hours > 0 && hours < 24) {
-      time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-    }
-    if (hours >= 24) {
-      time = `${padTo2Digits(hours / 24)}d`;
-    }
-    return time;
-  }
 
   return (
     <Box p={2}>
@@ -647,21 +624,21 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                     data?.order > disabledServicesOrder ||
                                     (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
                                   ) && (
-                                    <Grid item xs={2} container justify="flex-end">
-                                      <IconButton
-                                        size="small"
-                                        color="primary"
-                                        aria-label="delete"
-                                        disabled={!isAllowedToServiceEdit}
-                                        onClick={(event) => {
-                                          handleOpenMenu(event);
-                                          setSelectedService(data);
-                                        }}
-                                      >
-                                        <MoreHorizIcon />
-                                      </IconButton>
-                                    </Grid>
-                                  )}
+                                      <Grid item xs={2} container justify="flex-end">
+                                        <IconButton
+                                          size="small"
+                                          color="primary"
+                                          aria-label="delete"
+                                          disabled={!isAllowedToServiceEdit}
+                                          onClick={(event) => {
+                                            handleOpenMenu(event);
+                                            setSelectedService(data);
+                                          }}
+                                        >
+                                          <MoreHorizIcon />
+                                        </IconButton>
+                                      </Grid>
+                                    )}
                                 </>
                               )}
                             </Grid>
@@ -915,7 +892,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               <Box>
                 {selectedService?.type === 'service' ? (
                   allowedToEdit ||
-                  (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                     <Steps
                       workOrderId={workOrderId}
                       selectedService={selectedService}

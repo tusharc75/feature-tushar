@@ -400,7 +400,8 @@ const AddSerializedAsset = ({ renderedFrom = 'addSerializedAssets', isAdding, ad
                                         width={isMobile && !isTablet ? '75%' : "100%"}
                                     />
                                 </Box>
-                                {(getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) &&
+                                {permissions?.transferAsset?.isCreate &&
+                                    (getLocalStorageArrayData(`${localStorageSelectedRecords}`).length !== 0 && !checkUniqWarehouse()) &&
                                     <Box pl={1}>
                                         <Button
                                             size="small"
