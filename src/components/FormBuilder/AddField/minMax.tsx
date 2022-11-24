@@ -7,11 +7,10 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from "../../../StateProvider/CustomToastContext/CustomToastContext";
 import { Checkbox, FormControlLabel, Grid } from '@material-ui/core';
 
-export const MinMax = ({ values, setFieldValue, handleValuesChange }) => {
+export const MinMax = ({ values, setFieldValue, handleValuesChange, touched, errors }) => {
 
     const toastConfig = useContext(CustomToastContext)
     const [services, setServices] = useState([]);
-
 
     useEffect(() => {
         axiosInstance()
@@ -49,13 +48,14 @@ export const MinMax = ({ values, setFieldValue, handleValuesChange }) => {
                         margin="dense"
                         type="number"
                         value={values["minValue"]}
+                        error={touched['minValue'] && Boolean(errors['minValue'])}
+                        helperText={touched['minValue'] && errors['minValue']}
                         onChange={(e) => {
                             setFieldValue('minValue', parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
                             handleValuesChange({
                                 minValue: parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
                             });
-                        }
-                        }
+                        }}
                     />
                 </Grid>
                 <Grid item xs={12} sm={6} md={6}>
@@ -67,15 +67,15 @@ export const MinMax = ({ values, setFieldValue, handleValuesChange }) => {
                         margin="dense"
                         type="number"
                         value={values["maxValue"]}
+                        error={touched['maxValue'] && Boolean(errors['maxValue'])}
+                        helperText={touched['maxValue'] && errors['maxValue']}
                         onChange={(e) => {
                             setFieldValue('maxValue', parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
                             handleValuesChange({
                                 maxValue: parseFloat(e.target.value.replace(/[^0-9\.]/g, ''))
                             });
-                        }
-                        }
+                        }}
                     />
-
                 </Grid>
                 {services.length !== 0 && <>
                     <Grid item xs={12} sm={6} md={6}>

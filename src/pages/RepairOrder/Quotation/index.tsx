@@ -71,6 +71,7 @@ const Quotation = ({
   stepFullScreen,
   allowedToEdit,
   allowedToDelete,
+  setQuotationVersionData,
   invoiceStep = false,
 }) => {
 
@@ -105,7 +106,7 @@ const Quotation = ({
 
   useEffect(() => {
     fetchQuotationData();
-  }, []);
+  }, [repairOrderData]);
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
@@ -115,6 +116,7 @@ const Quotation = ({
         let keys = Object.keys(data.versions);
         let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1])
         setCurrentVersion(tempCurrentVersion);
+        setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] })
         setNextStep(data?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false)
       });
   };
@@ -170,17 +172,17 @@ const Quotation = ({
           </div>
         )
       },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-        Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-          return <>{total}</>;
-        }
-      }
+      // {
+      //   accessor: 'leadTime',
+      //   Header: 'Lead Time (Days)',
+      //   Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+      //   Footer: (info) => {
+      //     const total = info.rows
+      //       .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+      //       .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+      //     return <>{total}</>;
+      //   }
+      // }
     ];
     data.forEach((element) => {
       if (element.type === 'date') {
@@ -765,7 +767,12 @@ const Quotation = ({
         />
       )}
       {quotationData && showAllVersionStatus && (
-        <Versions onClose={() => setShowAllVersionStatus(false)} quotationId={quotationData?._id} handleChangeVersion={handleChangeVersion} />
+        <Versions
+          onClose={() => setShowAllVersionStatus(false)}
+          quotationId={quotationData?._id}
+          handleChangeVersion={handleChangeVersion}
+          refrenceType="repairOrder"
+        />
       )}
       {customerAcceptable && (
         <ManualReponseDialog
