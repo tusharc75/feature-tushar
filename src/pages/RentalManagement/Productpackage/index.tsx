@@ -188,19 +188,17 @@ const Productpackage = ({
         accessor: 'description',
         Header: 'Description',
         width: 200,
-        Cell: ({ row }) =>
-          row.original['type'] ? (
-            row.original['type'] === 'product' && row.original?.productDetail?.productDesc ?
-              <p>{row.original?.productDetail?.productDesc}</p>
-              : row.original?.type === 'package' && row.original?.packageDetail.packageDescription ?
-                <p>{row.original?.packageDetail.packageDescription}</p>
-                : row.original.type === 'service' && row?.original?.serviceDetail?.serviceDescription ?
-                  <p>{row?.original?.serviceDetail?.serviceDescription}</p> : <NoDataCell />
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => {
+          return row.original['description'] ?
+            <p className="text-truncate">
+              {row.original.description}</p>
+            : (
+              <NoDataCell />
+            )
+        }
       },
     ];
+
     data.forEach((element) => {
       if (element.fieldName === 'price' && element.required) {
         setIsRateRequired(true);
@@ -353,14 +351,11 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName
-        }`;
+      parent.detail = `${parent.type === 'service' ? parent.serviceDetail ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName
+        : parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.description = parent.type === 'service' ? parent?.serviceDetail?.serviceDescription || ''
+        : parent.type === 'product' ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -385,16 +380,15 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service'
-        ? _subRow.serviceDetail
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-        : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName :
+        _subRow.type === 'package' ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'product' ? _subRow.productDetail?.productName
+            : ''} `;
+      _subRow.description = _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceDescription || ''
+        : _subRow.type === 'product' ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || '' : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
@@ -458,12 +452,12 @@ const Productpackage = ({
           e.pricingMethod === element.pricingMethod
       );
       if (element.listPrice) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()} `;
         element[priceFieldName] = element.listPrice;
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
         Object.assign(element, calValues);
       } else if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()} `;
         element[priceFieldName] = rateResult[0].mrp;
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
         Object.assign(element, calValues);
