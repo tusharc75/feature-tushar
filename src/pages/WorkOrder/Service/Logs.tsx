@@ -126,28 +126,28 @@ const Logs = ({ handleClose, workOrderId = null }) => {
     let message;
     switch (row?.operation) {
       default:
-        message = `Updated value <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> `;
+        message = `<span>Updated value</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
         break;
       case operations.completed:
-        message = `<span>Completed</span> <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> <span class='${styles.badgeComplete} ${styles.badge}'>${operations.completed}</span>`;
+        message = `<span>Completed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
         break;
       case operations.start:
-        message = `<span>Started</span> <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> `;
+        message = `<span>Started</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
         break;
       case operations.passed:
-        message = `<span>Passed</span> <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> <span class='${styles.badgePass}  ${styles.badge}'>${operations.passed}</span>`;
+        message = `<span>Passed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
         break;
       case operations.failed:
-        message = `<span>Failed</span> <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> <span class='${styles.badgeFail}   ${styles.badge}'>${operations.failed}</span>`;
+        message = `<span>Failed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
         break;
       case operations.valueAdded:
-        message = `Added value <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> `;
+        message = `<span>Added value</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
         break;
       case operations.consumed:
-        message = `Consumed <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> `;
+        message = `<span>Consumed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
         break;
       case operations.valueUpdated:
-        message = `Updated value <span class='${styles.service} ${styles.badge}'>${row?.service?.optionLabel}</span>  <span class='${styles.step} ${styles.badge}'>${row?.step?.optionLabel}</span> `;
+        message = `<span>Updated value</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
         break;
     }
     return message;
@@ -177,7 +177,8 @@ const Logs = ({ handleClose, workOrderId = null }) => {
                             <div className={styles.textContainer}>
                               <h4 className={styles.logHead} dangerouslySetInnerHTML={{ __html: getHeadMessage(row) }} />
                               <p className={styles.logDetails}>
-                                {moment(row?.date).format('LT')} <span className={styles.timePassedBadge}>{moment(row?.date).fromNow()}</span>
+                                {moment(row?.date).format('LT')}
+                                <span> {moment(row?.date).fromNow()}</span>
                                 <span className={styles.timePassedBadge}>
                                   <UserIcon style={{ marginRight: '5px' }} />
                                   {row?.user?.optionLabel}

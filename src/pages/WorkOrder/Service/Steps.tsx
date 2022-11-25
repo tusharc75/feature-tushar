@@ -24,7 +24,6 @@ import StepFieldsDialog from './StepFieldsDialog';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import CompleteDialog from './CompleteDialog';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
-import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
 
 function convertMsToTime(milliseconds) {
   milliseconds = Math.abs(milliseconds);
@@ -180,6 +179,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '' }) => {
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -232,7 +232,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
-  }, [addServiceConfirmation, selectedService._id, serviceData]);
+  }, [addServiceConfirmation, selectedService, serviceData]);
 
   const getServiceData = () => {
     axiosInstance()
@@ -265,16 +265,21 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
 
   const handleAddStep = (values: any) => {
     values.fields = addStepFields?.fields;
-    return new Promise((resolve, reject) => {
-      axiosInstance()
-        .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
-        .then(({ data }) => {
-          resolve(data);
-        })
-        .catch((err) => {
-          reject(err);
+    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
         });
-    });
+        setAssignSteps(false);
+        getServiceData();
+        fetchService();
+        setAddStepFields({ fields: [], section: [] });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleAddService = (ids, forMinMax = false, step = null, values = null) => {
@@ -503,15 +508,13 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                   transition: 'background .5s ease',
                   backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                 }}
-                className={`${classes.accordionHeading}  ${
-                  Boolean(stepData?.passFailStatus)
-                    ? `${
-                        Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                          ? classes.green
-                          : ''
-                      } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                    : classes.white
-                }`}
+                className={`${classes.accordionHeading}  ${Boolean(stepData?.passFailStatus)
+                  ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                    ? classes.green
+                    : ''
+                  } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                  : classes.white
+                  }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!stepData?.status) return;
@@ -640,11 +643,11 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             message={
               addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
                 ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
-                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
+                addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
                 : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
-                ? `On pass, a new service has been added in compliance with the configuration ` +
+                  ? `On pass, a new service has been added in compliance with the configuration ` +
                   addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : `You have to add addional services based on your recent action`
+                  : `You have to add addional services based on your recent action`
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
@@ -673,36 +676,15 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             handleClose={() => {
               setAssignSteps(false);
             }}
-            handleSucess={() => {
-              setAssignSteps(false);
-              getServiceData();
-              fetchService();
-              setAddStepFields({ fields: [], section: [] });
+            handleSucess={(data) => {
+              handleAddStep(data)
             }}
-            handleAddStep={handleAddStep}
             stepId={''}
             steps={selectedService?.steps}
             reference={'workOrder'}
             workOrderId={workOrderId}
             serviceId={selectedService?._id}
             uniqueId={selectedService?.uniqueId}
-            setOpenFieldDialog={setOpenFieldDialog}
-          />
-        )}
-        {openFieldDialog && (
-          <FieldDialog
-            reference={'workOrder'}
-            serviceId={selectedService?._id}
-            stepIds={selectedService?.steps?.map((d) => d?._id)}
-            steps={[]}
-            sectionData={addStepFields?.section}
-            handleClose={() => {
-              setOpenFieldDialog(false);
-            }}
-            handleSucess={(fieldsData: any) => {
-              setOpenFieldDialog(false);
-              setAddStepFields(fieldsData);
-            }}
           />
         )}
       </>
