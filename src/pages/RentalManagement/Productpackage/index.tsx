@@ -47,6 +47,7 @@ import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
 import StorefrontIcon from '@material-ui/icons/Storefront';
 import AllOutIcon from '@material-ui/icons/AllOut';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 
 const Productpackage = ({
   rentalManagementData,
@@ -83,6 +84,9 @@ const Productpackage = ({
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
 
+  const [priceDataDialog, setPriceDataDialog] = useState({ open: false, rentalManagementData: null, material: null, });
+  const [priceData, setPriceData] = useState([]);
+
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -92,6 +96,10 @@ const Productpackage = ({
   useEffect(() => {
     fetchProductInventory();
   }, [columns]);
+
+  useEffect(() => {
+    if (priceData.length !== 0) { InitializeRowsData(); }
+  }, [priceData]);
 
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
@@ -420,6 +428,7 @@ const Productpackage = ({
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
+      element.detail = d.type === "product" ? d?.productName : d.type === "package" ? d?.packageName : "";
       element.type = addExistingProductDialog.type;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -438,12 +447,54 @@ const Productpackage = ({
       element.listPrice = d.listPrice ? d.listPrice : null;
       material.push(element);
     });
+    if (material.filter((d) => d.listPrice === null).length === 0) {
+      InitializeRowsData(material)
+    }
+    else {
+      setPriceDataDialog({ open: true, rentalManagementData: rentalManagementData, material: material })
+    }
+    // const priceData: any = await calculatePrice(
+    //   rentalManagementData,
+    //   material.filter((d) => d.listPrice === null)
+    // );
+    // material.forEach((element) => {
+    //   const rateResult = priceData?.filter(
+    //     (e) =>
+    //       e.materialId === element.materialId &&
+    //       e.materialType === element.type &&
+    //       e.unit === element.unit &&
+    //       e.pricingMethod === element.pricingMethod
+    //   );
+    //   if (element.listPrice) {
+    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+    //     element[priceFieldName] = element.listPrice;
+    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+    //     Object.assign(element, calValues);
+    //   } else if (rateResult.length && rateResult[0].mrp) {
+    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+    //     element[priceFieldName] = rateResult[0].mrp;
+    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    //     Object.assign(element, calValues);
+    //   }
+    // });
 
-    const priceData: any = await calculatePrice(
-      rentalManagementData,
-      material.filter((d) => d.listPrice === null)
-    );
-    material.forEach((element) => {
+    // axiosInstance()
+    //   .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
+    //   .then(() => {
+    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
+    //     fetchProductInventory();
+    //     setAddingProducts(false);
+    //   })
+    //   .catch((error) => {
+    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
+    //     toastConfig.setToastConfig(error);
+    //     setAddingProducts(false);
+    //   });
+  };
+
+  const InitializeRowsData = async (materialData: any = null) => {
+    let tempMaterial = materialData ? materialData : priceDataDialog?.material
+    tempMaterial.forEach((element) => {
       const rateResult = priceData?.filter(
         (e) =>
           e.materialId === element.materialId &&
@@ -465,16 +516,18 @@ const Productpackage = ({
     });
 
     axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
+      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
         setAddingProducts(false);
+        setPriceDataDialog({ open: false, rentalManagementData: null, material: null, })
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
+        setPriceDataDialog({ open: false, rentalManagementData: null, material: null, })
       });
   };
 
@@ -766,6 +819,13 @@ const Productpackage = ({
           </MenuList>
         </Popover>
       )}
+      {priceDataDialog.open &&
+        <CalculatePriceDialog
+          rentalManagementData={priceDataDialog.rentalManagementData}
+          material={priceDataDialog.material}
+          setPriceData={setPriceData}
+          onClose={() => setPriceDataDialog({ open: false, rentalManagementData: null, material: null, })}
+        />}
     </Fragment>
   );
 };

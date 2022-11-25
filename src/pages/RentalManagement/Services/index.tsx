@@ -32,6 +32,7 @@ import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
 import StorefrontIcon from '@material-ui/icons/Storefront';
 import AllOutIcon from '@material-ui/icons/AllOut';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 
 const Services = ({
   rentalManagementData,
@@ -67,6 +68,9 @@ const Services = ({
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
 
+  const [priceDataDialog, setPriceDataDialog] = useState({ open: false, rentalManagementData: null, material: null, });
+  const [priceData, setPriceData] = useState([]);
+
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -76,6 +80,10 @@ const Services = ({
   useEffect(() => {
     fetchProductInventory();
   }, [columns]);
+
+  useEffect(() => {
+    if (priceData.length !== 0) { InitializeRowsData(); }
+  }, [priceData]);
 
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
@@ -392,9 +400,10 @@ const Services = ({
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
+      element.detail = d?.serviceName || d?.packageName || "";
       element.type = addExistingProductDialog.type;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : d.unit ? d.unit : '';
+      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
       element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
@@ -410,8 +419,48 @@ const Services = ({
       material.push(element);
     });
 
-    const priceData: any = await calculatePrice(rentalManagementData, material);
-    material.forEach((element) => {
+
+    if (material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).length === 0) {
+      InitializeRowsData(material)
+    }
+    else {
+      setPriceDataDialog({ open: true, rentalManagementData: rentalManagementData, material: material })
+    }
+
+    // const priceData: any = await calculatePrice(rentalManagementData, material);
+    // material.forEach((element) => {
+    //   const rateResult = priceData?.filter(
+    //     (e) =>
+    //       e.materialId === element.materialId &&
+    //       e.materialType === element.type &&
+    //       e.unit === element.unit &&
+    //       e.pricingMethod === element.pricingMethod
+    //   );
+    //   if (rateResult.length && rateResult[0].mrp) {
+    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+    //     element[priceFieldName] = rateResult[0].mrp;
+    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    //     Object.assign(element, calValues);
+    //   }
+    // });
+
+    // axiosInstance()
+    //   .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
+    //   .then(() => {
+    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
+    //     fetchProductInventory();
+    //     setAddingProducts(false);
+    //   })
+    //   .catch((error) => {
+    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
+    //     toastConfig.setToastConfig(error);
+    //     setAddingProducts(false);
+    //   });
+  };
+
+  const InitializeRowsData = async (materialData: any = null) => {
+    let tempMaterial = materialData ? materialData : priceDataDialog?.material
+    tempMaterial.forEach((element) => {
       const rateResult = priceData?.filter(
         (e) =>
           e.materialId === element.materialId &&
@@ -419,7 +468,12 @@ const Services = ({
           e.unit === element.unit &&
           e.pricingMethod === element.pricingMethod
       );
-      if (rateResult.length && rateResult[0].mrp) {
+      if (element.listPrice) {
+        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+        element[priceFieldName] = element.listPrice;
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+        Object.assign(element, calValues);
+      } else if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
@@ -428,16 +482,18 @@ const Services = ({
     });
 
     axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
+      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
         setAddingProducts(false);
+        setPriceDataDialog({ open: false, rentalManagementData: null, material: null, })
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
+        setPriceDataDialog({ open: false, rentalManagementData: null, material: null, })
       });
   };
 
@@ -691,6 +747,13 @@ const Services = ({
           ids={rowsData.filter((d) => d.type === 'service').map((d) => d?.materialId)}
         />
       )}
+      {priceDataDialog.open &&
+        <CalculatePriceDialog
+          rentalManagementData={priceDataDialog.rentalManagementData}
+          material={priceDataDialog.material}
+          setPriceData={setPriceData}
+          onClose={() => setPriceDataDialog({ open: false, rentalManagementData: null, material: null, })}
+        />}
     </Fragment>
   );
 };
