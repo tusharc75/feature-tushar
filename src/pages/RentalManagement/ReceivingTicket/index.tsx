@@ -533,10 +533,10 @@ const ReceivingTicket = ({
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },
     { field: 'returnTicket', headerName: 'Return Ticket', show: true, cellRenderer: 'returnTicketRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'startDate', headerName: 'Actual Start Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'Actual End Date', show: true, cellRenderer: 'dateRenderer' },
-    { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'rentalAssetStatus', headerName: 'Rental Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' }
   ];
 

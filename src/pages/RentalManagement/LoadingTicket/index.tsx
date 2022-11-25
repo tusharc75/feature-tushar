@@ -385,7 +385,7 @@ const LoadingTicket = ({
     { field: 'productName', headerName: findHeader(columnHeader?.productFields, 'productName'), show: true, cellRenderer: 'productNameRenderer' },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));

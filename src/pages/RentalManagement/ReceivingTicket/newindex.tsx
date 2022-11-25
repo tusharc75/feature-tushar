@@ -324,7 +324,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     },
     {
       accessor: 'status',
-      Header: 'Asset Status',
+      Header: 'Status',
       width: 100,
       Cell: ({ row }) => (
         <p className="text-truncate">{row?.original?.status ? <p>{row?.original?.status}</p> : <NoDataCell />}</p>),
@@ -345,7 +345,7 @@ const ReceivingTicket = ({ currentStep, rentalManagementData, fetchRentalData, s
     },
     {
       accessor: 'rentalAssetStatus',
-      Header: 'Rental Asset Status',
+      Header: 'Rental Status',
       width: 100,
       Cell: ({ row }) => (
         <p className="text-truncate">{row?.original?.rentalAssetStatus ? <p>{row?.original?.rentalAssetStatus}</p> : <NoDataCell />}</p>),
