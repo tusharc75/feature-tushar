@@ -158,7 +158,7 @@ export const FormulaDialog = ({ open, handleClose, fieldData, sectionId, section
       <Dialog 
       fullScreen={isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}onClose={handleClose} aria-labelledby="customized-dialog-title" fullWidth maxWidth={"md"} open={open}>
-        <CustomDialogHeader title={`${FieldList[fieldData.type.toUpperCase()].label} Properties`} onClose={handleClose}></CustomDialogHeader>
+        <CustomDialogHeader title={`${FieldList[fieldData?.type?.toUpperCase()]?.label} Properties`} onClose={handleClose}></CustomDialogHeader>
         <CustomDialogContent >
           <Box padding={1}>
             <Grid container spacing={2}>

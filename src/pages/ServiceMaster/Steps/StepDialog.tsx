@@ -30,7 +30,8 @@ export default function StepDialog({
   setOpenFieldDialog = null,
   handleAddStep = null,
   notEditable = false,
-  stepData = null
+  stepData = null,
+  isCustom = false
 }) {
   const {
     state: {
@@ -60,13 +61,35 @@ export default function StepDialog({
 
   useEffect(() => {
     const sortedArr = getUniqueCurrencies().sort((a, b) =>
-      a.name.toUpperCase() < b.name.toUpperCase() ? -1 : a.name.toUpperCase() > b.name.toUpperCase() ? 1 : 0
+      a?.name?.toUpperCase() < b?.name?.toUpperCase() ? -1 : a?.name?.toUpperCase() > b?.name?.toUpperCase() ? 1 : 0
     );
     setCurrencyData(sortedArr);
   }, []);
 
   useEffect(() => {
     if (notEditable) {
+      setStepDetails({
+        stepName: stepData?.stepName,
+        leadDay: stepData?.leadDay || 0,
+        costPrice: stepData?.costPrice || 0,
+        listPrice: stepData?.listPrice || 0,
+        currency: stepData?.currency || '',
+        isPassFail: stepData?.isPassFail,
+        isFailAddon: stepData?.isFailAddon,
+        failAddon: stepData?.failAddon,
+        isPassAddon: stepData?.isPassAddon,
+        passAddon: stepData?.passAddon,
+        isJumpStepPass: stepData?.isJumpStepPass,
+        jumpStepsPass: stepData?.jumpStepsPass,
+        isJumpStepFail: stepData?.isJumpStepFail,
+        jumpStepsFail: stepData?.jumpStepsFail,
+        isQuoteRevisionOnFail: stepData?.isQuoteRevisionOnFail,
+        isReturnToStepOnFail: stepData?.isReturnToStepOnFail,
+        returnToStepOnFail: stepData?.returnToStepOnFail,
+        isReturnToServiceOnFail: stepData?.isReturnToServiceOnFail,
+        returnToServiceOnFail: stepData?.returnToServiceOnFail
+      });
+    } else if (stepData && isCustom) {
       setStepDetails({
         stepName: stepData?.stepName,
         leadDay: stepData?.leadDay || 0,
@@ -114,7 +137,7 @@ export default function StepDialog({
             returnToServiceOnFail: data?.returnToServiceOnFail
           });
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setStepDetails({
         stepName: '',
@@ -145,60 +168,77 @@ export default function StepDialog({
     values.costPrice = parseFloat(values.costPrice);
     values.listPrice = parseFloat(values.listPrice);
     setLoading(true);
-
     if (reference === 'workOrder') {
-      if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
-
-      values.serviceId = serviceId;
-      try {
-        const data = await handleAddStep(values);
-        toastConfig.setToastConfig({
-          open: true,
-          message: data.message,
-          severity: 'success'
-        });
-        handleSucess();
-
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
+      if (isCustom) {
+        if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
+        values.serviceId = serviceId;
+        values.stepId = stepData?._id;
+        try {
+          const data = await handleAddStep(values);
+          toastConfig.setToastConfig({
+            open: true,
+            message: data.message,
+            severity: 'success'
+          });
+          handleSucess();
+          setLoading(false);
+        } catch (error) {
+          setLoading(false);
+          toastConfig.setToastConfig(error);
+        }
       }
-
-      return;
+      else {
+        if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
+        values.serviceId = serviceId;
+        try {
+          const data = await handleAddStep(values);
+          toastConfig.setToastConfig({
+            open: true,
+            message: data.message,
+            severity: 'success'
+          });
+          handleSucess();
+          setLoading(false);
+        } catch (error) {
+          setLoading(false);
+          toastConfig.setToastConfig(error);
+        }
+      }
     }
-    if (stepId != '') {
-      axiosInstance()
-        .put(`${serviceMaster.api}/steps/${serviceId}/${stepId}`, values)
-        .then(({ data }) => {
-          handleSucess();
-          toastConfig.setToastConfig({
-            open: true,
-            message: data.message,
-            severity: 'success'
+    else {
+      if (stepId != '') {
+        axiosInstance()
+          .put(`${serviceMaster.api}/steps/${serviceId}/${stepId}`, values)
+          .then(({ data }) => {
+            handleSucess();
+            toastConfig.setToastConfig({
+              open: true,
+              message: data.message,
+              severity: 'success'
+            });
+            setLoading(false);
+          })
+          .catch((err) => {
+            setLoading(false);
+            toastConfig.setToastConfig(err);
           });
-          setLoading(false);
-        })
-        .catch((err) => {
-          setLoading(false);
-          toastConfig.setToastConfig(err);
-        });
-    } else {
-      axiosInstance()
-        .post(`${serviceMaster.api}/steps/${serviceId}`, values)
-        .then(({ data }) => {
-          handleSucess();
-          toastConfig.setToastConfig({
-            open: true,
-            message: data.message,
-            severity: 'success'
+      } else {
+        axiosInstance()
+          .post(`${serviceMaster.api}/steps/${serviceId}`, values)
+          .then(({ data }) => {
+            handleSucess();
+            toastConfig.setToastConfig({
+              open: true,
+              message: data.message,
+              severity: 'success'
+            });
+            setLoading(false);
+          })
+          .catch((err) => {
+            setLoading(false);
+            toastConfig.setToastConfig(err);
           });
-          setLoading(false);
-        })
-        .catch((err) => {
-          setLoading(false);
-          toastConfig.setToastConfig(err);
-        });
+      }
     }
   };
 
@@ -328,9 +368,8 @@ export default function StepDialog({
                     <TextField
                       InputProps={{
                         startAdornment: (
-                          <InputAdornment position="start">{`${
-                            values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                          }`}</InputAdornment>
+                          <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                            }`}</InputAdornment>
                         )
                       }}
                       margin="dense"
@@ -352,9 +391,8 @@ export default function StepDialog({
                     <TextField
                       InputProps={{
                         startAdornment: (
-                          <InputAdornment position="start">{`${
-                            values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                          }`}</InputAdornment>
+                          <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                            }`}</InputAdornment>
                         )
                       }}
                       margin="dense"

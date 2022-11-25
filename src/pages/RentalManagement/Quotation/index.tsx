@@ -631,7 +631,12 @@ const Quotation = ({
         />
       )}
       {quotationData && showAllVersionStatus && (
-        <Versions onClose={() => setShowAllVersionStatus(false)} quotationId={quotationData?._id} handleChangeVersion={handleChangeVersion} />
+        <Versions
+          onClose={() => setShowAllVersionStatus(false)}
+          quotationId={quotationData?._id}
+          handleChangeVersion={handleChangeVersion}
+          refrenceType="rentalJob"
+        />
       )}
       {customerAcceptable && (
         <ManualReponseDialog

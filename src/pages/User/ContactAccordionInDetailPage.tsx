@@ -191,7 +191,7 @@ export default function ContactAccordionInDetailPage({ contacts, type, expanded 
                                         <Avatar className="d-flex align-items-center gap-1" src={obj?.contactLogo}></Avatar>
                                       ) : (
                                         <div
-                                          data-initials={[obj?.firstName?.charAt(0).toUpperCase(), obj?.lastName?.charAt(0).toUpperCase()]
+                                          data-initials={[obj?.firstName?.charAt(0)?.toUpperCase(), obj?.lastName?.charAt(0)?.toUpperCase()]
                                             .filter((f) => f)
                                             .join('')}
                                         ></div>

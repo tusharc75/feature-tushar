@@ -25,7 +25,8 @@ import {
   repairJob,
   DELIVERY_FROM_TO_TYPE,
   COLOUR_MASTER,
-  REPAIR_JOB_STATUS
+  REPAIR_JOB_STATUS,
+  repairOrder
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
@@ -53,6 +54,7 @@ import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAsset
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import ConsumeProduct from '../../../components/RentalManagment/ConsumeProduct';
 import { useData } from '../../../StateProvider/Provider';
+import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -85,7 +87,7 @@ const ReceivingTicket = ({
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
 
-  const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: "add" });
+  const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: 'add' });
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
@@ -103,6 +105,9 @@ const ReceivingTicket = ({
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
   const [repairJobCount, setRepairJobCount] = useState(0);
 
+  const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
+  const [repairOrderCount, setRepairOrderCount] = useState(0);
+
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
@@ -114,7 +119,6 @@ const ReceivingTicket = ({
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
   const [seletedProducts, setSeletedProducts] = useState([]);
   const [columnHeader, setColumnHeader] = useState(null);
-
 
   const {
     state: { user, permissions, selectedEntity }
@@ -137,7 +141,7 @@ const ReceivingTicket = ({
   };
 
   useEffect(() => {
-    getColumn()
+    getColumn();
     fetchRecords();
     if (!isOffline) {
       if (permissions?.repairJob?.isRead) {
@@ -166,6 +170,7 @@ const ReceivingTicket = ({
         productAssets = productAssets?.map((u) => ({
           ...u,
           type: 'Asset',
+          displayType: 'Asset',
           qty: 1,
           productName: u?.product?.optionLabel,
           warehouse: u?.warehouse?.optionLabel,
@@ -195,6 +200,7 @@ const ReceivingTicket = ({
           .map((u) => ({
             ...u,
             type: 'Asset',
+            displayType: 'Asset',
             qty: 1,
             productName: u?.product?.optionLabel,
             productId: u?.product?.optionValue,
@@ -233,19 +239,15 @@ const ReceivingTicket = ({
 
       products?.forEach((element) => {
         var qty = element.qty;
-
-        const parentProduct = material.find((p) => p?._id === element?.parentId)?.productDetail
-
         var consumeQty = 0;
-
         consumeProducts?.filter((e) => e.product === element.materialId)?.forEach((e) => { consumeQty = consumeQty + e.qty; });
-
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
           const obj: any = {};
           obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
           obj.materialId = element?.productDetail?._id;
           obj.type = 'Product';
+          obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = ele.qty;
           obj.consumeQty = consumeQty;
           obj.assetNumber = element?.productDetail?.productName;
@@ -254,7 +256,6 @@ const ReceivingTicket = ({
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.status = element?.status;
-          obj.parentProductId = parentProduct ? parentProduct?._id : ''
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.rentalAssetStatus = element?.status;
@@ -273,11 +274,11 @@ const ReceivingTicket = ({
           obj._id = element.materialId;
           obj.materialId = element?.materialId;
           obj.type = 'Product';
+          obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = qty;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.consumeQty = consumeQty;
-          obj.parentProductId = parentProduct ? parentProduct?._id : ''
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -337,23 +338,29 @@ const ReceivingTicket = ({
         d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
       });
 
-      if (productAssets.filter((e) => [
-        INVENTORY_STATUS.underReview,
-        INVENTORY_STATUS.available,
-        INVENTORY_STATUS.repair,
-        INVENTORY_STATUS.scrap,
-        INVENTORY_STATUS.lost
-      ].includes(e.status) ||
-        [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
-          e.rentalAssetStatus
-        )).length === productAssets.length
+      if (
+        productAssets.filter(
+          (e) =>
+            [
+              INVENTORY_STATUS.underReview,
+              INVENTORY_STATUS.available,
+              INVENTORY_STATUS.repair,
+              INVENTORY_STATUS.scrap,
+              INVENTORY_STATUS.lost
+            ].includes(e.status) ||
+            [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
+              e.rentalAssetStatus
+            )
+        ).length === productAssets.length
       ) {
         setNextStep(true);
       }
 
       setUniqueReceivingTicket([...new Set(productAssets.filter((d) => d.receivingTicketId !== undefined).map((d) => d.receivingTicketId))]);
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
-      setTimeout(() => { dispatch({ type: 'loading', loading: false }); }, gridLoadingTimeout);
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
@@ -369,7 +376,7 @@ const ReceivingTicket = ({
       .then(({ data: { data } }) => {
         setRepairJobCount(data.length);
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const InventoryRenderer = (params) => (
@@ -414,11 +421,13 @@ const ReceivingTicket = ({
     </Link>
   );
 
-  const ParentNameRenderer = (params) => params.data?.parentId ? (
-    <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentProductId}`}>
-      {params?.data?.parentName}
-    </Link>
-  ) : <NoDataCell />;
+  const ParentNameRenderer = (params) =>
+    params.data?.parentId ? (
+      <span>{params?.data?.parentName}</span>
+    ) : (
+      <NoDataCell />
+    );
+
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
@@ -469,7 +478,9 @@ const ReceivingTicket = ({
   };
 
   const getColumn = async () => {
-    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
       fields: [
         {
           resource: 'Product',
@@ -513,7 +524,7 @@ const ReceivingTicket = ({
         return null;
       }
     },
-    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    { field: 'displayType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: findHeader(columnHeader?.assetFields, 'serialNumber'), show: true, cellRenderer: 'commonRenderer' },
@@ -522,10 +533,10 @@ const ReceivingTicket = ({
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },
     { field: 'returnTicket', headerName: 'Return Ticket', show: true, cellRenderer: 'returnTicketRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'startDate', headerName: 'Actual Start Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'Actual End Date', show: true, cellRenderer: 'dateRenderer' },
-    { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'rentalAssetStatus', headerName: 'Rental Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' }
   ];
 
@@ -578,10 +589,29 @@ const ReceivingTicket = ({
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => { })
+          .then(({ data: { data } }) => {})
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleAddAssetsToRepairOrder = async (repairOrderData: any) => {
+    let rows = selectedRecords.map((record: any) => ({
+      materialId: record._id,
+      type: 'serializedAsset',
+      unit: '',
+      qty: 1,
+      parentId: null
+    }));
+    axiosInstance()
+      .post(`${repairOrder.api}/${repairOrderData}/product-package`, { material: rows })
+      .then(() => {
+        setShowRepairOrderDialog(false);
+        fetchRecords();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -710,24 +740,27 @@ const ReceivingTicket = ({
     }
     setOkBtnLoading(true);
 
-    if (showConformationConsume?.type === "revert") {
-      axiosInstance().post(`${rentalManagement.api}/revert-consume-product/${rentalManagementData._id}`, { products: products }).then(({ data }) => {
-        setOkBtnLoading(false);
-        setShowConformationConsume({ open: false, type: "" });
-        setShowConformationConsumeMultiple(false);
-        fetchRecords();
-      })
+    if (showConformationConsume?.type === 'revert') {
+      axiosInstance()
+        .post(`${rentalManagement.api}/revert-consume-product/${rentalManagementData._id}`, { products: products })
+        .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationConsume({ open: false, type: '' });
+          setShowConformationConsumeMultiple(false);
+          fetchRecords();
+        })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
-    }
-    else {
-      axiosInstance().post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { products: products }).then(({ data }) => {
-        setOkBtnLoading(false);
-        setShowConformationConsume({ open: false, type: "" });
-        setShowConformationConsumeMultiple(false);
-        fetchRecords();
-      })
+    } else {
+      axiosInstance()
+        .post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { products: products })
+        .then(({ data }) => {
+          setOkBtnLoading(false);
+          setShowConformationConsume({ open: false, type: '' });
+          setShowConformationConsumeMultiple(false);
+          fetchRecords();
+        })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -861,17 +894,17 @@ const ReceivingTicket = ({
                       (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
                     [INVENTORY_STATUS.underReview].includes(f.status)
                 )?.length === selectedRecords?.length && (
-                    <Fragment>
-                      <MenuItem
-                        onClick={() => {
-                          setAnchorEl(null);
-                          setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: '' });
-                        }}
-                      >
-                        {INVENTORY_STATUS.available}
-                      </MenuItem>
-                    </Fragment>
-                  )}
+                  <Fragment>
+                    <MenuItem
+                      onClick={() => {
+                        setAnchorEl(null);
+                        setStatusToUpdate({ open: true, isUpdating: false, status: INVENTORY_STATUS.available, message: '' });
+                      }}
+                    >
+                      {INVENTORY_STATUS.available}
+                    </MenuItem>
+                  </Fragment>
+                )}
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null);
@@ -950,8 +983,8 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                ?.length === selectedRecords?.length ? (
+            selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
+              ?.length === selectedRecords?.length ? (
               <MenuItem
                 onClick={() => {
                   setShowRemoveAssetFromReceivingTicketDialog(true);
@@ -1026,23 +1059,45 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {permissions?.repairJob?.isCreate &&
-              selectedRecords.length &&
-              selectedRecords?.filter(
-                (f) =>
-                  ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                    f.status === INVENTORY_STATUS.scrap) &&
-                  [
-                    INVENTORY_STATUS.underReview,
-                    INVENTORY_STATUS.scrap,
-                    INVENTORY_STATUS.available,
-                    INVENTORY_STATUS.needRecert,
-                    INVENTORY_STATUS.needRepair
-                  ].includes(f.status) &&
-                  !f.subleaseAsset &&
-                  checkUniqWarehouse()
-              )?.length === selectedRecords?.length && !isOffline ? (
+            selectedRecords.length &&
+            selectedRecords?.filter(
+              (f) =>
+                ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  f.status === INVENTORY_STATUS.scrap) &&
+                [
+                  INVENTORY_STATUS.underReview,
+                  INVENTORY_STATUS.scrap,
+                  INVENTORY_STATUS.available,
+                  INVENTORY_STATUS.needRecert,
+                  INVENTORY_STATUS.needRepair
+                ].includes(f.status) &&
+                !f.subleaseAsset &&
+                checkUniqWarehouse()
+            )?.length === selectedRecords?.length &&
+            !isOffline ? (
               <MenuItem onClick={() => setShowRepairJobDialog(true)}>Create Repair Job</MenuItem>
+            ) : null}
+
+            {permissions?.repairOrder?.isCreate &&
+            selectedRecords.length &&
+            selectedRecords?.filter(
+              (f) =>
+                ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+                  f.status === INVENTORY_STATUS.scrap) &&
+                [
+                  INVENTORY_STATUS.underReview,
+                  INVENTORY_STATUS.scrap,
+                  INVENTORY_STATUS.available,
+                  INVENTORY_STATUS.needRecert,
+                  INVENTORY_STATUS.needRepair
+                ].includes(f.status) &&
+                !f.subleaseAsset &&
+                checkUniqWarehouse()
+            )?.length === selectedRecords?.length &&
+            !isOffline ? (
+              <MenuItem onClick={() => setShowRepairOrderDialog(true)}>Create Repair Order</MenuItem>
             ) : null}
 
             <MenuItem
@@ -1079,34 +1134,40 @@ const ReceivingTicket = ({
               Replace Assets
             </MenuItem>
 
-            {selectedRecords?.filter((f) => f.type === 'Product' && f.hasOwnProperty('loadingTicketId')
-              && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length && (
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    if (selectedRecords?.length === 1) {
-                      setShowConformationConsume({ open: true, type: "add" });
-                    } else {
-                      setShowConformationConsumeMultiple(true);
-                    }
-                  }}
-                >
-                  {RENTAL_INTERNAL_ASSET_STATUS.consumed}
-                </MenuItem>
-              )}
+            {selectedRecords?.filter(
+              (f) => f.type === 'Product' && f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+            ).length === selectedRecords.length && (
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  if (selectedRecords?.length === 1) {
+                    setShowConformationConsume({ open: true, type: 'add' });
+                  } else {
+                    setShowConformationConsumeMultiple(true);
+                  }
+                }}
+              >
+                {RENTAL_INTERNAL_ASSET_STATUS.consumed}
+              </MenuItem>
+            )}
 
-            {selectedRecords.length === 1 && selectedRecords?.filter((f) => f.type === 'Product' && f.hasOwnProperty('loadingTicketId')
-              && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && f?.consumeQty > 0).length === selectedRecords.length && (
+            {selectedRecords.length === 1 &&
+              selectedRecords?.filter(
+                (f) =>
+                  f.type === 'Product' &&
+                  f.hasOwnProperty('loadingTicketId') &&
+                  f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+                  f?.consumeQty > 0
+              ).length === selectedRecords.length && (
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    setShowConformationConsume({ open: true, type: "revert" });
+                    setShowConformationConsume({ open: true, type: 'revert' });
                   }}
                 >
                   {`Revert Consumed Qty`}
                 </MenuItem>
               )}
-              
           </Menu>
           <Box mx={1} />
           {showProcessDeliveryTicket && !isOffline && (
@@ -1133,6 +1194,23 @@ const ReceivingTicket = ({
                   size="small"
                   onClick={() => {
                     history.push(routes.repairJob.path, {
+                      rental: rentalManagementData
+                    });
+                  }}
+                >
+                  <InfoIcon color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+              <Box mx={1} />
+            </Fragment>
+          )}
+          {repairOrderCount > 0 && (
+            <Fragment>
+              <HtmlTooltip title={`Created ${routes.repairOrder.title}`}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    history.push(routes.repairOrder.path, {
                       rental: rentalManagementData
                     });
                   }}
@@ -1190,7 +1268,7 @@ const ReceivingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -1352,6 +1430,22 @@ const ReceivingTicket = ({
             }
             fetchRecords();
           }}
+        />
+      )}
+      {showRepairOrderDialog && (
+        <ManageRepairOrder
+          refrenceType="Rental Job"
+          refrenceData={{
+            _id: rentalManagementData._id,
+            warehouse: selectedRecords[0].warehouseId,
+            customerAccount: rentalManagementData.customerAccount?.optionValue,
+            customerContact: rentalManagementData.customerContact?.optionValue
+          }}
+          onClose={() => setShowRepairOrderDialog(false)}
+          onSuccess={(obj) => {
+            handleAddAssetsToRepairOrder(obj?._id);
+          }}
+          isClone={false}
         />
       )}
       {addSerializedAssetDialog.open && (

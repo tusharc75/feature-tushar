@@ -65,6 +65,9 @@ const RepairOrderDetails = () => {
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [repairOrderProcessSteps, setRepairOrderProcessSteps] = useState(repairOrderSteps);
 
+  const [quotationVersionData, setQuotationVersionData] = useState(null);
+  const [showQuotationConfirmBox, setShowQuotationConfirmBox] = useState(false);
+
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -165,6 +168,17 @@ const RepairOrderDetails = () => {
       });
   };
 
+  const createNewVersionQuote = () => {
+    axiosInstance().post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`)
+      .then(() => {
+        setShowQuotationConfirmBox(false)
+        fetchRepairOrderData()
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   useEffect(() => {
     if (isSmallScreen && tabValue === 0) {
       setActivityShow(true)
@@ -261,6 +275,17 @@ const RepairOrderDetails = () => {
                     setCurrentStep={setCurrentStep}
                     isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
                     setStepFullScreen={() => setStepFullScreen(true)}
+                    handlePrev={() => {
+                      if (quotationVersionData && quotationVersionData?.status === QUOTATION_STATUS.acceptByCustomer) {
+                        setShowQuotationConfirmBox(true);
+                      }
+                      else {
+                        setCurrentStep((prevStep) => {
+                          const newStep = prevStep - 1;
+                          return newStep;
+                        });
+                      }
+                    }}
                   />
                   <ContentFullScreen title={repairOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
                     {repairOrderProcessSteps[currentStep] === 'Add Assets' && repairOrderData && (
@@ -300,6 +325,7 @@ const RepairOrderDetails = () => {
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={allowedToEdit}
                         allowedToDelete={allowedToDelete}
+                        setQuotationVersionData={setQuotationVersionData}
                       />
                     )}
                     {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (
@@ -313,6 +339,7 @@ const RepairOrderDetails = () => {
                         allowedToEdit={false}
                         allowedToDelete={false}
                         invoiceStep={true}
+                        setQuotationVersionData={setQuotationVersionData}
                       />
                     )}
                   </ContentFullScreen>
@@ -368,6 +395,16 @@ const RepairOrderDetails = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showQuotationConfirmBox && (
+        <ConfirmationDialog
+          open={showQuotationConfirmBox}
+          message={`Are you sure you want to create new version of this quote ?`}
+          onClose={() => {
+            setShowQuotationConfirmBox(false);
+          }}
+          onOk={createNewVersionQuote}
         />
       )}
       {openUpdateDialog && (

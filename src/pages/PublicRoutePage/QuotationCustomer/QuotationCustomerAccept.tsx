@@ -14,7 +14,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Skeleton } from '@material-ui/lab';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import QCcomment from './QCcomment';
-import { orderBy } from 'lodash';
+import { orderBy, startCase } from 'lodash';
 
 const QuotationCustomerAccept = ({ openAuthId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -34,6 +34,32 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
     const coloum: any = [
       {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        disableFilters: true,
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -47,28 +73,11 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
             }
             {row.original?.parentId === null && row.original?.type !== 'Service' && (
               <Box ml={1} className="d-flex align-items-center">
-                <span>({row.original?.subRows?.length})</span>
+                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </Box>
             )}
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}`}
-              size="small"
-              color="primary"
-            />
           </div>
         )
-      },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
-        Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-          return <>{total}</>;
-        }
       }
     ];
     data.forEach((element) => {
@@ -200,8 +209,8 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           : parent.packageDetail?.packageName
       }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
-      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
-      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      // parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
+      // parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + response?.data?.data?.quoteData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : !isRateRequired;
@@ -225,8 +234,8 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           : _subRow.packageDetail?.packageName
       }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
-      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      // _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+      // _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = true;
       _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : !isRateRequired;
