@@ -55,6 +55,7 @@ import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import ConsumeProduct from '../../../components/RentalManagment/ConsumeProduct';
 import { useData } from '../../../StateProvider/Provider';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
+import ReturnTicketDialog from './ReturnTicketDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -95,6 +96,8 @@ const ReceivingTicket = ({
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
 
+
+  const [showQtyDialog, setShowQtyDialog] = useState({open: false, data: null});
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -239,7 +242,11 @@ const ReceivingTicket = ({
       products?.forEach((element) => {
         var qty = element.qty;
         var consumeQty = 0;
-        consumeProducts?.filter((e) => e.product === element.materialId)?.forEach((e) => { consumeQty = consumeQty + e.qty; });
+        consumeProducts
+          ?.filter((e) => e.product === element.materialId)
+          ?.forEach((e) => {
+            consumeQty = consumeQty + e.qty;
+          });
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
           const obj: any = {};
@@ -420,13 +427,7 @@ const ReceivingTicket = ({
     </Link>
   );
 
-  const ParentNameRenderer = (params) =>
-    params.data?.parentId ? (
-      <span>{params?.data?.parentName}</span>
-    ) : (
-      <NoDataCell />
-    );
-
+  const ParentNameRenderer = (params) => (params.data?.parentId ? <span>{params?.data?.parentName}</span> : <NoDataCell />);
 
   const WarehouseRenderer = (params) =>
     params?.value ? (
@@ -578,7 +579,7 @@ const ReceivingTicket = ({
     }
     data['status'] = DELIVERY_TICKET_STATUS.indTransit;
 
-    setShowTicketDialog({ open: true, ticketType: ticketType, data: data });
+    setShowTicketDialog({ open: false, ticketType: ticketType, data: data });
     closeActions();
   };
 
@@ -765,6 +766,22 @@ const ReceivingTicket = ({
         });
     }
   };
+
+
+  const handleAutoConsume = (data:any[]) => {
+    const products = data?.map((d) => ({product: d.materialId, qty: parseInt(d.qty)}))
+    axiosInstance()
+    .post(`${rentalManagement.api}/consume-product/${rentalManagementData._id}`, { products })
+    .then(({ data }) => {
+      setOkBtnLoading(false);
+      setShowConformationConsume({ open: false, type: '' });
+      setShowConformationConsumeMultiple(false);
+      fetchRecords();
+    })
+    .catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  }
 
   const handleChangeStatus = () => {
     setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: true }));
@@ -995,6 +1012,7 @@ const ReceivingTicket = ({
 
             <MenuItem
               onClick={() => {
+                setShowQtyDialog({open: true, data: null})
                 handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
               }}
               disabled={
@@ -1301,12 +1319,34 @@ const ReceivingTicket = ({
           refrenceType={DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}
           refrenceData={showTicketDialog.data}
           productInventory={selectedRecords?.filter((e) => e.type === 'Asset')}
-          products={seletedProducts}
+          products={showQtyDialog?.data && showQtyDialog?.data?.length > 0 ? showQtyDialog.data.map((d) => ({...d, _id: d?.productId, qty: d.returnQuantity})) : []}
           onClose={() => setShowTicketDialog({ open: false, ticketType: '', data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
+
+            if(showQtyDialog?.data || showQtyDialog?.data.length > 0) {
+              let consumableData = showQtyDialog.data.filter((d)=>d?.consumeQuantity > 0);
+               consumableData = consumableData.map((d) => ({...d, materialId: d?.row?.materialId, qty: d.consumeQuantity}))
+
+               if(consumableData.length > 0) {
+                handleAutoConsume(consumableData)
+               }
+            }
             fetchRecords();
             fetchRentalData();
+          }}
+        />
+      )}
+      {showQtyDialog.open && (
+        <ReturnTicketDialog
+          productList={selectedRecords.filter((d:any) => d?.type === "Product")}
+          onSuccess={(data) => {
+            setShowQtyDialog({data: data?.products, open: false})
+            setShowTicketDialog((ps:any) => ({...ps, open: true}))
+          }}
+          onClose={() => {
+            setShowQtyDialog({ open: false, data: null})
+            setShowTicketDialog({ open: false, ticketType: '', data: {}})
           }}
         />
       )}
@@ -1472,7 +1512,7 @@ const ReceivingTicket = ({
           }}
         />
       )}
-      {showConformationConsume?.open && (
+      {/* {showConformationConsume?.open && (
         <ConsumeProduct
           products={selectedRecords}
           handleClose={() => setShowConformationConsume({ open: false, type: '' })}
@@ -1482,7 +1522,7 @@ const ReceivingTicket = ({
             handleConsumProduct(data);
           }}
         />
-      )}
+      )} */}
       {showNonSerializeAsset.open && (
         <ShowNonSerializeAssets data={showNonSerializeAsset.data} onClose={() => setShowNonSerializeAsset({ open: false, data: {} })} />
       )}
