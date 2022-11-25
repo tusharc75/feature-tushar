@@ -137,7 +137,7 @@ export default function StepDialog({
             returnToServiceOnFail: data?.returnToServiceOnFail
           });
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setStepDetails({
         stepName: '',
@@ -164,82 +164,81 @@ export default function StepDialog({
   }, []);
 
   const handleSubmit = async (values) => {
-    console.log(reference, isCustom);
     values.leadDay = parseInt(values.leadDay);
     values.costPrice = parseFloat(values.costPrice);
     values.listPrice = parseFloat(values.listPrice);
     setLoading(true);
-    if (reference === 'workOrder' && !isCustom) {
-      if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
-      values.serviceId = serviceId;
-      try {
-        const data = await handleAddStep(values);
-        toastConfig.setToastConfig({
-          open: true,
-          message: data.message,
-          severity: 'success'
-        });
-        handleSucess();
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
-      }
-      return;
-    }
-    if (reference === 'workOrder' && isCustom) {
-      console.log('custom step');
-      if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
-      values.serviceId = serviceId;
-      console.log(stepData);
-      values.stepId = stepData?._id;
-      try {
-        const data = await handleAddStep(values);
-        toastConfig.setToastConfig({
-          open: true,
-          message: data.message,
-          severity: 'success'
-        });
-        handleSucess();
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
-      }
-      return;
-    }
-    if (stepId != '') {
-      axiosInstance()
-        .put(`${serviceMaster.api}/steps/${serviceId}/${stepId}`, values)
-        .then(({ data }) => {
-          handleSucess();
+    if (reference === 'workOrder') {
+      if (isCustom) {
+        if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
+        values.serviceId = serviceId;
+        values.stepId = stepData?._id;
+        try {
+          const data = await handleAddStep(values);
           toastConfig.setToastConfig({
             open: true,
             message: data.message,
             severity: 'success'
           });
-          setLoading(false);
-        })
-        .catch((err) => {
-          setLoading(false);
-          toastConfig.setToastConfig(err);
-        });
-    } else {
-      axiosInstance()
-        .post(`${serviceMaster.api}/steps/${serviceId}`, values)
-        .then(({ data }) => {
           handleSucess();
+          setLoading(false);
+        } catch (error) {
+          setLoading(false);
+          toastConfig.setToastConfig(error);
+        }
+      }
+      else {
+        if (!workOrderId || !uniqueId) toastConfig.setToast({ open: true, message: 'Something went wrong', severity: 'error' });
+        values.serviceId = serviceId;
+        try {
+          const data = await handleAddStep(values);
           toastConfig.setToastConfig({
             open: true,
             message: data.message,
             severity: 'success'
           });
+          handleSucess();
           setLoading(false);
-        })
-        .catch((err) => {
+        } catch (error) {
           setLoading(false);
-          toastConfig.setToastConfig(err);
-        });
+          toastConfig.setToastConfig(error);
+        }
+      }
+    }
+    else {
+      if (stepId != '') {
+        axiosInstance()
+          .put(`${serviceMaster.api}/steps/${serviceId}/${stepId}`, values)
+          .then(({ data }) => {
+            handleSucess();
+            toastConfig.setToastConfig({
+              open: true,
+              message: data.message,
+              severity: 'success'
+            });
+            setLoading(false);
+          })
+          .catch((err) => {
+            setLoading(false);
+            toastConfig.setToastConfig(err);
+          });
+      } else {
+        axiosInstance()
+          .post(`${serviceMaster.api}/steps/${serviceId}`, values)
+          .then(({ data }) => {
+            handleSucess();
+            toastConfig.setToastConfig({
+              open: true,
+              message: data.message,
+              severity: 'success'
+            });
+            setLoading(false);
+          })
+          .catch((err) => {
+            setLoading(false);
+            toastConfig.setToastConfig(err);
+          });
+      }
     }
   };
 
@@ -369,9 +368,8 @@ export default function StepDialog({
                     <TextField
                       InputProps={{
                         startAdornment: (
-                          <InputAdornment position="start">{`${
-                            values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                          }`}</InputAdornment>
+                          <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                            }`}</InputAdornment>
                         )
                       }}
                       margin="dense"
@@ -393,9 +391,8 @@ export default function StepDialog({
                     <TextField
                       InputProps={{
                         startAdornment: (
-                          <InputAdornment position="start">{`${
-                            values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                          }`}</InputAdornment>
+                          <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                            }`}</InputAdornment>
                         )
                       }}
                       margin="dense"

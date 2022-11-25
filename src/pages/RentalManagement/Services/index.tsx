@@ -309,7 +309,7 @@ const Services = ({
   };
 
   const fetchProductInventory = async () => {
-    // setNextStep(false);
+    setNextStep(false);
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
@@ -331,8 +331,8 @@ const Services = ({
       parent.srno = i + 1;
       parent.detail = parent.type === 'product' ? parent?.productDetail?.productName : parent.type === 'service' ? parent?.serviceDetail?.serviceName : parent?.packageDetail?.packageName;
       parent.description = parent.type === 'service' ? parent?.serviceDetail?.serviceDescription || ''
-      : parent.type === 'product' ? parent?.productDetail?.productDesc || ''
-        : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
+        : parent.type === 'product' ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -346,7 +346,9 @@ const Services = ({
     } else {
       setNextStep(true);
     }
-    setNextStep(true);
+    if (rows?.length === 0) {
+      setNextStep(true);
+    }
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -357,8 +359,8 @@ const Services = ({
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = _subRow.type === 'product' ? _subRow?.productDetail?.productName : _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow?.packageDetail?.packageName;
       _subRow.description = _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceDescription || ''
-      : _subRow.type === 'product' ? _subRow?.productDetail?.productDesc || ''
-        : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || '' : '';
+        : _subRow.type === 'product' ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || '' : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
