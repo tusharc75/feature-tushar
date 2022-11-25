@@ -621,7 +621,7 @@ const LoadingTicket = ({
                     closeActions();
                   }}
                 >
-                  Delivered to customer
+                  Delivered to Customer
                 </MenuItem>
               </Menu>
               <Box mx={1} />
