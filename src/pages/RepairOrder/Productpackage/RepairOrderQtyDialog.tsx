@@ -167,13 +167,13 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = (
         const _package = material?.filter((e) => e._id === rowData.parentId);
         if (_package.length) {
           if ((values.qty * _package[0].qty) < rowData.assetQty) {
-            errors['qty'] = 'Quantity is less than that which has been assigned.';
+            errors['qty'] = 'The quantity is less than what was assigned.';
           }
         }
       }
       else {
         if (values.qty < rowData.assetQty) {
-          errors['qty'] = 'Quantity is less than that which has been assigned.';
+          errors['qty'] = 'The quantity is less than what was assigned.';
         }
       }
     }

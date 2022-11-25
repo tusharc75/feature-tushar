@@ -223,7 +223,8 @@ const InventoryProduct = () => {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
     }
 
-    const updatedFilters = [{ field: "serializedProduct", term: "No" }];
+    //const updatedFilters = [{ field: "serializedProduct", term: "No" }];
+    const updatedFilters = [];
     if (!isObjectEmpty(filters)) {
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
