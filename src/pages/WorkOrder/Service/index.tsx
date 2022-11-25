@@ -34,9 +34,6 @@ import { Tabs, Tab } from './Tabs';
 import styles from './index.module.scss';
 import { IoMdArrowDropup, IoMdArrowDropdown } from 'react-icons/io';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
-import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
-import RotateLeftOutlinedIcon from '@material-ui/icons/RotateLeftOutlined';
-import RotateRightOutlinedIcon from '@material-ui/icons/RotateRightOutlined';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
@@ -131,8 +128,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const [comment, setComment] = useState('');
   const [bottomBarOpen, setBottomBarOpen] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
-  const [openFieldDialog, setOpenFieldDialog] = useState(false);
-  const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
   const [isQuotationStep, setIsQuotationStep] = useState(false);
 
   useEffect(() => {
@@ -175,51 +170,48 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 
   const fetchService = (isQuote: any = isQuotationStep) => {
     getServiceData();
-    axiosInstance()
-      .get(`${routes.workOrder.path}/service/${workOrderId}`)
-      .then(({ data: { data } }) => {
-        if (data?.length) {
-          data?.forEach((e) => {
-            e.type = 'service';
-          });
-          const preWorkService = data?.filter((e) => e.preWork);
-          const postWorkService = data?.filter((e) => !e.preWork);
-          const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
-          const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
-          setServiceSteps(services);
-          if (services?.length) {
-            let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
-            if (pendingServiceIndex === -1) {
-              pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
-            }
-            setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
+    axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`).then(({ data: { data } }) => {
+      if (data?.length) {
+        data?.forEach((e) => {
+          e.type = 'service';
+        });
+        const preWorkService = data?.filter((e) => e.preWork);
+        const postWorkService = data?.filter((e) => !e.preWork);
+        const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
+        const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
+        setServiceSteps(services);
+        if (services?.length) {
+          let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
+          if (pendingServiceIndex === -1) {
+            pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
           }
-
-          let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
-          let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
-            [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
-          );
-          if (tempServiceIndex > -1) {
-            tempServiceSortedArray[tempServiceIndex - 1]
-              ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
-              : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
-          } else {
-            setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
-          }
-
-          if (
-            preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
-            preWorkService?.length &&
-            postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
-          ) {
-            if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
-              setSelectedService(services[services.findIndex((d) => d.type === 'quotation')]);
-            }
-          }
-        } else {
-          setServiceSteps([]);
+          setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
         }
-      })
+        let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
+        let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
+          [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
+        );
+        if (tempServiceIndex > -1) {
+          tempServiceSortedArray[tempServiceIndex - 1]
+            ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
+            : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
+        } else {
+          setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
+        }
+
+        if (
+          preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
+          preWorkService?.length &&
+          postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
+        ) {
+          if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
+            setSelectedService(services[services.findIndex((d) => d.type === 'quotation')]);
+          }
+        }
+      } else {
+        setServiceSteps([]);
+      }
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -429,17 +421,21 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const handleAddStep = (values: any) => {
-    values.fields = addStepFields?.fields;
-    return new Promise((resolve, reject) => {
-      axiosInstance()
-        .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
-        .then(({ data }) => {
-          resolve(data);
-        })
-        .catch((err) => {
-          reject(err);
+    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
+      .then(({ data }) => {
+        const temp = selectedService;
+        setSelectedService(null)
+        setSelectedService(temp)
+        toastConfig.setToastConfig({
+          open: true,
+          message: data.message,
+          severity: 'success'
         });
-    });
+        setAssignSteps(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const getFieldsWithOtherDetails = (step: any, serviceData) => {
@@ -1012,38 +1008,19 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           handleClose={() => {
             setAssignSteps(false);
           }}
-          handleSucess={() => {
-            setAssignSteps(false);
-            getServiceData();
-            setAddStepFields({ fields: [], section: [] });
+          handleSucess={(data) => {
+            handleAddStep(data)
           }}
-          handleAddStep={handleAddStep}
           stepId={''}
           steps={selectedService?.steps}
           reference={'workOrder'}
           workOrderId={workOrderId}
           serviceId={selectedService?._id}
           uniqueId={selectedService?.uniqueId}
-          setOpenFieldDialog={setOpenFieldDialog}
-        />
-      )}
-      {openFieldDialog && (
-        <FieldDialog
-          reference={'workOrder'}
-          serviceId={selectedService?._id}
-          stepIds={selectedService?.steps?.map((d) => d?._id)}
-          steps={[]}
-          sectionData={addStepFields?.section}
-          handleClose={() => {
-            setOpenFieldDialog(false);
-          }}
-          handleSucess={(fieldsData: any) => {
-            setOpenFieldDialog(false);
-            setAddStepFields(fieldsData);
-          }}
         />
       )}
     </Box>
   );
+  
 };
 export default Service;
