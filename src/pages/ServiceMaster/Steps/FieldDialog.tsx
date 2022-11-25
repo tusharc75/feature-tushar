@@ -11,7 +11,17 @@ import { FormBuilder } from '../../../components/FormBuilder';
 import { uniq, map } from 'lodash';
 import { CustomDialogTransition } from '../../../constants/helpers';
 
-const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, reference = '', sectionData = null, notEditableField = false }) => {
+const FieldDialog = ({
+  handleClose,
+  handleSucess,
+  serviceId,
+  steps,
+  stepIds,
+  reference = '',
+  sectionData = null,
+  notEditableField = false,
+  isCustom = false
+}) => {
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
 
@@ -31,7 +41,19 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
       });
       setSection(_data);
     }
-    if (stepIds?.length === 1 && !notEditableField) {
+    if (isCustom) {
+      const _data = [];
+      const _section = uniq(map(sectionData, 'sectionName'));
+      _section.forEach((element: any, index: number) => {
+        _data.push({
+          sectionId: index,
+          sectionName: element,
+          field: sectionData?.filter((el: any) => el.sectionName === element)
+        });
+      });
+      setSection(_data);
+    }
+    if (stepIds?.length === 1 && !notEditableField && !isCustom) {
       axiosInstance()
         .get(`${serviceMaster.api}/fields/${serviceId}/${stepIds[0]}`)
         .then(({ data: { data } }) => {
@@ -50,7 +72,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
           toastConfig.setToastConfig(err);
         });
     }
-    if (reference === 'workOrder' && !notEditableField) {
+    if (reference === 'workOrder' && !notEditableField && !isCustom) {
       setSection(sectionData && sectionData?.length ? sectionData : []);
     }
   }, []);
