@@ -309,7 +309,7 @@ const Services = ({
   };
 
   const fetchProductInventory = async () => {
-    // setNextStep(false);
+    setNextStep(false);
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
@@ -346,7 +346,6 @@ const Services = ({
     } else {
       setNextStep(true);
     }
-    setNextStep(true);
     setRowsData(rows);
     setSelectedProducts([]);
   };
