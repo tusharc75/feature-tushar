@@ -230,7 +230,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
         }
       });
       additionalcost?.forEach((e) => {
-        e.type = "Extra Add-on";
+        e.type = "Add-on";
         e.detail = e.description
         e.parentId = null;
       })
@@ -238,7 +238,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
       const rows = combinedData.filter((e) => e.parentId === null)
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === "Extra Add-on" ? parent.detail :
+        parent.detail = `${parent.type === "Add-on" ? parent.detail :
           parent.type === "product" ? parent?.productDetail?.productName :
             parent.type === "service" ? parent?.serviceDetail?.serviceName :
               parent.packageDetail?.packageName}`
@@ -401,7 +401,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
                 setShowCostDialog(true);
               }}
             >
-              Add Extra Add-on
+              Add
             </Button>
             <Box mx={1} />
           </Fragment>
