@@ -192,6 +192,10 @@ const SerializedAsset = () => {
             };
           }
         });
+
+        columns.push({ field: 'ownerType', headerName: 'Actual Owner Type', show: true, disabled: true, cellRenderer: 'commonRenderer' })
+        columns.push({ field: 'owner', headerName: 'Actual Owner', show: true, disabled: true, cellRenderer: 'commonRenderer' })
+
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
@@ -387,13 +391,13 @@ const SerializedAsset = () => {
             <FileCopyIcon color="primary" />
           </IconButton>
         </HtmlTooltip>
-      ): (
+      ) : (
         <HtmlTooltip title="You do not have permission to clone">
           <IconButton
             size="small"
             aria-label="Clone"
           >
-            <FileCopyIcon  />
+            <FileCopyIcon />
           </IconButton>
         </HtmlTooltip>
       )}
@@ -410,13 +414,13 @@ const SerializedAsset = () => {
             <DeleteIcon color="error" />
           </IconButton>
         </HtmlTooltip>
-      ): (
+      ) : (
         <HtmlTooltip title="You do not have permission to delete">
           <IconButton
             size="small"
             aria-label="Clone"
           >
-            <DeleteIcon  />
+            <DeleteIcon />
           </IconButton>
         </HtmlTooltip>
       )}

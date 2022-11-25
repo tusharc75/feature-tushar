@@ -69,6 +69,9 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
             <p className="text-truncate"  >
               {row.original.srno}
             </p>),
+          Footer: () => {
+            return <>Total</>
+          }
         },
         {
           accessor: 'type',
@@ -104,10 +107,7 @@ const Invoice = ({ rentalManagementData, isTabletScreen, isSmallScreen, setNextS
                         : <a className="link text-truncate" href={`${routes.serializedAssetDetail.path}/${row.original._id}`} target="_blank">{row.original.detail}</a>
                   : row.original.detail}
               </p>
-            </div>),
-          Footer: () => {
-            return <>Total</>
-          }
+            </div>)
         },
         {
           accessor: 'status',
