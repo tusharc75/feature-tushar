@@ -91,7 +91,10 @@ const SerializedAsset = ({
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        },
       },
       {
         accessor: 'type',
@@ -230,9 +233,6 @@ const SerializedAsset = ({
             )}
           </div>
         ),
-        Footer: () => {
-          return <>Total</>;
-        },
         setCellClassNames: (row) => {
           if (row?.isTransferAsset || (row?.type === 'asset' && row?.warehouse && row?.warehouse !== rentalManagementData?.warehouse?.optionValue))
             return 'isTransferAsset';

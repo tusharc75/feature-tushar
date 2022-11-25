@@ -248,7 +248,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     const currency = rentalManagementData?.currency?.toLowerCase();
     if (isBulkedit) {
       for (const x in values) {
-        if (values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0)) {
+        if (values[x] === "" || (Array.isArray(values[x]) && values[x].length === 0) || values[x] === 0) {
           delete values[x]
         }
       }
