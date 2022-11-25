@@ -9,9 +9,9 @@ import Loader from "src/components/Loader";
 import { getUniqueCurrencies, pricingCondition } from "src/constants/helpers";
 
 const CalculatePriceDialog = ({
-    setPriceData,
+    handleSucess,
     onClose,
-    rentalManagementData,
+    referenceData,
     material
 }) => {
     const [pricingConditionData, setPricingConditionData] = useState([]);
@@ -20,7 +20,7 @@ const CalculatePriceDialog = ({
     const [value, setValue] = useState(null);
 
     useEffect(() => {
-        if (rentalManagementData) {
+        if (referenceData) {
             fetchCalculatePrice()
         }
         // eslint-disable-next-line
@@ -35,38 +35,35 @@ const CalculatePriceDialog = ({
             qty: ele?.qty,
             pricingMethod: ele?.pricingMethod,
             unit: ele?.unit,
-            currency: rentalManagementData?.currency
+            currency: referenceData?.currency
         }));
         data.supplier = [];
-        data.customer = [rentalManagementData?.customerAccount?.optionValue];
-        data.warehouse = [rentalManagementData?.warehouse?.optionValue];
-        axiosInstance()
-            .post(pricingCondition.api + `/calculatePrice`, data)
-            .then(({ data: { data } }) => {
-                let products = uniq(map(data, 'materialId'));
-                if (products.length === data.length) {
-                    setPriceData(data)
-                }
-                else {
-                    let customData = products.map((materialId) => {
-                        let pricingConditionList = data.filter((field) => field.materialId === materialId);
-                        if (pricingConditionList.length === 1) {
-                            setSubmitData((prevState) => {
-                                return [...prevState, ...pricingConditionList];
-                            });
-                        }
-                        else {
-                            let tempDetail = material.find((d) => d.materialId === materialId)?.detail;
-                            let productData = { materialId: materialId, detail: tempDetail }
-                            return { productData, pricingConditionList };
-                        }
-                    }).filter(d => d);
-                    setValue(customData.reduce(
-                        (obj, item) => Object.assign(obj, { [item.productData?.materialId]: item.pricingConditionList[0]?.mrp }), {}))
-                    setDisplayData(customData)
-                    setPricingConditionData(data);
-                }
-            })
+        data.customer = [referenceData?.customerAccount?.optionValue];
+        data.warehouse = [referenceData?.warehouse?.optionValue];
+        axiosInstance().post(pricingCondition.api + `/calculatePrice`, data).then(({ data: { data } }) => {
+            let products = uniq(map(data, 'materialId'));
+            if (products.length === data.length) {
+                handleSucess(data)
+            }
+            else {
+                let customData = products.map((materialId) => {
+                    let pricingConditionList = data.filter((field) => field.materialId === materialId);
+                    if (pricingConditionList.length === 1) {
+                        setSubmitData((prevState) => {
+                            return [...prevState, ...pricingConditionList];
+                        });
+                    }
+                    else {
+                        let tempDetail = material.find((d) => d.materialId === materialId)?.detail;
+                        let productData = { materialId: materialId, detail: tempDetail }
+                        return { productData, pricingConditionList };
+                    }
+                }).filter(d => d);
+                setValue(customData.reduce((obj, item) => Object.assign(obj, { [item.productData?.materialId]: item.pricingConditionList[0]?.mrp }), {}))
+                setDisplayData(customData)
+                setPricingConditionData(data);
+            }
+        })
     };
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>, materialId) => {
@@ -77,59 +74,57 @@ const CalculatePriceDialog = ({
     };
 
     return (
-        <>
-            {pricingConditionData.length !== 0 ?
-                <Dialog
-                    fullWidth
-                    maxWidth="md"
-                    open={true}
-                    onClose={onClose}
-                    aria-labelledby="pricing-condition-dialog"
-                >
-                    <CustomDialogHeader title="Select Pricing Condition" showRequiredLabel={false} />
-                    <CustomDialogContent>
-                        {displayData.length === 0 ? (
-                            <Loader text="Loading Pricing Conditions" />
-                        ) : (
-                            <>
-                                {displayData.map((obj) => (
-                                    <Box p={1}>
-                                        <Box border={0.7} p={1} borderColor="grey.300">
-                                            <Typography
-                                                variant="subtitle2"
-                                            >
-                                                {` ${obj.productData?.detail}`}
-                                            </Typography>
-                                            <FormControl component="fieldset">
-                                                <RadioGroup row aria-label="pricing-condition" name={obj.productData?.materialId} value={value[obj.productData?.materialId] ?? null} onChange={(event) => handleChange(event, obj.productData?.materialId)}>
-                                                    {obj.pricingConditionList?.map((price) => (
-                                                        <FormControlLabel value={Number(price?.mrp)} labelPlacement="end" control={<Radio />} label={`${price?.conditionName} : ${getUniqueCurrencies().find((d) => d.currencyCode === price['currency'])?.symbolNative} ${price?.mrp}`} />
-                                                    ))}
-                                                </RadioGroup>
-                                            </FormControl>
-                                        </Box>
+        <>{pricingConditionData.length !== 0 ?
+            <Dialog
+                fullWidth
+                maxWidth="md"
+                open={true}
+                onClose={onClose}
+                aria-labelledby="pricing-condition-dialog"
+            >
+                <CustomDialogHeader title="Select Pricing Condition" showRequiredLabel={false} />
+                <CustomDialogContent>
+                    {displayData.length === 0 ? (
+                        <Loader text="Loading Pricing Conditions" />
+                    ) : (
+                        <>
+                            {displayData.map((obj) => (
+                                <Box p={1}>
+                                    <Box border={0.7} p={1} borderColor="grey.300">
+                                        <Typography
+                                            variant="subtitle2"
+                                        >
+                                            {` ${obj.productData?.detail}`}
+                                        </Typography>
+                                        <FormControl component="fieldset">
+                                            <RadioGroup row aria-label="pricing-condition" name={obj.productData?.materialId} value={value[obj.productData?.materialId] ?? null} onChange={(event) => handleChange(event, obj.productData?.materialId)}>
+                                                {obj.pricingConditionList?.map((price) => (
+                                                    <FormControlLabel value={Number(price?.mrp)} labelPlacement="end" control={<Radio />} label={`${price?.conditionName} : ${getUniqueCurrencies().find((d) => d.currencyCode === price['currency'])?.symbolNative} ${price?.mrp}`} />
+                                                ))}
+                                            </RadioGroup>
+                                        </FormControl>
                                     </Box>
-                                ))}
-                            </>
-                        )}
-                    </CustomDialogContent>
-                    <CustomDialogFooter>
-                        <Button
-                            onClick={() => {
-                                setPriceData([...submitData, ...pricingConditionData.filter(d => value[d.materialId] === d.mrp)])
-                            }}
-                            color="primary"
-                            size="small"
-                            variant="contained"
-                        >
-                            Apply
-                        </Button>
-                    </CustomDialogFooter>
-                </Dialog>
-                : null}
-        </>
-
-    );
+                                </Box>
+                            ))}
+                        </>
+                    )}
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                    <Button
+                        onClick={() => {
+                            handleSucess([...submitData, ...pricingConditionData.filter(d => value[d.materialId] === d.mrp)])
+                        }}
+                        color="primary"
+                        size="small"
+                        variant="contained"
+                    >
+                        Apply
+                    </Button>
+                </CustomDialogFooter>
+            </Dialog>
+            : null
+        }
+        </>);
 };
 
 export default CalculatePriceDialog;
