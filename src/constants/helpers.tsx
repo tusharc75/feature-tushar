@@ -53,7 +53,7 @@ export const rentalManagementSteps = [
   'Add Products',
   'Add Services',
   // 'Add Consumables',
-  'Extra Add-on',
+  'Add-on',
   'Quotation',
   'Serialized Asset',
   'Loading Ticket',

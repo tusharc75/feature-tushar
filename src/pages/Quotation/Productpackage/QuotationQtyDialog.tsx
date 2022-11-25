@@ -308,7 +308,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     }
     if (rowData && rowData.hideSelection) {
       if (values.qty < rowData.assetQty) {
-        errors['qty'] = 'Quantity is less than that which has been assigned.';
+        errors['qty'] = 'The quantity is less than what was assigned.';
       }
     }
     return errors;

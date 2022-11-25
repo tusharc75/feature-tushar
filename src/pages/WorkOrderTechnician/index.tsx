@@ -167,8 +167,10 @@ const WorkOrderTechnician = () => {
                             <Box
                               key={index}
                               onClick={() => {
+                                console.log(data);
                                 let tempServiceData = data?.service;
                                 tempServiceData['uniqueId'] = data?._id;
+                                tempServiceData['status'] = data?.status;
                                 setService(tempServiceData);
                                 setWorkOrderId(data?.workOrderDetail?._id);
                                 setServiceDetailsShow(true);
