@@ -98,7 +98,10 @@ const Productpackage = ({
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
       },
       {
         accessor: 'type',
@@ -175,10 +178,7 @@ const Productpackage = ({
               </IconButton>
             )}
           </div>
-        ),
-        Footer: () => {
-          return <>Total</>;
-        }
+        )
       },
       {
         accessor: 'description',
@@ -376,7 +376,7 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName :
+      _subRow.detail = `${_subRow.type === 'serviTce' ? _subRow.serviceDetail?.serviceName :
         _subRow.type === 'package' ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product' ? _subRow.productDetail?.productName
             : ''} `;
