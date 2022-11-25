@@ -18,10 +18,10 @@ const FieldDialog = ({
   steps,
   stepIds,
   reference = '',
-  sectionData = null,
-  notEditableField = false,
-  isCustom = false
+  fields = null,
+  notEditable = false,
 }) => {
+
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
 
@@ -29,31 +29,19 @@ const FieldDialog = ({
   const [deleteField, setDeleteField] = React.useState([]);
 
   React.useEffect(() => {
-    if (notEditableField) {
+    if (reference === 'workOrder') {
       const _data = [];
-      const _section = uniq(map(sectionData, 'sectionName'));
+      const _section = uniq(map(fields, 'sectionName'));
       _section.forEach((element: any, index: number) => {
         _data.push({
           sectionId: index,
           sectionName: element,
-          field: sectionData?.filter((el: any) => el.sectionName === element)
+          field: fields?.filter((el: any) => el.sectionName === element)
         });
       });
       setSection(_data);
     }
-    if (isCustom) {
-      const _data = [];
-      const _section = uniq(map(sectionData, 'sectionName'));
-      _section.forEach((element: any, index: number) => {
-        _data.push({
-          sectionId: index,
-          sectionName: element,
-          field: sectionData?.filter((el: any) => el.sectionName === element)
-        });
-      });
-      setSection(_data);
-    }
-    if (stepIds?.length === 1 && !notEditableField && !isCustom) {
+    else {
       axiosInstance()
         .get(`${serviceMaster.api}/fields/${serviceId}/${stepIds[0]}`)
         .then(({ data: { data } }) => {
@@ -71,9 +59,6 @@ const FieldDialog = ({
         .catch((err) => {
           toastConfig.setToastConfig(err);
         });
-    }
-    if (reference === 'workOrder' && !notEditableField && !isCustom) {
-      setSection(sectionData && sectionData?.length ? sectionData : []);
     }
   }, []);
 
@@ -96,22 +81,23 @@ const FieldDialog = ({
       });
     });
     if (reference === 'workOrder') {
-      handleSucess({ fields: data, section });
-      return;
+      handleSucess(data);
     }
-    axiosInstance()
-      .post(`${serviceMaster.api}/fields/${serviceId}`, { stepIds: stepIds, fields: data })
-      .then(({ data }) => {
-        handleSucess();
-        toastConfig.setToastConfig({
-          open: true,
-          message: data.message,
-          severity: 'success'
+    else {
+      axiosInstance()
+        .post(`${serviceMaster.api}/fields/${serviceId}`, { stepIds: stepIds, fields: data })
+        .then(({ data }) => {
+          handleSucess();
+          toastConfig.setToastConfig({
+            open: true,
+            message: data.message,
+            severity: 'success'
+          });
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
         });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    }
   };
 
   const handleExportFields = () => {
@@ -138,7 +124,7 @@ const FieldDialog = ({
     <Dialog open aria-labelledby="customized-dialog-title" onClose={handleClose} TransitionComponent={CustomDialogTransition} fullWidth fullScreen>
       <CustomDialogHeader showRequiredLabel={false} title="Fields Configuration" onClose={handleClose} />
       <CustomDialogContent>
-        {!notEditableField && (
+        {!notEditable && (
           <Box display="flex" justifyContent="flex-end">
             <Box>
               <label htmlFor="importField" className="cursor-pointer mr-3">
@@ -174,7 +160,7 @@ const FieldDialog = ({
           resource={null}
         />
       </CustomDialogContent>
-      {!notEditableField && (
+      {!notEditable && (
         <CustomDialogFooter>
           <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
             Close

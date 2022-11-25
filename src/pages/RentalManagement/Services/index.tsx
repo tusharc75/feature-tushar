@@ -32,6 +32,7 @@ import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
 import StorefrontIcon from '@material-ui/icons/Storefront';
 import AllOutIcon from '@material-ui/icons/AllOut';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 
 const Services = ({
   rentalManagementData,
@@ -67,6 +68,7 @@ const Services = ({
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
 
+  const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -309,7 +311,7 @@ const Services = ({
   };
 
   const fetchProductInventory = async () => {
-    // setNextStep(false);
+    setNextStep(false);
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
@@ -331,8 +333,8 @@ const Services = ({
       parent.srno = i + 1;
       parent.detail = parent.type === 'product' ? parent?.productDetail?.productName : parent.type === 'service' ? parent?.serviceDetail?.serviceName : parent?.packageDetail?.packageName;
       parent.description = parent.type === 'service' ? parent?.serviceDetail?.serviceDescription || ''
-      : parent.type === 'product' ? parent?.productDetail?.productDesc || ''
-        : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
+        : parent.type === 'product' ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -346,7 +348,9 @@ const Services = ({
     } else {
       setNextStep(true);
     }
-    setNextStep(true);
+    if (rows?.length === 0) {
+      setNextStep(true);
+    }
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -357,8 +361,8 @@ const Services = ({
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = _subRow.type === 'product' ? _subRow?.productDetail?.productName : _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow?.packageDetail?.packageName;
       _subRow.description = _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceDescription || ''
-      : _subRow.type === 'product' ? _subRow?.productDetail?.productDesc || ''
-        : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || '' : '';
+        : _subRow.type === 'product' ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || '' : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -390,9 +394,10 @@ const Services = ({
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
+      element.detail = d?.serviceName || d?.packageName || "";
       element.type = addExistingProductDialog.type;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : d.unit ? d.unit : '';
+      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
       element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
@@ -407,35 +412,72 @@ const Services = ({
       }
       material.push(element);
     });
+    if (material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).length === 0) {
+      AddMaterial(material, [])
+    }
+    else {
+      setPriceDataDialog({ open: true, material: material })
+    }
+    // const priceData: any = await calculatePrice(rentalManagementData, material);
+    // material.forEach((element) => {
+    //   const rateResult = priceData?.filter(
+    //     (e) =>
+    //       e.materialId === element.materialId &&
+    //       e.materialType === element.type &&
+    //       e.unit === element.unit &&
+    //       e.pricingMethod === element.pricingMethod
+    //   );
+    //   if (rateResult.length && rateResult[0].mrp) {
+    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+    //     element[priceFieldName] = rateResult[0].mrp;
+    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    //     Object.assign(element, calValues);
+    //   }
+    // });
 
-    const priceData: any = await calculatePrice(rentalManagementData, material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
-      if (rateResult.length && rateResult[0].mrp) {
+    // axiosInstance()
+    //   .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
+    //   .then(() => {
+    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
+    //     fetchProductInventory();
+    //     setAddingProducts(false);
+    //   })
+    //   .catch((error) => {
+    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
+    //     toastConfig.setToastConfig(error);
+    //     setAddingProducts(false);
+    //   });
+  };
+
+  const AddMaterial = async (material, priceData) => {
+    const tempMaterial = [...material];
+    tempMaterial.forEach((element) => {
+      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit && e.pricingMethod === element.pricingMethod);
+      if (element.listPrice) {
+        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+        element[priceFieldName] = element.listPrice;
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+        Object.assign(element, calValues);
+      } else if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
         Object.assign(element, calValues);
       }
     });
-
     axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
+      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
         setAddingProducts(false);
+        setPriceDataDialog({ open: false, material: null })
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
+        setPriceDataDialog({ open: false, material: null })
       });
   };
 
@@ -689,6 +731,15 @@ const Services = ({
           ids={rowsData.filter((d) => d.type === 'service').map((d) => d?.materialId)}
         />
       )}
+      {priceDataDialog.open &&
+        <CalculatePriceDialog
+          referenceData={rentalManagementData}
+          material={priceDataDialog.material}
+          handleSucess={(data) => {
+            AddMaterial(priceDataDialog.material, data)
+          }}
+          onClose={() => setPriceDataDialog({ open: false, material: null })}
+        />}
     </Fragment>
   );
 };

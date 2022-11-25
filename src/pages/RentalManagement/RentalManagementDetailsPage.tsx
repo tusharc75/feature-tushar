@@ -739,6 +739,12 @@ const RentalManagementDetailsPage = () => {
           message={showCancelConfirmBox.isQuote ? 'Are you sure you want to create new version of this quote ' : `Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`}
           onClose={() => {
             setShowCancelConfirmBox({ open: false, isQuote: false });
+            if (showCancelConfirmBox.isQuote) {
+              setCurrentStep((prevStep) => {
+                const newStep = prevStep - 1;
+                return newStep;
+              });
+            }
           }}
           onOk={() => showCancelConfirmBox.isQuote ? cloneVersion() : handleCancelRentalJob()}
         />

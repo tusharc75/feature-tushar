@@ -239,7 +239,6 @@ const ReceivingTicket = ({
       });
 
       products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
-
       products?.forEach((element) => {
         var qty = element.qty;
         var consumeQty = 0;
@@ -331,7 +330,7 @@ const ReceivingTicket = ({
               productAssets[index]['receivingTicketId'] = obj?._id;
               productAssets[index]['receivingTicketStatus'] = obj?.status;
             }
-            if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['returnTicketId']) {
+            if (obj.ticketType === DELIVERY_TICKET_TYPE.return && productAssets[index]['loadingTicketId']) {
               productAssets[index]['returnTicket'] = obj?.ticketName;
               productAssets[index]['returnTicketId'] = obj?._id;
               productAssets[index]['returnTicketStatus'] = obj?.status;
@@ -534,10 +533,10 @@ const ReceivingTicket = ({
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },
     { field: 'returnTicket', headerName: 'Return Ticket', show: true, cellRenderer: 'returnTicketRenderer' },
-    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'startDate', headerName: 'Actual Start Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'Actual End Date', show: true, cellRenderer: 'dateRenderer' },
-    { field: 'rentalAssetStatus', headerName: 'Rental Asset Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'rentalAssetStatus', headerName: 'Rental Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' }
   ];
 

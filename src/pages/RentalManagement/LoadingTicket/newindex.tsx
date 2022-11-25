@@ -242,7 +242,7 @@ const LoadingTicket = ({ currentStep, rentalManagementData, fetchRentalData, set
     },
     {
       accessor: 'status',
-      Header: 'Asset Status',
+      Header: 'Status',
       Cell: ({ row }) => (
         <p className="text-truncate">{row?.original?.status ? <p>{row?.original?.status}</p> : <NoDataCell />}</p>),
     }
