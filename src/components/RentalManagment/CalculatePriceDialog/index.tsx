@@ -29,7 +29,7 @@ const CalculatePriceDialog = ({
     const fetchCalculatePrice = () => {
         const data: any = {};
         data.conditionType = ['Rent'];
-        data.material = material.filter((d) => d.listPrice === null).map((ele) => ({
+        data.material = material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).map((ele) => ({
             materialId: ele?.materialId,
             materialType: ele?.type,
             qty: ele?.qty,
