@@ -172,9 +172,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     getServiceData();
     axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`).then(({ data: { data } }) => {
       if (data?.length) {
-        data?.forEach((e) => {
-          e.type = 'service';
-        });
+        data?.forEach((e) => { e.type = 'service' });
         const preWorkService = data?.filter((e) => e.preWork);
         const postWorkService = data?.filter((e) => !e.preWork);
         const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
@@ -198,7 +196,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         } else {
           setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
         }
-
         if (
           preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
           preWorkService?.length &&
@@ -286,7 +283,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     axiosInstance()
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
-        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData.status)) {
+        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           createNewVersionQuote()
         }
         else {
@@ -299,17 +296,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const handleRemoveService = (id) => {
-    axiosInstance()
-      .put(`${workOrder.api}/service/${workOrderId}/remove`, {
-        uniqueIds: [id]
-      })
+    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, {
+      uniqueIds: [id]
+    })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data?.message
         });
-        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData.status)) {
+        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           createNewVersionQuote()
         }
         else {
@@ -467,16 +463,15 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 {!isColapsed && (
                   <>
                     <Box>
-                      {serviceSteps.filter((d) => d.type === 'service')?.length === 0 && (
-                        <Button
-                          variant="text"
-                          color="primary"
-                          size="small"
-                          onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}
-                        >
-                          Add Services
-                        </Button>
-                      )}
+                      <Button
+                        disabled={!allowedToEdit}
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}
+                      >
+                        Add Services
+                      </Button>
                     </Box>
                     {serviceSteps?.length > 0 && (
                       <Box marginX={2}>
@@ -511,9 +506,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 >
                   {serviceSteps?.map((data, index) => {
                     const style = stylesForEveryTab(selectedService, data);
-
                     const { steps, startTimes, endTimes } = getFieldsWithOtherDetails(data, serviceData);
-
                     return (
                       Boolean(allowedToEdit || data?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) && (
                         <Grid item xs={12} key={index}>
@@ -577,7 +570,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                       <Box ml={'10px'}>
                                         <Typography>{data?.serviceName}</Typography>
                                       </Box>
-
                                       {data?.type === 'service' && (
                                         <Box ml={1}>
                                           {data?.preWork ? (
@@ -777,20 +769,24 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 {!isColapsed && (
                   <>
                     <Box marginX={2}>
-                      {serviceSteps.filter((d) => d.type === 'service')?.length === 0 && (
-                        <Button
-                          variant="text"
-                          color="primary"
-                          size="small"
-                          onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}
-                        >
-                          Add Services
-                        </Button>
-                      )}
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        disabled={!allowedToEdit}
+                        size="small"
+                        onClick={() => setServiceDialog({ open: true, uniqueId: null, preWork: null })}
+                      >
+                        Add Services
+                      </Button>
                     </Box>
                     {serviceSteps?.length > 0 && (
                       <Box>
-                        <Button disabled={!allowedToEdit} variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+                        <Button
+                          disabled={!allowedToEdit}
+                          variant="outlined"
+                          color="primary"
+                          size="small"
+                          onClick={() => setArrangeView(true)}>
                           <GrDrag fontSize="small" color="primary" className="mr-1" />
                           Arrange
                         </Button>
@@ -1021,6 +1017,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       )}
     </Box>
   );
-  
+
 };
 export default Service;
