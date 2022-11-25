@@ -13,16 +13,13 @@ import Details from 'src/components/Shared/DetailsPage';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import SettingsIcon from '@material-ui/icons/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
-import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 
 const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, workOrderId, stepData, isStepValid, selectedService = null }) => {
+  
   const [isEditing, setEditing] = React.useState(false);
   const [viewStep, setViewStep] = React.useState(false);
-  const [openFieldDialog, setOpenFieldDialog] = React.useState(false);
-
-  const [stepFields, setStepFields] = React.useState(step?.fields || []);
-
+  
   const steps = selectedService?.steps || [];
 
   function convertMsToTime(milliseconds) {
@@ -123,17 +120,13 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
   };
 
   const handleUpdateStep = (values: any) => {
-    values.fields = stepFields?.fields;
-    return new Promise((resolve, reject) => {
-      axiosInstance()
-        .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`, values)
-        .then(({ data }) => {
-          resolve(data);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/update-step`, values)
+      .then(({ data }) => {
+        setViewStep(false);
+        handleClose()
+      })
+      .catch((err) => {
+      });
   };
 
   return (
@@ -358,38 +351,17 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
           handleClose={() => {
             setViewStep(false);
           }}
-          handleSucess={() => {
-            setViewStep(false);
+          handleSucess={(data) => {
+            handleUpdateStep(data)
           }}
-          handleAddStep={handleUpdateStep}
           stepId={''}
           stepData={step}
           notEditable={step?.customStep === true ? false : true}
           steps={steps}
-          isCustom={step?.customStep === true ? true : false}
           reference={'workOrder'}
           workOrderId={workOrderId}
           serviceId={selectedService?._id}
           uniqueId={selectedService?.uniqueId}
-          setOpenFieldDialog={setOpenFieldDialog}
-        />
-      )}
-      {openFieldDialog && (
-        <FieldDialog
-          reference={'workOrder'}
-          serviceId={selectedService?._id}
-          stepIds={selectedService?.steps?.map((d) => d?._id)}
-          steps={[]}
-          sectionData={step?.fields}
-          notEditableField={step?.customStep === true ? false : true}
-          isCustom={step?.customStep === true ? true : false}
-          handleClose={() => {
-            setOpenFieldDialog(false);
-          }}
-          handleSucess={(fieldsData: any) => {
-            setOpenFieldDialog(false);
-            setStepFields(fieldsData);
-          }}
         />
       )}
     </>
