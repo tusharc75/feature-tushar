@@ -551,7 +551,7 @@ const RentalManagementDetailsPage = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? false : allowedToEdit}
+                        allowedToEdit={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.waitingForSupplierPrice].includes(quotationData?.versions[currentVersion]?.status) ? false : allowedToEdit}
                       />
                     )}
                     {rentalSteps[currentStep] === 'Add Services' && rentalManagementData && (
@@ -564,7 +564,7 @@ const RentalManagementDetailsPage = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? false : allowedToEdit}
+                        allowedToEdit={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.waitingForSupplierPrice].includes(quotationData?.versions[currentVersion]?.status) ? false : allowedToEdit}
                       />
                     )}
                     {/* {rentalSteps[currentStep] === 'Add Consumables' && rentalManagementData && (
@@ -585,7 +585,7 @@ const RentalManagementDetailsPage = () => {
                         rentalManagementData={rentalManagementData}
                         setNextStep={setNextStep}
                         renderedFrom={`${renderedFrom}_grid-2`}
-                        allowedToEdit={quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? false : allowedToEdit}
+                        allowedToEdit={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.waitingForSupplierPrice].includes(quotationData?.versions[currentVersion]?.status) ? false : allowedToEdit}
                       />
                     )}
                     {rentalSteps[currentStep] === 'Quotation' && rentalManagementData && (
