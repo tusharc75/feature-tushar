@@ -266,7 +266,15 @@ const Productpackage = ({
             });
           });
         }
-      } else {
+      }
+      else if (element.fieldName === 'pricingCondition') {
+        coloum.push({
+          accessor: element.fieldName,
+          Header: element.fieldLabel,
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]?.optionLabel ? row.original[element.fieldName]?.optionLabel : row.original[element.fieldName]}</p> : <NoDataCell />)
+        });
+      }
+      else {
         if (element.fieldName === 'qty') {
           element.fieldName = 'qtyDisplay';
         }
@@ -492,6 +500,7 @@ const Productpackage = ({
       } else if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
+        element["pricingCondition"] = rateResult[0].conditionId;
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
         Object.assign(element, calValues);
       }
