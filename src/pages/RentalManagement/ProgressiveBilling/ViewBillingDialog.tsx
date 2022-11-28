@@ -227,6 +227,13 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         );
       }
       coloum.forEach((element) => {
+        if (element.Header === 'Actual Start Date') {
+          element.Header = 'Bill Start Date';
+        }
+        if (element.Header === 'Actual End Date') {
+          element.Header = 'Bill End Date';
+        }
+
         if (element.accessor.includes('detail')) {
           element['Footer'] = () => {
             return <>Total</>;
