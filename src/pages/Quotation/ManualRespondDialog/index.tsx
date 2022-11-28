@@ -77,7 +77,7 @@ const ManualReponseDialog = ({ quotationId, versionId, setCurrentStep, updateSta
               </ListItem>
             ))}
           </List>
-          {selectedOption === 'Reject' && (
+          {selectedOption && (
             <Box my={2}>
               <TextField
                 fullWidth
