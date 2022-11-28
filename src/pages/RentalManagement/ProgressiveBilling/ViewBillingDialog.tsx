@@ -27,12 +27,10 @@ import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import InvoiceFacility from 'src/pages/Invoice/Invoice/InvoiceFacility';
 import { startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import EditIcon from '@material-ui/icons/Edit';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
-
   const toastConfig = useContext(CustomToastContext);
-
-
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [material, setMaterial] = useState([]);
@@ -44,6 +42,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [allFields, setAllFields] = useState([]);
+  const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
+  const [actionAnchorEl, setActionAnchorEl] = useState(null);
+  // const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   useEffect(() => {
     fetchFields();
@@ -80,12 +82,12 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                    ? row.original?.packageDetail.packageType === 'Product'
-                      ? '(Product)'
-                      : '(Service)'
-                    : row.original.type === 'service'
-                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                      : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                  : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -121,6 +123,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           )
         }
       ];
+
       data.forEach((element) => {
         if (element.type === 'date') {
           coloum.push({
@@ -196,7 +199,41 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           });
         }
       });
+      {
+        isMobile ? (
+          <Box display={'none'} />
+        ) : (
+          coloum.push({
+            accessor: 'action',
+            Header: '',
+            minWidth: 50,
+            width: 50,
+            sticky: 'right',
+            disableFilters: true,
+            canDrag: false,
+            Cell: ({ row }) =>
+              row.original.isEditable && (
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setIsProductEdit({ open: true, rowData: row.original });
+                  }}
+                >
+                  <EditIcon color="primary" />
+                </IconButton>
+              )
+          })
+        );
+      }
       coloum.forEach((element) => {
+        if (element.Header === 'Actual Start Date') {
+          element.Header = 'Bill Start Date';
+        }
+        if (element.Header === 'Actual End Date') {
+          element.Header = 'Bill End Date';
+        }
+
         if (element.accessor.includes('detail')) {
           element['Footer'] = () => {
             return <>Total</>;
@@ -236,7 +273,14 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'package' ? parent.packageDetail?.packageName : parent.serviceDetail?.serviceName}`;
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'package'
+          ? parent.packageDetail?.packageName
+          : parent.serviceDetail?.serviceName
+      }`;
+      parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -248,11 +292,61 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === 'product' ? _subRow?.productDetail?.productName : _subRow?.type === 'package' ? _subRow?.packageDetail?.packageName : _subRow?.serviceDetail?.serviceName}`;
+      _subRow.detail = `${
+        _subRow?.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageName
+          : _subRow?.serviceDetail?.serviceName
+      }`;
+      _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
+  };
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSaveData = async (rows: any) => {
+    const data = {
+      invoiceId: invoiceData?._id,
+      materialId: rows[0]?.materialId,
+      qty: rows[0]?.qty
+    };
+    setIsLoadingUpdate(true);
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/update-qty`, data)
+      .then((res) => {
+        setIsLoadingUpdate(false);
+        setIsProductEdit({ open: false, rowData: null });
+        fetchProductInventory();
+      })
+      .catch((error) => {
+        setIsLoadingUpdate(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleDeleteData = async () => {
+    const data = {
+      invoiceId: invoiceData?._id,
+      materialIds: selectedProducts?.map((e) => e.materialId) || []
+    };
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
+      .then((res) => {
+        fetchProductInventory();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -261,7 +355,46 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         <CustomDialogHeader title={`Invoice Number : ${invoiceData?.invoiceNumber}`} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
           <Fragment>
-            {invoiceData && <InvoiceFacility invoiceData={invoiceData} />}
+            <Box display="flex" justifyContent="space-between">
+              {invoiceData && <InvoiceFacility invoiceData={invoiceData} />}
+              <Box display="flex" alignItems="center">
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={handleClick}
+                  aria-controls="action-menu"
+                  disabled={selectedProducts?.length === 0}
+                >
+                  Actions <ExpandMore />
+                </Button>
+                <Menu
+                  id="action-menu"
+                  anchorEl={anchorEl}
+                  keepMounted
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right'
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right'
+                  }}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      setAnchorEl(null);
+                      handleDeleteData();
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </Box>
+            </Box>
             {columns && rowsData ? (
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 285px)'} p={1}>
                 <CustomReactTable
@@ -271,7 +404,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   onSelect={setSelectedProducts}
                   childrenProperty="subRows"
                   uniqueKey="_id"
-                  hideSelection={invoiceData ? true : false}
+                  hideSelection={false}
                   renderedFrom="rental_management_create_billing"
                   isClientSideGrid={true}
                 />
@@ -297,6 +430,21 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           </Button>
         </CustomDialogFooter>
       </Dialog>
+      {isProductEdit.open && (
+        <RentalJobQtyDialog
+          onClose={() => {
+            setIsProductEdit({ open: false, rowData: null });
+          }}
+          isBulkedit={false}
+          handleSaveData={handleSaveData}
+          rentalManagementData={rentalManagementData}
+          rowData={rowsData?.find((d) => d._id === isProductEdit.rowData._id)}
+          material={material}
+          selectedProducts={[]}
+          loading={isLoadingUpdate}
+          isQtyOnly={true}
+        />
+      )}
     </Fragment>
   );
 };

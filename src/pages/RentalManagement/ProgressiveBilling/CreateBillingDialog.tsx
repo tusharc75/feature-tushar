@@ -259,6 +259,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
           e.estimateStartDate = actualEndDate;
           e.actualStartDate = actualEndDate;
+          e.isInvoiced = true
+
           setEndDate(actualEndDate);
           if (!['Per Day', 'Per Week', 'Per Month'].includes(e?.pricingMethod)) {
             let tempTotalPrevQty = invoiceData.map(obj => {
@@ -354,6 +356,19 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   };
 
   const handleCreateBill = () => {
+
+    const alreadyInvoiced = rowsApplied.some((d) => d?.isInvoiced)
+
+    if(alreadyInvoiced) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: "warning",
+        message: "Some of the selected records have been already billed"
+      });
+
+      return
+    }
+
     rowsApplied?.forEach((element) => {
       delete element?.srno;
       delete element?.detail;
