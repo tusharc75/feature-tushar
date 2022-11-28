@@ -133,6 +133,16 @@ const Quotation = ({
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
       {
+        accessor: 'srno',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        },
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -298,11 +308,12 @@ const Quotation = ({
     //     )
     // })
     coloum.forEach((element) => {
-      if (element.accessor.includes('detail')) {
-        element['Footer'] = () => {
-          return <>Total</>;
-        };
-      } else if (element.accessor === 'qtyDisplay') {
+      // if (element.accessor.includes('detail')) {
+      //   element['Footer'] = () => {
+      //     return <>Total</>;
+      //   };
+      // } else
+       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
             .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
@@ -334,6 +345,7 @@ const Quotation = ({
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
+      parent.srno = i + 1;
       parent.detail = `${parent.type === 'serializedAsset'
         ? parent.serializedAssetDetail?.assetNumber
         : parent.type === 'product'
@@ -357,6 +369,7 @@ const Quotation = ({
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === 'serializedAsset'
         ? _subRow.serializedAssetDetail?.assetNumber
         : _subRow.type === 'product'
@@ -801,3 +814,4 @@ const Quotation = ({
 };
 
 export default Quotation;
+
