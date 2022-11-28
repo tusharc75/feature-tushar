@@ -597,12 +597,18 @@ const SerializedAsset = ({
   useEffect(() => {
     let flatArray = treeToFlatArray(selectedRecords, 'subRows').filter(
       (f) => f.type === 'product' && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
-    );
+      );
+    let newFlatArray = treeToFlatArray(selectedRecords, 'subRows').filter((d) => d.type === 'product')
+    newFlatArray = uniqBy(newFlatArray, "_id")
+
     flatArray = uniqBy(flatArray, '_id');
-    const products = flatArray.map((m) => {
-      return { _id: m.materialId, unit: m.unit, assetsCount: m.realAssetQty - m.realAssetAssignedQty };
+    const products = newFlatArray.map((m) => {
+      return { _id: m.materialId, unit: m.unit, serialized: m.serializedProduct, assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : 0 };
     });
+
+    console.log(newFlatArray)
     const uniqProduct = [];
+
     products.forEach((element: any) => {
       const foundProduct = uniqProduct.filter((e) => e._id === element._id);
       if (foundProduct.length) {
