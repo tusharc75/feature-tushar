@@ -14,6 +14,9 @@ import {
   useMediaQuery,
   ButtonBase,
   Popover,
+  ListItem,
+  ListItemText,
+  List,
   Tooltip
 } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
@@ -26,7 +29,6 @@ import { useData } from '../../StateProvider/Provider';
 import { SVG } from '../../assets';
 import UserProfile from './../UserProfile';
 import { SET_CHATTER, SET_SELECTED_ENTITY, SET_START_TOUR, SET_USER } from '../../StateProvider/actionTypes';
-import './Header.scss';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -41,6 +43,13 @@ import { backendApi } from '../../config';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { AiOutlineClear } from 'react-icons/ai';
 
+import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from 'src/assets/dashboard_images';
+import { kebabCase } from 'lodash';
+import { staticHiddenResource } from '../../constants/helpers';
+import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
+import { useScrollDirection } from 'src/hooks/useScroll';
+import styles from './Header.module.scss';
+
 const useStyles = makeStyles((theme) => ({
   grow: {
     flexGrow: 1
@@ -49,17 +58,17 @@ const useStyles = makeStyles((theme) => ({
     zIndex: theme.zIndex.drawer + 1
   },
   toolbar: {
-    [theme.breakpoints.down('xs')]: {
-      paddingLeft: 0,
-      paddingRight: 0
-    }
+    // [theme.breakpoints.down('xs')]: {
+    //   paddingLeft: '16px',
+    //   paddingRight: '16px'
+    // }
   },
   menuButton: {
     marginRight: theme.spacing(2)
   },
 
   logo: {
-    paddingTop: "8px",
+    paddingTop: '8px',
     width: '120px'
   },
 
@@ -122,7 +131,7 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: '10%',
     height: '40px',
     borderRadius: '4px',
-    marginRight: '5px',
+    marginRight: '5px'
   },
   entitySelect: {
     fontSize: '16px',
@@ -179,7 +188,7 @@ const Header = ({ toggleDrawer }) => {
   const history = useHistory();
   const { pathname } = useLocation();
   const isMobile = useMediaQuery('(max-width:599px)');
-  const [isSearch, setSearch] = useState(false);
+  const [isSearch, setIsSearch] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
   const [servicesAnchorEl, setServicesAnchorEl] = useState(null);
@@ -203,6 +212,7 @@ const Header = ({ toggleDrawer }) => {
 
   // For FullScreen Notification - Start
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
+  const scrollPos = useScrollDirection(40);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -214,7 +224,7 @@ const Header = ({ toggleDrawer }) => {
   const saveEntity = () => {
     axiosInstance()
       .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -281,7 +291,7 @@ const Header = ({ toggleDrawer }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const s = io(`${backendApi?.replace("/api", "")}/user`, {
+    const s = io(`${backendApi?.replace('/api', '')}/user`, {
       path: backendApi?.includes('/api') ? '/api/socket.io/' : '/socket.io/',
       auth: {
         token
@@ -482,8 +492,8 @@ const Header = ({ toggleDrawer }) => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-        : '';
+      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+      : '';
 
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
@@ -606,7 +616,7 @@ const Header = ({ toggleDrawer }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -726,7 +736,7 @@ const Header = ({ toggleDrawer }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => { })
+                      .then(() => {})
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -788,20 +798,20 @@ const Header = ({ toggleDrawer }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-          <MenuItem
-            title={curEntity.entityName}
-            key={curEntity._id}
-            selected={selectedEntity === curEntity._id}
-            onClick={() => {
-              handleSelectedEnity(curEntity._id);
-              closeEntitiesMenu();
-            }}
-          >
-            <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
-            <Box component="span" marginX={1} />
-            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-          </MenuItem>
-        ))
+            <MenuItem
+              title={curEntity.entityName}
+              key={curEntity._id}
+              selected={selectedEntity === curEntity._id}
+              onClick={() => {
+                handleSelectedEnity(curEntity._id);
+                closeEntitiesMenu();
+              }}
+            >
+              <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
+              <Box component="span" marginX={1} />
+              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+            </MenuItem>
+          ))
         : null}
     </Menu>
   );
@@ -832,7 +842,7 @@ const Header = ({ toggleDrawer }) => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => {}}>
         <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary" aria-describedby={mobileScreenChatNotificationId}>
           <ChatIcon />
         </Badge>
@@ -863,7 +873,7 @@ const Header = ({ toggleDrawer }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => { }}>
+      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => {}}>
         <Badge badgeContent={notification ? notification.count : 0} color="secondary" aria-describedby={mobileScreenNotificationId}>
           <Notifications />
         </Badge>
@@ -989,40 +999,12 @@ const Header = ({ toggleDrawer }) => {
 
   return (
     <div>
-      <Slide direction="down" in={isSearch}>
-        <AppBar position="fixed" style={{ zIndex: 10000 }}>
-          <Toolbar>
-            <IconButton edge="start" color="inherit" aria-label="close search" onClick={() => setSearch(false)}>
-              <ClearIcon />
-            </IconButton>
-
-            {/* <div
-              className={classes.search}
-              style={{ display: "block", width: "100%" }}
-            >
-              <div className={classes.searchIcon}>
-                <Search />
-              </div>
-
-              <InputBase
-                placeholder="Search…"
-                classes={{
-                  root: classes.inputRoot,
-                  input: classes.inputInput,
-                }}
-                style={{ width: "100%" }}
-                inputProps={{ "aria-label": "search" }}
-              />
-            </div> */}
-          </Toolbar>
-        </AppBar>
-      </Slide>
-
-      <AppBar position="fixed" className={classes.appBar} color="primary">
-        <Toolbar className={classes.toolbar}>
+      {scrollPos?.scrolled && <div className={styles.filler}></div>}
+      <AppBar position="relative" className={`${classes.appBar} ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`} color="primary">
+        <Toolbar className={`${classes.toolbar} ${styles.mainConainer}`}>
           <Box component="div" display="flex" alignItems="center" flexGrow={1}>
             <div className={classes.sectionMobile}>
-              <IconButton aria-label="help" color="inherit" title="Menu" onClick={toggleDrawer}>
+              <IconButton aria-label="help" color="inherit" title="Menu" onClick={toggleDrawer} style={{ marginLeft: '-11px' }}>
                 <MenuIcon />
               </IconButton>
             </div>
@@ -1083,7 +1065,9 @@ const Header = ({ toggleDrawer }) => {
             </Button>
           </div> */}
           {user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={classes.brandLogo} /> : null}
-
+          <div className={styles.searchBar}>
+            <SearchBar user={user} selectedEntity={selectedEntity} history={history} />
+          </div>
           <div className={classes.sectionDesktop}>
             <div>
               {isOffline && (
@@ -1108,13 +1092,12 @@ const Header = ({ toggleDrawer }) => {
                 color="inherit"
                 title="Notifications"
                 onClick={handleFullScreenNotificationClick}
-                className="showIconLayout"
+                className={styles.showIconLayout}
               >
                 <Badge badgeContent={notification ? notification.count : 0} color="secondary">
                   <Notifications className="setIcon" />
                 </Badge>
               </IconButton>
-
               <Popover
                 className="mr-2"
                 id={fullScreenNotificationId}
@@ -1150,7 +1133,7 @@ const Header = ({ toggleDrawer }) => {
                 color="inherit"
                 title="Chats"
                 onClick={handleFullScreenChatNotificationClick}
-                className="showIconLayout"
+                className={styles.showIconLayout}
               >
                 <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
                   <ChatIcon className="setIcon" />
@@ -1188,7 +1171,7 @@ const Header = ({ toggleDrawer }) => {
               </Badge>
             </IconButton> */}
 
-            <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour} className="showIconLayout" title="Help">
+            <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour} className={styles.showIconLayout} title="Help">
               <HelpOutline className="setIcon" />
             </IconButton>
           </div>
@@ -1196,7 +1179,7 @@ const Header = ({ toggleDrawer }) => {
           {/* <div className={classes.sectionMobile}>
             <IconButton
               aria-label="search"
-              onClick={() => setSearch(true)}
+              onClick={() => setIsSearch(true)}
               color="inherit"
               title="Search"
             >
@@ -1229,3 +1212,213 @@ const Header = ({ toggleDrawer }) => {
 };
 
 export default Header;
+
+const sectionVariations = (sec) => {
+  let icon = <img src={SVGImages(IconConst.PRODUCT_SETUP)} alt="Product Setup Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+  let heading = '';
+  let text = '';
+  let color = '#FFEFEE';
+
+  switch (sec) {
+    case 'Product Setup':
+      icon = <img src={SVGImages(IconConst.PRODUCT_SETUP)} alt="Product Setup Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+      text = 'Product and Category Setup.';
+      color = '#FFEFEE';
+      break;
+    case 'Admin Portal':
+      icon = <img src={SVGImages(IconConst.ADMIN_PORTAL)} alt="Admin Portal Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+      text = 'Build your own Template, Manage Roles and Entities.';
+      color = '#F3F8FF';
+      break;
+    case 'CRM +':
+      icon = <img src={SVGImages(IconConst.CRM)} alt="Crm Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+      text = 'Convert leads and close sales deals faster.';
+      color = '#FFF7F2';
+      break;
+    case 'ROM':
+      icon = <img src={SVGImages(IconConst.ROM)} alt="ROM Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+      text = 'Fulfill Rental Orders Faster.';
+      color = '#F9FDEC';
+      break;
+    case 'Accounts':
+      icon = <img src={SVGImages(IconConst.ACCOUNTS)} alt="Accounts Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+      text = 'Customer and Supplier Account Management at your fingertips.';
+      color = '#FFFAEC';
+      break;
+    case 'Activities':
+      icon = <img src={SVGImages(IconConst.ACTIVITIES)} alt="Activities Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+      text = 'Assign and Access Activities related to an Order.';
+      color = '#F6F1FF';
+      break;
+
+    case 'Dynamic Forms':
+      icon = <img src={SVGImages(IconConst.FORM_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+      text = 'Setup Dynamic Forms & Templates';
+      color = '#FFEFEE';
+      break;
+    case 'Inventory Management':
+      icon = <img src={SVGImages(IconConst.INV_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+      text = 'Manage Inventory and Purchases Smartly.';
+      color = '#F3F8FF';
+      break;
+    default:
+      icon = <img src={SVGImages(IconConst.GEN_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+      text = '';
+      color = '#FFF7F2';
+  }
+  return { icon, heading, text, color };
+};
+
+const SearchBar = ({ user, selectedEntity, history }) => {
+  const [sections, setSections] = useState([]);
+  const [showCloseButton, setShowCloseButton] = useState(false);
+  const [search, setSearch] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
+
+  useEffect(() => {
+    let arr = [];
+    let allData = [];
+    // let allData = user && [...user?.role.sideBar];
+    let entityData;
+    if (user?.entity && user.entity.length) {
+      entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
+    }
+    if (entityData?.resource) {
+      allData = entityData.resource;
+    }
+
+    allData?.forEach((u) => {
+      u['resourceLabel'] = u.resourceLabel ?? u.name;
+      u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
+      u['resourceLabelLowerCase'] = u.resourceLabel?.toLowerCase() ?? u.name?.toLowerCase();
+      !arr.includes(u.sectionName) && arr.push(u.sectionName);
+    });
+
+    var data = arr.map((sec) => {
+      const list = allData?.filter((u) => {
+        if (u?.name === 'Product Builder' && process.env.REACT_APP_ENV === 'staging') {
+          return false;
+        }
+        if (u?.isHidden || staticHiddenResource?.includes(u?.name)) {
+          return false;
+        }
+        return sec === u.sectionName && u.isRead;
+      });
+
+      let { icon, heading, text, color } = sectionVariations(sec);
+
+      return {
+        icon: icon,
+        text: text,
+        head: sec,
+        items: list,
+        color: color
+      };
+    });
+
+    setSections(data);
+  }, [user, selectedEntity]);
+
+  const handleSearch = (value) => {
+    const searchedValueInLowerCase = value?.toLowerCase();
+    const filteredItems = [];
+
+    sections.forEach((section) => {
+      const items = section.items.filter(
+        (ff) => ff.sectionNameLowerCase.indexOf(searchedValueInLowerCase) > -1 || ff.resourceLabelLowerCase.indexOf(searchedValueInLowerCase) > -1
+      );
+      if (items.length > 0) {
+        filteredItems.push({ ...section, items: items });
+      }
+    });
+    setFilteredData(filteredItems);
+  };
+  const clearSearch = () => {
+    setSearch('');
+    setShowCloseButton(false);
+  };
+
+  const handleRoutes = (item) => {
+    switch (item.name) {
+      case 'Pos':
+        return routes.pos.path;
+      default:
+        return `/${kebabCase(item.name)}`;
+    }
+  };
+
+  return (
+    <div className={styles.searchContainer}>
+      <div className={`${styles.search_input}`} style={{ borderRadius: showCloseButton ? '4px 4px 0 0' : '4px' }}>
+        <input
+          type="text"
+          value={search}
+          placeholder="Search"
+          onChange={(e) => {
+            const searchedValue = e.target.value;
+            searchedValue.length > 0 ? setShowCloseButton(true) : setShowCloseButton(false);
+            setSearch(searchedValue);
+            handleSearch(searchedValue);
+          }}
+          style={{ borderRadius: showCloseButton ? '4px 4px 0 0' : '4px' }}
+        />
+        <div className={styles.searchIcon}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
+            <path d="M11.4233 11.5286L14.7983 14.9036" stroke="#7E818C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            <path
+              d="M7.20459 12.6536C10.1559 12.6536 12.5483 10.2611 12.5483 7.30981C12.5483 4.35854 10.1559 1.96606 7.20459 1.96606C4.25332 1.96606 1.86084 4.35854 1.86084 7.30981C1.86084 10.2611 4.25332 12.6536 7.20459 12.6536Z"
+              stroke="#7E818C"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        {showCloseButton && (
+          <div className={styles.clear_icon}>
+            <ClearIcon onClick={() => clearSearch()} />
+          </div>
+        )}
+      </div>
+      {search.trim() !== '' && <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} />}
+    </div>
+  );
+};
+
+const SearchResult = ({ filteredData, history, handleRoutes }) => {
+  return (
+    <div className={styles.searchResult}>
+      <div className={`${styles.filtered_data} `} style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll' }}>
+        {filteredData.length !== 0 ? (
+          filteredData.map((section) => {
+            return (
+              <List key={section.head} subheader={<li className={`${styles.list_header}`}>{section.head}</li>}>
+                {section.items.map((item) => {
+                  return (
+                    <>
+                      <ListItem
+                        key={item.name}
+                        button
+                        onClick={() => {
+                          history.push(handleRoutes(item));
+                        }}
+                        className={styles.heaaderResults}
+                      >
+                        <ListItemText primary={item.resourceLabel} style={{ fontSize: '14px' }} />
+                      </ListItem>
+                    </>
+                  );
+                })}
+              </List>
+            );
+          })
+        ) : (
+          <div className={styles.no_result_container}>
+            <SentimentVeryDissatisfiedIcon />
+            <p className={styles.no_result}>Sorry, we couldn't find any result</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
