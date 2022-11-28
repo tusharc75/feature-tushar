@@ -8,11 +8,14 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
+import { rentalManagement } from 'src/constants/helpers';
+import axiosInstance from 'src/axios/axiosInstance';
 
-const ReturnTicketDialog = ({ onClose, onSuccess, productList }) => {
+const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const handleSubmit = (values) => {
+    delete values['orderQuantity'];
     onSuccess(values);
   };
 
@@ -22,19 +25,22 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList }) => {
       values.map((d) => {
         const returnQty = parseInt(d.returnQuantity);
         const consumeQty = parseInt(d.consumeQuantity);
+        const invoiceData = invoiceQtyData?.find((i) => i?._id === d?.row?.uniqueId);
         let product = d?.row;
-        if (returnQty > product.qty) {
-          errors.returnQuantity = 'Return quantity should not be more then actual quantity';
+        if (!product?.serialized && returnQty > invoiceData?.qty) {
+          errors.returnQuantity = `Return quantity can not be greater than invoice quantity`;
+        } else if (returnQty > product.qty) {
+          errors.returnQuantity = 'Return quantity should not be more then order quantity';
         } else {
           errors.returnQuantity = '';
         }
         if (consumeQty > product.qty) {
-          errors.consumeQuantity = 'Consume quantity should not be more then actual quantity';
+          errors.consumeQuantity = 'Consume quantity should not be more then order quantity';
         } else {
           errors.consumeQuantity = '';
         }
         if (consumeQty + returnQty > product.qty && !errors?.returnQuantity && !errors?.consumeQuantity) {
-          errors['sum'] = 'Addition of return and consume quantity cannot be greater then actual quantity';
+          errors['sum'] = 'Addition of return and consume quantity cannot be greater then order quantity';
         } else {
           errors['sum'] = '';
         }
@@ -71,8 +77,9 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList }) => {
               _id: d._id,
               product: d.productName,
               productId: d.productId,
-              returnQuantity: d.qty || 0,
+              returnQuantity: 0,
               consumeQuantity: 0,
+              orderQuantity: d.qty || 0,
               row: d
             }))
           }}
@@ -116,7 +123,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList }) => {
                                               <Grid item xs={12} md={4}>
                                                 <Field
                                                   fullWidth
-                                                  label="Return Quantity"
+                                                  label="Return"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
@@ -138,7 +145,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList }) => {
                                               <Grid item xs={12} md={4}>
                                                 <Field
                                                   fullWidth
-                                                  label="Consume Quantity"
+                                                  label="Consume"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
@@ -155,6 +162,20 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList }) => {
                                                   }}
                                                   error={validate([data])?.consumeQuantity}
                                                   helperText={validate([data]).consumeQuantity ? validate([data]).consumeQuantity : ''}
+                                                />
+                                              </Grid>
+                                              <Grid item xs={12} md={4}>
+                                                <Field
+                                                  fullWidth
+                                                  label="Order Quantity"
+                                                  variant="outlined"
+                                                  type="number"
+                                                  size="small"
+                                                  component={TextField}
+                                                  name="orderQuantity"
+                                                  placeholder="Order Quantity"
+                                                  value={data.orderQuantity}
+                                                  disabled
                                                 />
                                               </Grid>
                                             </Grid>
@@ -202,3 +223,6 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList }) => {
 };
 
 export default ReturnTicketDialog;
+function useEffect(arg0: () => void, arg1: any[]) {
+  throw new Error('Function not implemented.');
+}
