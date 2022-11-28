@@ -404,7 +404,7 @@ const SerializedAsset = ({
         }
         parent.subRows = generateNestedData(data.material, data.inventory, data?.nonSerializeAsset, parent, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct, offlineAssetErrorLog);
       });
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
+      if (rows.some((_rows) => _rows.isValid === false || (_rows.subRows.length > 0 && _rows.subRows.some((_rows) => _rows.isValid === false)))) {
         setNextStep(false);
       } else {
         setNextStep(true);
@@ -505,8 +505,8 @@ const SerializedAsset = ({
   };
 
   const getAssetAssignedValues = (row) => {
-    if (row?.original?.type === 'asset') {
-      return '';
+    if (row?.original?.type === 'asset' || row?.original?.type === 'service') {
+      return <NoDataCell />;
     }
     // if (!row?.original?.serializedProduct && row?.original?.assetAssignedQty === 0) {
     //   return <p>---</p>;
