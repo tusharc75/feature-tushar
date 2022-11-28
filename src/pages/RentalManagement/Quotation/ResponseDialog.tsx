@@ -69,20 +69,22 @@ const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
             </ListItem>
           ))}
         </List>
-        <Box my={2}>
-          <TextField
-            fullWidth
-            id="outlined-multiline-static"
-            label="Comment"
-            multiline
-            value={comment}
-            onChange={handleChange}
-            rows={4}
-            variant="outlined"
-            error={Boolean(commentError)}
-            helperText={Boolean(commentError) && commentError}
-          />
-        </Box>
+        {selectedOption && (
+          <Box my={2}>
+            <TextField
+              fullWidth
+              id="outlined-multiline-static"
+              label="Comment"
+              multiline
+              value={comment}
+              onChange={handleChange}
+              rows={4}
+              variant="outlined"
+              error={Boolean(commentError)}
+              helperText={Boolean(commentError) && commentError}
+            />
+          </Box>
+        )}
       </CustomDialogContent>
       <CustomDialogFooter>
         <Button onClick={closeManualDiaog} color="primary" size="small" disabled={submitting}>
