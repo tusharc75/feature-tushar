@@ -29,10 +29,10 @@ export const IconConst = {
   COLABORATION_TOOL: 'Colab'
 };
 
-export const IMAGE_HEIGHT = 56;
-export const IMAGE_WIDTH = 56;
+export const IMAGE_HEIGHT = 50;
+export const IMAGE_WIDTH = 50;
 
-export const SVG = (name) => {
+export const SVGImages = (name) => {
   switch (name) {
     case IconConst.HERO:
       return hero;
