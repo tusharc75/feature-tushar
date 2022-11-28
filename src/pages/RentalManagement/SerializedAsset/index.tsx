@@ -404,7 +404,7 @@ const SerializedAsset = ({
         }
         parent.subRows = generateNestedData(data.material, data.inventory, data?.nonSerializeAsset, parent, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct, offlineAssetErrorLog);
       });
-      if (rows.some((_rows) => _rows.isValid === false || (_rows.subRows.length > 0 && _rows.subRows.some((_rows) => _rows.isValid === false)))) {
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
         setNextStep(false);
       } else {
         setNextStep(true);
@@ -505,8 +505,8 @@ const SerializedAsset = ({
   };
 
   const getAssetAssignedValues = (row) => {
-    if (row?.original?.type === 'asset' || row?.original?.type === 'service') {
-      return <NoDataCell />;
+    if (row?.original?.type === 'asset') {
+      return '';
     }
     // if (!row?.original?.serializedProduct && row?.original?.assetAssignedQty === 0) {
     //   return <p>---</p>;
@@ -597,12 +597,18 @@ const SerializedAsset = ({
   useEffect(() => {
     let flatArray = treeToFlatArray(selectedRecords, 'subRows').filter(
       (f) => f.type === 'product' && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
-    );
+      );
+    let newFlatArray = treeToFlatArray(selectedRecords, 'subRows').filter((d) => d.type === 'product')
+    newFlatArray = uniqBy(newFlatArray, "_id")
+
     flatArray = uniqBy(flatArray, '_id');
-    const products = flatArray.map((m) => {
-      return { _id: m.materialId, unit: m.unit, assetsCount: m.realAssetQty - m.realAssetAssignedQty };
+    const products = newFlatArray.map((m) => {
+      return { _id: m.materialId, unit: m.unit, serialized: m.serializedProduct, assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : 0 };
     });
+
+    
     const uniqProduct = [];
+
     products.forEach((element: any) => {
       const foundProduct = uniqProduct.filter((e) => e._id === element._id);
       if (foundProduct.length) {
