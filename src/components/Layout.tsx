@@ -15,6 +15,10 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
     width: '100%',
     overflow: 'hidden',
+    height: 'calc(100vh - 55px)',
+    ['@media (max-width:768px)']: {
+      height: 'calc(100vh - 108px)'
+    },
     backgroundColor: 'white'
   },
   layout: {
@@ -23,6 +27,7 @@ const useStyles = makeStyles(() => ({
     overflowX: 'hidden',
     overflowY: 'auto',
     height: '100%',
+
     zIndex: 1
   }
 }));
