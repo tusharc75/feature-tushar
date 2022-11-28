@@ -19,6 +19,7 @@ import {
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
 import { Menu as MenuIcon, MoreVert as MoreIcon, Clear as ClearIcon, Notifications, HelpOutline, ExpandMore, Brightness1 } from '@material-ui/icons';
+import SyncIcon from '@material-ui/icons/Sync';
 import io, { Socket } from 'socket.io-client';
 import { useHistory, Link, useLocation } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
@@ -37,9 +38,8 @@ import { displayCardDate } from '../../constants/helpers';
 import ChatIcon from '@material-ui/icons/Chat';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { backendApi } from '../../config';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import { SET_CART_COUNT } from "../../StateProvider/actionTypes"
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { AiOutlineClear } from 'react-icons/ai';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -59,7 +59,8 @@ const useStyles = makeStyles((theme) => ({
   },
 
   logo: {
-    width: '140px'
+    paddingTop: "8px",
+    width: '120px'
   },
 
   search: {
@@ -102,6 +103,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('sm')]: {
       display: 'flex',
       alignItems: 'center'
+      // gap: '5px'
     }
   },
   sectionMobile: {
@@ -118,8 +120,9 @@ const useStyles = makeStyles((theme) => ({
   },
   brandLogo: {
     maxWidth: '10%',
-    height: '45px',
-    borderRadius: '4px'
+    height: '40px',
+    borderRadius: '4px',
+    marginRight: '5px',
   },
   entitySelect: {
     fontSize: '16px',
@@ -168,9 +171,10 @@ const Header = ({ toggleDrawer }) => {
   const account = useAccount(accounts[0] || {});
 
   const {
-    state: { user, selectedEntity, cartCount },
+    state: { user, selectedEntity, cartItems, permissions },
     dispatch
   }: any = useData();
+
   const classes = useStyles();
   const history = useHistory();
   const { pathname } = useLocation();
@@ -192,7 +196,7 @@ const Header = ({ toggleDrawer }) => {
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline } = useContext(CustomOfflineContext);
+  const { isOffline, isSynch } = useContext(CustomOfflineContext);
 
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [notificationList, setNotificationList] = useState([]);
@@ -201,16 +205,18 @@ const Header = ({ toggleDrawer }) => {
   const [fullScreenNotificationAnchorEl, setFullScreenNotificationAnchorEl] = React.useState(null);
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    const token = localStorage.getItem('token');
+    if (token) {
+      saveEntity();
+    }
+  }, [selectedEntity]);
 
-  const fetchCart = () => {
+  const saveEntity = () => {
     axiosInstance()
-      .get(`/user/cart`)
-      .then(({ data: { data } }) => {
-        if (data) {
-          dispatch({ type: SET_CART_COUNT, payload: data.length });
-        }
+      .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
+      .then(({ data }) => { })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -219,7 +225,7 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     axiosInstance()
-      .get('/user/notification')
+      .get('/notification/all')
       .then(({ data: { data } }) => {
         setNotificationList(data);
         setLoadingNotifications(false);
@@ -247,7 +253,7 @@ const Header = ({ toggleDrawer }) => {
     setLoadingNotifications(true);
 
     await axiosInstance()
-      .get('/user/notification')
+      .get('/notification/all')
       .then(({ data: { data } }) => {
         setNotificationList(data);
         setLoadingNotifications(false);
@@ -275,7 +281,8 @@ const Header = ({ toggleDrawer }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const s = io(`${backendApi}/user`, {
+    const s = io(`${backendApi?.replace("/api", "")}/user`, {
+      path: backendApi?.includes('/api') ? '/api/socket.io/' : '/socket.io/',
       auth: {
         token
       },
@@ -522,37 +529,66 @@ const Header = ({ toggleDrawer }) => {
   const NotificationContent = ({ data }) => {
     return (
       <div className={`${data.length === 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
-        <div className={`${classes.markAll} d-flex align-items-center gap-1`}>
-          <Typography
-            onClick={() => {
-              axiosInstance()
-                .put('/user/notification/all-read', { toggle: true })
-                .then(({ data }) => {
-                  let updatedNotificationList = [];
-                  notificationList.map((notification) => {
-                    notification.read = true;
-                    updatedNotificationList.push(notification);
-                  });
+        <div className={`d-flex align-items-center gap-1`}>
+          <div className={`${classes.markAll} `}>
+            <Typography
+              onClick={() => {
+                axiosInstance()
+                  .put('/notification/all-read', { toggle: true })
+                  .then(({ data }) => {
+                    let updatedNotificationList = [];
+                    notificationList.map((notification) => {
+                      notification.read = true;
+                      updatedNotificationList.push(notification);
+                    });
 
-                  setNotificationList(updatedNotificationList);
-                  toastConfig.setToastConfig({
-                    open: true,
-                    message: data.message,
-                    type: 'success'
-                  });
+                    setNotificationList(updatedNotificationList);
+                    toastConfig.setToastConfig({
+                      open: true,
+                      message: data.message,
+                      type: 'success'
+                    });
 
-                  setFullScreenNotificationAnchorEl(null);
-                  setMobileScreenNotificationAnchorEl(null);
-                })
-                .catch((error) => {
-                  toastConfig.setToastConfig(error);
-                });
-            }}
-            className="cursor-pointer"
-          >
-            <FiCheckCircle className="mr-2 pt-1" size={16} />
-            <span>Mark all as read</span>
-          </Typography>
+                    setFullScreenNotificationAnchorEl(null);
+                    setMobileScreenNotificationAnchorEl(null);
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+              className="cursor-pointer"
+              style={{ marginRight: 20 }}
+            >
+              <FiCheckCircle className="mr-2 pt-1" size={16} />
+              <span>Mark all as read</span>
+            </Typography>
+          </div>
+          <div className={`${classes.markAll} `}>
+            <Typography
+              onClick={() => {
+                axiosInstance()
+                  .put('/notification/clear')
+                  .then(({ data }) => {
+                    toastConfig.setToastConfig({
+                      open: true,
+                      message: data.message,
+                      type: 'success'
+                    });
+                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                    !isMobile ? handleFullScreenNotificationClick : handleMobileScreenNotificationClick;
+                    setFullScreenNotificationAnchorEl(null);
+                    setMobileScreenNotificationAnchorEl(null);
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+              className="cursor-pointer"
+            >
+              <AiOutlineClear className="mr-2 pt-1" size={16} />
+              <span>Clear all</span>
+            </Typography>
+          </div>
         </div>
         <div className={classes.notificationContent}>
           {data.map((d, index) => {
@@ -582,7 +618,7 @@ const Header = ({ toggleDrawer }) => {
                   if (d?.entity) {
                     handleRedirect(d?.entity, d?.resourceId, d?.resourcePath);
                   } else {
-                    history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath);
+                    history.push(d?.resourceId ? `${d?.resourcePath}/${d?.resourceId}` : d?.resourcePath, { data: d?.of ? d?.of : null });
                   }
                 }}
               >
@@ -614,37 +650,64 @@ const Header = ({ toggleDrawer }) => {
   const ChatNotificationContent = ({ data }) => {
     return (
       <div className={`${data.length === 0 ? classes.notificationHeight : classes.notificationHeightWithData}`} style={{ position: 'relative' }}>
-        <div className={`${classes.markAll} d-flex align-items-center gap-1`} style={{ position: 'sticky', top: 0 }}>
-          <Typography
-            onClick={() => {
-              axiosInstance()
-                .put('/user/user-notification/all-read', { toggle: true })
-                .then(({ data }) => {
-                  let updatedNotificationList = [];
-                  chatNotificationList.map((notification) => {
-                    notification.read = true;
-                    updatedNotificationList.push(notification);
-                  });
+        <div className={`d-flex align-items-center gap-1`} style={{ position: 'sticky', top: 0 }}>
+          <div className={classes.markAll}>
+            <Typography
+              onClick={() => {
+                axiosInstance()
+                  .put('/user/user-notification/all-read', { toggle: true })
+                  .then(({ data }) => {
+                    let updatedNotificationList = [];
+                    chatNotificationList.map((notification) => {
+                      notification.read = true;
+                      updatedNotificationList.push(notification);
+                    });
 
-                  setChatNotificationList(updatedNotificationList);
-                  toastConfig.setToastConfig({
-                    open: true,
-                    message: data.message,
-                    type: 'success'
-                  });
+                    setChatNotificationList(updatedNotificationList);
+                    toastConfig.setToastConfig({
+                      open: true,
+                      message: data.message,
+                      type: 'success'
+                    });
 
-                  setFullScreenChatNotificationAnchorEl(null);
-                  setMobileScreenChatNotificationAnchorEl(null);
-                })
-                .catch((error) => {
-                  toastConfig.setToastConfig(error);
-                });
-            }}
-            className="cursor-pointer"
-          >
-            <FiCheckCircle className="mr-2 pt-1" size={16} />
-            <span>Mark all as read</span>
-          </Typography>
+                    setFullScreenChatNotificationAnchorEl(null);
+                    setMobileScreenChatNotificationAnchorEl(null);
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+              className="cursor-pointer"
+            >
+              <FiCheckCircle className="mr-2 pt-1" size={16} />
+              <span>Mark all as read</span>
+            </Typography>
+          </div>
+          <div className={classes.markAll}>
+            <Typography
+              onClick={() => {
+                axiosInstance()
+                  .put('/user/user-notification/clear-all', { toggle: true })
+                  .then(({ data }) => {
+                    toastConfig.setToastConfig({
+                      open: true,
+                      message: data.message,
+                      type: 'success'
+                    });
+
+                    setFullScreenChatNotificationAnchorEl(null);
+                    setMobileScreenChatNotificationAnchorEl(null);
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+              className="cursor-pointer"
+            >
+              <AiOutlineClear className="mr-2 pt-1" size={16} />
+              <span>Clear All</span>
+            </Typography>
+          </div>
         </div>
 
         <div className={classes.notificationContent}>
@@ -708,6 +771,7 @@ const Header = ({ toggleDrawer }) => {
 
   const entitiesMenu = (
     <Menu
+      style={{ marginTop: '40px' }}
       anchorEl={entitiesEl}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       keepMounted
@@ -868,38 +932,60 @@ const Header = ({ toggleDrawer }) => {
       history.push({ pathname: routes.product.path });
     }
     if (history.location.pathname.includes(`${routes.productTemplate.path}/`)) {
-      history.push({ pathname: routes.productTemplate.path })
+      history.push({ pathname: routes.productTemplate.path });
     }
     if (history.location.pathname.includes(`${routes.priceTemplate.path}/`)) {
-      history.push({ pathname: routes.priceTemplate.path })
+      history.push({ pathname: routes.priceTemplate.path });
     }
     if (history.location.pathname.includes(routes.quotePdfTemplateDetail.path)) {
-      history.push({ pathname: routes.quotePdfTemplate.path })
+      history.push({ pathname: routes.quotePdfTemplate.path });
+    }
+    if (history.location.pathname.includes(routes.purchaseOrderDetail.path)) {
+      history.push({ pathname: routes.purchaseOrder.path });
+    }
+    if (history.location.pathname.includes(routes.transferAssetDetail.path)) {
+      history.push({ pathname: routes.transferAsset.path });
+    }
+    if (history.location.pathname.includes(routes.rentalManagementDetail.path)) {
+      history.push({ pathname: routes.rentalManagement.path });
+    }
+    if (history.location.pathname.includes(routes.repairJobDetail.path)) {
+      history.push({ pathname: routes.repairJob.path });
+    }
+    if (history.location.pathname.includes(routes.deliveryTicketDetail.path)) {
+      history.push({ pathname: routes.deliveryTicket.path });
+    }
+    if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
+      history.push({ pathname: routes.serializedAsset.path });
+    }
+    if (history.location.pathname.includes(routes.pricingConditionDetail.path)) {
+      history.push({ pathname: routes.pricingCondition.path });
+    }
+    if (history.location.pathname.includes('/dashboards')) {
+      history.push({ pathname: '/dashboards' });
     }
   }
 
-
   const startTour = () => {
     if (['local', 'development'].includes(process.env.REACT_APP_ENV)) {
-
-      const paths = pathname.split("/").filter((x: string) => x)
+      const paths = pathname.split('/').filter((x: string) => x);
       let path: string;
 
-      if (paths.includes("detail")) {
-        paths.splice(paths.length - 1, 1)
-        path = paths.join("/")
+      if (paths.includes('detail')) {
+        paths.splice(paths.length - 1, 1);
+        path = paths.join('/');
       }
 
       dispatch({
         type: SET_START_TOUR,
         payload: {
-          path: paths.includes("detail") ? `/${path}` : pathname,
+          path: paths.includes('detail') ? `/${path}` : pathname,
           start: true,
           stepIndex: 0
         }
-      })
+      });
     }
-  }
+  };
 
   return (
     <div>
@@ -941,7 +1027,7 @@ const Header = ({ toggleDrawer }) => {
               </IconButton>
             </div>
             <Link to="/">
-              <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
+              <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
             </Link>
             <Box marginLeft={2} className={classes.servicesButton}>
               {/* <Button
@@ -1000,30 +1086,18 @@ const Header = ({ toggleDrawer }) => {
 
           <div className={classes.sectionDesktop}>
             <div>
-              {
-                isOffline && <IconButton>
+              {isOffline && (
+                <IconButton>
                   <Tooltip title="You are working offline right now">
                     <Brightness1 color="error" className="blink" />
                   </Tooltip>
                 </IconButton>
-              }
-
-              {/*Only show cart icon if environment is local || development*/}
-              {['local', 'development'].includes(process.env.REACT_APP_ENV) && (
-                <IconButton
-                  id="shoppingCartButton"
-                  aria-describedby={fullScreenNotificationId}
-                  aria-label="settings"
-                  color="inherit"
-                  onClick={() => {
-                    history.push({
-                      pathname: '/product/my-cart'
-                    });
-                  }}
-                >
-                  <Badge color="secondary" badgeContent={cartCount}>
-                    <ShoppingCartIcon />
-                  </Badge>
+              )}
+              {isSynch && (
+                <IconButton color="inherit">
+                  <Tooltip title="Synchronizing offline data">
+                    <SyncIcon className="rotate" />
+                  </Tooltip>
                 </IconButton>
               )}
 
@@ -1032,10 +1106,12 @@ const Header = ({ toggleDrawer }) => {
                 aria-describedby={fullScreenNotificationId}
                 aria-label="settings"
                 color="inherit"
+                title="Notifications"
                 onClick={handleFullScreenNotificationClick}
+                className="showIconLayout"
               >
                 <Badge badgeContent={notification ? notification.count : 0} color="secondary">
-                  <Notifications />
+                  <Notifications className="setIcon" />
                 </Badge>
               </IconButton>
 
@@ -1072,10 +1148,12 @@ const Header = ({ toggleDrawer }) => {
                 aria-describedby={fullScreenChatNotificationId}
                 aria-label="settings"
                 color="inherit"
+                title="Chats"
                 onClick={handleFullScreenChatNotificationClick}
+                className="showIconLayout"
               >
                 <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
-                  <ChatIcon />
+                  <ChatIcon className="setIcon" />
                 </Badge>
               </IconButton>
 
@@ -1110,8 +1188,8 @@ const Header = ({ toggleDrawer }) => {
               </Badge>
             </IconButton> */}
 
-            <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour}>
-              <HelpOutline />
+            <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour} className="showIconLayout" title="Help">
+              <HelpOutline className="setIcon" />
             </IconButton>
           </div>
 

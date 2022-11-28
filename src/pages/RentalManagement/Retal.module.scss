@@ -1,7 +1,10 @@
-.main_step_box{
-   display: flex;
+.main_step_box {
+  display: flex;
   margin: auto;
 }
-.steps_box{
+.steps_box {
   margin: 10px !important;
+}
+.MuiStepIcon-text {
+  fill: #000;
 }

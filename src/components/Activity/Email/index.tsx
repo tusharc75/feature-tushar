@@ -25,6 +25,7 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const {
     state: { user, permissions },
   }: any = useData();
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     fetchEmail();
@@ -97,7 +98,7 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         <ActivityLoader />
       ) : emails.length ?
         <Fragment>
-          {emails.map((_email, index) => (
+          {emails.slice(0, 5).map((_email, index) => (
             <Box key={_email._id} className="activity">
               <Box>
                 <Grid container>
@@ -154,17 +155,30 @@ export const Email = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
       </Menu>
       <Dialog
         open={open}
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
-        onClose={handleClose}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            handleClose()
+            setFullScreen(false);
+          }
+        }}
         fullWidth
       >
         <CreateEmail
           emailId={emailId}
-          handleClose={handleClose}
+          handleClose={() => {
+            handleClose()
+            setFullScreen(false);
+          }}
           relatedTo={relatedTo}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen(prevState => !prevState)
+          }}
+          showManimizeMaximize={true}
         />
       </Dialog>
     </Box >

@@ -18,7 +18,7 @@ import CustomDialogHeader from "../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "../../components/CustomDialog/CustomDialogFooter";
 import { useHistory } from "react-router-dom";
-import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, formFieldNames, getUniqueCurrencies } from "../../constants/helpers";
+import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, formFieldNames, getUniqueCurrencies, initializeDropdownById } from "../../constants/helpers";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "../../StateProvider/Provider";
 import FormTypes from "../../components/Helpers/FormTypes";
@@ -27,13 +27,17 @@ import InfoIcon from "@material-ui/icons/Info";
 import ManageMarketSegmentDialog from "../MarketSegment/ManageMarketSegmentDialog";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 import { simplifyValues } from "../../constants/helpers"
-
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from "react-icons/fa";
+import ManageAddressDialog from "../../components/Address/ManageAddressDialog";
+import routes from "src/components/Helpers/Routes";
 interface InitialData {
   fields: any[];
   values: object;
 }
 
-const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = null, projectSalesId = null, fields = null }) => {
+const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = null, projectSalesId = null, fields = null,
+  onSuccess = null, accountId = null, resource = null }) => {
   const {
     state: {
       user: { user }, permissions
@@ -41,7 +45,6 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
   } = useData();
   const theme = useTheme();
   const toastConfig = useContext(CustomToastContext);
-  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState<InitialData>({
@@ -64,6 +67,9 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
   const [newSubMarketSegmentId, setNewSubMarketSegmentId] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [formValues, setFormValues] = useState({})
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [showAddAddresstDialog, setShowAddAddresstDialog] = useState(false);
+  const [addressDataSource, setAddressDataSource] = useState([]);
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -85,7 +91,15 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
 
         const filterData = projectSalesId
           ? data.filter((d) => d.isUpdate)
-          : data.filter((d) => d.isCreate);
+          : data.filter((d) => {
+            if (accountId && ["customerAccountName", "supplierAccountName"].some(
+              (_f) => _f === d.fieldData.fieldName
+            )
+            ) {
+              d = initializeDropdownById(d, d.fieldData.fieldName, accountId);
+            }
+            return d.isCreate
+          });
 
 
         // const fieldsData = projectSalesId ?
@@ -93,6 +107,13 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
         //   data.filter(d => d.isCreate).map((d: any) => d.fieldData);
 
         //  Initialize market segment dropdown which have parentMarketSegment === "" or that record have child
+        const addressDropdownData = filterData.map(m => m.fieldData).find(
+          (d) => d.fieldName === "finalDestination"
+        );
+        if (addressDropdownData) {
+          setAddressDataSource(addressDropdownData.option);
+        }
+
         const marketSegmentDropdownData = filterData.map(m => m.fieldData).find(
           (d) => d.fieldName === formFieldNames.marketSegment
         );
@@ -125,13 +146,17 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
             if (isClone) {
 
               const { projectName, ...rest } = data
-              let tempData = { ...rest }
 
+              let tempData = { ...rest }
+              let tempObjKeysWithValues = getObjKeysWithValues(tempData, newFields)
+              if (newFields?.some((e) => e.fieldName === "projectManager")) {
+                tempObjKeysWithValues["projectManager"] = user._id
+              }
               setInitialData({
                 fields: newFields,
-                values: getObjKeysWithValues(tempData, newFields),
+                values: tempObjKeysWithValues,
               });
-              setFormValues(getObjKeysWithValues(tempData, newFields))
+              setFormValues(tempObjKeysWithValues)
             }
             else {
               setInitialData({
@@ -152,11 +177,18 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
         }
         else {
           const createFields = filterData.map(m => m.fieldData)
+          let tempObjKeysWithValues = getObjKeys("", createFields);
+          if (createFields.some((e) => e.fieldName === "currency")) {
+            tempObjKeysWithValues["currency"] = user?.brandCurrency;
+          }
+          if (createFields?.some((e) => e.fieldName === "projectManager")) {
+            tempObjKeysWithValues["projectManager"] = user._id;
+          }
           setInitialData({
             fields: createFields,
-            values: getObjKeys("", createFields),
+            values: tempObjKeysWithValues,
           });
-          setFormValues(getObjKeys("", createFields))
+          setFormValues(tempObjKeysWithValues)
         }
 
         setTimeout(() => setLoading(false), 500);
@@ -199,6 +231,17 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
       axiosInstance()
         .post("/project-Sales", values)
         .then(({ data }) => {
+          if (accountId) {
+            axiosInstance()
+              .put("/project-sales/add-customer-account", {
+                _id: data?.data._id,
+                customerAccount: [accountId]
+              })
+          }
+          if (onSuccess) {
+            onSuccess(data)
+          }
+
           const newId = data.data?._id;
           setSubmitting(false);
           fetchData();
@@ -270,6 +313,20 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
       ...data
     }))
   }
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err.length) {
+      const input = document.querySelector(
+        `input[name=${err[0]}]`,
+      );
+
+      input.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start',
+      });
+    }
+  }
   return (
     <Dialog
       open={open}
@@ -280,14 +337,20 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
       }}
       maxWidth="md"
       fullWidth
-      fullScreen={isMobile}
+      fullScreen={fullScreen || (isMobile || isTablet)}
     >
       <CustomDialogHeader
         onClose={() => {
           if (isFieldNotTouched(initialData, formValues)) close()
           else setShowConfirmDialog(true)
         }}
-        title={`${isClone ? "Clone" : projectSalesId ? `Update ${productSalesName}` : "Create New Project Sales"}`} />
+        title={`${isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${routes.projectSales.title}`}`}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
+      />
 
       {loading || !initialData.fields.length ? (
         <>
@@ -321,12 +384,17 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
             <>
               <CustomDialogContent>
                 <Form noValidate>
-                  <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                  {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
+
                   {formsData &&
                     formsData.map((form, index1) => {
                       return form.name ? (
                         <div key={index1}>
-                          <h2 className="form-label-style">{form.name}</h2>
+                          <div className={"detail-box-content"}>
+                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                            <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
+                          </div>
+
                           <Box marginY={2}>
                             <Grid spacing={3} container>
                               {form.sectionFields.map((field, index2) => (
@@ -338,15 +406,15 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                           <Grid
                                             item
                                             xs={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment.isCreate ? 11
                                                 : 11
                                             }
                                             sm={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment.isCreate ? 11
                                                 : 11
                                             }
                                             md={
-                                              permissions.marketSegment.isCreate ? 10
+                                              permissions.marketSegment.isCreate ? 11
                                                 : 11
                                             }
                                           >
@@ -372,12 +440,14 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                               onChange={(e, val) => {
                                                 setNewMarketSegmentId(null);
                                                 setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : "")
-                                                setNewSubMarketSegmentId(null);
-                                                setFieldValue(formFieldNames.subMarketSegment, "")
-                                                handleValuesChange({
-                                                  [field.fieldName]: val && val.optionValue ? val.optionValue : "",
-                                                  [formFieldNames.subMarketSegment]: ""
-                                                })
+                                                if (initialData?.fields?.some((e) => e.fieldName === formFieldNames.subMarketSegment)) {
+                                                  setNewSubMarketSegmentId(null);
+                                                  setFieldValue(formFieldNames.subMarketSegment, "")
+                                                  handleValuesChange({
+                                                    [field.fieldName]: val && val.optionValue ? val.optionValue : "",
+                                                    [formFieldNames.subMarketSegment]: ""
+                                                  })
+                                                }
                                                 marketSegmentChange(val && val.optionValue ? val.optionValue : "");
                                               }}
                                               size="small"
@@ -430,15 +500,15 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                             <Grid
                                               item
                                               xs={
-                                                permissions.marketSegment.isCreate ? 10
+                                                permissions.marketSegment.isCreate ? 11
                                                   : 11
                                               }
                                               sm={
-                                                permissions.marketSegment.isCreate ? 10
+                                                permissions.marketSegment.isCreate ? 11
                                                   : 11
                                               }
                                               md={
-                                                permissions.marketSegment.isCreate ? 10
+                                                permissions.marketSegment.isCreate ? 11
                                                   : 11
                                               }
                                             >
@@ -534,206 +604,278 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                                             size="small"
                                             imageOrFileUploadCompletePercentage={null}
                                           />
-                                        ): 
-                                        field.fieldName === "startDate" ? (
-                                          <FormTypes
-                                            {...field}
-                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                            isNew={Boolean(projectSalesId)}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            maxDate={values.endDate}
-                                            setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value })
-                                              setFieldValue(name, value)
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            imageOrFileUploadCompletePercentage={null}
-                                          />
                                         ) :
-                                        field.fieldName === "endDate" ? (
-                                          <FormTypes
-                                            {...field}
-                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                            isNew={Boolean(projectSalesId)}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            minDate={values.startDate}
-                                            setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value })
-                                              setFieldValue(name, value)
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            imageOrFileUploadCompletePercentage={null}
-                                          />
-                                        )
-                                         
-                                        : field.fieldName === "entity" ? (
-                                          <FormTypes
-                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                            multiple
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            onChange={(e, value) => {
-                                              setFieldValue(
-                                                field.fieldName,
-                                                value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
-                                              );
-                                              setFieldValue("projectManager", "");
-                                              handleValuesChange({
-                                                [field.fieldName]: value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [],
-                                                "projectManager": ""
-                                              })
-                                            }}
-                                          />
-                                        ) : field.fieldName === "projectManager" ? (
-                                          <FormTypes
-                                            {...field}
-                                            disabled={Boolean(projectSalesId)}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={values["entity"] && values["entity"].length !== 0 ?
-                                              field.option.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d)))
-                                              : field.option}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            onChange={(e, value) => {
-                                              setFieldValue(
-                                                field.fieldName,
-                                                value && value.optionValue
-                                                  ? value.optionValue
-                                                  : ""
-                                              );
-                                              handleValuesChange({
-                                                [field.fieldName]: value && value.optionValue ? value.optionValue : ""
-                                              })
-                                            }}
-                                          />
-                                        ) : field.fieldName === "currency" ? (
-                                          <FormTypes
-                                            {...field}
-                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                            isNew={Boolean(projectSalesId)}
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value })
-                                              setFieldValue(name, value)
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                            onChange={(e, val) => {
-                                              if (val && val.currencyCode) {
-                                                setFieldValue(
-                                                  field.fieldName,
-                                                  val.currencyCode
-                                                );
-                                                handleValuesChange({ [field.fieldName]: val.currencyCode })
-                                                setCurrencySymbol(val.symbolNative);
-                                              } else {
-                                                handleValuesChange({ [field.fieldName]: "" })
-                                                setFieldValue(field.fieldName, "");
-                                                setCurrencySymbol(null);
-                                              }
-                                            }}
-                                          />
-                                        ) : field.fieldName.trim() === "amount" ? (
-                                          <FormTypes
-                                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                            isNew={Boolean(projectSalesId)}
-                                            fieldId={field._id}
-                                            lookup={field.lookup}
-                                            // {...rest}
-                                            selectedCurrencyCode={values["currency"]}
-                                            startAdornment={
-                                              currencySymbol ? (
-                                                <InputAdornment position="start">
-                                                  {currencySymbol}
-                                                </InputAdornment>
-                                              ) : (
-                                                ""
-                                              )
-                                            }
-                                            values={values}
-                                            errors={errors}
-                                            touched={touched}
-                                            label={field.fieldLabel}
-                                            name={field.fieldName}
-                                            type={field.type}
-                                            options={field.option}
-                                            setFieldValue={(name, value) => {
-                                              handleValuesChange({ [name]: value })
-                                              setFieldValue(name, value)
-                                            }}
-                                            required={field.required}
-                                            fullWidth
-                                            isTooltip={field?.isTooltip || false}
-                                            tooltipMessage={field?.tooltipMessage}
-                                            size="small"
-                                          />
-                                        ) : <FormTypes
-                                          {...field}
-                                          isNew={Boolean(projectSalesId)}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value })
-                                            setFieldValue(name, value)
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={null}
-                                          disabled={projectSalesId && field.fieldName === "projectManager" || (!projectSalesId && field.disableOnEdit)}
-                                        />
+                                          field.fieldName === "startDate" ? (
+                                            <FormTypes
+                                              {...field}
+                                              disabled={Boolean(projectSalesId) && field.disableOnEdit}
+                                              isNew={Boolean(projectSalesId)}
+                                              values={values}
+                                              errors={errors}
+                                              touched={touched}
+                                              label={field.fieldLabel}
+                                              name={field.fieldName}
+                                              type={field.type}
+                                              options={field.option}
+                                              maxDate={values.endDate}
+                                              setFieldValue={(name, value) => {
+                                                handleValuesChange({ [name]: value })
+                                                setFieldValue(name, value)
+                                              }}
+                                              required={field.required}
+                                              fullWidth
+                                              isTooltip={field?.isTooltip || false}
+                                              tooltipMessage={field?.tooltipMessage}
+                                              size="small"
+                                              imageOrFileUploadCompletePercentage={null}
+                                            />
+                                          ) :
+                                            field.fieldName === "endDate" ? (
+                                              <FormTypes
+                                                {...field}
+                                                disabled={Boolean(projectSalesId) && field.disableOnEdit}
+                                                isNew={Boolean(projectSalesId)}
+                                                values={values}
+                                                errors={errors}
+                                                touched={touched}
+                                                label={field.fieldLabel}
+                                                name={field.fieldName}
+                                                type={field.type}
+                                                options={field.option}
+                                                minDate={values.startDate}
+                                                setFieldValue={(name, value) => {
+                                                  handleValuesChange({ [name]: value })
+                                                  setFieldValue(name, value)
+                                                }}
+                                                required={field.required}
+                                                fullWidth
+                                                isTooltip={field?.isTooltip || false}
+                                                tooltipMessage={field?.tooltipMessage}
+                                                size="small"
+                                                imageOrFileUploadCompletePercentage={null}
+                                              />
+                                            )
+
+                                              : field.fieldName === "entity" ? (
+                                                <FormTypes
+                                                  disabled={Boolean(projectSalesId) && !isClone && field.disableOnEdit}
+                                                  multiple
+                                                  values={values}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  options={field.option}
+                                                  fullWidth
+                                                  isTooltip={field?.isTooltip || false}
+                                                  tooltipMessage={field?.tooltipMessage}
+                                                  size="small"
+                                                  onChange={(e, value) => {
+                                                    setFieldValue(
+                                                      field.fieldName,
+                                                      value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []
+                                                    );
+                                                    if (initialData?.fields?.some((e) => e.fieldName === "projectManager")) {
+                                                      setFieldValue("projectManager", "");
+                                                      handleValuesChange({
+                                                        [field.fieldName]: value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : [],
+                                                        "projectManager": ""
+                                                      })
+                                                    }
+                                                  }}
+                                                />
+                                              ) : field.fieldName === "projectManager" ? (
+                                                <FormTypes
+                                                  {...field}
+                                                  values={values}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  options={values["entity"] && values["entity"].length ?
+                                                    field.option.filter(data => values["entity"]?.some(d => data.entities?.some(e => e.entity === d)))
+                                                    : field.option}
+                                                  fullWidth
+                                                  isTooltip={field?.isTooltip || false}
+                                                  tooltipMessage={field?.tooltipMessage}
+                                                  size="small"
+                                                  onChange={(e, value) => {
+                                                    setFieldValue(
+                                                      field.fieldName,
+                                                      value && value.optionValue
+                                                        ? value.optionValue
+                                                        : ""
+                                                    );
+                                                    handleValuesChange({
+                                                      [field.fieldName]: value && value.optionValue ? value.optionValue : ""
+                                                    })
+                                                  }}
+                                                />
+                                              ) : field.fieldName === "currency" ? (
+                                                <FormTypes
+                                                  {...field}
+                                                  disabled={Boolean(projectSalesId) && field.disableOnEdit}
+                                                  isNew={Boolean(projectSalesId)}
+                                                  values={values}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  options={field.option}
+                                                  setFieldValue={(name, value) => {
+                                                    handleValuesChange({ [name]: value })
+                                                    setFieldValue(name, value)
+                                                  }}
+                                                  required={field.required}
+                                                  fullWidth
+                                                  isTooltip={field?.isTooltip || false}
+                                                  tooltipMessage={field?.tooltipMessage}
+                                                  size="small"
+                                                  onChange={(e, val) => {
+                                                    if (val && val.currencyCode) {
+                                                      setFieldValue(
+                                                        field.fieldName,
+                                                        val.currencyCode
+                                                      );
+                                                      handleValuesChange({ [field.fieldName]: val.currencyCode })
+                                                      setCurrencySymbol(val.symbolNative);
+                                                    } else {
+                                                      handleValuesChange({ [field.fieldName]: "" })
+                                                      setFieldValue(field.fieldName, "");
+                                                      setCurrencySymbol(null);
+                                                    }
+                                                  }}
+                                                />
+                                              ) : field.fieldName.trim() === "amount" ? (
+                                                <FormTypes
+                                                  disabled={Boolean(projectSalesId) && field.disableOnEdit}
+                                                  isNew={Boolean(projectSalesId)}
+                                                  fieldId={field._id}
+                                                  lookup={field.lookup}
+                                                  // {...rest}
+                                                  selectedCurrencyCode={values["currency"]}
+                                                  startAdornment={
+                                                    currencySymbol ? (
+                                                      <InputAdornment position="start">
+                                                        {currencySymbol}
+                                                      </InputAdornment>
+                                                    ) : (
+                                                      ""
+                                                    )
+                                                  }
+                                                  values={values}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  options={field.option}
+                                                  setFieldValue={(name, value) => {
+                                                    handleValuesChange({ [name]: value })
+                                                    setFieldValue(name, value)
+                                                  }}
+                                                  required={field.required}
+                                                  fullWidth
+                                                  isTooltip={field?.isTooltip || false}
+                                                  tooltipMessage={field?.tooltipMessage}
+                                                  size="small"
+                                                />
+                                              ) : field.fieldName === "finalDestination" ?
+                                                <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
+                                                  <Grid container spacing={1}>
+                                                    <Grid
+                                                      item
+                                                      xs={
+                                                        permissions?.projectSales?.isCreate ? 11
+                                                          : 12
+                                                      }
+                                                      sm={
+                                                        permissions?.projectSales?.isCreate ? 11
+                                                          : 12
+                                                      }
+                                                      md={
+                                                        permissions?.projectSales?.isCreate ? 11
+                                                          : 12
+                                                      }
+                                                    >
+                                                      <FormTypes
+                                                        {...field}
+                                                        values={values}
+                                                        errors={errors}
+                                                        touched={touched}
+                                                        label={field.fieldLabel}
+                                                        name={field.fieldName}
+                                                        type={field.type}
+                                                        options={addressDataSource}
+                                                        setFieldValue={(name, value) => {
+                                                          handleValuesChange({ [name]: value })
+                                                          setFieldValue(name, value)
+                                                        }}
+                                                        required={field.required}
+                                                        fullWidth
+                                                        isTooltip={field?.isTooltip || false}
+                                                        tooltipMessage={field?.tooltipMessage}
+                                                        size="small"
+                                                      />
+                                                    </Grid>
+                                                    {
+                                                      permissions?.projectSales?.isCreate && (
+                                                        <Grid item xs={1} sm={1} md={1}>
+                                                          <Tooltip
+                                                            title="Add Address"
+                                                            className="mt-1"
+                                                          >
+                                                            <IconButton
+                                                              onClick={() => {
+                                                                setShowAddAddresstDialog(true);
+                                                              }}
+                                                              disabled={field.disableOnEdit}
+                                                              size="small"
+                                                            >
+                                                              <AddIcon color={field.disableOnEdit ? "disabled" : "primary"} />
+                                                            </IconButton>
+                                                          </Tooltip>
+                                                        </Grid>
+                                                      )
+                                                    }
+                                                    {field?.tooltipMessage ? (
+                                                      <Grid item xs={1} sm={1} md={1}>
+                                                        <Tooltip
+                                                          title={
+                                                            field?.tooltipMessage ?? ""
+                                                          }
+                                                        >
+                                                          <InfoIcon color="disabled" />
+                                                        </Tooltip>
+                                                      </Grid>
+                                                    ) : null}
+                                                  </Grid>
+                                                </Grid>
+                                                : <FormTypes
+                                                  {...field}
+                                                  isNew={Boolean(projectSalesId)}
+                                                  values={values}
+                                                  errors={errors}
+                                                  touched={touched}
+                                                  label={field.fieldLabel}
+                                                  name={field.fieldName}
+                                                  type={field.type}
+                                                  options={field.option}
+                                                  setFieldValue={(name, value) => {
+                                                    handleValuesChange({ [name]: value })
+                                                    setFieldValue(name, value)
+                                                  }}
+                                                  required={field.required}
+                                                  fullWidth
+                                                  isTooltip={field?.isTooltip || false}
+                                                  tooltipMessage={field?.tooltipMessage}
+                                                  size="small"
+                                                  imageOrFileUploadCompletePercentage={null}
+                                                  disabled={projectSalesId && field.fieldName === "projectManager" || (!projectSalesId && field.disableOnEdit)}
+                                                />
                                   }
                                 </Grid>
                               ))}
@@ -768,6 +910,32 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                       );
                     })}
                 </Form>
+                {
+                  showAddAddresstDialog && <ManageAddressDialog
+                    onClose={() => {
+                      setShowAddAddresstDialog(false);
+                    }}
+                    onSuccess={(obj) => {
+                      if (obj) {
+                        setShowAddAddresstDialog(false);
+                        if (obj?.isAlreadyExist === true) {
+                          let tempAddress = addressDataSource.find(d => d?.optionLabel === obj?.fullAddress)
+                          setFieldValue("finalDestination", [...values[`finalDestination`], tempAddress.optionValue]);
+                        }
+                        else {
+                          setAddressDataSource((prevState) => [...prevState,
+                          {
+                            default: false,
+                            optionLabel: obj?.fullAddress,
+                            optionValue: obj._id,
+                            order: addressDataSource.length + 1,
+                          }]);
+                          setFieldValue("finalDestination", [...values[`finalDestination`], obj._id]);
+                        }
+                      }
+                    }}
+                  />
+                }
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button
@@ -786,7 +954,10 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
                   variant="contained"
                   color="primary"
                   size="small"
-                  onClick={submitForm}
+                  onClick={() => {
+                    submitForm()
+                    handleScroll(errors)
+                  }}
                   disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : "Submit"}
@@ -795,6 +966,7 @@ const CreateProjectSales = ({ isClone = false, open, close, fetchData, type = nu
               {
                 showConfirmDialog ?
                   <ConfirmCancelDialog
+                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false)

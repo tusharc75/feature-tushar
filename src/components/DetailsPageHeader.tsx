@@ -25,8 +25,10 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0.5, 1.5),
     borderRadius: "4px",
     boxShadow: "2px 2px 4px #747474",
-    background: "linear-gradient(to bottom right, #010c02  0%, #378280 100%)",
+    backgroundColor: "#378280",
+    opacity: "0.95",
     border: "#03232e",
+    // display: "flex",
     [theme.breakpoints.down("xs")]: {
       borderRadius: "4px",
       boxShadow: "2px 2px 4px #747474",
@@ -37,7 +39,13 @@ const useStyles = makeStyles((theme) => ({
       justifyContent: "space-between",
       padding: "4px 6px"
     },
-
+  },
+  lineAddStyle: {
+    // width: "2px",
+    // backgroundColor: "white",
+    // paddingRight: "5px",
+    // margin: "5px 7px",
+    // borderRadius: "2px"
   },
   labelColor: {
     color: "#fff",
@@ -62,44 +70,44 @@ const DetailsPageHeader = (props) => {
   const classes = useStyles();
   return (
     <>
-      <Paper elevation={0}>
-        <Grid container justify="space-between" className="detailHeader">
+      <Paper elevation={0} className={"mainHeader"}>
+        <Grid container justifyContent="space-between" className="detailHeader detail-header-purchase-order">
           <Grid item className="d-flex align-items-center">
             {loading ? (
               <Skeleton width={100} />
             ) : showHeading ? (
-              <>
-                <Typography
-                  className="text-capitalize"
-                  style={{ display: "inline-block" }}
-                  variant="h6"
-                  component="h2"
-                  color="primary"
-                  id="detailHeaderPageTitle"
-                >
-                  <span className="d-flex align-items-center"><span className="listingHeader">{heading}
-                  </span>
-                    {
-                      isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
-                    }
-                    {
-                      leadStatus ?
-                        <>
-                          {leadStatus === "Qualified" ? <FiCheckCircle title={leadStatus} className={classes.qualified} color="green" /> :
-                            leadStatus === "Unqualified" ? <AiOutlineCloseCircle title={leadStatus} className={classes.unQulified} /> : ""}
-                        </>
-                        : null
-                    }
-                  </span>
-                </Typography>
-              </>
+                <div className={"mobileHeading"}>
+                  <Typography
+                    className="text-capitalize"
+                    style={{ display: "inline-block" }}
+                    variant="h6"
+                    component="h2"
+                    color="primary"
+                    id="detailHeaderPageTitle"
+                  >
+                    <span className="d-flex align-items-center">
+                      <span className="listingHeader"> {heading}</span>
+                      {
+                        isApproved && <Tooltip title="Approved"><FcApproval title="Approved" size={20} /></Tooltip>
+                      }
+                      {
+                        leadStatus ?
+                          <>
+                            {leadStatus === "Qualified" ? <FiCheckCircle title={leadStatus} className={classes.qualified} color="green" /> :
+                              leadStatus === "Unqualified" ? <AiOutlineCloseCircle title={leadStatus} className={classes.unQulified} /> : ""}
+                          </>
+                          : null
+                      }
+                    </span>
+                  </Typography>
+                </div>
             ) : null}
           </Grid>
-          <Grid id="detailHeaderPageActions" item className="d-flex align-items-center gap-2" justify="flex-end">{children}</Grid>
+          <Grid id="detailHeaderPageActions" item className={isMobile && !isTablet ? "d-flex align-items-center justify-flex-end gap-1" : "d-flex align-items-center gap-2 justify-flex-end"}>{children}</Grid>
         </Grid>
         <Box className="gap-2 detailHeaderDashboard">
           {loading ? (
-            <Grid container wrap="nowrap">
+            <Box display="flex" flexWrap="nowrap">
               {[...Array(4).keys()].map((i, index) => (
                 <React.Fragment key={index}>
                   <Skeleton
@@ -111,7 +119,7 @@ const DetailsPageHeader = (props) => {
                   <Box marginY={1} />
                 </React.Fragment>
               ))}
-            </Grid>
+            </Box>
           ) : mainPoints && Object.keys(mainPoints).length ? (
             Object.keys(mainPoints).map((key, i) => {
               return (
@@ -123,7 +131,7 @@ const DetailsPageHeader = (props) => {
                           <Typography
                             align="center"
                             variant="subtitle1"
-                            style={{ opacity: 0.9 }}
+                            style={{ opacity: 0.9 , fontSize:"0.8rem" }}
                             className={`text-capitalize ${classes.labelColor}`}
                           >
                             {key}
@@ -143,22 +151,25 @@ const DetailsPageHeader = (props) => {
                       )
                       : (
                         <Box className={classes.box}>
-                          <Typography
-                            align="center"
-                            variant="subtitle1"
-                            style={{ opacity: 0.9 }}
-                            className={`text-capitalize ${classes.labelColor}`}
-                          >
-                            {key}
-                          </Typography>
-                          <Typography
-                            align="center"
-                            className={`text-truncate ${classes.labelColor}`}
-                            style={{ fontWeight: 500 }}
-                          >
-                            {mainPoints[key] || ""}
-                            {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: isMobile || isTablet ? "#010c02" : "white" }} /> : null}
-                          </Typography>
+                          <div className={classes.lineAddStyle}> </div>
+                          <div>
+                            <Typography
+                              align="left"
+                              variant="subtitle1"
+                              style={{ opacity: 0.9, fontSize: "0.8rem", lineHeight: "20px" }}
+                              className={`text-capitalize ${classes.labelColor}`}
+                            >
+                              {key}
+                            </Typography>
+                            <Typography
+                              align="center"
+                              className={`text-truncate ${classes.labelColor}`}
+                              style={{ fontWeight: 500 }}
+                            >
+                              {mainPoints[key] || ""}
+                              {["email", "phone"].indexOf(key.toLocaleLowerCase()) >= 0 ? <CopyToClipboard textToCopy={mainPoints[key]} style={{ color: isMobile || isTablet ? "#010c02" : "white" }} /> : null}
+                            </Typography>
+                          </div>
                         </Box>
                       )) : null}
                 </React.Fragment>
@@ -175,7 +186,7 @@ DetailsPageHeader.propTypes = {
   total: PropTypes.any,
   active: PropTypes.any,
   inactive: PropTypes.any,
-  heading: PropTypes.string.isRequired,
+  heading: PropTypes.any,
   children: PropTypes.node,
   loading: PropTypes.any,
   logo: PropTypes.any,

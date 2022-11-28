@@ -32,11 +32,13 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
     const [formsData, setFormsData] = useState([]);
     const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
     const [ownerData, setOwnerData] = useState([]);
+    const [packageName, setPackageName] = useState("");
     const [collaboratorData, setCollaboratorData] = useState([]);
     const {
         state: { user },
     }: any = useData();
     const [formValues, setFormValues] = useState({})
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
 
@@ -91,7 +93,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                     let data;
 
                     if (!isOffline) {
-                        const response: any = await axiosInstance().get(`${packages.packageApi}/` + packageId);
+                        const response: any = await axiosInstance().get(`${packages.api}/` + packageId);
                         data = response?.data?.data;
                     } else {
                         data = offlineGridData?.packages?.find(d => d._id === packageId)
@@ -99,7 +101,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
 
                     if (isClone) {
                         const { _id, brand, createdBy, entity, packageName, history, updatedBy, ...rest } = data
-
+                        setPackageName(packageName)
                         setPackageData({
                             fields: fieldsDataForCreate,
                             initialValues: getObjKeysWithValues(rest, fieldsDataForCreate),
@@ -159,7 +161,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
             values._id = packageId
 
             if (!isOffline) {
-                axiosInstance().put(`${packages.packageApi}`, values).then(({ data }) => {
+                axiosInstance().put(`${packages.api}`, values).then(({ data }) => {
                     setSubmitting(false);
                     onSuccess()
                     toastConfig.setToastConfig({
@@ -179,7 +181,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                 }
 
                 const dataToSave = {
-                    api: packages.packageApi,
+                    api: packages.api,
                     method: "put",
                     values: values
                 };
@@ -202,7 +204,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
         }
         else {
             if (!isOffline) {
-                axiosInstance().post(`${packages.packageApi}`, values).then(({ data: { data, message } }) => {
+                axiosInstance().post(`${packages.api}`, values).then(({ data: { data, message } }) => {
                     history.push(`${routes.packagesDetail.path}/${data._id}`)
                     setSubmitting(false);
                     onSuccess(data)
@@ -224,7 +226,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                 }
 
                 const dataToSave = {
-                    api: packages.packageApi,
+                    api: packages.api,
                     method: "post",
                     values: values
                 };
@@ -266,7 +268,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
             <Dialog
                 maxWidth="md"
                 fullWidth
-                fullScreen={isMobile || isTablet}
+                fullScreen={fullScreen || (isMobile || isTablet)}
                 TransitionComponent={CustomDialogTransition}
                 aria-labelledby="customized-dialog-title"
                 onClose={(e, reason) => {
@@ -280,12 +282,17 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                     title={
                         !packageId
                             ? "Create Package"
-                            : `${isClone ? "Clone" : "Editing"}`
+                            : `${isClone ? `Clone - ${packageName}` : "Editing"}`
                     }
                     onClose={(e, reason) => {
                         if (isFieldNotTouched(packageData, formValues)) onClose()
                         else setShowConfirmDialog(true)
                     }}
+                    isMinimized={!fullScreen}
+                    onMinimizeMaximize={() => {
+                        setFullScreen(prevState => !prevState)
+                    }}
+                    showManimizeMaximize={true}
                 />
                 {loading || !packageData.fields.length ? (
                     <>
@@ -328,7 +335,6 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                             <>
                                 <CustomDialogContent>
                                     <Form>
-                                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
                                         {formsData &&
                                             formsData.map((form, i) => {
                                                 return (
@@ -503,7 +509,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                                         disabled={
                                             // loading || Object.keys(errors).length > 0 ? true : false
                                             uploadingImageOrFileProgress > 0 ||
-                                            isFieldNotTouched(packageData, values) ||
+                                            // isFieldNotTouched(packageData, values) ||
                                             submitting
                                         }
                                         onClick={(e) => {
@@ -524,6 +530,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open }) =
                                 {
                                     showConfirmDialog ?
                                         <ConfirmCancelDialog
+                                            close={() => setShowConfirmDialog(false)}
                                             open={showConfirmDialog}
                                             onSave={() => {
                                                 setShowConfirmDialog(false)

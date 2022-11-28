@@ -1,72 +1,81 @@
-.detail_main{
+.detail_main {
   display: grid !important;
   grid-template-columns: 1fr 1fr;
   grid-gap: 8px;
-
 }
-.detailFromCard{
-  display:grid;
+.detailFromCard {
+  display: grid;
 }
-.detail_card_view{
+.detail_card_view {
   //padding: 4px !important;
   box-shadow: none !important;
-  background-color: #E6E6E6;
+  background-color: #ddf0f0;
+  & > .detailListing {
+    background-color: #ddf0f0;
+  }
 }
-.detail_header{
+.detail_header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
   font-size: 0.8rem;
 }
-.detail_view{
+.detail_view {
+  display: flex;
+  gap: 5px;
   padding: 12px !important;
   padding-bottom: 0 !important;
-  background-color: #E6E6E6;
+  // background-color: #c8e9ce;
 }
-.delete_contact{
+.delete_contact {
   display: flex !important;
   justify-content: flex-end;
 }
-.delete_contact_icon{
-  svg{
-    width: 20px;
-    height: 20px;
-  }
-
+// .delete_contact_icon {
+// }
+.delete_icon_button {
+  width: 20px !important;
+  height: auto;
 }
-.detail_account{
-  ul{
+.detail_account {
+  ul {
     padding-top: 0 !important;
   }
 }
-.opportunity_layout{
+.list_start_icon {
+  min-width: 26px !important;
+}
+.label_size {
+  font-size: 10px !important;
+}
+.opportunity_layout {
   display: grid !important;
-  grid-template-columns: minmax(250px,1fr) minmax(250px,1fr);
+  grid-template-columns: minmax(250px, 1fr) minmax(250px, 1fr);
   grid-gap: 8px;
   //padding: 4px !important;
-  &_container{
-    padding: 4px !important;
-    background-color: #E6E6E6;
-    border-radius: 5px;
-  }
+  // &_container {
+  //   padding: 4px;
+  //   background-color: #e6e6e6;
+  //   border-radius: 5px;
+  // }
 }
-.opportunity_closed_date{
-  ul{
+.opportunity_closed_date {
+  ul {
     display: flex;
     justify-content: flex-end;
-    li{
+    li {
       width: auto;
     }
   }
 }
-.opportunity_layout_box{
+.opportunity_layout_box {
   padding-bottom: 10px;
 }
 
-@media screen and (max-width: 767px){
-  .detail_main{
-    grid-template-columns: 1fr ;
+@media screen and (max-width: 767px) {
+  .detail_main {
+    grid-template-columns: 1fr;
   }
   .opportunity_layout {
     display: grid !important;

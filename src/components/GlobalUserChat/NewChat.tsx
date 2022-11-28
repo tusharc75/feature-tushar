@@ -85,12 +85,17 @@ const NewChat = (props) => {
           error={newUsers.length > 1 && groupName && groupName.length < 4}
           helperText={newUsers.length > 1 && groupName && 'Name must be at least 4 characters'}
         />
-      </div>
-
-      <div className="new-chat-btn">
-        <Button disabled={!newUsers.length || (newUsers.length > 1 && !groupName)} fullWidth color="primary" variant="outlined" onClick={createRoom}>
-          Start Chatting
-        </Button>
+        <Box mt={4}>
+          <Button
+            disabled={!newUsers.length || (newUsers.length > 1 && !groupName)}
+            fullWidth
+            color="primary"
+            variant="outlined"
+            onClick={createRoom}
+          >
+            Start Chatting
+          </Button>
+        </Box>
       </div>
     </div>
   );

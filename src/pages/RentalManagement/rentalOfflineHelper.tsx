@@ -1,0 +1,152 @@
+
+import { objectStore, insertUpdate, findOne, findAll, clearAll } from '../../constants/indexdbhelper';
+import axiosInstance from '../../axios/axiosInstance';
+import { INVENTORY_STATUS, rentalManagement } from '../../constants/helpers';
+
+export const rentalJobOfflineUpdate = async (ids) => {
+    try {
+        if (ids.length === 0) {
+            const rentalManagement = await findAll(objectStore.rentalManagement);
+            rentalManagement?.forEach(e => {
+                ids.push(e?._id)
+            })
+            await clearAll(objectStore.rentalManagement)
+            await clearAll(objectStore.deliveryTicket)
+        }
+        await axiosInstance().post(`${rentalManagement.api}/get-all-offline-data`, { ids: ids }).then(({ data: { data } }) => {
+            data?.rentalManagement?.forEach(element => {
+                insertUpdate(objectStore.rentalManagement, element._id, element);
+            });
+            data?.deliveryTicket?.forEach(element => {
+                insertUpdate(objectStore.deliveryTicket, element._id, element);
+            });
+        })
+        return true
+    }
+    catch (e) {
+    }
+};
+
+export const getRentalProductAssets = async (id) => {
+    const rentalManagement = await findOne(objectStore.rentalManagement, id);
+    return rentalManagement?.productInventory?.map(u => ({ ...u.inventoryDetail }))
+};
+
+export const getRentalDeliveryTicket = async (id) => {
+    try {
+        const deliveryTicket = await findAll(objectStore.deliveryTicket);
+        const result: any = []
+        deliveryTicket.forEach(e => {
+            if (e?.rentalJob?.optionValue === id) {
+                result.push(e)
+            }
+        })
+        return result
+    }
+    catch (e) {
+    }
+};
+
+export const updateRentalProcessStatus = async (id, processStatus) => {
+    try {
+        const rentalManagement = await findOne(objectStore.rentalManagement, id);
+        rentalManagement.processStatus = processStatus;
+        await insertUpdate(objectStore.rentalManagement, id, rentalManagement);
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+export const updateRentalAssetStatus = async (id, status, asset) => {
+    try {
+        const rentalManagement = await findOne(objectStore.rentalManagement, id);
+        rentalManagement?.productInventory?.forEach(element => {
+            if (element?.inventoryDetail && asset.includes(element?.inventory)) {
+                element.inventoryDetail.status = status;
+            }
+        });
+        await insertUpdate(objectStore.rentalManagement, id, rentalManagement);
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+export const updateRentalProductStatus = async (id, status, product) => {
+    try {
+        const rentalManagement = await findOne(objectStore.rentalManagement, id);
+        rentalManagement?.material?.forEach(element => {
+            if (product.includes(element?.materialId)) {
+                element.status = status;
+            }
+        });
+        await insertUpdate(objectStore.rentalManagement, id, rentalManagement);
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+export const addAssetsInRental = async (id, assets) => {
+    try {
+        const offlineDataSync = await findOne(objectStore.offlineDataSync, id);
+        assets?.forEach(element => {
+            element.status = INVENTORY_STATUS.reserved
+        });
+        if (offlineDataSync) {
+            await insertUpdate(objectStore.offlineDataSync, id, { _id: id, type: "assets", data: [...offlineDataSync.data, ...assets] });
+        }
+        else {
+            await insertUpdate(objectStore.offlineDataSync, id, { _id: id, type: "assets", data: assets });
+        }
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+export const removeAssetsInRental = async (id, assets) => {
+    try {
+        const offlineDataSync = await findOne(objectStore.offlineDataSync, id);
+        if (offlineDataSync) {
+            offlineDataSync.data = offlineDataSync.data?.filter((element) => assets?.some((e) => element.assetNumber === e.assetNumber) === false)
+            await insertUpdate(objectStore.offlineDataSync, id, { ...offlineDataSync });
+        }
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+
+export const uniqueProduct = (material) => {
+    const result: any = []
+    material.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")?.forEach((ele) => {
+        if (result.filter((e) => e.materialId === ele.materialId).length) {
+            result.forEach(element => {
+                if (element.materialId === ele.materialId) {
+                    element.qty += getNestedQty(material, ele)
+                }
+            });
+        }
+        else {
+            result.push({ ...ele, qty: getNestedQty(material, ele) })
+        }
+    })
+    return result;
+}
+
+export const getNestedQty = (material, parent) => {
+    const subRows: any = material.filter((e) => e._id === parent.parentId);
+    if (subRows.length === 1) {
+        return parent.qty * getNestedQty(material, subRows[0]);
+    }
+    else {
+        return parent.qty
+    }
+}

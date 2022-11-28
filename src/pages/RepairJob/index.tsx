@@ -1,26 +1,30 @@
 import { useState, useEffect, useContext, useReducer, Fragment } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Chip, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Chip, Grid, IconButton, Tooltip, Fab } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { FaRegistered } from 'react-icons/fa';
-
+import queryString from 'query-string';
 import ManageRepairJobDialog from './ManageRepairJob';
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob } from '../../constants/helpers';
+import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, repairJob, prepareDataForGrid, getLocalStorageArrayData } from '../../constants/helpers';
 import CustomContainer from '../../components/CustomContainer';
 import routes from './../../components/Helpers/Routes';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { CommonRenderer, CreatedByRenderer, DateRenderer, UpdatedByRenderer } from '../../components/AgGridComponents/CustomAgGridCellRenderers';
-import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 import RepairJobHeader from './RepairJobHeader';
-
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
+import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
+import { camelCase } from 'lodash'
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { FaSuitcase, SiStatuspage, FaWarehouse, GiAutoRepair, GrStatusInfo, BsFillPersonFill, GiCargoShip, FaShippingFast, RiSpaceShipFill } from "react-icons/all"
+
 
 let repairJobTimeout;
 const RepairJobType = [
@@ -35,12 +39,14 @@ const RepairJobType = [
 ];
 
 const RepairJob = () => {
+  const renderedFrom = camelCase(routes?.repairJob.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [selectedType, setSelectedType] = useState(1);
+  const { type }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
@@ -60,88 +66,110 @@ const RepairJob = () => {
   });
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [frameworkComponents, setFrameworkComponents] = useState({});
+  const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
+  const [columns, setColumns] = useState([]);
+  const pageTitle = camelCase(`${routes.repairJob.title}`)
+  const localStorageSelectedRecords = `${renderedFrom}_selected`
 
-  const columns = [
-    {
-      field: 'repairJobName',
-      headerName: 'Repair Job Name',
-      show: true,
-      disabled: true,
-      cellRenderer: 'repairJobNameRenderer'
-    },
-    {
-      field: 'status',
-      headerName: 'Status',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'productInventory',
-      headerName: 'Product Inventory',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'repairPerson',
-      headerName: 'Repair Person',
-      show: true,
-      disabled: false,
-      cellRenderer: 'repairPersonRenderer'
-    },
-    {
-      field: 'typeOfRepair',
-      headerName: 'Type Of Repair',
-      show: true,
-      disabled: false,
-      cellRenderer: 'commonRenderer'
-    },
-    {
-      field: 'createdBy',
-      headerName: 'Created By',
-      show: true,
-      cellRenderer: 'createdByRenderer'
-    },
-    {
-      field: 'updatedBy',
-      headerName: 'Updated By',
-      show: true,
-      cellRenderer: 'updatedByRenderer'
-    },
-    {
-      field: 'owner',
-      headerName: 'Repair Job Owner',
-      show: true,
-      cellRenderer: 'OwnerRenderer'
+  const { getColumnData } = useColumns();
+
+  const [fromRental, setFromRental] = useState(history.location?.state?.rental);
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  const fetchGridColumns = async () => {
+    let data
+    if (isOffline) {
+      data = await findOne(objectStore.resource, objectStore.repairJob)
     }
-  ];
+    else {
+      const response = await axiosInstance().get(`/field?resource=Repair Job`)
+      data = response?.data?.data
+      try {
+        insertUpdate(objectStore.resource, objectStore.repairJob, data);
+      } catch (ex) {
+        console.error(`Repair Job: Error while storing data for Offline context. Error: ${ex.message}`)
+      }
+    }
+    let columns = []
+    let rendererNames = []
+    data.forEach(o => {
+      let currentColumn = getColumnData(pageTitle, o?.fieldData, routes.repairJobDetail.path)
+      if (currentColumn !== null) {
+        if (isOffline) {
+          currentColumn.columnData["filter"] = false
+          currentColumn.columnData["sortable"] = false
+        }
+        columns = [...columns, currentColumn?.columnData]
+        if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+          rendererNames.push(currentColumn?.rendererName)
+        }
+      }
+      return o?.fieldData
+    })
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    tempFrameworkComponent = {
+      ...tempFrameworkComponent,
+      actionsRenderer: ActionsRenderer
+    }
+    setFrameworkComponents({ ...tempFrameworkComponent })
+    let staticFields = getStaticFields()
+    staticFields.forEach(field => {
+      columns.push(checkStaticField(pageTitle, field))
+    })
+    setColumns([...columns])
+  };
+
   //  Grid Variables - End
+  const [locationKeys, setLocationKeys] = useState([])
+  useEffect(() => {
+    return history.listen(location => {
+      const { type }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key])
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys)
+          // Handle forward event
+          setSelectedType(type ? parseInt(type) : 1)
+
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys])
+          // Handle back event
+          setSelectedType(type ? parseInt(type) : 1)
+
+        }
+      }
+    })
+  }, [locationKeys,])
+
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (repairJobTimeout) {
       clearTimeout(repairJobTimeout);
     }
-
     repairJobTimeout = setTimeout(() => {
       fetchRepairJobs();
     }, millisec);
-    // eslint-disable-next-line
   }, [search]);
 
   useEffect(() => {
     if (renderCount > 0) {
       fetchRepairJobs();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, fromRental, selectedEntity, showFilteredRecordsOnly]);
 
   const handleSingleDeleteRepairJob = async () => {
     dispatch({ type: 'loading', loading: true });
-
     axiosInstance()
-      .put(`${repairJob.repairJobApi}/remove`, {
+      .put(`${repairJob.api}/remove`, {
         ids: [singleRepairJobDelete.id]
       })
       .then(({ data }) => {
@@ -159,50 +187,6 @@ const RepairJob = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
-  const RepairJobNameRenderer = (params) => (
-    <>
-      <Link className="text-truncate link" title={params.value} to={`${routes.repairJob.path}/detail/${params.data._id}`}>
-        {params.value}
-      </Link>
-    </>
-  );
-
-  const RepairPersonRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" title={params.value} to={`${routes.user.path}/detail/${params.data.repairPersonId}`}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  // const ProductInventoryRenderer = (params) => (
-  //   <>
-  //     {params.value ? (
-  //       <Link className="link" to={`${routes.opportunityDetail.path}/${params.data.relatedOpportunityId}`} title={params.value}>
-  //         {params.value}
-  //       </Link>
-  //     ) : (
-  //       <NoDataCell />
-  //     )}
-  //   </>
-  // );
-
-  const OwnerRenderer = (params) => (
-    <>
-      {params.value ? (
-        <Link className="link" to={`${routes.userDetail.path}/${params.data.ownerId}`} title={params.owner}>
-          {params.value}
-        </Link>
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
 
   const ActionsRenderer = (params) => (
     <>
@@ -226,7 +210,7 @@ const RepairJob = () => {
         </Tooltip>
       )}
 
-      <GridDeleteIcon
+      {/* <GridDeleteIcon
         hasDeletePermission={permissions.repairJob?.isDelete}
         ownerId={params.data.ownerId}
         userId={user?.user?._id}
@@ -238,21 +222,9 @@ const RepairJob = () => {
           })
         }
         entity="repair job"
-      />
+      /> */}
     </>
   );
-
-  const frameworkComponents = {
-    repairJobNameRenderer: RepairJobNameRenderer,
-    repairPersonRenderer: RepairPersonRenderer,
-    // productInventoryRenderer: ProductInventoryRenderer,
-    ownerRenderer: OwnerRenderer,
-    createdByRenderer: CreatedByRenderer,
-    updatedByRenderer: UpdatedByRenderer,
-    actionsRenderer: ActionsRenderer,
-    commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer
-  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -287,88 +259,96 @@ const RepairJob = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterRepairJobs=${selectedType}`;
+    if (isExport) {
+      deepFilter = `filterRepairJobs=${selectedType}`;
+    }
+    let filterById = [];
     if (accountDetails.accountId) {
       if (accountDetails.resource === customerAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('customerAccount'),
-            term: accountDetails.accountId
-          }
-        ])}`;
+        filterById.push({
+          field: replaceFieldName('customerAccount'),
+          term: accountDetails.accountId
+        });
       } else if (accountDetails.resource === supplierAccount.accountResource) {
-        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-          {
-            field: replaceFieldName('supplierAccountName'),
-            term: { $in: [accountDetails.accountId] }
-          }
-        ])}`;
+        filterById.push({
+          field: replaceFieldName('supplierAccountName'),
+          term: { $in: [accountDetails.accountId] }
+        });
       }
     }
-
+    if (fromRental) {
+      filterById.push({ field: "rentalJob", term: fromRental?._id });
+    }
+    if (filterById.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`
+    }
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
-
       Object.keys(filters).forEach((field) => {
         updatedFilters.push({
           field: replaceFieldName(field),
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${replaceFieldNameForSorting(sorting[0].colId)}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
-
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+    }
     return deepFilter;
   };
 
   const fetchRepairJobs = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
-    axiosInstance()
-      .get(`${repairJob.repairJobApi}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          const { owner, collaborator, createdBy, updatedBy, customerAccount, ...restProperties } = u;
-
-          let res = {
-            ...restProperties,
-            id: u._id,
-            productInventory: u.productInventory?.map((p) => p.optionLabel).join(', '),
-            repairPerson: u.repairPerson?.optionLabel,
-            repairPersonId: u.repairPerson?.optionValue,
-            owner: u.createdBy?.user?.concatedName,
-            ownerId: u.createdBy?.user?._id,
-            createdBy: u.createdBy?.user?.concatedName,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date
-          };
-          return res;
-        });
-
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
+    try {
+      let data: any = [], count;
+      if (!isOffline) {
+        const response: any = await axiosInstance().get(`${repairJob.api}${queryString}`);
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      else {
+        data = await findAll(objectStore.repairJob);
+        count = data?.length || 0;
+      }
+      let rows = data.map((u) => {
+        let finalObject = prepareDataForGrid(u, user);
+        finalObject["isChecked"] = false;
+        finalObject["allowedToEdit"] = permissions?.repairJob?.isUpdate;
+        finalObject["owerCollaboratorInitialsOrImages"] = [];
+        if (finalObject["owner"])
+          finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] }); finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+            if (f.initials) {
+              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+            }
+          })
+        return finalObject;
       });
+      if (appendRows) {
+        dispatch({ type: "initialize", data: [...dataRows, ...rows], count: count });
+      } else {
+        dispatch({ type: "initialize", data: rows, count: count });
+      }
+      setTimeout(() => {
+        dispatch({ type: "loading", loading: false });
+      }, gridLoadingTimeout);
+    } catch (error) {
+      dispatch({ type: "loading", loading: false });
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleSearch = (e) => {
@@ -377,6 +357,7 @@ const RepairJob = () => {
 
   const handleRepairJobTypeSel = (filterValues) => {
     setSelectedType(filterValues);
+    history.push(`?type=${filterValues}`)
   };
 
   const handleTransferEntityDialog = () => {
@@ -412,7 +393,7 @@ const RepairJob = () => {
     }
     if (recordsToDelete.length > 0) {
       axiosInstance()
-        .put(`${repairJob.repairJobApi}/remove`, {
+        .put(`${repairJob.api}/remove`, {
           ids: recordsToDelete
         })
         .then(({ data }) => {
@@ -447,31 +428,37 @@ const RepairJob = () => {
                 <ImportExportLinks
                   permissions={permissions.repairJob}
                   module="repairJob"
-                  api={repairJob.repairJobApi}
-                  afterImportCompleted={() => { }}
+                  api={repairJob.api}
+                  afterImportCompleted={() => { fetchRepairJobs() }}
                   isExportAllOrSomeFeature={true}
                   total={rowCount}
-                  recordsToExport={selectedRecords.length}
-                  ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                  ids={
+                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                      : []
+                  }
                   onExportToExcelSuccess={() => {
                     if (gridApi) gridApi.deselectAll()
                     else fetchRepairJobs()
                   }}
+                  additionalParams={getQueryString(true)}
                 />
               </Grid>
             </Grid>
           </Grid>
         </Grid>
       </Grid>
-
-      {/* Tables Begins Here */}
       <CustomContainer>
         <div className="header-panel">
           <RepairJobHeader
+            selectedType={selectedType}
             selectedRecords={selectedRecords}
             onTypeChange={handleRepairJobTypeSel}
             options={RepairJobType}
             onSearch={handleSearch}
+            columns={columns}
+            dispatch={dispatch}
             searchVal={search}
             RepairJobPermissions={permissions.repairJob}
             onCreate={clickCreateNew}
@@ -480,6 +467,7 @@ const RepairJob = () => {
             icon={<FaRegistered className="headerLogo" />}
             heading={routes.repairJob.title}
             showTransferEntityDialog={handleTransferEntityDialog}
+            filters={filters}
           // showCloneRepairJobDialog={() => {
           //   handleShowCloneRepairJobDialog()
           // }}
@@ -498,24 +486,72 @@ const RepairJob = () => {
                 }}
               />
             )}
+            {fromRental && (
+              <Chip
+                className="ml-3"
+                color="primary"
+                label={`Rental Job : ${fromRental?.rentalJobName}`}
+                onDelete={() => {
+                  setFromRental(null);
+                }}
+              />
+            )}
           </RepairJobHeader>
         </div>
-
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={100}
-          loading={loading}
-          renderedFrom={'repairJobPage'}
-          refreshGrid={fetchRepairJobs}
-        />
+        {
+          Object.keys(frameworkComponents).length > 0 ?
+            isMobile && !isTablet ?
+              <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions.repairJob}
+                primaryField={columns?.find(d => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${routes.repairJobDetail.path}/${data._id}`)
+                }}
+                dataRows={dataRows}
+                selectedRecords={selectedRecords}
+                dispatch={dispatch}
+                onEdit={(data) => {
+                  history.push(`${routes.repairJobDetail.path}/${data._id}?openEdit=true`)
+                }}
+                extraParamsToCheckDelete={true}
+                onDelete={(data) => {
+                  setDeleteRecord(data._id);
+                  setIsConformDialogVisible(true);
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                chips={[
+                  {
+                    icon: <SiStatuspage />,
+                    label: "Status: ",
+                    field: "status",
+                  }
+                ]}
+                onCreate={false}
+                showClone={true}
+                onClone={(data) => { setShowManageRepairJobDialog({ open: true, isClone: true, idToClone: data._id }); }}
+                renderedFrom={renderedFrom}
+              /> :
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameworkComponents}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={100}
+                loading={loading}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchRepairJobs}
+                showOnlyShowFilteredRecordSwitch={true}
+              /> : null
+        }
 
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
@@ -556,11 +592,10 @@ const RepairJob = () => {
       {showManageRepairJobDialog.open && (
         <ManageRepairJobDialog
           isClone={showManageRepairJobDialog.isClone}
-          open={showManageRepairJobDialog.open}
           repairJobId={showManageRepairJobDialog.idToClone}
           onClose={() => setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null })}
-          onSuccess={() => {
-            fetchRepairJobs();
+          onSuccess={(data) => {
+            history.push(`${routes.repairJobDetail.path}/${data._id}`);
             setShowManageRepairJobDialog({ open: false, isClone: false, idToClone: null });
           }}
         />

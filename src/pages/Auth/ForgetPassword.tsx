@@ -5,9 +5,9 @@ import {
     Button,
     CssBaseline,
     Grid,
-    LinearProgress,
     Paper,
     Link as MuiLink,
+    CircularProgress,
 } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
 import { TextField } from 'formik-material-ui';
@@ -127,7 +127,7 @@ const ForgetPassword = () => {
                             <Box textAlign="center">
                                 <img
                                     className={classes.logo}
-                                    src={SVG("LogoPng")}
+                                    src={SVG("LogoNew")}
                                     alt="equip logo"
                                     title="eQuipt Logo"
                                 />
@@ -144,12 +144,11 @@ const ForgetPassword = () => {
                                                 component={TextField}
                                                 name='email'
                                                 type='email'
+                                                size="small"
                                                 label='Email'
                                                 variant='outlined'
                                                 style={{ width: 260 }}
                                             />
-
-                                            {isSubmitting && <LinearProgress />}
                                             <Box textAlign="right" className="p-2">
                                                 <MuiLink component={Link} to="/login">
                                                     Go To Login
@@ -157,10 +156,11 @@ const ForgetPassword = () => {
                                             </Box>
                                             <Button
                                                 variant='contained'
-                                                color='secondary'
+                                                className="logo-bg-color"
                                                 size="small"
                                                 disabled={isSubmitting}
-                                                onClick={submitForm}>
+                                                onClick={submitForm}
+                                                startIcon={isSubmitting && <CircularProgress size={20} color='inherit' />}>
                                                 Submit
                                             </Button>
                                         </Form>

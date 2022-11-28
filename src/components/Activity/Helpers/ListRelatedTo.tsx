@@ -1,12 +1,26 @@
-import { Chip, Box } from "@material-ui/core";
-import { startCase } from "lodash";
+import { Chip, Box } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import { resActivityColors, resActivityTextColors } from './utils';
+import routes from '../../Helpers/Routes';
 
-import { resActivityColors } from "./utils";
+const useStyles = makeStyles((theme) => ({
+  chipStyle: {
+    textAlign: 'center',
+    borderRadius: '4px',
+    height: 'unset !important',
+    '& span.MuiChip-label': {
+      fontSize: '12px',
+      lineHeight: '15px',
+      fontWeight: '500',
+      padding: '8px 21px',
+      display: 'inline-block'
+    }
+  }
+}));
 
 export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
-  let filter = originRelatedTo.filter(
-    (_relatedTo) => _relatedTo.access === true
-  );
+  const classes = useStyles();
+  let filter = originRelatedTo.filter((_relatedTo) => _relatedTo.access === true);
 
   return filter.length ? (
     <Box>
@@ -17,11 +31,11 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
               <Box mr={1} mb={1} key={index}>
                 <Chip
                   className="custom-chip"
-                  label={startCase(_element.type) + " - " + _element.name}
+                  label={routes[_element?.type]?.title + ' - ' + _element.name}
                   size="small"
                   style={{
                     backgroundColor: resActivityColors[_element.type],
-                    color: "white",
+                    color: resActivityTextColors[_element.type]
                   }}
                 />
               </Box>
@@ -34,11 +48,12 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
         relatedTo.map((_element, index) => (
           <Box mr={1} mb={1} key={index}>
             <Chip
-              label={startCase(_element.type) + " - " + _element.name}
+              className={`${classes.chipStyle} chip-text`}
+              label={` ${routes[_element?.type]?.title + ' - ' + _element.name}`}
               size="small"
               style={{
                 backgroundColor: resActivityColors[_element.type],
-                color: "white",
+                color: resActivityTextColors[_element.type]
               }}
             />
           </Box>

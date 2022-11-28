@@ -16,6 +16,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import CustomButton from '../../components/Helpers/CustomButton'
 import { getUniqueCurrencies } from "../../constants/helpers";
 import { useData } from "../../StateProvider/Provider";
+import {isMobile, isTablet} from "react-device-detect";
+import {MdUpdate} from "react-icons/all";
 
 const useStyles = makeStyles(() => ({
   tdWidth: {
@@ -179,7 +181,7 @@ const CurrencyConverter = () => {
           <CustomBreadCrumbs routes={[routes.currencyConverter]} />
         </Grid>
       </Grid>
-      <CustomContainer>
+      <CustomContainer styles={{overflowY:"auto"}}>
         <div className="header-panel">
           <Grid container>
             <Grid item xs={6} md={6} sm={6} className="d-flex align-items-center gap-1">
@@ -187,7 +189,7 @@ const CurrencyConverter = () => {
             </Grid>
             <Grid xs={6} md={6} sm={6} container justify="flex-end">
               {currencyConverterPermissions.isUpdate &&
-                <Button onClick={handleUpdate} variant="contained" size="small" color="primary" >Update</Button>
+                <Button onClick={handleUpdate} variant={isMobile && !isTablet ? "text" : "contained"} size="small" color="primary"  style={isMobile && !isTablet ? {color:"var(--info)"} : {}}> {isMobile && !isTablet ? <MdUpdate size={20}/> : "Update" }   </Button>
               }
             </Grid>
           </Grid>
@@ -255,7 +257,7 @@ const CurrencyConverter = () => {
                     > Fetch Rates</CustomButton>
                   </Grid>
                 </Grid>
-                <Box mt={1} border={1} p={1} borderColor="grey.300"  >
+                <Box mt={1} border={1} p={1} borderColor="grey.300" style={{overflowX:"auto"}} >
                   <table>
                     <thead>
                       <tr>

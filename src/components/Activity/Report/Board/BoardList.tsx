@@ -1,36 +1,28 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { Box, Button, Dialog } from "@material-ui/core";
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Box, Button, Dialog } from '@material-ui/core';
+import { useDrop } from 'react-dnd';
+import update from 'immutability-helper';
+import { BoardBox } from './BoardBox';
 import { Add } from "@material-ui/icons";
-import { useDrop } from "react-dnd";
-import update from "immutability-helper";
-import { camelCase } from "lodash";
 import { isMobile, isTablet } from "react-device-detect";
-
-import { BoardBox } from "./BoardBox";
+import { useData } from '../../../../StateProvider/Provider';
 import { CreateTask } from "../../Task/CreateTask";
 import { CreateCase } from "../../Case/CreateCase";
-import { useData } from "../../../../StateProvider/Provider";
+import { camelCase } from "lodash";
+import ActivityModelHandler from '../../ActivityModelHandler';
 import { CustomDialogTransition } from "../../../../constants/helpers";
-import ActivityModelHandler from "../../ActivityModelHandler";
 
-export const BoardList = ({
-  status,
-  type,
-  activity,
-  selectedResource,
-  resource,
-  fetchBoard,
-  handleChangeStatus,
-  loading,
-}) => {
+export const BoardList = ({ status, type, activity, selectedResource, resource, fetchBoard, handleChangeStatus, loading }) => {
   const {
     state: {
-      user: { user },permissions
-    },
+      user: { user },
+      permissions
+    }
   } = useData();
   const ref = useRef(null);
   const [subActivity, setSubActivity] = useState([]);
   const [isCreateButton, setCreateButton] = useState(false);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
@@ -45,8 +37,8 @@ export const BoardList = ({
         update(subActivity, {
           $splice: [
             [dragIndex, 1],
-            [hoverIndex, 0, dragCard],
-          ],
+            [hoverIndex, 0, dragCard]
+          ]
         })
       );
     },
@@ -54,25 +46,26 @@ export const BoardList = ({
   );
 
   const [{ }, drop] = useDrop({
-    accept: "move",
+    accept: 'move',
     drop: (data: any) => {
       handleChangeStatus(data.id, status, data.index);
-    },
+    }
   });
 
   drop(ref);
+
+  const handleActivityOpen = (id) => {
+    setSelectedId(id);
+  };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
     fetchBoard();
   };
 
-  const handleActivityOpen = (id) => {
-    setSelectedId(id);
-  };
 
   return (
-    <div ref={ref} style={{ height: "calc(100% - 42px)" }}>
+    <div ref={ref} style={{ height: 'calc(100% - 42px)' }}>
       <Box
         minHeight="100%"
         onMouseEnter={() => setCreateButton(true)}
@@ -94,9 +87,8 @@ export const BoardList = ({
                 handleActivityOpen={handleActivityOpen}
               />
             ))}
-
             {
-             permissions &&  permissions[type?.toLowerCase()]?.isCreate ? 
+              permissions && permissions[type?.toLowerCase()]?.isCreate ?
                 <Box
                   p={1}
                   style={{
@@ -106,34 +98,40 @@ export const BoardList = ({
                     fullWidth
                     style={{ justifyContent: "flex-start" }}
                     startIcon={<Add />}
-                    onClick={() => setOpenDialog(true)}
+                    onClick={() => {
+                      setOpenDialog(true)
+                      setFullScreen(false);
+                    }}
                   >
                     Create {type}
                   </Button>
                 </Box>
-                :null
-             } 
+                : null
+            }
           </>
         ) : (
           <Box p={1}></Box>
         )}
       </Box>
 
-      {selectedId && (
+      {selectedId &&
         <ActivityModelHandler
           setActivityData={setSelectedId}
           activityType={type}
           fetchBoard={fetchBoard}
-          activityId={selectedId}
-        />
-      )}
-
+          activityId={selectedId} />
+      }
       <Dialog
         open={openDialog}
-        onClose={handleCloseDialog}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            handleCloseDialog()
+            setFullScreen(false);
+          }
+        }}
         fullWidth
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
       >
         {type === "task" ? (
@@ -149,7 +147,15 @@ export const BoardList = ({
                 access: true,
               },
             ]}
-            handleClose={handleCloseDialog}
+            handleClose={() => {
+              handleCloseDialog()
+              setFullScreen(false);
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen(prevState => !prevState)
+            }}
+            showManimizeMaximize={true}
           />
         ) : type === "case" ? (
           <CreateCase
@@ -164,7 +170,16 @@ export const BoardList = ({
                 access: true,
               },
             ]}
-            handleClose={handleCloseDialog}
+            handleClose={() => {
+              handleCloseDialog()
+              setFullScreen(false);
+            }}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen(prevState => !prevState)
+            }}
+            showManimizeMaximize={true}
+
           />
         ) : null}
       </Dialog>

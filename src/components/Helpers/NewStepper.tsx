@@ -9,12 +9,16 @@ import {
   Grid,
   Typography,
   Paper,
+  Chip,
+  Box
 } from "@material-ui/core";
 import { Check } from "@material-ui/icons";
 import { getUniqueCurrencies } from "../../constants/helpers";
 import { FcCancel } from "react-icons/fc";
 import { FaHourglassHalf } from "react-icons/fa";
 import { Link } from "react-router-dom";
+
+import HtmlTooltip from '../../components/CustomTooltipTitle'
 import routes from "./Routes";
 
 const useStyles = makeStyles((theme) => ({
@@ -186,7 +190,7 @@ function QontoStepIconForReject(status) {
     </div>
   );
 }
-const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null }) => {
+const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null, doaApproveType = "User" }) => {
   const classes = useStyles();
 
   return (
@@ -202,55 +206,94 @@ const NewStepper = ({ steps = null, heading, doaCurrency = null, quoteDOA = null
           >
             {
               quoteDOA ?
-                (quoteDOA.map((label) => (
-                  <Step key={label?.id}>
+                (quoteDOA.map((label, index) => (
+                  <Step key={index}>
                     <StepLabel StepIconComponent={label?.status === "approve" ?
                       QontoStepIconForApprove
                       : label?.status === "pending" ?
                         QontoStepIconForPending :
                         QontoStepIconForReject
                     }>
-                      <div style={{ color: "#09445A" }}>
-                        <Link
-                          title={label?.name}
-                          className="link"
-                          to={`${routes.userDetail.path}/${label?.id}`}
-                        >
-                          {`${label?.firstName} ${label?.lastName}`}
-                        </Link>
-                      </div>
-                      {label?.proxyBy && <div style={{ color: "#09445A" }}>
-                        <Link
-                          title={label?.proxyBy?.firstName}
-                          className="link"
-                          to={`${routes.userDetail.path}/${label?.id}`}
-                        >
-                          {`(${label?.proxyBy?.firstName} ${label?.proxyBy?.lastName})`}
-                        </Link>
-                      </div>
-                      }
+                      <>
+                        {label?.status === "pending" ?
+                          (<>
+                            {label?.users?.slice(0, 3).map((obj) => (
+                              <div style={{ color: "#09445A" }}>
+                                <Link
+                                  title={obj?.firstName}
+                                  className="link"
+                                  to={`${routes.userDetail.path}/${obj?.id}`}
+                                >
+                                  {`${obj?.firstName} ${obj?.lastName}`}
+                                </Link>
+                              </div>
+                            ))}
+                            {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
+                          </>
+                          )
+                          : <div style={{ color: "#09445A" }}>
+                            <Link
+                              title={label?.users.find(d => d?.status === label?.status)?.firstName}
+                              className="link"
+                              to={`${routes.userDetail.path}/${label?.users.find(d => d?.status === label?.status)?.id}`}
+                            >
+                              {`${label?.users.find(d => d?.status === label?.status)?.firstName} ${label?.users.find(d => d.status === label?.status)?.lastName}`}
+                            </Link>
+                          </div>
+
+
+                        }
+                      </>
                     </StepLabel>
                   </Step>
                 )))
-                : (steps.filter((label) => label?.id).map((label) => (
-                  <Step key={label?.id}>
+                : (steps.filter((item) => !item?.disable).map((label) => (
+                  <Step key={label}>
                     <StepLabel StepIconComponent={QontoStepIcon}>
-                      <div style={{ color: "#09445A" }}>
-                        <Link
-                          title={label?.name}
-                          className="link"
-                          to={`${routes.userDetail.path}/${label?.id}`}
-                        >
-                          {`${label?.firstName} ${label?.lastName}`}
-                        </Link>
-                      </div>
-                      {doaCurrency && <div style={{ color: "#09445A" }}>{
-                        getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
-                          ? getUniqueCurrencies().filter(
-                            (data) => data?.currencyCode === doaCurrency
-                          )[0].symbolNative
-                          : null}{label?.amount}
-                      </div>}
+                      {doaApproveType === "User" ?
+                        <>
+                          {label?.user?.slice(0, 3).filter(user => (user?.firstName && user?.lastName)).map((obj) => (
+                            <div style={{ color: "#09445A" }}>
+                              <Link
+                                title={obj?.firstName}
+                                className="link"
+                                to={`${routes.userDetail.path}/${obj?._id}`}
+                              >
+                                {`${obj?.firstName} ${obj?.lastName}`}
+                              </Link>
+                            </div>
+                          ))}
+                          {label?.users?.length > 4 && `+ ${label?.users.length - 4} more`}
+                          {doaCurrency && <div style={{ color: "#09445A" }}>{
+                            getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
+                              ? getUniqueCurrencies().filter(
+                                (data) => data?.currencyCode === doaCurrency
+                              )[0].symbolNative
+                              : null}{label?.amount}
+                          </div>}
+                        </>
+                        : <>
+                          {label?.role?.slice(0, 3).filter(role => role?.name).map((obj) => (
+                            <div style={{ color: "#09445A" }}>
+                              <Link
+                                title={obj?.name}
+                                className="link"
+                                to={`${routes.roleDetail.path}/${obj?._id}`}
+                              >
+                                {`${obj?.name}`}
+                              </Link>
+                            </div>
+                          ))}
+                          {label?.role?.length > 4 && `+ ${label?.role.length - 4} more`}
+                          {doaCurrency && <div style={{ color: "#09445A" }}>{
+                            getUniqueCurrencies().filter((data) => data?.currencyCode === doaCurrency).length
+                              ? getUniqueCurrencies().filter(
+                                (data) => data?.currencyCode === doaCurrency
+                              )[0].symbolNative
+                              : null}{label?.amount}
+                          </div>}
+                        </>
+                      }
 
                     </StepLabel>
                   </Step>

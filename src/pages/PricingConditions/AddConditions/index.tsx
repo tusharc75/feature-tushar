@@ -1,0 +1,468 @@
+import React, { useState, useEffect, useContext, Fragment, useReducer } from 'react';
+import {
+  MenuItem,
+  Grid,
+  Box,
+  Button,
+  Paper,
+  Typography,
+  IconButton,
+  Tab,
+  Tabs,
+  ButtonGroup,
+  Container,
+  InputAdornment,
+  TextField,
+  Menu
+} from '@material-ui/core';
+import { Autocomplete, Skeleton } from '@material-ui/lab';
+import { useParams, useHistory } from 'react-router-dom';
+import axiosInstance from '../../../axios/axiosInstance';
+import routes from '../../../components/Helpers/Routes';
+import { useData } from '../../../StateProvider/Provider';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { pricingCondition, gridLoadingTimeout, downloadExcel, removeLocalStorage, getLocalStorageArrayData } from '../../../constants/helpers';
+import EditIcon from '@material-ui/icons/Edit';
+import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridComponents/CustomAgGrid';
+import { CommonRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
+import GridDeleteIcon from '../../../components/Helpers/GridDeleteIcon';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import AddExistingMaterialDialog from '../AddExistingMaterialDialog';
+import ConditionDialog from './ConditionDialog';
+import { camelCase, startCase } from 'lodash';
+import InfoIcon from '@material-ui/icons/Info';
+import { ExpandMore } from '@material-ui/icons';
+import { isMobile, isTablet } from 'react-device-detect';
+import styles from '../../Leads/Header.module.scss';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+
+const AddConditions = ({ pricingConditionId, detailData }) => {
+  const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
+  const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user, permissions }
+  }: any = useData();
+
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
+  const [addMaterialDialog, setAddMaterialDialog] = useState({ open: false, materialType: '' });
+
+  const [condition, setCondition] = useState(null);
+  const [showDialog, setShowDialog] = useState({ open: false, isBulkedit: false });
+  const [conditionData, setConditionData] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const localStorageSelectedRecords = `${renderFrom}_selected`;
+
+  useEffect(() => {
+    fetchCondition();
+  }, [pricingConditionId]);
+
+  const fetchCondition = () => {
+    dispatch({ type: 'loading', loading: true });
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    setCondition(null);
+    axiosInstance()
+      .get(`${pricingCondition.api}/condition/${pricingConditionId}`)
+      .then(({ data: { data } }) => {
+        setCondition(JSON.parse(JSON.stringify(data)));
+        data.forEach((element) => {
+          element.detail = `${element.materialType === 'product' ? element.productDetail?.productName : element.materialType === 'service' ? element.serviceDetail?.serviceName : element.packageDetail?.packageName}`;
+          element.materialType = startCase(element.materialType);
+          element.conditionType = element.conditionType?.join(',');
+          element.unit = element.unit?.join(',');
+          element.pricingMethod = element.pricingMethod?.join(',');
+        });
+        dispatch({ type: 'initialize', data: data, count: data.length });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleAdd = (rows) => {
+    const data = [];
+    rows.forEach((element) => {
+      data.push({ materialId: element._id, materialType: addMaterialDialog.materialType });
+    });
+    axiosInstance()
+      .post(`${pricingCondition.api}/condition/${pricingConditionId}`, { condition: data })
+      .then(({ data: { data } }) => {
+        setAddMaterialDialog({ open: false, materialType: '' });
+        fetchCondition();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleDelete = () => {
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords.map((d) => d._id);
+    }
+    axiosInstance()
+      .post(`${pricingCondition.api}/condition/remove/${pricingConditionId}`, { ids: ids })
+      .then(() => {
+        fetchCondition();
+        setAnchorEl(null);
+        setDeleteRecord(null);
+        setShowDeleteConfirmBox(false);
+        localStorage.removeItem(localStorageSelectedRecords);
+      })
+      .catch((error) => {
+        setDeleteRecord(null);
+        setShowDeleteConfirmBox(false);
+        localStorage.removeItem(localStorageSelectedRecords);
+        toastConfig.setToastConfig(error);
+      });
+  };
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const handleOpen = (id) => {
+    const result = condition.filter((e) => e._id === id);
+    if (result.length) {
+      setShowDialog({ open: true, isBulkedit: false });
+      setConditionData(result[0]);
+    }
+  };
+
+  const DetailRenderer = (params) => (
+    <Fragment>
+      <p
+        onClick={() => {
+          handleOpen(params.data._id);
+        }}
+        className="link text-truncate"
+        title={params.data.detail}
+      >
+        {params.data.detail}
+      </p>
+      <HtmlTooltip title="Details">
+        <IconButton
+          size="small"
+          aria-label="Details"
+          onClick={() => {
+            window.open(
+              `${params.data.materialType === 'Product' ? routes.productDetail.path : params.data.materialType === 'Service' ? routes.serviceMasterDetail.path : routes.packagesDetail.path}/${params.data.materialId}`
+            );
+          }}
+        >
+          <InfoIcon fontSize="small" />
+        </IconButton>
+      </HtmlTooltip>
+    </Fragment>
+  );
+
+  const ActionsRenderer = (params) => (
+    <>
+      <HtmlTooltip title="Edit">
+        <IconButton
+          size="small"
+          aria-label="Edit"
+          onClick={() => {
+            handleOpen(params.data._id);
+          }}
+        >
+          <EditIcon color="primary" />
+        </IconButton>
+      </HtmlTooltip>
+      <GridDeleteIcon
+        hasDeletePermission={permissions?.pricingCondition?.isUpdate}
+        ownerId={user?.user?._id}
+        userId={user?.user?._id}
+        onDelete={() => {
+          // handleDelete([params.data._id]);
+          setDeleteRecord(params.data);
+          setShowDeleteConfirmBox(true);
+        }}
+        entity="pricingCondition"
+      />
+    </>
+  );
+
+  const frameworkComponents = {
+    detailRenderer: DetailRenderer,
+    actionsRenderer: ActionsRenderer,
+    commonRenderer: CommonRenderer
+  };
+
+  const columns = [
+    { field: 'detail', headerName: 'Detail', show: true, cellRenderer: 'detailRenderer' },
+    { field: 'materialType', headerName: 'Type', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'conditionType', headerName: 'Condition Type', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'unit', headerName: 'Unit', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'pricingMethod', headerName: 'Pricing Method', show: true, cellRenderer: 'commonRenderer' }
+  ];
+  const uploadData = (event) => {
+    if (event.target.files && event.target.files.length) {
+      toastConfig.setToastConfig({
+        hideDuration: null,
+        open: true,
+        type: 'info',
+        message: `Uploading file, Please wait...`
+      });
+      const file = event.target.files[0];
+
+      let formData = new FormData();
+      formData.append('file', file);
+
+      let importApi = `${pricingCondition.api}/condition/import/${pricingConditionId}`;
+
+      axiosInstance()
+        .post(importApi, formData, {
+          responseType: 'blob',
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        .then((response) => {
+          if (!response.headers['content-disposition']) {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: 'All Records Added Successfully'
+            });
+            fetchCondition();
+          } else {
+            const fileName = response.headers['content-disposition'].split('filename=')[1];
+            downloadExcel(response.data, fileName);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'error',
+              message: `Found some issue(s) while importing file. Please check the file and try again.`
+            });
+            fetchCondition();
+          }
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+    setAnchorEl(null);
+  };
+
+  const exportToExcel = () => {
+    toastConfig.setToastConfig({
+      hideDuration: null,
+      open: true,
+      type: 'info',
+      message: `Your file will be downloaded/uploaded in a matter of seconds`
+    });
+    let exportApi = `${pricingCondition.api}/condition/template/${pricingConditionId}${getLocalStorageArrayData(localStorageSelectedRecords).length
+      ? `?ids=${JSON.stringify(getLocalStorageArrayData(localStorageSelectedRecords)?.map((e) => e?.materialId) || [])}`
+      : ''
+      }`;
+
+    axiosInstance()
+      .get(exportApi, {
+        responseType: 'arraybuffer'
+      })
+      .then((response) => {
+        const fileName = response.headers['content-disposition'].split('filename=')[1];
+        downloadExcel(response.data, fileName);
+        removeLocalStorage(renderFrom);
+        // localStorage.removeItem(renderFrom);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Exported to excel successfully.'
+        });
+      })
+      .catch((error) => {
+        localStorage.removeItem(renderFrom);
+        toastConfig.setToastConfig(error);
+      });
+    setAnchorEl(null);
+  };
+
+  const ImportInput = (
+    <input
+      onClick={(e: any) => (e.target.value = null)}
+      id="importFromExcel"
+      name="importFromExcel"
+      onChange={uploadData}
+      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+      style={{
+        opacity: '0',
+        position: 'absolute',
+        zIndex: -1
+      }}
+      type="file"
+    />
+  );
+
+  return (
+    <Fragment>
+      <Box display="flex" justifyContent="space-between" m={1} mt={2}>
+        <Box display="flex" alignItems="center">
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => {
+              setAddMaterialDialog({ open: true, materialType: 'product' });
+            }}
+          >
+            {`Add ${routes.product.title}`}
+          </Button>
+          <Box mx={1} />
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => {
+              setAddMaterialDialog({ open: true, materialType: 'package' });
+            }}
+          >
+            {`Add ${routes.packages.title}`}
+          </Button>
+          <Box mx={1} />
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => {
+              setAddMaterialDialog({ open: true, materialType: 'service' });
+            }}
+          >
+            {`Add ${routes.serviceMaster.title}`}
+          </Button>
+        </Box>
+        <Box display="flex">
+          <Button
+            variant={isMobile && !isTablet ? 'text' : 'outlined'}
+            color="default"
+            size="small"
+            className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+            onClick={openActions}
+            aria-controls="action-menu"
+          >
+            {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="action-menu"
+            open={Boolean(anchorEl)}
+            onClose={closeActions}
+          >
+            <MenuItem
+              disabled={!Boolean(selectedRecords && selectedRecords?.length > 1 && dataRows?.length > 1)}
+              onClick={() => {
+                setShowDialog({ open: true, isBulkedit: true });
+                setConditionData(condition.filter((data) => selectedRecords.some((rec) => rec._id === data._id)));
+              }}
+            >
+              Bulk Edit
+            </MenuItem>
+            <MenuItem
+              disabled={!Boolean(selectedRecords && selectedRecords.length && dataRows?.length)}
+              onClick={() => {
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              Delete
+            </MenuItem>
+            <MenuItem
+              disabled={!Boolean(dataRows?.length)}
+              onClick={() => {
+                exportToExcel();
+              }}
+            >
+              Export to Excel{' '}
+              {getLocalStorageArrayData(localStorageSelectedRecords).length
+                ? `(${getLocalStorageArrayData(localStorageSelectedRecords).length})`
+                : '(All)'}
+            </MenuItem>
+            <MenuItem onClick={() => { }}>
+              <label htmlFor="importFromExcel">{ImportInput}Import from Excel</label>
+            </MenuItem>
+          </Menu>
+        </Box>
+      </Box>
+      <Grid item xs={12} md={12} sm={12} className="mt-3">
+        {columns && condition ? (
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            allowAction={true}
+            loading={loading}
+            isClientSideGrid={true}
+            selectedRecords={selectedRecords}
+            renderedFrom={renderFrom}
+            refreshGrid={fetchCondition}
+          />
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </Grid>
+      {addMaterialDialog.open && (
+        <AddExistingMaterialDialog
+          type={addMaterialDialog.materialType}
+          handleClose={() => {
+            setAddMaterialDialog({ open: false, materialType: '' });
+          }}
+          handleAdd={handleAdd}
+          ignoreIds={condition?.map((e) => e.materialId)}
+        />
+      )}
+      {showDialog.open && conditionData && (
+        <ConditionDialog
+          conditionData={conditionData}
+          detailData={detailData}
+          isBulkedit={showDialog.isBulkedit}
+          pricingConditionId={pricingConditionId}
+          handleClose={() => {
+            setShowDialog({ open: false, isBulkedit: false });
+          }}
+          handleSuccess={() => {
+            setShowDialog({ open: false, isBulkedit: false });
+            fetchCondition();
+          }}
+        />
+      )}
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+            } ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+    </Fragment>
+  );
+};
+
+export default AddConditions;

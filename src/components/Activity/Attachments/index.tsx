@@ -28,6 +28,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const {
     state: { permissions },
   }: any = useData();
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     fetchAttachment();
@@ -94,6 +95,48 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     if (attachmentData && attachmentData?._id) setAttachmentData(null);
     handleActivityRefresh();
   };
+
+  const handleDownload = () => {
+    setAnchorEl(null);
+    const file = attachmentData?.file
+    if (file?.length === 1) {
+      axiosInstance().get(`user/download?fileName=${file[0].url}`, {
+        responseType: 'blob',
+      })
+        .then(({ data }) => {
+          const url = window.URL.createObjectURL(new Blob([data]));
+          const link = document.createElement('a');
+          link.href = url;
+          var fileExt = file[0].url?.split('.').pop();
+          link.setAttribute('download', file[0].name + "." + fileExt);
+          document.body.appendChild(link);
+          link.click();
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+    else {
+      const fileUrl = file.map(f => f.url)
+      axiosInstance().put(`user/download`, {
+        files: fileUrl
+      }, {
+        responseType: 'blob',
+      })
+        .then(({ data }) => {
+          const url = window.URL.createObjectURL(new Blob([data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', attachmentData?.name ? `${attachmentData?.name}.zip` : "download.zip");
+          document.body.appendChild(link);
+          link.click();
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  };
+
   return (
     <Box className="activityDetailBox">
       {loading ? (
@@ -103,7 +146,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           <>
             {attachments.length ? (
               <Fragment>
-                {attachments.map((_attachment, index) => (
+                {attachments.slice(0, 5).map((_attachment, index) => (
                   <Box key={_attachment._id} className="activity">
                     <Box>
                       <Grid container>
@@ -170,26 +213,38 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               open={Boolean(anchorEl)}
               onClose={handleCloseMenu}
             >
-              {
-                permissions["attachment"]?.isUpdate ?
-                  <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
-              {
-                permissions["attachment"]?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
+              {permissions["attachment"]?.isUpdate ?
+                <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
+              <MenuItem onClick={handleDownload}>Download</MenuItem>
+              {permissions["attachment"]?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
             </Menu>
             <Dialog
               open={open}
               aria-labelledby="customized-dialog-title"
               maxWidth="md"
-              onClose={handleClose}
+              onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                  handleClose()
+                  setFullScreen(false);
+                }
+              }}
               fullWidth
-              fullScreen={isMobile || isTablet}
+              fullScreen={fullScreen || (isMobile || isTablet)}
               TransitionComponent={CustomDialogTransition}
             >
               <ManageAttachment
                 attachmentId={attachmentId}
                 attachmentData={attachmentData}
-                handleClose={handleClose}
+                handleClose={() => {
+                  handleClose()
+                  setFullScreen(false);
+                }}
                 relatedTo={relatedTo}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen(prevState => !prevState)
+                }}
+                showManimizeMaximize={true}
               />
             </Dialog>
           </>

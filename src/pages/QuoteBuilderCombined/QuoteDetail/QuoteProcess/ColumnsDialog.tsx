@@ -26,12 +26,14 @@ const ItemTypes = {
 };
 
 const ColumnsDialog = (props) => {
-  const { columns, setOpenDialog,versionStatus,selectedTNC, id, version, refresh } = props;
+  const { columns, visibleColumns, setOpenDialog, versionStatus, selectedTNC, id, version, refresh, type } = props;
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = useState(false);
   const [cards, setCards] = useState(
     columns.map((col, idx) => ({ id: idx + 1, text: col })) || []
   );
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
   const [{ handlerId }, drop] = useDrop({
     accept: "Card",
     collect(monitor) {
@@ -60,12 +62,25 @@ const ColumnsDialog = (props) => {
 
   const onSave = () => {
     setSubmitting(true);
-    axiosInstance()
-      .post(`quote-builder/updateVersion/${id}?version=${version}`, {
+    let tempObj
+    if (type === "pdf") {
+      tempObj = {
         acceptedColumns: cards.map((card) => card.text),
+        excelColumns: visibleColumns,
         status: versionStatus,
         TNC: selectedTNC
-      })
+      }
+    }
+    else if (type === "excel") {
+      tempObj = {
+        acceptedColumns: visibleColumns,
+        excelColumns: cards.map((card) => card.text),
+        status: versionStatus,
+        TNC: selectedTNC
+      }
+    }
+    axiosInstance()
+      .post(`quote-builder/updateVersion/${id}?version=${version}`, tempObj)
       .then(({ data }) => {
         setSubmitting(false);
         closeDialog();
@@ -80,7 +95,7 @@ const ColumnsDialog = (props) => {
   return (
     <Dialog
       maxWidth="sm"
-      fullScreen={isMobile || isTablet}
+      fullScreen={fullScreen || (isMobile || isTablet)}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       open={true}
@@ -90,6 +105,11 @@ const ColumnsDialog = (props) => {
       <CustomDialogHeader
         title="Re-arrange sequence for columns"
         onClose={closeDialog}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
       />
       <CustomDialogContent>
         <List component="nav" aria-label="main mailbox folders">

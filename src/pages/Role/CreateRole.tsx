@@ -20,6 +20,8 @@ import Loader from "../../components/Loader";
 import RoleEngine from "../../components/Shared/RoleEngine";
 import { roleTypes } from "../../constants/helpers";
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
+import { isMobile, isTablet } from 'react-device-detect';
+import {useData} from '../../StateProvider/Provider'
 
 const CreateRole = ({
   open,
@@ -32,14 +34,16 @@ const CreateRole = ({
   roleId = null
 }) => {
   const theme = useTheme();
+  const {state : {user: { user }}} = useData()
   const history = useHistory();
-  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
   const [isSubmitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({ name: "", description: "" });
+  const [cloneHeading, setCloneHeading] = useState("")
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     if (isClone) {
@@ -57,6 +61,7 @@ const CreateRole = ({
         data: { data },
       } = await axiosInstance().get(`/role/${roleId}`);
       setValues({ name: "", description: data.description });
+      setCloneHeading(data.name)
       setField(data.field);
       setResource(data.resource);
       setLoading(false);
@@ -72,10 +77,31 @@ const CreateRole = ({
         ? `/field?resource=Role&roleType=${roleType}`
         : `/field?resource=Role&roleType=${roleType}&entity=${selectedEntity}`;
     axiosInstance()
-      .get(api)
+      .get(`user/entity-union-role/?userId=${user?._id}&entityId=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        setField(data.field);
-        setResource(data.resource);
+        const oldData = {...data}
+        const field = data.field.map(((f:any) => ({
+          ...f,
+          isCreate: false,
+          isRead: false,
+          isUpdate: false,
+          isCreateDisabled: !f.isCreate,
+          isReadDisabled: !f.isRead,
+          isUpdateDisabled: !f.isUpdate,
+        })))
+        const resource = data.resource.map((r:any) => ({
+          ...r,
+          isCreate: false,
+          isCreateDisabled: !r.isCreate,
+          isDelete: false,
+          isDeleteDisabled: !r.isDelete,
+          isRead: false,
+          isReadDisabled: !r.isRead,
+          isUpdate: false,
+          isUpdateDisabled: !r.isUpdate,
+        }))
+        setField(field);
+        setResource(resource);
         setLoading(false);
       })
       .catch((err) => {
@@ -91,12 +117,30 @@ const CreateRole = ({
       ) ||
       field.some((d) => d.isCreate || d.isRead || d.isUpdate || d.isDelete)
     ) {
+      const resources = resource.map(r => {
+        const newData = {...r}
+        delete newData.isCreateDisabled
+        delete newData.isDeleteDisabled
+        delete newData.isReadDisabled
+        delete newData.isUpdateDisabled
+        delete newData.isHiddenDisabled
+        return newData
+      })
+      const fields = field.map(f => {
+        const newData = {...f}
+        delete newData.isCreateDisabled
+        delete newData.isReadDisabled
+        delete newData.isUpdateDisabled
+        delete newData.isHiddenDisabled
+        delete newData.isHidden
+        return newData
+      })
       setSubmitting(true);
       axiosInstance()
         .post("/role", {
           ...values,
-          field,
-          resource,
+          field: fields,
+          resource: resources,
           type: roleType,
         })
         .then(({ data }) => {
@@ -119,20 +163,28 @@ const CreateRole = ({
     }
   };
 
+
+
   return (
     <Dialog
       open={open}
       maxWidth="md"
       fullWidth
-      fullScreen={isMobile}
+      fullScreen={fullScreen || (isMobile || isTablet)}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           setShowConfirmDialog(true)
         }
       }}
     >
-      <CustomDialogHeader title="Create New Role"
-        onClose={() => setShowConfirmDialog(true)} />
+      <CustomDialogHeader title={isClone ? `Clone Role - [${cloneHeading}]` : "Create New Role"}
+        onClose={() => setShowConfirmDialog(true)}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={true}
+      />
 
       {loading ? (
         <>
@@ -158,7 +210,7 @@ const CreateRole = ({
       ) : (
         <>
           <CustomDialogContent>
-            <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+            {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
 
             <Box paddingX={1} paddingY={2}>
               <Box display="flex" marginBottom={2} gridGap={10}>
@@ -240,6 +292,7 @@ const CreateRole = ({
           {
             showConfirmDialog ?
               <ConfirmCancelDialog
+                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false)

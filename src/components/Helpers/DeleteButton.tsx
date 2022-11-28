@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import {isMobile, isTablet} from "react-device-detect";
 
 const useStyles = makeStyles((theme) => ({
     deleteButton: {
@@ -18,9 +19,11 @@ function DeleteButton({ text, onClick, ...rest }) {
         <Button
             className={classes.deleteButton}
             size="small"
-            variant="outlined"
+            variant={isMobile && !isTablet ? "text" : "outlined" }
             onClick={onClick}
+            style={isMobile  ? {color:"#f44336", padding:"5px 10px"} : {}}
             {...rest}
+
         >
             {text}
         </Button>

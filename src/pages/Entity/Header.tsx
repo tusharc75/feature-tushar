@@ -5,6 +5,11 @@ import styles from "../Leads/Header.module.scss";
 import SearchBox from "../../components/Helpers/SearchBox";
 import { BiNetworkChart } from "react-icons/bi";
 import routes from "../../components/Helpers/Routes";
+import { isMobile, isTablet } from "react-device-detect";
+import { MdAdd, MdSort, MdFilterList } from "react-icons/all";
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+
 
 const EntityHeader = (props) => {
   const {
@@ -14,8 +19,17 @@ const EntityHeader = (props) => {
     entityPermissions,
     openUserDialog,
     anyEntitySelected,
+    selectedRecords = [],
+    manageDeleteEntity,
+    canDelete,
+    columns,
+    dispatch,
+    filters
   } = props;
   const [anchorEl, setAnchorEl] = useState(null);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [isOpenDialog, setisOpenDialog] = useState(false);
+  const [showDeleteEntityDialog, setShowDeleteEntityDialog] = useState(null);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -25,84 +39,164 @@ const EntityHeader = (props) => {
     setAnchorEl(null);
   };
 
+  const handleOpen = () => {
+    setisOpenDialog(true);
+  };
+
+  const handleClickOpen = () => {
+    setSortOpen(true);
+  };
+
+  const handleClickClose = () => {
+    setSortOpen(false);
+  };
+
+  const handleFilterClose = () => {
+    setisOpenDialog(false);
+  };
+
+
+
   return (
     <Grid container className={styles.filter_side_container}>
-      <Grid item xs={6} className="d-flex align-items-center gap-1">
-        <BiNetworkChart className="headerLogo" />
-        <span className="listingHeader">{routes.entity.title}</span>
-      </Grid>
-      <Grid item xs={6} className={styles.filter_side}>
-        <Box component="div" className={styles.filter_side_header}>
-          <SearchBox
-            onSearch={onSearch}
-            value={searchVal}
-            searchbox={styles.search_box_input}
-            size="small"
-            placeholder="Search Entities"
-            width="242px"
-          />
-          {entityPermissions.isCreate && (
-            <Button
-              className={styles.add_submit_btn}
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={onCreate}
-              startIcon={<AddOutlined />}
-            >
-              Add
-            </Button>
-          )}
-
-          {entityPermissions.isUpdate ? (
-            <>
+      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+        <div className="d-flex align-items-center">
+          <BiNetworkChart className="headerLogo" />
+          <span className="listingHeader">{routes.entity.title}</span>
+        </div>
+        {isMobile && (
+          <>
+            <Grid style={{ display: 'inline-flex' }}>
               <Button
-                className={styles.action_submit_btn}
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
+                onClick={handleClickOpen}
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                aria-expanded={'true'}
+                color="secondary"
+                variant="text"
+                disableElevation
+                startIcon={<MdSort />}
+                className={'sort-filter-tablet'}
+                style={isTablet ? { marginLeft: '50px' } : {}}
               >
-                Actions <ExpandMore />
+                Sort
               </Button>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                getContentAnchorEl={null}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
+              <MobileSortDialog
+                isOpen={sortOpen}
+                handleClose={handleClickClose}
+                contentPart={null}
+                secHeading={['Sort Entity']}
+                columns={columns}
+                dispatch={dispatch}
+              />
+
+              <Button
+                id="demo-customized-button"
+                aria-controls="demo-customized-menu"
+                aria-haspopup="true"
+                aria-expanded={'true'}
+                variant="text"
+                color="secondary"
+                disableElevation
+                className={'sort-filter-tablet'}
+                startIcon={<MdFilterList />}
+                onClick={handleOpen}
               >
-                {/* {entityPermissions.isDelete && (
-                  <MenuItem
-                    disabled={Boolean(canDelete)}
-                    onClick={() => {
-                      showConfirmBox(null);
-                      closeActions();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                )} */}
-                {entityPermissions.isUpdate && (
-                  <MenuItem
-                    disabled={!anyEntitySelected}
-                    onClick={() => {
-                      openUserDialog();
-                      closeActions();
-                    }}
-                  >
-                    Assign User
-                  </MenuItem>
-                )}
-              </Menu>
-            </>
-          ) : null}
+                Filter
+              </Button>
+
+              <MobileFilterDialog
+                isOpen={isOpenDialog}
+                handleClose={handleFilterClose}
+                contentPart={null}
+                columns={columns}
+                dispatch={dispatch}
+                title={routes?.entity?.title}
+                filters={filters}
+              />
+            </Grid>
+          </>
+        )}
+      </Grid>
+      <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
+        <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header}>
+          <Grid style={{ display: "flex", flex: 1 }}>
+            <SearchBox
+              onSearch={onSearch}
+              value={searchVal}
+              searchbox={styles.search_box_input}
+              size="small"
+              placeholder="Search Entities"
+              width={isMobile && !isTablet ? "200px" : "242px"}
+              style={isMobile && !isTablet ? { flex: 1 } : {}}
+            />
+          </Grid>
+
+          <Grid style={{ display: "flex", gap: "5px" }}>
+            {entityPermissions?.isCreate && (
+              <Button
+                variant={isMobile && !isTablet ? "text" : "contained"}
+                color="primary"
+                size="small"
+                onClick={onCreate}
+                className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+              >
+                {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+              </Button>
+            )}
+            {entityPermissions?.isUpdate ? (
+              <>
+                <Button
+                  className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                  variant={isMobile && !isTablet ? "text" : "contained"}
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedRecords?.length ? false : true}
+                >
+                  {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  id="action-menu"
+                  open={Boolean(anchorEl)}
+                  onClose={closeActions}
+                >
+                  {entityPermissions?.isDelete && (
+                    <MenuItem
+                      disabled={selectedRecords.length > 1 ? true : Boolean(!canDelete) ? true : false}
+                      onClick={() => {
+                        manageDeleteEntity()
+                        closeActions();
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                  )}
+                  {entityPermissions?.isUpdate && (
+                    <MenuItem
+                      disabled={!anyEntitySelected}
+                      onClick={() => {
+                        openUserDialog();
+                        closeActions();
+                      }}
+                    >
+                      Assign User
+                    </MenuItem>
+                  )}
+                </Menu>
+              </>
+            ) : null}
+          </Grid>
         </Box>
       </Grid>
     </Grid>

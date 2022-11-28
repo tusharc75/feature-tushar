@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 
 import BoxWithBorder from "../../components/BoxWithBorder";
 import CopyToClipboard from "../../components/Helpers/CopyToClipboard";
+import { isMobile, isTablet } from 'react-device-detect';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,6 +33,12 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     padding: 0,
   },
+  "@media only screen and (max-width: 560px)":{
+    title:{
+      justifyContent:"space-between"
+    }
+  }
+
 }));
 
 const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
@@ -43,12 +50,12 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
         <Grid container>
           {data && data.length
             ? data.map((obj) => (
-                <Grid item xs={6}>
+                <Grid item xs={isMobile ? 12 : 6} >
                   <BoxWithBorder key={obj._id} style={{ margin: "8px" }}>
                     <ListItem disableGutters className={classes.list}>
                       <ListItemText
                         primary={
-                          <Typography className={classes.title}>
+                          <Typography className={`${classes.title} ""`}>
                             <Link
                               className="link"
                               to={`/user/detail/${obj._id}`}
@@ -77,7 +84,7 @@ const TeamUsers = ({ data, permissions, managerId, removeUser }) => {
                         }
                       />
 
-                      {permissions?.projectStrategy?.isUpdate &&
+                      {permissions?.projectSales?.isUpdate &&
                         managerId !== obj._id && (
                           <ListItemSecondaryAction>
                             <IconButton

@@ -53,10 +53,10 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                     primary={
                       <Typography
                         title={obj.name || ""}
-                        className="text-truncate"
+                        className={permissions?.role?.isRead ? "link text-truncate" : "text-truncate"}
                       >
                         {
-                          permissions.role.isRead ?
+                          permissions?.role?.isRead ?
                             <Link to={`/role/detail/${obj._id}`}>
                               {obj.name || ""}
                             </Link>
@@ -76,7 +76,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                       </Typography>
                     }
                   />
-                  {permissions.user.isUpdate && (
+                  {permissions?.user?.isUpdate && (
                     <ListItemSecondaryAction
                       className={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin ? "cursor-stop" : "cursor-pointer"}
                       title={
@@ -86,7 +86,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                       }
                     >
                       <IconButton
-                        disabled={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin}
+                        //disabled={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin}
                         size="small"
                         edge="end"
                         aria-label="delete"
@@ -101,7 +101,8 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                           //     ? "disabled"
                           //     : "error"
                           // }
-                          color={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin ? "disabled" : "error"}
+                          color={"error"}
+                        //color={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin ? "disabled" : "error"}
                         />
                       </IconButton>
                     </ListItemSecondaryAction>

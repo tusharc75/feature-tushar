@@ -10,7 +10,7 @@ import SearchBox from '../../components/Helpers/SearchBox'
 import styles from "../Leads/Header.module.scss";
 import routes from "../../components/Helpers/Routes";
 import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { productInventory, isObjectEmpty, gridLoadingTimeout, displayDate } from '../../constants/helpers';
+import { serializedAsset, isObjectEmpty, gridLoadingTimeout, displayDate } from '../../constants/helpers';
 import {
     CommonRenderer,
     CreatedByRenderer,
@@ -19,6 +19,10 @@ import {
 } from "../../components/AgGridComponents/CustomAgGridCellRenderers";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
 import { useData } from "../../StateProvider/Provider";
+import { MdAccountCircle } from "react-icons/md";
+import { AiFillCrown } from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile } from 'react-device-detect';
 
 const EquipmentRentalMaster = () => {
 
@@ -28,7 +32,10 @@ const EquipmentRentalMaster = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
+    const [isAllChecked, setIsAllChecked] = useState(false);
+    const [clonedData, setClonedData] = useState([])
+    const localStorageSelectedRecords = "equipmentRentalMasterPage_selected";
 
     const {
         state: { permissions },
@@ -39,7 +46,7 @@ const EquipmentRentalMaster = () => {
     }, [page, limit, filters, sorting, search]);
 
     const columns = [
-        { field: "productName", headerName: "Product Name", show: true, disabled: true, cellRenderer: "commonRenderer" },
+        { field: "productName", headerName: "Product Name", show: true, disabled: true, primaryField: true, cellRenderer: "commonRenderer" },
         { field: "assetNumber", headerName: "Asset Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "serialNumber", headerName: "Serial Number", show: true, disabled: true, cellRenderer: "commonRenderer" },
         { field: "rentalStartDate", headerName: "Rental Start Date", show: true, disabled: true, filter: false, sortable: false, cellRenderer: "commonRenderer" },
@@ -57,7 +64,7 @@ const EquipmentRentalMaster = () => {
         }
 
         const queryString = getQueryString();
-        axiosInstance().get(`${productInventory.api}${queryString}`).then(({ data }) => {
+        axiosInstance().get(`${serializedAsset.api}${queryString}`).then(({ data }) => {
             data.data = data.data?.map((u) => ({
                 ...u,
                 id: u._id,
@@ -94,7 +101,7 @@ const EquipmentRentalMaster = () => {
                     term: filters[field].filter
                 })
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
+            deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`
         }
 
         if (sorting.length > 0) {
@@ -102,7 +109,7 @@ const EquipmentRentalMaster = () => {
         }
 
         if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
+            deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
         }
 
         return deepFilter;
@@ -116,7 +123,7 @@ const EquipmentRentalMaster = () => {
         else {
             ids = selectedRecords.map(d => d._id);
         }
-        axiosInstance().put(`${productInventory.api}/remove`, { "ids": ids }).then(() => {
+        axiosInstance().put(`${serializedAsset.api}/remove`, { "ids": ids }).then(() => {
             fetchProductInventory();
             setShowDeleteConfirmBox(false)
             setDeleteRecord(null)
@@ -175,20 +182,54 @@ const EquipmentRentalMaster = () => {
                     </Grid>
                     <Grid xs={6} container className={styles.filter_side} >
                         <Box className={styles.filter_side_header} component="div" >
-
-                            <SearchBox
-                                onSearch={handleSearch}
-                                searchbox={styles.search_box_input}
-                                width="242px"
-                                size="small"
-                                value={search}
-                            />
+                            <div className="d-flex gap-2">
+                                <SearchBox
+                                    onSearch={handleSearch}
+                                    width="242px"
+                                    size="small"
+                                    value={search}
+                                />
+                            </div>
                         </Box>
                     </Grid>
                 </Grid>
             </div>
             {columns ?
-                <CustomAgGrid
+                isMobile ? <CustomSwipableList
+                    allowSelection={true}
+                    allowSwipe={true}
+                    permissions={[]}
+                    primaryField={columns?.find(d => d.primaryField)}
+                    onClick={(data) => {
+
+                    }}
+                    dataRows={dataRows}
+                    selectedRecords={selectedRecords}
+                    dispatch={dispatch}
+                    onEdit={(data) => {
+
+                    }}
+                    extraParamsToCheckDelete={true}
+                    onDelete={handleDelete}
+                    rowCount={rowCount}
+                    page={page}
+                    loading={loading}
+                    additionalDetails={[
+
+                    ]}
+                    chips={[
+
+                    ]}
+                    owerCollaboratorInitialsOrImages=""
+                    onCreate={() => {
+                    }
+                    }
+                    showClone={true}
+                    onClone={(data) => {
+                    }
+                    }
+                    renderedFrom={"equipmentRentalMasterPage"}
+                /> : <CustomAgGrid
                     columns={columns}
                     dataRows={dataRows}
                     frameworkComponents={frameworkComponents}
@@ -209,7 +250,10 @@ const EquipmentRentalMaster = () => {
             <ConfirmationDialog
                 open={showDeleteConfirmBox}
                 message={`Are you sure you want to delete the product inventory ${deleteRecord?._id ? deleteRecord?.assetNumber : ""} ?`}
-                onClose={() => setShowDeleteConfirmBox(false)}
+                onClose={() => {
+                    setDeleteRecord(null)
+                    setShowDeleteConfirmBox(false)
+                }}
                 onOk={handleDelete}
             />
         }

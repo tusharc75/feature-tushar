@@ -1,7 +1,7 @@
 import { getPermissions } from "../constants/helpers";
 import {
   SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER,
-  SET_CART_COUNT, SET_START_TOUR, SET_GRID_METADATA
+  SET_CART, SET_START_TOUR, SET_GRID_METADATA
 } from "./actionTypes";
 
 export const initialState = {
@@ -12,13 +12,14 @@ export const initialState = {
   selectedEntity: null,
   permissions: null,
   chatter: null,
-  cartCount: 0,
+  cartItems: [],
   tour: {
     path: '',
     start: false,
     stepIndex: 0,
   },
-  gridMetaData: {}
+  gridMetaData: {},
+  mappedEntities: []
 };
 
 const reducer = (state = initialState, action) => {
@@ -39,8 +40,8 @@ const reducer = (state = initialState, action) => {
       const { start, path, stepIndex } = action.payload
       return { ...state, tour: { start, path, stepIndex } };
 
-    case SET_CART_COUNT:
-      return { ...state, cartCount: action.payload };
+    case SET_CART:
+      return { ...state, cartItems: [...action.payload] };
 
     case SET_SELECTED_ENTITY:
       localStorage.setItem("selectedEntity", action.payload);

@@ -1,34 +1,37 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Box, Grid, Paper, Container } from '@material-ui/core';
+import { useState, useEffect } from 'react';
+import { Box, Grid, Paper, Typography, CircularProgress } from '@material-ui/core';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import moment from 'moment';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import Layout from '../../components/Layout';
-import axiosInstance from '../../axios/axiosInstance';
-import { entity, marketSegment, customerAccount } from '../../constants/helpers';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import axiosInstance from 'src/axios/axiosInstance';
+import { marketSegment, customerAccount } from 'src/constants/helpers';
 import OpportunityDashboards from './OpportunityDashboards';
 import Filters from './Filters';
 import styles from './dashboard.module.scss';
+import placeholder_img from 'src/assets/PerformanceTuning.png';
 
+import AssetDashboard from './AssetDashboard';
 import TopDashboard from './TopDasboard';
 import Top2Dashboard from './Top2Dashboard';
 import OpportunitiesDashboard from './OpportunitiesDashboard';
 import OpportunityTrends from './OpportunityTrends';
+import { useData } from 'src/StateProvider/Provider';
 
 const Dashboard = () => {
+  const {
+    state: { userLoading, user, selectedEntity }
+  } = useData();
   const [currency, setCurrency] = useState('');
   const [filterCurrency, setFilterCurrency] = useState('');
-  const [entities, setEntities] = useState([]);
   const [salesReps, setSalesReps] = useState([]);
   const [customerAccounts, setCustomerAccounts] = useState([]);
   const [productCategory, setProductCategory] = useState([]);
   const [marketSegments, setMarketSegments] = useState([]);
   const [subMarketSegments, setSubMarketSegments] = useState([]);
-  const [status, setStatus] = useState('open');
+  const [dashboardType, setDashboardType] = useState('');
 
   const [salesFilter, setSalesFilter] = useState({
-    entity: {},
     marketSegment: {},
     salesRep: {},
     customerAccount: {},
@@ -37,43 +40,42 @@ const Dashboard = () => {
     between: {
       from: new Date(moment().subtract(1, 'year').calendar()),
       to: new Date()
-    }
+    },
+    countrySellTo: {},
+    countryBillTo: {}
   });
-
   const getExchangeRates = async (date, amount) => {
     if (filterCurrency && filterCurrency !== currency) {
-      if (amount > 0) {  
+      if (amount > 0) {
         try {
           const host = 'api.frankfurter.app';
           const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currency}&to=${filterCurrency}`);
           const data = await res.json();
-          
+
           return data;
         } catch (error) {
           console.error(error);
         }
       } else {
-        return 0
+        return 0;
       }
     }
   };
 
   useEffect(() => {
-    fetchEntities();
-    fetchMarketSegment();
-    fetchProductCategory();
-    fetchSalesReps();
-    fetchCustomerAccount();
-  }, []);
+    if (dashboardType && dashboardType.includes('CRM')) {
+      fetchMarketSegment();
+      fetchProductCategory();
+      fetchSalesReps();
+      fetchCustomerAccount();
+    }
+  }, [dashboardType]);
 
-  const fetchEntities = () => {
-    axiosInstance()
-      .get(`${entity.entityApi}?limit=0`)
-      .then(({ data: { data } }) => {
-        setEntities(data.map((d) => ({ id: d._id, name: d.entityName })));
-      })
-      .catch((err) => { });
-  };
+  useEffect(() => {
+    if (user && user?.user) {
+      setDashboardType(user.user?.dashboards[0])
+    }
+  }, [user])
 
   const fetchProductCategory = () => {
     axiosInstance()
@@ -100,7 +102,7 @@ const Dashboard = () => {
 
   const fetchSalesReps = () => {
     axiosInstance()
-      .get(`/user?limit=0`)
+      .get(`/user?filterById=[{"field": "entities.entity", "term": "${selectedEntity}"}]`)
       .then(({ data: { data } }) => {
         data = data.map((d) => ({
           id: d._id,
@@ -123,71 +125,140 @@ const Dashboard = () => {
       .catch((err) => { });
   };
 
+
+
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <Layout>
-        <Grid container className="headerbox">
-          <CustomBreadCrumbs routes={[{ title: 'Dashboard', path: '/dashboard' }]} />
-        </Grid>
-        <div className="detail-container">
-          <Paper>
+      <Grid container className="headerbox">
+        <CustomBreadCrumbs routes={[{ title: 'Dashboard' }]} />
+      </Grid>
+      <div className="detail-container">
+        <Paper>
+          {userLoading && (
+            <Box
+              style={{ height: 'calc(100vh - 110px)', minHeight: '400px' }}
+              width={'100%'}
+              display={'flex'}
+              flexDirection="column"
+              justifyContent={'center'}
+              alignItems={'center'}
+              bgcolor={'rgba(255, 255, 255, 0.7)'}
+            >
+              <CircularProgress size={28} color="primary" />
+            </Box>
+          )}
+          {!dashboardType && (
+            <Box
+              style={{ height: 'calc(100vh - 110px)', minHeight: '400px' }}
+              width={'100%'}
+              display={'flex'}
+              flexDirection="column"
+              justifyContent={'center'}
+              alignItems={'center'}
+              bgcolor={'rgba(255, 255, 255, 0.7)'}
+            >
+              <img width={400} height={340} src={placeholder_img} alt="dashboard" />
+              <Typography color="textSecondary" variant="h5">
+                You don't have access to any dashboard
+              </Typography>
+            </Box>
+          )}
+          {dashboardType && (
             <div>
               <Filters
                 currency={filterCurrency}
                 setCurrency={setFilterCurrency}
                 moment={moment}
-                entities={entities}
                 salesReps={salesReps}
                 customerAccounts={customerAccounts}
                 marketSegments={marketSegments}
                 subMarketSegments={subMarketSegments}
                 productCategory={productCategory}
-                setSubMarketSegment={setSubMarketSegments}
+                setSubMarketSegments={setSubMarketSegments}
                 salesFilter={salesFilter}
                 setSalesFilter={setSalesFilter}
-                status={status}
-                setStatus={setStatus}
+                setDashboardType={setDashboardType}
+                dashboardType={dashboardType}
               />
-              <Box className={styles.dashboard_container}>
-                <TopDashboard
-                  filterCurrency={filterCurrency}
-                  salesFilter={salesFilter}
-                  currency={currency}
-                  setCurrency={setCurrency}
-                  moment={moment}
-                  getExchangeRates={getExchangeRates}
-                />
 
-                <Top2Dashboard
-                  getExchangeRates={getExchangeRates}
-                  salesFilter={salesFilter}
-                  filterCurrency={filterCurrency}
-                  moment={moment}
-                  currency={currency}
-                />
+              {dashboardType && dashboardType.includes('CRM') && (
+                <Box className={styles.dashboard_container}>
+                  <TopDashboard
+                    filterCurrency={filterCurrency}
+                    salesFilter={salesFilter}
+                    currency={currency}
+                    setCurrency={setCurrency}
+                    moment={moment}
+                    getExchangeRates={getExchangeRates}
+                    salesReps={salesReps}
+                    customerAccounts={customerAccounts}
+                    marketSegments={marketSegments}
+                    subMarketSegments={subMarketSegments}
+                    productCategory={productCategory}
+                    setSubMarketSegments={setSubMarketSegments}
+                    setSalesFilter={setSalesFilter}
+                  />
 
-                <OpportunityDashboards
-                  moment={moment}
-                  getExchangeRates={getExchangeRates}
-                  filterCurrency={filterCurrency}
-                  currency={currency}
-                  salesFilter={salesFilter}
-                  status={status}
-                />
+                  <Top2Dashboard
+                    getExchangeRates={getExchangeRates}
+                    filterCurrency={filterCurrency}
+                    salesFilter={salesFilter}
+                    currency={currency}
+                    setCurrency={setCurrency}
+                    moment={moment}
+                    salesReps={salesReps}
+                    customerAccounts={customerAccounts}
+                    marketSegments={marketSegments}
+                    subMarketSegments={subMarketSegments}
+                    productCategory={productCategory}
+                    setSubMarketSegments={setSubMarketSegments}
+                    setSalesFilter={setSalesFilter}
+                  />
 
-                <OpportunityTrends moment={moment} salesFilter={salesFilter} />
+                  <OpportunityDashboards
+                    getExchangeRates={getExchangeRates}
+                    filterCurrency={filterCurrency}
+                    salesFilter={salesFilter}
+                    currency={currency}
+                    setCurrency={setCurrency}
+                    moment={moment}
+                    salesReps={salesReps}
+                    customerAccounts={customerAccounts}
+                    marketSegments={marketSegments}
+                    subMarketSegments={subMarketSegments}
+                    productCategory={productCategory}
+                    setSubMarketSegments={setSubMarketSegments}
+                    setSalesFilter={setSalesFilter}
+                  />
 
-                <Box my={2}>
-                  <OpportunitiesDashboard />
+                  <OpportunityTrends
+                    getExchangeRates={getExchangeRates}
+                    filterCurrency={filterCurrency}
+                    salesFilter={salesFilter}
+                    currency={currency}
+                    setCurrency={setCurrency}
+                    moment={moment}
+                    salesReps={salesReps}
+                    customerAccounts={customerAccounts}
+                    marketSegments={marketSegments}
+                    subMarketSegments={subMarketSegments}
+                    productCategory={productCategory}
+                  />
+
+                  {/* <Box my={2}>
+                    <OpportunitiesDashboard />
+                  </Box> */}
                 </Box>
-              </Box>
+              )}
+              {dashboardType && dashboardType.includes('Asset') && (
+                <Box p={1} style={{ backgroundColor: "#F5F5F5" }}>
+                  <AssetDashboard salesFilter={salesFilter} />
+                </Box>
+              )}
             </div>
-            <Box p={2} display="flex" alignItems="center" flexDirection="column">
-              <Box my={2} p={2} width="100%" maxWidth="800px" textAlign="center"></Box>
-            </Box>
-          </Paper>
-        </div>
-      </Layout>
+          )}
+        </Paper>
+      </div>
     </MuiPickersUtilsProvider>
   );
 };

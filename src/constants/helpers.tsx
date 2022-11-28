@@ -16,12 +16,14 @@ import {
   Search,
   ViewColumn
 } from '@material-ui/icons';
-import { object, string, array, boolean } from 'yup';
+import { object, string, array, boolean, number } from 'yup';
 import moment from 'moment';
 import currencies from './currency_with_country.json';
 import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
-import { orderBy, uniqBy } from 'lodash';
+import { kebabCase, orderBy, uniqBy } from 'lodash';
+
+export const staticHiddenResource = ['Dashboard', 'Report'];
 
 export const defaultActivityShow = false;
 
@@ -42,6 +44,27 @@ export const termsAndConditionDocumentUploadMaxSize = {
   text: '2 MB'
 };
 
+export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
+export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Ready To Invoice'];
+export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
+export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
+export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
+export const rentalManagementSteps = [
+  'Add Products',
+  'Add Services',
+  // 'Add Consumables',
+  'Extra Add-on',
+  'Quotation',
+  'Serialized Asset',
+  'Loading Ticket',
+  'Receiving Ticket',
+  'Final Slip'
+];
+export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
+export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
+export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
+export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Invoice'];
+
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
 
@@ -53,6 +76,19 @@ export const leadImportErrorFileName = 'Leads-Errors.xlsx';
 
 export const opportunityTemplateFileName = 'Opportunities-Template.xlsx';
 export const opportunityImportErrorFileName = 'Opportunities-Errors.xlsx';
+
+export const quoteStepColors = {
+  'accepted by customer': { backgroundColor: '#008000', color: '#fff' },
+  'not booked by customer': { backgroundColor: '#ba181b', color: '#fff' },
+
+  're-open': { backgroundColor: '#ff7d00', color: '#fff' },
+  'invalid by customer': { backgroundColor: '#eb5e28', color: '#fff' },
+
+  'not booked': { backgroundColor: '#2b2d42', color: '#fff' },
+  'building quote': { backgroundColor: '#023e7d', color: '#fff' },
+
+  __default__: { backgroundColor: '#023e7d', color: '#fff' }
+};
 
 export const roleTypes = [
   {
@@ -85,11 +121,11 @@ export const localStorageKeys = {
 
 export const formFieldNames = {
   marketSegment: 'marketSegment',
-  subMarketSegment: 'subMarketSegment'
+  subMarketSegment: 'subMarketSegment',
+  parentAccount: 'parentAccount'
 };
 
 export const sidebarResource = {
-
   customerAccount: 'Customer Account',
   user: 'User',
   customerContact: 'Customer Contact',
@@ -101,13 +137,13 @@ export const sidebarResource = {
   field: 'Field',
   productCategory: 'Product Category',
   productInventory: 'Product Inventory',
+  serializedAsset: 'Serialized Asset',
   priceTemplate: 'Price Template',
   product: 'Product',
   productTemplate: 'Product Template',
   doa: 'DOA',
   termsAndConditions: 'Terms & Conditions',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Project Sales',
   productBuilder: 'Product Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -128,20 +164,124 @@ export const sidebarResource = {
   quotePdfTemplate: 'Quote Pdf Template',
   warehouse: 'Warehouse',
   rentalManagement: 'Rental Management',
-  deliveryTicket: 'Loading Ticket',
+  deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
-  receivingTicket: 'Receiving Ticket',
   salesOrder: 'Sales Order',
-  eCommerce: 'e-Commerce',
+  invoice: 'Invoice',
+  eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
+  supplierContact: 'Supplier Contact',
+  supplierAccount: 'Supplier Account',
+  pricing: 'Pricing',
+  priceBuilder: 'Price Builder',
+  flags: 'Flags',
+  purchaseOrder: 'Purchase Order',
+  transferAsset: 'Transfer Asset',
+  address: 'Address',
+  sublease: 'Sublease',
+  transferInventory: 'Transfer Inventory',
+  zone: 'Zone',
+  projectSales: 'Project Sales',
+  wellMaster: 'Well Master',
+  bulkAssetCreation: 'Bulk Asset Creation',
+  pos: 'Pos',
+  repairType: 'Repair Type',
+  report: 'Report',
+  resourceCalendar: 'Resource Calendar',
+  cageManagement: 'Cage Management',
+  productAuction: 'Product Auction',
+  inventoryToAsset: 'Inventory to Asset',
+  inventoryCycle: 'Inventory Cycle',
+  dashboardMaster: 'Dashboard Master',
+  scheduleReport: 'Schedule Report',
+  cycleCountDetermination: 'Cycle Count Determination',
+  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
+  quotation: 'Quotation',
+  serviceMaster: 'Service Master',
+  leadTimeMaster: 'Lead Time Master',
+  repairOrder: 'Repair Order',
+  workOrder: 'Work Order',
+  workOrderTechnician: 'Work Order Technician'
+};
 
+export const resourceNames = {
+  customerAccount: 'Customer Account',
+  user: 'User',
+  customerContact: 'Customer Contact',
+  brand: 'Brand',
+  entity: 'Entity',
+  role: 'Role',
+  lead: 'Lead',
+  opportunity: 'Opportunity',
+  field: 'Field',
+  productCategory: 'Product Category',
+  productInventory: 'Product Inventory',
+  serializedAsset: 'Serialized Asset',
+  priceTemplate: 'Price Template',
+  product: 'Product',
+  productTemplate: 'Product Template',
+  doa: 'DOA',
+  termsAndConditions: 'Terms & Conditions',
+  equiptmentRentalMaster: 'Equiptment Rental Master',
+  productBuilder: 'Product Builder',
+  formBuilder: 'Form Builder',
+  currencyConverter: 'Currency Converter',
+  quoteBuilder: 'Quotes',
+  PNQBuilder: 'PNQ Builder',
+  DOARequest: 'DOA Request',
+  task: 'Task',
+  case: 'Case',
+  note: 'Note',
+  event: 'Event',
+  email: 'Email',
+  attachment: 'Attachment',
+  reminder: 'Reminder',
+  calendar: 'Calendar',
+  dashboard: 'Dashboard',
+  budget: 'Budget',
+  marketSegment: 'Market Segment',
+  quotePdfTemplate: 'Quote Pdf Template',
+  warehouse: 'Plant',
+  rentalManagement: 'Rental Management',
+  deliveryTicket: 'Delivery Ticket',
+  pricingCondition: 'Pricing Condition',
+  repairJob: 'Repair Job',
+  salesOrder: 'Sales Order',
+  invoice: 'Invoice',
+  eCommercePolicy: 'e-Commerce Policy',
+  packages: 'Packages',
   supplierContact: 'Supplier Contact',
   supplierAccount: 'Supplier Account',
   pricing: 'Pricing',
   priceBuilder: 'Price Builder',
   flags: 'Flags',
   projectSales: 'Project Sales',
+  purchaseOrder: 'Purchase Order',
+  transferAsset: 'Transfer Asset',
+  sublease: 'Sublease',
+  transferInventory: 'Transfer Inventory',
+  wellMaster: 'Well Master',
+  bulkAssetCreation: 'Bulk Asset Creation',
+  pos: 'Pos',
+  report: 'Report',
+  scheduleReport: 'Schedule Report',
+  resourceCalendar: 'Resource Calendar',
+  cageManagement: 'Cage Management',
+  productAuction: 'Product Auction',
+  quotation: 'Quotation',
+  repairOrder: 'Repair Order',
+  workOrder: 'Work Order',
+  workOrderTechnician: 'Work Order Technician'
+};
+
+export const primaryFields = {
+  serializedAsset: 'assetNumber',
+  rentalManagement: 'rentalJobName',
+  transferAsset: 'transferAssetNumber',
+  repairJob: 'repairJobName',
+  purchaseOrder: 'purchaseOrderNumber',
+  deliveryTicket: 'ticketName'
 };
 
 export const RESOURCE_LABEL = {
@@ -158,14 +298,15 @@ export const RESOURCE_LABEL = {
   opportunity: 'Opportunities',
   field: 'Fields',
   productCategory: 'Product Categories',
-  productInventory: 'Serialized Assets',
+  productInventory: 'Product Inventory',
+  serializedAsset: 'Serialized Assets',
   priceTemplate: 'Price Templates',
   product: 'Product Master',
   productTemplate: 'Product Templates',
   doa: 'DOA',
   termsAndConditions: 'T&Cs',
   equiptmentRentalMaster: 'Equiptment Rental Master',
-  projectStrategy: 'Project Sales',
+  projectSales: 'Project Sales',
   productBuilder: 'Price Builder',
   formBuilder: 'Form Builder',
   currencyConverter: 'Currency Converter',
@@ -183,15 +324,67 @@ export const RESOURCE_LABEL = {
   dashboard: 'Dashboards',
   budget: 'Budgets',
   marketSegment: 'Market Segments',
-  quotePdfTemplate: 'Quote PDF Templates',
+  quotePdfTemplate: 'PDF Templates',
   rentalManagement: 'Rental Job',
-  deliveryTicket: 'Loading Tickets',
-  pricingCondition: 'Pricing Conditions',
+  deliveryTicket: 'Delivery Tickets',
+  pricingCondition: 'Pricing Setup',
   repairJob: 'Repair Jobs',
-  receivingTicket: 'Receiving Tickets',
   salesOrder: 'Sales Order',
-  eCommerce: 'e-Commerce',
+  invoice: 'Invoice',
+  eCommercePolicy: 'e-Commerce Policy',
   packages: 'Packages',
+  purchaseOrder: 'Purchase Orders',
+  transferAsset: 'Transfer Assets',
+  address: 'Addresses',
+  sublease: 'Sublease',
+  transferInventory: 'Transfer Inventory',
+  zone: 'Zone',
+  wellMaster: 'Well Master',
+  bulkAssetCreation: 'Bulk Asset Creation',
+  pos: 'eRECS',
+  repairType: 'Repair Types',
+  report: 'Report',
+  scheduleReport: 'Schedule Report',
+  resourceCalendar: 'Resource Calendar',
+  cageManagement: 'Cage Management',
+  productAuction: 'Product Auction',
+  inventoryToAsset: 'Inventory to Asset',
+  importExport: 'Import-Export',
+  inventoryCycle: 'Inventory Cycle',
+  cycleCountDetermination: 'Cycle Count Determination',
+  cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
+  quotation: 'Quotation',
+  serviceMaster: 'Service Master',
+  leadTimeMaster: 'Lead Time Master',
+  repairOrder: 'Repair Order',
+  workOrder: 'Work Order',
+  workOrderSupervisor:'Work Order Supervisor',
+  workOrderTechnician: 'Work Order Technician'
+};
+
+export const CHILD_RESOURCE = {
+  rentalManagementProduct: 'Rental Management Product',
+  rentalManagementCost: 'Rental Management Cost',
+  purchaseOrderProduct: 'Purchase Order Product',
+  purchaseOrderService: 'Purchase Order Service',
+  bulkAssetCreationProduct: 'Bulk Asset Creation Product',
+  repairJobAsset: 'Repair Job Asset',
+  invoiceProduct: 'Invoice Product',
+  salesOrderProduct: 'Sales Order Product',
+  salesOrderCost: 'Sales Order Cost',
+  subleaseProduct: 'Sublease Product',
+  quotationProduct: 'Quotation Product',
+  quotationCost: 'Quotation Cost',
+  quotationService: 'Quotation Service',
+  repairOrderProduct: 'Repair Order Product'
+};
+
+export const sidebarResourceObjectFromValues = () => {
+  let obj: any = {};
+  Object.keys(sidebarResource).forEach((key) => {
+    obj[sidebarResource[key]] = key;
+  });
+  return obj;
 };
 
 export const lead = {
@@ -215,8 +408,6 @@ export const productTemplate = {
   productTemplateRoute: 'product-template'
 };
 
-
-
 export const priceTemplate = {
   priceTemplateResource: 'priceTemplate',
   priceTemplateApi: '/price-template',
@@ -229,29 +420,45 @@ export const quoteBuilder = {
 };
 
 export const rentalManagement = {
+  api: '/rental-management',
   rentalManagementResource: 'rentalManagement',
-  rentalManagementApi: '/rental-management',
-  resource: "rental-management"
+  resource: 'rental-management'
 };
 
 export const deliveryTicket = {
-  deliveryTicketResource: 'deliveryTicket',
-  deliveryTicketApi: '/delivery-ticket'
+  resource: 'deliveryTicket',
+  api: '/delivery-ticket'
 };
 
 export const repairJob = {
-  repairJobResource: 'repairJob',
-  repairJobApi: '/repair-job'
+  resource: 'repairJob',
+  api: '/repair-job'
+};
+
+export const repairOrder = {
+  resource: 'repairOrder',
+  api: '/repair-order'
 };
 
 export const salesOrder = {
-  salesOrderResource: 'salesOrder',
-  salesOrderApi: '/sales-order'
+  api: '/sales-order',
+  resource: 'sales-order'
+};
+
+export const invoice = {
+  api: '/invoice',
+  resource: 'invoice'
+};
+
+export const quotation = {
+  api: '/quotation',
+  resource: 'quotation'
 };
 
 export const packages = {
-  packageResource: 'packages',
-  packageApi: '/packages'
+  resource: 'Packages',
+  api: '/packages',
+  permissions: 'packages'
 };
 
 export const warehouse = {
@@ -259,9 +466,10 @@ export const warehouse = {
   warehouseApi: '/warehouse'
 };
 
-export const receivingTicket = {
-  receivingTicketResource: 'receivingTicket',
-  receivingTicketApi: '/receiving-ticket'
+export const wellMaster = {
+  resource: 'wellMaster',
+  api: '/well-master',
+  route: 'well-master'
 };
 
 export const projectSales = {
@@ -322,23 +530,43 @@ export const product = {
   permission: 'product'
 };
 
+export const eProduct = {
+  api: '/e-product',
+  route: '/e-product'
+};
+
+export const serializedAsset = {
+  api: '/serialized-asset',
+  route: '/serialized-asset',
+  permission: 'serializedAsset',
+  resource: 'Serialized Asset'
+};
+
+export const workOrderSupervisor = {
+  api:'/work-order-supervisor',
+  route:'/work-order-supervisor',
+  permission:'workOrderSupervisor',
+  resource:'Work Order Supervisor'
+}
+
+export const convertInventory = {
+  api: '/convert-inventory-to-asset',
+  route: '/inventory-to-asset',
+  permission: 'inventoryToAsset',
+  resource: 'Inventory to Asset'
+};
+
 export const productInventory = {
   api: '/product-inventory',
   route: '/product-inventory',
-  permission: 'productInventory'
+  permission: 'productInventory',
+  resource: 'product-inventory'
 };
-
 export const budget = {
   budgetApi: '/budget',
   budgetRoute: '/budget',
-  budgetPermission: 'budget'
-};
-
-export const pricingCondition = {
-  pricingConditionApi: "/pricing-condition",
-  pricingConditionRoute: "pricing-condition",
-  pricingConditionPermission: "pricingCondition",
-
+  budgetPermission: 'budget',
+  resource: 'budget'
 };
 
 export const quotePdfTemplate = {
@@ -352,6 +580,96 @@ export const marketSegment = {
   marketSegmentResource: 'marketSegment'
 };
 
+export const address = {
+  addressApi: '/address',
+  addressResource: 'address'
+};
+
+export const purchaseOrder = {
+  api: '/purchase-order',
+  route: '/purchase-order',
+  permission: 'purchaseOrder',
+  resource: 'purchaseOrder'
+};
+
+export const sublease = {
+  api: '/sublease',
+  route: '/sublease',
+  permission: 'sublease',
+  resource: 'sublease'
+};
+
+export const transferAsset = {
+  api: '/transfer-asset',
+  route: '/transfer-asset',
+  permission: 'transferAsset',
+  resource: 'transferAsset'
+};
+
+export const transferInventory = {
+  api: '/transfer-inventory',
+  route: '/transfer-inventory',
+  permission: 'transferInventory',
+  resource: 'transferInventory'
+};
+
+export const pricingCondition = {
+  resource: 'pricingCondition',
+  api: '/pricing-condition',
+  route: 'pricing-condition'
+};
+
+export const bulkAssetCreation = {
+  api: '/bulk-asset-creation',
+  route: '/bulk-asset-creation',
+  permission: 'bulkAssetCreation',
+  resource: 'bulkAssetCreation'
+};
+
+export const repairType = {
+  api: '/repair-type',
+  route: '/repair-type',
+  permission: 'Repair Type',
+  resource: 'Repair Type'
+};
+export const cageManagement = {
+  api: '/cage-management',
+  route: '/cage-management',
+  permission: 'Cage Management',
+  resource: 'Cage Management'
+};
+export const productAuction = {
+  api: '/product-auction',
+  route: '/product-auction',
+  permission: 'Product Auction',
+  resource: 'Product Auction'
+};
+
+export const cycleCountPhysicalInventory = {
+  api: '/inventory-cycle/physical-inventory',
+  route: '/cycle-count-physical-inventory',
+  permission: 'Cycle Count Physical Inventory',
+  resource: 'Cycle Count Physical Inventory'
+};
+
+export const serviceMaster = {
+  api: '/service-master',
+  route: '/service-master',
+  permission: 'Service Master',
+  resource: 'Service Master'
+};
+export const leadTimeMaster = {
+  api: '/lead-time-master',
+  route: '/lead-time-master',
+  permission: 'Lead Time Master',
+  resource: 'Lead Time Master'
+};
+
+export const workOrder = {
+  resource: 'Work Order',
+  api: '/work-order'
+};
+
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
@@ -360,14 +678,36 @@ export const profileMenuItems = {
   securityPrivacy: 5
 };
 
+export const SCHEDULE_FREQUENCY = ['Daily', 'Weekly', 'Monthly'];
+export const FREQUENCY_WEEKS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
+  //let selectedEntity = localStorage.getItem("selectedEntity")
+  //let isCreate = (val === "") ? true : false
+
   const obj = {};
   for (const key of arr) {
     let value = key.isDefaultValue ? key.defaultValue : val;
+
+    //let isEntityField = key?.fieldName === "entity"
+    // if (isEntityField && selectedEntity && isCreate) {
+    //   value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
+    // }
+
     if (key.type === 'dropDown') {
-      const option = key.option?.find((data: any) => data.default === true);
+      let option = key.option?.find((data: any) => data.default === true);
+      if (!option && key.required && key.option?.length === 1) {
+        option = key.option[0];
+      }
       obj[key.fieldName] = value ? value : option ? option.optionValue : '';
     } else if (key.type === 'multiSelect') {
+      let defaultOptions = key.option?.filter((item: any) => item.default === true);
+      if (defaultOptions?.length === 0 && key.required && key.option?.length === 1) {
+        defaultOptions = key.option;
+      }
+      const options = defaultOptions?.map((data: any) => data.optionValue);
+      obj[key.fieldName] = value ? (typeof value === 'string' ? [value] : value) : options;
+    } else if (key.type === 'freeStyleMultiSelect') {
       const defaultOptions = key.option?.filter((item: any) => item.default === true);
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? value : options;
@@ -375,6 +715,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
+    } else if (key.type === 'colorPicker') {
+      obj[key.fieldName] = value ? value : '#aaaaaa';
     } else if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = value ? value : false;
     } else if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
@@ -408,14 +750,27 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data.optionValue : '');
   for (const key of arr) {
+    let defaultValue;
+
+    if (key?.isDefaultValue && key?.defaultValue) {
+      defaultValue = key.defaultValue;
+    }
     if (key.type === 'switch' || key.type === 'checkBox') {
-      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;
+      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue ? defaultValue : false;
     } else if (key.type === 'multiSelect') {
-      const values = dataObj[key.fieldName] && dataObj[key.fieldName].length ? dataObj[key.fieldName].map((val: any) => filterValues(val)) : [];
+      const values =
+        dataObj[key.fieldName] && dataObj[key.fieldName].length
+          ? typeof dataObj[key.fieldName] === 'string'
+            ? [dataObj[key.fieldName]]
+            : dataObj[key.fieldName].map((val: any) => filterValues(val))
+          : defaultValue || [];
       obj[key.fieldName] = values;
     } else if (key.type === 'dropDown') {
-      const value = filterValues(dataObj[key.fieldName]);
-      obj[key.fieldName] = value ? value : '';
+      const value =
+        dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length
+          ? dataObj[key.fieldName][0]
+          : filterValues(dataObj[key.fieldName]);
+      obj[key.fieldName] = value ? value : defaultValue || '';
     } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayUnits &&
@@ -424,7 +779,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
             if (key.fieldName.includes('_')) {
               fieldName = key.fieldName;
             }
-            obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
+            obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : defaultValue || 0;
           });
       } else if (key.type === 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayCurrency &&
@@ -449,9 +804,9 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[]) => {
           });
       }
     } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
-      obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
+      obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : defaultValue || 0;
     } else {
-      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
+      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : defaultValue || '';
     }
   }
   return obj;
@@ -492,7 +847,9 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect') {
-      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`) : array();
+      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
+    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
+      schema[input.fieldName] = input.required ? number().required(`${input.fieldLabel} is required`).nullable() : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
@@ -503,7 +860,9 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
       input.displayUnits &&
         input.displayUnits.forEach((_unit) => {
-          schema[input.fieldName + '_' + _unit.toLowerCase()] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+          schema[input.fieldName + '_' + _unit.toLowerCase()] = input.required
+            ? number().required(`${input.fieldLabel} is required`).nullable()
+            : number().nullable();
         });
     } else if (input.type === 'currencyAmount') {
       input.displayCurrency &&
@@ -511,13 +870,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
           if (input.isConverter && input.displayUnits.length) {
             input.displayUnits.forEach((_unit) => {
               schema[input.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] = input.required
-                ? string().required(`${input.fieldLabel} is required`)
-                : string();
+                ? number().required(`${input.fieldLabel} is required`).nullable()
+                : number().nullable();
             });
           } else {
             schema[input.fieldName + '_' + _currency.toLowerCase()] = input.required
-              ? string().required(`${input.fieldLabel} is required`)
-              : string();
+              ? number().required(`${input.fieldLabel} is required`).nullable()
+              : number().nullable();
           }
         });
     } else if (input.type === 'date') {
@@ -536,14 +895,6 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   return object().shape(schema);
 };
 
-export const camelCase = (str) => {
-  return str
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-      return index === 0 ? word.toLowerCase() : word.toUpperCase();
-    })
-    .replace(/\s+/g, '');
-};
-
 export const UnCamelCase = (str) => {
   return str
     .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -554,7 +905,7 @@ export const UnCamelCase = (str) => {
 };
 
 export const isObjectEmpty = (obj) => {
-  return Object.keys(obj).length === 0;
+  return Object.keys(obj)?.length === 0;
 };
 
 export const currencyCodeToSymbol = (currencyCode) => {
@@ -596,11 +947,11 @@ export const initializeDropdownById = (field, fieldName, id) => {
 
   return field;
 };
-export const dateFormat = 'MM/DD/YYYY';
-export const dateTimeFormat = 'MM/DD/YYYY hh:mm A';
-export const cardDateFormat = 'MMM,DD YYYY';
+export const dateFormat = localStorage.getItem('dateFormat') ?? 'MM/DD/YYYY';
+export const dateTimeFormat = localStorage.getItem('dateTimeFormat') ?? 'MM/DD/YYYY hh:mm A';
+export const cardDateFormat = localStorage.getItem('cardDateFormat') ?? 'MMM DD, YYYY';
 
-export const dateFormatForInputControl = 'MM/dd/yyyy';
+export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/dd/yyyy';
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
 // export const cardDateFormat = "MMM,dd yyyy"
 
@@ -610,6 +961,10 @@ export const yyyyMMDD = (dateToBeFormatted) => {
 
 export const displayDate = (date) => {
   return date ? moment(date).format(dateFormat) : date;
+};
+
+export const displayDateTime = (date) => {
+  return date ? moment(date).format(dateTimeFormat) : date;
 };
 
 export const displayCardDate = (date) => {
@@ -667,12 +1022,12 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
       }
     }
 
+    const sidebarFieldsKeys = Object.keys(sidebarResource);
+    const sidebarFieldsValues = Object.values(sidebarResource);
+
     if (data) {
       const hasApproveAccountPermission = user.user.permissions.approveAccount;
       const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
-
-      const sidebarFieldsKeys = Object.keys(sidebarResource);
-      const sidebarFieldsValues = Object.values(sidebarResource);
 
       data.forEach((d) => {
         const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
@@ -695,10 +1050,22 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
             title: d.resourceLabel || d.name
           };
         } else {
-          console.info(`Custom Error (helper.tsx > getPermissions()) => ${JSON.stringify(d)} resource not found`)
+          console.info(`Custom Error (helper.tsx > getPermissions()) => ${JSON.stringify(d)} resource not found`);
         }
       });
     }
+
+    // sidebarFieldsKeys.forEach((d) => {
+    //   if (!permissions.hasOwnProperty(d)) {
+    //     permissions[d] = {
+    //       isCreate: false,
+    //       isRead: false,
+    //       isUpdate: false,
+    //       isDelete: false
+    //     };
+    //   }
+    // });
+
     localStorage.setItem('routes', JSON.stringify(routesAndTitle));
     return permissions;
   }
@@ -755,9 +1122,9 @@ export const simplifyValues = (obj, fields) => {
   return newObj;
 };
 
-export const review = {
-  reviewsApi: '/product/review'
-};
+// export const review = {
+//   reviewsApi: '/product/review'
+// };
 
 export const getUniqueCurrencies = () => {
   return uniqBy(currencies, 'currencyCode');
@@ -882,6 +1249,85 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     }).format(amount),
     amountWithouCurrencyCode: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`).format(amount)
   };
+};
+
+/**
+ *
+ * @param date From when to convert amount
+ * @param amount An amount to be converted
+ * @param currencyFrom Currency to convert from
+ * @param currencyTo Currency to convert to
+ * @returns It returns a coverted amount in numbers
+ */
+
+export const getExchangeRates = (date: string, amount: number, currencyFrom: string, currencyTo: string) => {
+  if (!currencyFrom || !currencyTo) return;
+
+  if (currencyFrom === currencyTo) return;
+
+  if (amount <= 0) return;
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const host = 'api.frankfurter.app';
+      const res = await fetch(`https://${host}/${date}?amount=${amount}&from=${currencyFrom}&to=${currencyTo}`);
+      const data = await res.json();
+
+      resolve(data);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+export const b64toBlob = (dataURI: string) => {
+  var byteString = atob(dataURI.split(',')[1]);
+  var ab = new ArrayBuffer(byteString.length);
+  var ia = new Uint8Array(ab);
+
+  for (var i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([ab], { type: 'image/jpeg' });
+};
+
+export const determineLightOrDark = (color: any) => {
+  let r: number, g: number, b: number, hsp: number;
+  // Check the format of the color, HEX or RGB?
+  if (color.match(/^rgb/)) {
+    // If HEX --> store the red, green, blue values in separate variables
+    color = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/);
+
+    r = color[1];
+    g = color[2];
+    b = color[3];
+  } else {
+    // If RGB then Convert it to HEX
+    color = +('0x' + color.slice(1).replace(color.length < 5 && /./g, '$&$&'));
+
+    r = color >> 16;
+    g = (color >> 8) & 255;
+    b = color & 255;
+  }
+
+  // HSP (Highly Sensitive Poo) equation
+  hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
+
+  // Using the HSP value, determine whether the color is light or dark
+  if (hsp > 127.5) {
+    return 'light';
+  } else {
+    return 'dark';
+  }
+};
+
+/**
+ * Convert Miliseconds to Hour
+ */
+
+export const msToHour = (ms: number) => {
+  let hour = ms / (1000 * 60 * 60);
+  return hour.toFixed(1);
 };
 
 //  Currencies Short Form Symbols
@@ -1109,39 +1555,586 @@ export const generateUniqueId = () => {
   return `id-${new Date().getTime()}`;
 };
 
-export const prepareDataForGrid = (data) => {
+export const generateUniqueIdOnly = () => {
+  return new Date().getTime();
+};
 
+export const prepareDataForGrid = (data, user = {}) => {
   let objectValues = {};
   let restProperties = {};
 
   Object.keys(data).forEach((key) => {
-    if (typeof data[key] === "object") {
-
+    if (typeof data[key] === 'object') {
       if (Array.isArray(data[key])) {
-        if (data[key].length > 0 && data[key][0].hasOwnProperty("optionLabel")) {
+        if (data[key].length > 0 && data[key][0] && data[key][0].hasOwnProperty('optionLabel')) {
           const [first, ...rest] = data[key];
 
-          restProperties[key] = first["optionLabel"];
-          restProperties[`${key}Id`] = first["optionValue"];
-          restProperties[`rest${key}`] = rest
+          restProperties[key] = first['optionLabel'];
+          restProperties[`${key}Id`] = first['optionValue'];
+          restProperties[`rest${key}`] = rest;
+        } else if (typeof data[key][0] !== 'object') {
+          restProperties[key] = data[key].join(' , ');
+        } else {
+          restProperties[key] = data[key];
         }
-
       } else {
         objectValues[key] = data[key];
       }
     } else {
       restProperties[key] = data[key];
     }
-  })
+  });
 
   let finalObject = { ...restProperties };
 
-  Object.keys(objectValues).forEach(d => {
-    if (objectValues[d].hasOwnProperty("optionLabel")) {
-      finalObject[d] = objectValues[d]["optionLabel"];
-      finalObject[`${d}Id`] = objectValues[d]["optionValue"];
+  Object.keys(objectValues).forEach((d) => {
+    if (objectValues[d] && objectValues[d].hasOwnProperty('optionLabel')) {
+      finalObject[d] = objectValues[d]['optionLabel'];
+      finalObject[`${d}Id`] = objectValues[d]['optionValue'];
     }
   });
 
+  if (data?.collaborator) {
+    finalObject['isAllowedToUpdate'] = [...(data?.collaborator ?? []), data?.owner ?? {}].some((obj) => obj.optionValue === user['user']?._id);
+  }
+
+  if (data?.createdBy) {
+    finalObject['createdBy'] = data.createdBy?.user?.concatedName;
+    finalObject['createdByDate'] = data.createdBy?.date;
+    finalObject['createdById'] = data.createdBy?.user?._id;
+    if (!finalObject['isAllowedToUpdate']) {
+      finalObject['isAllowedToUpdate'] = data.createdBy?.user?._id === user['user']?._id;
+    }
+  }
+  if (data?.updatedBy) {
+    finalObject['updatedBy'] = data?.updatedBy?.user?.concatedName;
+    finalObject['updatedByDate'] = data?.updatedBy?.date;
+  }
+  finalObject['id'] = data?._id;
+
   return finalObject;
+};
+
+export const getLocalStorageArrayData = (key) => {
+  try {
+    if (localStorage.getItem(key) && JSON.parse(localStorage.getItem(key)).length > 0) {
+      return JSON.parse(localStorage.getItem(key));
+    }
+    return [];
+  } catch (ex) {
+    return [];
+  }
+};
+
+export const removeLocalStorage = (key) => {
+  try {
+    localStorage.setItem(key, JSON.stringify([]));
+  } catch (err) {
+    return [];
+  }
+};
+
+export const translateDataToTree = (data, parentProperty, childProperty, childrenPropertyToStore) => {
+  let parents = data.filter((value) => value[parentProperty] == 'undefined' || value[parentProperty] == null);
+  let childrens = data.filter((value) => value[parentProperty] !== 'undefined' && value[parentProperty] != null);
+
+  let translator = (parents, childrens) => {
+    parents.forEach((parent) => {
+      childrens.forEach((current, index) => {
+        if (current.parent === parent[childProperty]) {
+          let temp = JSON.parse(JSON.stringify(childrens));
+          temp.splice(index, 1);
+          translator([current], temp);
+
+          if (typeof parent[childrenPropertyToStore] !== 'undefined') {
+            parent[childrenPropertyToStore].push(current);
+          } else {
+            parent[childrenPropertyToStore] = [current];
+          }
+        }
+      });
+    });
+  };
+  translator(parents, childrens);
+
+  return parents;
+};
+
+export function treeToFlatArray(array, childrenProperty) {
+  var result = [];
+  array.forEach(function (a) {
+    result.push(a);
+    if (a.hasOwnProperty(childrenProperty) && Array.isArray(a[childrenProperty])) {
+      result = result.concat(treeToFlatArray(a[childrenProperty], childrenProperty));
+    }
+  });
+
+  return result;
 }
+
+export const arrayToDropwdownOption = (array) => {
+  const option: any = [];
+  array?.forEach((element, index) => {
+    option.push({
+      optionLabel: element,
+      optionValue: element,
+      order: index
+    });
+  });
+  return option;
+};
+
+export const INVENTORY_STATUS = {
+  new: 'New',
+  available: 'Available',
+  reserved: 'Reserved',
+  inSale: 'In Sale',
+  inUse: 'In-Use',
+  indTransit: 'In-Transit',
+  underReview: 'Under Review',
+  repair: 'Repair',
+  readyToShip: 'Ready to ship',
+  scrap: 'Scrap',
+  lost: 'Lost',
+  customer: 'With Customer',
+  supplier: 'With Supplier',
+  returned: 'Returned',
+  needRepair: 'Need Repair',
+  needRecert: 'Need Recert'
+};
+
+
+export const INVENTORY_HISTORY_TYPE = {
+  rental: 'Rental',
+  repair: 'Repair',
+  deliveryTicket: 'Delivery Ticket',
+  loadingTicket: 'Loading Ticket',
+  receivingTicket: 'Receiving Ticket',
+  returnTicket: 'Return Ticket',
+  purchaseOrder: 'Purchase Order',
+  inventory: 'Inventory',
+  serializedAssets: 'Serialized Assets',
+  transferAssets: 'Transfer Assets',
+  salesOrder: 'Sales Order',
+  sublease: 'Sublease',
+  bulkAssetCreation: 'Bulk Asset Creation',
+  transferInventory: 'Transfer Inventory',
+  inventoryToAsset: 'Inventory to Asset',
+  quotation: 'Quotation',
+  invoice: 'Invoice'
+}
+
+export const DELIVERY_TICKET_STATUS = {
+  new: 'New',
+  indTransit: 'In-Transit',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled'
+};
+
+export const RENTAL_STATUS = {
+  new: 'New',
+  cancelled: 'Cancelled',
+  inProgress: 'In-Progress',
+  jobPartiallyStarted: 'Job Partially Started',
+  jobStarted: 'Job Started',
+  jobPartiallyEnded: 'Job Partially Ended',
+  jobEnded: 'Job Ended',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  closed: 'Closed'
+};
+
+export const RENTAL_INTERNAL_ASSET_STATUS = {
+  reserved: 'Reserved',
+  inUse: 'In-Use',
+  complete: 'Complete',
+  return: 'Return',
+  consumed: 'Consumed'
+} as const;
+
+export const REPAIR_JOB_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  completed: 'Completed'
+};
+
+export const DELIVERY_TICKET_MAPPED_STATUS = {
+  'Sign-off - Dispatch': DELIVERY_TICKET_STATUS.indTransit,
+  'Sign-off - Delivery': DELIVERY_TICKET_STATUS.delivered
+};
+
+export const DELIVERY_TICKET_TYPE = {
+  loading: 'Loading',
+  receiving: 'Receiving',
+  return: 'Return',
+  delivery: 'Delivery'
+};
+
+export const DELIVERY_TICKET_REFRENCE_TYPE = {
+  rentalJob: 'Rental Job',
+  transferAsset: 'Transfer Asset',
+  repairJob: 'Repair Job',
+  salesOrder: 'Sales Order',
+  sublease: 'Sublease',
+  transferInventory: 'Transfer Inventory'
+};
+
+export const DELIVERY_FROM_TO_TYPE = {
+  plant: 'Plant',
+  customer: 'Customer',
+  supplier: 'Supplier'
+};
+
+export const SUBLEASE_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  issued: 'Issued',
+  completed: 'Completed'
+};
+
+export const REPAIR_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  completed: 'Completed'
+};
+
+export const PURCHASE_ORDER_STATUS = {
+  //new: 'New',
+  //inProgress: 'In-Progress',
+  //issued: 'Issued',
+  open: 'Open',
+  partialReceived: 'Partial Received',
+  received: 'Received',
+  //readyToInvoice: 'Ready to Invoice',
+  //invoiced: 'Invoiced',
+  closed: 'Closed'
+} as const;
+
+export const INVENTORY_OWNER_TYPE = {
+  brand: 'Brand',
+  supplierAccount: 'Supplier Account',
+  customerAccount: 'Customer Account'
+} as const;
+
+export const TRANSFER_INVENTORY_STATUS = {
+  new: 'New',
+  inProgress: 'In Progress',
+  readyToShip: 'Ready to ship',
+  inTransit: 'In-Transit',
+  delivered: 'Delivered'
+};
+
+export const REPAIR_PROCESS_STATUS = {
+  start: 'Start',
+  complete: 'Complete',
+  failed: 'Failed'
+} as const;
+
+export const asyncForEach = async (array: any[], callback: (arrayIndex: any, i: number, array: any[]) => Promise<any>) => {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+};
+
+export const ACTIVITY_RESOURCE = {
+  customerAccount: 'customerAccount',
+  customerContact: 'customerContact',
+  supplierAccount: 'supplierAccount',
+  supplierContact: 'supplierContact',
+  lead: 'lead',
+  opportunity: 'opportunity',
+  quote: 'quote',
+  projectSales: 'projectSales',
+  rentalManagement: 'rentalManagement',
+  repairJob: 'repairJob',
+  transferAsset: 'transferAsset',
+  purchaseOrder: 'purchaseOrder',
+  deliveryTicket: 'deliveryTicket',
+  sublease: 'sublease',
+  salesOrder: 'salesOrder',
+  invoice: 'invoice',
+  bulkAssetCreation: 'bulkAssetCreation',
+  serializedAsset: 'serializedAsset',
+  transferInventory: 'transferInventory',
+  quotation: 'quotation',
+  repairOrder: 'repairOrder',
+  workOrder: 'workOrder'
+};
+
+export const REPORT_LIST = [
+  { title: sidebarResource.rentalManagement, permission: 'rentalManagement', key: 'rentalManagement', type: 'dynamic' },
+  { title: sidebarResource.salesOrder, permission: 'salesOrder', key: 'salesOrder', type: 'dynamic' },
+  { title: sidebarResource.serializedAsset, permission: 'serializedAsset', key: 'serializedAsset', type: 'dynamic' },
+  { title: sidebarResource.lead, permission: 'lead', key: 'lead', type: 'dynamic' },
+  { title: sidebarResource.opportunity, permission: 'opportunity', key: 'opportunity', type: 'dynamic' },
+  { title: sidebarResource.quoteBuilder, permission: 'quoteBuilder', key: 'quoteBuilder', type: 'dynamic' },
+  { title: sidebarResource.projectSales, permission: 'projectSales', key: 'projectSales', type: 'dynamic' },
+  { title: sidebarResource.purchaseOrder, permission: 'purchaseOrder', key: 'purchaseOrder', type: 'dynamic' },
+  { title: 'Purchase Order Details', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'purchaseOrderDetails' },
+  { title: 'Inventory Evaluation', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'inventoryEvaluation' },
+  { title: 'Inventory History', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'inventoryHistory' },
+  { title: 'Average Price By Supplier', permission: 'purchaseOrder', key: 'purchaseOrderType', type: 'averagePriceBySupplier' }
+];
+
+export const RESOURCE_CALENDAR = [
+  { title: sidebarResource.rentalManagement, key: 'rentalManagement' },
+  { title: sidebarResource.quoteBuilder, key: 'quoteBuilder' }
+];
+
+export const PDF_RESOURCE_LIST = [
+  { title: sidebarResource.quoteBuilder, value: resourceNames.quoteBuilder, key: 'quoteBuilder' },
+  { title: sidebarResource.quotation, value: resourceNames.quotation, key: 'quotation' },
+  { title: sidebarResource.rentalManagement, value: resourceNames.rentalManagement, key: 'rentalManagement' },
+  { title: sidebarResource.repairJob, value: resourceNames.repairJob, key: 'repairJob' },
+  { title: sidebarResource.purchaseOrder, value: resourceNames.purchaseOrder, key: 'purchaseOrder' },
+  { title: sidebarResource.deliveryTicket, value: resourceNames.deliveryTicket, key: 'deliveryTicket' },
+  { title: sidebarResource.transferAsset, value: resourceNames.transferAsset, key: 'transferAsset' },
+  { title: sidebarResource.sublease, value: resourceNames.sublease, key: 'sublease' },
+  { title: sidebarResource.bulkAssetCreation, value: resourceNames.bulkAssetCreation, key: 'bulkAssetCreation' },
+  { title: sidebarResource.transferInventory, value: resourceNames.transferInventory, key: 'transferInventory' },
+  { title: sidebarResource.salesOrder, value: resourceNames.salesOrder, key: 'salesOrder' },
+  { title: sidebarResource.repairOrder, value: resourceNames.repairOrder, key: 'repairOrder' },
+  { title: sidebarResource.workOrder, value: resourceNames.workOrder, key: 'workOrder' },
+  { title: sidebarResource.invoice, value: resourceNames.invoice, key: 'invoice' }
+];
+
+export const getApi = (resource: string) => {
+  switch (kebabCase(resource)) {
+    case 'quote':
+      return 'quote-builder';
+    default:
+      return kebabCase(resource);
+  }
+};
+
+export const getData = (resource: string, data: any) => {
+  switch (kebabCase(resource)) {
+    case 'customer-account':
+      return {
+        name: `${data.accountName}`,
+        id: data._id
+      };
+    case 'customer-contact':
+      return {
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
+          }`,
+        id: data._id
+      };
+    case 'supplier-account':
+      return {
+        name: `${data.accountName}`,
+        id: data._id
+      };
+    case 'supplier-contact':
+      return {
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
+          }`,
+        id: data._id
+      };
+    case 'lead':
+      return {
+        name: `${data.concatedName}`,
+        id: data._id
+      };
+    case 'opportunity':
+      return {
+        name: `${data.opportunityName}`,
+        id: data._id
+      };
+    case 'quote':
+      return {
+        name: `${data.quoteName}`,
+        id: data._id
+      };
+    case 'project-sales':
+      return {
+        name: `${data.projectName}`,
+        id: data._id
+      };
+    case 'rental-management':
+      return {
+        name: `${data.rentalJobName}`,
+        id: data._id
+      };
+    case 'repair-job':
+      return {
+        name: `${data.repairJobName}`,
+        id: data._id
+      };
+    case 'transfer-asset':
+      return {
+        name: `${data.transferAssetNumber}`,
+        id: data._id
+      };
+    case 'purchase-order':
+      return {
+        name: `${data.purchaseOrderNumber}`,
+        id: data._id
+      };
+    case 'delivery-ticket':
+      return {
+        name: `${data.ticketName}`,
+        id: data._id
+      };
+    case 'sublease':
+      return {
+        name: `${data.subleaseName}`,
+        id: data._id
+      };
+    case 'sales-order':
+      return {
+        name: `${data.salesOrderNo}`,
+        id: data._id
+      };
+    case 'invoice':
+      return {
+        name: `${data.invoiceNumber}`,
+        id: data._id
+      };
+    case 'serialized-asset':
+      return {
+        name: `${data.assetNumber}`,
+        id: data._id
+      };
+    case 'bulk-asset-creation':
+      return {
+        name: `${data.baNumber}`,
+        id: data._id
+      };
+    case 'transfer-inventory':
+      return {
+        name: `${data.transferNumber}`,
+        id: data._id
+      };
+    case 'quotation':
+      return {
+        name: `${data.quotationNumber}`,
+        id: data._id
+      };
+    default:
+      break;
+  }
+};
+
+export const COLOUR_MASTER = {
+  rentalJob: {
+    background: '#c3d5e6',
+    borderColor: '#6c89a6'
+  },
+  cancelledRentalJob: {
+    background: '#00FF00',
+    borderColor: '#999999'
+  },
+  closedRentalJob: {
+    background: '#4BB543',
+    borderColor: '#999999'
+  },
+  repairJob: {
+    background: '#c3d5e6',
+    borderColor: '#6c89a6'
+  },
+  closedRepairJob: {
+    background: '#4BB543',
+    borderColor: '#999999'
+  },
+  package: {
+    background: '#acdce6',
+    borderColor: '#81afb8'
+  },
+  product: {
+    background: '#97c9bf',
+    borderColor: '#70948d'
+  },
+  assets: {
+    background: '#ffd65b',
+    borderColor: '#f5c431'
+  },
+  lostAssets: {
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
+  scrapAssets: {
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
+  purchaseOrder: {
+    background: '#FFA500',
+    borderColor: '#6c89a6'
+  },
+  sublease: {
+    background: '#FFE4C0',
+    borderColor: '#FFE4C0'
+  },
+  transferAsset: {
+    background: '#ecc19c',
+    borderColor: '#d98298'
+  },
+  bulkAsset: {
+    background: '#FFA500',
+    borderColor: '#6c89a6'
+  },
+  loadingTicket: {
+    background: '#e6c6e6',
+    borderColor: '#b38fb3'
+  },
+  deliveredLoadingTicket: {
+    background: '#e6c6e6',
+    borderColor: '#b38fb3'
+  },
+  receivingTicket: {
+    background: '#cfdb7f',
+    borderColor: '#aeb86e'
+  },
+  deliveredReceivingTicket: {
+    background: '#cfdb7f',
+    borderColor: '#aeb86e'
+  },
+  returnTicket: {
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
+  deliveredReturnTicket: {
+    background: '#ff9980',
+    borderColor: '#db765c'
+  },
+  replaceAssetColor: {
+    background: '#FFFF99',
+    borderColor: '#FFFF99'
+  }
+};
+
+export const leadTimeStatusDropdown = ['Production', 'Supplier', 'Assemble', 'Freight', 'Customer'];
+
+export const QUOTATION_STATUS = {
+  buildingQuote: 'Building Quote',
+  waitingForSupplierPrice: 'Waiting for Supplier Price',
+  sentToCustomer: 'Sent to Customer',
+  acceptByCustomer: 'Acceptd by Customer',
+  rejectByCustomer: 'Rejectd by Customer'
+};
+
+export const WORKORDER_SERVICE_COLOR = {
+  preWork: 'rgba(254, 249, 230, 1)',
+  quote: 'rgba(169, 43, 3, .1)',
+  postWork: 'rgba(222, 249, 255, 1)'
+};
+
+export const WORKORDER_SERVICE_STATUS = {
+  pending: 'Pending',
+  inProgress: 'In-Progress',
+  completed: 'Completed',
+  failed: 'Failed'
+};
+
+export const WORKORDER_SERVICE_STEP_STATUS = {
+  completed: 'Completed',
+  passed: 'Passed',
+  failed: 'Failed',
+  skipped: 'Skipped',
+  end: 'end',
+};
+
+export const REPAIR_ORDER_TYPE = {
+  internal: 'Asset Repair',
+  external: 'Customer Owned Asset Repair',
+};

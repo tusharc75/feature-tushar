@@ -1,141 +1,81 @@
-import React, { useEffect, useState } from "react";
-import clsx from "clsx";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  CssBaseline,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Toolbar,
-  Collapse,
-  ListItemIcon,
-  Tooltip,
-} from "@material-ui/core";
-import { Link, withRouter, useHistory } from "react-router-dom";
-import Header from "../Header/Header";
-import { useData } from "../../StateProvider/Provider";
-import "./Sidebar.scss";
-import { ChevronRight, ExpandMore, ExpandLess } from "@material-ui/icons";
-import { kebabCase, lowerCase } from "lodash";
-import { FaUserTie, FaDatabase, FaHandshake, FaRegistered } from "react-icons/fa";
-import { BsCalendarFill } from "react-icons/bs";
-import { MdDashboard, MdLocalActivity } from "react-icons/md";
-import { RiFolderSettingsFill, RiAccountPinCircleFill } from "react-icons/ri";
-import { SiCivicrm } from "react-icons/si";
-import { AiFillSetting } from "react-icons/ai"
+import React, { useEffect, useState, useContext, useRef } from 'react';
+import clsx from 'clsx';
+import { makeStyles } from '@material-ui/core/styles';
+import { CssBaseline, Drawer, List, ListItem, ListItemText, Toolbar, Collapse, ListItemIcon, Tooltip } from '@material-ui/core';
+import { Link, withRouter, useHistory } from 'react-router-dom';
+import Header from '../Header/Header';
+import { useData } from '../../StateProvider/Provider';
+import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
+import './Sidebar.scss';
+import { ChevronRight, ExpandMore, ExpandLess } from '@material-ui/icons';
+import { kebabCase, lowerCase, sortBy } from 'lodash';
 
+import { FaRegUserCircle, FaReact, FaRegRegistered } from 'react-icons/fa';
+import { MdOutlineDashboard, MdOutlineLocalActivity } from 'react-icons/md';
+import { RiFolderSettingsLine, RiAccountPinCircleFill, RiShieldUserLine } from 'react-icons/ri';
+import { SiCivicrm } from 'react-icons/si';
+import { AiOutlineSetting } from 'react-icons/ai';
+import { BsChatLeftTextFill } from 'react-icons/bs';
+import { ProductSetup, AccountsIcon } from '../../assets/sidebar_assets/icons';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { staticHiddenResource } from '../../constants/helpers';
 
-import { AccountCircle } from "@material-ui/icons";
-const drawerWidth = 240;
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "flex",
-  },
+import { AiOutlineDatabase, AiOutlineFileText } from 'react-icons/ai';
+// import { HiOutlineUser } from 'react-icons/hi';
+import { FaRegUser } from 'react-icons/fa';
 
-  hide: { display: "none" },
-
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-  },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-    whiteSpace: "nowrap",
-  },
-  drawerOpen: {
-    overflowY: "auto",
-
-    width: drawerWidth,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  drawerClose: {
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    width: "48px",
-    [theme.breakpoints.down("sm")]: {
-      width: 0,
-      borderRight: "none !important"
-    },
-  },
-  toolbar: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    padding: theme.spacing(0),
-    borderBottom: "2px solid #f5f8f9",
-  },
-  menuIcon: {
-    width: 22,
-  },
-  drawerIcon: {
-    width: 18,
-  },
-  heading: {
-    fontWeight: "normal",
-    marginLeft: theme.spacing(2),
-  },
-  nested: {
-    paddingLeft: theme.spacing(4),
-  },
-  sidebarUser: {
-    padding: "1.5rem 1rem 1rem",
-    background: "#fff",
-    color: "#153d77",
-    textAlign: "center",
-    display: "flex",
-    flexDirection: "column",
-    height: "8rem",
-  },
-}));
+import { AccountCircle } from '@material-ui/icons';
+import useStyles from './style';
+import routes from '../Helpers/Routes';
 
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
-  const {
-    state: { user, selectedEntity, tour },
-  }: any = useData();
+  const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
+  const [subItemToAddActiveClass, setSubItemToAddActiveClass] = useState(NaN);
 
+  const {
+    state: { permissions, user, selectedEntity, tour }
+  }: any = useData();
+  const { isOffline } = useContext(CustomOfflineContext);
+
+  const { setOpen: setChatOpen } = useContext(GlobalChatContext);
   const history = useHistory();
   const classes = useStyles();
   const [open, setOpen] = useState({});
-  const pathnames = location.pathname.split("/").filter((x) => x);
+  const pathnames = location.pathname.split('/').filter((x) => x);
+
   const iconMapping = [
     {
-      key: "Brand Admin",
-      icon: <FaUserTie size={15} className="sidebar-icon" />,
+      key: 'Brand Admin',
+      icon: <FaRegUserCircle size={15} className="sidebar-icon" />
     },
     {
-      key: "Master Data",
-      icon: <FaDatabase size={15} className="sidebar-icon" />,
+      key: 'Master Data',
+      icon: <AiOutlineDatabase size={15} className="sidebar-icon" />
     },
     {
-      key: "Product Setup",
-      icon: <RiFolderSettingsFill size={15} className="sidebar-icon" />,
+      key: 'Product Setup',
+      icon: <ProductSetup size={15} className="sidebar-icon" />
     },
     {
-      key: "Admin Portal",
-      icon: <BsCalendarFill size={15} className="sidebar-icon" />,
+      key: 'Admin Portal',
+      icon: <RiShieldUserLine size={15} className="sidebar-icon" />
     },
     {
-      key: "CRM",
-      icon: <FaHandshake size={15} className="sidebar-icon" />,
+      key: 'Activities',
+      icon: <MdOutlineLocalActivity size={15} className="sidebar-icon" />
     },
     {
-      key: "Activities",
-      icon: <MdLocalActivity size={15} className="sidebar-icon" />,
+      key: 'Accounts',
+      icon: <FaRegUser size={15} className="sidebar-icon" />
     },
     {
-      key: "Accounts",
-      icon: <RiAccountPinCircleFill size={15} className="sidebar-icon" />,
+      key: 'CRM +',
+      icon: <SiCivicrm size={15} className="sidebar-icon" />
     },
     {
-      key: "CRM +",
-      icon: <SiCivicrm size={15} className="sidebar-icon" />,
-    },
+      key: 'ROM',
+      icon: <FaRegRegistered size={15} className="sidebar-icon" />
+    }
   ];
 
   let toggleTimeout;
@@ -147,6 +87,15 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
     }
   };
 
+  const handleRoutes = (item) => {
+    switch (item.name) {
+      case 'Pos':
+        return routes.pos.path;
+      default:
+        return `/${kebabCase(item.name)}`;
+    }
+  };
+
   useEffect(() => {
     if (!toggleDrawer) {
       setOpen({});
@@ -155,44 +104,44 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
 
   const listItems = () => {
     if (user) {
-      const sections = [];
+      var sections = [];
 
       let entityData;
       if (user?.entity && user.entity.length) {
-        entityData = user.entity.find(
-          (curEntity) => curEntity._id === selectedEntity
-        );
+        entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
       }
 
       user.role.sideBar.forEach((item) => {
-        if (!sections.includes(item.sectionName) && item.isRead) {
+        if (!sections.includes(item.sectionName) && item.isRead && !item.isHidden) {
           sections.push(item.sectionName);
         }
       });
 
       if (entityData?.resource && entityData.resource.length) {
         entityData.resource.forEach((item) => {
-          if (!sections.includes(item.sectionName) && item.isRead) {
+          if (!sections.includes(item.sectionName) && item.isRead && !item.isHidden && item.sectionName !== '') {
             sections.push(item.sectionName);
           }
         });
       }
 
       return sections.map((section) => {
-        const lists = user.role.sideBar.filter(
-          (list) => list.sectionName === section
-        );
+        const lists = user.role.sideBar.filter((list) => list.sectionName === section);
 
         let enitityList = [];
 
         if (entityData?.resource && entityData.resource.length) {
-          enitityList = entityData.resource.filter(
-            (list) => list.sectionName === section
-          );
+          enitityList = entityData.resource.filter((list) => list.sectionName === section);
         }
-        const items = [...lists, ...enitityList].filter(
-          (item) => item.isRead === true
-        );
+        const items = [...lists, ...enitityList].filter((item) => {
+          if (item?.name === 'Product Builder' && process.env.REACT_APP_ENV === 'staging') {
+            return false;
+          }
+          if (item?.isHidden || staticHiddenResource?.includes(item?.name)) {
+            return false;
+          }
+          return item.isRead === true;
+        });
         return { section, items };
       });
     }
@@ -226,60 +175,93 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           [classes.drawerOpen]: toggleDrawer,
           [classes.drawerClose]: !toggleDrawer,
           'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
-          'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1,
+          'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1
         })}
         classes={{
           paper: clsx({
             [classes.drawerOpen]: toggleDrawer,
             [classes.drawerClose]: !toggleDrawer,
             'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
-            'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1,
-          }),
+            'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1
+          })
         }}
-
-
       >
         <Toolbar />
-        <div id="sidebarOrDrawer" >
+        <div id="sidebarOrDrawer">
           <List className="sidebar-list">
-            <ListItem button className="list-item">
+            <ListItem
+              button
+              selected={location.pathname === '/'}
+              className="list-item"
+              onClick={() => {
+                setItemToAddActiveClass(NaN);
+                setSubItemToAddActiveClass(NaN);
+              }}
+            >
               <ListItemIcon>
                 {toggleDrawer ? (
-                  <AccountCircle className="sidebar-icon" onClick={() => { history.push("/") }} />
+                  <FaRegUserCircle
+                    className="sidebar-icon"
+                    onClick={() => {
+                      history.push('/');
+                    }}
+                  />
                 ) : (
-                  <ChevronRight className="sidebar-icon" />
+                  <ChevronRight className="sidebar-icon open_sidebar" />
                 )}
               </ListItemIcon>
               <ListItemText
-                onClick={() => { history.push("/") }}
-                primary={[user?.user?.firstName, user?.user?.lastName]
-                  .filter((f) => f)
-                  .join(" ")}
+                onClick={() => {
+                  history.push('/');
+                }}
+                primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
+              // className={`wordWrap`}
               />
             </ListItem>
-            <Link to="/dashboards">
-              <Tooltip title={!toggleDrawer ? "Dashboards" : ""}>
-                <ListItem
-                  button
-                  selected={location.pathname === "/dashboards"}
-                  className="list-item"
-                >
-                  <ListItemIcon>
-                    <MdDashboard size={15} className="sidebar-icon" />
-                  </ListItemIcon>
-                  <ListItemText primary="Dashboards" />
-                </ListItem>
-              </Tooltip>
-            </Link>
-
+            {permissions?.dashboard?.isRead && !isOffline && (
+              <Link
+                to="/dashboards"
+                onClick={() => {
+                  setItemToAddActiveClass(NaN);
+                  setSubItemToAddActiveClass(NaN);
+                }}
+              >
+                <Tooltip title={!toggleDrawer ? 'Dashboards' : ''}>
+                  <ListItem button selected={location.pathname === '/dashboards'} className="list-item">
+                    <ListItemIcon>
+                      <MdOutlineDashboard size={15} className="sidebar-icon" />
+                    </ListItemIcon>
+                    <ListItemText primary="Dashboards" className={`wordWrap`} />
+                  </ListItem>
+                </Tooltip>
+              </Link>
+            )}
+            {permissions?.report?.isRead && !isOffline && (
+              <Link
+                to="/reports"
+                onClick={() => {
+                  setItemToAddActiveClass(NaN);
+                  setSubItemToAddActiveClass(NaN);
+                }}
+              >
+                <Tooltip title={!toggleDrawer ? 'Reports' : ''}>
+                  <ListItem button selected={location.pathname === '/reports'} className="list-item">
+                    <ListItemIcon>
+                      <AiOutlineFileText size={16} className="sidebar-icon" />
+                    </ListItemIcon>
+                    <ListItemText primary="Reports" className={`wordWrap`} />
+                  </ListItem>
+                </Tooltip>
+              </Link>
+            )}
             {user &&
               listItems().map((listItem, i) => (
                 <React.Fragment key={i}>
-                  <Tooltip title={!toggleDrawer ? listItem.section : ""}>
+                  <Tooltip title={!toggleDrawer ? listItem.section : ''}>
                     <ListItem
-                      className="list-item"
+                      className={`list-item ${itemToAddActiveClass == i ? 'active_element' : ''}`}
                       button
-                      key={listItem.section + "" + i}
+                      key={listItem.section + '' + i}
                       onClick={() => {
                         handleCollapse(listItem.section);
                         if (!toggleDrawer) {
@@ -288,35 +270,27 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                       }}
                     >
                       <ListItemIcon>
-                        {
-                          iconMapping.find((mapping) => {
-                            return mapping.key === listItem.section;
-                          })?.icon || <FaRegistered size={17} className="sidebar-icon" /> || <AiFillSetting size={18} className="sidebar-icon" />
-                        }
+                        {iconMapping.find((mapping) => {
+                          return mapping.key === listItem.section;
+                        })?.icon || <FaReact size={16} className="sidebar-icon" />}
                       </ListItemIcon>
-                      <ListItemText primary={listItem.section} />
+                      <ListItemText primary={listItem.section} className={`wordWrap`} />
                       {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
                   </Tooltip>
-                  <Collapse
-                    in={open[listItem.section]}
-                    timeout="auto"
-                    unmountOnExit
-                  >
+                  <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding className="list-item">
                       {listItem.items.map((item, j) => (
                         <Link
-                          className="sub-list"
+                          className={`sub-list ${itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''}`}
                           key={j}
-                          to={`/${kebabCase(lowerCase(item.name))}`}
+                          onClick={() => {
+                            setItemToAddActiveClass(i);
+                            setSubItemToAddActiveClass(j);
+                          }}
+                          to={handleRoutes(item)}
                         >
-                          <ListItem
-                            button
-                            selected={pathnames.includes(
-                              lowerCase(item.name)
-                            )}
-                            className={classes.nested}
-                          >
+                          <ListItem button selected={pathnames.includes(lowerCase(item.name))} className={classes.nested}>
                             <ListItemText primary={item.resourceLabel || item.name} />
                           </ListItem>
                         </Link>
@@ -327,6 +301,16 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
               ))}
           </List>
         </div>
+        {!isOffline && (
+          <List style={{ bottom: '0px', marginTop: 'auto' }}>
+            <ListItem button onClick={() => setChatOpen((prevState) => !prevState)}>
+              <ListItemIcon>
+                <BsChatLeftTextFill size={16} className="sidebar-icon chat-icon" />
+              </ListItemIcon>
+              <ListItemText primary="Chat" />
+            </ListItem>
+          </List>
+        )}
       </Drawer>
     </div>
   );

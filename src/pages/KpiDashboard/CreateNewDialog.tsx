@@ -20,7 +20,6 @@ const ProductBuilderSchema = object().shape({
         .required("Please enter name"),
 });
 
-
 const CreateNewDialog = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
@@ -28,6 +27,7 @@ const CreateNewDialog = (props) => {
     const [loading, setLoading] = useState(false);
     const [initialData] = useState({ name: "" });
     const history = useHistory();
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     const handleSubmit = (values) => {
         setLoading(true)
@@ -44,7 +44,7 @@ const CreateNewDialog = (props) => {
 
     return (<Dialog
         maxWidth="sm"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
@@ -62,7 +62,13 @@ const CreateNewDialog = (props) => {
                 submitForm,
             }) => (
                 <Fragment>
-                    <CustomDialogHeader title={"New Dashboard"} onClose={handleClose}></CustomDialogHeader>
+                    <CustomDialogHeader title={"New Dashboard"} onClose={handleClose}
+                        isMinimized={!fullScreen}
+                        onMinimizeMaximize={() => {
+                            setFullScreen(prevState => !prevState)
+                        }}
+                        showManimizeMaximize={true}
+                    ></CustomDialogHeader>
                     <CustomDialogContent>
                         <Form autoComplete="off" autoCorrect="off" noValidate >
                             <Box p={1}>

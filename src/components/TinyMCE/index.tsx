@@ -18,8 +18,10 @@ import CircularProgress from "@material-ui/core/CircularProgress"
 import MenuItem from "@material-ui/core/MenuItem"
 import Menu from "@material-ui/core/Menu"
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import 'tinymce/icons/default';
+// import 'tinymce/icons/default';
 import "./tinymce.scss"
+import { startCase } from 'lodash';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -40,22 +42,6 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const mappedVariablesNames = {
-    entity: "Entity",
-    customerAccountName: "Customer Account Name",
-    quoteDate: "Quote Date",
-    quoteName: "Quote Name",
-    version: "Version",
-    quoteId: "Quote Id",
-    currency: "Currency",
-    expiryDate: "Expiry Date",
-    owner: "Owner",
-    currentDate: "Current Date",
-    customerContactName: "Customer Contact",
-    collaborator: "Collaborator",
-    incoTerms: "Inco Terms"
-}
-
 const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -64,11 +50,13 @@ const toBase64 = file => new Promise((resolve, reject) => {
 });
 
 export default function TinyMCE(props) {
+    const { isOffline } = useContext(CustomOfflineContext);
+
     const { onChange, initialValue, imageOrFileUploadCompletePercentage, height = 400, width = "",
         fileUploadMaxSize = { ...documentUploadMaxSize }, onUploadFile = null,
         onUploadImage = null, usePublicUrlforFileUpload = false,
         doNotShowUploadFile = false, showVariableDropdown = false, id, isCheckHeight = false, disabledEditor = false,
-        isSendToCustomer = false, onQuoteUpload = null
+        isSendToCustomer = false, onQuoteUpload = null, variables = null
     } = props
 
     const classes = useStyles();
@@ -285,6 +273,7 @@ export default function TinyMCE(props) {
         }
         else editorRef.current.execCommand('mceInsertContent', false, newTag);
     }
+
     const openActions = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -292,292 +281,288 @@ export default function TinyMCE(props) {
     const closeActions = () => {
         setAnchorEl(null);
     };
+
     return <>
-        <>
-            {
-                disabledEditor ? "" : <>
+        {
+            isOffline ? <div style={{ width: width }}>
+                <div style={{ height: 175, overflow: "auto", width: "100%", textAlign: "left" }}
+                    className="border p-2 border-radius-1" dangerouslySetInnerHTML={{ __html: initialValue || "" }}></div>
+            </div> :
+                <>
                     {
-                        isUploadImage ?
-                            <Dialog
-                                disableBackdropClick={true}
-                                open={true}
-                                fullScreen={isMobile || isTablet}
-                                TransitionComponent={CustomDialogTransition}
-                                aria-labelledby="customized-dialog-title"
-                                maxWidth="xs"
-                                onClose={() => setIsUploadImage(false)}
-                            >
-                                <CustomDialogHeader
-                                    onClose={() => setIsUploadImage(false)}
-                                    title="Upload Image"
-                                ></CustomDialogHeader>
+                        disabledEditor ? "" : <>
+                            {
+                                isUploadImage ?
+                                    <Dialog
+                                        disableBackdropClick={true}
+                                        open={true}
+                                        fullScreen={isMobile || isTablet}
+                                        TransitionComponent={CustomDialogTransition}
+                                        aria-labelledby="customized-dialog-title"
+                                        maxWidth="xs"
+                                        onClose={() => setIsUploadImage(false)}
+                                    >
+                                        <CustomDialogHeader
+                                            onClose={() => setIsUploadImage(false)}
+                                            title="Upload Image"
+                                        ></CustomDialogHeader>
 
-                                <CustomDialogContent>
-                                    <div>
-                                        <Grid container spacing={3}>
-                                            <Grid item xs={12} style={{ display: 'flex' }}>
-                                                <input
-                                                    id="avatar"
-                                                    name="avatar"
-                                                    onChange={handleUploadImage}
-                                                    accept="image/x-png,image/gif,image/jpeg"
-                                                    style={{
-                                                        opacity: "0",
-                                                        position: "absolute",
-                                                        zIndex: -1,
-                                                    }}
-                                                    onClick={(e: any) =>
-                                                        (e.target.value = null)
-                                                    }
-                                                    type="file"
-                                                />
+                                        <CustomDialogContent>
+                                            <div>
+                                                <Grid container spacing={3}>
+                                                    <Grid item xs={12} style={{ display: 'flex' }}>
+                                                        <input
+                                                            id="avatar"
+                                                            name="avatar"
+                                                            onChange={handleUploadImage}
+                                                            accept="image/x-png,image/gif,image/jpeg"
+                                                            style={{
+                                                                opacity: "0",
+                                                                position: "absolute",
+                                                                zIndex: -1,
+                                                            }}
+                                                            onClick={(e: any) =>
+                                                                (e.target.value = null)
+                                                            }
+                                                            type="file"
+                                                        />
 
-                                                <label htmlFor="avatar">
-                                                    <IconButton
-                                                        title="Add picture"
-                                                        size="small"
-                                                        aria-label="upload picture"
-                                                        component="span">
-                                                        <Button
-                                                            startIcon={<HiOutlinePhotograph />}
-                                                            // size="small"
-                                                            variant="outlined"
-                                                            component="span"
-                                                            disabled={disabledEditor || isImageLoading}>
-                                                            Upload Image
-                                                        </Button>
-                                                    </IconButton>
-                                                </label>
-                                                <Box display="flex" >
-                                                    {isImgUploading && (
-                                                        <>
-                                                            <CircularProgress variant="determinate" value={imageUploadProgress} />
-                                                            <Box>
-                                                                <Typography variant="caption" component="div" color="textSecondary">{`${imageUploadProgress}%`}</Typography>
-                                                            </Box>
-                                                        </>
-                                                    )}
-                                                </Box>
-                                            </Grid>
-                                            {
-                                                imageUrl || uploadError ?
-                                                    <Grid item container>
-                                                        {imageUrl ?
-                                                            <>
-                                                                <Grid item xs={10}>
-                                                                    <Typography noWrap variant="body2" >
-                                                                        {imageUrl.substring(imageUrl.lastIndexOf("/") + 1)}
-                                                                    </Typography>
-                                                                </Grid>
-                                                                <Grid item xs={2}>
-                                                                    <Button
-                                                                        size="small"
-                                                                        startIcon={<AiOutlineClose />}
-                                                                        onClick={() => setImageUrl("")}
-                                                                    />
-                                                                </Grid>
-                                                            </>
-                                                            : null
-                                                        }
-
-                                                        {
-                                                            uploadError ?
-                                                                <Grid item xs={12}>
-                                                                    <Typography className={classes.errorText}>
-                                                                        Please Upload Image/Photo
-                                                                    </Typography>
-                                                                </Grid>
-                                                                : null
-                                                        }
+                                                        <label htmlFor="avatar">
+                                                            <IconButton
+                                                                title="Add picture"
+                                                                size="small"
+                                                                aria-label="upload picture"
+                                                                component="span">
+                                                                <Button
+                                                                    startIcon={<HiOutlinePhotograph />}
+                                                                    // size="small"
+                                                                    variant="outlined"
+                                                                    component="span"
+                                                                    disabled={disabledEditor || isImageLoading}>
+                                                                    Upload Image
+                                                                </Button>
+                                                            </IconButton>
+                                                        </label>
+                                                        <Box display="flex" >
+                                                            {isImgUploading && (
+                                                                <>
+                                                                    <CircularProgress variant="determinate" value={imageUploadProgress} />
+                                                                    <Box>
+                                                                        <Typography variant="caption" component="div" color="textSecondary">{`${imageUploadProgress}%`}</Typography>
+                                                                    </Box>
+                                                                </>
+                                                            )}
+                                                        </Box>
                                                     </Grid>
-                                                    : null}
-                                            <Grid item xs={6}>
-                                                <TextField id="width"
-                                                    type="number"
-                                                    name="width" size="small" label="Width"
-                                                    variant="outlined" onChange={handleChange} />
-                                            </Grid>
-                                            <Grid item xs={6}>
-                                                <TextField id="height" name="height"
-                                                    type="number"
-                                                    size="small" label="Height"
-                                                    defaultValue={imageDetails.height}
-                                                    variant="outlined" onChange={handleChange} />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField id="alt" name="Alternative Text"
-                                                    size="small" label="alt" fullWidth
-                                                    variant="outlined" onChange={handleChange} />
-                                            </Grid>
-
-                                        </Grid>
-                                    </div>
-                                </CustomDialogContent>
-                                <CustomDialogFooter>
-                                    <Button size="small" color="primary"
-                                        onClick={() => {
-                                            let tempHeight = (id && ["header", "footer"].indexOf(id) >= 0) ? 60 : 0
-                                            setImageDetails({ width: 0, height: tempHeight, alt: "" })
-                                            setImageUrl("")
-                                            setIsUploadImage(false)
-                                        }}>
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        type="submit"
-                                        onClick={handleSubmit}>
-                                        Save
-                                    </Button>
-                                </CustomDialogFooter>
-                            </Dialog >
-                            : null
-                    }
-                    {
-                        isInitiated ?
-                            <div style={{ width: width }} className={classes.buttonContainer} >
-                                {
-                                    doNotShowUploadFile ? null :
-                                        <Fragment>
-                                            <Box display="flex" alignItems="center" style={{ marginRight: '5px' }}>
-                                                <input
-                                                    id={`${id}file`}
-                                                    name={`${id}file`}
-                                                    onChange={handleUploadFile}
-                                                    style={{ display: 'none' }}
-                                                    onClick={(e: any) => (e.target.value = null)}
-                                                    type="file"
-                                                    accept=".docx,.doc"
-                                                />
-                                                <label htmlFor={`${id}file`}>
-                                                    <Button
-                                                        size="small"
-                                                        variant="outlined"
-                                                        component="span"
-                                                        disabled={disabledEditor || isImgUploading}
-                                                        startIcon={<AiOutlineFileAdd />}>
-                                                        Upload File
-                                                    </Button>
-                                                </label>
-                                            </Box>
-
-                                        </Fragment>
-                                }
-                                <span >
-                                    <Box display="flex" alignItems="center" >
-                                        <Button
-                                            startIcon={<HiOutlinePhotograph />}
-                                            size="small"
-                                            variant="outlined"
-                                            disabled={disabledEditor}
-                                            onClick={() => setIsUploadImage(true)}
-                                        >
-                                            Upload Image
-                                        </Button>
-                                    </Box>
-                                </span>
-                                <span>
-                                    {
-                                        showVariableDropdown ?
-                                            <>
-                                                <Button
-                                                    variant="outlined"
-                                                    color="default"
-                                                    size="small"
-                                                    onClick={openActions}
-                                                    className={classes.varibalesButton}
-                                                    aria-controls="action-menu"
-                                                >
-                                                    Variables <ExpandMore />
-                                                </Button>
-                                                <Menu
-                                                    anchorEl={anchorEl}
-                                                    keepMounted
-                                                    getContentAnchorEl={null}
-                                                    anchorOrigin={{
-                                                        vertical: 'bottom',
-                                                        horizontal: 'left'
-                                                    }}
-                                                    id="action-menu"
-                                                    open={Boolean(anchorEl)}
-                                                    onClose={closeActions}>
                                                     {
-                                                        ['entity', 'customerAccountName', 'quoteDate', 'quoteName',
-                                                            'version', 'quoteId', "currency", "expiryDate", "collaborator",
-                                                            "customerContactName", "currentDate", "owner", "incoTerms"
-                                                        ].map(o => {
-                                                            return <MenuItem
-                                                                onClick={() => handleVaribleSelect(o)}
-                                                                value={o}>{mappedVariablesNames[o]}</MenuItem>
-                                                        })
-                                                    }
-                                                </Menu>
-                                            </> : null
-                                    }
-                                </span>
+                                                        imageUrl || uploadError ?
+                                                            <Grid item container>
+                                                                {imageUrl ?
+                                                                    <>
+                                                                        <Grid item xs={10}>
+                                                                            <Typography noWrap variant="body2" >
+                                                                                {imageUrl.substring(imageUrl.lastIndexOf("/") + 1)}
+                                                                            </Typography>
+                                                                        </Grid>
+                                                                        <Grid item xs={2}>
+                                                                            <Button
+                                                                                size="small"
+                                                                                startIcon={<AiOutlineClose />}
+                                                                                onClick={() => setImageUrl("")}
+                                                                            />
+                                                                        </Grid>
+                                                                    </>
+                                                                    : null
+                                                                }
 
-                            </div>
-                            : null
-                    }
-                </>
-            }
-            <div style={{ width: width }}>
-                <Editor
-                    disabled={disabledEditor}
-                    id={id ?? "editor"}
-                    onInit={(evt, editor) => {
-                        setIsInitiated(true)
-                        editorRef.current = editor
-                    }}
-                    initialValue={initialValue || ""}
-                    onChange={(content) => {
-                        if (editorRef.current.isDirty()) {
-                            if (isCheckHeight) {
-                                if (isValidHeight()) {
-                                    onChange(editorRef.current.getContent())
-                                }
-                                else {
-                                    setToastConfig({
-                                        open: true,
-                                        type: 'error',
-                                        message: `${id ? id.charAt(0).toUpperCase() + id.slice(1) : "Editor"} height is restricted so you cannot add more content`
-                                    });
-                                }
+                                                                {
+                                                                    uploadError ?
+                                                                        <Grid item xs={12}>
+                                                                            <Typography className={classes.errorText}>
+                                                                                Please Upload Image/Photo
+                                                                            </Typography>
+                                                                        </Grid>
+                                                                        : null
+                                                                }
+                                                            </Grid>
+                                                            : null}
+                                                    <Grid item xs={6}>
+                                                        <TextField id="width"
+                                                            type="number"
+                                                            name="width" size="small" label="Width"
+                                                            variant="outlined" onChange={handleChange} />
+                                                    </Grid>
+                                                    <Grid item xs={6}>
+                                                        <TextField id="height" name="height"
+                                                            type="number"
+                                                            size="small" label="Height"
+                                                            defaultValue={imageDetails.height}
+                                                            variant="outlined" onChange={handleChange} />
+                                                    </Grid>
+                                                    <Grid item xs={12}>
+                                                        <TextField id="alt" name="Alternative Text"
+                                                            size="small" label="alt" fullWidth
+                                                            variant="outlined" onChange={handleChange} />
+                                                    </Grid>
+
+                                                </Grid>
+                                            </div>
+                                        </CustomDialogContent>
+                                        <CustomDialogFooter>
+                                            <Button size="small" color="primary"
+                                                onClick={() => {
+                                                    let tempHeight = (id && ["header", "footer"].indexOf(id) >= 0) ? 60 : 0
+                                                    setImageDetails({ width: 0, height: tempHeight, alt: "" })
+                                                    setImageUrl("")
+                                                    setIsUploadImage(false)
+                                                }}>
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                type="submit"
+                                                onClick={handleSubmit}>
+                                                Save
+                                            </Button>
+                                        </CustomDialogFooter>
+                                    </Dialog >
+                                    : null
                             }
-                            else onChange(editorRef.current.getContent())
-                        }
-                    }}
-                    init={{
-                        height: height,
-                        width: "100%",
-                        // menubar: false,
-                        table_default_attributes: {
-                            border: '0'
-                        },
-                        block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
-                        font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
-                        plugins: [
-                            'advlist autolink lists link charmap print preview anchor',
-                            'searchreplace visualblocks code fullscreen',
-                            'insertdatetime media table paste code wordcount'
-                        ],
-                        toolbar: 'undo redo | formatselect  | ' +
-                            'bold italic backcolor | alignleft aligncenter ' +
-                            'alignright alignjustify | bullist numlist outdent indent ',
-                        content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                            {
+                                isInitiated ?
+                                    <div style={{ width: width }} className={classes.buttonContainer} >
+                                        {
+                                            doNotShowUploadFile ? null :
+                                                <Fragment>
+                                                    <Box display="flex" alignItems="center" style={{ marginRight: '5px' }}>
+                                                        <input
+                                                            id={`${id}file`}
+                                                            name={`${id}file`}
+                                                            onChange={handleUploadFile}
+                                                            style={{ display: 'none' }}
+                                                            onClick={(e: any) => (e.target.value = null)}
+                                                            type="file"
+                                                            accept=".docx,.doc"
+                                                        />
+                                                        <label htmlFor={`${id}file`}>
+                                                            <Button
+                                                                size="small"
+                                                                variant="outlined"
+                                                                component="span"
+                                                                disabled={disabledEditor || isImgUploading}
+                                                                startIcon={<AiOutlineFileAdd />}>
+                                                                Upload File
+                                                            </Button>
+                                                        </label>
+                                                    </Box>
 
-                        // setup: (editor) => {
-                        //     editor.ui.registry.addButton("myCustomToolbarButton", {
-                        //         text: "Upload File",
-                        //         onAction: () => console.log("button text")
-                        //     });
-                        // }
-                    }}
-                />
-            </div>
-            <div style={{ visibility: "hidden" }} id="contentDiv"></div>
-        </>
+                                                </Fragment>
+                                        }
+                                        <span >
+                                            <Box display="flex" alignItems="center" >
+                                                <Button
+                                                    startIcon={<HiOutlinePhotograph />}
+                                                    size="small"
+                                                    variant="outlined"
+                                                    disabled={disabledEditor}
+                                                    onClick={() => setIsUploadImage(true)}
+                                                >
+                                                    Upload Image
+                                                </Button>
+                                            </Box>
+                                        </span>
+                                        <span>
+                                            {
+                                                showVariableDropdown ?
+                                                    <>
+                                                        <Button
+                                                            variant="outlined"
+                                                            color="default"
+                                                            size="small"
+                                                            onClick={openActions}
+                                                            className={classes.varibalesButton}
+                                                            aria-controls="action-menu"
+                                                        >
+                                                            Variables <ExpandMore />
+                                                        </Button>
+                                                        <Menu
+                                                            anchorEl={anchorEl}
+                                                            keepMounted
+                                                            getContentAnchorEl={null}
+                                                            anchorOrigin={{
+                                                                vertical: 'bottom',
+                                                                horizontal: 'left'
+                                                            }}
+                                                            id="action-menu"
+                                                            open={Boolean(anchorEl)}
+                                                            onClose={closeActions}>
+                                                            {
+                                                                variables && variables.map(o => {
+                                                                    return <MenuItem
+                                                                        onClick={() => handleVaribleSelect(o)}
+                                                                        value={o}>{o === "pDFTemplate" ? "PDF Template" : startCase(o)}</MenuItem>
+                                                                })
+                                                            }
+                                                        </Menu>
+                                                    </> : null
+                                            }
+                                        </span>
 
+                                    </div>
+                                    : null
+                            }
+                        </>
+                    }
+                    <div style={{ width: width }}>
+                        <Editor
+                            disabled={disabledEditor}
+                            id={id ?? "editor"}
+                            onInit={(evt, editor) => {
+                                setIsInitiated(true)
+                                editorRef.current = editor
+                            }}
+                            initialValue={initialValue || ""}
+                            onChange={(content) => {
+                                if (editorRef.current.isDirty()) {
+                                    if (isCheckHeight) {
+                                        if (isValidHeight()) {
+                                            onChange(editorRef.current.getContent())
+                                        }
+                                        else {
+                                            setToastConfig({
+                                                open: true,
+                                                type: 'error',
+                                                message: `${id ? id.charAt(0).toUpperCase() + id.slice(1) : "Editor"} height is restricted so you cannot add more content`
+                                            });
+                                        }
+                                    }
+                                    else onChange(editorRef.current.getContent())
+                                }
+                            }}
+                            init={{
+                                height: height,
+                                width: "100%",
+                                // menubar: false,
+                                table_default_attributes: {
+                                    border: '0'
+                                },
+                                block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
+                                font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
+                                plugins: [
+                                    'advlist autolink lists link charmap print preview anchor',
+                                    'searchreplace visualblocks code fullscreen',
+                                    'insertdatetime media table paste code wordcount'
+                                ],
+                                toolbar: 'undo redo | formatselect  | ' +
+                                    'bold italic backcolor | alignleft aligncenter ' +
+                                    'alignright alignjustify | bullist numlist outdent indent ',
+                                content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                            }}
+                        />
+                    </div>
+                    <div style={{ visibility: "hidden" }} id="contentDiv"></div>
+                </>
+        }
     </>
 }

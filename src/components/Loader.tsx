@@ -1,26 +1,19 @@
-import { Box, Typography } from "@material-ui/core";
-import { CircularProgress } from "@material-ui/core";
+import { Box, Typography, BoxProps } from '@material-ui/core';
+import { CircularProgress } from '@material-ui/core';
 
-import PropTypes from "prop-types";
+interface Props extends BoxProps {
+  text?: string;
+  noLoader?: boolean;
+}
 
-const Loader = ({ text, ...rest }) => {
+const Loader = ({ noLoader = false, text, ...rest }: Props) => {
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      {...rest}
-    >
-      <CircularProgress />
+    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" {...rest}>
+      {!noLoader && <CircularProgress />}
       <Box marginY={1} />
       {text && <Typography variant="caption">{text}</Typography>}
     </Box>
   );
-};
-
-Loader.propTypes = {
-  text: PropTypes.any,
 };
 
 export default Loader;

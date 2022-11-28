@@ -21,11 +21,16 @@ import emailStyles from "../../../pages/Activity/Email/email.module.scss"
 import ImagePreview from "../Email/ImagePreview";
 import ConfirmationDialog from "../../Helpers/ConfirmationDialog";
 import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import { useData } from '../../../StateProvider/Provider';
+
 
 const AttachmentSchema = object().shape({
     name: string().required("please add attachment name"),
     fileUrl: string().required("please upload attachment"),
 });
+
+
+
 
 const fileIcons = [
     {
@@ -58,7 +63,7 @@ const fileIcons = [
     }
 ]
 
-export default function ManageAttachment({ relatedTo, attachmentId, handleClose, fetchData = null, attachmentData = null }) {
+export default function ManageAttachment({ relatedTo, attachmentId, handleClose, fetchData = null, attachmentData = null, isMinimized, onMinimizeMaximize, showManimizeMaximize }) {
 
     const [initialValues, setInitialValues] = useState(null);
     const [loading, setLoading] = useState(false)
@@ -77,6 +82,9 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
     const [formValues, setFormValues] = useState({})
 
+    const {
+        state: { permissions }
+      }: any = useData();
     useEffect(() => {
         fetchAttachmentDetail();
     }, []);
@@ -172,6 +180,8 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
         }
     };
 
+    
+
     const downloadFile = (event, file) => {
         if (event) {
             toastConfig.setToastConfig({
@@ -265,7 +275,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                                             <GetAppIcon />
                                                         }
                                                     </IconButton>
-                                                    {canEdit ? <IconButton >
+                                                    {canEdit && permissions.attachment.isDelete ? <IconButton >
                                                         {
                                                             <DeleteIcon color='error'
                                                                 onClick={() => {
@@ -278,7 +288,7 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                                                     </IconButton> :
                                                         <Tooltip
                                                             className='cursor-stop'
-                                                            title="Signed quote attachments can not be deleted"
+                                                            title={permissions.quoteBuilder.isDelete ? "Signed quote attachments can not be deleted": "You don't have permissions to delete attachment"}
                                                         >
                                                             <IconButton>
                                                                 <DeleteIcon color='disabled' />
@@ -327,10 +337,14 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                         if (isFieldNotTouched(initialValues, formValues)) handleClose()
                         else setShowConfirmDialog(true)
                     }}
-                    title={`${attachmentId ? "Edit" : "New"} Attachment`}></CustomDialogHeader>
+                    title={`${attachmentId ? "Edit" : "New"} Attachment`}
+                    isMinimized={isMinimized}
+                    onMinimizeMaximize={onMinimizeMaximize}
+                    showManimizeMaximize={showManimizeMaximize}
+                ></CustomDialogHeader>
                 <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-                        <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                        {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                         <Box padding={1}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
@@ -458,17 +472,22 @@ export default function ManageAttachment({ relatedTo, attachmentId, handleClose,
                             if (isFieldNotTouched(initialValues, values)) handleClose()
                             else setShowConfirmDialog(true)
                         }}>Cancel</Button>
-                    <CustomButton
-                        type="button"
+                    {
+                        canEdit &&
+                        <CustomButton
+                            type="button"
 
-                        color="primary"
-                        disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
-                        loading={loading}
-                        variant="contained" onClick={submitForm}>Save</CustomButton>
+                            color="primary"
+                            disabled={loading || uploadingImageOrFileProgress > 0 || otherAttachments.length === 0}
+                            loading={loading}
+                            variant="contained" onClick={submitForm}>
+                            Save
+                        </CustomButton>}
                 </CustomDialogFooter>
                 {
                     showConfirmDialog ?
                         <ConfirmCancelDialog
+                            close={() => setShowConfirmDialog(false)}
                             open={showConfirmDialog}
                             onSave={() => {
                                 setShowConfirmDialog(false)

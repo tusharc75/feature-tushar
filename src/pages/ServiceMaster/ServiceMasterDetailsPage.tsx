@@ -1,0 +1,177 @@
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Grid, Box, Button, Paper, Tabs, Tab } from '@material-ui/core';
+import { useParams, useHistory } from 'react-router-dom';
+import axiosInstance from '../../axios/axiosInstance';
+import routes from '../../components/Helpers/Routes';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import DetailsPageHeader from '../../components/DetailsPageHeader';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import { useData } from '../../StateProvider/Provider';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { serviceMaster } from '../../constants/helpers';
+import ManageServiceMaster from './ManageServiceMaster';
+import { BiEdit } from 'react-icons/bi';
+import { isMobile, isTablet } from 'react-device-detect';
+import accountClass from '../Account/account.module.scss';
+import DeleteButton from '../../components/Helpers/DeleteButton';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import LeadTimeMaster from '../../components/LeadTime';
+import Steps from './Steps';
+import Product from './Product';
+
+const ServiceMasterDetailsPage = () => {
+  const toastConfig = useContext(CustomToastContext);
+  const { id } = useParams();
+  const history = useHistory();
+  const {
+    state: { user, permissions }
+  }: any = useData();
+
+  const [serviceMasterDetailData, setServiceMasterDetailData] = useState(null);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [fields, setFields] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+
+  useEffect(() => {
+    fetchFields();
+    fetchData();
+  }, [id]);
+
+  const fetchFields = () => {
+    axiosInstance()
+      .get(`/field?resource=${serviceMaster.resource}`)
+      .then(({ data }) => {
+        setFields(data.data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    axiosInstance()
+      .get(`${serviceMaster.api}/${id}`)
+      .then(({ data: { data } }) => {
+        setServiceMasterDetailData(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleDelete = () => {
+    axiosInstance()
+      .put(`${serviceMaster.api}/remove`, { ids: [id] })
+      .then(() => {
+        setShowConfirmBox(false);
+        history.goBack();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setShowConfirmBox(false);
+      });
+  };
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  return (
+    <Fragment>
+      <Grid container className="headerbox">
+        <CustomBreadCrumbs routes={[routes.serviceMaster, { title: `${serviceMasterDetailData?.serviceName || ''}` }]} />
+      </Grid>
+      <Grid container spacing={1} className="detail-container">
+        <Grid item xs={12} sm={12} md={8} lg={8}>
+          <Paper style={{ height: '650px' }}>
+            <DetailsPageHeader heading={serviceMasterDetailData?.serviceName || ''} mainPoints={null} showHeading={true}>
+              {permissions?.product?.isUpdate && (
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    setOpenUpdateDialog(true);
+                  }}
+                  className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                >
+                  {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                </Button>
+              )}
+              {permissions?.serviceMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            </DetailsPageHeader>
+            <Tabs
+              variant="scrollable"
+              scrollButtons="auto"
+              className="oms-tab"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              indicatorColor="primary"
+              textColor="primary"
+              aria-label="Product Details Tab"
+              TabIndicatorProps={{
+                style: {
+                  height: 0
+                }
+              }}
+            >
+              <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              <Tab label="Steps" value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+              <Tab label="Consumables" value={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />
+            </Tabs>
+            {tabValue === 0 && (
+              <Box>
+                {loading || (!fields.length && serviceMasterDetailData != null) ? (
+                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                ) : (
+                  <DetailsPage data={serviceMasterDetailData} fields={fields} />
+                )}
+              </Box>
+            )}
+            {tabValue === 1 &&
+              <Steps serviceId={id} />}
+            {tabValue === 2 &&
+              <Product id={id} />}
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={12} md={4} lg={4}>
+          {permissions?.leadTimeMaster?.isRead && (
+            <Box mb={2}>
+              <LeadTimeMaster Id={id} type={'service'} />
+            </Box>
+          )}
+        </Grid>
+      </Grid>
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete this ${routes.serviceMaster?.title} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      {openUpdateDialog && (
+        <ManageServiceMaster
+          isClone={false}
+          serviceMasterId={id}
+          onClose={() => setOpenUpdateDialog(false)}
+          onSuccess={() => {
+            setOpenUpdateDialog(false);
+            fetchData();
+          }}
+        />
+      )}
+    </Fragment>
+  );
+};
+
+export default ServiceMasterDetailsPage;

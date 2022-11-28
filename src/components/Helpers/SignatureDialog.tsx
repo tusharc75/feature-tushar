@@ -1,18 +1,63 @@
-import React, { useRef, useState } from 'react'
-import { Button, Dialog } from '@material-ui/core';
+import { useRef, useState, useContext } from 'react'
+import { Button, Box, Dialog, Stepper, Step, StepLabel, Typography, Divider } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import SignaturePad from 'react-signature-canvas';
+import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
+import TextField from '@material-ui/core/TextField';
 
-export default function SignatureDialog({ open, onClose, onSigned }) {
+export default function SignatureDialog(props) {
+    const { open, onClose, onSigned, forDelivery, steps, label, submitting } = props;
+    const { setToastConfig } = useContext(CustomToastContext);
 
-    const signCanvas: any = useRef(null);
+    const [activeStep, setActiveStep] = useState(0)
+    const [name1, setName1] = useState("")
+    const [name2, setName2] = useState("")
+
+    const signCanvas1: any = useRef(null);
+    const signCanvas2: any = useRef(null);
+
     const [loading, setLoading] = useState(false);
 
-    const clear = () => signCanvas.current.clear();
+    const clearSignCanvas1 = () => signCanvas1.current?.clear();
+    const clearSignCanvas2 = () => signCanvas2.current?.clear();
+
+    const handleClickNext = (signCanvas) => {
+        const isEmpty = signCanvas.current?.isEmpty();
+        if (!isEmpty) {
+            let signedData: any = {};
+            if (label.includes("Dispatch")) {
+                signedData = {
+                    type: activeStep === 0 ? "supervisor" : "deliveryPerson",
+                    sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
+                }
+            } else if (label.includes("Delivery")) {
+                signedData = {
+                    type: activeStep === 0 ? "deliveryPerson" : "receiver",
+                    sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png")
+                }
+            }
+            if (forDelivery) {
+                signedData.name = activeStep === 0 ? name1 : name2;
+            }
+            if (label.includes("Customer Sign")) {
+                signedData = {
+                    sign: signCanvas.current?.getTrimmedCanvas().toDataURL("image/png"),
+                    name: name1 || name2
+                }
+            }
+            onSigned(signedData)
+            if (activeStep === 0) {
+                setActiveStep(prevStep => prevStep + 1)
+                // clearSignCanvas1()
+            }
+        } else {
+            setToastConfig({ open: true, type: "warning", message: "Signature pad cannot be empty!" })
+        }
+    }
 
     return (
         <Dialog
@@ -27,31 +72,96 @@ export default function SignatureDialog({ open, onClose, onSigned }) {
             TransitionComponent={CustomDialogTransition}
         >
             <CustomDialogHeader
-                title="Signature"
+                title={label}
                 onClose={() => {
                     onClose(false);
                 }}
             />
             <CustomDialogContent>
-                <SignaturePad
-                    ref={signCanvas}
-                    canvasProps={{ minWidth: 500, width: 500, height: 500 }}
-                />
-            </CustomDialogContent>
-
-            <CustomDialogFooter>
-                <Button size="small" onClick={clear} color="primary">
+                {forDelivery &&
+                    <>
+                        <Stepper activeStep={activeStep} alternativeLabel>
+                            {steps.map((label) => (
+                                <Step key={label}>
+                                    <StepLabel>{label}</StepLabel>
+                                </Step>
+                            ))}
+                        </Stepper>
+                        <Box textAlign="center" my={2}>
+                            <Typography>Sign Below</Typography>
+                            <Box mb={2} />
+                            <Divider />
+                        </Box>
+                    </>
+                }
+                <div style={{ display: activeStep === 1 ? "none" : "block" }}>
+                    <SignaturePad
+                        ref={signCanvas1}
+                        canvasProps={{ minWidth: 500, width: 500, height: 400 }}
+                    />
+                </div>
+                <div style={{ display: activeStep === 0 ? "none" : "block" }}>
+                    <SignaturePad
+                        ref={signCanvas2}
+                        canvasProps={{ minWidth: 500, width: 500, height: 400 }}
+                    />
+                </div>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    color="primary"
+                    onClick={() => { activeStep === 0 ? clearSignCanvas1() : clearSignCanvas2() }}
+                    fullWidth
+                >
                     Clear
                 </Button>
-
-                <Button size="small"
-                    disabled={loading}
-                    onClick={() => {
-                        setLoading(true);
-                        onSigned(signCanvas.current.getTrimmedCanvas().toDataURL("image/png"))
-                    }} color="primary" variant="contained">
-                    {loading ? "Sending..." : "Send"}
+                {forDelivery &&
+                    <Box pt={2}>
+                        <TextField
+                            id="outlined-basic"
+                            label="Name"
+                            fullWidth
+                            margin="dense"
+                            value={activeStep === 0 ? name1 : name2}
+                            onChange={(e) => { activeStep === 0 ? setName1(e.target.value) : setName2(e.target.value) }}
+                            variant="outlined" />
+                    </Box>
+                }
+            </CustomDialogContent>
+            <CustomDialogFooter>
+                <Button variant="outlined" size="small" disabled={submitting} onClick={onClose} color="primary">
+                    Close
                 </Button>
+                {forDelivery ?
+                    <>
+                        <Button
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            disabled={activeStep === 0 || submitting}
+                            onClick={() => setActiveStep(prevStep => prevStep - 1)}
+                        >
+                            Back
+                        </Button>
+                        <Button
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            disabled={submitting}
+                            onClick={() => { handleClickNext(activeStep === 0 ? signCanvas1 : signCanvas2) }}
+                        >
+                            {steps.length > 1 && activeStep === 0 ? "Next" : "Submit"}
+                        </Button>
+                    </>
+                    : <Button
+                        size="small"
+                        disabled={loading || signCanvas1.current?.isEmpty()}
+                        onClick={() => {
+                            setLoading(true);
+                            onSigned(signCanvas1.current?.getTrimmedCanvas().toDataURL("image/png"))
+                        }} color="primary" variant="contained">
+                        {loading ? "Sending..." : "Send"}
+                    </Button>}
             </CustomDialogFooter>
         </Dialog >
     )

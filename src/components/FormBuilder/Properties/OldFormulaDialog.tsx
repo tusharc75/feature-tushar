@@ -16,12 +16,12 @@ import { checkFormula, getFormulaValue } from "../../../constants/formulaUtility
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
-import { camelCase } from "../../../constants/helpers";
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition} from "../../../constants/helpers";
+import { camelCase } from 'lodash';
 
 const OperatorList = [
   { name: "Add", value: "+" },

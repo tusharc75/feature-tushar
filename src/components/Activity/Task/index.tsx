@@ -1,20 +1,20 @@
-import { useState, useEffect, Fragment } from "react";
-import Box from "@material-ui/core/Box";
-import Grid from "@material-ui/core/Grid";
-import { CreateTask } from "./CreateTask";
-import { GetTask, DeleteTask } from "../../../axios/activity";
-import Typography from "@material-ui/core/Typography";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
-import IconButton from "@material-ui/core/IconButton";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import Dialog from "@material-ui/core/Dialog";
-import { ListRelatedTo } from "../Helpers/ListRelatedTo";
-import { ViewAll } from "../Helpers/ViewAll";
-import ActivityLoader from "../../Helpers/ActivityLoader";
-import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, displayDate } from "../../../constants/helpers";
-import { useData } from "../../../StateProvider/Provider";
+import { useState, useEffect, Fragment } from 'react';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import { CreateTask } from './CreateTask';
+import { GetTask, DeleteTask } from '../../../axios/activity';
+import Typography from '@material-ui/core/Typography';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import IconButton from '@material-ui/core/IconButton';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import Dialog from '@material-ui/core/Dialog';
+import { ListRelatedTo } from '../Helpers/ListRelatedTo';
+import { ViewAll } from '../Helpers/ViewAll';
+import ActivityLoader from '../../Helpers/ActivityLoader';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
+import { useData } from '../../../StateProvider/Provider';
 
 export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -23,8 +23,9 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(true);
   const {
-    state: { permissions },
+    state: { permissions }
   }: any = useData();
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     fetchTask();
@@ -35,7 +36,7 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
     await GetTask(JSON.stringify(relatedTo))
       .then(({ data }) => {
         setTask(data);
-        onSetCount("Task", data.length);
+        onSetCount('Task', data.length);
 
         setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
       })
@@ -70,7 +71,7 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         fetchTask();
         handleActivityRefresh();
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const handleClose = () => {
@@ -85,15 +86,11 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
         <ActivityLoader />
       ) : task.length ? (
         <Fragment>
-          {task.map((_task, index) => (
+          {task.slice(0, 5).map((_task, index) => (
             <Box className="activity" key={_task._id}>
               <Box>
                 <Grid container>
-                  <Grid
-                    item
-                    xs={10}
-                    className="d-flex align-items-center gap-1"
-                  >
+                  <Grid item xs={10} className="d-flex align-items-center gap-1">
                     <Typography
                       variant="subtitle2"
                       className="cursor-pointer"
@@ -104,31 +101,21 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                     >
                       {_task.name}
                     </Typography>
-                    <span className="activity-date">
-                      Due On : {displayDate(_task?.dueDate)}
-                    </span>
+                    <span className="activity-date">Due On : {displayDate(_task?.dueDate)}</span>
                   </Grid>
-                  {
-                    permissions["task"]?.isUpdate || permissions["task"]?.isDelete ?
-                      <Grid item xs={2} container justify="flex-end">
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          aria-label="delete"
-                          onClick={(event) => handleOpenMenu(event, _task._id)}
-                        >
-                          <MoreHorizIcon />
-                        </IconButton>
-                      </Grid> : null}
+                  {permissions['task']?.isUpdate || permissions['task']?.isDelete ? (
+                    <Grid item xs={2} container justify="flex-end">
+                      <IconButton size="small" color="primary" aria-label="delete" onClick={(event) => handleOpenMenu(event, _task._id)}>
+                        <MoreHorizIcon />
+                      </IconButton>
+                    </Grid>
+                  ) : null}
                 </Grid>
               </Box>
               <Box pt={1}>
                 <Grid container>
                   <Grid item xs={12}>
-                    <ListRelatedTo
-                      relatedTo={_task.relatedTo}
-                      originRelatedTo={relatedTo}
-                    />
+                    <ListRelatedTo relatedTo={_task.relatedTo} originRelatedTo={relatedTo} />
                     {/* <Chip label={_task.status} size="small" color="primary" /> */}
                   </Grid>
                 </Grid>
@@ -142,32 +129,34 @@ export const Task = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
           <Typography variant="subtitle2">No Past Task</Typography>
         </Box>
       )}
-      <Menu
-        id="simple-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={handleCloseMenu}
-      >
-        {
-          permissions["task"]?.isUpdate ?
-            <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
-        {
-          permissions["task"]?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
+      <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+        {permissions['task']?.isUpdate ? <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
+        {permissions['task']?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
       </Menu>
       <Dialog
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
         open={open}
         aria-labelledby="customized-dialog-title"
         maxWidth="md"
-        onClose={handleClose}
+        onClose={() => {
+          handleClose();
+          setFullScreen(false);
+        }}
         fullWidth
       >
         <CreateTask
           taskId={taskId}
-          handleClose={handleClose}
+          handleClose={() => {
+            handleClose();
+            setFullScreen(false);
+          }}
           relatedTo={relatedTo}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
+          }}
+          showManimizeMaximize={true}
         />
       </Dialog>
     </Box>

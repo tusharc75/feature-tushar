@@ -1,5 +1,5 @@
 import { uniq } from "lodash";
-import { camelCase } from "../constants/helpers";
+import { camelCase } from "lodash";
 
 const removeBracket = (string) => {
     return string.replace(/{/g, '').replace(/}/g, '')
@@ -53,7 +53,7 @@ export const checkFormula = (formula, inputFields) => {
 }
 
 export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces) => {
-    let value = 0
+    let value: any = 0
     try {
         let argument = [];
         let values = [];
@@ -79,10 +79,14 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
             if (isNaN(value)) {
                 value = 0
             }
+            if (value == "Infinity") {
+                value = 0
+            }
             //value = parseFloat(value.toFixed(decimalPlaces))
         }
     }
     catch (e) {
+        console.log(e)
     }
     return value
 }
@@ -123,9 +127,14 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
         }
         resultValues = handleFormula(fieldData, fields, values, name, value, resultValues, true);
         resultValues = handleCheckVlookupReverse(fieldData, fields, values, name, value, resultValues);
-        if (fieldData.type === 'dropDown') {
-            fields && fields.filter((_f: any) => _f.type === "dropDown" && _f.isDependentDropdown && _f.dropdowDependentOn === fieldData.fieldName).forEach((_r: any) => {
-                resultValues[_r.fieldName] = ""
+        if (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') {
+            fields && fields.filter((_f: any) => (_f.type === "dropDown" || _f.type === 'multiSelect') && _f.isDependentDropdown && _f.dropdowDependentOn === fieldData.fieldName).forEach((_r: any) => {
+                if (fieldData.type === 'dropDown') {
+                    resultValues[_r.fieldName] = ""
+                }
+                else {
+                    resultValues[_r.fieldName] = []
+                }
             });
         }
         for (var x in resultValues) {
@@ -185,7 +194,8 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
         fields.filter((_f) => (_f.type === "formula" || _f.isFormula === true) && _f.inputFields.includes(name)).forEach((_data) => {
             if (_data.inputFields.includes(name)) {
                 loop_count++
-                if (loop_count > 100) {
+                if (loop_count > 300) {
+                    console.warn("Loop in formula")
                     return resultValues
                 }
                 let inputFields = {};
@@ -213,6 +223,7 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
                     if (resultValues[_fieldName] === undefined || isOverride) {
                         resultValues[_fieldName] = calValue;
                         resultValues = handleFormula(fieldData, fields, values, _fieldName, calValue, resultValues, true);
+                        resultValues = handleCheckVlookupReverse(fieldData, fields, values, _fieldName, calValue, resultValues);
                         if (_data.type !== 'currencyAmount' && (_data.type === 'converter' || _data.isConverter === true)) {
                             if (_data.displayUnits && _data.displayUnits.length) {
                                 resultValues = handleConverter(
@@ -264,6 +275,7 @@ const handleFormula = (fieldData, fields, values, name, value, resultValues, isO
                     if (resultValues[_fieldName] === undefined || isOverride) {
                         resultValues[_fieldName] = calValue;
                         resultValues = handleFormula(fieldData, fields, values, _fieldName, calValue, resultValues, true);
+                        resultValues = handleCheckVlookupReverse(fieldData, fields, values, _fieldName, calValue, resultValues);
                         if (_data.isMulitFormula && isOverride) {
                             resultValues = handleMulitFormula(_data, fields, values, resultValues);
                         }
@@ -297,10 +309,9 @@ const handleCheckVlookupReverse = (fieldData, fields, values, name, value, resul
     if (fields && fields.filter((_f: any) => (_f.type === "vlookupDropdown" || _f.isVlookup) && !_f.isvlookupReverse).length) {
         fields.filter((_f: any) => (_f.type === "vlookupDropdown" || _f.isVlookup) && !_f.isvlookupReverse).forEach((_data: any) => {
             if (_data.vlookupInputFields.includes(name)) {
-
                 let result = _data.option && _data.option.filter(function (val: any) {
                     for (var i = 0; i < _data.vlookupInputFields.length; i++)
-                        if ((_data.vlookupInputFields[i] === name ? value.toString() : values[_data.vlookupInputFields[i]].toString()) !== val[_data.vlookupInputFields[i]].toString())
+                        if ((_data.vlookupInputFields[i] === name ? value : (values[_data.vlookupInputFields[i]])) != (val[_data.vlookupInputFields[i]]))
                             return false;
                     return true;
                 });
@@ -450,6 +461,36 @@ export const extractFields = (fields) => {
     return result
 }
 
+export const extractFieldsForDisplay = (fields) => {
+    const result: any = []
+    fields.forEach(_field => {
+        let ele = { ..._field }
+        if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
+            if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+                ele.displayUnits && ele.displayUnits.forEach(_unit => {
+                    result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _unit + ")", fieldName: ele.fieldName + "_" + _unit.toLowerCase() })
+                })
+            }
+            else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+                ele.displayCurrency && ele.displayCurrency.forEach(_currency => {
+                    ele.displayUnits && ele.displayUnits.forEach(_unit => {
+                        result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _currency + "/" + _unit + ")", fieldName: ele.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
+                    })
+                })
+            }
+            else if (ele.type === 'currencyAmount') {
+                ele.displayCurrency && ele.displayCurrency.forEach(_currency => {
+                    result.push({ ...ele, fieldLabel: ele.fieldLabel + " (" + _currency + ")", fieldName: ele.fieldName + "_" + _currency.toLowerCase() })
+                })
+            }
+        }
+        else {
+            result.push(ele)
+        }
+    })
+    return result
+}
+
 export const autoCalculate = (values: any, fieldList: any) => {
     const returnvalues: any = values;
     fieldList.forEach((ele: any) => {
@@ -521,7 +562,7 @@ export const autoCalculate = (values: any, fieldList: any) => {
                 }
             }
             for (const x in calValues) {
-                if (calValues[x] === 0 || calValues[x] === '') {
+                if (calValues[x] === 0 || calValues[x] === '' || (values[x] && values[x] !== '')) {
                     delete calValues[x];
                 }
             }
@@ -556,7 +597,7 @@ export const autoCalculateSpecificFields = (inputValues: any, values: any, field
                     }
                 }
             }
-            const calValues = handleAutoCalculation(fieldData, fieldList, values, _fieldName, currency, unit, inputValues[_fieldName]);
+            const calValues = handleAutoCalculation(fieldData, fieldList, { ...values, ...returnvalues }, _fieldName, currency?.toUpperCase(), unit, inputValues[_fieldName]);
             Object.assign(returnvalues, calValues);
         }
     }
@@ -725,18 +766,120 @@ export const checkFieldDependency = (fieldId, sectionId, section) => {
     }
 }
 
-export const optionConverter = (option, units, unitoption, dropdownOnConverter, _unit) => {
+export const optionConverter = (option, units, unitoption, dropdownOnConverter, _unit, decimalPlaces) => {
     const result = JSON.parse(JSON.stringify(option))
     let indexConverter = units.indexOf(dropdownOnConverter);
-    if (indexConverter >= 0 && unitoption) {
+    if (indexConverter >= 0 && unitoption && unitoption.length) {
         result.forEach((ele) => {
-            const calValue = (ele.optionValue * unitoption[indexConverter][_unit]).toString()
+            const calValue = (parseFloat((ele.optionValue * unitoption[indexConverter]?.[_unit])?.toFixed(decimalPlaces)))?.toString()
             ele.optionLabel = calValue
             ele.optionValue = calValue
         })
     }
     return result;
 }
+
+export const updateFieldAccordingCurrency = (
+    fields: any,
+    oldFieldName: any,
+    newFieldName: any,
+    oldCurrency: any,
+    currency: any
+) => {
+    const regexOldFieldName = new RegExp(oldFieldName, 'g');
+    fields.forEach((_f: any) => {
+        if (_f.inputFields) {
+            _f.inputFields = _f.inputFields.map(function (_fi: any) {
+                return _fi == oldFieldName ? newFieldName : _fi;
+            });
+        }
+        if (_f.formula) {
+            _f.formula = _f.formula.replace(regexOldFieldName, newFieldName);
+        }
+        if (_f.formulaFields) {
+            _f.formulaFields = _f.formulaFields.map(function (_fi: any) {
+                return _fi == oldFieldName ? newFieldName : _fi;
+            });
+        }
+        if (_f.formulainputFields) {
+            _f.formulainputFields = _f.formulainputFields.map(function (_fi: any) {
+                return _fi == oldFieldName ? newFieldName : _fi;
+            });
+        }
+        if (_f.formulaoption) {
+            for (const x in _f.formulaoption) {
+                if (x === oldFieldName) {
+                    _f.formulaoption[newFieldName] = _f.formulaoption[x].replace(
+                        regexOldFieldName,
+                        newFieldName
+                    );
+                    delete _f.formulaoption[x];
+                } else {
+                    _f.formulaoption[x] = _f.formulaoption[x].replace(regexOldFieldName, newFieldName);
+                }
+            }
+        }
+        if (_f.formulaOnCurrency) {
+            _f.formulaOnCurrency = _f.formulaOnCurrency.replace(oldCurrency, currency);
+        }
+        if (_f.vlookupInputFields) {
+            _f.vlookupInputFields = _f.vlookupInputFields.map(function (_fi: any) {
+                return _fi == oldFieldName ? newFieldName : _fi;
+            });
+            if (_f.option) {
+                _f.option.forEach((_option: any) => {
+                    for (const x in _option) {
+                        if (x === oldFieldName) {
+                            _option[newFieldName] = _option[x];
+                            delete _option[x];
+                        }
+                    }
+                });
+            }
+        }
+    });
+    return fields;
+};
+
+export const CURReplaceByCurrencySingle = (fields: any, currency: any) => {
+    const currencyField = fields.filter((_f: any) => _f.type === 'currencyAmount');
+    currencyField.forEach((_c: any) => {
+        if (_c.displayCurrency.length && _c.displayCurrency[0] === 'CUR') {
+            if (_c.isConverter && _c.formulaUnits) {
+                _c.formulaUnits.forEach((_unit: any) => {
+                    const oldFieldName =
+                        _c.fieldName + '_' + _c.displayCurrency[0].toLowerCase() + '_' + _unit.toLowerCase();
+                    const newFieldName =
+                        _c.fieldName + '_' + currency.toLowerCase() + '_' + _unit.toLowerCase();
+                    if (oldFieldName !== newFieldName) {
+                        fields = updateFieldAccordingCurrency(
+                            fields,
+                            oldFieldName,
+                            newFieldName,
+                            _c.displayCurrency[0],
+                            currency
+                        );
+                    }
+                });
+                _c.displayCurrency[0] = currency;
+            } else {
+                const oldFieldName = _c.fieldName + '_' + _c.displayCurrency[0].toLowerCase();
+                const newFieldName = _c.fieldName + '_' + currency.toLowerCase();
+                if (oldFieldName !== newFieldName) {
+                    fields = updateFieldAccordingCurrency(
+                        fields,
+                        oldFieldName,
+                        newFieldName,
+                        _c.displayCurrency[0],
+                        currency
+                    );
+                }
+                _c.displayCurrency[0] = currency;
+            }
+        }
+    });
+    return fields;
+};
 
 // export const checkFormula = (formula) => {
 

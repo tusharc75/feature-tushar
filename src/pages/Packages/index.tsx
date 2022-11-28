@@ -8,9 +8,8 @@ import MessageDialog from '../../components/Helpers/MessageDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { FaRegistered, FaListAlt } from 'react-icons/fa';
 import { BiPackage } from "react-icons/bi";
-import { isObjectEmpty, customerAccount, supplierAccount, gridLoadingTimeout, packages, product } from '../../constants/helpers';
+import { isObjectEmpty, gridLoadingTimeout, packages, product } from '../../constants/helpers';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import CustomContainer from '../../components/CustomContainer';
 import { useHistory } from 'react-router-dom';
@@ -20,24 +19,30 @@ import PackageHeader from './PackageHeader';
 import ManagePackageDialog from './ManagePackageDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import HideWhenOffline from '../../components/HideWhenOffline';
-import AssignQuantityDialog from '../../components/Helpers/AssignQuantityDialog';
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/columns';
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
 import { camelCase } from 'lodash';
 import ProductListDialog from './ProductListDialog';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
+import { prepareDataForGrid } from "../../constants/helpers"
+import { MdAccountCircle, MdDescription } from "react-icons/md";
+import { GoDeviceMobile } from "react-icons/go";
+import { AiFillCrown, IoIosPricetags, RiPriceTagLine } from "react-icons/all";
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile, isTablet } from 'react-device-detect';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 let packagesTimeout;
 
 const PackageList = () => {
-    const toastConfig = useContext(CustomToastContext);
-    const { isOffline, offlineGridData, updateOfflineGridData, offlineFieldsData, updateFieldsData } = useContext(CustomOfflineContext);
 
-    const pageTitle = camelCase(`${routes.packages.title}Page`);
+    const renderedFrom = camelCase(routes?.packages.title)
+    const localStorageSelectedRecords = `${renderedFrom}_selected`;
+
+    const toastConfig = useContext(CustomToastContext);
+
     const history = useHistory();
-    const {
-        state: { user, permissions, selectedEntity }
-    }: any = useData();
+    const { state: { user, permissions, selectedEntity } }: any = useData();
+    const { getColumnData } = useColumns();
     const [selectedType, setSelectedType] = useState(1);
     const [renderCount, setRenderCount] = useState(0);
     const [deleteLoading, setDeleteLoading] = useState(false);
@@ -55,22 +60,11 @@ const PackageList = () => {
         show: false,
         packageName: ''
     });
-    const [accountDetails, setAccountDetails] = useState({
-        accountId: history.location?.state?.accountId,
-        accountName: history.location?.state?.accountName,
-        resource: history.location?.state?.resource
-    });
-    // const [packagePermissions, setPackagePermission] = useState({
-    //   isCreate: permissions?.package?.isCreate,
-    //   isUpdate: permissions?.quoteBuilder?.isUpdate,
-    //   isRead: permissions?.quoteBuilder?.isRead,
-    //   isDelete: permissions?.quoteBuilder?.isDelete,
-    // });
-    const { packageResource, packageApi } = packages;
     //  Grid Variables - Start
     const [gridApi, setGridApi] = useState(null);
     const [state, dispatch] = useReducer(reducer, intialState);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+    const [selectedPackageProducts, setSelectedPackageProducts] = useState([]);
 
     useEffect(() => {
         fetchGridColumns();
@@ -78,27 +72,13 @@ const PackageList = () => {
 
     const fetchGridColumns = async () => {
         let data;
-        if (isOffline) {
-            data = offlineFieldsData;
-        } else {
-            const response = await axiosInstance().get(`/field?resource=Packages&entity=${selectedEntity}`);
-
-            data = response?.data?.data;
-            try {
-                updateFieldsData('packages', data);
-            } catch (ex) {
-                console.error(`Packages: Error while storing data for Offline context. Error: ${ex.message}`);
-            }
-        }
+        const response = await axiosInstance().get(`/field?resource=Packages&entity=${selectedEntity}&view=true`);
+        data = response?.data?.data;
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-            let currentColumn = getColumnData(pageTitle, o?.fieldData, `${routes.packages.path}/detail`);
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.packagesDetail.path}`);
             if (currentColumn !== null) {
-                if (isOffline) {
-                    currentColumn.columnData['filter'] = false;
-                    currentColumn.columnData['sortable'] = false;
-                }
                 columns = [...columns, currentColumn?.columnData];
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
                     rendererNames.push(currentColumn?.rendererName);
@@ -114,11 +94,12 @@ const PackageList = () => {
         setFrameWorkComponent({ ...tempFrameworkComponent });
         let staticFields = getStaticFields();
         staticFields.forEach((field) => {
-            columns.push(checkStaticField(pageTitle, field));
+            columns.push(checkStaticField(renderedFrom, field));
         });
         setColumns([...columns]);
     };
-    const columnState = JSON.parse(localStorage.getItem('packagesPage'));
+
+    const columnState = JSON.parse(localStorage.getItem(renderedFrom));
     if (columnState) {
         columns.forEach((item) => {
             columnState.forEach((d) => {
@@ -134,7 +115,6 @@ const PackageList = () => {
         if (packagesTimeout) {
             clearTimeout(packagesTimeout);
         }
-
         packagesTimeout = setTimeout(() => {
             fetchPackages();
         }, millisec);
@@ -145,13 +125,12 @@ const PackageList = () => {
         if (renderCount > 0) {
             fetchPackages();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, isOffline]);
+    }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
     const handleSingleDeletePackage = async () => {
         dispatch({ type: 'loading', loading: true });
-
         axiosInstance()
-            .put(`${packageApi}/remove`, {
+            .put(`${packages.api}/remove`, {
                 ids: [singlePackageDelete.id]
             })
             .then(({ data }) => {
@@ -191,36 +170,19 @@ const PackageList = () => {
                     </IconButton>
                 </HtmlTooltip>
             )}
-
-            <HideWhenOffline>
-                <GridDeleteIcon
-                    hasDeletePermission={permissions?.packages.isDelete}
-                    ownerId={params.data.ownerId}
-                    userId={user?.user?._id}
-                    onDelete={() =>
-                        setSinglePackageDelete({
-                            show: true,
-                            id: params.data._id,
-                            packageName: `${params.data.packageName}`
-                        })
-                    }
-                    entity="packages"
-                />
-            </HideWhenOffline>
-            <HideWhenOffline>
-                <HtmlTooltip title="View product list">
-                    <IconButton
-                        color='primary'
-                        size="small"
-                        aria-label="View List"
-                        onClick={() => {
-                            setOpenProductListDialog({ open: true, id: params.data._id })
-                        }}
-                    >
-                        <FaListAlt fontSize="small" />
-                    </IconButton>
-                </HtmlTooltip>
-            </HideWhenOffline>
+            <GridDeleteIcon
+                hasDeletePermission={permissions?.packages.isDelete}
+                ownerId={user?.user?._id}
+                userId={user?.user?._id}
+                onDelete={() =>
+                    setSinglePackageDelete({
+                        show: true,
+                        id: params.data._id,
+                        packageName: `${params.data.packageName}`
+                    })
+                }
+                entity="packages"
+            />
         </>
     );
 
@@ -257,26 +219,15 @@ const PackageList = () => {
         }
     };
 
-    const getQueryString = () => {
+    const getQueryString = (isExport = false) => {
         let deepFilter = `?page=${page}&limit=${limit}&filterpackagess=${selectedType}`;
-        if (accountDetails.accountId) {
-            if (accountDetails.resource === customerAccount.accountResource) {
-                deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-                    {
-                        field: replaceFieldName('customerAccount'),
-                        term: accountDetails.accountId
-                    }
-                ])}`;
-            } else if (accountDetails.resource === supplierAccount.accountResource) {
-                deepFilter = `${deepFilter}&filterById=${JSON.stringify([
-                    {
-                        field: replaceFieldName('supplierAccountName'),
-                        term: { $in: [accountDetails.accountId] }
-                    }
-                ])}`;
-            }
+        if (isExport) {
+            deepFilter = `filterpackagess=${selectedType}`;
         }
-
+        if (showFilteredRecordsOnly) {
+            const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+            deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+        }
         if (!isObjectEmpty(filters)) {
             const updatedFilters = [];
 
@@ -286,7 +237,7 @@ const PackageList = () => {
                     term: filters[field].filter
                 });
             });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+            deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
         }
 
         if (sorting.length > 0) {
@@ -294,7 +245,7 @@ const PackageList = () => {
         }
 
         if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
+            deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
         }
 
         return deepFilter;
@@ -310,39 +261,18 @@ const PackageList = () => {
 
         try {
             let data, count;
-
-            if (!isOffline) {
-                const response: any = await axiosInstance().get(`${packageApi}${queryString}`);
-
-                data = response?.data?.data;
-                count = response?.data?.count;
-            } else {
-                data = offlineGridData?.packages || [];
-                count = offlineGridData?.packages?.length || 0;
-            }
-
-            try {
-                updateOfflineGridData('packages', data);
-            } catch (ex) {
-                console.error(`Packages: Error while storing data for Offline context. Error: ${ex.message}`);
-            }
-
+            const response: any = await axiosInstance().get(`${packages.api}${queryString}`);
+            data = response?.data?.data;
+            count = response?.data?.count;
             let rows = data.map((u) => {
-                const { owner, createdBy, updatedBy, ...restProperties } = u;
-
-                let res = {
-                    ...restProperties,
-                    id: u._id,
-                    owner: u.createdBy.user.concatedName,
-                    ownerId: u.createdBy.user._id,
-                    createdBy: u.createdBy?.user?.concatedName,
-                    createdByDate: u.createdBy?.date,
-                    updatedBy: u.updatedBy?.user?.concatedName,
-                    updatedByDate: u.updatedBy?.date
+                let finalObject = prepareDataForGrid(u, user);
+                finalObject["canDelete"] = permissions.packages.isDelete;
+                finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+                finalObject["allowedToEdit"] = permissions.packages.isUpdate;
+                return {
+                    ...finalObject,
                 };
-                return res;
             });
-
             dispatch({ type: 'initialize', data: rows, count: count });
             setTimeout(() => {
                 dispatch({ type: 'loading', loading: false });
@@ -394,16 +324,10 @@ const PackageList = () => {
         }
         if (recordsToDelete.length > 0) {
             axiosInstance()
-                .put(`${packageApi}/remove`, {
+                .put(`${packages.api}/remove`, {
                     ids: recordsToDelete
                 })
                 .then(({ data }) => {
-                    try {
-                        updateOfflineGridData('packages', [], recordsToDelete);
-                    } catch (ex) {
-                        console.error(`Packages: Error while removing data for Offline context. Error: ${ex.message}`);
-                    }
-
                     toastConfig.setToastConfig({
                         open: true,
                         type: 'success',
@@ -422,6 +346,22 @@ const PackageList = () => {
         }
     };
 
+    const openAssingToProduct = async () => {
+        if (selectedRecords.length > 0) {
+            await axiosInstance()
+                .post(`${packages.api}/material/alreadyAssigned`, {
+                    ids: selectedRecords.map(d => d._id)
+                })
+                .then(({ data }) => {
+                    setSelectedPackageProducts(data?.data)
+                })
+                .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                });
+            setShowProductAssignDialog(true)
+        }
+    }
+
     return (
         <>
             <Fragment>
@@ -436,7 +376,7 @@ const PackageList = () => {
                                     <ImportExportLinks
                                         permissions={permissions?.packages}
                                         module="packagess"
-                                        api={packageApi}
+                                        api={packages.api}
                                         afterImportCompleted={() => {
                                             fetchPackages();
                                         }}
@@ -448,6 +388,7 @@ const PackageList = () => {
                                             if (gridApi) gridApi.deselectAll()
                                             else fetchPackages()
                                         }}
+                                        additionalParams={getQueryString(true)}
                                     />
                                 </Grid>
                             </Grid>
@@ -467,50 +408,88 @@ const PackageList = () => {
                             packagePermissions={permissions?.packages}
                             onCreate={clickCreateNew}
                             showConfirmBox={showConfirmBox}
+                            columns={columns}
+                            dispatch={dispatch}
                             canDelete={selectedRecords.length === 0}
                             icon={<BiPackage className="headerLogo" />}
                             heading={routes.packages.title}
                             showTransferEntityDialog={handleTransferEntityDialog}
-                            openAssingToProduct={() => setShowProductAssignDialog(true)}
+                            openAssingToProduct={openAssingToProduct}
+                            filters={filters}
                         // showClonepackagesDialog={() => {
                         //   handleShowClonepackagesDialog()
                         // }}
                         >
-                            {accountDetails.accountId && (
-                                <Chip
-                                    className="ml-3"
-                                    color="primary"
-                                    label={`Account: ${accountDetails.accountName}`}
-                                    onDelete={() => {
-                                        setAccountDetails({
-                                            accountId: null,
-                                            accountName: null,
-                                            resource: null
-                                        });
-                                    }}
-                                />
-                            )}
                         </PackageHeader>
                     </div>
-
                     {Object.keys(frameWorkComponent).length > 0 ? (
-                        <CustomAgGrid
-                            columns={columns}
+                        isMobile && !isTablet ? <CustomSwipableList
+                            allowSelection={true}
+                            allowSwipe={true}
+                            permissions={permissions?.packages}
+                            primaryField={columns?.find(d => d.primaryField)}
+                            onClick={(data) => {
+                                history.push(`${routes.packagesDetail.path}/${data._id}`)
+                            }}
                             dataRows={dataRows}
-                            frameworkComponents={frameWorkComponent}
-                            setGridApi={setGridApi}
+                            selectedRecords={selectedRecords}
                             dispatch={dispatch}
+                            onEdit={(data) => {
+                                history.push(`${routes.packagesDetail.path}/${data._id}?openEdit=true`)
+                            }}
+                            extraParamsToCheckDelete={true}
+                            onDelete={(data) => {
+                                setDeleteRecord({})
+                            }}
                             rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
                             page={page}
-                            actionWidth={140}
                             loading={loading}
-                            renderedFrom={pageTitle}
-                            allowSelection={!isOffline}
-                            isClientSideGrid={isOffline}
-                            refreshGrid={fetchPackages}
-                        />
+                            additionalDetails={[
+                                {
+                                    icon: <IoIosPricetags size={18} />,
+                                    field: 'packageType'
+                                }
+                            ]}
+                            chips={[
+                                {
+                                    icon: <MdDescription />,
+                                    label: 'Package Description: ',
+                                    field: 'packageDescription'
+                                },
+                                {
+                                    icon: <GoDeviceMobile />,
+                                    label: 'Unit: ',
+                                    field: 'unit'
+                                },
+                                {
+                                    icon: <RiPriceTagLine />,
+                                    label: 'Pricing Method',
+                                    field: 'pricingMethod'
+                                }
+                            ]}
+                            owerCollaboratorInitialsOrImages=""
+                            onCreate={false}
+                            showClone={true}
+                            onClone={(data) => { setShowManagePackageDialog({ open: true, isClone: true, idToClone: data._id }); }}
+                            renderedFrom={renderedFrom}
+                        /> :
+                            <CustomAgGrid
+                                columns={columns}
+                                dataRows={dataRows}
+                                frameworkComponents={frameWorkComponent}
+                                setGridApi={setGridApi}
+                                dispatch={dispatch}
+                                rowCount={rowCount}
+                                limit={limit}
+                                pageSizes={pageSizes}
+                                page={page}
+                                actionWidth={140}
+                                loading={loading}
+                                renderedFrom={renderedFrom}
+                                allowSelection={true}
+                                refreshGrid={fetchPackages}
+                                showOnlyShowFilteredRecordSwitch={true}
+                            />
                     ) : null}
 
                     {showDeleteWarningConfirmBox ? (
@@ -523,7 +502,7 @@ const PackageList = () => {
                     {isConfirmDialogVisible ? (
                         <ConfirmationDialog
                             open={isConfirmDialogVisible}
-                            message={`Are you sure you want to delete ${deleteRecord?.packageName ? 'Package' : 'selected Packages'}   ${deleteRecord.packageName || ''}?`}
+                            message={`Are you sure you want to delete ${deleteRecord?.packageName ? 'this Package' : 'selected Packages'}?`}
                             onClose={() => {
                                 if (deleteRecord) setDeleteRecord({});
                                 setIsConformDialogVisible(false);
@@ -536,7 +515,7 @@ const PackageList = () => {
                     {singlePackageDelete.show ? (
                         <ConfirmationDialog
                             open={singlePackageDelete.show}
-                            message={`Are you sure you want to delete Package: ${singlePackageDelete.packageName}?`}
+                            message={`Are you sure you want to delete this Package: ${singlePackageDelete?.packageName} ?`}
                             onClose={() =>
                                 setSinglePackageDelete({
                                     id: null,
@@ -550,14 +529,16 @@ const PackageList = () => {
                 </CustomContainer>
             </Fragment>
             {showProductAssignDialog && (
-                <AssignQuantityDialog
-                    ids={selectedRecords.map((s) => s.id)}
-                    onClose={() => setShowProductAssignDialog(false)}
-                    onSuccess={() => setShowProductAssignDialog(false)}
-                    resource={product.api}
-                    title="Assign Products"
-                    label='Select Product'
-                    resourceData={[]}
+                <AssignProductDialog
+                    reference="package"
+                    productsDialogOpen={true}
+                    productId={[...selectedRecords.map(d => d._id)]}
+                    handleCloseDialog={() => setShowProductAssignDialog(false)}
+                    assignedProducts={selectedPackageProducts}
+                    renderedFrom={`${renderedFrom}_sub-1`}
+                    onSuccess={() => {
+                        setShowProductAssignDialog(false);
+                    }}
                 />
             )}
             {showManagePackageDialog.open && (
@@ -567,15 +548,14 @@ const PackageList = () => {
                     packageId={showManagePackageDialog.idToClone}
                     onClose={() => setShowManagePackageDialog({ open: false, isClone: false, idToClone: null })}
                     onSuccess={() => {
-                        if (!isOffline) {
-                            fetchPackages();
-                        }
+                        fetchPackages();
                         setShowManagePackageDialog({ open: false, isClone: false, idToClone: null });
                     }}
                 />
             )}
             {openProductListDialog.open && (
                 <ProductListDialog
+                    renderedFrom={`${renderedFrom}_i-grid-1`}
                     id={openProductListDialog.id}
                     onClose={() => setOpenProductListDialog({ open: false, id: null })}
                     toastConfig={toastConfig} />

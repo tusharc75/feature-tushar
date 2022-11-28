@@ -1,20 +1,20 @@
-import { useEffect, useState } from "react";
-import { camelCase } from "lodash";
-import { Redirect, Route, useLocation } from "react-router-dom";
-import { useData } from "../StateProvider/Provider";
-import Unauthorized from "../pages/Unauthorized";
-import Layout from "./Layout";
+import { useEffect, useState } from 'react';
+import { camelCase } from 'lodash';
+import { Redirect, Route, useLocation } from 'react-router-dom';
+import { useData } from '../StateProvider/Provider';
+import Unauthorized from '../pages/Unauthorized';
+import Layout from './Layout';
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
-    state: { user, permissions, userLoading },
+    state: { user, permissions, userLoading }
   }: any = useData();
   const { pathname, key } = useLocation();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
   const [access, setAccess] = useState(false);
   const [checking, setChecking] = useState(true);
 
-  const pathnames = pathname.split("/").filter((x) => x);
+  const pathnames = pathname.split('/').filter((x) => x);
 
   useEffect(() => {
     checkAccess();
@@ -23,9 +23,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
 
   const checkAccess = async () => {
     let path = camelCase(pathnames[0]);
-
-    if (path === "quotes") {
-      path = "quoteBuilder";
+    if (path === 'quotes') {
+      path = 'quoteBuilder';
     }
     if (permissions && permissions[path]) {
       if (permissions[path].isRead) {
@@ -33,32 +32,55 @@ const ProtectedRoute = ({ children, ...rest }) => {
         setChecking(false);
       }
     } else if (
-      pathname === "/" ||
+      pathname === '/' ||
       [
-        "case",
-        "task",
-        "attachment",
-        "note",
-        "event",
-        "terms-conditions",
-        "product-category",
-        "product-template",
-        "price-template",
-        "form-builder",
-        "product-builder",
-        "currency-converter",
-        "profile",
-        "brand-configuration",
-        "project-sales",
-        "doa-request",
-        "product-list",
-        "product/details",
-        "quote-pdf-template",
-        "product-inventory",
-        "equiptment-rental-master",
-        "rental-management",
-        "loading-ticket",
-        "entity",
+        'dashboards',
+        'case',
+        'task',
+        'attachment',
+        'note',
+        'event',
+        'terms-conditions',
+        'product-category',
+        'product-template',
+        'price-template',
+        'form-builder',
+        'product-builder',
+        'currency-converter',
+        'profile',
+        'brand-configuration',
+        'project-sales',
+        'doa-request',
+        'quote-pdf-template',
+        'serialized-asset',
+        'equiptment-rental-master',
+        'rental-management',
+        'delivery-ticket',
+        'product-inventory',
+        'entity',
+        'logout',
+        'address',
+        'reports',
+        'e-commerce-policy',
+        'sublease',
+        'old-dashboard',
+        'transfer-inventory',
+        'zone',
+        'well-master',
+        'dashboard-master',
+        'bulk-asset-creation',
+        'erecs',
+        'resource-calendar',
+        'serialized-asset-new',
+        'import-export',
+        'schedule-report',
+        'custom-report',
+        'inventory-cycle',
+        'cycle-count-determination',
+        'quotation',
+        'invoice',
+        'work-order-supervisor',
+        'work-order-technician'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
@@ -74,31 +96,24 @@ const ProtectedRoute = ({ children, ...rest }) => {
           checking || userLoading ? (
             <div
               style={{
-                width: "100vw",
-                height: "100vh",
-                padding: "1rem",
+                width: '100vw',
+                height: '100vh',
+                padding: '1rem'
               }}
             >
               <p>Checking Credentials...</p>
             </div>
           ) : access ? (
-            <Layout>
-              {/* <Suspense fallback={<div>Loading...</div>}> */}
-              {children}
-              {/* </Suspense> */}
-            </Layout>
+            <Layout>{children}</Layout>
           ) : (
             <Unauthorized />
           )
         ) : (
           <Redirect
             to={{
-              pathname: "/login",
-              search: `${location && location.pathname
-                ? `?redirect=${location.pathname}${location.search}`
-                : null
-                }`,
-              state: { from: location },
+              pathname: '/login',
+              search: `${location && location.pathname ? `?redirect=${location.pathname}${location.search}` : null}`,
+              state: { from: location }
             }}
           />
         )

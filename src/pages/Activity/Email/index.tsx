@@ -8,7 +8,7 @@ import { GetReferenceName, GetEmails } from '../../../axios/activity';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import { useData } from '../../../StateProvider/Provider';
 import CustomContainer from '../../../components/CustomContainer';
-import { Button, MenuItem, Menu, Typography, Tooltip, IconButton } from '@material-ui/core';
+import { Button, MenuItem, Menu, Typography, Tooltip, IconButton, TextField, Chip, Link } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import axiosInstance from '../../../axios/axiosInstance';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -19,9 +19,7 @@ import reactHtmlparser, { convertNodeToElement } from 'react-html-parser';
 import { HiOutlineMail } from 'react-icons/hi';
 import Dialog from '@material-ui/core/Dialog';
 import { CreateEmail } from '../../../components/Activity/Email/CreateEmail';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import { isObjectEmpty } from '../../../constants/helpers';
+import { getApi, getData, isObjectEmpty } from '../../../constants/helpers';
 import styles from '../../Leads/Header.module.scss';
 import emailStyles from './email.module.scss';
 import './email.scss';
@@ -31,11 +29,18 @@ import CustomAgGrid, { reducer, intialState } from '../../../components/AgGridCo
 import { AddOutlined } from '@material-ui/icons';
 import { displayDate } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
+import { AiFillCrown, MdAdd } from 'react-icons/all';
+import CustomSwipableList from '../../../components/SwipableListComponents/CustomSwipableList';
+import { Autocomplete } from '@material-ui/lab';
+import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 
 const tabs = {
   Inbox: 1,
   Sent: 2
 };
+
+
 
 const Email = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -46,7 +51,7 @@ const Email = () => {
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
 
-  const [filter, setFilter] = useState([]);
+  const [filter, setFilter] = useState(null);
   const [inboxEmails, setInboxEmails] = useState([]);
   const [sentEmails, setSentEmails] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -61,23 +66,26 @@ const Email = () => {
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows } = state;
   const columnState = JSON.parse(localStorage.getItem('emailPage'));
 
-  const [columns,] = useState([
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [clonedData, setClonedData] = useState([]);
+  const localStorageSelectedRecords = 'emailPage_selected';
+  const [resource, setResource] = useState(null);
+  const [resourceData, setResourceData] = useState(null);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const [selectedResourceData, setSelectedResourceData] = useState(null);
+  const [columns] = useState([
     { field: 'to', headerName: 'Recipient', show: true, disabled: true, cellRenderer: 'recipentRenderer' },
+    { field: 'relatedTo', headerName: 'Related To', show: true, disabled: true, cellRenderer: 'referenceRenderer' },
     {
       field: 'subject',
       headerName: 'Subject',
       show: true,
+      primaryField: true,
       cellRenderer: 'subjectRenderer'
-    },
-    {
-      field: 'message',
-      headerName: 'Message',
-      show: true,
-      // sortable: false,
-      cellRenderer: 'messageRenderer'
     },
     {
       field: 'createdBy',
@@ -99,6 +107,12 @@ const Email = () => {
     });
   }
 
+  const [resourceOptions, setResourceOptions] = useState([]);
+
+  useEffect(() => {
+    setResourceOptions(get_activity_resource(permissions))
+  }, []);
+
   useEffect(() => {
     fetchUsersEmails();
   }, []);
@@ -109,13 +123,50 @@ const Email = () => {
         .then(({ data }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => { });
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+    else {
+      setFilter([])
     }
   }, [referenceId]);
 
   useEffect(() => {
-    fetchEmails();
+    if (filter) {
+      fetchEmails();
+    }
   }, [page, limit, filters, filter, sorting]);
+
+  useEffect(() => {
+    if (resource && resource?.optionValue) {
+      setLoadingResources(true);
+      axiosInstance()
+        .get(`${getApi(resource?.optionValue)}?limit=100`)
+        .then(({ data: { data } }) => {
+          if (data.length) {
+            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
+            setResourceData(mappedData || []);
+          }
+          setLoadingResources(false);
+        })
+        .catch((error) => {
+          setLoadingResources(false);
+        });
+
+      return () => {
+        setSelectedResourceData(null);
+        setResourceData(null);
+      };
+    }
+  }, [resource]);
+
+  const redirectToResource = (type, id) => {
+    history.push(
+      type === "quote" ? `${routes["quoteBuilder"].path}/detail/${id}`
+        : `${routes[type].path}/detail/${id}`
+    )
+  }
 
   const fetchEmails = async () => {
     const queryString = getQueryString();
@@ -136,10 +187,12 @@ const Email = () => {
             id: obj._id,
             createdByDate: obj?.createdBy?.date ?? '',
             createdByUser: obj?.createdBy?.user,
-            isCreatedByMe
+            isCreatedByMe,
+            isChecked: false,
           };
-          if (isCreatedByMe) sentEmails.push(currentObject);
-          else inboxEmailsData.push(currentObject);
+          inboxEmailsData.push(currentObject);
+          // if (isCreatedByMe) sentEmails.push(currentObject);
+          // else inboxEmailsData.push(currentObject);
         });
         dispatch({
           type: 'initialize',
@@ -148,6 +201,7 @@ const Email = () => {
         });
         setSentEmails(sentEmails);
         setInboxEmails(inboxEmailsData);
+
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
@@ -166,7 +220,7 @@ const Email = () => {
   };
 
   const transform = (node, index) => {
-    if (node.type === 'tag' && ['h2', 'h1', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'del'].indexOf(node.name) >= 0) {
+    if (node.type === 'tag' && ['h2', 'h1', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'del', 'img'].indexOf(node.name) >= 0) {
       node.name = 'p';
       return convertNodeToElement(node, index, transform);
     }
@@ -174,11 +228,19 @@ const Email = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      <Tooltip title="Delete">
-        <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
-          <DeleteIcon fontSize="small" color="error" />
-        </IconButton>
-      </Tooltip>
+      {permissions.email.isDelete ?
+        (<Tooltip title="Delete">
+          <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(params.data)}>
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </Tooltip>)
+        : (
+          <Tooltip className="cursor-stop" title="You don't have the permissions to delete">
+            <IconButton size="small" aria-label="Delete">
+              <DeleteIcon fontSize="small" color="disabled" />
+            </IconButton>
+          </Tooltip>
+        )}
     </>
   );
 
@@ -214,10 +276,35 @@ const Email = () => {
     </div>
   );
 
+  const ReferenceRenderer = (params) => (
+    <>{params.value && params.value?.length > 0 ? params.value.map(d => {
+      return (
+        <>
+          <Link
+            className="link text-truncate"
+            onClick={() => redirectToResource(d?.type, d?.referenceId)}
+
+          >
+            {d?.salutation ? `${d?.saluation} ${d?.name}` : d?.name}
+          </Link>
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`${routes[d?.type]?.title}`}
+          />
+        </>
+      )
+    })
+      : <NoDataCell />
+    }
+    </>
+  );
+
   const CreatedByDateRenderer = (params) => <span className={emailStyles.emailCreatedAt}>{displayDate(params.data?.createdByDate)}</span>;
 
   const frameworkComponents = {
     recipentRenderer: RecipentRenderer,
+    referenceRenderer: ReferenceRenderer,
     subjectRenderer: SubjectRenderer,
     messageRenderer: MessageRenderer,
     createdByDate: CreatedByDateRenderer,
@@ -239,7 +326,7 @@ const Email = () => {
           term: filters[field].filter
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -249,7 +336,6 @@ const Email = () => {
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
-
     return deepFilter;
   };
 
@@ -291,7 +377,6 @@ const Email = () => {
 
   const handleDeleteEmails = async () => {
     setDeleteLoading(true);
-
     if (deleteRecord?.id || selectedRecords.length > 0) {
       axiosInstance()
         .put('/email', { emails: deleteRecord?.id ? [deleteRecord.id] : selectedRecords.map((d) => d._id) })
@@ -335,94 +420,168 @@ const Email = () => {
           <CustomBreadCrumbs routes={[{ title: routes.activityEmail.title }]} />
         </Grid>
       </Grid>
+
       <CustomContainer>
-        <div className="header-panel">
-          <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} sm={6} md={6} className="d-flex align-items-center gap-1">
-              <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{routes.activityEmail.title}</span>
-              <ToggleButtonGroup size="small" className="ml-8" value={currentTab} exclusive onChange={handleTab}>
-                {Object.keys(tabs).map((k, index) => (
-                  <ToggleButton value={tabs[k]} key={index} className="l-2">
-                    {k} {currentTab === tabs[k] ? `(${rowCount})` : ''}
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup>
-            </Grid>
-            <Grid item xs={6} className={styles.filter_side}>
-              <Box component="div" className={styles.filter_side_header} style={{ width: '100%' }}>
-                {/* <Box style={{ width: '70%' }}> */}
-                <SearchFilter
-                  handleChangeFilter={handleChangeFilter}
-                  filter={filter}
-                  chip={{ size: 'small' }}
-                  activityName="email"
+        {filter &&
+          <div className="header-panel">
+            <Grid container className={styles.filter_side_container}>
+              <Grid item xs={12} sm={12} md={6} className="d-flex align-items-center gap-1">
+                <HiOutlineMail className="headerLogo" /> <span className="listingHeader">{routes.activityEmail.title}</span>
+                <Autocomplete
+                  options={resourceOptions}
+                  getOptionLabel={(option) => option.optionLabel}
+                  style={{ width: "250px" }}
+                  value={resource}
+                  onChange={(event, newValue) => {
+                    setResource(newValue);
+                    if (newValue) {
+                      setFilter((prevState) => ([...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]))
+                    }
+                    else {
+                      setFilter([])
+                    }
+                  }}
+                  size="small"
+                  renderInput={(params) =>
+                    isMobile && !isTablet ? (
+                      <TextField {...params} label="Select Resource" variant="standard" className={isMobile ? 'serchBox' : ''} />
+                    ) : (
+                      <TextField {...params} label="Select Resource" variant="outlined" />
+                    )
+                  }
                 />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  className={styles.add_submit_btn}
-                  onClick={() => {
-                    setOpen(true);
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Add
-                </Button>
-
-                {/* </Box> */}
-                <Button
-                  className={styles.action_submit_btn}
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords.length > 0 ? false : true}
-                >
-                  Actions <ExpandMore />
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      showConfirmBox(null);
-                      closeActions();
+                {resource && resourceData && (
+                  <Autocomplete
+                    disabled={loadingResources}
+                    options={resourceData}
+                    getOptionLabel={(option: any) => option.name}
+                    getOptionSelected={(option: any, value: any) => option.name === value.name}
+                    style={{ width: "250px" }}
+                    value={selectedResourceData}
+                    onChange={(event, newValue) => {
+                      setSelectedResourceData(newValue);
+                      if (newValue?.id) {
+                        setFilter((prevState) => ([...prevState, { _id: newValue.id, type: resource.optionValue, name: newValue.name }]))
+                      }
+                      else {
+                        setFilter([])
+                      }
                     }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </Box>
+                    size="small"
+                    renderInput={(params) => <TextField {...params} label={`Select ${resource.optionLabel}`} variant="outlined" />}
+                  />
+                )}
+              </Grid>
+              <Grid item xs={12} md={6} sm={12} className={styles.filter_side}>
+                <Box component="div" className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} style={{ width: '100%' }}>
+                  <Grid style={{ width: '100%', display: 'flex' }}>
+                    <SearchFilter
+                      handleChangeFilter={handleChangeFilter}
+                      filter={filter}
+                      chip={{ size: 'large' }}
+                      activityName="email" />
+                  </Grid>
+                  <Grid style={{ display: 'flex', gap: '5px' }}>
+                    {
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setOpen(true);
+                        }}
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                        startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                      >
+                        {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                      </Button>
+                    }
+                    {/* </Box> */}
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      disabled={selectedRecords.length > 0 ? false : true}
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                    >
+                      {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      <MenuItem
+                        onClick={() => {
+                          showConfirmBox(null);
+                          closeActions();
+                        }}
+                        disabled={!permissions.email.isDelete}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
+                  </Grid>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </div>
-        <CustomAgGrid
-          columns={columns}
-          dataRows={dataRows}
-          frameworkComponents={frameworkComponents}
-          setGridApi={setGridApi}
-          dispatch={dispatch}
-          rowCount={rowCount}
-          limit={limit}
-          pageSizes={pageSizes}
-          page={page}
-          actionWidth={150}
-          loading={loading}
-          renderedFrom="emailPage"
-          refreshGrid={fetchEmails}
-        />
-
+          </div>
+        }
+        {isMobile && !isTablet ? (
+          <CustomSwipableList
+            allowSelection={true}
+            allowSwipe={true}
+            permissions={permissions.note}
+            primaryField={columns?.find((d) => d.primaryField)}
+            onClick={(data) => {
+              if (permissions?.email?.isUpdate) {
+                setOpen(true);
+                setEmailId(data.id);
+              }
+            }}
+            dataRows={dataRows}
+            selectedRecords={selectedRecords}
+            dispatch={dispatch}
+            onEdit={false}
+            extraParamsToCheckDelete={true}
+            onDelete={(data) => {
+              showConfirmBox(data);
+            }}
+            rowCount={rowCount}
+            page={page}
+            loading={loading}
+            onCreate={false}
+            showClone={false}
+            onClone={false}
+            renderedFrom={'emailPage'}
+            chips={false}
+          />
+        ) : (
+          <CustomAgGrid
+            columns={columns}
+            dataRows={dataRows}
+            frameworkComponents={frameworkComponents}
+            setGridApi={setGridApi}
+            dispatch={dispatch}
+            rowCount={rowCount}
+            limit={limit}
+            pageSizes={pageSizes}
+            page={page}
+            actionWidth={150}
+            loading={loading}
+            renderedFrom="emailPage"
+            refreshGrid={fetchEmails}
+          />
+        )}
         {showDeleteWarningConfirmBox ? (
           <MessageDialog
             open={showDeleteWarningConfirmBox}
@@ -445,19 +604,38 @@ const Email = () => {
         {open ? (
           <Dialog
             open={open}
-            fullScreen={isMobile || isTablet}
+            fullScreen={fullScreen || isMobile || isTablet}
             TransitionComponent={CustomDialogTransition}
             aria-labelledby="customized-dialog-title"
             maxWidth="md"
-            onClose={handleClose}
+            onClose={(e, reason) => {
+              if (reason !== 'backdropClick') {
+                handleClose()
+                setFullScreen(false);
+              }
+            }}
             fullWidth
           >
             <CreateEmail
               emailId={emailId}
-              handleClose={handleClose}
+              handleClose={() => {
+                handleClose();
+                setFullScreen(false);
+              }}
               fetchData={fetchEmails}
-              relatedTo={[{ type: 'my', name: user?.user?._id }]}
+              relatedTo={[
+                {
+                  type: resource && selectedResourceData ? resource.optionValue : "user",
+                  referenceId: resource && selectedResourceData ? selectedResourceData.id : user?.user?._id,
+                  access: true,
+                },
+              ]}
               options={emailUsersOptions}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
             />
           </Dialog>
         ) : null}

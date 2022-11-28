@@ -6,9 +6,9 @@ import {
   Grid,
   Paper,
   Button,
-  LinearProgress,
   Box,
   Link as MuiLink,
+  CircularProgress,
 } from '@material-ui/core';
 import { Formik, Form, Field } from 'formik';
 import { TextField } from 'formik-material-ui';
@@ -74,7 +74,6 @@ const ResetPassword = () => {
 
   useEffect(() => {
     checkToken()
-    // eslint-disable-next-line
   }, []);
 
   const checkToken = async () => {
@@ -221,13 +220,14 @@ const ResetPassword = () => {
                       required
                     />
                     <br />
-                    {isSubmitting && <LinearProgress />}
                     <Button
                       variant='contained'
                       color='primary'
                       size="small"
                       disabled={isSubmitting || !isTokenValid || !tokenChecking}
-                      onClick={submitForm}>
+                      onClick={submitForm}
+                      startIcon={isSubmitting && <CircularProgress size={20} color='inherit' />}
+                      >
                       Submit
                     </Button>
                   </Form>

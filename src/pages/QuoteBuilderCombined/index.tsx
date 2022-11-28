@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useContext, useReducer, Fragment } from "react";
+import { useState, useEffect, useContext, useReducer, Fragment } from "react";
 import { Grid, Chip, Typography, Tooltip } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { useData } from "../../StateProvider/Provider";
 import axiosInstance from "../../axios/axiosInstance";
-import { displayDate } from "../../services/util";
 import ConfirmationDialog from "../../components/Helpers/ConfirmationDialog";
 import MessageDialog from "../../components/Helpers/MessageDialog";
 import CustomBreadCrumbs from "./../../components/CustomBreadCrumbs";
 import routes from "./../../components/Helpers/Routes";
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
 import { GiHiveMind } from "react-icons/gi";
+import { SiMarketo, AiFillFileMarkdown, FaPercentage, SiStatuspage, GoVersions } from "react-icons/all";
 import {
   isObjectEmpty,
   customerAccount,
@@ -18,6 +18,11 @@ import {
   formatAmountWithCurrency,
   gridLoadingTimeout,
   prepareDataForGrid,
+  customerContact,
+  supplierContact,
+  quote,
+  getLocalStorageArrayData,
+  removeLocalStorage
 } from "../../constants/helpers";
 import ImportExportLinks from "../../components/Helpers/ImportExportLinks";
 import CustomContainer from "../../components/CustomContainer";
@@ -39,9 +44,18 @@ import NoDataCell from "../../components/Helpers/NoDataCell";
 import CustomDialogComponent from "../../components/CustomDialog/CustomDialogComponent";
 import VersionStatus from "./VersionStatus";
 import TransferEntityDialog from "../../components/AssignRolesDialog/TransferEntityDialog";
-import CustomDialogContent from "../../components/CustomDialog/CustomDialogContent";
 import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
-import { getColumnData, getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/columns"
+import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from "../../constants/useColumns"
+import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import { isMobile, isTablet } from 'react-device-detect';
+import { quoteStepColors } from '../../constants/helpers';
+import InfiniteScroll from "react-infinite-scroll-component";
+import { FaSuitcase } from "react-icons/fa";
+import { AiFillCrown, BiDollar } from "react-icons/all";
+import IconButton from "@material-ui/core/IconButton";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import { styles } from "@material-ui/pickers/views/Calendar/Calendar";
+import { camelCase } from "lodash";
 
 let quoteTimeout;
 const QuoteType = [
@@ -57,11 +71,14 @@ const QuoteType = [
 const arr = [...Array(9).keys()];
 
 const QuoteBuilders = () => {
+  const renderedFrom = camelCase(routes?.quoteBuilder.title)
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
     state: { user, selectedEntity, permissions },
   }: any = useData();
+  const { getColumnData } = useColumns();
+  const { quoteResource } = quote;
   const [selectedType, setSelectedType] = useState(1);
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -89,83 +106,26 @@ const QuoteBuilders = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource,
   });
+
+  const [contactDetails, setContactDetails] = useState({
+    contactId: history.location?.state?.contactId,
+    contactName: history.location?.state?.contactName,
+    resource: history.location?.state?.resource,
+  })
+  const [opportunityDetails, setOpportunityDetails] = useState({
+    opportunityId: history.location?.state?.opportunityId,
+    opportunityName: history.location?.state?.opportunityName,
+  })
   const [showVersionsDialog, setShowVersionsDialog] = useState(false);
   const [frameWorkComponent, setFrameWorkComponent] = useState({})
   const [columns, setColumns] = useState([])
-  const [versionStatusData, setVersionStatusData] = useState({
-    columns: [
-      {
-        field: "versionNumber", headerName: "Version #", flex: .75,
-        renderCell: (params: any) => (
-          <span
-            title={params.value}
-          >
-            {params.value}
-          </span>
-        ),
-      },
-      {
-        field: "status", headerName: "Status", flex: 1,
-        renderCell: (params: any) => (
-          <span
-            title={params.value}
-            className="text-truncate link"
-            onClick={() => {
-              history.push(`quotes/detail/${params.row._id}`, {
-                versionNumber: `${params.row.versionNumber}`,
-                tabValue: 2
-              })
-            }}
-          >
-            {params.value}
-          </span>
-        ),
-      },
-      {
-        field: "comment", headerName: "Comment", flex: 1,
-        renderCell: (params: any) => (
-          <Typography
-            title={params.value}
-            className="text-truncate"
-          >
-            {params.value}
-          </Typography>
-        ),
-      },
-      {
-        field: "processStatus", headerName: "Current Step", flex: 1,
-        renderCell: (params: any) => (
-          <Typography
-            title={params.value}
-          >
-            {params.value}
-          </Typography>
-        ),
-      },
+  const [isAllChecked, setIsAllChecked] = useState(false);
+  const [doa, setDoa] = useState([]);
+  const [clonedData, setClonedData] = useState([])
+  const [clonedId, setClonedId] = useState(null)
 
-      {
-        field: "totalCost", headerName: "Total Cost", flex: 1,
-        renderCell: (params: any) => (
-          <span>
-            {params.value}
-          </span>
-        ),
-      },
-      {
-        field: "totalSalesPrice",
-        headerName: "Total Sales Price",
-        flex: 1,
-        renderCell: (params: any) => (
-          <span
-          >
-            {params.value}
-          </span>
-        ),
-      },
-      // { field: "processStatus", headerName: "ProcessStatus" }
-    ],
-    data: [],
-  });
+  const [versionStatusData, setVersionStatusData] = useState([]);
+  const [cloneQuoteWithVersionNumber, setCloneQuoteWithVersionNumber] = useState(0);
 
   const { qbApi } = quoteBuilder;
 
@@ -183,56 +143,11 @@ const QuoteBuilders = () => {
     filters,
     sorting,
     selectedRecords,
+    appendRows,
+    showFilteredRecordsOnly
   } = state;
 
-  // const columns = [
-  //   {
-  //     field: "quoteName",
-  //     headerName: "Quote Name",
-  //     show: true,
-  //     disabled: true,
-  //     cellRenderer: "quoteNameRenderer",
-  //   },
-  //   {
-  //     field: "customerAccountName",
-  //     headerName: "Customer Account Name",
-  //     show: true,
-  //     cellRenderer: "customerAccountNameRenderer",
-  //   },
-  //   {
-  //     field: "relatedOpportunity",
-  //     headerName: "Related Opportunity",
-  //     show: true,
-  //     cellRenderer: "relatedOpportunityRenderer"
-  //   },
-
-  //   {
-  //     field: "createdBy",
-  //     headerName: "Created By",
-  //     show: true,
-  //     cellRenderer: "createdByRenderer",
-  //   },
-  //   {
-  //     field: "updatedBy",
-  //     headerName: "Updated By",
-  //     show: true,
-  //     cellRenderer: "updatedByRenderer",
-  //   },
-  //   {
-  //     field: "expiryDate",
-  //     headerName: "Expiry Date",
-  //     show: true,
-  //     filter: false,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  //   {
-  //     field: "owner",
-  //     headerName: "Quote Owner",
-  //     show: true,
-  //     cellRenderer: "commonRenderer",
-  //   },
-  // ];
-  //  Grid Variables - End
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   useEffect(() => {
     fetchGridColumns()
@@ -241,7 +156,7 @@ const QuoteBuilders = () => {
   const fetchGridColumns = async () => {
 
     const response = await axiosInstance()
-      .get(`/field?resource=Quotes&entity=${selectedEntity}`)
+      .get(`/field?resource=Quotes&entity=${selectedEntity}&view=true`)
 
     let data = response?.data?.data
 
@@ -252,14 +167,15 @@ const QuoteBuilders = () => {
         columns = [...columns, {
           disabled: true,
           field: "quoteName",
-          headerName: "Quote Name",
+          headerName: "Quote Number",
           pivotIndex: 0,
           show: true,
-          cellRenderer: "quoteNameRenderer"
+          cellRenderer: "quoteNameRenderer",
+          primaryField: true
         }]
       }
       else {
-        let currentColumn = getColumnData(routes.quoteBuilder.title, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
+        let currentColumn = getColumnData(renderedFrom, o?.fieldData, `${routes.quoteBuilder.path}/detail`)
         if (currentColumn !== null) {
           columns = [...columns, currentColumn?.columnData]
           if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -273,8 +189,17 @@ const QuoteBuilders = () => {
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
       quoteNameRenderer: QuoteNameRenderer,
+      relatedOpportunityRenderer: RelatedOpportunityRenderer,
       actionsRenderer: ActionsRenderer
     }
+    columns = [...columns,
+    {
+      field: "relatedOpportunity",
+      headerName: "Related Opportunity",
+      show: true,
+      cellRenderer: "relatedOpportunityRenderer"
+    }
+    ]
     setFrameWorkComponent({ ...tempFrameworkComponent })
     let staticFields = getStaticFields()
     staticFields.forEach(field => {
@@ -302,7 +227,6 @@ const QuoteBuilders = () => {
     quoteTimeout = setTimeout(() => {
       fetchQuoteBuilder();
     }, millisec);
-    // eslint-disable-next-line
   }, [search]);
 
   useEffect(() => {
@@ -317,6 +241,9 @@ const QuoteBuilders = () => {
     sorting,
     selectedEntity,
     accountDetails,
+    contactDetails,
+    opportunityDetails,
+    showFilteredRecordsOnly
   ]);
 
   const getVersionStatus = (id, currency) => {
@@ -332,52 +259,39 @@ const QuoteBuilders = () => {
     axiosInstance()
       .get(`/quote-builder/quote-hierarchy/${id}`)
       .then(({ data: { data } }) => {
-        //   toastConfig.setToastConfig({
-        //     open: true,
-        //     type: "success",
-        //     message: "Data Retreived successfully",
-        // });
-        // setShowVersionsDialog(true);
-        let quoteId = id;
         const newData = data.versions.map((d, index) => {
           return {
             ...d,
             id: index + 1,
             versionNumber: index + 1,
-            _id: quoteId,
+            quoteId: id,
             totalCost: formatAmountWithCurrency(
               currency,
-              d.productData.totalCost
+              d?.productData?.totalCost
             ).fullFormatAmount,
             totalSalesPrice: formatAmountWithCurrency(
               currency,
-              d.productData.totalSalesPrice
+              d?.productData?.totalSalesPrice
             ).fullFormatAmount,
-            comment: d.comment ? d.comment : "",
+            comment: d.comment || "",
           };
         });
 
-        setVersionStatusData((prevState) => {
-          return {
-            ...prevState,
-            data: newData,
-          }
-
-        });
-
-
+        setVersionStatusData(newData);
         setLoadingVersions(false);
-        // setAllVersionStatusButtonText("All Version Status");
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setLoadingVersions(false);
-        // setAllVersionStatusButtonText("All Version Status");
       });
   };
 
   const handleSingleDeleteQuote = async () => {
     dispatch({ type: "loading", loading: true });
+
+    const savedIds = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+    localStorage.setItem(localStorageSelectedRecords, JSON.stringify(savedIds.filter(f => f !== singleQuoteDelete.id)));
+    dispatch({ type: "selection", selectedRecords: selectedRecords.filter(f => f._id !== singleQuoteDelete.id) });
 
     axiosInstance()
       .put(`${qbApi}/remove?entity=${selectedEntity}`, {
@@ -398,7 +312,6 @@ const QuoteBuilders = () => {
         toastConfig.setToastConfig(error);
       });
   };
-
   const handleShowCloneQuoteDialog = () => {
     setIsClone(true)
     setshowCreateQuoteDialog(true)
@@ -446,7 +359,28 @@ const QuoteBuilders = () => {
   </>
 
   const ActionsRenderer = (params) => (
-    <>
+    <>{quotePermissions?.isCreate ?
+      (<Tooltip
+        title={"Clone"} >
+        <IconButton
+          size="small"
+          aria-label="Clone"
+          onClick={() => {
+            handleShowCloneQuoteDialog()
+            setClonedId(params.data?._id)
+          }}
+        >
+          <FileCopyIcon fontSize="small" color="primary" />
+        </IconButton>
+      </Tooltip>) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton aria-label="Clone" size="small">
+            <FileCopyIcon />
+          </IconButton>
+        </Tooltip>
+      )
+    }
+
       <GridDeleteIcon
         hasDeletePermission={quotePermissions.isDelete}
         ownerId={params.data.ownerId}
@@ -506,11 +440,20 @@ const QuoteBuilders = () => {
     }
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}&filterQuotes=${selectedType}`;
+
+    if (isExport) {
+      deepFilter = `filterQuotes=${selectedType}`;
+    }
 
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
     }
 
     if (accountDetails.accountId) {
@@ -531,6 +474,33 @@ const QuoteBuilders = () => {
       }
     }
 
+    if (contactDetails.contactId) {
+      if (contactDetails.resource === customerContact.contactResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          {
+            field: replaceFieldName("customerContactName"),
+            term: contactDetails.contactId,
+          },
+        ])}`;
+      } else if (contactDetails.resource === supplierContact.contactResource) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+          {
+            field: replaceFieldName("supplierContactName"),
+            term: { $in: [contactDetails.contactId] },
+          },
+        ])}`;
+      }
+    }
+
+    if (opportunityDetails.opportunityId) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify([
+        {
+          field: "opportunity",
+          term: opportunityDetails.opportunityId
+        }
+      ])}`
+    }
+
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
 
@@ -540,9 +510,7 @@ const QuoteBuilders = () => {
           term: filters[field].filter,
         });
       });
-      deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(
-        updatedFilters
-      )}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURI(JSON.stringify(updatedFilters))}&filterType=and`;
     }
 
     if (sorting.length > 0) {
@@ -552,7 +520,7 @@ const QuoteBuilders = () => {
     }
 
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURI(search)}`;
     }
 
     return deepFilter;
@@ -570,7 +538,13 @@ const QuoteBuilders = () => {
       axiosInstance()
         .get(`${qbApi}${queryString}`)
         .then(({ data: { data, count } }) => {
+
+          let clonedData = {}
           let rows = data.map((u) => {
+            clonedData = {
+              ...clonedData,
+              [u.quoteName]: u
+            }
 
             let versionCount = Object.keys(u.versions).length;
             let tempStatus = "Building Quote"
@@ -585,9 +559,11 @@ const QuoteBuilders = () => {
             }
 
             //  Dynamic grid code - start
-            let finalObject = prepareDataForGrid(u);
+            let finalObject = prepareDataForGrid(u, user);
 
             //  Custom props which are required
+            finalObject["relatedOpportunity"] = u.opportunity?.optionLabel;
+            finalObject["relatedOpportunityId"] = u.opportunity?.optionValue;
             finalObject["id"] = u._id;
             finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
             finalObject["createdBy"] = u.createdBy?.user?.concatedName;
@@ -598,11 +574,66 @@ const QuoteBuilders = () => {
             finalObject["versionCount"] = versionCount;
             finalObject["versionData"] = versionArray;
 
+            finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
+            finalObject["allowedToEdit"] = (
+              [...(u.collaborator ?? []), u.owner].some(
+                (d) => d?.optionValue === user?.user?._id
+              )
+            );
+
+            finalObject["owerCollaboratorInitialsOrImages"] = [];
+            if (finalObject["owner"])
+              finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
+            if (finalObject["collaborator"])
+              finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["collaborator"] });
+            if (finalObject["restcollaborator"]?.length > 0) {
+              finalObject["restcollaborator"].forEach((m: any) => {
+                finalObject["owerCollaboratorInitialsOrImages"].push({ initials: m.optionLabel })
+              });
+            }
+
+            finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+              if (f.initials) {
+                f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+              }
+            })
+
             return finalObject;
           });
+
+
           //  Dynamic grid code - end
 
-          dispatch({ type: "initialize", data: rows, count: count });
+          setIsAllChecked(false);
+          setClonedData(data)
+
+          if (appendRows) {
+            dispatch({
+              type: "initialize", data: [...dataRows, ...rows],
+              count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+            });
+          } else {
+            dispatch({
+              type: "initialize", data: rows, count: count,
+              selectedRecords: rows.filter(f => f.isChecked === true)
+            });
+          }
+
+          if (gridApi) {
+            try {
+              let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+              if (oldSelectedRecords.length > 0) {
+                gridApi.forEachNode(function (node) {
+                  node.setSelected(
+                    oldSelectedRecords.some((o) => o === node.data._id)
+                  );
+                });
+              }
+            } catch (ex) {
+              console.error("Error in getting selected records from local storage")
+            }
+          }
+
           setTimeout(() => {
             dispatch({ type: "loading", loading: false });
           }, gridLoadingTimeout);
@@ -670,6 +701,13 @@ const QuoteBuilders = () => {
             type: "success",
             message: data.message,
           });
+
+          let storedSelectedIds = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+          recordsToDelete.forEach((idToDeleteFromLocalStorage) => {
+            storedSelectedIds = storedSelectedIds.filter(id => id !== idToDeleteFromLocalStorage)
+          })
+          localStorage.setItem(localStorageSelectedRecords, JSON.stringify(storedSelectedIds));
+          removeLocalStorage(localStorageSelectedRecords)
           setIsConformDialogVisible(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -683,8 +721,16 @@ const QuoteBuilders = () => {
     }
   };
 
+  const handleCloneQuoteWithVersionFromAllVersion = (quoteId, versionNumber) => {
+    setCloneQuoteWithVersionNumber(versionNumber);
+    setshowCreateQuoteDialog(true);
+    setIsClone(true)
+    setClonedId(quoteId)
+    setShowVersionsDialog(false);
+  };
+
   return (
-    <>
+    <div className="quote_index_page">
       <Fragment>
         <Grid container className="headerbox">
           <Grid item md={4} sm={11} xs={10}>
@@ -703,12 +749,13 @@ const QuoteBuilders = () => {
                     }}
                     isExportAllOrSomeFeature={true}
                     total={rowCount}
-                    recordsToExport={selectedRecords.length}
-                    ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
+                    recordsToExport={getLocalStorageArrayData(localStorageSelectedRecords).length}
+                    ids={getLocalStorageArrayData(localStorageSelectedRecords)?.map(m => m._id)}
                     onExportToExcelSuccess={() => {
                       if (gridApi) gridApi.deselectAll()
                       else fetchQuoteBuilder()
                     }}
+                    additionalParams={getQueryString(true)}
                   />
                 </Grid>
               </Grid>
@@ -735,7 +782,9 @@ const QuoteBuilders = () => {
               showCloneQuoteDialog={() => {
                 handleShowCloneQuoteDialog()
               }}
-
+              columns={columns}
+              dispatch={dispatch}
+              filters={filters}
             >
               {accountDetails.accountId && (
                 <Chip
@@ -751,25 +800,129 @@ const QuoteBuilders = () => {
                   }}
                 />
               )}
+              {contactDetails.contactId && (
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={`Contact: ${contactDetails.contactName}`}
+                  onDelete={() => {
+                    setContactDetails({
+                      contactId: null,
+                      contactName: null,
+                      resource: null,
+                    });
+                  }}
+                />
+              )}
+
+              {opportunityDetails.opportunityId && (
+                <Chip
+                  className="ml-3"
+                  color="primary"
+                  label={`Opportunity: ${opportunityDetails.opportunityName}`}
+                  onDelete={() => {
+                    setOpportunityDetails({
+                      opportunityId: null,
+                      opportunityName: null
+                    });
+                  }}
+                />
+              )}
             </QuoteHeader>
           </div>
           {
-            Object.keys(frameWorkComponent).length > 0 ?
-              <CustomAgGrid
-                columns={columns}
+            isMobile && !isTablet ?
+              <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions.quoteBuilder}
+                primaryField={columns?.find(d => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${routes.quoteBuilderDetail.path}/${data._id}`)
+                }}
                 dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
+                selectedRecords={selectedRecords}
                 dispatch={dispatch}
+                onEdit={(data) => {
+                  history.push(`${routes.quoteBuilderDetail.path}/${data._id}?openEdit=true`)
+                }}
+                extraParamsToCheckDelete={true}
+                onDelete={(data) => {
+                  setSingleQuoteDelete({
+                    show: true,
+                    id: data._id,
+                    quoteName: `${data.quoteName}`,
+                  })
+                }}
                 rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
                 page={page}
-                actionWidth={100}
                 loading={loading}
-                renderedFrom={routes.quoteBuilder.title}
-                refreshGrid={fetchQuoteBuilder}
-              /> : null
+                additionalDetails={[
+                  {
+                    icon: <FaSuitcase size={18} />,
+                    field: "customerAccountName"
+                  },
+                  {
+                    icon: <BiDollar size={18} />,
+                    field: "estimatedAmount"
+                  }
+                ]}
+                chips={[
+                  {
+                    icon: <GoVersions />,
+                    label: "Version(s): ",
+                    field: "versionCount",
+                    onClick: (data) => {
+                      setShowVersionsDialog(true)
+                      getVersionStatus(data._id, data.currency)
+
+                    }
+                  },
+                  {
+                    icon: <SiStatuspage />,
+                    label: "Status: ",
+                    field: "status",
+                    chipColorVariable: quoteStepColors
+
+                  },
+                  {
+                    icon: <AiFillFileMarkdown />,
+                    label: "Market:",
+                    field: "marketSegment"
+
+                  },
+                  {
+                    icon: <SiMarketo />,
+                    label: "Sub-Market:",
+                    field: "subMarketSegment"
+
+                  },
+
+                ]}
+                owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
+                onCreate={false}
+                showClone={false}
+                onClone={() => { }}
+                renderedFrom={renderedFrom}
+              /> : (
+                Object.keys(frameWorkComponent).length > 0 ?
+                  <CustomAgGrid
+                    columns={columns}
+                    dataRows={dataRows}
+                    frameworkComponents={frameWorkComponent}
+                    setGridApi={setGridApi}
+                    dispatch={dispatch}
+                    rowCount={rowCount}
+                    limit={limit}
+                    pageSizes={pageSizes}
+                    page={page}
+                    actionWidth={100}
+                    loading={loading}
+                    renderedFrom={renderedFrom}
+                    refreshGrid={fetchQuoteBuilder}
+                    showOnlyShowFilteredRecordSwitch={true}
+                  /> : null
+              )
           }
 
           {showDeleteWarningConfirmBox ? (
@@ -817,9 +970,10 @@ const QuoteBuilders = () => {
           onClose={() => {
             setshowCreateQuoteDialog(false);
             setIsClone(false)
+            setClonedId(null)
           }}
           isNew={isClone ? false : true}
-          dataToUpdate={isClone ? { ...selectedRecords[0], ...{ 'owner': { 'optionLabel': selectedRecords[0].owner, 'optionValue': selectedRecords[0].ownerId } } } : null}
+          dataToUpdate={isClone ? clonedId && clonedData ? clonedData.filter(o => o._id === clonedId)[0] : clonedData.filter(o => o._id === selectedRecords[0]._id)[0] : null}
           isClone={isClone ? true : false}
           resource={null}
           isRedirectTodetailPage={isClone ? false : true}
@@ -827,8 +981,9 @@ const QuoteBuilders = () => {
           opportunityId={null}
           disableOwnerDropDown={true}
           contacts={null}
-          doaCollaboratorResources={user.user?.doa?.map(obj => obj.user)}
+          doaCollaboratorResources={doa}
           isRenderedFromOpportunity={false}
+          cloneQuoteWithVersionNumber={cloneQuoteWithVersionNumber}
         />
       )}
 
@@ -839,17 +994,17 @@ const QuoteBuilders = () => {
           open={showVersionsDialog}
           onClose={() => {
             setShowVersionsDialog(false);
-            setVersionStatusData((prevState) => ({ ...prevState, data: [] }))
+            setVersionStatusData([])
           }}
         >
-          <CustomDialogContent>
-            {versionStatusData.data.length === 0 && (
+          {
+            versionStatusData.length === 0 ?
               <CommonSkeleton lenArray={arr} />
-            )}
-            {versionStatusData.data.length > 0 &&
-              <VersionStatus loadingVersions={loadingVersions} versionStatusData={versionStatusData}
-              />}
-          </CustomDialogContent>
+              :
+              <VersionStatus
+                handleCloneQuoteWithVersionFromAllVersion={handleCloneQuoteWithVersionFromAllVersion}
+                versionStatusData={versionStatusData} />
+          }
         </CustomDialogComponent>
       )}
       {showTransferEntityDialog && (
@@ -868,7 +1023,7 @@ const QuoteBuilders = () => {
           api="quote-builder"
         />
       )}
-    </>
+    </div>
   );
 };
 

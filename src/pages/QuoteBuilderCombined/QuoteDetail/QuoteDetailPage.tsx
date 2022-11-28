@@ -10,11 +10,12 @@ import { CustomToastContext } from "../../../StateProvider/CustomToastContext/Cu
 const useStyles = makeStyles(() => ({
     detailBox: {
         border: "1px solid #163340",
+        borderTop: "0px"
     },
     btnHeader: {
         position: "absolute",
-        top: "4px",
-        right: "20px",
+        top: "13px",
+        right: "36px",
     },
 }));
 
@@ -32,12 +33,12 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
             modifiedData["estimatedAmount"] = formatAmountWithCurrency(
                 modifiedData["currency"],
                 modifiedData["estimatedAmount"]
-            ).shortFormatAmount;
+            ).fullFormatAmount;
 
             modifiedData["invoiceAmount"] = formatAmountWithCurrency(
                 modifiedData["currency"],
                 modifiedData["invoiceAmount"]
-            ).shortFormatAmount;
+            ).fullFormatAmount;
         }
         return modifiedData;
     }, [quoteData?.accountName, quoteData?.closeDate, quoteData?.estimatedAmount, quoteData?.currency, quoteData?.owner,]);
@@ -88,10 +89,10 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
             {quoteData  && (
                 <>
                     <div className={classes.btnHeader}>
-                        {quotePermissions?.isCreate ? (
+                        {/* {quotePermissions?.isCreate ? (
                             <Button
-                                variant="contained"
-                                color="primary"
+                                variant="text"
+                                style={{color:"white"}}
                                 size="small"
                                 className="mr-1"
                                 startIcon={<BiLayerPlus />}
@@ -102,15 +103,15 @@ export default function QuoteDetailPage({ quoteData, quotePermissions, selectedE
                         ) : null}
                         {allowedToEdit ? (
                             <Button
-                                variant="contained"
-                                color="primary"
+                                variant="text"
+                                style={{color:"white"}}
                                 size="small"
                                 startIcon={<HiPencil />}
                                 onClick={handleOpenUpdateDialog}
                             >
                                 Edit
                             </Button>
-                        ) : null}
+                        ) : null} */}
                     </div>
                     {!loadingFields && quoteFields ? (
                         <DetailsPage

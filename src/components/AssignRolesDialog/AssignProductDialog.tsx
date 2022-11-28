@@ -1,248 +1,322 @@
-import { useState, useEffect, useContext, useReducer } from "react";
+import { useState, useEffect, useContext, useReducer } from 'react';
+import { Box, Button, ButtonGroup, CircularProgress, Dialog, Grid, IconButton } from '@material-ui/core';
+import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import SearchBox from '../Helpers/SearchBox';
 import {
-    Box,
-    Button,
-    ButtonGroup,
-    Checkbox,
-    CircularProgress,
-    Dialog,
-    FormControl,
-    Grid,
-    IconButton,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    TextField,
-    Typography,
-} from "@material-ui/core";
-import CustomDialogContent from "../CustomDialog/CustomDialogContent";
-import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
-import Loader from "../Loader";
-import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
-import axiosInstance from "../../axios/axiosInstance";
-import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import SearchBox from "../Helpers/SearchBox";
-import { gridLoadingTimeout, isObjectEmpty, product } from "../../constants/helpers";
-import CustomAgGrid, { reducer, intialState } from "../../components/AgGridComponents/CustomAgGrid";
-import { useData } from "../../StateProvider/Provider";
-import CommonSkeleton from "../Helpers/CommonSkeleton";
-import { CommonRenderer } from "../AgGridComponents/CustomAgGridCellRenderers";
-import routes from "../Helpers/Routes";
-import styles from "../../pages/Leads/Header.module.scss";
-import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import { AddOutlined, RemoveOutlined } from "@material-ui/icons";
-import CustomAgGridEditable from "../AgGridComponents/CustomAgGridEditable";
+  gridLoadingTimeout,
+  isObjectEmpty,
+  product,
+  packages,
+  prepareDataForGrid,
+  getLocalStorageArrayData,
+  serviceMaster,
+  workOrder
+} from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
+import routes from '../Helpers/Routes';
+import styles from 'src/pages/Leads/Header.module.scss';
+import { AddOutlined, RemoveOutlined } from '@material-ui/icons';
+import CustomAgGridEditable, { reducer, intialState } from '../AgGridComponents/CustomAgGridEditable';
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 const options = [
-    {
-        key: `All ${routes.product.title}`,
-        value: 1
-    },
-    {
-        key: `Selected ${routes.product.title}`,
-        value: 2
-    }
+  {
+    key: `All ${routes.product.title}`,
+    value: 1
+  },
+  {
+    key: `Selected ${routes.product.title}`,
+    value: 2
+  }
 ];
 
+let searchTimeout;
 const AssignProductDialog = ({
-    productsDialogOpen,
-    productId,
-    onSuccess,
-    handleCloseDialog,
-    assignedProducts
+  productsDialogOpen,
+  productId,
+  onSuccess,
+  handleCloseDialog,
+  assignedProducts,
+  reference = 'product',
+  renderedFrom,
+  serialized = null
 }) => {
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
+  const {
+    state: { permissions, selectedEntity }
+  }: any = useData();
 
-    const {
-        state: { permissions, selectedEntity },
-    }: any = useData();
+  const toastConfig = useContext(CustomToastContext);
+  const [isAssigning, setAssigning] = useState(false);
+  const [disableSaveButton, setDisableSaveButton] = useState(false);
+  const [gridApi, setGridApi] = useState(null);
+  const [state, dispatch] = useReducer(reducer, intialState);
+  const [selectedType, setSelectedType] = useState(1);
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const [frameWorkComponent, setFrameWorkComponent] = useState(null);
+  const [columns, setColumns] = useState([]);
 
-    const toastConfig = useContext(CustomToastContext);
-    const [selectedProducts, setSelectedProducts] = useState([]);
-    const [isAssigning, setAssigning] = useState(false);
-    const [productsConst, setProductsConst] = useState([]);
-    const [gridApi, setGridApi] = useState(null);
-    const [state, dispatch] = useReducer(reducer, intialState);
-    const [selectedType, setSelectedType] = useState(1);
-    const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords } = state;
+  const defaultColumns = [
+    { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
+  ];
 
-    const [columns, setColumns] = useState([
-        { field: 'productName', headerName: 'Product Description', show: true, cellRenderer: 'commonRenderer' },
-        { field: 'productNumber', headerName: 'Product Number', show: true, cellRenderer: 'commonRenderer' },
-        { field: 'quantity', headerName: 'Quantity', show: true, cellRenderer: 'commonRenderer', cellEditor: "numericCellEditor", editable: true },
-    ]);
-    const [filter, setFilter] = useState(`All ${routes.product.title}`);
+  const [filter, setFilter] = useState(`All ${routes.product.title}`);
+  const [isProductType, setIsProductType] = useState(false);
+  const { getColumnData } = useColumns();
 
-    const getQueryString = () => {
-        let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}`;
+  useEffect(() => {
+    localStorage.removeItem(localStorageSelectedRecords);
+    fetchGridColumns();
+  }, []);
 
-        if (selectedEntity) {
-            deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+  useEffect(() => {
+    setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)].some((d) => d.qty === 0));
+  }, [selectedRecords]);
+
+  useEffect(() => {
+    let millisec = Object.keys(search).length > 0 ? 600 : 5;
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(() => {
+      fetchProduct();
+    }, millisec);
+  }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
+
+  const fetchGridColumns = () => {
+    axiosInstance()
+      .get('/field?resource=Product&view=true')
+      .then(({ data: { data } }) => {
+        const productTypes = data.find((e) => e.fieldData.fieldName === 'productType');
+        if (productTypes) {
+          setIsProductType(true);
+        } else {
+          setIsProductType(false);
         }
-        if (!isObjectEmpty(filters)) {
-            const updatedFilters = [];
-
-            Object.keys(filters).forEach(field => {
-                updatedFilters.push({
-                    field: replaceFieldName(field),
-                    term: filters[field].filter
-                })
-            });
-            deepFilter = `${deepFilter}&deepFilter=${JSON.stringify(updatedFilters)}&filterType=and`
-        }
-
-        if (sorting.length > 0) {
-            deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`
-        }
-
-        if (search) {
-            deepFilter = `${deepFilter}&search=${search}`;
-        }
-
-        return deepFilter;
-    };
-
-    useEffect(() => {
-        fetchProduct()
-        // eslint-disable-next-line
-    }, [page, limit, filters, sorting, search, selectedEntity, selectedType]);
-
-    const fetchProduct = () => {
-        dispatch({ type: "loading", loading: true });
-
-        if (gridApi) {
-            gridApi.setRowData([]);
-        }
-
-        const queryString = getQueryString();
-        axiosInstance().get(`${product.api}/bom/${productId}/available-products`).then(({ data }) => {
-            // let tData = data.filter(o => o._id !== productId)
-            // tData = tData.map(obj => ({ ...obj, isChecked: assignedProducts.some(item => item?._id === obj?._id) ? true : false }))
-            data.data = data.data?.map((u) => ({
-                ...u,
-                id: u._id,
-                quantity: assignedProducts.some(item => item?._id === u?._id) ? assignedProducts.find(item => item?._id === u?._id).qty : 0,
-            }));
-            setProductsConst(data.data)
-            // setSelectedProducts(assignedProducts.map(obj => obj._id))
-            dispatch({ type: "initialize", data: data.data, count: data.data.length });
-            setTimeout(() => {
-                dispatch({ type: "loading", loading: false });
-                dispatch({ type: "selection", selectedRecords: data.data.filter(obj => assignedProducts.some(item => item?._id === obj?._id)) });
-            }, gridLoadingTimeout);
-
-        })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
-    };
-
-    const ActionsRenderer = params => {
-        const rowNode = params.node.gridApi.getRowNode(params.data.id)
-
-        return <>
-            {/* {selectedRecords.find(d => d._id === params.data._id) && */}
-            {
-                <ButtonGroup size="small" aria-label="small outlined button group">
-                    <IconButton
-                        size="small"
-                        aria-label="Clone"
-                        onClick={() => {
-                            if (params.data.quantity > 0) rowNode.setDataValue("quantity", params.data.quantity - 1)
-                        }}>
-                        <RemoveOutlined fontSize="small" color="primary" />
-                    </IconButton>
-                    {/* <TextField
-                        type="number"
-                        name={params.data.id}
-                        margin="dense"
-                        size="small"
-                        value={rowNode.data.quantity ? rowNode.data.quantity : 110}
-                        onChange={(e) => {
-
-                         }
-                        }
-                    /> */}
-                    <IconButton
-                        size="small"
-                        aria-label="Clone"
-                        onClick={() => {
-                            rowNode.setDataValue("quantity", params.data.quantity + 1)
-                        }}>
-                        <AddOutlined fontSize="small" color="primary" />
-                    </IconButton>
-                </ButtonGroup>
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.productDetail.path);
+          if (currentColumn !== null) {
+            columns = [...columns, currentColumn?.columnData];
+            if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+              rendererNames.push(currentColumn?.rendererName);
             }
-        </>
+          }
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...defaultColumns, ...columns]);
+      });
+  };
+
+  const fetchProduct = () => {
+    dispatch({ type: 'loading', loading: true });
+    if (gridApi) {
+      gridApi.setRowData([]);
+    }
+    const queryString = getQueryString();
+    axiosInstance()
+      .get(`${product.api}${queryString}`)
+      .then(({ data }) => {
+        let rows = data.data.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          finalObject['isChecked'] = false;
+          finalObject['id'] = u._id;
+          finalObject['qty'] = 1;
+          const qtyAdded = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e._id === u._id);
+          if (qtyAdded.length) {
+            finalObject['qty'] = qtyAdded[0].qty;
+          }
+          return {
+            ...finalObject
+          };
+        });
+        const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+        dispatch({
+          type: 'selection',
+          selectedRecords: savedRecords
+        });
+        dispatch({ type: 'initialize', data: rows, count: data.count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const getQueryString = () => {
+    const ignoreIds = assignedProducts && assignedProducts?.length > 0 ? assignedProducts : [];
+    let deepFilter = `?page=${page}&limit=${limit}&filterProducts=${selectedType}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const frameworkComponents = {
-        actionsRenderer: ActionsRenderer,
-        commonRenderer: CommonRenderer,
-    };
-
-
-    const handleAssignProduct = async () => {
-        if (selectedRecords.length > 0) {
-            setAssigning(true);
-            const dataObj = {
-                "_id": productId,
-                "bom": selectedRecords.filter(d => d.quantity > 0).map(d => {
-                    return ({
-                        "product": d.id,
-                        "qty": Number(d.quantity)
-                    })
-                })
-            };
-
-            await axiosInstance().post(`/product/bom`, dataObj)
-                .then(({ data }) => {
-                    setAssigning(false);
-                    toastConfig.setToastConfig({
-                        message: data.message,
-                        type: "success",
-                        open: true,
-                    });
-
-                    onSuccess();
-                })
-                .catch((error) => {
-                    setAssigning(false);
-                    toastConfig.setToastConfig(error);
-                });
-        }
-    };
-
-    const handleSearch = (e) => {
-        dispatch({ type: "search", search: e.target.value });
-    };
-
-
-    const handleFilter = (event, newFilter) => {
-        if (newFilter !== null) {
-            setFilter(newFilter);
-            setSelectedType(options.find((d) => d.key === newFilter).value);
-        }
-    };
-
-    const onCellValueChanged = (row) => {
+    if (showFilteredRecordsOnly) {
+      const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
+    const updatedFilters = [];
+    if (isProductType) {
+      updatedFilters.push({
+        field: 'productType',
+        term: 'Part'
+      });
+    }
+    if (serialized != null) {
+      updatedFilters.push({
+        field: 'serializedProduct',
+        term: `${serialized === 'true' ? 'Yes' : 'No'}`
+      });
+    }
+    if (!isObjectEmpty(filters)) {
+      Object.keys(filters).forEach((field) => {
+        updatedFilters.push({
+          field: field,
+          term: filters[field].filter
+        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    } else {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+    return deepFilter;
+  };
 
-    return (
-        <Dialog
-            fullWidth
-            maxWidth="md"
-            open={productsDialogOpen}
-            onClose={handleCloseDialog}
-            aria-labelledby="assign-roles-dialog"
-        >
-            <CustomDialogHeader title={`Assign ${routes.product.title}`} />
-            <CustomDialogContent>
-                <>
-                    <div className="header-panel">
-                        <Grid container className={styles.filter_side_container}>
-                            <Grid item xs={6} className="d-flex align-items-center gap-1">
-                                {/* {
+  const handleAssignProduct = async () => {
+    setAssigning(true);
+    if (reference === 'product') {
+      const dataObj = [...getLocalStorageArrayData(localStorageSelectedRecords)]
+        .filter((d) => d.qty > 0)
+        .map((d) => {
+          return {
+            childProduct: d.id,
+            qty: Number(d.qty)
+          };
+        });
+      await axiosInstance()
+        .post(`/product/${productId}/bom`, dataObj)
+        .then(({ data }) => {
+          setAssigning(false);
+          onSuccess();
+        })
+        .catch((error) => {
+          setAssigning(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else if (reference === 'serviceMaster') {
+      const productObj = [...getLocalStorageArrayData(localStorageSelectedRecords)]
+        .filter((d) => d.qty > 0)
+        .map((d) => {
+          return {
+            product: d.id,
+            qty: Number(d.qty)
+          };
+        });
+      await axiosInstance()
+        .post(`${serviceMaster.api}/product/${productId}`, productObj)
+        .then(({ data }) => {
+          setAssigning(false);
+          onSuccess();
+        })
+        .catch((error) => {
+          setAssigning(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else if (reference === 'package') {
+      axiosInstance()
+        .post(`${packages.api}/material`, {
+          ids: Array.isArray(productId) && productId.length ? productId : [productId],
+          products: [...getLocalStorageArrayData(localStorageSelectedRecords)].map((d: any) => ({ product: d.id, qty: Number(d.qty) }))
+        })
+        .then(() => {
+          setAssigning(false);
+          onSuccess();
+        })
+        .catch((err) => {
+          setAssigning(false);
+          toastConfig.setToastConfig(err);
+        });
+    } else if (reference === 'workOrder') {
+      let tempData = [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((d) => {
+        return {
+          product: d.id,
+          qty: d.qty
+        };
+      });
+      axiosInstance()
+        .post(`${workOrder.api}/${productId}/consumable`, tempData)
+        .then(({ data }) => {
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
+  };
+
+  const handleFilter = (event, newFilter) => {
+    if (newFilter !== null) {
+      setFilter(newFilter);
+      setSelectedType(options.find((d) => d.key === newFilter).value);
+    }
+  };
+
+  const onCellValueChanged = (row) => {
+    if (!row || !row?.data) return;
+    const { data } = row;
+    const selectedFromStorage = [...getLocalStorageArrayData(localStorageSelectedRecords)];
+    if (!selectedFromStorage || selectedFromStorage.length === 0) return;
+    const updatedRecords = selectedFromStorage.map((d) => {
+      if (data._id === d._id) {
+        d.qty = data.qty;
+      }
+      return d;
+    });
+    localStorage.setItem(localStorageSelectedRecords, JSON.stringify(updatedRecords));
+    setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)]?.some((d) => d.qty === 0));
+  };
+
+  return (
+    <Dialog fullWidth maxWidth="md" fullScreen={true} open={productsDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+      <CustomDialogHeader
+        title={`Assign ${routes.product.title}`}
+        showManimizeMaximize={false}
+        showRequiredLabel={false}
+        onClose={handleCloseDialog}
+      />
+      <CustomDialogContent>
+        <>
+          <div className="header-panel">
+            <Grid container className={styles.filter_side_container}>
+              <Grid item xs={6} className="d-flex align-items-center gap-1">
+                {/* {
                                     options && <ToggleButtonGroup size="small" className="ml-2"
                                         value={filter}
                                         exclusive
@@ -255,67 +329,55 @@ const AssignProductDialog = ({
                                         })}
                                     </ToggleButtonGroup>
                                 } */}
-                            </Grid>
-                            <Grid xs={6} container className={styles.filter_side} >
-                                <Box className={styles.filter_side_header} component="div" >
-
-                                    <SearchBox
-                                        onSearch={handleSearch}
-                                        searchbox={styles.search_box_input}
-                                        width="242px"
-                                        size="small"
-                                        value={search}
-                                    />
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </div>
-                    {columns ?
-                        <CustomAgGridEditable
-                            columns={columns}
-                            dataRows={dataRows}
-                            frameworkComponents={frameworkComponents}
-                            setGridApi={setGridApi}
-                            dispatch={dispatch}
-                            rowCount={rowCount}
-                            limit={limit}
-                            pageSizes={pageSizes}
-                            page={page}
-                            allowAction={false}
-                            loading={loading}
-                            renderedFrom="productDetailsPage"
-                            refreshGrid={fetchProduct}
-                            onCellValueChanged={onCellValueChanged}
-                            selectedRecords={selectedRecords}
-                        />
-                        : <Box p={2} height={500} bgcolor="white"><CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-                </>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-                <Button
-                    disabled={isAssigning}
-                    onClick={handleCloseDialog}
-                    color="primary"
-                    size="small"
-                >
-                    Cancel
-                </Button>
-                <Button
-                    disabled={isAssigning}
+              </Grid>
+              <Grid item xs={6} className={styles.filter_side}>
+                <Box className={styles.filter_side_header} component="div">
+                  <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
+                  <Button
+                    disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                     onClick={handleAssignProduct}
                     color="primary"
                     size="small"
                     variant="contained"
-                >
-                    {isAssigning ? <CircularProgress size={22} /> : "Save"}
-                </Button>
-            </CustomDialogFooter>
-        </Dialog>
-    );
+                    endIcon={isAssigning && <CircularProgress color="inherit" size={18} />}
+                  >
+                    Add{' '}
+                    {[...getLocalStorageArrayData(localStorageSelectedRecords)].length > 0
+                      ? '(' + [...getLocalStorageArrayData(localStorageSelectedRecords)].length + ')'
+                      : ''}
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
+          </div>
+          {frameWorkComponent && Object.keys(frameWorkComponent).length > 0 ? (
+            <CustomAgGridEditable
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowAction={false}
+              loading={loading}
+              allowSelection={true}
+              onCellValueChanged={onCellValueChanged}
+              showOnlyShowFilteredRecordSwitch={true}
+              refreshGrid={fetchProduct}
+              renderedFrom={renderedFrom}
+            />
+          ) : (
+            <Box p={2} height={500} bgcolor="white">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </>
+      </CustomDialogContent>
+    </Dialog>
+  );
 };
 
 export default AssignProductDialog;
-function replaceFieldName(field: string) {
-    throw new Error("Function not implemented.");
-}
-

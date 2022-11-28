@@ -9,14 +9,18 @@ import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
-
+import InputAdornment from '@material-ui/core/InputAdornment';
+import IconButton from '@material-ui/core/IconButton';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
 import { isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
 import { SVG } from '../../assets';
-import { SET_GRID_METADATA } from "../../StateProvider/actionTypes"
+import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
+import { entity, eProduct } from '../../constants/helpers';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -36,7 +40,7 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'center'
   },
   logo: {
-    width: '150px',
+    width: '140px',
     height: '100%'
   }
 }));
@@ -53,6 +57,9 @@ const Login = () => {
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { entityApi } = entity;
 
   useEffect(() => {
     if (!isEmpty(account)) {
@@ -64,6 +71,20 @@ const Login = () => {
           });
           const { data } = res.data;
           localStorage.setItem('token', data.token);
+          const gridRequest = await axiosInstance().get(`user/meta-grid/${data.user?._id}`);
+
+          let tempMetaData = JSON.stringify(gridRequest.data.data?.gridMetaData);
+          localStorage.setItem('gridMetaData', tempMetaData);
+          dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
+
+          let mappedEntities = [];
+          if (data.entity && data.entity.length) {
+            data.entity.forEach((o) => {
+              mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
+            });
+          }
+          localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
+
           dispatch({ type: SET_USER, payload: data });
           if (data?.role?.selectedEntity?._id) {
             dispatch({
@@ -90,19 +111,28 @@ const Login = () => {
       }
     }
   }, [invalidAzureLogin, counter]);
+
   const handleSubmit = async (values) => {
     setSubmitting(true);
     const data = {
       email: values.email,
       password: values.password
     };
-
     axiosInstance()
       .post('/user/login', data)
-      .then(({ data: response }) => {
+      .then(async ({ data: response }) => {
         setSubmitting(false);
         const { data } = response;
         localStorage.setItem('token', data.token);
+
+        let mappedEntities = [];
+        if (data.entity && data.entity.length) {
+          data.entity.forEach((o) => {
+            mappedEntities = [...mappedEntities, { optionLabel: o?.entityName, optionValue: o?._id }];
+          });
+        }
+        localStorage.setItem('mappedEntities', JSON.stringify(mappedEntities));
+
         dispatch({ type: SET_USER, payload: data });
         if (data?.role?.selectedEntity?._id) {
           dispatch({
@@ -128,13 +158,14 @@ const Login = () => {
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
+
         axiosInstance()
           .get(`user/meta-grid/${data?.user?._id}`)
           .then(({ data: { data } }) => {
-            let tempMetaData = JSON.stringify(data?.gridMetaData)
-            localStorage.setItem("gridMetaData", tempMetaData);
+            let tempMetaData = JSON.stringify(data?.gridMetaData);
+            localStorage.setItem('gridMetaData', tempMetaData);
             dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
-          })
+          });
       })
       .catch((error) => {
         setSubmitting(false);
@@ -163,17 +194,17 @@ const Login = () => {
         <Grid container className={classes.grid}>
           <Grid item sm={6} md={5} className="loginSidebar">
             <Box display={{ xs: 'none', sm: 'block', md: 'block' }}>
-              <img className="imgLogin" src={SVG('imgComputer')}></img>
+              <img className="imgLogin" src={SVG('imgComputer')} />
             </Box>
           </Grid>
           <Grid item sm={6} md={7} xs={12} className={classes.formSide}>
             <Box textAlign="center">
-              <img className={classes.logo} src={SVG('LogoPng')} alt="equip logo" title="eQuipt Logo" />
+              <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
               <Box my={4} />
               <Formik
                 initialValues={{
-                  email: ['local', 'development'].includes(process.env.REACT_APP_ENV) ? 'gagan@test.com' : '',
-                  password: ['local', 'development'].includes(process.env.REACT_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
+                  email: ['local'].includes(process.env.REACT_APP_ENV) ? 'gagan@test.com' : '',
+                  password: ['local'].includes(process.env.REACT_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}
@@ -201,7 +232,7 @@ const Login = () => {
                           data-testid="password"
                           style={{ width: 260 }}
                           variant="outlined"
-                          type="password"
+                          type={showPassword ? 'text' : 'password'}
                           size="small"
                           label="Password"
                           name="password"
@@ -209,6 +240,15 @@ const Login = () => {
                           error={touched['password'] && Boolean(errors['password'])}
                           helperText={touched['password'] && errors['password']}
                           onChange={(e) => setFieldValue('password', e.target.value)}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
+                                  {showPassword ? <Visibility /> : <VisibilityOff />}
+                                </IconButton>
+                              </InputAdornment>
+                            )
+                          }}
                         />
                       </Box>
                       <Box width={260} mt={1}>
@@ -219,8 +259,16 @@ const Login = () => {
                         </Box>
                       </Box>
                       <Box width={260} className="mt-2">
-                        <Button disabled={isSubmitting} fullWidth variant="contained" color="secondary" type="submit" onClick={submitForm}>
-                          {isSubmitting ? <CircularProgress size={22} /> : 'Login'}
+                        <Button
+                          disabled={isSubmitting}
+                          fullWidth
+                          variant="contained"
+                          className="logo-bg-color"
+                          type="submit"
+                          onClick={submitForm}
+                          startIcon={isSubmitting && <CircularProgress color='inherit' size={20} />}
+                        >
+                          Login
                         </Button>
 
                         <Box className="mt-2">
@@ -229,9 +277,9 @@ const Login = () => {
                               <span>Not authorized loging out in {counter}</span>
                             ) : (
                               <Button
+                                className="logo-bg-color"
                                 variant="contained"
                                 fullWidth
-                                color="secondary"
                                 startIcon={<SiMicrosoftoffice />}
                                 disabled={isSubmitting}
                                 onClick={() => instance.logoutPopup()}
@@ -241,7 +289,7 @@ const Login = () => {
                             )}
                           </AuthenticatedTemplate>
                           <UnauthenticatedTemplate>
-                            <AzureLogin></AzureLogin>
+                            <AzureLogin />
                           </UnauthenticatedTemplate>
                         </Box>
                       </Box>

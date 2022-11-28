@@ -1,31 +1,36 @@
 import { useState, useEffect, Fragment, useContext } from "react";
-import { Box, Dialog, Button } from '@material-ui/core';
+import { Box, Dialog, Button, CircularProgress } from '@material-ui/core';
 import { Formik, Form } from "formik";
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import axiosInstance from '../../axios/axiosInstance'
 import { CustomToastContext } from "../../StateProvider/CustomToastContext/CustomToastContext";
-import CustomButton from '../../components/Helpers/CustomButton'
 import routes from "../../components/Helpers/Routes";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomDialogTransition } from "../../constants/helpers";
 import InputField from "../../components/Helpers/InputField";
-import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched } from "../../constants/helpers";
+import { getObjKeysWithValues, getObjKeys, yupSchema, isFieldNotTouched, sidebarResource } from "../../constants/helpers";
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton'
 import ConfirmCancelDialog from "../../components/ConfirmCancelDialog"
 
 const ManageWarehouse = (props) => {
 
     const toastConfig = useContext(CustomToastContext)
-    const { addressResource, onClose, onSuccess, isClone } = props;
+    const { addressResource, close, onSuccess, isClone = false, open } = props;
+    const [cloneHeading,setCloneHeading] = useState('')
     const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [initialData, setInitialData] = useState({ fields: [], values: {} });
     const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
+    
 
     useEffect(() => {
         axiosInstance().get("/field?resource=Warehouse").then(({ data: { data } }) => {
             const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+
             const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
             if (addressResource) {
@@ -35,6 +40,7 @@ const ManageWarehouse = (props) => {
                     if (isClone) {
                         fields = fieldsDataForCreate
                         const { warehouseName, ...rest } = data
+                        setCloneHeading(warehouseName);
                         tempData = { ...rest }
                     }
                     setInitialData({
@@ -59,22 +65,33 @@ const ManageWarehouse = (props) => {
 
 
     const handleSubmit = (values) => {
+        setSubmitting(true)
         if (addressResource?.id && !isClone) {
             values._id = addressResource?.id
-            axiosInstance().put(`/warehouse`, values).then(({ data: { data } }) => {
-                setLoading(false);
+            axiosInstance().put(`/warehouse`, values).then(({ data }) => {
+                setSubmitting(false);
                 onSuccess()
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                });
             }).catch((error) => {
-                setLoading(false);
+                setSubmitting(false);
                 toastConfig.setToastConfig(error);
             });
         }
         else {
-            axiosInstance().post(`/warehouse`, values).then(({ data: { data } }) => {
-                setLoading(false);
+            axiosInstance().post(`/warehouse`, values).then(({ data }) => {
+                setSubmitting(false);
                 onSuccess(data)
+                toastConfig.setToastConfig({
+                    open: true,
+                    type: "success",
+                    message: data.message,
+                });
             }).catch((error) => {
-                setLoading(false);
+                setSubmitting(false);
                 toastConfig.setToastConfig(error);
             });
         }
@@ -82,10 +99,10 @@ const ManageWarehouse = (props) => {
 
     return (<Dialog
         maxWidth="md"
-        fullScreen={isMobile || isTablet}
+        fullScreen={fullScreen || (isMobile || isTablet)}
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
-        open={true}
+        open={open}
         fullWidth
         onClose={(e, reason) => {
             if (reason !== 'backdropClick') {
@@ -108,17 +125,23 @@ const ManageWarehouse = (props) => {
                 }) => (
                     <Fragment>
                         <CustomDialogHeader
-                            title={addressResource?.id ? "Update " + addressResource.warehouseName : "Create " + routes.warehouse.title}
+                            title={isClone ? `Clone - ${cloneHeading}` : addressResource?.id ? `Update ${initialData?.values["warehouseName"] ?? ""}` : "Create Plant"}
                             onClose={() => {
                                 if (isFieldNotTouched({
                                     initialValues: initialData.values,
                                     fields: initialData.fields
-                                }, values)) onClose()
+                                }, values)) close()
                                 else setShowConfirmDialog(true)
-                            }}></CustomDialogHeader>
+                            }}
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen(prevState => !prevState)
+                            }}
+                            showManimizeMaximize={true}
+                        ></CustomDialogHeader>
                         <CustomDialogContent>
                             <Form autoComplete="off" autoCorrect="off" noValidate >
-                                <h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>
+                                {/*<h2 className="form-label-style" style={{ borderBottom: "none" }}>* Required Fields</h2>*/}
                                 <InputField
                                     errors={errors}
                                     values={values}
@@ -131,26 +154,29 @@ const ManageWarehouse = (props) => {
                             </Form>
                         </CustomDialogContent>
                         <CustomDialogFooter>
-                            <Button size="small" color="primary"
+                            <Button size="small" color="primary" 
+                                disabled={submitting}
                                 onClick={() => {
                                     if (isFieldNotTouched({
                                         initialValues: initialData.values,
                                         fields: initialData.fields
-                                    }, values)) onClose()
+                                    }, values)) close()
                                     else setShowConfirmDialog(true)
                                 }}
                             >Cancel</Button>
-                            <CustomButton
-                                loading={loading}
+                            <Button
+                                disabled={loading || submitting}
                                 variant="contained"
                                 color="primary"
                                 type="submit"
                                 onClick={submitForm}
-                            > Save</CustomButton>
+                                endIcon={submitting && <CircularProgress color='inherit' size={18} />}
+                            > Save</Button>
                         </CustomDialogFooter>
                         {
                             showConfirmDialog ?
                                 <ConfirmCancelDialog
+                                close={() => setShowConfirmDialog(false)}
                                     open={showConfirmDialog}
                                     onSave={() => {
                                         setShowConfirmDialog(false)
@@ -158,7 +184,7 @@ const ManageWarehouse = (props) => {
                                     }}
                                     onClose={() => {
                                         setShowConfirmDialog(false)
-                                        onClose()
+                                        close()
                                     }}
                                 /> : null
                         }

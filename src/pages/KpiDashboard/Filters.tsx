@@ -5,6 +5,9 @@ import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { FilterList } from '@material-ui/icons';
 import FormTypes from '../../components/Helpers/FormTypes';
+import { dateFormatForInputControl } from '../../constants/helpers';
+import Countries from "../../constants/Country.json"
+import { useData } from '../../StateProvider/Provider'
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -20,13 +23,13 @@ const useStyles = makeStyles((theme) => ({
       height: "auto",
     }
   },
-  currencyBox:{
+  currencyBox: {
     width: "250px",
     [theme.breakpoints.down("xs")]: {
       width: "auto",
     }
   },
-  status:{
+  status: {
     width: "100%",
     [theme.breakpoints.down("xs")]: {
       width: "auto",
@@ -40,7 +43,6 @@ const useStyles = makeStyles((theme) => ({
 const Filters = (props) => {
   const classes = useStyles();
   const {
-    entities,
     marketSegments,
     subMarketSegments,
     productCategory,
@@ -50,11 +52,12 @@ const Filters = (props) => {
     moment,
     salesReps,
     customerAccounts,
-    status,
-    setStatus,
     currency,
-    setCurrency
+    setCurrency,
+    setDashboardType,
+    dashboardType
   } = props;
+  const { state: { user } } = useData()
   const [filterAnchor, setFilterAnchor] = useState(null);
   const [openFilter, setOpenFilter] = useState(false);
   const [timeFrame, setTimeFrame] = useState<any>('1-year');
@@ -128,7 +131,7 @@ const Filters = (props) => {
       >
         <Box p={2}>
           <Box width="250px">
-            <Autocomplete
+            {/* <Autocomplete
               fullWidth
               size="small"
               disabled={salesFilter.allEntity}
@@ -141,7 +144,7 @@ const Filters = (props) => {
                 setSalesFilter({ ...salesFilter, entity: val });
               }}
               renderInput={(params) => <TextField {...params} label="Entity" variant="outlined" />}
-            />
+            /> */}
             <Box mt={1} />
             <Autocomplete
               size="small"
@@ -166,7 +169,14 @@ const Filters = (props) => {
               getOptionLabel={(option) => option.name || ''}
               getOptionSelected={(option, val) => (option ? option.name === val.name : false)}
               onChange={(_, val) => {
-                setSalesFilter({ ...salesFilter, customerAccount: val });
+                let data = { ...salesFilter, customerAccount: val }
+                if (val?.country) {
+                  let foundCountry = Countries.find(o => o.optionValue === val?.country)
+                  if (foundCountry) {
+                    data.country = foundCountry
+                  }
+                }
+                setSalesFilter({ ...data });
               }}
               renderInput={(params) => <TextField {...params} label="Customer Account" variant="outlined" />}
             />
@@ -213,6 +223,19 @@ const Filters = (props) => {
               onChange={(_, val) => setSalesFilter({ ...salesFilter, productCategory: val })}
               renderInput={(params) => <TextField {...params} label="Product Category" variant="outlined" />}
             />
+            <Box mt={1} />
+
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={Countries}
+              autoHighlight
+              value={salesFilter.country}
+              getOptionLabel={(option) => option.optionLabel || ''}
+              getOptionSelected={(option, val) => (option ? option.optionValue === val.optionValue : false)}
+              onChange={(_, val) => setSalesFilter({ ...salesFilter, country: val })}
+              renderInput={(params) => <TextField {...params} label="Country" variant="outlined" />}
+            />
           </Box>
         </Box>
       </Popover>
@@ -220,18 +243,28 @@ const Filters = (props) => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={6}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={4} md={2}>
+              {/* <Grid item xs={12} sm={4} md={2}>
                 <Button onClick={handleClickFilter} color="primary" endIcon={<FilterList />}>
                   Filters
                 </Button>
-              </Grid>
-              <Grid item xs={6} sm={4} md={3}>
+              </Grid> */}
+              {/* <Grid item xs={6} sm={4} md={3}>
                 <FormControl className={classes.status} size="small" variant="outlined">
                   <InputLabel id="status">Status</InputLabel>
                   <Select labelId="status" id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
                     <MenuItem value={'won'}>Won</MenuItem>
                     <MenuItem value={'lost'}>Lost</MenuItem>
                     <MenuItem value={'open'}>Open</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid> */}
+              <Grid item xs={6} sm={4} md={3}>
+                <FormControl fullWidth size="small" variant="outlined">
+                  <InputLabel id="dashboard-type">Dashboard</InputLabel>
+                  <Select labelId="dashboard-type" id="type" value={dashboardType} onChange={(e) => setDashboardType(e.target.value)}>
+                    {user && user?.user?.dashboards.map(type => (
+                      <MenuItem key={type} value={type}>{type}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -280,7 +313,7 @@ const Filters = (props) => {
                   size="small"
                   disableFuture
                   openTo="year"
-                  format="MM/dd/yyyy"
+                  format={dateFormatForInputControl}
                   maxDate={salesFilter.between.to}
                   label="From"
                   views={['year', 'month', 'date']}
@@ -300,7 +333,7 @@ const Filters = (props) => {
                   minDate={salesFilter.between.from}
                   disableFuture
                   openTo="year"
-                  format="MM/dd/yyyy"
+                  format={dateFormatForInputControl}
                   label="To"
                   views={['year', 'month', 'date']}
                   value={salesFilter.between.to}

@@ -22,7 +22,6 @@ import MomentUtils from "@date-io/moment";
 import { object, string } from "yup";
 import moment from "moment";
 import { camelCase, isEmpty, kebabCase } from "lodash";
-
 import {
   GetEventDetail,
   CreateNewEvent,
@@ -40,7 +39,8 @@ import { useAccount, useMsal } from "@azure/msal-react";
 import axiosInstance from "../../../axios/axiosInstance";
 import { useData } from "../../../StateProvider/Provider";
 import Loader from "../../Loader";
-import { dateFormat } from "../../../constants/helpers";
+import { dateFormat, getData } from "../../../constants/helpers";
+import { get_activity_resource } from '../Helpers/utils';
 
 const EventSchema = object().shape({
   name: string().required("Please enter event name").min(3, "Too Short"),
@@ -50,22 +50,26 @@ const EventSchema = object().shape({
   endDate: string().required("Please enter end date").nullable(),
 });
 
-export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
-  const {
-    state: {
-      user: { user },
-    },
-  } = useData();
+export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimized, onMinimizeMaximize, showManimizeMaximize }) => {
+
+  const { state: { user: { user }, permissions }, } = useData();
+
   const isMobile = useMediaQuery("(max-width:599px)");
   const [initialValues, setInitialValues] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const { instance, accounts } = useMsal();
   const azureAccount = useAccount(accounts[0] || {});
   const [isSubmitting, setSubmitting] = useState(false);
-  const [resource, setResource] = useState("");
+  const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
+  const [resourceOptions, setResourceOptions] = useState([]);
+
+  useEffect(() => {
+    setResourceOptions(get_activity_resource(permissions))
+  }, []);
+
 
   useEffect(() => {
     fetchEventDetail();
@@ -105,26 +109,26 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
 
   // Data for Autocomplete
   useEffect(() => {
-    if (!resource) return;
-    setLoadingResources(true);
-    axiosInstance()
-      .get(`${kebabCase(resource)}?limit=100`)
-      .then(({ data: { data } }) => {
-        if (data.length) {
-          const mappedData = data.map((_d) => getData(resource, _d));
-          setResourceData(mappedData);
-        }
-        setLoadingResources(false);
-      })
-      .catch((error) => {
-        setLoadingResources(false);
-      });
+    if (resource && resource?.optionValue) {
+      setLoadingResources(true);
+      axiosInstance()
+        .get(`${kebabCase(resource?.optionValue)}?limit=100`)
+        .then(({ data: { data } }) => {
+          if (data.length) {
+            const mappedData = data.map((_d) => getData(resource?.optionValue, _d));
+            setResourceData(mappedData);
+          }
+          setLoadingResources(false);
+        })
+        .catch((error) => {
+          setLoadingResources(false);
+        });
 
-    return () => {
-      setSelectedResourceData(null);
-      setResourceData(null);
-    };
-    // eslint-disable-next-line
+      return () => {
+        setSelectedResourceData(null);
+        setResourceData(null);
+      };
+    }
   }, [resource]);
 
   const handleSave = async (values) => {
@@ -159,7 +163,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
         if (resource && selectedResourceData) {
           values.relatedTo = [
             {
-              type: camelCase(resource),
+              type: resource?.optionValue,
               referenceId: selectedResourceData.id,
               access: true,
             },
@@ -188,81 +192,37 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
   };
 
   function validate(values) {
+    const startDate = new Date(values?.startDate)
+    const endDate = new Date(values?.endDate)
+    startDate.setHours(0, 0, 0, 0)
+    endDate.setHours(0, 0, 0, 0)
     const errors = {};
-
-    if (
-      new Date(values.startTime).getTime() >= new Date(values.endTime).getTime()
-    ) {
-      errors["endTime"] = "End time should be different";
-    }
-
-    if (
-      new Date(values.startDate).getTime() > new Date(values.endDate).getTime()
-    ) {
+    if (startDate > endDate) {
       errors["endDate"] = "End date should be greater then start date";
+      return errors;
     }
-
-    if (new Date(values.startTime).toString() === "Invalid Date") {
+    if (moment(startDate)?.format("MM-DD-YYYY") === moment(endDate)?.format("MM-DD-YYYY")) {
+      if (new Date(values?.startTime)?.getTime() > new Date(values?.endTime).getTime()) {
+        errors["endTime"] = "End time should be greater then start time";
+      }
+    }
+    if (new Date(values.startTime)?.toString() === "Invalid Date") {
       errors["startTime"] = "Invalid Time";
     }
-    if (new Date(values.endTime).toString() === "Invalid Date") {
+    if (new Date(values.endTime)?.toString() === "Invalid Date") {
       errors["endTime"] = "Invalid Time";
     }
-
     return errors;
   }
-
-  const resourceOptions = [
-    "Customer Account",
-    "Customer Contact",
-    "Supplier Account",
-    "Supplier Contact",
-    "Lead",
-    "Opportunity",
-  ];
-
-  const getData = (resource: string, data: any) => {
-    switch (kebabCase(resource)) {
-      case "lead":
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id,
-        };
-      case "opportunity":
-        return {
-          name: `${data.opportunityName}`,
-          id: data._id,
-        };
-      case "customer-account":
-        return {
-          name: `${data.accountName}`,
-          id: data._id,
-        };
-      case "supplier-account":
-        return {
-          name: `${data.accountName}`,
-          id: data._id,
-        };
-      case "customer-contact":
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id,
-        };
-      case "supplier-contact":
-        return {
-          name: `${data.salutation} ${data.firstName} ${data.middleName} ${data.lastName}`,
-          id: data._id,
-        };
-      default:
-        break;
-    }
-  };
 
   return (
     <>
       <CustomDialogHeader
         title={`${eventId ? "Edit" : "New"} Event`}
         onClose={handleClose}
+        isMinimized={isMinimized}
+        onMinimizeMaximize={onMinimizeMaximize}
+        showManimizeMaximize={showManimizeMaximize}
       ></CustomDialogHeader>
       {initialValues ? (
         <Formik
@@ -314,7 +274,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                         <Box mt={2}>
                           <Autocomplete
                             options={resourceOptions}
-                            getOptionLabel={(option) => option}
+                            getOptionLabel={(option) => option.optionLabel}
                             value={resource}
                             fullWidth
                             onChange={(event, newValue) => {
@@ -330,7 +290,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                             )}
                           />
                           <Box mt={2} />
-                          {Boolean(resource) && resourceData && (
+                          {resource && resourceData && (
                             <Autocomplete
                               disabled={loadingResources}
                               options={resourceData}
@@ -347,7 +307,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               renderInput={(params) => (
                                 <TextField
                                   {...params}
-                                  label={`Select ${resource}`}
+                                  label={`Select ${resource.optionValue}`}
                                   variant="outlined"
                                   required={Boolean(resource)}
                                 />
@@ -373,8 +333,8 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               name="startDate"
                               label="Start Date"
                               onChange={(date: any) => {
-                                setFieldValue("startDate", date);
-                                setFieldValue("startTime", getTime(date._d));
+                                setFieldValue("startDate", date ? date : null);
+                                setFieldValue("startTime", date ? getTime(date._d) : null);
                               }}
                               format={dateFormat}
                               error={
@@ -401,13 +361,13 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               inputVariant="outlined"
                               label="Start Time"
                               name="startTime"
-                              placeholder="08:00 AM"
-                              mask="__:__ _M"
+                              placeholder="08:00"
+                              mask="__:__"
                               value={values.startTime}
                               invalidDateMessage="Invalid time format"
                               onChange={(date: any) => {
-                                setFieldValue("startTime", date);
-                                if (new Date(date._d).getHours() < 23) {
+                                setFieldValue("startTime", date || null);
+                                if (date && new Date(date._d).getHours() < 23) {
                                   setFieldValue("endTime", new Date(
                                     new Date(date._d).getTime() + 30 * 60000
                                   )
@@ -450,11 +410,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               label="End Date"
                               onChange={(date: any) => {
                                 setFieldValue("endDate", date);
-                                setFieldValue(
-                                  "endTime",
-                                  new Date(
-                                    getTime(date._d).getTime() + 30 * 60000
-                                  )
+                                setFieldValue("endTime", new Date(getTime(date ? date._d : new Date()).getTime() + 30 * 60000)
                                 );
                               }}
                               format={dateFormat}
@@ -480,18 +436,20 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email }) => {
                               inputVariant="outlined"
                               label="End Time"
                               name="endTime"
-                              placeholder="08:00 AM"
+                              placeholder="08:00"
                               mask="__:__"
                               value={values.endTime}
                               onChange={(date: any) => {
                                 const nDate = new Date(values.startTime).toISOString().split("T")[0];
                                 let nTime = ""
-                                if ((date._d + "").includes("Invalid Date")) {
-                                  setFieldValue("endTime", `${date._i}`)
-                                }
-                                else {
-                                  nTime = new Date(date._d).toISOString().split("T")[1];
-                                  setFieldValue("endTime", new Date(`${nDate}T${nTime}`))
+                                if (date) {
+                                  if ((date._d + "").includes("Invalid Date")) {
+                                    setFieldValue("endTime", `${date._i}`)
+                                  }
+                                  else {
+                                    nTime = new Date(date._d).toISOString().split("T")[1];
+                                    setFieldValue("endTime", new Date(`${nDate}T${nTime}`))
+                                  }
                                 }
 
                               }}
@@ -629,4 +587,7 @@ CreateEvent.propTypes = {
   taskId: PropTypes.any,
   handleClose: PropTypes.any,
   email: PropTypes.array,
+  // isMinimized: PropTypes.bool, 
+  // onMinimizeMaximize: PropTypes.func, 
+  // showManimizeMaximize: PropTypes.bool
 };
