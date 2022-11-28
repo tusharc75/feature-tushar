@@ -15,7 +15,6 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
     width: '100%',
     overflow: 'hidden',
-    height: 'calc(100vh - 55px)',
     backgroundColor: 'white'
   },
   layout: {
