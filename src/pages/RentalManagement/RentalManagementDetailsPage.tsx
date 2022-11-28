@@ -101,9 +101,27 @@ const RentalManagementDetailsPage = () => {
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
 
+  const [disabledEditButton, setDisabledEditButton] = useState(false)
+
   const [rentalSteps, setRentalSteps] = useState(
     user?.role?.selectedEntity?.policy?.isQuotationRentalManagement ? rentalManagementSteps : rentalManagementSteps?.filter((e) => !['Quotation', 'Add Services'].includes(e))
   );
+
+  useEffect(() => {
+
+    if(quotationData) {
+      const keys = Object.keys(quotationData?.versions);
+
+      keys.forEach((k) => {
+        if(quotationData?.versions[k].status?.includes("Customer")) {
+          setDisabledEditButton(true)
+        } else {
+          setDisabledEditButton(false)
+        }
+      })
+    }
+
+  },[quotationData])
 
   useEffect(() => {
     return history.listen((location) => {
@@ -377,7 +395,7 @@ const RentalManagementDetailsPage = () => {
                   {permissions?.rentalManagement?.isUpdate &&
                     allowedToEdit && !isOffline && ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
-                        <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                        <Button disabled={disabledEditButton} className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                           Edit
                         </Button>
                         <Button
