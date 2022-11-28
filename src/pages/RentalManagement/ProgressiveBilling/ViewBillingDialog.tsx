@@ -29,10 +29,7 @@ import { startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
-
   const toastConfig = useContext(CustomToastContext);
-
-
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [material, setMaterial] = useState([]);
@@ -80,12 +77,12 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                    ? row.original?.packageDetail.packageType === 'Product'
-                      ? '(Product)'
-                      : '(Service)'
-                    : row.original.type === 'service'
-                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                      : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                  : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -197,6 +194,13 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         }
       });
       coloum.forEach((element) => {
+        if (element.Header === 'Actual Start Date') {
+          element.Header = 'Bill Start Date';
+        }
+        if (element.Header === 'Actual End Date') {
+          element.Header = 'Bill End Date';
+        }
+
         if (element.accessor.includes('detail')) {
           element['Footer'] = () => {
             return <>Total</>;
@@ -236,7 +240,13 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'package' ? parent.packageDetail?.packageName : parent.serviceDetail?.serviceName}`;
+      parent.detail = `${
+        parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'package'
+          ? parent.packageDetail?.packageName
+          : parent.serviceDetail?.serviceName
+      }`;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -248,7 +258,13 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === 'product' ? _subRow?.productDetail?.productName : _subRow?.type === 'package' ? _subRow?.packageDetail?.packageName : _subRow?.serviceDetail?.serviceName}`;
+      _subRow.detail = `${
+        _subRow?.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === 'package'
+          ? _subRow?.packageDetail?.packageName
+          : _subRow?.serviceDetail?.serviceName
+      }`;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
