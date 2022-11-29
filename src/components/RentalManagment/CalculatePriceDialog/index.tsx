@@ -33,7 +33,7 @@ const CalculatePriceDialog = ({
             materialId: ele?.materialId,
             materialType: ele?.type,
             qty: ele?.qty,
-            pricingMethod: ele?.pricingMethod,
+            pricingMethod: ele?.pricingMethod?.split(",")[0],
             unit: ele?.unit,
             currency: referenceData?.currency
         }));
@@ -41,6 +41,7 @@ const CalculatePriceDialog = ({
         data.customer = [referenceData?.customerAccount?.optionValue];
         data.warehouse = [referenceData?.warehouse?.optionValue];
         axiosInstance().post(pricingCondition.api + `/calculatePrice`, data).then(({ data: { data } }) => {
+            data = data.filter(d => d.mrp !== undefined && d.mrp !== null)
             let products = uniq(map(data, 'materialId'));
             if (products.length === data.length) {
                 handleSucess(data)
@@ -59,7 +60,7 @@ const CalculatePriceDialog = ({
                         return { productData, pricingConditionList };
                     }
                 }).filter(d => d);
-                setValue(customData.reduce((obj, item) => Object.assign(obj, { [item.productData?.materialId]: item.pricingConditionList[0]?.mrp }), {}))
+                setValue(customData.reduce((obj, item) => Object.assign(obj, { [item.productData?.materialId]: item.pricingConditionList[0]?.conditionId }), {}))
                 setDisplayData(customData)
                 setPricingConditionData(data);
             }
@@ -69,7 +70,7 @@ const CalculatePriceDialog = ({
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>, materialId) => {
         setValue((prevState) => ({
             ...prevState,
-            [`${materialId}`]: Number((event.target as HTMLInputElement).value)
+            [`${materialId}`]: (event.target as HTMLInputElement).value
         }))
     };
 
@@ -99,7 +100,8 @@ const CalculatePriceDialog = ({
                                         <FormControl component="fieldset">
                                             <RadioGroup row aria-label="pricing-condition" name={obj.productData?.materialId} value={value[obj.productData?.materialId] ?? null} onChange={(event) => handleChange(event, obj.productData?.materialId)}>
                                                 {obj.pricingConditionList?.map((price) => (
-                                                    <FormControlLabel value={Number(price?.mrp)} labelPlacement="end" control={<Radio />} label={`${price?.conditionName} : ${getUniqueCurrencies().find((d) => d.currencyCode === price['currency'])?.symbolNative} ${price?.mrp}`} />
+                                                    // <FormControlLabel value={Number(price?.mrp)} labelPlacement="end" control={<Radio />} label={`${price?.conditionName} : ${getUniqueCurrencies().find((d) => d.currencyCode === price['currency'])?.symbolNative} ${price?.mrp}`} />
+                                                    <FormControlLabel value={price?.conditionId} labelPlacement="end" control={<Radio />} label={`${price?.conditionName}`} />
                                                 ))}
                                             </RadioGroup>
                                         </FormControl>
@@ -112,7 +114,7 @@ const CalculatePriceDialog = ({
                 <CustomDialogFooter>
                     <Button
                         onClick={() => {
-                            handleSucess([...submitData, ...pricingConditionData.filter(d => value[d.materialId] === d.mrp)])
+                            handleSucess([...submitData, ...pricingConditionData.filter(d => value[d.materialId] === d.conditionId)])
                         }}
                         color="primary"
                         size="small"
