@@ -14,6 +14,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
+  if (!productList?.length) {
+    onSuccess([]);
+  }
+
   const handleSubmit = (values) => {
     delete values['orderQuantity'];
     onSuccess(values);
