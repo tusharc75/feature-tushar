@@ -4,6 +4,11 @@
     min-height: 0px !important;
   }
 }
+@media all and (max-width: 768px) {
+  .MuiButtonBase-root.MuiListItem-root.list-item.MuiListItem-gutters.MuiListItem-button.Mui-selected {
+    margin-top: 106px;
+  }
+}
 
 .MuiButton-root {
   // padding: 6px 16px !important;
