@@ -15,7 +15,7 @@ import {
   rentalManagement,
   sidebarResource,
   treeToFlatArray,
-  INVENTORY_STATUS,
+  INVENTORY_STATUS
 } from '../../../constants/helpers';
 import moment from 'moment';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -94,7 +94,7 @@ const SerializedAsset = ({
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
-        },
+        }
       },
       {
         accessor: 'type',
@@ -105,10 +105,18 @@ const SerializedAsset = ({
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
-              {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? "Inventory" : `${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
-                row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
-                  row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
+              {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? 'Inventory' : `${startCase(row.original?.type)} `}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -199,7 +207,9 @@ const SerializedAsset = ({
             )}
             {row.original?.type === 'asset' && (
               <span className="d-flex align-items-center gap-2">
-                {(row.original.status === INVENTORY_STATUS.reserved || [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(row.original.status)) && !row?.original?.rentalAssetStatus &&
+                {(row.original.status === INVENTORY_STATUS.reserved ||
+                  [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(row.original.status)) &&
+                  !row?.original?.rentalAssetStatus &&
                   allowedToEdit && (
                     <HtmlTooltip title={`Remove`}>
                       <IconButton
@@ -216,7 +226,9 @@ const SerializedAsset = ({
                     </HtmlTooltip>
                   )}
                 {row.original.isTransferAsset && (
-                  <HtmlTooltip title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`} >
+                  <HtmlTooltip
+                    title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}
+                  >
                     <IconButton
                       size="small"
                       onClick={() => {
@@ -237,6 +249,14 @@ const SerializedAsset = ({
           if (row?.isTransferAsset || (row?.type === 'asset' && row?.warehouse && row?.warehouse !== rentalManagementData?.warehouse?.optionValue))
             return 'isTransferAsset';
           if (row?.isSubleaseAsset) return 'isSublease';
+        }
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       },
       {
@@ -388,10 +408,26 @@ const SerializedAsset = ({
 
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === 'service' ? parent?.serviceDetail?.serviceName : parent.type === 'product' ? parent?.productDetail?.productName : parent?.packageDetail?.packageName}`;
+        parent.detail = `${
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
+        }`;
+        parent.description =
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent.type === 'product'
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
-        parent.assetAssignedQty = parent.serializedProduct ? data.inventory?.filter((e) => e._id === parent._id).length : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+        parent.assetAssignedQty = parent.serializedProduct
+          ? data.inventory?.filter((e) => e._id === parent._id).length
+          : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty = parent.assetAssignedQty;
         parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
@@ -402,7 +438,17 @@ const SerializedAsset = ({
         if (parent.isOfflineError) {
           parent.offlineErrorAsset = offlineAssetErrorLog?.filter((e) => e._id === parent._id).map((e) => e.assetNumber);
         }
-        parent.subRows = generateNestedData(data.material, data.inventory, data?.nonSerializeAsset, parent, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct, offlineAssetErrorLog);
+        parent.subRows = generateNestedData(
+          data.material,
+          data.inventory,
+          data?.nonSerializeAsset,
+          parent,
+          transferAssets,
+          subleaseProduct,
+          purchaseOrderProduct,
+          bulkAssetCreationProduct,
+          offlineAssetErrorLog
+        );
       });
       if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
         setNextStep(false);
@@ -475,10 +521,25 @@ const SerializedAsset = ({
     var assetAssignedQtySUM = 0;
     childProduct.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow?.productDetail?.productName : _subRow?.packageDetail?.packageName;
+      _subRow.detail =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow?.packageDetail?.packageName;
+      _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
-      _subRow.assetAssignedQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+      _subRow.assetAssignedQty = _subRow.serializedProduct
+        ? inventory?.filter((e) => e._id === _subRow._id).length
+        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.realAssetQty : 0;
       _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
       _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
@@ -489,7 +550,17 @@ const SerializedAsset = ({
       if (_subRow.isOfflineError) {
         _subRow.offlineErrorAsset = offlineAssetErrorLog?.filter((e) => e._id === _subRow._id).map((e) => e.assetNumber);
       }
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct, offlineAssetErrorLog);
+      _subRow.subRows = generateNestedData(
+        material,
+        inventory,
+        nonSerializeAsset,
+        _subRow,
+        transferAssets,
+        subleaseProduct,
+        purchaseOrderProduct,
+        bulkAssetCreationProduct,
+        offlineAssetErrorLog
+      );
       subRows.push(_subRow);
       assetQtySUM += _subRow.serializedProduct ? _subRow.assetQty : 0;
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
@@ -597,16 +668,20 @@ const SerializedAsset = ({
   useEffect(() => {
     let flatArray = treeToFlatArray(selectedRecords, 'subRows').filter(
       (f) => f.type === 'product' && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
-      );
-    let newFlatArray = treeToFlatArray(selectedRecords, 'subRows').filter((d) => d.type === 'product')
-    newFlatArray = uniqBy(newFlatArray, "_id")
+    );
+    let newFlatArray = treeToFlatArray(selectedRecords, 'subRows').filter((d) => d.type === 'product');
+    newFlatArray = uniqBy(newFlatArray, '_id');
 
     flatArray = uniqBy(flatArray, '_id');
     const products = newFlatArray.map((m) => {
-      return { _id: m.materialId, unit: m.unit, serialized: m.serializedProduct, assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : 0 };
+      return {
+        _id: m.materialId,
+        unit: m.unit,
+        serialized: m.serializedProduct,
+        assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : 0
+      };
     });
 
-    
     const uniqProduct = [];
 
     products.forEach((element: any) => {
@@ -859,12 +934,12 @@ const SerializedAsset = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}
             >

@@ -186,6 +186,14 @@ const LoadingTicket = ({
           obj.type = 'Product';
           obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = ele.qty;
+          obj.description =
+            element.type === 'service'
+              ? element?.serviceDetail?.serviceDescription || ''
+              : element.type === 'product'
+              ? element?.productDetail?.productDesc || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -207,6 +215,14 @@ const LoadingTicket = ({
           obj.type = 'Product';
           obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = qty;
+          obj.description =
+            element.type === 'service'
+              ? element?.serviceDetail?.serviceDescription || ''
+              : element.type === 'product'
+              ? element?.productDetail?.productDesc || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
@@ -318,12 +334,7 @@ const LoadingTicket = ({
     </Link>
   );
 
-  const ParentNameRenderer = (params) =>
-    params.data?.parentId ? (
-      <span>{params?.data?.parentName}</span>
-    ) : (
-      <NoDataCell />
-    );
+  const ParentNameRenderer = (params) => (params.data?.parentId ? <span>{params?.data?.parentName}</span> : <NoDataCell />);
 
   const frameworkComponents = {
     ticketRenderer: TicketRenderer,
@@ -362,7 +373,7 @@ const LoadingTicket = ({
   const columns = [
     {
       field: 'assetNumber',
-      headerName: "Details",
+      headerName: 'Details',
       show: true,
       disabled: true,
       cellRenderer: 'inventoryRenderer',
@@ -377,6 +388,12 @@ const LoadingTicket = ({
         }
         return null;
       }
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      show: true,
+      cellRenderer: 'commonRenderer'
     },
     { field: 'displayType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
@@ -626,7 +643,7 @@ const LoadingTicket = ({
               </Menu>
               <Box mx={1} />
               {selectedRecords.length &&
-                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Fragment>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -704,7 +721,7 @@ const LoadingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => { }}
+              onClone={() => {}}
               renderedFrom={renderedFrom}
             />
           ) : (
