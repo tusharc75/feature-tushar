@@ -27,8 +27,8 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
         const consumeQty = parseInt(d.consumeQuantity);
         const invoiceData = invoiceQtyData?.find((i) => i?._id === d?.row?.uniqueId);
         let product = d?.row;
-        if (!product?.serialized && returnQty > invoiceData?.qty) {
-          errors.returnQuantity = `Return quantity can not be greater than invoice quantity`;
+        if ((!product?.serialized && returnQty > product.qty - invoiceData?.qty) || 0) {
+          errors.returnQuantity = `Return quantity can not be greater than Returnable quantity (${product.qty - invoiceData?.qty || 0})`;
         } else if (returnQty > product.qty) {
           errors.returnQuantity = 'Return quantity should not be more then order quantity';
         } else {
