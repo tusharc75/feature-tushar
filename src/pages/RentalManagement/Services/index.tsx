@@ -253,6 +253,12 @@ const Services = ({
             });
           });
         }
+      } else if (element.fieldName === 'pricingCondition') {
+        coloum.push({
+          accessor: element.fieldName,
+          Header: element.fieldLabel,
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]?.optionLabel ? row.original[element.fieldName]?.optionLabel : row.original[element.fieldName]}</p> : <NoDataCell />)
+        });
       } else {
         if (element.fieldName === 'qty') {
           element.fieldName = 'qtyDisplay';
@@ -452,7 +458,7 @@ const Services = ({
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
     tempMaterial.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit && e.pricingMethod === element.pricingMethod);
+      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
       if (element.listPrice) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = element.listPrice;
@@ -461,6 +467,8 @@ const Services = ({
       } else if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
+        element["pricingCondition"] = rateResult[0].conditionId;
+        element["pricingMethod"] = rateResult[0].pricingMethod?.trim();
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
         Object.assign(element, calValues);
       }
