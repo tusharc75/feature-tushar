@@ -270,8 +270,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
             materialData.estimateStartDate = actualEndDate;
             materialData.actualStartDate = actualEndDate;
-
-            
             setEndDate(actualEndDate);
             
             let pMethod = materialData?.pricingMethod?.split(',') || []
@@ -297,9 +295,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         })
         .filter((d) => d.qty > 0);
     }
-
-    console.log('OUTSIDE BUT AFTER', data?.material);
-
     setMaterial(data?.material);
     setOrginalMaterial(data?.material);
     setProductData(data);
