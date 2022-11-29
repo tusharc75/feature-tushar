@@ -100,7 +100,7 @@ const RentalManagementDetailsPage = () => {
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
 
-  const [disabledEditButton, setDisabledEditButton] = useState(false)
+  const [disabledEditButton, setDisabledEditButton] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState(
     user?.role?.selectedEntity?.policy?.isQuotationRentalManagement
@@ -109,20 +109,18 @@ const RentalManagementDetailsPage = () => {
   );
 
   useEffect(() => {
-
-    if(quotationData) {
+    if (quotationData) {
       const keys = Object.keys(quotationData?.versions);
 
       keys.forEach((k) => {
-        if(quotationData?.versions[k].status?.includes("Customer")) {
-          setDisabledEditButton(true)
+        if (quotationData?.versions[k].status?.includes('Customer')) {
+          setDisabledEditButton(true);
         } else {
-          setDisabledEditButton(false)
+          setDisabledEditButton(false);
         }
-      })
+      });
     }
-
-  },[quotationData])
+  }, [quotationData]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -409,7 +407,14 @@ const RentalManagementDetailsPage = () => {
                     !isOffline &&
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
-                        <Button disabled={disabledEditButton} className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                        <Button
+                          disabled={disabledEditButton}
+                          className="buttonStyleBigScreen"
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenUpdateDialog}
+                        >
                           Edit
                         </Button>
                         <Button
@@ -801,7 +806,7 @@ const RentalManagementDetailsPage = () => {
           open={showCancelConfirmBox.open}
           message={
             showCancelConfirmBox.isQuote
-              ? 'Do you want to create a new version of the quote'
+              ? 'Do you want to create a new version of the quote?'
               : `Are you sure you want to cancel this ${routes.rentalManagement.title.toLowerCase()} ?`
           }
           onClose={() => {
