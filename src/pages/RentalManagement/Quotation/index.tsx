@@ -177,9 +177,6 @@ const Quotation = ({
             </IconButton>
           </div>
         ),
-        Footer: () => {
-          return <>Total</>;
-        }
       }
     ];
 
