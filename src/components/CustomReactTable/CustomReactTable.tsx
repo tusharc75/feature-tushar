@@ -363,8 +363,8 @@ export default function CustomReactTable({
   const submitInput = () => {
     const rowData = Object.keys(rowState[currentRowEditing.id].cellState).filter((k) => rowState[currentRowEditing.id].cellState[k].isEditing);
     const updatedData = material.find((row) => row?._id == currentRowEditing?.original?._id);
-    updatedData[rowData[0]] = parseFloat(cellValue.replace(/[^0-9\.]/g, '')) || 0;
-    const inputField = { [`${rowData[0]}`]: parseFloat(cellValue.replace(/[^0-9\.]/g, '')) || 0 };
+    updatedData[rowData[0]] = cellValue;
+    const inputField = { [`${rowData[0]}`]: cellValue}
 
     if (onSaveEdit && cellValue && cellValue !== updatedData[rowData[0]]) {
       onSaveEdit(inputField, updatedData);
@@ -488,6 +488,7 @@ export default function CustomReactTable({
                         rowState.hasOwnProperty(row.id) &&
                         rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
                           <input
+                            type='number'
                             autoFocus
                             style={{
                               borderLeft: '0',
