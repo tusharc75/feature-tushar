@@ -47,14 +47,6 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
   useEffect(() => {
     fetchFields();
   }, []);
-  const descriptionColumn = {
-    accessor: 'description',
-    Header: 'Description',
-    width: 200,
-    Cell: ({ row }) => {
-      return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
-    }
-  };
   const fetchFields = async () => {
     const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
     let rendererNames = [];
@@ -75,7 +67,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
     //column array 2 to last element
     const tempColumns = columns.slice(2);
 
-    setColumns([columns[0], columns[1], descriptionColumn, ...columns.slice(2)]);
+    setColumns([...columns]);
     fetchAdditionalCost();
   };
 
