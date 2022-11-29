@@ -367,15 +367,13 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           pricingMethod: values?.pricingMethod,
           unit: values.unit
         }]);
-        if (priceData && priceData.length) {
-          if (priceConditionList.length === 0) {
-            setPriceConditionList(priceData.map(d => {
-              return {
-                "optionLabel": d?.conditionName,
-                "optionValue": d?.conditionId
-              }
-            }))
+        setPriceConditionList(priceData.filter(d => d.mrp !== undefined && d.mrp !== null).map(d => {
+          return {
+            "optionLabel": d?.conditionName,
+            "optionValue": d?.conditionId
           }
+        }))
+        if (priceData && priceData.length) {
           let pricingConditionIndex = priceData.findIndex(d => d?.conditionId === values?.pricingCondition)
           let price: any = pricingConditionIndex > -1 ? priceData[pricingConditionIndex]?.mrp : priceData[0].mrp ? priceData[0].mrp : 0;
           return price;
@@ -507,7 +505,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                       label={field.fieldLabel}
                                       name={field.fieldName}
                                       type={field.type}
-                                      options={field.fieldName === "pricingCondition" && priceConditionList.length !== 0 ? priceConditionList : field.option}
+                                      options={field.fieldName === "pricingCondition" ? priceConditionList : field.option}
                                       setFieldValue={(name, value) => {
                                         setFieldValue(name, value)
                                       }}

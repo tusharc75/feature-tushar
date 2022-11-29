@@ -23,7 +23,7 @@ import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
-import EditIcon from "@material-ui/icons/Edit";
+import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 
 const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData, onClose, onSuccess }) => {
@@ -84,12 +84,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -201,7 +201,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) => (row.original[element.fieldName]?.optionLabel ? <p>{row.original[element.fieldName].optionLabel}</p> : row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
         });
       }
     });
@@ -223,7 +223,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                 size="small"
                 aria-label="Details"
                 onClick={() => {
-                  setIsProductEdit({ open: true, rowData: row.original })
+                  setIsProductEdit({ open: true, rowData: row.original });
                 }}
               >
                 <EditIcon color="primary" />
@@ -246,37 +246,49 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   };
 
   const fetchProductInventory = async () => {
-    var data: any = [];
-
+    let data: any = {};
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
     data = response?.data?.data;
 
     if (invoiceData) {
       // data.material = data.material?.filter((item) => ['Per Day', 'Per Week', 'Per Month'].includes(item?.pricingMethod));
-      data.material = data?.material?.map((e) => {
-        const row: any = invoiceData[0]?.material?.find((ele) => ele._id === e._id);
-        if (row) {
-          const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
-          e.estimateStartDate = actualEndDate;
-          e.actualStartDate = actualEndDate;
+      data.material = data?.material
+        ?.map((e) => {
+          let materialData: any = { ...e };
+          let row: any = null;
+          invoiceData?.forEach((invoiceData) => {
+            const invoiceMaterial = invoiceData?.material;
+            const existingProduct = invoiceMaterial?.find((md) => materialData._id === md._id);
+            if (existingProduct) {
+              row = existingProduct;
+            }
+          });
 
-          if(['Per Week', 'Per Month'].includes(e?.pricingMethod)) {
-            e.isInvoiced = true
-          }
+          if (row) {
+            const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
+            materialData.estimateStartDate = actualEndDate;
+            materialData.actualStartDate = actualEndDate;
+            setEndDate(actualEndDate);
 
-          setEndDate(actualEndDate);
-          if (!['Per Day', 'Per Week', 'Per Month'].includes(e?.pricingMethod)) {
-            let tempTotalPrevQty = invoiceData.map(obj => {
-              let tempQty = obj.material?.find((ele) => ele._id === e._id)?.qty
-              if (tempQty) return tempQty;
-            }).reduce((a, b) => a + b, 0)
-            let values = { qty: e.qty - tempTotalPrevQty }
-            const calValues = autoCalculateSpecificFields(values, { ...e, ...values }, allFields);
-            e = { ...e, ...calValues }
+            let pMethod = materialData?.pricingMethod?.split(',') || [];
+            pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
+
+            if (!['Per Day', 'Per Week', 'Per Month'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
+              let tempTotalPrevQty = invoiceData
+                .map((obj) => {
+                  let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
+                  if (tempQty) return tempQty;
+                })
+                .filter((d) => d);
+              tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
+              let values = { qty: materialData.qty - tempTotalPrevQty };
+              const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
+              materialData = { ...materialData, ...calValues };
+            }
           }
-        }
-        return e;
-      }).filter(d => d.qty > 0);
+          return materialData;
+        })
+        .filter((d) => d.qty > 0);
     }
     setMaterial(data?.material);
     setOrginalMaterial(data?.material);
@@ -296,8 +308,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName;
+          ? parent?.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName;
       parent.qtyDisplay = parent.qty;
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
@@ -314,8 +326,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
@@ -351,25 +363,24 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     setMaterial(tempRows);
     initializeTable(tempProduct);
     setRowsApplied((prevState) => {
-      let prevRowsApplied = prevState.filter(obj => rows.map(d => d._id).includes(e => e !== obj._id))
+      let prevRowsApplied = prevState.filter((obj) => rows.map((d) => d._id).includes((e) => e !== obj._id));
       return [...prevRowsApplied, ...rows];
     });
-    setIsProductEdit({ open: false, rowData: null })
+    setIsProductEdit({ open: false, rowData: null });
     setAppliedDate(true);
   };
 
   const handleCreateBill = () => {
+    const alreadyInvoiced = rowsApplied.some((d) => d?.isInvoiced);
 
-    const alreadyInvoiced = rowsApplied.some((d) => d?.isInvoiced)
-
-    if(alreadyInvoiced) {
+    if (alreadyInvoiced) {
       toastConfig.setToastConfig({
         open: true,
-        type: "warning",
-        message: "Some of the selected records have been already billed"
+        type: 'warning',
+        message: 'Some of the selected records have been already billed'
       });
 
-      return
+      return;
     }
 
     rowsApplied?.forEach((element) => {
@@ -541,7 +552,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           isBulkedit={false}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
-          rowData={orginalMaterial.find(d => d._id === isProductEdit.rowData._id)}
+          rowData={orginalMaterial.find((d) => d._id === isProductEdit.rowData._id)}
           material={material}
           selectedProducts={[]}
           loading={isUpdating}

@@ -44,6 +44,7 @@ import { groupBy, uniq, map } from 'lodash';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
+import HelpIcon from '@material-ui/icons/HelpOutline';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import { ExpandMore } from '@material-ui/icons';
 
@@ -308,6 +309,13 @@ const LoadingTicket = ({
       >
         {params.value}
       </Link>
+      {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
+        <HtmlTooltip title="This asset will be shipped separately">
+          <IconButton size="small">
+            <HelpIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
       {params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0 && (
         <Box ml={1}>
           <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
