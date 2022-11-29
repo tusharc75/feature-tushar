@@ -6,7 +6,7 @@ import { camelCase, kebabCase, sortBy } from 'lodash';
 import styles from './Dashboard.module.scss';
 
 import './style.scss';
-import { SVG, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
+import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/dashboard_images';
 
 import Icon from '@material-ui/core/Icon';
 import { SiCivicrm } from 'react-icons/si';
@@ -79,48 +79,48 @@ function Dashboard() {
 
       switch (sec) {
         case 'Product Setup':
-          icon = <img src={SVG(IconConst.PRODUCT_SETUP)} alt="Product Setup Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+          icon = <img src={SVGImages(IconConst.PRODUCT_SETUP)} alt="Product Setup Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Product and Category Setup.';
           color = '#FFEFEE';
           break;
         case 'Admin Portal':
-          icon = <img src={SVG(IconConst.ADMIN_PORTAL)} alt="Admin Portal Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+          icon = <img src={SVGImages(IconConst.ADMIN_PORTAL)} alt="Admin Portal Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Build your own Template, Manage Roles and Entities.';
           color = '#F3F8FF';
           break;
         case 'CRM +':
-          icon = <img src={SVG(IconConst.CRM)} alt="Crm Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+          icon = <img src={SVGImages(IconConst.CRM)} alt="Crm Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Convert leads and close sales deals faster.';
           color = '#FFF7F2';
           break;
         case 'ROM':
-          icon = <img src={SVG(IconConst.ROM)} alt="ROM Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+          icon = <img src={SVGImages(IconConst.ROM)} alt="ROM Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Fulfill Rental Orders Faster.';
           color = '#F9FDEC';
           break;
         case 'Accounts':
-          icon = <img src={SVG(IconConst.ACCOUNTS)} alt="Accounts Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+          icon = <img src={SVGImages(IconConst.ACCOUNTS)} alt="Accounts Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Customer and Supplier Account Management at your fingertips.';
           color = '#FFFAEC';
           break;
         case 'Activities':
-          icon = <img src={SVG(IconConst.ACTIVITIES)} alt="Activities Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+          icon = <img src={SVGImages(IconConst.ACTIVITIES)} alt="Activities Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Assign and Access Activities related to an Order.';
           color = '#F6F1FF';
           break;
 
         case 'Dynamic Forms':
-          icon = <img src={SVG(IconConst.FORM_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+          icon = <img src={SVGImages(IconConst.FORM_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Setup Dynamic Forms & Templates';
           color = '#FFEFEE';
           break;
         case 'Inventory Management':
-          icon = <img src={SVG(IconConst.INV_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+          icon = <img src={SVGImages(IconConst.INV_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = 'Manage Inventory and Purchases Smartly.';
           color = '#F3F8FF';
           break;
         default:
-          icon = <img src={SVG(IconConst.GEN_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+          icon = <img src={SVGImages(IconConst.GEN_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
           text = '';
           color = '#FFF7F2';
       }
@@ -183,7 +183,7 @@ function Dashboard() {
       <div className={`content-wrapper ${styles.contentWrapper}`}>
         <div className={styles.main}>
           <div className={styles.leftContainer}>
-            <div className={`${styles.search_section}`}>
+            {/* <div className={`${styles.search_section}`}>
               <div className={`${styles.search_input}`}>
                 <input
                   type="text"
@@ -205,7 +205,7 @@ function Dashboard() {
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
             {search.trim() !== '' ? (
               <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} />
             ) : (
@@ -218,7 +218,7 @@ function Dashboard() {
           {/* <div className={styles.hero_container}>
             <h1 className={styles.hero_heading}>Raising resiliency in a rapidly transforming business environment</h1>
             <p className={styles.hero_paragraph}>Simplify and accelerate your B2B transactions.</p>
-            <img src={SVG(IconConst.HERO)} alt="Dashboard Hero Image" className={styles.crm_hero_image} />
+            <img src={SVGImages(IconConst.HERO)} alt="Dashboard Hero Image" className={styles.crm_hero_image} />
           </div>
           <div className="card_container">
             <div className={`${styles.search_section}`}>
@@ -451,7 +451,7 @@ const DisplayColabTool = ({ sections, handleRoutes }) => {
     <>
       {colabData ? (
         <div className={styles.rightInner} onClick={() => setModalContent({ items: colabData?.items, title: sectionHead })}>
-          <img src={SVG(IconConst.COLABORATION_TOOL)} alt="Colab Logo" className={styles.colabLogo} />
+          <img src={SVGImages(IconConst.COLABORATION_TOOL)} alt="Colab Logo" className={styles.colabLogo} />
           <Typography component={'h2'}>{sectionHead}</Typography>
           <Typography component={'p'}>By using Collaboration tools, collaborate with or within team members easily</Typography>
           <button className={styles.colabButton} onClick={() => setModalContent({ items: colabData?.items, title: sectionHead })}>
