@@ -259,7 +259,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
           e.estimateStartDate = actualEndDate;
           e.actualStartDate = actualEndDate;
-          e.isInvoiced = true
+
+          if(['Per Week', 'Per Month'].includes(e?.pricingMethod)) {
+            e.isInvoiced = true
+          }
 
           setEndDate(actualEndDate);
           if (!['Per Day', 'Per Week', 'Per Month'].includes(e?.pricingMethod)) {
