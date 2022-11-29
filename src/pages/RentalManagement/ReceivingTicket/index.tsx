@@ -1045,11 +1045,12 @@ const ReceivingTicket = ({
 
             <MenuItem
               disabled={
-                selectedRecords.length === 0 ||
-                selectedRecords.filter(
+                selectedRecords?.length === 0 ||
+                selectedRecords?.filter(
                   (e: any) =>
                     e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.indTransit
-                ).length !== selectedRecords.length
+                )?.length !== selectedRecords?.length ||
+                anchorActionEl === null
               }
               onClick={() => {
                 closeActions();

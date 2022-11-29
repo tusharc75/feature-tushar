@@ -38,7 +38,7 @@ export default function ConfirmationDialogRaw({ onClose, onOk, open, message, ok
       keepMounted
     >
       <DialogTitle id="confirmation-dialog-title" className="text-white">
-        {!forwardText ? 'Confirm' : forwardText}
+        Confirm
       </DialogTitle>
       <DialogContent dividers>{message ? <Typography>{message}</Typography> : null}</DialogContent>
       <DialogActions>
@@ -47,7 +47,7 @@ export default function ConfirmationDialogRaw({ onClose, onOk, open, message, ok
         </Button>
         <Button size="small" onClick={onOk} disabled={okBtnLoading} color="primary">
           {okBtnLoading ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
-          Ok
+          {!forwardText ? 'Confirm' : forwardText}
         </Button>
       </DialogActions>
     </Dialog>
