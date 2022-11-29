@@ -312,7 +312,7 @@ const SerializedAsset = ({
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) => (row.original[element.fieldName]?.optionLabel ? <p>{row.original[element.fieldName].optionLabel}</p> : row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
         });
       }
     });
@@ -597,7 +597,7 @@ const SerializedAsset = ({
   useEffect(() => {
     let flatArray = treeToFlatArray(selectedRecords, 'subRows').filter(
       (f) => f.type === 'product' && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
-      );
+    );
     let newFlatArray = treeToFlatArray(selectedRecords, 'subRows').filter((d) => d.type === 'product')
     newFlatArray = uniqBy(newFlatArray, "_id")
 
@@ -606,7 +606,7 @@ const SerializedAsset = ({
       return { _id: m.materialId, unit: m.unit, serialized: m.serializedProduct, assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : 0 };
     });
 
-    
+
     const uniqProduct = [];
 
     products.forEach((element: any) => {

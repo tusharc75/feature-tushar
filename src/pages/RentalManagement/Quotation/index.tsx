@@ -134,12 +134,12 @@ const Quotation = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -253,7 +253,7 @@ const Quotation = ({
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) => (row.original[element.fieldName]?.optionLabel ? <p>{row.original[element.fieldName].optionLabel}</p> : row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
         });
       }
     });
@@ -275,15 +275,14 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
           ? _subRow?.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName
-      }`;
+            ? _subRow?.productDetail?.productName
+            : _subRow.type === 'service'
+              ? _subRow?.serviceDetail?.serviceName
+              : _subRow?.packageDetail?.packageName
+        }`;
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -313,15 +312,14 @@ const Quotation = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
+      parent.detail = `${parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.productDetail?.productName
+            : parent.type === 'service'
+              ? parent.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName
+        }`;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -469,7 +467,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)
