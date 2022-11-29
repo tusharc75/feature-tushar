@@ -26,9 +26,10 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
         const returnQty = parseInt(d.returnQuantity);
         const consumeQty = parseInt(d.consumeQuantity);
         const invoiceData = invoiceQtyData?.find((i) => i?._id === d?.row?.uniqueId);
+        const invoiceQuantity = invoiceData?.qty || 0;
         let product = d?.row;
-        if ((!product?.serialized && returnQty > product.qty - invoiceData?.qty) || 0) {
-          errors.returnQuantity = `Return quantity can not be greater than Returnable quantity (${product.qty - invoiceData?.qty || 0})`;
+        if (!product?.serialized && returnQty > product.qty - invoiceQuantity) {
+          errors.returnQuantity = `Return quantity can not be greater than Returnable quantity (${product.qty - invoiceQuantity})`;
         } else if (returnQty > product.qty) {
           errors.returnQuantity = 'Return quantity should not be more then order quantity';
         } else {
@@ -40,7 +41,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
           errors.consumeQuantity = '';
         }
         if (consumeQty + returnQty > product.qty && !errors?.returnQuantity && !errors?.consumeQuantity) {
-          errors['sum'] = 'Addition of return and consume quantity cannot be greater then order quantity';
+          errors['sum'] = 'The sum of the quantities you return and consume cannot exceed the quantity you ordered.';
         } else {
           errors['sum'] = '';
         }
