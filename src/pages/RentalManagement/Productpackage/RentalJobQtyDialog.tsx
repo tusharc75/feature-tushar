@@ -368,14 +368,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           unit: values.unit
         }]);
         if (priceData && priceData.length) {
-          if (priceConditionList.length === 0) {
-            setPriceConditionList(priceData.map(d => {
-              return {
-                "optionLabel": d?.conditionName,
-                "optionValue": d?.conditionId
-              }
-            }))
-          }
+          setPriceConditionList(priceData.filter(d => d.mrp !== undefined && d.mrp !== null).map(d => {
+            return {
+              "optionLabel": d?.conditionName,
+              "optionValue": d?.conditionId
+            }
+          }))
           let pricingConditionIndex = priceData.findIndex(d => d?.conditionId === values?.pricingCondition)
           let price: any = pricingConditionIndex > -1 ? priceData[pricingConditionIndex]?.mrp : priceData[0].mrp ? priceData[0].mrp : 0;
           return price;
