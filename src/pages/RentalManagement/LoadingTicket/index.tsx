@@ -187,6 +187,14 @@ const LoadingTicket = ({
           obj.type = 'Product';
           obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = ele.qty;
+          obj.description =
+            element.type === 'service'
+              ? element?.serviceDetail?.serviceDescription || ''
+              : element.type === 'product'
+              ? element?.productDetail?.productDesc || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -208,6 +216,14 @@ const LoadingTicket = ({
           obj.type = 'Product';
           obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = qty;
+          obj.description =
+            element.type === 'service'
+              ? element?.serviceDetail?.serviceDescription || ''
+              : element.type === 'product'
+              ? element?.productDetail?.productDesc || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
@@ -380,6 +396,12 @@ const LoadingTicket = ({
         }
         return null;
       }
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      show: true,
+      cellRenderer: 'commonRenderer'
     },
     { field: 'displayType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },

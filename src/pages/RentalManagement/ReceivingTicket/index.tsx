@@ -267,6 +267,14 @@ const ReceivingTicket = ({
           obj.materialId = element?.productDetail?._id;
           obj.type = 'Product';
           obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
+          obj.description =
+            element.type === 'service'
+              ? element?.serviceDetail?.serviceDescription || ''
+              : element.type === 'product'
+              ? element?.productDetail?.productDesc || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.qty = ele.qty;
           obj.consumeQty = consumeQty;
           obj.assetNumber = element?.productDetail?.productName;
@@ -294,6 +302,14 @@ const ReceivingTicket = ({
           obj.materialId = element?.materialId;
           obj.type = 'Product';
           obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
+          obj.description =
+            element.type === 'service'
+              ? element?.serviceDetail?.serviceDescription || ''
+              : element.type === 'product'
+              ? element?.productDetail?.productDesc || ''
+              : element.type === 'package'
+              ? element?.packageDetail?.packageDescription || ''
+              : '';
           obj.qty = qty;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
@@ -536,6 +552,12 @@ const ReceivingTicket = ({
         }
         return null;
       }
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      show: true,
+      cellRenderer: 'commonRenderer'
     },
     { field: 'displayType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
