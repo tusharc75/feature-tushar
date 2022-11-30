@@ -201,7 +201,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) => (row.original[element.fieldName]?.optionLabel ? <p>{row.original[element.fieldName].optionLabel}</p> : row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
         });
       }
     });
@@ -247,8 +247,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
   const fetchProductInventory = async () => {
     let data: any = {};
-    let material:any = []
-
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
     data = response?.data?.data;
 
@@ -256,28 +254,25 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       // data.material = data.material?.filter((item) => ['Per Day', 'Per Week', 'Per Month'].includes(item?.pricingMethod));
       data.material = data?.material
         ?.map((e) => {
-          let materialData:any = {...e};
+          let materialData: any = { ...e };
           let row: any = null;
           invoiceData?.forEach((invoiceData) => {
             const invoiceMaterial = invoiceData?.material;
             const existingProduct = invoiceMaterial?.find((md) => materialData._id === md._id);
-            if(existingProduct) {
-              row = existingProduct
+            if (existingProduct) {
+              row = existingProduct;
             }
-          })
-          
+          });
+
           if (row) {
             const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
             materialData.estimateStartDate = actualEndDate;
             materialData.actualStartDate = actualEndDate;
             setEndDate(actualEndDate);
-            
-            let pMethod = materialData?.pricingMethod?.split(',') || []
-            pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m))
-            
-            if(['Per Week', 'Per Month'].includes(materialData?.pricingMethod)) {
-              materialData.isInvoiced = true;
-            }
+
+            let pMethod = materialData?.pricingMethod?.split(',') || [];
+            pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
+
             if (!['Per Day', 'Per Week', 'Per Month'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
               let tempTotalPrevQty = invoiceData
                 .map((obj) => {

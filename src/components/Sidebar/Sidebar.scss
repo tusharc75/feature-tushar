@@ -59,11 +59,11 @@
     padding: 0;
   }
   .list-item {
-    color: #6c6f70;
-    border-bottom: 1px solid #eaeaea;
+    color: white;
     position: relative;
     svg {
-      fill: var(--primary);
+      fill: white;
+      color: white;
     }
     &::before {
       content: '';
@@ -82,12 +82,12 @@
       z-index: -1;
     }
     &.active_element::before {
-      background-color: #41aeaa;
+      background-color: #41aeaa !important;
       -webkit-box-shadow: 0px 4px 4px rgba(65, 174, 170, 0.25);
       box-shadow: 0px 4px 4px rgba(65, 174, 170, 0.25);
     }
     &.Mui-selected::before {
-      background-color: #41aeaa;
+      background-color: #41aeaa !important;
       -webkit-box-shadow: 0px 4px 4px rgba(65, 174, 170, 0.25);
       box-shadow: 0px 4px 4px rgba(65, 174, 170, 0.25);
     }
@@ -116,7 +116,7 @@
 
       .MuiListItem-root {
         padding: 2px 0px 0 50px;
-        background: #f2f2f2;
+        background: hsl(207deg, 49%, 23%) !important;
 
         span {
           white-space: break-spaces;
@@ -195,4 +195,11 @@
 
 .sidebar-overflow-auto {
   overflow: auto !important;
+}
+.sidebar-drawer {
+  color: white !important;
+  background-color: #162d40 !important;
+}
+.dropdown-items {
+  background-color: red;
 }

@@ -490,22 +490,24 @@ const Productpackage = ({
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    tempMaterial.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
-      if (element.listPrice) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = element.listPrice;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
-        Object.assign(element, calValues);
-      } else if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element["pricingCondition"] = rateResult[0].conditionId;
-        element["pricingMethod"] = rateResult[0].pricingMethod?.trim();
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-        Object.assign(element, calValues);
-      }
-    });
+    if(priceData) {
+      tempMaterial.forEach((element) => {
+        const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
+        if (element.listPrice) {
+          const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+          element[priceFieldName] = element.listPrice;
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          Object.assign(element, calValues);
+        } else if (rateResult.length && rateResult[0].mrp) {
+          const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+          element[priceFieldName] = rateResult[0].mrp;
+          element["pricingCondition"] = rateResult[0].conditionId;
+          element["pricingMethod"] = rateResult[0].pricingMethod?.trim();
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+          Object.assign(element, calValues);
+        }
+      });
+    }
     axiosInstance()
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {
@@ -817,7 +819,10 @@ const Productpackage = ({
           handleSucess={(data) => {
             AddMaterial(priceDataDialog.material, data)
           }}
-          onClose={() => setPriceDataDialog({ open: false, material: null })}
+          onClose={() => {
+            AddMaterial(priceDataDialog.material, null)
+            setPriceDataDialog({ open: false, material: null });
+          }}
         />
       }
     </Fragment>
