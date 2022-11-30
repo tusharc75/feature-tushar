@@ -171,7 +171,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             }, 500);
         }}
         variant="permanent"
-        className={clsx(classes.drawer, {
+        className={clsx(classes.drawer, 'sidebar-drawer', {
           [classes.drawerOpen]: toggleDrawer,
           [classes.drawerClose]: !toggleDrawer,
           'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
@@ -182,7 +182,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             [classes.drawerOpen]: toggleDrawer,
             [classes.drawerClose]: !toggleDrawer,
             'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
-            'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1
+            'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1,
+            'sidebar-drawer': true
           })
         }}
       >
@@ -259,7 +260,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 <React.Fragment key={i}>
                   <Tooltip title={!toggleDrawer ? listItem.section : ''}>
                     <ListItem
-                      className={`list-item ${itemToAddActiveClass == i ? 'active_element' : ''}`}
+                      className={`list-item dropdown-items ${itemToAddActiveClass == i ? 'active_element' : ''}`}
                       button
                       key={listItem.section + '' + i}
                       onClick={() => {
@@ -304,7 +305,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         {!isOffline && (
           <List style={{ bottom: '0px', marginTop: 'auto' }}>
             <ListItem button onClick={() => setChatOpen((prevState) => !prevState)}>
-              <ListItemIcon>
+              <ListItemIcon style={{ color: 'white' }}>
                 <BsChatLeftTextFill size={16} className="sidebar-icon chat-icon" />
               </ListItemIcon>
               <ListItemText primary="Chat" />

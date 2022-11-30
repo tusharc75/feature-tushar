@@ -176,10 +176,7 @@ const Quotation = ({
               <InfoIcon fontSize="small" color="primary" />
             </IconButton>
           </div>
-        ),
-        Footer: () => {
-          return <>Total</>;
-        }
+        )
       },
       {
         accessor: 'description',
