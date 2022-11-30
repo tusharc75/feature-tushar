@@ -28,7 +28,7 @@ import { useHistory, Link, useLocation } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { SVG } from '../../assets';
 import UserProfile from './../UserProfile';
-import { SET_CHATTER, SET_SELECTED_ENTITY, SET_START_TOUR, SET_USER } from '../../StateProvider/actionTypes';
+import { SET_CHATTER, SET_SELECTED_ENTITY, SET_START_TOUR, SET_USER, SET_SEARCH } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -48,6 +48,7 @@ import { kebabCase } from 'lodash';
 import { staticHiddenResource } from '../../constants/helpers';
 import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
 import { useScrollDirection } from 'src/hooks/useScroll';
+import useClickdOutside from 'src/hooks/clickOutside';
 import styles from './Header.module.scss';
 
 const useStyles = makeStyles((theme) => ({
@@ -1270,10 +1271,17 @@ const sectionVariations = (sec) => {
 };
 
 const SearchBar = ({ user, selectedEntity, history }) => {
+  const {
+    state: { searchQuery },
+    dispatch
+  }: any = useData();
+
   const [sections, setSections] = useState([]);
   const [showCloseButton, setShowCloseButton] = useState(false);
   const [search, setSearch] = useState('');
   const [filteredData, setFilteredData] = useState([]);
+
+  console.log(searchQuery);
 
   useEffect(() => {
     let arr = [];
@@ -1320,6 +1328,7 @@ const SearchBar = ({ user, selectedEntity, history }) => {
   }, [user, selectedEntity]);
 
   const handleSearch = (value) => {
+    dispatch({ type: SET_SEARCH, payload: value });
     const searchedValueInLowerCase = value?.toLowerCase();
     const filteredItems = [];
 
@@ -1380,27 +1389,35 @@ const SearchBar = ({ user, selectedEntity, history }) => {
           </div>
         )}
       </div>
-      {search.trim() !== '' && <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} />}
+      {search.trim() !== '' && <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} clearSearch={clearSearch} />}
     </div>
   );
 };
 
-const SearchResult = ({ filteredData, history, handleRoutes }) => {
+const SearchResult = ({ filteredData, history, handleRoutes, clearSearch }) => {
+  const resultRef = useRef(null);
+  const isClickOutside = useClickdOutside(resultRef);
+  useEffect(() => {
+    if (isClickOutside) {
+      clearSearch();
+    }
+  }, [isClickOutside]);
   return (
-    <div className={styles.searchResult}>
+    <div className={styles.searchResult} ref={resultRef}>
       <div className={`${styles.filtered_data} `} style={{ overflowY: filteredData.length === 0 ? 'auto' : 'scroll' }}>
         {filteredData.length !== 0 ? (
-          filteredData.map((section) => {
+          filteredData.map((section, key) => {
             return (
-              <List key={section.head} subheader={<li className={`${styles.list_header}`}>{section.head}</li>}>
-                {section.items.map((item) => {
+              <List key={key} subheader={<li className={`${styles.list_header}`}>{section.head}</li>}>
+                {section.items.map((item, key) => {
                   return (
                     <>
                       <ListItem
-                        key={item.name}
+                        key={key}
                         button
                         onClick={() => {
                           history.push(handleRoutes(item));
+                          clearSearch();
                         }}
                         className={styles.heaaderResults}
                       >
