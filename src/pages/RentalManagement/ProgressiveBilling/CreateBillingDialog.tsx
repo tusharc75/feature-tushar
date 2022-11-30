@@ -201,7 +201,14 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName]?.optionLabel ? <p>{row.original[element.fieldName].optionLabel}</p> : row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) =>
+            row.original[element.fieldName]?.optionLabel ? (
+              <p>{row.original[element.fieldName].optionLabel}</p>
+            ) : row.original[element.fieldName] ? (
+              <p>{row.original[element.fieldName]}</p>
+            ) : (
+              <NoDataCell />
+            )
         });
       }
     });
@@ -255,36 +262,30 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       data.material = data?.material
         ?.map((e) => {
           let materialData: any = { ...e };
-          let row: any = null;
-          invoiceData?.forEach((invoiceData) => {
-            const invoiceMaterial = invoiceData?.material;
-            const existingProduct = invoiceMaterial?.find((md) => materialData._id === md._id);
-            if (existingProduct) {
-              row = existingProduct;
-            }
-          });
+
+          let pMethod = materialData?.pricingMethod?.split(',') || [];
+          pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
+
+          if (!['Per Day', 'Per Week', 'Per Month'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
+            let tempTotalPrevQty = invoiceData
+              .map((obj) => {
+                let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
+                if (tempQty) return tempQty;
+              })
+              .filter((d) => d);
+            tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
+            let values = { qty: materialData.qty - tempTotalPrevQty };
+            const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
+            materialData = { ...materialData, ...calValues };
+          }
+
+          let row: any = invoiceData[0]?.material.find((m) => m._id === materialData._id);
 
           if (row) {
             const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
             materialData.estimateStartDate = actualEndDate;
             materialData.actualStartDate = actualEndDate;
             setEndDate(actualEndDate);
-
-            let pMethod = materialData?.pricingMethod?.split(',') || [];
-            pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
-
-            if (!['Per Day', 'Per Week', 'Per Month'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
-              let tempTotalPrevQty = invoiceData
-                .map((obj) => {
-                  let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
-                  if (tempQty) return tempQty;
-                })
-                .filter((d) => d);
-              tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
-              let values = { qty: materialData.qty - tempTotalPrevQty };
-              const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
-              materialData = { ...materialData, ...calValues };
-            }
           }
           return materialData;
         })
@@ -340,11 +341,49 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       actualEndDate: endDate,
       estimateEndDate: endDate
     };
+    let actualEndCycleDate: any = null;
+
     let rows: any = [];
     selectedProducts.forEach((element) => {
+      actualEndCycleDate = null;
+      const startDate = new Date(element.actualStartDate);
+      const endDate = new Date(values.actualEndDate);
+      const dayDiff = moment(endDate).diff(startDate, 'days');
+
+      if (element?.pricingMethod === 'Per Month') {
+        const endDate = new Date(values.actualEndDate);
+        const lastDay = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0);
+
+        if (dayDiff > 0) {
+          actualEndCycleDate = lastDay.toISOString();
+        }
+      }
+
+      if (element?.pricingMethod === 'Per Week') {
+        if (dayDiff < 7 && dayDiff > 0) {
+          actualEndCycleDate = moment(startDate).add(7, 'd');
+        } else {
+          const weeks = Math.ceil(dayDiff / 7);
+          const endCycle:any = moment(startDate).add(7 * weeks, 'd');
+
+          actualEndCycleDate = new Date(endCycle?._d).toISOString()
+
+        }
+      }
+
+      if (actualEndCycleDate) {
+        values.actualEndDate = actualEndCycleDate;
+        values.estimateEndDate = actualEndCycleDate;
+      }
+
+      if (moment(endDate).diff(startDate) < 0) {
+        element.hasInvalidDate = true;
+      }
+
       const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
       rows.push({ ...element, ...calValues });
     });
+
     let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
     let tempProduct = productData;
     tempProduct['material'] = tempRows;
@@ -504,6 +543,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   height={'calc(100vh - 285px)'}
                   columns={columns}
                   data={rowsData}
+                  setWholeRowsCellColor={(rowData) => (rowData?.hasInvalidDate ? 'error' : '')}
                   onSelect={setSelectedProducts}
                   childrenProperty="subRows"
                   uniqueKey="_id"

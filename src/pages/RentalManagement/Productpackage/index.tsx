@@ -384,7 +384,7 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serviTce' ? _subRow.serviceDetail?.serviceName :
+      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName :
         _subRow.type === 'package' ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product' ? _subRow.productDetail?.productName
             : ''} `;
@@ -490,7 +490,7 @@ const Productpackage = ({
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    if(priceData) {
+    if (priceData) {
       tempMaterial.forEach((element) => {
         const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
         if (element.listPrice) {
