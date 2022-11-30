@@ -235,9 +235,12 @@ const ReceivingTicket = ({
       }
 
       const loadingTicketProducts = [];
+      const returnTicketProducts = {};
       deliveryTicketList?.forEach((element) => {
         if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products && element?.products?.length) {
           element?.products?.forEach((ele) => {
+            // returnTicketProducts['ticketId'] = element?._id;
+            returnTicketProducts[ele?.product] = ele?.qty;
             loadingTicketProducts.push({
               ...ele,
               loadingTicketId: element._id,
@@ -247,6 +250,7 @@ const ReceivingTicket = ({
           });
         }
       });
+      console.log(returnTicketProducts);
 
       products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
       products?.forEach((element) => {
@@ -259,6 +263,7 @@ const ReceivingTicket = ({
           });
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
+          console.log(element);
           const obj: any = {};
           obj.uniqueId = element._id;
           // this is the material id
@@ -277,6 +282,7 @@ const ReceivingTicket = ({
               : '';
           obj.qty = ele.qty;
           obj.consumeQty = consumeQty;
+          obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicketProducts[element?.materialId] || 0 : 0;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -285,7 +291,15 @@ const ReceivingTicket = ({
           obj.status = element?.status;
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
-          obj.rentalAssetStatus = element?.status;
+          obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
+            ? ele.qty === consumeQty
+              ? 'Consumed'
+              : consumeQty < ele.qty && consumeQty > 0
+              ? 'Partially Consumed'
+              : ele.qty === returnTicketProducts[element?.materialId]
+              ? 'Returned'
+              : ''
+            : element?.status;
           obj.startDate = element?.actualStartDate;
           obj.endDate = element?.actualEndDate;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
@@ -314,12 +328,23 @@ const ReceivingTicket = ({
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.consumeQty = consumeQty;
+          obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicketProducts[element?.materialId] || 0 : 0;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
+          obj.status = element?.status;
+          obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
+            ? qty === consumeQty
+              ? 'Consumed'
+              : consumeQty < qty && consumeQty > 0
+              ? 'Partially Consumed'
+              : qty === returnTicketProducts[element?.materialId]
+              ? 'Returned'
+              : ''
+            : element?.status;
           productAssets.push(obj);
         }
       });
@@ -568,6 +593,7 @@ const ReceivingTicket = ({
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'deliveryTicketRenderer' },
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },
     { field: 'returnTicket', headerName: 'Return Ticket', show: true, cellRenderer: 'returnTicketRenderer' },
+    { field: 'returnQty', headerName: 'Returned Qty', show: true, cellRenderer: 'returnTicketRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'startDate', headerName: 'Actual Start Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'Actual End Date', show: true, cellRenderer: 'dateRenderer' },
