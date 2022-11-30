@@ -83,7 +83,7 @@ const CalculatePriceDialog = ({
                 onClose={onClose}
                 aria-labelledby="pricing-condition-dialog"
             >
-                <CustomDialogHeader title="Select Pricing Condition" showRequiredLabel={false} />
+                <CustomDialogHeader title="Select Pricing Condition" showRequiredLabel={false} onClose={onClose} />
                 <CustomDialogContent>
                     {displayData.length === 0 ? (
                         <Loader text="Loading Pricing Conditions" />
