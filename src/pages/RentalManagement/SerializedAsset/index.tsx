@@ -416,10 +416,10 @@ const SerializedAsset = ({
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
         parent.detail = `${parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'
@@ -436,7 +436,7 @@ const SerializedAsset = ({
           : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty = parent.assetAssignedQty;
-        parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
+        // parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
         parent.isSublease = subleaseProduct?.some((e) => e.materialId === parent.materialId);
         parent.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === parent.materialId);
         parent.isBulkAssetCreation = bulkAssetCreationProduct?.some((e) => e.productId === parent.materialId);
@@ -455,6 +455,8 @@ const SerializedAsset = ({
           bulkAssetCreationProduct,
           offlineAssetErrorLog
         );
+        parent.assetQty = parent.subRows.length === 0 ? parent.assetQty : parent.subRows.reduce((sum, row) => row.assetQty + sum, 0);
+        parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false) : parent.assetAssignedQty === parent.subRows.filter(d => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0);
       });
       if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
         setNextStep(false);
@@ -542,13 +544,17 @@ const SerializedAsset = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
-      _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
+      // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
+      _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ?
+        parent.type === 'product' || parent.type === 'package' ?
+          _subRow.qty * parent.assetQty :
+          _subRow.qty * parent.qty : 0
       _subRow.assetAssignedQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.realAssetQty : 0;
       _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
-      _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
+      // _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
       _subRow.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === _subRow.materialId);
       _subRow.isBulkAssetCreation = bulkAssetCreationProduct?.some((e) => e.productId === _subRow.materialId);
@@ -556,7 +562,7 @@ const SerializedAsset = ({
       if (_subRow.isOfflineError) {
         _subRow.offlineErrorAsset = offlineAssetErrorLog?.filter((e) => e._id === _subRow._id).map((e) => e.assetNumber);
       }
-      _subRow.subRows = generateNestedData(
+      let tempSubRows = generateNestedData(
         material,
         inventory,
         nonSerializeAsset,
@@ -567,13 +573,12 @@ const SerializedAsset = ({
         bulkAssetCreationProduct,
         offlineAssetErrorLog
       );
+      _subRow.subRows = tempSubRows
+      _subRow.assetQty = tempSubRows.filter(d => d.type !== 'asset').length === 0 ? _subRow.assetQty : tempSubRows.filter(d => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+      _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : _subRow.assetAssignedQty === tempSubRows.filter(d => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0);
       subRows.push(_subRow);
-      assetQtySUM += _subRow.serializedProduct ? _subRow.assetQty : 0;
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
-
-    parent.assetQty += assetQtySUM - (parent.type === 'package' ? parent.qty : 0);
-    parent.assetQty = parent.assetQty < 0 ? 0 : parent.assetQty;
 
     parent.assetAssignedQty += assetAssignedQtySUM;
     parent.isValid = parent.serializedProduct || parent.type === 'package' ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
@@ -582,8 +587,8 @@ const SerializedAsset = ({
   };
 
   const getAssetAssignedValues = (row) => {
-    if (row?.original?.type === 'asset') {
-      return '';
+    if (row?.original?.type === 'asset' || row?.original?.assetQty === 0) {
+      return ' N/A ';
     }
     // if (!row?.original?.serializedProduct && row?.original?.assetAssignedQty === 0) {
     //   return <p>---</p>;
