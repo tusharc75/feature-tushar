@@ -112,12 +112,12 @@ const Invoice = ({
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                  : ''}
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -239,7 +239,14 @@ const Invoice = ({
             coloum.push({
               accessor: element.fieldName,
               Header: element.fieldLabel,
-              Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+              Cell: ({ row }) =>
+                row.original[element.fieldName]?.optionLabel ? (
+                  <p>{row.original[element.fieldName].optionLabel}</p>
+                ) : row.original[element.fieldName] ? (
+                  <p>{row.original[element.fieldName]}</p>
+                ) : (
+                  <NoDataCell />
+                )
             });
           }
         });
@@ -283,10 +290,10 @@ const Invoice = ({
             item.type === 'product'
               ? item.productDetail?.productName
               : item.type === 'service'
-              ? item.serviceDetail?.serviceName
-              : item.type === 'package'
-              ? item.packageDetail?.packageName
-              : '';
+                ? item.serviceDetail?.serviceName
+                : item.type === 'package'
+                  ? item.packageDetail?.packageName
+                  : '';
           item.type = item.type;
           combinedData.push(item);
         }
@@ -300,24 +307,23 @@ const Invoice = ({
       const rows = combinedData.filter((e) => e.parentId === null);
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${
-          parent.type === 'Add-on'
-            ? parent.detail
-            : parent.type === 'product'
+        parent.detail = `${parent.type === 'Add-on'
+          ? parent.detail
+          : parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+              ? parent?.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName
+          }`;
         console.log(parent?.productDetail?.productDesc);
         parent.description =
           parent?.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent?.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent?.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : '';
+              ? parent?.productDetail?.productDesc || ''
+              : parent?.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
         parent.qty = parent.qty;
         parent.subRows = generateNestedData(material, inventory, parent);
       });
@@ -351,16 +357,16 @@ const Invoice = ({
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow?.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow?.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow?.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
-          : _subRow?.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDesc || ''
+            : _subRow?.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.qty = `${parent.qty * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
       subRows.push(_subRow);
@@ -593,12 +599,12 @@ const Invoice = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}
             >
@@ -606,8 +612,8 @@ const Invoice = ({
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 365px)'}
                 columns={columns}
                 data={rowsData}
-                setWholeRowsCellColor={() => {}}
-                onSelect={() => {}}
+                setWholeRowsCellColor={() => { }}
+                onSelect={() => { }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={true}
