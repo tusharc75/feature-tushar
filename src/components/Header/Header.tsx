@@ -48,7 +48,8 @@ import { kebabCase } from 'lodash';
 import { staticHiddenResource } from '../../constants/helpers';
 import SentimentVeryDissatisfiedIcon from '@material-ui/icons/SentimentVeryDissatisfied';
 import { useScrollDirection } from 'src/hooks/useScroll';
-import useClickdOutside from 'src/hooks/clickOutside';
+import useClickdOutside from 'src/hooks/useClickOutside';
+import usePathname from 'src/hooks/usePathName';
 import styles from './Header.module.scss';
 
 const useStyles = makeStyles((theme) => ({
@@ -1281,8 +1282,6 @@ const SearchBar = ({ user, selectedEntity, history }) => {
   const [search, setSearch] = useState('');
   const [filteredData, setFilteredData] = useState([]);
 
-  console.log(searchQuery);
-
   useEffect(() => {
     let arr = [];
     let allData = [];
@@ -1343,6 +1342,7 @@ const SearchBar = ({ user, selectedEntity, history }) => {
     setFilteredData(filteredItems);
   };
   const clearSearch = () => {
+    dispatch({ type: SET_SEARCH, payload: '' });
     setSearch('');
     setShowCloseButton(false);
   };
@@ -1355,6 +1355,7 @@ const SearchBar = ({ user, selectedEntity, history }) => {
         return `/${kebabCase(item.name)}`;
     }
   };
+  const pathName = usePathname();
 
   return (
     <div className={styles.searchContainer}>
@@ -1389,7 +1390,9 @@ const SearchBar = ({ user, selectedEntity, history }) => {
           </div>
         )}
       </div>
-      {search.trim() !== '' && <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} clearSearch={clearSearch} />}
+      {search.trim() !== '' && pathName === '/' && (
+        <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} clearSearch={clearSearch} />
+      )}
     </div>
   );
 };
