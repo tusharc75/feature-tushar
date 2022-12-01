@@ -100,7 +100,7 @@ const RentalManagementDetailsPage = () => {
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
 
-  const [disabledEditButton, setDisabledEditButton] = useState(false)
+  const [disabledEditButton, setDisabledEditButton] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState(
     user?.role?.selectedEntity?.policy?.isQuotationRentalManagement
@@ -109,20 +109,18 @@ const RentalManagementDetailsPage = () => {
   );
 
   useEffect(() => {
-
-    if(quotationData) {
+    if (quotationData) {
       const keys = Object.keys(quotationData?.versions);
 
       keys.forEach((k) => {
-        if(quotationData?.versions[k].status?.includes("Customer")) {
-          setDisabledEditButton(true)
+        if (quotationData?.versions[k].status?.includes('Customer')) {
+          setDisabledEditButton(true);
         } else {
-          setDisabledEditButton(false)
+          setDisabledEditButton(false);
         }
-      })
+      });
     }
-
-  },[quotationData])
+  }, [quotationData]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -407,9 +405,21 @@ const RentalManagementDetailsPage = () => {
                   {permissions?.rentalManagement?.isUpdate &&
                     allowedToEdit &&
                     !isOffline &&
-                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
+                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) &&
+                    !(
+                      [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                        quotationData?.versions[currentVersion]?.status
+                      ) && ['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep])
+                    ) && (
                       <Fragment>
-                        <Button disabled={disabledEditButton} className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
+                        <Button
+                          disabled={disabledEditButton}
+                          className="buttonStyleBigScreen"
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={handleOpenUpdateDialog}
+                        >
                           Edit
                         </Button>
                         <Button
