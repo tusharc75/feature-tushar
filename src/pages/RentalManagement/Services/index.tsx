@@ -253,6 +253,12 @@ const Services = ({
             });
           });
         }
+      } else if (element.fieldName === 'pricingCondition') {
+        coloum.push({
+          accessor: element.fieldName,
+          Header: element.fieldLabel,
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]?.optionLabel ? row.original[element.fieldName]?.optionLabel : row.original[element.fieldName]}</p> : <NoDataCell />)
+        });
       } else {
         if (element.fieldName === 'qty') {
           element.fieldName = 'qtyDisplay';
@@ -337,6 +343,7 @@ const Services = ({
           : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
+      parent.pricingCondition = parent.pricingCondition?.optionLabel;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
@@ -365,6 +372,7 @@ const Services = ({
           : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || '' : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.pricingCondition = _subRow.pricingCondition?.optionLabel;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
@@ -452,7 +460,7 @@ const Services = ({
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
     tempMaterial.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit && e.pricingMethod === element.pricingMethod);
+      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
       if (element.listPrice) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = element.listPrice;
@@ -461,6 +469,8 @@ const Services = ({
       } else if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
+        element["pricingCondition"] = rateResult[0].conditionId;
+        element["pricingMethod"] = rateResult[0].pricingMethod?.trim();
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
         Object.assign(element, calValues);
       }
@@ -716,6 +726,7 @@ const Services = ({
           material={material}
           selectedProducts={selectedProducts}
           loading={isUpdating}
+          from={"service"}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (

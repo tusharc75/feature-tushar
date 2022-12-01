@@ -1,10 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
-import SearchBox from "../../components/Helpers/SearchBox";
-import MobileFilterDialog from "../../components/MobileFilterDialog";
-import MobileSortDialog from "../../components/MobileSortDialog";
-import {
-  AddOutlined,
-} from "@material-ui/icons";
+import React, { useState, useRef, useEffect } from 'react';
+import SearchBox from '../../components/Helpers/SearchBox';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
+import MobileSortDialog from '../../components/MobileSortDialog';
+import { AddOutlined } from '@material-ui/icons';
 import {
   Box,
   Grid,
@@ -28,51 +26,65 @@ import {
   ListItemText,
   withStyles,
   makeStyles
-} from "@material-ui/core";
-import MuiListItem from "@material-ui/core/ListItem";
+} from '@material-ui/core';
+import MuiListItem from '@material-ui/core/ListItem';
 import { TransitionProps } from '@material-ui/core/transitions';
-import { ExpandMore } from "@material-ui/icons";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
-import styles from "../Leads/Header.module.scss";
-import { isMobile, isTablet } from "react-device-detect";
-import { FaUserTie, IoFilterCircle, MdAccountBalanceWallet, MdAdd, MdFilterList, MdSort, FaCalendarDay, RiTicketFill, RiArrowUpDownFill, RiArrowUpDownLine, BsArrowUpShort, BsArrowUp, BsArrowDown } from "react-icons/all";
-import routes from "src/components/Helpers/Routes";
+import { ExpandMore } from '@material-ui/icons';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import styles from '../Leads/Header.module.scss';
+import { isMobile, isTablet } from 'react-device-detect';
+import {
+  FaUserTie,
+  IoFilterCircle,
+  MdAccountBalanceWallet,
+  MdAdd,
+  MdFilterList,
+  MdSort,
+  FaCalendarDay,
+  RiTicketFill,
+  RiArrowUpDownFill,
+  RiArrowUpDownLine,
+  BsArrowUpShort,
+  BsArrowUp,
+  BsArrowDown
+} from 'react-icons/all';
+import routes from 'src/components/Helpers/Routes';
+import { useData } from '../../StateProvider/Provider';
 
 const StyledMenu = styled((props: MenuProps) => (
   <Menu
     elevation={0}
     anchorOrigin={{
       vertical: 'bottom',
-      horizontal: 'right',
+      horizontal: 'right'
     }}
     transformOrigin={{
       vertical: 'top',
-      horizontal: 'right',
+      horizontal: 'right'
     }}
     {...props}
   />
 ));
 
-
 const ListItem = withStyles({
   root: {
-    borderLeft: "3px solid white",
-    "& .MuiListItemIcon-root": {
-      minWidth: "36px !important",
-      fontSize: "16px",
+    borderLeft: '3px solid white',
+    '& .MuiListItemIcon-root': {
+      minWidth: '36px !important',
+      fontSize: '16px'
     },
-    "&$selected": {
-      borderLeft: "3px solid #43AEAA",
-      color: "#43AEAA !important",
-      backgroundColor: "white !important",
-      "& .MuiListItemIcon-root": {
-        color: "#43AEAA"
+    '&$selected': {
+      borderLeft: '3px solid #43AEAA',
+      color: '#43AEAA !important',
+      backgroundColor: 'white !important',
+      '& .MuiListItemIcon-root': {
+        color: '#43AEAA'
       },
-      "& .MuiListItemText-primary": {
+      '& .MuiListItemText-primary': {
         fontWeight: 600
       }
-    },
+    }
     // "&$selected:hover": {
     //   backgroundColor: "purple",
     //   color: "white",
@@ -91,16 +103,14 @@ const ListItem = withStyles({
   selected: {}
 })(MuiListItem);
 
-
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement<any, any>;
   },
-  ref: React.Ref<unknown>,
+  ref: React.Ref<unknown>
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-
 
 function OpportunitiesHeader(props) {
   const ref = useRef(null);
@@ -111,12 +121,10 @@ function OpportunitiesHeader(props) {
   const [clicked, setClicked] = useState(false);
 
   const handleListIconClick = (id) => {
-    setClicked(true)
-  }
+    setClicked(true);
+  };
 
-  const [isOpenDialog, setisOpenDialog] = useState(false)
-
-
+  const [isOpenDialog, setisOpenDialog] = useState(false);
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -134,10 +142,7 @@ function OpportunitiesHeader(props) {
 
   const handleClickClose = () => {
     setOpen(false);
-
   };
-
-
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -147,10 +152,9 @@ function OpportunitiesHeader(props) {
     setAnchorEl(null);
   };
   const [show, setShow] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-
-  // Sort 
+  // Sort
 
   const [selectedIndex, setSelectedIndex] = React.useState(1);
 
@@ -158,29 +162,24 @@ function OpportunitiesHeader(props) {
     setSelectedIndex(index);
   };
 
-
-
-
   useEffect(() => {
-    const checkIfClickedOutside = e => {
+    const checkIfClickedOutside = (e) => {
       // If the menu is open and the clicked target is not within the menu,
       // then close the menu
       if (isMenuOpen && ref.current && !ref.current.contains(e.target)) {
-        setIsMenuOpen(false)
+        setIsMenuOpen(false);
       }
-    }
+    };
 
-    document.addEventListener("mousedown", checkIfClickedOutside)
+    document.addEventListener('mousedown', checkIfClickedOutside);
 
     return () => {
       // Cleanup the event listener
-      document.removeEventListener("mousedown", checkIfClickedOutside)
-    }
-  }, [isMenuOpen])
+      document.removeEventListener('mousedown', checkIfClickedOutside);
+    };
+  }, [isMenuOpen]);
 
-
-
-  const [filter, setFilter] = useState("All Opportunities");
+  const [filter, setFilter] = useState('All Opportunities');
 
   const handleFilter = (event, newFilter) => {
     if (newFilter != null) {
@@ -189,7 +188,6 @@ function OpportunitiesHeader(props) {
       handleClose();
     }
   };
-
 
   const {
     selectedRecords,
@@ -210,18 +208,8 @@ function OpportunitiesHeader(props) {
     filters
   } = props;
 
-
-
-
-
   let toggleInner = options && (
-    <ToggleButtonGroup
-      size="small"
-      className=" toggle-button-layout"
-      value={filter}
-      exclusive
-      onChange={handleFilter}
-    >
+    <ToggleButtonGroup size="small" className=" toggle-button-layout" value={filter} exclusive onChange={handleFilter}>
       {options.map((k, index) => {
         return (
           <ToggleButton value={k.key} key={index}>
@@ -232,12 +220,12 @@ function OpportunitiesHeader(props) {
     </ToggleButtonGroup>
   );
   return (
-    <Grid className={styles.filter_side_container} container >
-      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+    <Grid className={styles.filter_side_container} container>
+      <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
         <div className="d-flex align-items-center">
           {icon} <span className="listingHeader">{heading}</span>
         </div>
-        {isMobile && !isTablet ?
+        {isMobile && !isTablet ? (
           <div className="d-flex ">
             <Button
               onClick={handleClickOpen}
@@ -257,12 +245,10 @@ function OpportunitiesHeader(props) {
               isOpen={open}
               handleClose={handleClickClose}
               contentPart={toggleInner}
-              secHeading={["Sort Opportunities"]}
+              secHeading={['Sort Opportunities']}
               columns={columns}
               dispatch={dispatch}
             />
-
-
 
             <Button
               id="demo-customized-button"
@@ -286,14 +272,10 @@ function OpportunitiesHeader(props) {
               title={routes?.opportunity?.title}
               filters={filters}
             />
-          </div> : options && (
-            <ToggleButtonGroup
-              size="small"
-              className="ml-2"
-              value={filter}
-              exclusive
-              onChange={handleFilter}
-            >
+          </div>
+        ) : (
+          options && (
+            <ToggleButtonGroup size="small" className="ml-2" value={filter} exclusive onChange={handleFilter}>
               {options.map((k, index) => {
                 return (
                   <ToggleButton value={k.key} key={index}>
@@ -302,57 +284,57 @@ function OpportunitiesHeader(props) {
                 );
               })}
             </ToggleButtonGroup>
-          )}
-
+          )
+        )}
 
         {children}
       </Grid>
       <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
         <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-          <Grid style={{ display: "flex", flex: 1 }}>
+          <Grid style={{ display: 'flex', flex: 1 }}>
             <SearchBox
               onSearch={onSearch}
               searchbox={styles.search_box_input}
               value={searchVal}
               size="small"
               placeholder="Search Opportunity"
-              width={isMobile && !isTablet ? "200px" : "242px"}
+              width={isMobile && !isTablet ? '200px' : '242px'}
               style={isMobile && !isTablet ? { flex: 1 } : {}}
             />
           </Grid>
-          <Grid style={{ display: "flex", gap: "5px" }}>
+          <Grid style={{ display: 'flex', gap: '5px' }}>
             {opportunityPermissions.isCreate && opportunityPermissions.isUpdate && (
               <Button
-                variant={isMobile && !isTablet ? "text" : "contained"}
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
                 color="primary"
                 size="small"
-                className={isMobile && !isTablet ? "mobile_button" : styles.add_submit_btn}
+                className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                 onClick={onCreate}
                 startIcon={isMobile && !isTablet ? null : <AddOutlined />}
               >
-                {isMobile && !isTablet ? <MdAdd size={23} /> : "Add"}
+                {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
               </Button>
             )}
             {(opportunityPermissions.isDelete || opportunityPermissions.isUpdate) && (
               <>
                 <Button
                   disabled={canDelete}
-                  variant={isMobile && !isTablet ? "text" : "contained"}
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
                   color="default"
                   size="small"
                   onClick={openActions}
-                  className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
+                  className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
                   aria-controls="action-menu"
                 >
-                  {isMobile && !isTablet ? "" : "Actions"} <ExpandMore />
+                  {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
                 </Button>
                 <Menu
                   anchorEl={anchorEl}
                   keepMounted
                   getContentAnchorEl={null}
                   anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
+                    vertical: 'bottom',
+                    horizontal: 'left'
                   }}
                   id="action-menu"
                   open={Boolean(anchorEl)}

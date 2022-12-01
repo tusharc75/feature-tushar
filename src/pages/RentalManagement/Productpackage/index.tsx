@@ -317,7 +317,7 @@ const Productpackage = ({
     }
     coloum.forEach((element) => {
       if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
-        element.editable = true;
+        element.editable = allowedToEdit;
       }
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
@@ -362,6 +362,7 @@ const Productpackage = ({
           : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
+      parent.pricingCondition = parent.pricingCondition?.optionLabel;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
@@ -384,7 +385,7 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serviTce' ? _subRow.serviceDetail?.serviceName :
+      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName :
         _subRow.type === 'package' ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product' ? _subRow.productDetail?.productName
             : ''} `;
@@ -393,6 +394,7 @@ const Productpackage = ({
           : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || '' : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
+      _subRow.pricingCondition = _subRow.pricingCondition?.optionLabel;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
@@ -490,21 +492,24 @@ const Productpackage = ({
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    tempMaterial.forEach((element) => {
-      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit && e.pricingMethod === element.pricingMethod);
-      if (element.listPrice) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = element.listPrice;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
-        Object.assign(element, calValues);
-      } else if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-        element[priceFieldName] = rateResult[0].mrp;
-        element["pricingCondition"] = rateResult[0].conditionId;
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-        Object.assign(element, calValues);
-      }
-    });
+    if (priceData) {
+      tempMaterial.forEach((element) => {
+        const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
+        if (element.listPrice) {
+          const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+          element[priceFieldName] = element.listPrice;
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          Object.assign(element, calValues);
+        } else if (rateResult.length && rateResult[0].mrp) {
+          const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+          element[priceFieldName] = rateResult[0].mrp;
+          element["pricingCondition"] = rateResult[0].conditionId;
+          element["pricingMethod"] = rateResult[0].pricingMethod?.trim();
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+          Object.assign(element, calValues);
+        }
+      });
+    }
     axiosInstance()
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {
@@ -748,6 +753,7 @@ const Productpackage = ({
           material={material}
           selectedProducts={selectedProducts.filter((e) => !e.hideSelection)}
           loading={isUpdating}
+          from={"product"}
         />
       )}
       {addExistingProductDialog.open && (
@@ -816,7 +822,10 @@ const Productpackage = ({
           handleSucess={(data) => {
             AddMaterial(priceDataDialog.material, data)
           }}
-          onClose={() => setPriceDataDialog({ open: false, material: null })}
+          onClose={() => {
+            AddMaterial(priceDataDialog.material, null)
+            setPriceDataDialog({ open: false, material: null });
+          }}
         />
       }
     </Fragment>

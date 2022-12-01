@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from "../../../axios/axiosInstance";
-import { groupBy } from 'lodash';
+import { groupBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
@@ -31,6 +31,7 @@ interface EditDialogProps {
   selectedProducts: any[]
   isBulkedit: any
   loading: any
+  from?: any
   isQtyOnly?: Boolean
 }
 
@@ -46,7 +47,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     selectedProducts,
     isBulkedit,
     loading,
-    isQtyOnly = false
+    isQtyOnly = false,
+    from
   }) => {
 
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
@@ -54,6 +56,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
   const [priceConditionList, setPriceConditionList] = useState([]);
+  const [priceMethodList, setPriceMethodList] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const ref = useRef(null);
@@ -128,7 +131,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       if (rowData?.actualStartDate === "" || rowData?.actualStartDate === "") {
         data = data.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
       }
-      getPricing(rowData)
+      getPricing(rowData, pricingMethodOptions)
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data),
@@ -140,6 +143,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
   const EvaluteproductFields = (fields) => {
     if (isQtyOnly) {
       fields = fields.filter(d => d.fieldName === "qty")
+    }
+    if (isBulkedit && (from === "product" || from === "service")) {
+      fields = fields.filter(d => d.fieldName !== "pricingCondition" && d.fieldName !== "pricingMethod")
     }
     const sections = uniq(map(fields, 'sectionName'));
     const customData = sections.map((name) => {
@@ -357,25 +363,29 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     }
   };
 
-  const getPricing = async (values: any) => {
+  const getPricing = async (values: any, pricingMethodOptions: any = null) => {
     if (rowData) {
       if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
         const priceData: any = await calculatePrice(rentalManagementData, [{
           materialId: rowData.materialId,
           type: rowData.type,
           qty: values.qty,
-          pricingMethod: values?.pricingMethod,
+          pricingMethod: pricingMethodOptions ? pricingMethodOptions.map(d => d.optionLabel).join() : values?.pricingMethod,
           unit: values.unit
         }]);
-        if (priceData && priceData.length) {
-          if (priceConditionList.length === 0) {
-            setPriceConditionList(priceData.map(d => {
-              return {
-                "optionLabel": d?.conditionName,
-                "optionValue": d?.conditionId
-              }
-            }))
+        setPriceConditionList(uniqBy(priceData.filter(d => d.mrp !== undefined && d.mrp !== null).map(d => {
+          return {
+            "optionLabel": d?.conditionName,
+            "optionValue": d?.conditionId
           }
+        }), 'optionValue'))
+        setPriceMethodList(uniqBy(priceData.filter(d => d.mrp !== undefined && d.mrp !== null).map(d => {
+          return {
+            "optionLabel": d?.pricingMethod,
+            "optionValue": d?.pricingMethod
+          }
+        }), 'optionValue'))
+        if (priceData && priceData.length) {
           let pricingConditionIndex = priceData.findIndex(d => d?.conditionId === values?.pricingCondition)
           let price: any = pricingConditionIndex > -1 ? priceData[pricingConditionIndex]?.mrp : priceData[0].mrp ? priceData[0].mrp : 0;
           return price;
@@ -507,7 +517,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                       label={field.fieldLabel}
                                       name={field.fieldName}
                                       type={field.type}
-                                      options={field.fieldName === "pricingCondition" && priceConditionList.length !== 0 ? priceConditionList : field.option}
+                                      options={field.fieldName === "pricingMethod" ? priceMethodList : field.fieldName === "pricingCondition" ? priceConditionList : field.option}
                                       setFieldValue={(name, value) => {
                                         setFieldValue(name, value)
                                       }}

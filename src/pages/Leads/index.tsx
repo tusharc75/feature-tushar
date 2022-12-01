@@ -23,12 +23,12 @@ import CustomAgGrid, { reducer, intialState } from '../../components/AgGridCompo
 import './style.scss';
 import TransferEntityDialog from '../../components/AssignRolesDialog/TransferEntityDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import useColumns, { getStaticFields, getFrameworkComponents } from "../../constants/useColumns"
-import { CustomOfflineContext } from "../../StateProvider/OfflineContext/OfflineContext";
-import { FcProcess } from "react-icons/fc";
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
+import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { FcProcess } from 'react-icons/fc';
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BsBuilding, AiFillMail } from "react-icons/all";
+import { BsBuilding, AiFillMail } from 'react-icons/all';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const LeadTypes = [
@@ -48,7 +48,7 @@ const Leads = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, selectedEntity, permissions }
+    state: { user, selectedEntity, permissions, searchQuery }
   }: any = useData();
   const { getColumnData } = useColumns();
   const { leadResource, leadApi } = lead;
@@ -76,10 +76,10 @@ const Leads = () => {
   const columnState = JSON.parse(localStorage.getItem(leadResource));
 
   const [columns, setColumns] = useState([]);
-  const [frameWorkComponent, setFrameWorkComponent] = useState({})
+  const [frameWorkComponent, setFrameWorkComponent] = useState({});
 
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const [clonedData, setClonedData] = useState([])
+  const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = `${leadResource}_selected`;
 
   if (columnState) {
@@ -108,8 +108,8 @@ const Leads = () => {
   }, [permissions]);
 
   useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    fetchGridColumns();
+  }, []);
 
   useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
@@ -129,74 +129,72 @@ const Leads = () => {
   }, [page, limit, selectedType, filters, sorting, selectedEntity]);
 
   const fetchGridColumns = async () => {
-    let data
+    let data;
     if (isOffline) {
-      data = offlineFieldsData["lead"] ?? []
-    }
-    else {
+      data = offlineFieldsData['lead'] ?? [];
+    } else {
       if (selectedEntity) {
-        const response = await axiosInstance()
-          .get(`/field?resource=Lead&entity=${selectedEntity}&view=true`)
+        const response = await axiosInstance().get(`/field?resource=Lead&entity=${selectedEntity}&view=true`);
 
-        data = response?.data?.data
+        data = response?.data?.data;
       } else {
         data = [];
       }
 
       try {
-        updateFieldsData("lead", data);
+        updateFieldsData('lead', data);
       } catch (ex) {
-        console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`)
+        console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`);
       }
     }
 
-    let columns = []
-    let rendererNames = []
-    data.forEach(o => {
+    let columns = [];
+    let rendererNames = [];
+    data.forEach((o) => {
+      let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path);
 
-      let currentColumn = getColumnData(leadResource, o?.fieldData, leadDetailPage.path)
-
-      if (["concatedName"].find(d => d === o?.fieldData?.fieldName)) {
-        columns = [...columns, {
-          disabled: true,
-          field: "concatedName",
-          headerName: "Lead Name",
-          pivotIndex: 0,
-          show: true,
-          cellRenderer: "nameRenderer",
-          primaryField: true
-        }]
-      }
-      else if (currentColumn !== null) {
-        columns = [...columns, currentColumn?.columnData]
+      if (['concatedName'].find((d) => d === o?.fieldData?.fieldName)) {
+        columns = [
+          ...columns,
+          {
+            disabled: true,
+            field: 'concatedName',
+            headerName: 'Lead Name',
+            pivotIndex: 0,
+            show: true,
+            cellRenderer: 'nameRenderer',
+            primaryField: true
+          }
+        ];
+      } else if (currentColumn !== null) {
+        columns = [...columns, currentColumn?.columnData];
         if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-          rendererNames.push(currentColumn?.rendererName)
+          rendererNames.push(currentColumn?.rendererName);
         }
       }
-    })
-    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+    });
+    let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
     tempFrameworkComponent = {
       ...tempFrameworkComponent,
       relatedOpportunityRenderer: RelatedOpportunityRenderer,
       actionsRenderer: ActionsRenderer
-    }
-    setFrameWorkComponent({ ...tempFrameworkComponent })
-    columns = [...columns,
-    { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
-    ...getStaticFields()]
-    setColumns([...columns])
-  }
+    };
+    setFrameWorkComponent({ ...tempFrameworkComponent });
+    columns = [
+      ...columns,
+      { field: 'relatedOpportunity', headerName: 'Related Opportunity', show: true, cellRenderer: 'relatedOpportunityRenderer' },
+      ...getStaticFields()
+    ];
+    setColumns([...columns]);
+  };
 
-
-  const NameRenderer = params => <span className="d-flex gap-2 align-items-center">
-    <Link
-      className="text-truncate link"
-      title={params.value}
-      to={`${routes.leadDetail.path}/${params.data._id}`}
-    >
-      {params.value}
-    </Link>
-  </span>
+  const NameRenderer = (params) => (
+    <span className="d-flex gap-2 align-items-center">
+      <Link className="text-truncate link" title={params.value} to={`${routes.leadDetail.path}/${params.data._id}`}>
+        {params.value}
+      </Link>
+    </span>
+  );
 
   const RelatedOpportunityRenderer = (params) => (
     <>
@@ -212,24 +210,21 @@ const Leads = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {leadsPermissions.isCreate ? (<HtmlTooltip
-        title={"Clone"} >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setIsOpen({ open: true, isClone: true, idToClone: params.data._id })
-          }}>
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>) : (
-        <HtmlTooltip
-          className={"cursor-stop"}
-          title={"You do not have permission to clone/create"} >
+      {leadsPermissions.isCreate ? (
+        <HtmlTooltip title={'Clone'}>
           <IconButton
             size="small"
             aria-label="Clone"
+            onClick={() => {
+              setIsOpen({ open: true, isClone: true, idToClone: params.data._id });
+            }}
           >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      ) : (
+        <HtmlTooltip className={'cursor-stop'} title={'You do not have permission to clone/create'}>
+          <IconButton size="small" aria-label="Clone">
             <FileCopyIcon fontSize="small" />
           </IconButton>
         </HtmlTooltip>
@@ -319,7 +314,6 @@ const Leads = () => {
         gridApi.setRowData([]);
       }
       try {
-
         let data, count;
 
         if (!isOffline) {
@@ -327,8 +321,7 @@ const Leads = () => {
 
           data = response?.data?.data;
           count = response?.data?.count;
-        }
-        else {
+        } else {
           data = offlineGridData[leadResource] || [];
           count = offlineGridData[leadResource]?.length || 0;
         }
@@ -336,7 +329,7 @@ const Leads = () => {
         try {
           updateOfflineGridData(leadResource, data);
         } catch (ex) {
-          console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`)
+          console.error(`Lead: Error while storing data for Offline context. Error: ${ex.message}`);
         }
 
         let rows = data.map((u) => {
@@ -344,60 +337,61 @@ const Leads = () => {
 
           let finalObject = prepareDataForGrid(u);
 
-          finalObject["canDelete"] = u.owner?.optionValue === user?.user._id;
-          finalObject["isChecked"] = selectedRecords.some(s => s._id === u._id);
-          finalObject["allowedToEdit"] = (
-            [...(u.collaborator ?? []), u.owner].some(
-              (d) => d?.optionValue === user?.user?._id
-            )
-          );
+          finalObject['canDelete'] = u.owner?.optionValue === user?.user._id;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
 
-          finalObject["owerCollaboratorInitialsOrImages"] = [];
-          if (finalObject["owner"])
-            finalObject["owerCollaboratorInitialsOrImages"].push({ initials: finalObject["owner"] });
+          finalObject['owerCollaboratorInitialsOrImages'] = [];
+          if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
 
-          finalObject["owerCollaboratorInitialsOrImages"].forEach((f) => {
+          finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
             if (f.initials) {
-              f.initials = f.initials.split(" ").map((i) => i[0]).join("");
+              f.initials = f.initials
+                .split(' ')
+                .map((i) => i[0])
+                .join('');
             }
-          })
+          });
 
           let res = {
             ...finalObject,
             isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
             convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
             relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
-            relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id,
-
+            relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id
           };
           return res;
         });
         setIsAllChecked(false);
-        setClonedData(data)
+        setClonedData(data);
         if (appendRows) {
           dispatch({
-            type: "initialize", data: [...dataRows, ...rows],
-            count: count, selectedRecords: [...dataRows, ...rows].filter(f => f.isChecked === true)
+            type: 'initialize',
+            data: [...dataRows, ...rows],
+            count: count,
+            selectedRecords: [...dataRows, ...rows].filter((f) => f.isChecked === true)
           });
         } else {
           dispatch({
-            type: "initialize", data: rows, count: count,
-            selectedRecords: rows.filter(f => f.isChecked === true)
+            type: 'initialize',
+            data: rows,
+            count: count,
+            selectedRecords: rows.filter((f) => f.isChecked === true)
           });
         }
 
         if (gridApi) {
           try {
-            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : []
+            let oldSelectedRecords = localStorage.getItem(localStorageSelectedRecords)
+              ? JSON.parse(localStorage.getItem(localStorageSelectedRecords))
+              : [];
             if (oldSelectedRecords.length > 0) {
               gridApi.forEachNode(function (node) {
-                node.setSelected(
-                  oldSelectedRecords.some((o) => o === node.data._id)
-                );
+                node.setSelected(oldSelectedRecords.some((o) => o === node.data._id));
               });
             }
           } catch (ex) {
-            console.error("Error in getting selected records from local storage")
+            console.error('Error in getting selected records from local storage');
           }
         }
 
@@ -405,9 +399,8 @@ const Leads = () => {
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
-
       } catch (error) {
-        dispatch({ type: "loading", loading: false });
+        dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
       }
     }
@@ -593,8 +586,8 @@ const Leads = () => {
             recordsToExport={selectedRecords.length}
             ids={selectedRecords.length ? selectedRecords.map((obj) => obj._id) : []}
             onExportToExcelSuccess={() => {
-              if (gridApi) gridApi.deselectAll()
-              else fetchLeads()
+              if (gridApi) gridApi.deselectAll();
+              else fetchLeads();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -634,25 +627,25 @@ const Leads = () => {
           />
         </div>
 
-        {
-          Object.keys(frameWorkComponent).length > 0 ?
-            isMobile && !isTablet ? <CustomSwipableList
+        {Object.keys(frameWorkComponent).length > 0 ? (
+          isMobile && !isTablet ? (
+            <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
               permissions={permissions[leadResource]}
-              primaryField={columns?.find(d => d.primaryField)}
+              primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                history.push(`${routes.leadDetail.path}/${data._id}`)
+                history.push(`${routes.leadDetail.path}/${data._id}`);
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                history.push(`${routes.leadDetail.path}/${data._id}?openEdit=true`)
+                history.push(`${routes.leadDetail.path}/${data._id}?openEdit=true`);
               }}
               extraParamsToCheckDelete={true}
               onDelete={(data) => {
-                showConfirmBox(data)
+                showConfirmBox(data);
               }}
               rowCount={rowCount}
               page={page}
@@ -660,44 +653,47 @@ const Leads = () => {
               additionalDetails={[
                 {
                   icon: <FcProcess size={18} />,
-                  field: "process"
-                },
+                  field: 'process'
+                }
               ]}
               chips={[
                 {
                   icon: <BsBuilding />,
-                  label: "Company: ",
-                  field: "company",
+                  label: 'Company: ',
+                  field: 'company'
                 },
                 {
                   icon: <AiFillMail />,
-                  label: "Email",
-                  field: "email"
-
+                  label: 'Email',
+                  field: 'email'
                 }
               ]}
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={true}
-              onClone={(data) => { setIsOpen({ open: true, isClone: true, idToClone: data._id }) }}
+              onClone={(data) => {
+                setIsOpen({ open: true, isClone: true, idToClone: data._id });
+              }}
               renderedFrom={leadResource}
-            /> :
-              <CustomAgGrid
-                columns={columns}
-                dataRows={dataRows}
-                frameworkComponents={frameWorkComponent}
-                setGridApi={setGridApi}
-                dispatch={dispatch}
-                rowCount={rowCount}
-                limit={limit}
-                pageSizes={pageSizes}
-                page={page}
-                actionWidth={150}
-                loading={loading}
-                renderedFrom={leadResource}
-                refreshGrid={fetchLeads}
-              /> : null
-        }
+            />
+          ) : (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              actionWidth={150}
+              loading={loading}
+              renderedFrom={leadResource}
+              refreshGrid={fetchLeads}
+            />
+          )
+        ) : null}
 
         {isOpen?.open && (
           <ManageLeadDialog
