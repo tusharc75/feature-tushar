@@ -85,6 +85,14 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
             )}
           </div>
         )
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
       }
     ];
     data.forEach((element) => {
@@ -216,6 +224,14 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
       }`;
+      parent.description =
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.type === 'product'
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       // parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       // parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -242,6 +258,14 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
       }`;
+      _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       // _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       // _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -326,7 +350,6 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                       size="small"
                       disabled={isSubmitting.accept}
                       onClick={() => {
-                        handleSubmit('accept');
                         setIsSubmitting({ accept: true, reject: false });
                       }}
                     >
@@ -396,8 +419,9 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           </Box>
         </>
       )}
-      {isSubmitting.reject && (
+      {(isSubmitting.reject || isSubmitting.accept) && (
         <QCcomment
+          type={isSubmitting.reject ? 'reject' : 'accept'}
           onClose={() => {
             setIsSubmitting({ accept: false, reject: false });
           }}
