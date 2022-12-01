@@ -317,7 +317,7 @@ const Productpackage = ({
     }
     coloum.forEach((element) => {
       if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
-        element.editable = true;
+        element.editable = allowedToEdit;
       }
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {

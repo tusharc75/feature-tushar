@@ -337,6 +337,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   };
 
   const handleApplyDate = async () => {
+    const {data: {data : materialEndDates}} = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`)
+
     let values = {
       actualEndDate: endDate,
       estimateEndDate: endDate
@@ -365,7 +367,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         } else {
           const weeks = Math.ceil(dayDiff / 7);
           const endCycle:any = moment(startDate).add(7 * weeks, 'd');
-
           actualEndCycleDate = new Date(endCycle?._d).toISOString()
 
         }
