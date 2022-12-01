@@ -84,6 +84,7 @@ const SerializedAsset = ({
   }, []);
 
   const fetchFields = async () => {
+    setNextStep(false)
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     const coloum: any = [
       {
@@ -355,6 +356,7 @@ const SerializedAsset = ({
     });
     setColumns(coloum);
     fetchProductInventory();
+    setNextStep(true)
   };
 
   const fetchProductInventory = async () => {
@@ -617,6 +619,7 @@ const SerializedAsset = ({
   };
 
   const handleAddSerializedAsset = (assets) => {
+    setNextStep(false)
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
     flatArray = uniqBy(flatArray, '_id');
@@ -653,15 +656,18 @@ const SerializedAsset = ({
             type: 'success',
             message: data.message
           });
+          setNextStep(true)
         })
         .catch((error) => {
           setAdding(false);
           toastConfig.setToastConfig(error);
+          setNextStep(true)
         });
     }
   };
 
   const handleRemoveInventory = async () => {
+    setNextStep(false)
     if (deleteData.length >= 1) {
       if (isOffline) {
         setDeleting(true);
@@ -676,17 +682,19 @@ const SerializedAsset = ({
         });
         setDeleting(true);
         axiosInstance()
-          .put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
-          .then(() => {
-            setDeleting(false);
-            fetchProductInventory();
-            setDeleteData(null);
-            setShowConfirmBox(false);
-          })
-          .catch((error) => {
-            setDeleting(false);
-            toastConfig.setToastConfig(error);
-            setDeleteData(null);
+        .put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
+        .then(() => {
+          setDeleting(false);
+          fetchProductInventory();
+          setDeleteData(null);
+          setShowConfirmBox(false);
+          setNextStep(true)
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+          setNextStep(true)
           });
       }
     }

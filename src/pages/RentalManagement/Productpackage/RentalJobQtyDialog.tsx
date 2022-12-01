@@ -379,12 +379,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
             "optionValue": d?.conditionId
           }
         }), 'optionValue'))
-        setPriceMethodList(uniqBy(priceData.filter(d => d.mrp !== undefined && d.mrp !== null).map(d => {
+        if(pricingMethodOptions){setPriceMethodList(uniqBy(priceData.filter(d => d.mrp !== undefined && d.mrp !== null).map(d => {
           return {
             "optionLabel": d?.pricingMethod,
             "optionValue": d?.pricingMethod
           }
-        }), 'optionValue'))
+        }), 'optionValue'))}
         if (priceData && priceData.length) {
           let pricingConditionIndex = priceData.findIndex(d => d?.conditionId === values?.pricingCondition)
           let price: any = pricingConditionIndex > -1 ? priceData[pricingConditionIndex]?.mrp : priceData[0].mrp ? priceData[0].mrp : 0;
