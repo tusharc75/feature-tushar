@@ -80,23 +80,24 @@ const RoleDetailsPage = () => {
     rentalManagement: false,
     sublease: false,
     purchaseOrder: false,
-    quoteBuilder: false,
+    quoteBuilder: false
   });
 
   const [policyFieldCheckBox, SetPolicyFieldCheckBox] = useState({
     isPricingRentalManagement: false,
     isPricingSublease: false,
+    isRentalReopen: false,
     isPricingPurchaseOrder: false,
     isQuoteAskSupplierPrice: false,
     isQuotationRentalManagement: false,
-    isProgressiveBillingRentalManagement: false,
+    isProgressiveBillingRentalManagement: false
   });
 
   const [resourceCheckbox, setResourceCheckBox] = useState({
     rentalManagement: false,
     sublease: false,
     purchaseOrder: false,
-    quoteBuilder: false,
+    quoteBuilder: false
   });
 
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false);
@@ -118,6 +119,11 @@ const RoleDetailsPage = () => {
       resource: 'Rental Management',
       fieldLabel: 'Progressive Billing',
       fieldName: 'isProgressiveBillingRentalManagement'
+    },
+    {
+      resource: 'Rental Management',
+      fieldLabel: 'Re-open',
+      fieldName: 'isRentalReopen'
     },
     {
       resource: 'Sublease',
@@ -203,24 +209,26 @@ const RoleDetailsPage = () => {
         isPricingPurchaseOrder: e.target.checked,
         isPricingRentalManagement: e.target.checked,
         isPricingSublease: e.target.checked,
+        isRentalReopen: e.target.checked,
         isQuoteAskSupplierPrice: e.target.checked,
         isQuotationRentalManagement: e.target.checked,
-        isProgressiveBillingRentalManagement: e.target.checked,
-
+        isProgressiveBillingRentalManagement: e.target.checked
       });
     }
     if (checkBoxType === 'Policy-CheckBox') {
       setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(type)]: e.target.checked }));
-      policyResources.filter(d => d.resource === type).forEach(obj => {
-        SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [obj.fieldName]: e.target.checked }));
-      })
+      policyResources
+        .filter((d) => d.resource === type)
+        .forEach((obj) => {
+          SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [obj.fieldName]: e.target.checked }));
+        });
     }
 
     if (checkBoxType === 'Fields') {
       SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [type.field]: e.target.checked }));
-      let temppolicyFieldCheckBox = policyFieldCheckBox
-      temppolicyFieldCheckBox[type.field] = e.target.checked
-      let tempResourceCheckBox = policyResources.filter(d => d.resource === type.resource).every(d => temppolicyFieldCheckBox[d.fieldName])
+      let temppolicyFieldCheckBox = policyFieldCheckBox;
+      temppolicyFieldCheckBox[type.field] = e.target.checked;
+      let tempResourceCheckBox = policyResources.filter((d) => d.resource === type.resource).every((d) => temppolicyFieldCheckBox[d.fieldName]);
       setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(resourceObject)]: tempResourceCheckBox }));
     }
   };
@@ -740,10 +748,10 @@ const RoleDetailsPage = () => {
             roleDeleteRec
               ? `Are you sure you want to delete this Role ?`
               : userDeleteRec
-                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-                : entityDeleteRec
-                  ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-                  : ''
+              ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+              : entityDeleteRec
+              ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+              : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
