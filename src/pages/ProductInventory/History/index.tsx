@@ -138,32 +138,32 @@ const History = ({ product, warehouse }) => {
 
   const ActionsRenderer = (params) => (
     <>
-      {params?.data?.type === 'Credit' && params.data.referenceType === 'Product Inventory' ? <Box pl={1}>
-        <Tooltip title="Revert">
-          <IconButton
-            size="small"
-            aria-label="revert"
-            onClick={() => {
-              let data = {
-                comment: "Reverted"
-              };
-              axiosInstance()
-                .put(`${productInventory.api}/${params?.data?.product}/ledger-revert/${params?.data?._id}`, data)
-                .then(({ data: { data } }) => {
-                  dispatch({ type: 'initialize', data: [], count: 0 });
-                  fetchRecords();
-                })
-                .catch((error) => {
-                  toastConfig.setToastConfig(error);
-                });
-            }}
-          >
-            <Autorenew fontSize="small" color="primary" />
-          </IconButton>
-        </Tooltip>
-      </Box>
-        : null
-      }
+      {['Credit', 'Debit'].includes(params?.data?.type) && params.data.referenceType === 'Product Inventory' ? (
+        <Box pl={1}>
+          <Tooltip title="Revert">
+            <IconButton
+              size="small"
+              aria-label="revert"
+              onClick={() => {
+                let data = {
+                  comment: 'Reverted'
+                };
+                axiosInstance()
+                  .put(`${productInventory.api}/${params?.data?.product}/ledger-revert/${params?.data?._id}`, data)
+                  .then(({ data: { data } }) => {
+                    dispatch({ type: 'initialize', data: [], count: 0 });
+                    fetchRecords();
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+            >
+              <Autorenew fontSize="small" color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ) : null}
     </>
   );
 
