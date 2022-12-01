@@ -108,6 +108,8 @@ const RentalManagementDetailsPage = () => {
       : rentalManagementSteps?.filter((e) => !['Quotation', 'Add Services'].includes(e))
   );
 
+  const [versionNotClonned, setVersionNotClonned] = useState(false);
+
   useEffect(() => {
     if (quotationData) {
       const keys = Object.keys(quotationData?.versions);
@@ -207,6 +209,8 @@ const RentalManagementDetailsPage = () => {
           setQuotationData(data);
           let keys = Object.keys(data.versions);
           setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
+          const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])];
+          [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status) && setVersionNotClonned(true);
         }
       });
   };
@@ -402,33 +406,50 @@ const RentalManagementDetailsPage = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={rentalManagementData?.rentalJobName} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.rentalManagement?.isUpdate &&
-                    allowedToEdit &&
-                    !isOffline &&
-                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
-                      <Fragment>
-                        <Button
-                          disabled={disabledEditButton}
-                          className="buttonStyleBigScreen"
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={handleOpenUpdateDialog}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          className="buttonStyleSmallScreen"
-                          variant="text"
-                          color="primary"
-                          size="small"
-                          onClick={handleOpenUpdateDialog}
-                          style={isMobile ? { color: '#43aeaa' } : {}}
-                        >
-                          <BiEdit size={20} />
-                        </Button>
-                      </Fragment>
+                  <Fragment>
+                    {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]) && versionNotClonned && (
+                      <Button
+                        disabled={!versionNotClonned}
+                        className="buttonStyleBigScreen"
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setVersionNotClonned(false);
+                          cloneVersion();
+                        }}
+                      >
+                        Create New Version
+                      </Button>
                     )}
+                    {permissions?.rentalManagement?.isUpdate &&
+                      allowedToEdit &&
+                      !isOffline &&
+                      ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
+                        <Fragment>
+                          <Button
+                            disabled={disabledEditButton}
+                            className="buttonStyleBigScreen"
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={handleOpenUpdateDialog}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            className="buttonStyleSmallScreen"
+                            variant="text"
+                            color="primary"
+                            size="small"
+                            onClick={handleOpenUpdateDialog}
+                            style={isMobile ? { color: '#43aeaa' } : {}}
+                          >
+                            <BiEdit size={20} />
+                          </Button>
+                        </Fragment>
+                      )}
+                  </Fragment>
                   {/* {permissions?.rentalManagement?.isUpdate &&
                     [RENTAL_STATUS.new, RENTAL_STATUS.inProgress].includes(rentalManagementData?.status) && (
                       <Button variant="outlined" color="primary" size="small" onClick={() => setShowCancelConfirmBox(true)}>
