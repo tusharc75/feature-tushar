@@ -5,7 +5,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 
-export default function QCcomment({ onClose, onSubmit }) {
+export default function QCcomment({ onClose, onSubmit, status }) {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [rejectSubmission, setRejectSubmission] = useState(false);
   const [comment, setComment] = useState('');
@@ -13,7 +13,7 @@ export default function QCcomment({ onClose, onSubmit }) {
   return (
     <Dialog open onClose={onClose} fullWidth>
       <CustomDialogHeader
-        title={`Reason for Rejection`}
+        title={ status === 'Reject' ? 'Reject Quotation' : 'Approve Quotation' }
         onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
@@ -47,7 +47,8 @@ export default function QCcomment({ onClose, onSubmit }) {
           color="primary"
           size="small"
           onClick={() => {
-            onSubmit('reject', comment);
+            let response = (status === 'Reject' ? 'reject' : 'accept');
+            onSubmit(response, comment);
           }}
         >
           Submit
