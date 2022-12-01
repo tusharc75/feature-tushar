@@ -386,6 +386,13 @@ const RentalManagementDetailsPage = () => {
       });
   };
 
+  const handleRentalReOpen = () => {
+    axiosInstance()
+      .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: RENTAL_STATUS.inProgress })
+      .then(({ data }) => {})
+      .catch((error) => {});
+  };
+
   return (
     <>
       <Grid container className="headerbox">
@@ -420,6 +427,19 @@ const RentalManagementDetailsPage = () => {
                         }}
                       >
                         Create New Version
+                      </Button>
+                    )}
+                    {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
+                      <Button
+                        className="buttonStyleBigScreen"
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          handleRentalReOpen();
+                        }}
+                      >
+                        Re-Open
                       </Button>
                     )}
                     {permissions?.rentalManagement?.isUpdate &&

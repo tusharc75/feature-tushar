@@ -86,27 +86,36 @@ const CalculatePriceDialog = ({
                             {displayData.map((obj) => (
                                 <Box p={1}>
                                     <Box border={0.7} p={1} borderColor="grey.300">
-                                        <Typography
-                                            variant="subtitle2"
-                                        >
-                                            {` ${obj.productData?.detail}`}
-                                        </Typography>
-                                        <Autocomplete
-                                            size="small"
-                                            fullWidth
-                                            options={obj.pricingConditionList}
-                                            autoHighlight
-                                            value={value[obj.productData?.materialId]}
-                                            getOptionLabel={(option) => option.conditionName || ''}
-                                            getOptionSelected={(option, val) => (option ? option.conditionId === val.conditionId : false)}
-                                            onChange={(_, val) => {
-                                                setValue((prevState) => ({
-                                                    ...prevState,
-                                                    [`${obj.productData?.materialId}`]: val
-                                                }))
-                                            }}
-                                            renderInput={(params) => <TextField {...params} label={`select Pricing condition`} variant="outlined" />}
-                                        />
+                                        <Grid spacing={3} container>
+                                            <Grid item xs={12} sm={6} md={6}>
+                                                <Typography
+                                                    variant="subtitle2"
+                                                >
+                                                    {` ${obj.productData?.detail}`}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item xs={12} sm={6} md={6}>
+                                                <Autocomplete
+                                                    size="small"
+                                                    fullWidth
+                                                    options={obj.pricingConditionList}
+                                                    autoHighlight
+                                                    value={value[obj.productData?.materialId]}
+                                                    getOptionLabel={(option) => option.conditionName || ''}
+                                                    getOptionSelected={(option, val) => (option ? option.conditionId === val.conditionId : false)}
+                                                    onChange={(_, val) => {
+                                                        setValue((prevState) => ({
+                                                            ...prevState,
+                                                            [`${obj.productData?.materialId}`]: val
+                                                        }))
+                                                    }}
+                                                    renderInput={(params) => <TextField {...params} label={`select Pricing condition`} variant="outlined" />}
+                                                />
+                                            </Grid>
+                                        </Grid>
+
+
+
                                         {/* <FormControl component="fieldset">
                                             <RadioGroup row aria-label="pricing-condition" name={obj.productData?.materialId} value={value[obj.productData?.materialId] ?? null} onChange={(event) => handleChange(event, obj.productData?.materialId)}>
                                                 {obj.pricingConditionList?.map((price) => (
