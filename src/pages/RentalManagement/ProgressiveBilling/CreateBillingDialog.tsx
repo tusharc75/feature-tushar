@@ -67,7 +67,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
       },
       {
         accessor: 'type',
@@ -126,10 +129,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
               <InfoIcon fontSize="small" color="primary" />
             </IconButton>
           </div>
-        ),
-        Footer: () => {
-          return <>Total</>;
-        }
+        )
       }
     ];
     data.forEach((element) => {
@@ -255,6 +255,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   const fetchProductInventory = async () => {
     let data: any = {};
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
+    const {
+      data: { data: invoicedProducts }
+    } = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`);
     data = response?.data?.data;
 
     if (invoiceData) {
@@ -276,15 +279,24 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
             let values = { qty: materialData.qty - tempTotalPrevQty };
             const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
+
+          
             materialData = { ...materialData, ...calValues };
           }
 
-          let row: any = invoiceData[0]?.material.find((m) => m._id === materialData._id);
+          const product = invoicedProducts.find((p) => p._id === e._id);
 
-          if (row) {
-            const actualEndDate = new Date(row?.actualEndDate)?.setDate(new Date(row?.actualEndDate)?.getDate() + 1);
+          if (product) {
+            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
+
             materialData.estimateStartDate = actualEndDate;
             materialData.actualStartDate = actualEndDate;
+          }
+
+          const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
+
+          if (row) {
+            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
             setEndDate(actualEndDate);
           }
           return materialData;
@@ -337,48 +349,28 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   };
 
   const handleApplyDate = async () => {
-    const {data: {data : materialEndDates}} = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`)
-
     let values = {
       actualEndDate: endDate,
       estimateEndDate: endDate
     };
-    let actualEndCycleDate: any = null;
+
+    const {
+      data: { data: invoicedProducts }
+    } = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`);
 
     let rows: any = [];
     selectedProducts.forEach((element) => {
-      actualEndCycleDate = null;
-      const startDate = new Date(element.actualStartDate);
-      const endDate = new Date(values.actualEndDate);
-      const dayDiff = moment(endDate).diff(startDate, 'days');
+      const product = invoicedProducts.find((p) => p._id === element._id);
 
-      if (element?.pricingMethod === 'Per Month') {
-        const endDate = new Date(values.actualEndDate);
-        const lastDay = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0);
+      if (product) {
+        const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
+        const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
 
-        if (dayDiff > 0) {
-          actualEndCycleDate = lastDay.toISOString();
-        }
-      }
-
-      if (element?.pricingMethod === 'Per Week') {
-        if (dayDiff < 7 && dayDiff > 0) {
-          actualEndCycleDate = moment(startDate).add(7, 'd');
+        if (selectedEndDateTime < productEndDateTime) {
+          element.invalidDate = true;
         } else {
-          const weeks = Math.ceil(dayDiff / 7);
-          const endCycle:any = moment(startDate).add(7 * weeks, 'd');
-          actualEndCycleDate = new Date(endCycle?._d).toISOString()
-
+          element.invalidDate = false;
         }
-      }
-
-      if (actualEndCycleDate) {
-        values.actualEndDate = actualEndCycleDate;
-        values.estimateEndDate = actualEndCycleDate;
-      }
-
-      if (moment(endDate).diff(startDate) < 0) {
-        element.hasInvalidDate = true;
       }
 
       const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
@@ -411,18 +403,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   };
 
   const handleCreateBill = () => {
-    const alreadyInvoiced = rowsApplied.some((d) => d?.isInvoiced);
-
-    if (alreadyInvoiced) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'warning',
-        message: 'Some of the selected records have been already billed'
-      });
-
-      return;
-    }
-
     rowsApplied?.forEach((element) => {
       delete element?.srno;
       delete element?.detail;
@@ -544,7 +524,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   height={'calc(100vh - 285px)'}
                   columns={columns}
                   data={rowsData}
-                  setWholeRowsCellColor={(rowData) => (rowData?.hasInvalidDate ? 'error' : '')}
+                  setWholeRowsCellColor={(rowData) => (rowData?.invalidDate ? 'error' : '')}
                   onSelect={setSelectedProducts}
                   childrenProperty="subRows"
                   uniqueKey="_id"

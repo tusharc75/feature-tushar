@@ -65,7 +65,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           Header: 'Index',
           width: 70,
           sticky: isMobile ? 'none' : 'left',
-          Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+          Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+          Footer: () => {
+            return <>Total</>;
+          }
         },
         {
           accessor: 'type',
@@ -234,11 +237,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           element.Header = 'Bill End Date';
         }
 
-        if (element.accessor.includes('detail')) {
-          element['Footer'] = () => {
-            return <>Total</>;
-          };
-        } else if (element.accessor === 'qtyDisplay') {
+      
+         if (element.accessor === 'qtyDisplay') {
           element['Footer'] = (info) => {
             const qtyTotal = info.rows
               .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
