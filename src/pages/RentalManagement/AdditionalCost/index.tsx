@@ -48,6 +48,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
     fetchFields();
   }, []);
   const fetchFields = async () => {
+    setNextStep(false)
     const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
     let rendererNames = [];
     genrateColoum(fields, columns, rendererNames, false, renderedFrom);
@@ -66,12 +67,14 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
     setFrameWorkComponent({ ...tempFrameworkComponent });
     //column array 2 to last element
     const tempColumns = columns.slice(2);
-
+    
     setColumns([...columns]);
     fetchAdditionalCost();
+    setNextStep(false)
   };
 
   const fetchAdditionalCost = async () => {
+    setNextStep(false)
     try {
       dispatch({ type: 'loading', loading: true });
       if (gridApi) {
