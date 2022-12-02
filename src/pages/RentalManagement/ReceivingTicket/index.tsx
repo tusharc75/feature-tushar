@@ -938,7 +938,7 @@ const ReceivingTicket = ({
               color="primary"
               aria-controls="simple-menu"
               aria-haspopup="true"
-              disabled={selectedRecords?.length === 0 || isOffline}
+              disabled={selectedRecords?.length === 0 || isOffline || selectedRecords?.some((f) => f.type === 'Product')}
               size="small"
               onClick={handleClick}
               endIcon={<ArrowDropDownIcon />}
@@ -1105,7 +1105,7 @@ const ReceivingTicket = ({
                 handelProcessTickets();
               }}
             >
-              Receive Assets
+              Receive Products
             </MenuItem>
 
             <MenuItem
@@ -1210,7 +1210,7 @@ const ReceivingTicket = ({
                 )
               }
             >
-              Replace Assets
+              Replace Products
             </MenuItem>
 
             {selectedRecords?.filter(

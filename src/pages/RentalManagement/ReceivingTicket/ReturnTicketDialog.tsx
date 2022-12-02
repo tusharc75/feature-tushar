@@ -150,7 +150,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
                                               <Grid item xs={12} md={4}>
                                                 <Field
                                                   fullWidth
-                                                  label="Consume"
+                                                  label="Consumed"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
