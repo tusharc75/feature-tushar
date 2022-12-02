@@ -734,7 +734,7 @@ const RentalManagementDetailsPage = () => {
                       />
                     )}
                     {rentalSteps[currentStep] === 'Loading Ticket' && rentalManagementData && (
-                      <LoadingTicket
+                     <LoadingTicket
                         fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
                         currentStep={currentStep}

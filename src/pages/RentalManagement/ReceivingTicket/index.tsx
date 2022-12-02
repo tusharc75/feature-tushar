@@ -397,7 +397,7 @@ const ReceivingTicket = ({
 
       productAssets.forEach((d) => {
         d['isChecked'] = false;
-        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
+        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved || d.loadingTicketStatus != DELIVERY_TICKET_STATUS.delivered
       });
 
       if (
@@ -1369,10 +1369,10 @@ const ReceivingTicket = ({
               pageSizes={pageSizes}
               page={page}
               allowAction={false}
-              loading={loading}
+              loading={loading || loadingData}
               isClientSideGrid={true}
               renderedFrom={renderedFrom}
-              allowSelection={loading || loadingData ? false : allowedToEdit || isProcessor}
+              allowSelection= {allowedToEdit || isProcessor}
               refreshGrid={fetchRecords}
             />
           )
@@ -1416,6 +1416,9 @@ const ReceivingTicket = ({
           onSuccess={(data) => {
             setShowQtyDialog({ data: data?.products, open: false });
             setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
+            console.log("lt")
+            fetchRecords();
+            fetchRentalData();
           }}
           onClose={() => {
             setShowQtyDialog({ open: false, data: null });
