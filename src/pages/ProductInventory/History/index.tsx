@@ -138,7 +138,7 @@ const History = ({ product, warehouse }) => {
 
   const ActionsRenderer = (params) => (
     <>
-      {params.data.referenceType === 'Product Inventory' || (params?.data?.hasOwnProperty('reverted') && params?.data?.reverted === true)  ? (
+      {['Product Inventory','Reverted'].includes(params.data.referenceType) && !params?.data?.reverted  ? (
         <Box pl={1}>
           <Tooltip title="Revert">
             <IconButton
