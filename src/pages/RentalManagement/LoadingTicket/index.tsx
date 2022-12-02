@@ -80,6 +80,7 @@ const LoadingTicket = ({
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -102,6 +103,7 @@ const LoadingTicket = ({
   }, []);
 
   const fetchRecords = async () => {
+    setLoadingData(true)
     setNextStep(false);
     try {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
@@ -202,7 +204,7 @@ const LoadingTicket = ({
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-          obj.status = element?.status;
+          obj.status = element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true ? element?.status : "N/A";
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
@@ -276,9 +278,11 @@ const LoadingTicket = ({
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
+      setLoadingData(false)
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
+      setLoadingData(false)
     }
   };
 
@@ -410,7 +414,7 @@ const LoadingTicket = ({
     { field: 'productName', headerName: findHeader(columnHeader?.productFields, 'productName'), show: true, cellRenderer: 'productNameRenderer' },
     { field: 'warehouse', headerName: 'Plant', show: false, cellRenderer: 'warehouseRenderer' },
     { field: 'loadingTicket', headerName: 'Loading Ticket', show: true, cellRenderer: 'ticketRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' }
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
