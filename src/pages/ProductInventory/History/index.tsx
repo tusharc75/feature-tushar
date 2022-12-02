@@ -5,15 +5,19 @@ import CustomAgGrid, { intialState, reducer } from '../../../components/AgGridCo
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { gridLoadingTimeout } from 'src/constants/helpers';
+import { gridLoadingTimeout, productInventory } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { CommonRenderer, DateTimeRenderer } from '../../../components/AgGridComponents/CustomAgGridCellRenderers';
 import { capitalize } from 'lodash';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
+import { IconButton, Tooltip } from '@material-ui/core';
+import { Autorenew } from '@material-ui/icons';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const History = ({ product, warehouse }) => {
+  const toastConfig = useContext(CustomToastContext);
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
@@ -132,11 +136,43 @@ const History = ({ product, warehouse }) => {
       <NoDataCell />
     );
 
+  const ActionsRenderer = (params) => (
+    <>
+      {['Product Inventory','Reverted'].includes(params.data.referenceType) && !params?.data?.reverted  ? (
+        <Box pl={1}>
+          <Tooltip title="Revert">
+            <IconButton
+              size="small"
+              aria-label="revert"
+              onClick={() => {
+                let data = {
+                  comment: 'Reverted'
+                };
+                axiosInstance()
+                  .put(`${productInventory.api}/${params?.data?.product}/ledger-revert/${params?.data?._id}`, data)
+                  .then(({ data: { data } }) => {
+                    dispatch({ type: 'initialize', data: [], count: 0 });
+                    fetchRecords();
+                  })
+                  .catch((error) => {
+                    toastConfig.setToastConfig(error);
+                  });
+              }}
+            >
+              <Autorenew fontSize="small" color="primary" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ) : null}
+    </>
+  );
+
   const frameworkComponents = {
     referenceRenderer: ReferenceRenderer,
     creditDebitRenderer: CreditDebitRenderer,
     commonRenderer: CommonRenderer,
-    dateTimeRenderer: DateTimeRenderer
+    dateTimeRenderer: DateTimeRenderer,
+    actionsRenderer: ActionsRenderer
   };
 
   return (
@@ -153,7 +189,7 @@ const History = ({ product, warehouse }) => {
             limit={limit}
             pageSizes={pageSizes}
             page={page}
-            allowAction={false}
+            allowAction={true}
             loading={loading}
             isClientSideGrid={true}
             allowSelection={false}
