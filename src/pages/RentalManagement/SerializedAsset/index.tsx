@@ -459,10 +459,9 @@ const SerializedAsset = ({
         );
         parent.assetQty = parent.subRows.filter((d) => d.type !== 'asset').length === 0 ? parent.assetQty : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
         parent.assetAssignedQty = parent.subRows.filter((d) => d.type !== 'asset').length === 0 ? parent.assetAssignedQty : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0);
-        parent.isValid = parent.serializedProduct ?
-          parent.assetAssignedQty === parent.assetQty ? true
-            : parent.assetAssignedQty === parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
-          : parent.subRows.every(d => d.isValid);
+        parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false)
+          : parent.subRows.length !== 0 ? parent.assetAssignedQty === parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) || parent.subRows.every(d => d.isValid)
+            : true;
       });
       if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
         setNextStep(false);
