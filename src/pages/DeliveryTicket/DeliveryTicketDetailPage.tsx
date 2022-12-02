@@ -696,7 +696,7 @@ export default function DeliveryTicketDetail(props) {
                   <TabPanel value={tabValue} index={0}>
                     {(deliveryTicketData && deliveryTicketFields.length > 0 ?
                       <DetailsPage
-                        data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveryDate: signOffDate }}
+                        data={{ ...deliveryTicketData, actualDispatchedDate: startDeliveryDate, actualDeliveryDate: signOffDate, creationDate: deliveryTicketData?.createdBy?.date, completionDate: deliveryTicketData?.actualDeliveryDate }}
                         fields={[...deliveryTicketFields
                           , {
                           fieldData: {
@@ -705,7 +705,21 @@ export default function DeliveryTicketDetail(props) {
                             fieldName: "actualDeliveryDate",
                             sectionName: "Actuals"
                           }
-                        }
+                        },
+                        { 
+                          fieldData: {
+                            type: "date",
+                            fieldLabel: "Creation Date",
+                            fieldName: "creationDate",
+                            sectionName: "Actuals"
+                          }},
+                         { 
+                          fieldData: {
+                            type: "date",
+                            fieldLabel: "Completion Date",
+                            fieldName: "completionDate",
+                            sectionName: "Actuals"
+                          }}
                         ]} /> : null
                     )}
                   </TabPanel>
