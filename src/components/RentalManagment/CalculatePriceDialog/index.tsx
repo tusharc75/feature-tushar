@@ -30,7 +30,7 @@ const CalculatePriceDialog = ({
     const fetchCalculatePrice = () => {
         const data: any = {};
         data.conditionType = ['Rent'];
-        data.material = material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).map((ele) => ({
+        data.material = material.filter((d) => d.parentId === null &&(d.listPrice === null || d.listPrice === undefined || d.listPrice === 0)).map((ele) => ({
             materialId: ele?.materialId,
             materialType: ele?.type,
             qty: ele?.qty,
@@ -133,7 +133,7 @@ const CalculatePriceDialog = ({
                 <CustomDialogFooter>
                     <Button
                         onClick={() => {
-                            handleSucess([...submitData, ...pricingConditionData.filter(d => value[d.materialId].conditionId === d.conditionId)])
+                            handleSucess([...submitData, ...pricingConditionData.filter(d => value[d.materialId]?.conditionId === d?.conditionId)])
                         }}
                         color="primary"
                         size="small"
