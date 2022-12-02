@@ -84,6 +84,7 @@ const SerializedAsset = ({
   }, []);
 
   const fetchFields = async () => {
+    setNextStep(false)
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     const coloum: any = [
       {
@@ -355,6 +356,7 @@ const SerializedAsset = ({
     });
     setColumns(coloum);
     fetchProductInventory();
+    setNextStep(true)
   };
 
   const fetchProductInventory = async () => {
@@ -455,8 +457,12 @@ const SerializedAsset = ({
           bulkAssetCreationProduct,
           offlineAssetErrorLog
         );
-        parent.assetQty = parent.subRows.length === 0 ? parent.assetQty : parent.subRows.reduce((sum, row) => row.assetQty + sum, 0);
-        parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false) : parent.assetAssignedQty === parent.subRows.filter(d => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0);
+        parent.assetQty = parent.subRows.filter((d) => d.type !== 'asset').length === 0 ? parent.assetQty : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+        parent.assetAssignedQty = parent.subRows.filter((d) => d.type !== 'asset').length === 0 ? parent.assetAssignedQty : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0);
+        parent.isValid = parent.serializedProduct ?
+          parent.assetAssignedQty === parent.assetQty ? true
+            : parent.assetAssignedQty === parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+          : parent.subRows.every(d => d.isValid);
       });
       if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
         setNextStep(false);
@@ -545,10 +551,12 @@ const SerializedAsset = ({
               : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
-      _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ?
-        parent.type === 'product' || parent.type === 'package' ?
-          _subRow.qty * parent.assetQty :
-          _subRow.qty * parent.qty : 0
+      _subRow.assetQty =
+        _subRow.type === 'product' || _subRow.type === 'package'
+          ? parent.type === 'product' || parent.type === 'package'
+            ? _subRow.qty * parent.assetQty
+            : _subRow.qty * parent.qty
+          : 0;
       _subRow.assetAssignedQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
@@ -573,9 +581,17 @@ const SerializedAsset = ({
         bulkAssetCreationProduct,
         offlineAssetErrorLog
       );
-      _subRow.subRows = tempSubRows
-      _subRow.assetQty = tempSubRows.filter(d => d.type !== 'asset').length === 0 ? _subRow.assetQty : tempSubRows.filter(d => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
-      _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : _subRow.assetAssignedQty === tempSubRows.filter(d => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0);
+      _subRow.subRows = tempSubRows;
+      _subRow.assetQty =
+        tempSubRows.filter((d) => d.type !== 'asset').length === 0
+          ? _subRow.assetQty
+          : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+      _subRow.isValid = _subRow.serializedProduct
+        ? _subRow.assetAssignedQty === _subRow.assetQty
+          ? true
+          : false
+        : _subRow.assetAssignedQty ===
+        tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0);
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -601,6 +617,7 @@ const SerializedAsset = ({
   };
 
   const handleAddSerializedAsset = (assets) => {
+    setNextStep(false)
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
     flatArray = uniqBy(flatArray, '_id');
@@ -637,15 +654,18 @@ const SerializedAsset = ({
             type: 'success',
             message: data.message
           });
+          setNextStep(true)
         })
         .catch((error) => {
           setAdding(false);
           toastConfig.setToastConfig(error);
+          setNextStep(true)
         });
     }
   };
 
   const handleRemoveInventory = async () => {
+    setNextStep(false)
     if (deleteData.length >= 1) {
       if (isOffline) {
         setDeleting(true);
@@ -666,11 +686,13 @@ const SerializedAsset = ({
             fetchProductInventory();
             setDeleteData(null);
             setShowConfirmBox(false);
+            setNextStep(true)
           })
           .catch((error) => {
             setDeleting(false);
             toastConfig.setToastConfig(error);
             setDeleteData(null);
+            setNextStep(true)
           });
       }
     }
@@ -867,7 +889,7 @@ const SerializedAsset = ({
                     closeActions();
                   }}
                 >
-                  {`Remove ${routes.serializedAsset.title}`}
+                  {`Remove Asset/Inventory`}
                 </MenuItem>
               </Menu>
               {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (

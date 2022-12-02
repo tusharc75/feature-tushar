@@ -267,16 +267,12 @@ const Productpackage = ({
           });
         }
       }
-      else if (element.fieldName === 'pricingCondition') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]?.optionLabel ? row.original[element.fieldName]?.optionLabel : row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
       else {
         if (element.fieldName === 'qty') {
           element.fieldName = 'qtyDisplay';
+        }
+        if (element.fieldName === 'pricingCondition') {
+          element.fieldName = 'pricingConditionDisplay';
         }
         coloum.push({
           accessor: element.fieldName,
@@ -362,6 +358,8 @@ const Productpackage = ({
           : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
+      parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
+      parent.pricingCondition = parent.pricingCondition?.optionValue;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
@@ -393,6 +391,8 @@ const Productpackage = ({
           : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || '' : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
+      _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
+      _subRow.pricingCondition = _subRow.pricingCondition?.optionValue;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
@@ -526,10 +526,12 @@ const Productpackage = ({
 
   const handleSaveData = async (rows: any) => {
     rows.forEach((element) => {
+      element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
       delete element.srno;
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;
+      delete element.pricingConditionDisplay;
       delete element.isValid;
       delete element.hideSelection;
       delete element.assetQty;
@@ -751,6 +753,7 @@ const Productpackage = ({
           material={material}
           selectedProducts={selectedProducts.filter((e) => !e.hideSelection)}
           loading={isUpdating}
+          from={"product"}
         />
       )}
       {addExistingProductDialog.open && (

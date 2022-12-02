@@ -65,7 +65,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           Header: 'Index',
           width: 70,
           sticky: isMobile ? 'none' : 'left',
-          Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+          Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+          Footer: () => {
+            return <>Total</>;
+          }
         },
         {
           accessor: 'type',
@@ -121,6 +124,14 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
               </IconButton>
             </div>
           )
+        },
+        {
+          accessor: 'description',
+          Header: 'Description',
+          width: 200,
+          Cell: ({ row }) => {
+            return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          }
         }
       ];
 
@@ -234,11 +245,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           element.Header = 'Bill End Date';
         }
 
-        if (element.accessor.includes('detail')) {
-          element['Footer'] = () => {
-            return <>Total</>;
-          };
-        } else if (element.accessor === 'qtyDisplay') {
+      
+         if (element.accessor === 'qtyDisplay') {
           element['Footer'] = (info) => {
             const qtyTotal = info.rows
               .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
@@ -280,6 +288,14 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           ? parent.packageDetail?.packageName
           : parent.serviceDetail?.serviceName
       }`;
+      parent.description =
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.type === 'product'
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
@@ -299,6 +315,14 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           ? _subRow?.packageDetail?.packageName
           : _subRow?.serviceDetail?.serviceName
       }`;
+      _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);

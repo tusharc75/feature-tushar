@@ -163,69 +163,72 @@ const PurchaseOrderViews = (props) => {
           });
         });
       }
-      if (productReceived) {
-        xPosition += 300;
-        flow.push({
-          id: `${pId}_received`,
-          type: 'default',
-          className: 'dark-node',
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          data: {
-            ref_type: 'received',
-            ref_id: pId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Received</div>
-          },
-          position: { x: xPosition, y: 80 },
-          style: customNodeStyles.receiving
-        });
-        allProducts
-          ?.filter((i) => !serialisedAssetInProduct[i?.productId])
-          ?.map((item, pIdx) => {
-            flowEdge.push({
-              id: `${pId}_${item}_received_edge`,
-              source: `${item?.productId}_${item?._id}`,
-              target: `${pId}_received`
-            });
-          });
-        allSerializedAssets?.map((item, sIdx) => {
-          flowEdge.push({
-            id: `${pId}_${item}_received_edge`,
-            source: `${item?._id}`,
-            target: `${pId}_received`
-          });
-        });
-        allSerialNumber?.map((item, sIdx) => {
-          flowEdge.push({
-            id: `${pId}_${item}_received_edge`,
-            source: `${item?._id}`,
-            target: `${pId}_received`
-          });
-        });
-      }
 
-      if (pStatus === PURCHASE_ORDER_STATUS.closed) {
-        xPosition += 300;
-        flow.push({
-          id: `${pId}_closed`,
-          type: 'output',
-          className: 'dark-node',
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          data: {
-            ref_type: 'purchaseOrder',
-            ref_id: pId,
-            label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pName ?? pName}</div>
-          },
-          position: { x: xPosition, y: 80 },
-          style: customDeliveredNodeStyle.closedPurchaseOrder
+      xPosition += 300;
+      flow.push({
+        id: `${pId}_received`,
+        type: 'default',
+        className: 'dark-node',
+        sourcePosition: 'right',
+        targetPosition: 'left',
+        data: {
+          ref_type: 'received',
+          ref_id: pId,
+          label: (
+            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {pStatus === PURCHASE_ORDER_STATUS.closed || pStatus === PURCHASE_ORDER_STATUS.open ? pStatus : 'In-Progress'}
+            </div>
+          )
+        },
+        position: { x: xPosition, y: 80 },
+        style: customNodeStyles.receiving
+      });
+      allProducts
+        ?.filter((i) => !serialisedAssetInProduct[i?.productId])
+        ?.map((item, pIdx) => {
+          flowEdge.push({
+            id: `${pId}_${item}_received_edge`,
+            source: `${item?.productId}_${item?._id}`,
+            target: `${pId}_received`
+          });
         });
+      allSerializedAssets?.map((item, sIdx) => {
         flowEdge.push({
-          id: `${pId}_closed_edge`,
-          source: `${pId}_received`,
-          target: `${pId}_closed`
+          id: `${pId}_${item}_received_edge`,
+          source: `${item?._id}`,
+          target: `${pId}_received`
         });
-      }
+      });
+      allSerialNumber?.map((item, sIdx) => {
+        flowEdge.push({
+          id: `${pId}_${item}_received_edge`,
+          source: `${item?._id}`,
+          target: `${pId}_received`
+        });
+      });
+
+      // if (pStatus === PURCHASE_ORDER_STATUS.closed) {
+      //   xPosition += 300;
+      //   flow.push({
+      //     id: `${pId}_closed`,
+      //     type: 'output',
+      //     className: 'dark-node',
+      //     sourcePosition: 'right',
+      //     targetPosition: 'left',
+      //     data: {
+      //       ref_type: 'purchaseOrder',
+      //       ref_id: pId,
+      //       label: <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pName ?? pName}</div>
+      //     },
+      //     position: { x: xPosition, y: 80 },
+      //     style: customDeliveredNodeStyle.closedPurchaseOrder
+      //   });
+      //   flowEdge.push({
+      //     id: `${pId}_closed_edge`,
+      //     source: `${pId}_received`,
+      //     target: `${pId}_closed`
+      //   });
+      // }
       setFlowData([...flow, ...flowEdge]);
       setLoading(false);
     } catch (error) {

@@ -1,4 +1,5 @@
-import { Dialog, Button, CircularProgress, List, ListItem, ListItemText, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Grid, Box, Typography } from "@material-ui/core";
+import { Dialog, Button, CircularProgress, List, ListItem, ListItemText, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Grid, Box, Typography, TextField } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
 import { map, uniq } from "lodash";
 import { useContext, useState, useEffect } from "react";
 import axiosInstance from "src/axios/axiosInstance";
@@ -60,25 +61,18 @@ const CalculatePriceDialog = ({
                         return { productData, pricingConditionList };
                     }
                 }).filter(d => d);
-                setValue(customData.reduce((obj, item) => Object.assign(obj, { [item.productData?.materialId]: item.pricingConditionList[0]?.conditionId }), {}))
+                setValue(customData.reduce((obj, item) => Object.assign(obj, { [item.productData?.materialId]: item.pricingConditionList[0] }), {}))
                 setDisplayData(customData)
                 setPricingConditionData(data);
             }
         })
     };
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>, materialId) => {
-        setValue((prevState) => ({
-            ...prevState,
-            [`${materialId}`]: (event.target as HTMLInputElement).value
-        }))
-    };
-
     return (
         <>{pricingConditionData.length !== 0 ?
             <Dialog
                 fullWidth
-                maxWidth="md"
+                maxWidth="xs"
                 open={true}
                 onClose={onClose}
                 aria-labelledby="pricing-condition-dialog"
@@ -92,19 +86,44 @@ const CalculatePriceDialog = ({
                             {displayData.map((obj) => (
                                 <Box p={1}>
                                     <Box border={0.7} p={1} borderColor="grey.300">
-                                        <Typography
-                                            variant="subtitle2"
-                                        >
-                                            {` ${obj.productData?.detail}`}
-                                        </Typography>
-                                        <FormControl component="fieldset">
+                                        <Grid spacing={3} container>
+                                            <Grid item xs={12} sm={6} md={6}>
+                                                <Typography
+                                                    variant="subtitle2"
+                                                >
+                                                    {` ${obj.productData?.detail}`}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item xs={12} sm={6} md={6}>
+                                                <Autocomplete
+                                                    size="small"
+                                                    fullWidth
+                                                    options={obj.pricingConditionList}
+                                                    autoHighlight
+                                                    value={value[obj.productData?.materialId]}
+                                                    getOptionLabel={(option) => option.conditionName || ''}
+                                                    getOptionSelected={(option, val) => (option ? option.conditionId === val.conditionId : false)}
+                                                    onChange={(_, val) => {
+                                                        setValue((prevState) => ({
+                                                            ...prevState,
+                                                            [`${obj.productData?.materialId}`]: val
+                                                        }))
+                                                    }}
+                                                    renderInput={(params) => <TextField {...params} label={`select Pricing condition`} variant="outlined" />}
+                                                />
+                                            </Grid>
+                                        </Grid>
+
+
+
+                                        {/* <FormControl component="fieldset">
                                             <RadioGroup row aria-label="pricing-condition" name={obj.productData?.materialId} value={value[obj.productData?.materialId] ?? null} onChange={(event) => handleChange(event, obj.productData?.materialId)}>
                                                 {obj.pricingConditionList?.map((price) => (
                                                     // <FormControlLabel value={Number(price?.mrp)} labelPlacement="end" control={<Radio />} label={`${price?.conditionName} : ${getUniqueCurrencies().find((d) => d.currencyCode === price['currency'])?.symbolNative} ${price?.mrp}`} />
                                                     <FormControlLabel value={price?.conditionId} labelPlacement="end" control={<Radio />} label={`${price?.conditionName}`} />
                                                 ))}
                                             </RadioGroup>
-                                        </FormControl>
+                                        </FormControl> */}
                                     </Box>
                                 </Box>
                             ))}
@@ -114,7 +133,7 @@ const CalculatePriceDialog = ({
                 <CustomDialogFooter>
                     <Button
                         onClick={() => {
-                            handleSucess([...submitData, ...pricingConditionData.filter(d => value[d.materialId] === d.conditionId)])
+                            handleSucess([...submitData, ...pricingConditionData.filter(d => value[d.materialId].conditionId === d.conditionId)])
                         }}
                         color="primary"
                         size="small"
