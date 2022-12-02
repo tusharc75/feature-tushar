@@ -57,8 +57,8 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
       ownerCollaboratorEmails.push(quotationData.owner.email);
     }
     let toEmails = [];
-    if (quotationData?.supplier?.email) {
-      toEmails.push(quotationData.supplier.email);
+    if (quotationData?.customerContact?.email) {
+      toEmails.push(quotationData.customerContact.email);
     }
     setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
   };
@@ -68,7 +68,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
       contentType: pdfFileBase64.split(';')[0].split(':')[1],
-      name: `Purchase Order-${quotationData.quotationNumber}`
+      name: `Rental Order-${quotationData.quotationNumber}`
     });
   }
 
@@ -329,7 +329,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
               setFullScreen(false);
             }}
             fetchData={onSendEmailSuccess}
-            id={quotationData._id}
+            id={quotationData.rentalManagement}
             isQuoteBuilder={true}
             options={userEmails?.to}
             cc={userEmails?.cc ?? []}
@@ -342,7 +342,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            refrenceType="purchaseOrder"
+            refrenceType="rentalJob"
           />
         </Dialog>
       )}
