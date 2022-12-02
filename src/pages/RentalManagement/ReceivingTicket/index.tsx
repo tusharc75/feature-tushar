@@ -92,6 +92,7 @@ const ReceivingTicket = ({
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -164,6 +165,7 @@ const ReceivingTicket = ({
   };
 
   const fetchRecords = async () => {
+    setLoadingData(true);
     try {
       setNextStep(false);
       dispatch({ type: 'loading', loading: true });
@@ -288,7 +290,7 @@ const ReceivingTicket = ({
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-          obj.status = element?.status;
+          obj.status = element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true ? element?.status : "N/A";
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
@@ -421,22 +423,28 @@ const ReceivingTicket = ({
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
+      setLoadingData(false)
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
+      setLoadingData(false)
     }
   };
 
   const fetchRepairJob = async () => {
+    setLoadingData(true)
     let filterById = [];
     filterById.push({ field: 'rentalJob', term: rentalManagementData?._id });
     const queryString = `?filterById=${JSON.stringify(filterById)}`;
     axiosInstance()
-      .get(`${repairJob.api}${queryString}`)
-      .then(({ data: { data } }) => {
-        setRepairJobCount(data.length);
-      })
-      .catch((error) => {});
+    .get(`${repairJob.api}${queryString}`)
+    .then(({ data: { data } }) => {
+      setRepairJobCount(data.length);
+      setLoadingData(false)
+    })
+    .catch((error) => {
+      setLoadingData(false)
+    });
   };
 
   const InventoryRenderer = (params) => (
@@ -594,7 +602,7 @@ const ReceivingTicket = ({
     { field: 'receivingTicket', headerName: 'Receiving Ticket', show: true, cellRenderer: 'receivingTicketRenderer' },
     { field: 'returnTicket', headerName: 'Return Ticket', show: true, cellRenderer: 'returnTicketRenderer' },
     { field: 'returnQty', headerName: 'Returned Qty', show: true, cellRenderer: 'returnTicketRenderer' },
-    { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'startDate', headerName: 'Actual Start Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'Actual End Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'rentalAssetStatus', headerName: 'Rental Status', show: true, cellRenderer: 'commonRenderer' },
@@ -1364,7 +1372,7 @@ const ReceivingTicket = ({
               loading={loading}
               isClientSideGrid={true}
               renderedFrom={renderedFrom}
-              allowSelection={allowedToEdit || isProcessor}
+              allowSelection={loading || loadingData ? false : allowedToEdit || isProcessor}
               refreshGrid={fetchRecords}
             />
           )
