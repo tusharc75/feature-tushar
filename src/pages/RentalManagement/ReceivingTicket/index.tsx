@@ -1397,7 +1397,7 @@ const ReceivingTicket = ({
           onSuccess={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
             if (showTicketDialog.ticketType === DELIVERY_TICKET_TYPE.return) {
-              if (showQtyDialog?.data || showQtyDialog?.data.length > 0) {
+              if (showQtyDialog?.data || showQtyDialog?.data?.length > 0) {
                 let consumableData = showQtyDialog.data.filter((d) => d?.consumeQuantity > 0);
                 consumableData = consumableData.map((d) => ({ ...d, materialId: d?.row?.materialId, qty: d.consumeQuantity }));
                 if (consumableData.length > 0) {
