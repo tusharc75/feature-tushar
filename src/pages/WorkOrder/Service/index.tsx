@@ -107,9 +107,12 @@ const RenderTotalTime = ({ steps, startTimes, endTimes }) => {
 };
 
 const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
-
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user: { user } } } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
   const [serviceSteps, setServiceSteps] = useState(null);
   const [disabledServicesOrder, setDisabledServicesOrder] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
@@ -140,25 +143,32 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       .then(({ data: { data } }) => {
         if (data.type === 'Repair Order') {
           let tempRepairOrderId = data?.repairOrder?.optionValue;
-          axiosInstance().get(`${repairOrder.api}/${tempRepairOrderId}`).then(({ data: { data } }) => {
-            if (data.type !== REPAIR_ORDER_TYPE.internal) {
-              setIsQuotationStep(true);
-              axiosInstance()
-                .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
-                .then(({ data: { data } }) => {
-                  if (data) {
-                    let keys = Object.keys(data?.versions);
-                    if (keys?.length) {
-                      const version = data.versions[parseInt(keys[keys.length - 1])];
-                      setQuotationData({ _id: data?._id, versionId: version?._id, quotationNumber: data?.quotationNumber, status: version?.status });
+          axiosInstance()
+            .get(`${repairOrder.api}/${tempRepairOrderId}`)
+            .then(({ data: { data } }) => {
+              if (data.type !== REPAIR_ORDER_TYPE.internal) {
+                setIsQuotationStep(true);
+                axiosInstance()
+                  .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
+                  .then(({ data: { data } }) => {
+                    if (data) {
+                      let keys = Object.keys(data?.versions);
+                      if (keys?.length) {
+                        const version = data.versions[parseInt(keys[keys.length - 1])];
+                        setQuotationData({
+                          _id: data?._id,
+                          versionId: version?._id,
+                          quotationNumber: data?.quotationNumber,
+                          status: version?.status
+                        });
+                      }
                     }
-                  }
-                });
-              fetchService(true);
-            } else {
-              fetchService(false);
-            }
-          });
+                  });
+                fetchService(true);
+              } else {
+                fetchService(false);
+              }
+            });
         } else {
           fetchService(false);
         }
@@ -170,45 +180,49 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 
   const fetchService = (isQuote: any = isQuotationStep) => {
     getServiceData();
-    axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`).then(({ data: { data } }) => {
-      if (data?.length) {
-        data?.forEach((e) => { e.type = 'service' });
-        const preWorkService = data?.filter((e) => e.preWork);
-        const postWorkService = data?.filter((e) => !e.preWork);
-        const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
-        const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
-        setServiceSteps(services);
-        if (services?.length) {
-          let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
-          if (pendingServiceIndex === -1) {
-            pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
+    axiosInstance()
+      .get(`${routes.workOrder.path}/service/${workOrderId}`)
+      .then(({ data: { data } }) => {
+        if (data?.length) {
+          data?.forEach((e) => {
+            e.type = 'service';
+          });
+          const preWorkService = data?.filter((e) => e.preWork);
+          const postWorkService = data?.filter((e) => !e.preWork);
+          const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
+          const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
+          setServiceSteps(services);
+          if (services?.length) {
+            let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
+            if (pendingServiceIndex === -1) {
+              pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
+            }
+            setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
           }
-          setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
-        }
-        let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
-        let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
-          [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
-        );
-        if (tempServiceIndex > -1) {
-          tempServiceSortedArray[tempServiceIndex - 1]
-            ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
-            : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
+          let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
+          let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
+            [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
+          );
+          if (tempServiceIndex > -1) {
+            tempServiceSortedArray[tempServiceIndex - 1]
+              ? setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex - 1]?.order)
+              : setDisabledServicesOrder(tempServiceSortedArray[tempServiceIndex]?.order);
+          } else {
+            setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
+          }
+          if (
+            preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
+              preWorkService?.length &&
+            postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
+          ) {
+            if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
+              setSelectedService(services[services.findIndex((d) => d.type === 'quotation')]);
+            }
+          }
         } else {
-          setDisabledServicesOrder(tempServiceSortedArray[tempServiceSortedArray.length - 1]?.order);
+          setServiceSteps([]);
         }
-        if (
-          preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
-          preWorkService?.length &&
-          postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
-        ) {
-          if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
-            setSelectedService(services[services.findIndex((d) => d.type === 'quotation')]);
-          }
-        }
-      } else {
-        setServiceSteps([]);
-      }
-    })
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -284,9 +298,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
-          createNewVersionQuote()
-        }
-        else {
+          createNewVersionQuote();
+        } else {
           fetchService();
         }
       })
@@ -296,9 +309,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const handleRemoveService = (id) => {
-    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/remove`, {
-      uniqueIds: [id]
-    })
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/remove`, {
+        uniqueIds: [id]
+      })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -306,9 +320,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           message: data?.message
         });
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
-          createNewVersionQuote()
-        }
-        else {
+          createNewVersionQuote();
+        } else {
           fetchService();
         }
         if (id === selectedService?.uniqueId) {
@@ -321,7 +334,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const createNewVersionQuote = () => {
-    axiosInstance().put(`/repair-order/${workOrderData?.repairOrder?.optionValue}/quotation/clone-version`)
+    axiosInstance()
+      .put(`/repair-order/${workOrderData?.repairOrder?.optionValue}/quotation/clone-version`)
       .then(() => {
         fetchRepairOrderData();
       })
@@ -352,8 +366,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-              ? '#FFE9EA'
-              : 'white',
+            ? '#FFE9EA'
+            : 'white',
         cursor: 'pointer',
         borderRadius: '3px'
       };
@@ -366,8 +380,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-              ? '#FFE9EA'
-              : 'white',
+            ? '#FFE9EA'
+            : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -394,8 +408,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
             ? '#E9FFE8'
             : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-              ? '#FFE9EA'
-              : 'white',
+            ? '#FFE9EA'
+            : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -408,8 +422,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
             ? '#E9FFE8'
             : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-              ? '#FFE9EA'
-              : 'white',
+            ? '#FFE9EA'
+            : 'white',
         borderColor: 'rgb(224, 224, 224)',
         cursor: 'pointer'
       };
@@ -417,11 +431,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const handleAddStep = (values: any) => {
-    axiosInstance().put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
+    axiosInstance()
+      .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
       .then(({ data }) => {
         const temp = selectedService;
-        setSelectedService(null)
-        setSelectedService(temp)
+        setSelectedService(null);
+        setSelectedService(temp);
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
@@ -616,21 +631,21 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                     data?.order > disabledServicesOrder ||
                                     (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
                                   ) && (
-                                      <Grid item xs={2} container justify="flex-end">
-                                        <IconButton
-                                          size="small"
-                                          color="primary"
-                                          aria-label="delete"
-                                          disabled={!isAllowedToServiceEdit}
-                                          onClick={(event) => {
-                                            handleOpenMenu(event);
-                                            setSelectedService(data);
-                                          }}
-                                        >
-                                          <MoreHorizIcon />
-                                        </IconButton>
-                                      </Grid>
-                                    )}
+                                    <Grid item xs={2} container justify="flex-end">
+                                      <IconButton
+                                        size="small"
+                                        color="primary"
+                                        aria-label="delete"
+                                        disabled={!isAllowedToServiceEdit}
+                                        onClick={(event) => {
+                                          handleOpenMenu(event);
+                                          setSelectedService(data);
+                                        }}
+                                      >
+                                        <MoreHorizIcon />
+                                      </IconButton>
+                                    </Grid>
+                                  )}
                                 </>
                               )}
                             </Grid>
@@ -781,12 +796,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                     </Box>
                     {serviceSteps?.length > 0 && (
                       <Box>
-                        <Button
-                          disabled={!allowedToEdit}
-                          variant="outlined"
-                          color="primary"
-                          size="small"
-                          onClick={() => setArrangeView(true)}>
+                        <Button disabled={!allowedToEdit} variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
                           <GrDrag fontSize="small" color="primary" className="mr-1" />
                           Arrange
                         </Button>
@@ -807,7 +817,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                   setAnchorEl(null);
                 }}
               >
-                Assign Users
+                Assign Technicians
               </MenuItem>
               <MenuItem
                 disabled={!allowedToEdit}
@@ -827,14 +837,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Add Step
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setConsumablesDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Consume
-              </MenuItem>
+              {selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) && (
+                <MenuItem
+                  onClick={() => {
+                    setConsumablesDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Consume
+                </MenuItem>
+              )}
               <MenuItem
                 disabled={
                   disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)
@@ -866,14 +878,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Remove
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setLogsDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Logs
-              </MenuItem>
+              {selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) && (
+                <MenuItem
+                  onClick={() => {
+                    setLogsDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Logs
+                </MenuItem>
+              )}
             </Menu>
           )}
           <Grid
@@ -892,7 +906,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               <Box>
                 {selectedService?.type === 'service' ? (
                   allowedToEdit ||
-                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                  (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                     <Steps
                       workOrderId={workOrderId}
                       selectedService={selectedService}
@@ -1005,7 +1019,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
             setAssignSteps(false);
           }}
           handleSucess={(data) => {
-            handleAddStep(data)
+            handleAddStep(data);
           }}
           stepId={''}
           steps={selectedService?.steps}
@@ -1017,6 +1031,5 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       )}
     </Box>
   );
-
 };
 export default Service;
