@@ -107,7 +107,7 @@ const Quotation = ({
   }, [quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async (currency) => {
-    setNextStep(false)
+    // setNextStep(false)
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     const coloum: any = [
       {
@@ -318,7 +318,7 @@ const Quotation = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    setNextStep(true)
+    // setNextStep(true)
     return orderBy(subRows, ['order'], ['asc']);
   };
   

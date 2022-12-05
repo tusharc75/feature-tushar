@@ -240,7 +240,9 @@ const WorkOrder = ({
     var data: any = [];
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
-    const rows = data.material.filter((e) => e.parentId === null);
+    // sort rows by prework true/false
+    const rows = data.material?.filter((e) => e.parentId === null);
+
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -291,7 +293,7 @@ const WorkOrder = ({
   };
 
   const generateNestedData = (material, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    const subRows: any = material.filter((e) => e.parentId === parent._id)?.sort((a, b) => b?.serviceDetail?.preWork - a?.serviceDetail?.preWork);
     let productIndex = 0;
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
@@ -448,7 +450,9 @@ const WorkOrder = ({
                     setShowConfirmBox(true);
                     closeActions();
                   }}
-                  disabled={services?.length && services?.every((d) => d.type === 'service' && d.workOrder?._id === services[0].workOrder?._id) ? false : true}
+                  disabled={
+                    services?.length && services?.every((d) => d.type === 'service' && d.workOrder?._id === services[0].workOrder?._id) ? false : true
+                  }
                 >
                   Delete
                 </MenuItem>
@@ -539,7 +543,13 @@ const WorkOrder = ({
           )}
           {arrangeView && (
             <ArrangeView
-              data={services?.filter((e) => e.type === 'service')?.map((d) => { return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork }; }) || []}
+              data={
+                services
+                  ?.filter((e) => e.type === 'service')
+                  ?.map((d) => {
+                    return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
+                  }) || []
+              }
               title={'Arrange Services'}
               handleClose={() => setArrangeView(false)}
               handleSubmit={(data) => handleArrangeUpdate(data, services[0].workOrder?._id)}
