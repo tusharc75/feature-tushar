@@ -215,7 +215,6 @@ const RepairOrderDetails = () => {
     }
   }, [isSmallScreen, tabValue]);
 
-  console.log(quotationVersionData);
   return (
     <>
       <Grid container className="headerbox">
@@ -326,7 +325,12 @@ const RepairOrderDetails = () => {
                     isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
                     setStepFullScreen={() => setStepFullScreen(true)}
                     handlePrev={() => {
-                      if (quotationVersionData && quotationVersionData?.status === QUOTATION_STATUS.acceptByCustomer) {
+                      if (
+                        [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                          quotationVersionData?.status
+                        ) &&
+                        repairOrderProcessSteps[currentStep] === 'Quotation'
+                      ) {
                         setShowQuotationConfirmBox(true);
                       } else {
                         setCurrentStep((prevStep) => {
@@ -467,8 +471,20 @@ const RepairOrderDetails = () => {
           message={`Are you sure you want to create new version of this quote ?`}
           onClose={() => {
             setShowQuotationConfirmBox(false);
+            setCurrentStep((prevStep) => {
+              const newStep = prevStep - 1;
+              return newStep;
+            });
           }}
-          onOk={createNewVersionQuote}
+          onOk={() => {
+            createNewVersionQuote();
+            setCurrentStep((prevStep) => {
+              const newStep = prevStep - 1;
+              return newStep;
+            });
+          }}
+          forwardText={'Yes'}
+          cancelText={'No'}
         />
       )}
       {openUpdateDialog && (
