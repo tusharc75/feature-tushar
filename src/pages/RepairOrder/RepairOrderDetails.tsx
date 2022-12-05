@@ -11,7 +11,15 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { repairOrder, sidebarResource, ACTIVITY_RESOURCE, REPAIR_ORDER_STATUS, repairOrderSteps, REPAIR_ORDER_TYPE, QUOTATION_STATUS } from 'src/constants/helpers';
+import {
+  repairOrder,
+  sidebarResource,
+  ACTIVITY_RESOURCE,
+  REPAIR_ORDER_STATUS,
+  repairOrderSteps,
+  REPAIR_ORDER_TYPE,
+  QUOTATION_STATUS
+} from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairOrder from './ManageRepairOrder';
@@ -48,7 +56,9 @@ const RepairOrderDetails = () => {
 
   const parsed = queryString.parse(history.location.search);
   const { openEdit, tab }: any = parsed;
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const [repairOrderData, setRepairOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -67,6 +77,8 @@ const RepairOrderDetails = () => {
 
   const [quotationVersionData, setQuotationVersionData] = useState(null);
   const [showQuotationConfirmBox, setShowQuotationConfirmBox] = useState(false);
+
+  const [quoteClonning, setQuoteClonning] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -102,6 +114,7 @@ const RepairOrderDetails = () => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= repairOrderProcessSteps.length) {
       updateProcessStatus(repairOrderProcessSteps[currentStep]);
     }
+    if (['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep])) fetchQuotationData();
   }, [currentStep]);
 
   const getResourceFields = () => {
@@ -124,9 +137,9 @@ const RepairOrderDetails = () => {
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
-          setRepairOrderProcessSteps(repairOrderSteps.filter(d => !['Quotation', `Post Work Service`, `Invoice`]?.includes(d)))
+          setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, `Invoice`]?.includes(d)));
         }
-        setAllowedToDelete(data.owner.optionValue === user?.user?._id)
+        setAllowedToDelete(data.owner.optionValue === user?.user?._id);
         if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -163,31 +176,46 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => {
+      .then(({ data }) => {})
+      .catch((error) => {});
+  };
+
+  const fetchQuotationData = (versionNumber = null) => {
+    axiosInstance()
+      .get(`${repairOrder.api}/${repairOrderData?._id}/repairorder/quotation`)
+      .then(({ data: { data } }) => {
+        let keys = Object.keys(data?.versions);
+        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1]);
+        setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
       });
   };
 
   const createNewVersionQuote = () => {
-    axiosInstance().post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`)
+    setQuoteClonning(true);
+    axiosInstance()
+      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`)
       .then(() => {
-        setShowQuotationConfirmBox(false)
-        fetchRepairOrderData()
+        setShowQuotationConfirmBox(false);
+        fetchQuotationData();
+        fetchRepairOrderData();
+        setQuoteClonning(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setShowQuotationConfirmBox(false);
+        setQuoteClonning(false);
       });
   };
 
   useEffect(() => {
     if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true)
+      setActivityShow(true);
+    } else {
+      setActivityShow(false);
     }
-    else {
-      setActivityShow(false)
-    }
-  }, [isSmallScreen, tabValue])
+  }, [isSmallScreen, tabValue]);
 
+  console.log(quotationVersionData);
   return (
     <>
       <Grid container className="headerbox">
@@ -199,18 +227,40 @@ const RepairOrderDetails = () => {
             <Paper>
               {repairOrderData ? (
                 <DetailsPageHeader heading={repairOrderData?.repairOrderNumber} mainPoints={null} showHeading={true}>
-                  {permissions?.repairOrder?.isUpdate && allowedToEdit && (
-                    <Button
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      color="primary"
-                      size="small"
-                      onClick={() => setOpenUpdateDialog(true)}
-                      className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                    >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-                  )}
+                  {['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep]) &&
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                      quotationVersionData?.status
+                    ) && (
+                      <Button
+                        className="buttonStyleBigScreen"
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          createNewVersionQuote();
+                        }}
+                      >
+                        Create New Version
+                      </Button>
+                    )}
+                  {permissions?.repairOrder?.isUpdate &&
+                    allowedToEdit &&
+                    !(
+                      [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                        quotationVersionData?.status
+                      ) && ['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep])
+                    ) && (
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="primary"
+                        size="small"
+                        onClick={() => setOpenUpdateDialog(true)}
+                        className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
+                        style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                      >
+                        {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                      </Button>
+                    )}
                   {permissions?.repairOrder?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 </DetailsPageHeader>
               ) : (
@@ -278,8 +328,7 @@ const RepairOrderDetails = () => {
                     handlePrev={() => {
                       if (quotationVersionData && quotationVersionData?.status === QUOTATION_STATUS.acceptByCustomer) {
                         setShowQuotationConfirmBox(true);
-                      }
-                      else {
+                      } else {
                         setCurrentStep((prevStep) => {
                           const newStep = prevStep - 1;
                           return newStep;
@@ -287,7 +336,7 @@ const RepairOrderDetails = () => {
                       }
                     }}
                   />
-                  <ContentFullScreen title={repairOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen} >
+                  <ContentFullScreen title={repairOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {repairOrderProcessSteps[currentStep] === 'Add Assets' && repairOrderData && (
                       <Productpackage
                         repairOrderData={repairOrderData}
@@ -298,23 +347,36 @@ const RepairOrderDetails = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
+                        allowedToEdit={
+                          [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                            quotationVersionData?.status
+                          )
+                            ? false
+                            : allowedToEdit
+                        }
                         allowedToDelete={allowedToDelete}
                       />
                     )}
-                    {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') && repairOrderData && (
-                      <WorkOrder
-                        repairOrderData={repairOrderData}
-                        setNextStep={setNextStep}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={allowedToEdit}
-                        allowedToDelete={allowedToDelete}
-                        isPostWorkService={Boolean(currentStep === 3)}
-                      />
-                    )}
+                    {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') &&
+                      repairOrderData && (
+                        <WorkOrder
+                          repairOrderData={repairOrderData}
+                          setNextStep={setNextStep}
+                          isSmallScreen={isSmallScreen}
+                          isTabletScreen={isTabletScreen}
+                          showActivity={showActivity}
+                          stepFullScreen={stepFullScreen}
+                          allowedToEdit={
+                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                              quotationVersionData?.status
+                            )
+                              ? false
+                              : allowedToEdit
+                          }
+                          allowedToDelete={allowedToDelete}
+                          isPostWorkService={Boolean(currentStep === 3)}
+                        />
+                      )}
                     {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (
                       <Quotation
                         repairOrderData={repairOrderData}
@@ -366,7 +428,9 @@ const RepairOrderDetails = () => {
                           resourceId={repairOrderData._id}
                           resource={ACTIVITY_RESOURCE.repairOrder}
                           restrictedAddActivities={
-                            permissions && permissions[`${ACTIVITY_RESOURCE.repairOrder}`] && permissions[`${ACTIVITY_RESOURCE.repairOrder}`].isUpdate ? [] : ['Attachment', 'Case']
+                            permissions && permissions[`${ACTIVITY_RESOURCE.repairOrder}`] && permissions[`${ACTIVITY_RESOURCE.repairOrder}`].isUpdate
+                              ? []
+                              : ['Attachment', 'Case']
                           }
                           relatedTo={[
                             {
@@ -375,7 +439,7 @@ const RepairOrderDetails = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>
