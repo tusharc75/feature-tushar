@@ -403,7 +403,7 @@ const ReceivingTicket = ({
 
       productAssets.forEach((d) => {
         d['isChecked'] = false;
-        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved || d.loadingTicketStatus != DELIVERY_TICKET_STATUS.delivered
+        // d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
       });
 
       if (
@@ -664,7 +664,7 @@ const ReceivingTicket = ({
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => {})
+          .then(({ data: { data } }) => { })
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
@@ -1360,7 +1360,7 @@ const ReceivingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -1422,6 +1422,8 @@ const ReceivingTicket = ({
           onSuccess={(data) => {
             setShowQtyDialog({ data: data?.products, open: false });
             setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
+            fetchRecords();
+            fetchRentalData();
           }}
           onClose={() => {
             setShowQtyDialog({ open: false, data: null });
