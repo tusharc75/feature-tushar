@@ -200,7 +200,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       user: { user }
     }
   } = useData();
-  console.log(user, selectedService);
 
   useEffect(() => {
     getServiceData();
