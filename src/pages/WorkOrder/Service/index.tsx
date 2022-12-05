@@ -837,14 +837,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Add Step
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setConsumablesDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Consume
-              </MenuItem>
+              {selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) && (
+                <MenuItem
+                  onClick={() => {
+                    setConsumablesDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Consume
+                </MenuItem>
+              )}
               <MenuItem
                 disabled={
                   disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)
@@ -876,14 +878,16 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Remove
               </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setLogsDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Logs
-              </MenuItem>
+              {selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) && (
+                <MenuItem
+                  onClick={() => {
+                    setLogsDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Logs
+                </MenuItem>
+              )}
             </Menu>
           )}
           <Grid

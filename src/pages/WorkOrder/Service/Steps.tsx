@@ -24,6 +24,7 @@ import StepFieldsDialog from './StepFieldsDialog';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import CompleteDialog from './CompleteDialog';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
+import { useData } from 'src/StateProvider/Provider';
 
 function convertMsToTime(milliseconds) {
   milliseconds = Math.abs(milliseconds);
@@ -194,6 +195,12 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const [assignSteps, setAssignSteps] = useState(false);
   const [openFieldDialog, setOpenFieldDialog] = useState(false);
   const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
+  console.log(user, selectedService);
 
   useEffect(() => {
     getServiceData();
@@ -501,9 +508,9 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             ?.map((step, index) => {
               const { stepData, isStepValid } = getFields(step);
               let isPrevStepDone: any = false;
+              const isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
               if (index > 0) {
                 const pD = getFields(serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)[index - 1]);
-                console.log(step[index - 1], pD?.stepData);
                 isPrevStepDone = pD?.stepData?.passFailStatus ? true : stepData?.passFailStatus ? true : false;
               }
               return (
@@ -550,7 +557,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                         </Typography>
                       </Box>
                     </Box>
-                    {(isPrevStepDone || index === 0) && (
+                    {(isPrevStepDone || index === 0) && isMeTechnician && (
                       <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
                         {stepData?.startDate && !stepData?.endDate && <TimerComponent stepData={stepData} />}
                         {stepData?.startDate && stepData?.endDate && <TimerComponent stepData={stepData} updateTime={false} />}
