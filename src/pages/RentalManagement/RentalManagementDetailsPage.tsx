@@ -210,7 +210,11 @@ const RentalManagementDetailsPage = () => {
           let keys = Object.keys(data.versions);
           setCurrentVersion(versionNumber ? versionNumber : parseInt(keys[keys.length - 1]));
           const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : parseInt(keys[keys.length - 1])];
-          [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status) && setVersionNotClonned(true);
+          if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status)) {
+            setVersionNotClonned(true);
+          } else {
+            setVersionNotClonned(false);
+          }
         }
       });
   };
@@ -734,7 +738,7 @@ const RentalManagementDetailsPage = () => {
                       />
                     )}
                     {rentalSteps[currentStep] === 'Loading Ticket' && rentalManagementData && (
-                     <LoadingTicket
+                      <LoadingTicket
                         fetchRentalData={fetchRentalManagementData}
                         rentalManagementData={rentalManagementData}
                         currentStep={currentStep}
