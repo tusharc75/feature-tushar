@@ -327,10 +327,12 @@ const WorkOrder = ({
   };
 
   const handleAddService = (ids) => {
+    const allWorkOrders = selectedProducts?.map((e) => e.workOrder?._id);
     const data: any = {};
     data.serviceIds = ids;
+    data.workOrderIds = [...new Set(allWorkOrders)];
     axiosInstance()
-      .post(`${workOrder.api}/service/${selectedProducts[0]['workOrder']?._id}`, data)
+      .post(`${workOrder.api}/service/`, data)
       .then(() => {
         fetchData();
       })
@@ -503,7 +505,7 @@ const WorkOrder = ({
             <AssignServiceDialog
               reference="workorder"
               handleClose={() => setAddServicesDialog({ open: false })}
-              ids={[]}
+              ids={[...selectedProducts?.filter((e) => e.type === 'service')?.map((e) => e?.materialId)]}
               onSuccess={(data) => {
                 handleAddService(data?.map((e) => e.service));
                 setAddServicesDialog({ open: false });

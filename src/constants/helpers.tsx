@@ -358,7 +358,7 @@ export const RESOURCE_LABEL = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
-  workOrderSupervisor:'Work Order Supervisor',
+  workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician'
 };
 
@@ -543,10 +543,10 @@ export const serializedAsset = {
 };
 
 export const workOrderSupervisor = {
-  api:'/work-order-supervisor',
-  route:'/work-order-supervisor',
-  permission:'workOrderSupervisor',
-  resource:'Work Order Supervisor'
+  api: '/work-order-supervisor',
+  route: '/work-order-supervisor',
+  permission: 'workOrderSupervisor',
+  resource: 'Work Order Supervisor'
 }
 
 export const convertInventory = {
@@ -1700,7 +1700,8 @@ export const INVENTORY_STATUS = {
   supplier: 'With Supplier',
   returned: 'Returned',
   needRepair: 'Need Repair',
-  needRecert: 'Need Recert'
+  needRecert: 'Need Recert',
+  notApplied: "N/A",
 };
 
 

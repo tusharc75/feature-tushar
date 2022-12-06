@@ -33,7 +33,8 @@ const Productpackage = ({
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
-  allowedToDelete
+  allowedToDelete,
+  setHasAssetsAdded
 }) => {
 
   const toastConfig = useContext(CustomToastContext);
@@ -204,10 +205,16 @@ const Productpackage = ({
       parent.subRows = generateNestedData(data.material, parent);
     });
 
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
+    if (rows.length !== 0) {
+      setHasAssetsAdded(true)
+      if(rows.filter((_rows) => _rows.isValid === false).length > 0) {
+        setNextStep(false);
+      } else {
+        setNextStep(true)
+      }
     } else {
-      setNextStep(true);
+      setHasAssetsAdded(false)
+      setNextStep(false);
     }
     setRowsData(rows);
     setSelectedProducts([]);

@@ -45,6 +45,7 @@ import MultipleTicket from '../../DeliveryTicket/MultipleTicket';
 import ManageRepairJob from '../../RepairJob/ManageRepairJob';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
+import HelpIcon from '@material-ui/icons/HelpOutline';
 import { ExpandMore } from '@material-ui/icons';
 import ExistingRentalJob from './ExistingRentalJob';
 import { groupBy, uniq, map, filter } from 'lodash';
@@ -403,7 +404,7 @@ const ReceivingTicket = ({
 
       productAssets.forEach((d) => {
         d['isChecked'] = false;
-        // d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
+        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
       });
 
       if (
@@ -462,6 +463,13 @@ const ReceivingTicket = ({
       >
         {params.value}
       </Link>
+      {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
+        <HtmlTooltip title="This asset will be shipped from different facility">
+          <IconButton size="small">
+            <HelpIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
       {params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0 && (
         <Box ml={1}>
           <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
@@ -1063,7 +1071,7 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('returnTicketId') ||
                     !f.hasOwnProperty('loadingTicketId') ||
                     [INVENTORY_STATUS.lost].includes(f.status) ||
-                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(f.status)
+                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.notApplied].includes(f.status)
                 )
               }
               onClick={() => {
@@ -1098,7 +1106,7 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('receivingTicketId') ||
                     f.hasOwnProperty('returnTicketId') ||
                     [INVENTORY_STATUS.lost].includes(f.status) ||
-                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(f.status)
+                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.notApplied].includes(f.status)
                 )
               }
             >
@@ -1378,7 +1386,7 @@ const ReceivingTicket = ({
               loading={loading || loadingData}
               isClientSideGrid={true}
               renderedFrom={renderedFrom}
-              allowSelection= {allowedToEdit || isProcessor}
+              allowSelection={allowedToEdit || isProcessor}
               refreshGrid={fetchRecords}
             />
           )
