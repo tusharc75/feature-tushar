@@ -403,7 +403,7 @@ const ReceivingTicket = ({
 
       productAssets.forEach((d) => {
         d['isChecked'] = false;
-        // d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
+        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
       });
 
       if (
@@ -1063,7 +1063,7 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('returnTicketId') ||
                     !f.hasOwnProperty('loadingTicketId') ||
                     [INVENTORY_STATUS.lost].includes(f.status) ||
-                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(f.status)
+                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.notApplied].includes(f.status)
                 )
               }
               onClick={() => {
@@ -1098,7 +1098,7 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('receivingTicketId') ||
                     f.hasOwnProperty('returnTicketId') ||
                     [INVENTORY_STATUS.lost].includes(f.status) ||
-                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(f.status)
+                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.notApplied].includes(f.status)
                 )
               }
             >
@@ -1378,7 +1378,7 @@ const ReceivingTicket = ({
               loading={loading || loadingData}
               isClientSideGrid={true}
               renderedFrom={renderedFrom}
-              allowSelection= {allowedToEdit || isProcessor}
+              allowSelection={allowedToEdit || isProcessor}
               refreshGrid={fetchRecords}
             />
           )
