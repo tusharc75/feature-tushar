@@ -31,7 +31,7 @@ import ManageAccountDialog from "../../Account/ManageAccount";
 import ManageContactDialog from "../../Contact/ManageContact";
 import ManageWarehouse from "src/pages/Warehouse/ManageWarehouse";
 
-const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onSuccess, refrenceType = null, refrenceData = null }) => {
+const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onSuccess, refrenceType = null, refrenceData = null, isEditable = true }) => {
 
   const history = useHistory()
   const toastConfig = useContext(CustomToastContext);
@@ -342,7 +342,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
       title={
         !repairOrderId
           ? `Create ${routes.repairOrder.title}`
-          : `${isClone ? `Clone - ${cloneHeading}` : `Update ${repairOrderData?.repairOrderNumber}`}`
+          : `${isClone ? `Clone - ${cloneHeading}` : `Update ${repairOrderData?.repairOrderNumber || ''}`}`
       }
       onClose={(e, reason) => {
         if (isFieldNotTouched(repairOrderInitialData, formValues)) onClose()
@@ -422,7 +422,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                         name={field.fieldName}
                                         type={field.type}
                                         options={accountData}
-                                        disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                        disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={
@@ -462,10 +462,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                 true
                                               );
                                             }}
-                                            disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                             size="small"
                                           >
-                                            <AddIcon color={values["type"] === REPAIR_ORDER_TYPE.internal ? "disabled" : isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
+                                            <AddIcon color={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? "disabled" : isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
                                           </IconButton>
                                         </Tooltip>
                                       </Grid>
@@ -503,7 +503,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                           handleValuesChange({ [name]: value })
                                           setFieldValue(name, value)
                                         }}
-                                        disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                        disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={false}
@@ -531,10 +531,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                 true
                                               );
                                             }}
-                                            disabled={values["type"] === REPAIR_ORDER_TYPE.internal ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                             size="small"
                                           >
-                                            <AddIcon color={values["type"] === REPAIR_ORDER_TYPE.internal ? "disabled" : isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                            <AddIcon color={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? "disabled" : isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
                                           </IconButton>
                                         </Tooltip>
                                       </Grid>
@@ -699,7 +699,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                               repairOrderId={repairOrderId}
                                               {...field}
                                               fieldData={field}
-                                              disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit)}
+                                              disabled={disablePlantIfAssetAdded || (repairOrderId && field.disableOnEdit) || !isEditable}
                                               values={values}
                                               errors={errors}
                                               touched={touched}
@@ -756,7 +756,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                           repairOrderId={repairOrderId}
                                           {...field}
                                           fieldData={field}
-                                          disabled={(repairOrderId && field.disableOnEdit)}
+                                          disabled={(repairOrderId && field.disableOnEdit) || !isEditable}
                                           values={values}
                                           errors={errors}
                                           touched={touched}

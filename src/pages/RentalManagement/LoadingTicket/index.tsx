@@ -314,7 +314,7 @@ const LoadingTicket = ({
         {params.value}
       </Link>
       {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
-        <HtmlTooltip title="This asset will be shipped separately">
+        <HtmlTooltip title="This asset will be shipped from different facility">
           <IconButton size="small">
             <HelpIcon fontSize="small" color="primary" />
           </IconButton>
