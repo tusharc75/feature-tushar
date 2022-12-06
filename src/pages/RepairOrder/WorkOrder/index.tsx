@@ -148,7 +148,11 @@ const WorkOrder = ({
         Header: 'Assigned Users',
         Cell: ({ row }) =>
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
-            <p>{row?.original?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}</p>
+            row?.original['assignedUsers'].map((e, i)=>{
+              return (i === row?.original['assignedUsers'].length - 1 ) ?
+                 <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`}>{e?.optionLabel}</a> : 
+                 <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`}>{e?.optionLabel}, </a>
+              })
           ) : (
             <NoDataCell />
           )
