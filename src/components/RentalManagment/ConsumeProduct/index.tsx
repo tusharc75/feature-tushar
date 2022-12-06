@@ -24,7 +24,7 @@ const ConsumeProduct = ({ handleClose, type, loading, handleSucess, products }) 
       errors['qty'] = 'Please enter qty';
     }
     if (values.qty > qty) {
-      errors['qty'] = 'Please enter valid qty not more than ' + qty;
+      errors['qty'] = "Enter a valid qty, make sure it’s not more than ordered qty";
     }
     return errors;
   }
