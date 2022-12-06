@@ -3,7 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
+import { Box, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
@@ -87,12 +87,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -205,7 +205,18 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             row.original[element.fieldName]?.optionLabel ? (
               <p>{row.original[element.fieldName].optionLabel}</p>
             ) : row.original[element.fieldName] ? (
-              <p>{row.original[element.fieldName]}</p>
+              <>{
+                ['Per Week', 'Per Month'].includes(row.original[element.fieldName]) ?
+                  <Box display="flex" alignItems="center">
+                    <p>{row.original[element.fieldName]}</p>
+                    <Box ml={1} /><Tooltip title="Per Day Price is calculated">
+                      <InfoIcon fontSize="small" color="primary" />
+                    </Tooltip>
+                  </Box>
+                  : <p>{row.original[element.fieldName]}</p>
+              }
+
+              </>
             ) : (
               <NoDataCell />
             )
@@ -280,7 +291,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             let values = { qty: materialData.qty - tempTotalPrevQty };
             const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
 
-          
+
             materialData = { ...materialData, ...calValues };
           }
 
@@ -321,8 +332,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName;
       parent.qtyDisplay = parent.qty;
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
@@ -339,8 +350,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
@@ -361,7 +372,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     let rows: any = [];
     selectedProducts.forEach((element) => {
       const product = invoicedProducts.find((p) => p._id === element._id);
-
       if (product) {
         const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
         const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
@@ -372,8 +382,24 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           element.invalidDate = false;
         }
       }
-
-      const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+      let priceFieldName = Object.keys(element).find(d => d.includes("price_"))
+      let calValues: any
+      if (element.pricingMethod === "Per Week") {
+        values["pricingMethod"] = "Per Day"
+        if (priceFieldName) values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 7 //original becaause element is change when apply
+        calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        calValues["pricingMethod"] = "Per Week"
+      }
+      else if (element.pricingMethod === "Per Month") {
+        values["pricingMethod"] = "Per Day"
+        if (priceFieldName) values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 30
+        calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        calValues["pricingMethod"] = "Per Month"
+      }
+      else {
+        calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+      }
+      element.isAppliedBill = true // row color
       rows.push({ ...element, ...calValues });
     });
 
@@ -383,11 +409,15 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     setProductData(tempProduct);
     setMaterial(tempRows);
     initializeTable(tempProduct);
-    setRowsApplied(rows);
+    setRowsApplied((prevState) => {
+      let prevRowsApplied = prevState.filter((obj) => !rows.map((d) => d._id).includes(obj._id));
+      return [...prevRowsApplied, ...rows];
+    });
     setAppliedDate(true);
   };
 
   const handleSaveData = async (rows: any) => {
+    rows[0].isAppliedBill = true // only 1 element will come and  row color
     let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
     let tempProduct = productData;
     tempProduct['material'] = tempRows;
@@ -395,7 +425,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     setMaterial(tempRows);
     initializeTable(tempProduct);
     setRowsApplied((prevState) => {
-      let prevRowsApplied = prevState.filter((obj) => rows.map((d) => d._id).includes((e) => e !== obj._id));
+      let prevRowsApplied = prevState.filter((obj) => !rows.map((d) => d._id).includes(obj._id));
       return [...prevRowsApplied, ...rows];
     });
     setIsProductEdit({ open: false, rowData: null });
@@ -469,7 +499,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                         disablePast
                         variant="inline"
                         inputVariant="outlined"
-                        minDate={endDate || new Date()}
+                        // minDate={endDate || new Date()}
                         value={endDate}
                         name="endDate"
                         label="End Date"
@@ -488,7 +518,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                             <Button
                               variant="contained"
                               color="primary"
-                              disabled={!Boolean(selectedProducts && selectedProducts.length)}
+                              disabled={!Boolean(selectedProducts && selectedProducts.length && endDate)}
                               size="small"
                               onClick={() => {
                                 handleApplyDate();
@@ -524,7 +554,11 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   height={'calc(100vh - 285px)'}
                   columns={columns}
                   data={rowsData}
-                  setWholeRowsCellColor={(rowData) => (rowData?.invalidDate ? 'error' : '')}
+                  setWholeRowsCellColor={(rowData) => {
+                    if (rowData?.invalidDate) return 'error';
+                    if (rowData?.isAppliedBill) return "isAppliedBill";
+                    return '';
+                  }}
                   onSelect={setSelectedProducts}
                   childrenProperty="subRows"
                   uniqueKey="_id"
