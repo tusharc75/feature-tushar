@@ -132,6 +132,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const [bottomBarOpen, setBottomBarOpen] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
   const [isQuotationStep, setIsQuotationStep] = useState(false);
+  const isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id);
 
   useEffect(() => {
     fetchRepairOrderData();
@@ -810,15 +811,17 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 
           {anchorEl && (
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-              <MenuItem
-                disabled={!allowedToEdit}
-                onClick={() => {
-                  setUserAssignDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Assign Technicians
-              </MenuItem>
+              {!isMeTechnician && (
+                <MenuItem
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setUserAssignDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Assign Technicians
+                </MenuItem>
+              )}
               <MenuItem
                 disabled={!allowedToEdit}
                 onClick={() => {
@@ -837,7 +840,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Add Step
               </MenuItem>
-              {selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) && (
+              {isMeTechnician && (
                 <MenuItem
                   onClick={() => {
                     setConsumablesDialog(true);
@@ -878,7 +881,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Remove
               </MenuItem>
-              {selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) && (
+              {
                 <MenuItem
                   onClick={() => {
                     setLogsDialog(true);
@@ -887,7 +890,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 >
                   Logs
                 </MenuItem>
-              )}
+              }
             </Menu>
           )}
           <Grid
