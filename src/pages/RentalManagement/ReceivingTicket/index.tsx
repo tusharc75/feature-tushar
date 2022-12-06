@@ -45,6 +45,7 @@ import MultipleTicket from '../../DeliveryTicket/MultipleTicket';
 import ManageRepairJob from '../../RepairJob/ManageRepairJob';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
+import HelpIcon from '@material-ui/icons/HelpOutline';
 import { ExpandMore } from '@material-ui/icons';
 import ExistingRentalJob from './ExistingRentalJob';
 import { groupBy, uniq, map, filter } from 'lodash';
@@ -462,6 +463,13 @@ const ReceivingTicket = ({
       >
         {params.value}
       </Link>
+      {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
+        <HtmlTooltip title="This asset will be shipped from different facility">
+          <IconButton size="small">
+            <HelpIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
       {params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0 && (
         <Box ml={1}>
           <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
