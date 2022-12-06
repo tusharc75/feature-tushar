@@ -60,6 +60,7 @@ const RepairOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
+  const [hasAssetsAdded, setHasAssetsAdded] = useState(false)
   const [repairOrderData, setRepairOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -351,6 +352,7 @@ const RepairOrderDetails = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
+                        setHasAssetsAdded={setHasAssetsAdded}
                         allowedToEdit={
                           [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                             quotationVersionData?.status
@@ -489,6 +491,7 @@ const RepairOrderDetails = () => {
       )}
       {openUpdateDialog && (
         <ManageRepairOrder
+          isEditable={!hasAssetsAdded}
           isClone={false}
           repairOrderId={id}
           onClose={() => {

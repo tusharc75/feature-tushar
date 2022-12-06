@@ -37,7 +37,7 @@ const Steps = ({ serviceId }) => {
   }: any = useData();
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
+  const { dataRows, rowCount, loading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
   const toastConfig = useContext(CustomToastContext);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
@@ -300,7 +300,7 @@ const Steps = ({ serviceId }) => {
           pageSizes={pageSizes}
           page={page}
           actionWidth={150}
-          loading={gridLoading}
+          loading={null}
           renderedFrom={renderedFrom}
           refreshGrid={fetchStepsData}
         />

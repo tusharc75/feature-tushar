@@ -29,9 +29,13 @@ export default function StepDialog({
   workOrderId = null,
   uniqueId = null,
   notEditable = false,
-  stepData = null,
+  stepData = null
 }) {
-  const { state: { user: { user } } } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
   const toastConfig = useContext(CustomToastContext);
   const [stepDetails, setStepDetails] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -42,6 +46,22 @@ export default function StepDialog({
 
   const [openFieldDialog, setOpenFieldDialog] = useState(false);
   const [fields, setFields] = useState(stepData ? stepData?.fields : []);
+  const [allFollowingStepToJump, setAllFollowingStepToJump] = useState([]);
+
+  useEffect(() => {
+    fllowingStep();
+  }, [stepId]);
+
+  const fllowingStep = () => {
+    const thisStep = steps?.find((e: any) => e._id == stepId);
+    const options = [];
+    steps?.forEach((e: any) => {
+      if (e._id !== stepId && e?.order > thisStep?.order) {
+        options.push({ optionValue: e._id, optionLabel: e.stepName });
+      }
+    });
+    setAllFollowingStepToJump(options);
+  };
 
   useEffect(() => {
     axiosInstance()
@@ -112,7 +132,7 @@ export default function StepDialog({
             returnToServiceOnFail: data?.returnToServiceOnFail
           });
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setStepDetails({
         stepName: '',
@@ -152,8 +172,7 @@ export default function StepDialog({
       values.fields = fields;
       handleSucess(values);
       setLoading(false);
-    }
-    else {
+    } else {
       if (stepId != '') {
         axiosInstance()
           .put(`${serviceMaster.api}/steps/${serviceId}/${stepId}`, values)
@@ -316,8 +335,9 @@ export default function StepDialog({
                       <TextField
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                              }`}</InputAdornment>
+                            <InputAdornment position="start">{`${
+                              values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                            }`}</InputAdornment>
                           )
                         }}
                         margin="dense"
@@ -339,8 +359,9 @@ export default function StepDialog({
                       <TextField
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                              }`}</InputAdornment>
+                            <InputAdornment position="start">{`${
+                              values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                            }`}</InputAdornment>
                           )
                         }}
                         margin="dense"
@@ -400,7 +421,10 @@ export default function StepDialog({
                           <Grid item xs={6}>
                             {values['isPassAddon'] && (
                               <Autocomplete
-                                options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...services]}
+                                options={[
+                                  { optionValue: 'all', optionLabel: 'Select All' },
+                                  ...services?.filter((data: any) => data.optionValue !== serviceId)
+                                ]}
                                 fullWidth
                                 multiple
                                 disabled={notEditable}
@@ -410,7 +434,9 @@ export default function StepDialog({
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any) => {
                                   const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
-                                  const values = isAll ? services.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
+                                  const values = isAll
+                                    ? [...services?.filter((data: any) => data.optionValue !== serviceId)].map((o) => o.optionValue)
+                                    : newVal?.map((val) => val.optionValue);
                                   setFieldValue('passAddon', values);
                                 }}
                                 renderInput={(params) => (
@@ -487,7 +513,7 @@ export default function StepDialog({
                           <Grid item xs={6}>
                             {values['isJumpStepPass'] && (
                               <Autocomplete
-                                options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...stepOption]}
+                                options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...stepOption]}
                                 fullWidth
                                 multiple
                                 disabled={notEditable}
@@ -533,7 +559,7 @@ export default function StepDialog({
                           <Grid item xs={6}>
                             {values['isJumpStepFail'] && (
                               <Autocomplete
-                                options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...stepOption]}
+                                options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...allFollowingStepToJump]}
                                 fullWidth
                                 multiple
                                 disabled={notEditable}
@@ -545,7 +571,7 @@ export default function StepDialog({
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any[]) => {
                                   const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
-                                  const values = isAll ? stepOption.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
+                                  const values = isAll ? allFollowingStepToJump?.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
 
                                   setFieldValue('jumpStepsFail', values);
                                 }}
@@ -676,11 +702,7 @@ export default function StepDialog({
                     <Box mt={2}>
                       <Divider />
                       <Box mb={2} />
-                      <Button
-                        size="small"
-                        color="primary"
-                        variant="contained"
-                        onClick={() => setOpenFieldDialog(true)}>
+                      <Button size="small" color="primary" variant="contained" onClick={() => setOpenFieldDialog(true)}>
                         Configure Fields
                       </Button>
                     </Box>
@@ -697,12 +719,7 @@ export default function StepDialog({
                     >
                       Cancel
                     </Button>
-                    <CustomButton
-                      loading={loading}
-                      disabled={loading}
-                      variant="contained"
-                      color="primary"
-                      type="submit" >
+                    <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
                       Save
                     </CustomButton>
                   </CustomDialogFooter>
