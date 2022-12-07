@@ -422,7 +422,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                         name={field.fieldName}
                                         type={field.type}
                                         options={accountData}
-                                        disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                        disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false || !isEditable}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={
@@ -503,7 +503,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                           handleValuesChange({ [name]: value })
                                           setFieldValue(name, value)
                                         }}
-                                        disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                        disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false || !isEditable}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={false}
