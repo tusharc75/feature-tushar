@@ -469,7 +469,10 @@ export default function StepDialog({
                           <Grid item xs={6}>
                             {values['isFailAddon'] && (
                               <Autocomplete
-                                options={[{ optionValue: 'all', optionLabel: 'Select All' }, ...services]}
+                                options={[
+                                  { optionValue: 'all', optionLabel: 'Select All Consequent Steps' },
+                                  ...services?.filter((data: any) => data.optionValue !== serviceId)
+                                ]}
                                 fullWidth
                                 multiple
                                 disabled={notEditable}
@@ -479,7 +482,9 @@ export default function StepDialog({
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any) => {
                                   const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
-                                  const values = isAll ? services.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
+                                  const values = isAll
+                                    ? [...services?.filter((data: any) => data.optionValue !== serviceId)].map((o) => o.optionValue)
+                                    : newVal?.map((val) => val.optionValue);
 
                                   setFieldValue('failAddon', values);
                                 }}
@@ -513,7 +518,7 @@ export default function StepDialog({
                           <Grid item xs={6}>
                             {values['isJumpStepPass'] && (
                               <Autocomplete
-                                options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...stepOption]}
+                                options={[{ optionValue: 'all', optionLabel: 'Select All Consequent Steps' }, ...allFollowingStepToJump]}
                                 fullWidth
                                 multiple
                                 disabled={notEditable}
@@ -525,7 +530,9 @@ export default function StepDialog({
                                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                                 onChange={(_, newVal: any) => {
                                   const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
-                                  const values = isAll ? stepOption.map((o) => o.optionValue) : newVal?.map((val) => val.optionValue);
+                                  const values = isAll
+                                    ? [...allFollowingStepToJump].map((o) => o.optionValue)
+                                    : newVal?.map((val) => val.optionValue);
 
                                   setFieldValue('jumpStepsPass', values);
                                 }}
