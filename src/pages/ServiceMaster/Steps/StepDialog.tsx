@@ -139,7 +139,7 @@ export default function StepDialog({
         leadDay: 0,
         costPrice: 0,
         listPrice: 0,
-        currency: reference === 'workOrder' ? user?.currency : user?.brandCurrency || '',
+        currency: user?.currency || user?.brandCurrency,
         isPassFail: false,
         isFailAddon: false,
         failAddon: [],
