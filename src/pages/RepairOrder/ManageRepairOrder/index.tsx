@@ -422,7 +422,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                         name={field.fieldName}
                                         type={field.type}
                                         options={accountData}
-                                        disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false || !isEditable}
+                                        disabled={![ REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false || !isEditable}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={
@@ -462,10 +462,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                 true
                                               );
                                             }}
-                                            disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            disabled={![ REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                             size="small"
                                           >
-                                            <AddIcon color={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? "disabled" : isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
+                                            <AddIcon color={![ REPAIR_ORDER_TYPE.external].includes(values['type']) ? "disabled" : isClone ? "primary" : repairOrderId && field.disableOnEdit ? "disabled" : "primary"} />
                                           </IconButton>
                                         </Tooltip>
                                       </Grid>
@@ -503,7 +503,7 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                           handleValuesChange({ [name]: value })
                                           setFieldValue(name, value)
                                         }}
-                                        disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false || !isEditable}
+                                        disabled={![ REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false || !isEditable}
                                         required={field.required}
                                         fullWidth
                                         isTooltip={false}
@@ -531,10 +531,10 @@ const ManageRepairOrder = ({ isClone = false, repairOrderId = null, onClose, onS
                                                 true
                                               );
                                             }}
-                                            disabled={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
+                                            disabled={![ REPAIR_ORDER_TYPE.external].includes(values['type']) ? true : !isClone ? (repairOrderId && field.disableOnEdit) : false}
                                             size="small"
                                           >
-                                            <AddIcon color={![REPAIR_ORDER_TYPE.internal, REPAIR_ORDER_TYPE.external].includes(values['type']) ? "disabled" : isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
+                                            <AddIcon color={![ REPAIR_ORDER_TYPE.external].includes(values['type']) ? "disabled" : isClone ? "primary" : (repairOrderId && field.disableOnEdit) ? "disabled" : "primary"} />
                                           </IconButton>
                                         </Tooltip>
                                       </Grid>
