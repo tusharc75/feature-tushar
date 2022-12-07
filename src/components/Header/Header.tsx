@@ -51,6 +51,7 @@ import { useScrollDirection } from 'src/hooks/useScroll';
 import useClickdOutside from 'src/hooks/useClickOutside';
 import usePathname from 'src/hooks/usePathName';
 import styles from './Header.module.scss';
+import AzureInstance from 'src/AzureInstance';
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -452,16 +453,17 @@ const Header = ({ toggleDrawer }) => {
   const logoutUser = async () => {
     try {
       if (!isEmpty(account)) {
-        await instance.logoutPopup({
-          account: account
+        await instance.logout({
+          account: account,
+          authority:"https://login.microsoftonline.com/common/.well-known/openid-configuration"
         });
       }
     } catch (e) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Need to logout from Azure'
-      });
+      // toastConfig.setToastConfig({
+      //   open: true,
+      //   type: 'error',
+      //   message: 'Need to logout from Azure'
+      // });
     } finally {
       await axiosInstance()
         .get('/user/logout')

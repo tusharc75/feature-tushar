@@ -198,7 +198,22 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
             if (pendingServiceIndex === -1) {
               pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
             }
-            setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
+            const prevService = services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]
+            const userServices = services.filter((d) => d.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) 
+
+            if(allowedToEdit) {
+              setSelectedService(prevService)
+            } else if(userServices.length === 0) {
+              setSelectedService(userServices[0])
+            } else {
+              const prevServiceExistInUserServices = Boolean(userServices.find((d) => prevService?._id === d?._id));
+              if(prevServiceExistInUserServices) {
+                setSelectedService(prevService);
+              } else {
+                setSelectedService(userServices[0])
+              }
+            }
+
           }
           let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
           let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
