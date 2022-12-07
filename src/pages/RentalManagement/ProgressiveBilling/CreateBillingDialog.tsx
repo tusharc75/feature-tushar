@@ -303,6 +303,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             materialData.estimateStartDate = actualEndDate;
             materialData.actualStartDate = actualEndDate;
           }
+          else {
+            materialData.estimateStartDate = materialData.estimateStartDate ? materialData.estimateStartDate : new Date().setDate(new Date().getDate() + 1);
+            materialData.actualStartDate = materialData.actualStartDate ? materialData.actualStartDate : new Date().setDate(new Date().getDate() + 1);
+          }
 
           const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
 
