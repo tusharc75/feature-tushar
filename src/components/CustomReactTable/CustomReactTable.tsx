@@ -499,7 +499,12 @@ export default function CustomReactTable({
                               outline: 'none'
                             }}
                             value={cellValue}
-                            onChange={(e) => setCellValue(e.target.value)}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value)
+                              if(value < 0 || isNaN(value)) return
+
+                              setCellValue(e.target.value)
+                            }}
                           />
                         ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
                           <HtmlTooltip title="Save">
