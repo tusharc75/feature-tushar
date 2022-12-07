@@ -296,7 +296,7 @@ const Productpackage = ({
           disableFilters: true,
           canDrag: false,
           Cell: ({ row }) => (
-            <HtmlTooltip title={row.original.hideSelection && !allowedToEdit ? 'Assets are assigned for this product' : 'Edit'}>
+            <HtmlTooltip title={row.original.hideSelection && !allowedToEdit ? '' : 'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Details"
