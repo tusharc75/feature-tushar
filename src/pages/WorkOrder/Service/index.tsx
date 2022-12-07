@@ -132,7 +132,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const [bottomBarOpen, setBottomBarOpen] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
   const [isQuotationStep, setIsQuotationStep] = useState(false);
-  const isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id);
 
   useEffect(() => {
     fetchRepairOrderData();
@@ -198,22 +197,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
             if (pendingServiceIndex === -1) {
               pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
             }
-            const prevService = services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]
-            const userServices = services.filter((d) => d.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) 
-
-            if(allowedToEdit) {
-              setSelectedService(prevService)
-            } else if(userServices.length === 0) {
-              setSelectedService(userServices[0])
-            } else {
-              const prevServiceExistInUserServices = Boolean(userServices.find((d) => prevService?._id === d?._id));
-              if(prevServiceExistInUserServices) {
-                setSelectedService(prevService);
-              } else {
-                setSelectedService(userServices[0])
-              }
-            }
-
+            setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
           }
           let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
           let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
@@ -826,17 +810,15 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 
           {anchorEl && (
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-              {!isMeTechnician && (
-                <MenuItem
-                  disabled={!allowedToEdit}
-                  onClick={() => {
-                    setUserAssignDialog(true);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Assign Technicians
-                </MenuItem>
-              )}
+              <MenuItem
+                disabled={!allowedToEdit}
+                onClick={() => {
+                  setUserAssignDialog(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Assign Technicians
+              </MenuItem>
               <MenuItem
                 disabled={!allowedToEdit}
                 onClick={() => {
@@ -855,16 +837,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Add Step
               </MenuItem>
-              {isMeTechnician && (
-                <MenuItem
-                  onClick={() => {
-                    setConsumablesDialog(true);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Consume
-                </MenuItem>
-              )}
+              <MenuItem
+                onClick={() => {
+                  setConsumablesDialog(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Consume
+              </MenuItem>
               <MenuItem
                 disabled={
                   disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)
@@ -896,16 +876,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Remove
               </MenuItem>
-              {
-                <MenuItem
-                  onClick={() => {
-                    setLogsDialog(true);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Logs
-                </MenuItem>
-              }
+              <MenuItem
+                onClick={() => {
+                  setLogsDialog(true);
+                  setAnchorEl(null);
+                }}
+              >
+                Logs
+              </MenuItem>
             </Menu>
           )}
           <Grid
@@ -1013,6 +991,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       )}
       {logsDialog && (
         <Logs
+          serviceName={selectedService?.serviceName}
+          serviceID={selectedService?._id}
           workOrderId={workOrderId}
           handleClose={() => {
             setLogsDialog(false);
