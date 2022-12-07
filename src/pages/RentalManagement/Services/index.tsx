@@ -67,8 +67,6 @@ const Services = ({
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
-
-  const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -423,37 +421,12 @@ const Services = ({
       AddMaterial(material, [])
     }
     else {
-      setPriceDataDialog({ open: true, material: material })
+      const priceData: any = await calculatePrice(
+        rentalManagementData,
+        material
+      );
+      AddMaterial(material, priceData)
     }
-    // const priceData: any = await calculatePrice(rentalManagementData, material);
-    // material.forEach((element) => {
-    //   const rateResult = priceData?.filter(
-    //     (e) =>
-    //       e.materialId === element.materialId &&
-    //       e.materialType === element.type &&
-    //       e.unit === element.unit &&
-    //       e.pricingMethod === element.pricingMethod
-    //   );
-    //   if (rateResult.length && rateResult[0].mrp) {
-    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
-    //     element[priceFieldName] = rateResult[0].mrp;
-    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-    //     Object.assign(element, calValues);
-    //   }
-    // });
-
-    // axiosInstance()
-    //   .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
-    //   .then(() => {
-    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
-    //     fetchProductInventory();
-    //     setAddingProducts(false);
-    //   })
-    //   .catch((error) => {
-    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
-    //     toastConfig.setToastConfig(error);
-    //     setAddingProducts(false);
-    //   });
   };
 
   const AddMaterial = async (material, priceData) => {
@@ -480,13 +453,11 @@ const Services = ({
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
         setAddingProducts(false);
-        setPriceDataDialog({ open: false, material: null })
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
-        setPriceDataDialog({ open: false, material: null })
       });
   };
 
@@ -743,15 +714,6 @@ const Services = ({
           ids={rowsData.filter((d) => d.type === 'service').map((d) => d?.materialId)}
         />
       )}
-      {priceDataDialog.open &&
-        <CalculatePriceDialog
-          referenceData={rentalManagementData}
-          material={priceDataDialog.material}
-          handleSucess={(data) => {
-            AddMaterial(priceDataDialog.material, data)
-          }}
-          onClose={() => setPriceDataDialog({ open: false, material: null })}
-        />}
     </Fragment>
   );
 };
