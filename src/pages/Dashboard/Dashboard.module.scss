@@ -220,7 +220,7 @@
       padding: var(--card-padding, 15px);
       cursor: pointer;
       &:hover {
-        button svg {
+        .viewAll svg {
           margin-left: 10px;
         }
       }
@@ -249,32 +249,6 @@
       img {
         display: block;
         max-width: 100%;
-      }
-      button {
-        display: block;
-        border: 0;
-        background-color: transparent;
-        outline: none;
-        cursor: pointer;
-        transition: color 0.3s;
-
-        span {
-          font-weight: 600;
-          font-size: 17.3279px;
-          line-height: 29px;
-          color: #2a3042;
-        }
-        svg {
-          vertical-align: middle;
-          margin-left: 6px;
-          transition: margin 0.3s, color 0.3s;
-          color: inherit;
-        }
-        &:hover {
-          span {
-            color: var(--link);
-          }
-        }
       }
     }
   }
@@ -329,19 +303,66 @@
     }
   }
 }
+
+.viewAll {
+  display: block;
+  border: 0;
+  background-color: transparent;
+  outline: none;
+  cursor: pointer;
+  transition: color 0.3s;
+
+  span {
+    font-weight: 600;
+    font-size: 17.3279px;
+    line-height: 29px;
+    color: #2a3042;
+  }
+  svg {
+    vertical-align: middle;
+    margin-left: 6px;
+    transition: margin 0.3s, color 0.3s;
+    color: inherit;
+  }
+  &:hover {
+    span {
+      color: var(--link);
+    }
+  }
+}
 .rightInner {
+  @media all and (min-width: 548px) {
+    --hor-gap: 18px;
+  }
   @media all and (min-width: 768px) {
     --padding: 37px;
+    --hor-gap: 20px;
     --image-mb: 25px;
     --button-mt: 30px;
+  }
+  @media all and (min-width: 900px) {
+    --hor-gap: 23px;
   }
   @media all and (min-width: 1024px) {
     --padding: 37px 34px 44px;
     --image-mb: 31px;
     --button-mt: 61px;
   }
+  @media all and (min-width: 1100px) {
+    --hor-gap: 25px;
+  }
+  &:hover {
+    .viewAll svg {
+      margin-left: 10px;
+    }
+  }
+  text-align: left;
+  margin-bottom: var(--hor-gap);
+  &::last-child {
+    margin-bottom: 0;
+  }
 
-  background: #fffaee;
+  background: var(--sideCardBg, #fffaee);
   border: 2.16598px solid #ebebeb;
   box-shadow: 0px 4.33197px 43.3197px rgba(0, 0, 0, 0.08);
   border-radius: 10px;
@@ -385,6 +406,25 @@
     &:hover {
       span {
         color: var(--link);
+      }
+    }
+  }
+  .linkList {
+    margin-top: 16px;
+    list-style-type: none;
+    li {
+      margin-bottom: 16px;
+      &::last-child {
+        margin-bottom: 0;
+      }
+      a {
+        span {
+          font-weight: 600;
+          font-size: 16.2759px;
+          line-height: 20px;
+          color: #298b88;
+        }
+        padding: 16px 0;
       }
     }
   }
