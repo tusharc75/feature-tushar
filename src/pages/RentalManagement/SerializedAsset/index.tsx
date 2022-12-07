@@ -84,7 +84,7 @@ const SerializedAsset = ({
   }, []);
 
   const fetchFields = async () => {
-    setNextStep(false)
+    setNextStep(false);
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     const coloum: any = [
       {
@@ -112,12 +112,12 @@ const SerializedAsset = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -208,24 +208,40 @@ const SerializedAsset = ({
             )}
             {row.original?.type === 'asset' && (
               <span className="d-flex align-items-center gap-2">
-                {(row.original.status === INVENTORY_STATUS.reserved ||
-                  [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(row.original.status)) &&
-                  !row?.original?.rentalAssetStatus &&
-                  allowedToEdit && (
-                    <HtmlTooltip title={`Remove`}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setShowConfirmBox(true);
-                          setDeleteData([
-                            { _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }
-                          ]);
-                        }}
-                      >
-                        <Delete fontSize="small" color="error" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
+                {
+                  <HtmlTooltip
+                    title={
+                      !(
+                        row.original.status === INVENTORY_STATUS.reserved ||
+                        [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(row.original.status)
+                      ) &&
+                      row?.original?.rentalAssetStatus &&
+                      !allowedToEdit
+                        ? 'Assets are assigned for this product'
+                        : `Remove`
+                    }
+                  >
+                    <IconButton
+                      size="small"
+                      disabled={
+                        !(
+                          row.original.status === INVENTORY_STATUS.reserved ||
+                          [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(row.original.status)
+                        ) &&
+                        row?.original?.rentalAssetStatus &&
+                        !allowedToEdit
+                      }
+                      onClick={() => {
+                        setShowConfirmBox(true);
+                        setDeleteData([
+                          { _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }
+                        ]);
+                      }}
+                    >
+                      <Delete fontSize="small" color="error" />
+                    </IconButton>
+                  </HtmlTooltip>
+                }
                 {row.original.isTransferAsset && (
                   <HtmlTooltip
                     title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}
@@ -356,7 +372,7 @@ const SerializedAsset = ({
     });
     setColumns(coloum);
     fetchProductInventory();
-    setNextStep(true)
+    setNextStep(true);
   };
 
   const fetchProductInventory = async () => {
@@ -417,20 +433,21 @@ const SerializedAsset = ({
 
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
+        parent.detail = `${
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent?.packageDetail?.packageName
-          }`;
+        }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-              ? parent?.productDetail?.productDesc || ''
-              : parent.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : '';
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
@@ -457,11 +474,23 @@ const SerializedAsset = ({
           bulkAssetCreationProduct,
           offlineAssetErrorLog
         );
-        parent.assetQty = parent.subRows.filter((d) => d.type !== 'asset').length === 0 ? parent.assetQty : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
-        parent.assetAssignedQty = parent.subRows.filter((d) => d.type !== 'asset').length === 0 ? parent.assetAssignedQty : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0);
-        parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false)
-          : parent.subRows.length !== 0 ? parent.assetAssignedQty === parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) || parent.subRows.every(d => d.isValid)
-            : true;
+        parent.assetQty =
+          parent.subRows.filter((d) => d.type !== 'asset').length === 0
+            ? parent.assetQty
+            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+        parent.assetAssignedQty =
+          parent.subRows.filter((d) => d.type !== 'asset').length === 0
+            ? parent.assetAssignedQty
+            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0);
+        parent.isValid = parent.serializedProduct
+          ? parent.assetAssignedQty === parent.assetQty
+            ? true
+            : false
+          : parent.subRows.length !== 0
+          ? parent.assetAssignedQty ===
+              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+            parent.subRows.every((d) => d.isValid)
+          : true;
       });
       if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
         setNextStep(false);
@@ -538,16 +567,16 @@ const SerializedAsset = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetQty =
@@ -590,7 +619,7 @@ const SerializedAsset = ({
           ? true
           : false
         : _subRow.assetAssignedQty ===
-        tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0);
+          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0);
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -616,7 +645,7 @@ const SerializedAsset = ({
   };
 
   const handleAddSerializedAsset = (assets) => {
-    setNextStep(false)
+    setNextStep(false);
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
     flatArray = uniqBy(flatArray, '_id');
@@ -653,18 +682,18 @@ const SerializedAsset = ({
             type: 'success',
             message: data.message
           });
-          setNextStep(true)
+          setNextStep(true);
         })
         .catch((error) => {
           setAdding(false);
           toastConfig.setToastConfig(error);
-          setNextStep(true)
+          setNextStep(true);
         });
     }
   };
 
   const handleRemoveInventory = async () => {
-    setNextStep(false)
+    setNextStep(false);
     if (deleteData.length >= 1) {
       if (isOffline) {
         setDeleting(true);
@@ -685,13 +714,13 @@ const SerializedAsset = ({
             fetchProductInventory();
             setDeleteData(null);
             setShowConfirmBox(false);
-            setNextStep(true)
+            setNextStep(true);
           })
           .catch((error) => {
             setDeleting(false);
             toastConfig.setToastConfig(error);
             setDeleteData(null);
-            setNextStep(true)
+            setNextStep(true);
           });
       }
     }
@@ -966,12 +995,12 @@ const SerializedAsset = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}
             >
