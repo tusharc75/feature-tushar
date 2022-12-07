@@ -102,7 +102,7 @@ const WorkOrder = ({
                       : row.original.type === 'serializedAsset'
                       ? routes.serializedAsset.path
                       : routes.packagesDetail.path
-                  }/${row.original.materialId}`
+                  }/detail/${row.original.materialId}`
                 );
               }}
             />
