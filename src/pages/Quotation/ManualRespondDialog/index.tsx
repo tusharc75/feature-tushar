@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { quotation, QUOTATION_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const ManualReponseDialog = ({ quotationId, versionId, setCurrentStep, updateStatus, setCustomerAcceptable }) => {
+const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCurrentStep, updateStatus, setCustomerAcceptable }) => {
   const toastConfig = useContext(CustomToastContext);
   const [selectedOption, setSelectedOption] = useState(null);
   const options = { Accept: QUOTATION_STATUS.acceptByCustomer, Reject: QUOTATION_STATUS.rejectByCustomer };
@@ -37,6 +37,9 @@ const ManualReponseDialog = ({ quotationId, versionId, setCurrentStep, updateSta
         .put(`${quotation.api}/status/${quotationId}/${versionId}`, dataObj)
         .then(() => {
           setSubmitting(false);
+          if(setNextStep) {
+            setNextStep(options[selectedOption])
+          }
           setCurrentStep((prevStep) => {
             const newStep = prevStep + 1;
             if (updateStatus) {
