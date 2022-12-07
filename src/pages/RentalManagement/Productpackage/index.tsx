@@ -34,10 +34,13 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import { isMobile, isTablet } from 'react-device-detect';
+import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
+import { RiEditCircleLine } from 'react-icons/ri';
 import { BiChevronDown } from 'react-icons/bi';
 import { calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 
 const Productpackage = ({
   rentalManagementData,
@@ -73,6 +76,9 @@ const Productpackage = ({
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
+
+  const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
+
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
@@ -107,9 +113,17 @@ const Productpackage = ({
           row.original['type'] ? (
             <p>
               {`${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
-                row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
-                  row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -179,14 +193,9 @@ const Productpackage = ({
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ?
-            <p className="text-truncate">
-              {row.original.description}</p>
-            : (
-              <NoDataCell />
-            )
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
-      },
+      }
     ];
 
     data.forEach((element) => {
@@ -260,8 +269,7 @@ const Productpackage = ({
             });
           });
         }
-      }
-      else {
+      } else {
         if (element.fieldName === 'qty') {
           element.fieldName = 'qtyDisplay';
         }
@@ -287,12 +295,12 @@ const Productpackage = ({
           sticky: 'right',
           disableFilters: true,
           canDrag: false,
-          Cell: ({ row }) =>
-            !row.original.hideSelection &&
-            allowedToEdit && (
+          Cell: ({ row }) => (
+            <HtmlTooltip title={row.original.hideSelection && !allowedToEdit ? '' : 'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Details"
+                disabled={row.original.hideSelection && !allowedToEdit}
                 onClick={() => {
                   const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
                   getNestedSubRows(obj, row.original);
@@ -301,7 +309,8 @@ const Productpackage = ({
               >
                 <DeleteIcon fontSize="small" color="error" />
               </IconButton>
-            )
+            </HtmlTooltip>
+          )
         })
       );
     }
@@ -345,11 +354,23 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service' ? parent.serviceDetail ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName
-        : parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
-      parent.description = parent.type === 'service' ? parent?.serviceDetail?.serviceDescription || ''
-        : parent.type === 'product' ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package' ? parent?.packageDetail?.packageDescription || '' : '';
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+          : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.packageDetail?.packageName
+      }`;
+      parent.description =
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.type === 'product'
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
@@ -376,13 +397,23 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service' ? _subRow.serviceDetail?.serviceName :
-        _subRow.type === 'package' ? _subRow.packageDetail?.packageName
-          : _subRow.type === 'product' ? _subRow.productDetail?.productName
-            : ''} `;
-      _subRow.description = _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceDescription || ''
-        : _subRow.type === 'product' ? _subRow?.productDetail?.productDesc || ''
-          : _subRow.type === 'package' ? _subRow?.packageDetail?.packageDescription || '' : '';
+      _subRow.detail = `${
+        _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === 'package'
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : ''
+      } `;
+      _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -418,7 +449,7 @@ const Productpackage = ({
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
-      element.detail = d.type === "product" ? d?.productName : d.type === "package" ? d?.packageName : "";
+      element.detail = d.type === 'product' ? d?.productName : d.type === 'package' ? d?.packageName : '';
       element.type = addExistingProductDialog.type;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -438,22 +469,56 @@ const Productpackage = ({
       material.push(element);
     });
     if (material.filter((d) => d.listPrice === null).length === 0) {
-      AddMaterial(material, [])
+      AddMaterial(material, []);
+    } else {
+      setPriceDataDialog({ open: true, material: material });
     }
-    else {
-      const priceData: any = await calculatePrice(
-        rentalManagementData,
-        material
-      );
-      AddMaterial(material, priceData)
-    }
+    // const priceData: any = await calculatePrice(
+    //   rentalManagementData,
+    //   material.filter((d) => d.listPrice === null)
+    // );
+    // material.forEach((element) => {
+    //   const rateResult = priceData?.filter(
+    //     (e) =>
+    //       e.materialId === element.materialId &&
+    //       e.materialType === element.type &&
+    //       e.unit === element.unit &&
+    //       e.pricingMethod === element.pricingMethod
+    //   );
+    //   if (element.listPrice) {
+    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+    //     element[priceFieldName] = element.listPrice;
+    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+    //     Object.assign(element, calValues);
+    //   } else if (rateResult.length && rateResult[0].mrp) {
+    //     const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+    //     element[priceFieldName] = rateResult[0].mrp;
+    //     const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
+    //     Object.assign(element, calValues);
+    //   }
+    // });
+
+    // axiosInstance()
+    //   .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
+    //   .then(() => {
+    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
+    //     fetchProductInventory();
+    //     setAddingProducts(false);
+    //   })
+    //   .catch((error) => {
+    //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
+    //     toastConfig.setToastConfig(error);
+    //     setAddingProducts(false);
+    //   });
   };
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
-        const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
+        const rateResult = priceData?.filter(
+          (e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit
+        );
         if (element.listPrice) {
           const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
@@ -462,8 +527,8 @@ const Productpackage = ({
         } else if (rateResult.length && rateResult[0].mrp) {
           const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
           element[priceFieldName] = rateResult[0].mrp;
-          element["pricingCondition"] = rateResult[0].conditionId;
-          element["pricingMethod"] = rateResult[0].pricingMethod?.trim();
+          element['pricingCondition'] = rateResult[0].conditionId;
+          element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
           Object.assign(element, calValues);
         }
@@ -475,11 +540,13 @@ const Productpackage = ({
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
         setAddingProducts(false);
+        setPriceDataDialog({ open: false, material: null });
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        setAddingProducts(false);
         toastConfig.setToastConfig(error);
+        setAddingProducts(false);
+        setPriceDataDialog({ open: false, material: null });
       });
   };
 
@@ -622,7 +689,13 @@ const Productpackage = ({
                     horizontal: 'right'
                   }}
                 >
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) ? 'Bulk edit selected records' : 'Select records to edit'}>
+                  <HtmlTooltip
+                    title={
+                      Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                        ? 'Bulk edit selected records'
+                        : 'Select records to edit'
+                    }
+                  >
                     <MenuItem
                       onClick={() => {
                         setIsProductEdit({ open: true, isBulkedit: true });
@@ -632,7 +705,13 @@ const Productpackage = ({
                       Bulk Edit
                     </MenuItem>
                   </HtmlTooltip>
-                  <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) ? 'Delete selected records' : 'Select records to delete'}>
+                  <HtmlTooltip
+                    title={
+                      Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)
+                        ? 'Delete selected records'
+                        : 'Select records to delete'
+                    }
+                  >
                     <MenuItem
                       disabled={isDeleting}
                       onClick={() => {
@@ -656,12 +735,12 @@ const Productpackage = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -712,7 +791,7 @@ const Productpackage = ({
           material={material}
           selectedProducts={selectedProducts.filter((e) => !e.hideSelection)}
           loading={isUpdating}
-          from={"product"}
+          from={'product'}
         />
       )}
       {addExistingProductDialog.open && (
@@ -773,6 +852,19 @@ const Productpackage = ({
             </MenuItem> */}
           </MenuList>
         </Popover>
+      )}
+      {priceDataDialog.open && (
+        <CalculatePriceDialog
+          referenceData={rentalManagementData}
+          material={priceDataDialog.material}
+          handleSucess={(data) => {
+            AddMaterial(priceDataDialog.material, data);
+          }}
+          onClose={() => {
+            AddMaterial(priceDataDialog.material, null);
+            setPriceDataDialog({ open: false, material: null });
+          }}
+        />
       )}
     </Fragment>
   );
