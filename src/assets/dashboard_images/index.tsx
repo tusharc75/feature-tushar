@@ -11,22 +11,24 @@ import invIcon from './inv_icon.svg';
 import heroTextIcon from './heroTextIcon.svg';
 import sidebarCogIcon from './sidebarCogIcon.svg';
 import colabIcon from './colab.svg';
+import setupsIcon from './setups.svg';
 import { FcViewDetails } from 'react-icons/fc';
 
 export const IconConst = {
   HERO: 'Hero',
-  CRM: 'ROM',
-  ROM: 'CRM',
+  CRM: 'CRM +',
+  ROM: 'ROM',
   ACCOUNTS: 'Accounts',
-  PRODUCT_SETUP: 'PorductSetup',
+  PRODUCT_SETUP: 'Product Setup',
   ACTIVITIES: 'Activities',
-  ADMIN_PORTAL: 'adminPortal',
-  FORM_ICON: 'FormIcon',
-  INV_ICON: 'InvIcon',
+  ADMIN_PORTAL: 'Admin Portal',
+  FORM_ICON: 'Dynamic Forms',
+  INV_ICON: 'Inventory Management',
   GEN_ICON: 'GenIcon',
   HERO_TEXT_ICON: 'HeroTextIcon',
   SIDEBAR_COG_ICON: 'SidebarCog',
-  COLABORATION_TOOL: 'Colab'
+  COLABORATION_TOOL: 'Collaboration Tools',
+  SETUPS_ICON: 'Setups'
 };
 
 export const IMAGE_HEIGHT = 50;
@@ -60,6 +62,8 @@ export const SVGImages = (name) => {
       return sidebarCogIcon;
     case IconConst.COLABORATION_TOOL:
       return colabIcon;
+    case IconConst.SETUPS_ICON:
+      return setupsIcon;
     default:
       return;
   }

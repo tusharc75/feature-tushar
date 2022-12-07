@@ -62,7 +62,7 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
             materialType: ele?.type,
             qty: ele?.qty,
             pricingMethod: ele?.pricingMethod,
-            unit: ele?.unit,
+            unit: [ele?.unit].flat(1).pop(),
             currency: rentalManagementData?.currency
         }));
         data.supplier = [];

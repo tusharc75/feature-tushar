@@ -244,6 +244,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       .get(`${workOrder.api}/${workOrderId}/steps-data`)
       .then(({ data: { data } }) => {
         setServiceData(data);
+        // console.log(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -493,7 +494,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
         toastConfig.setToastConfig(error);
       });
   };
-
+  let startIdx = 0;
   return stepList ? (
     stepList?.length ? (
       <Box
@@ -508,10 +509,18 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
               const { stepData, isStepValid } = getFields(step);
               let isPrevStepDone: any = false;
               const isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
+              let isSameStartStep = false;
               if (index > 0) {
-                const pD = getFields(serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)[index - 1]);
+                const prevStep = serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)[index - 1];
+                const pD = getFields(prevStep);
                 isPrevStepDone = pD?.stepData?.passFailStatus ? true : stepData?.passFailStatus ? true : false;
               }
+              if (startIdx === step?.order) {
+                isSameStartStep = true;
+              } else {
+                isSameStartStep = false;
+              }
+              startIdx = step?.order || 0;
               return (
                 <Box
                   key={step._id}
@@ -556,7 +565,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                         </Typography>
                       </Box>
                     </Box>
-                    {(isPrevStepDone || index === 0) && isMeTechnician && (
+                    {(isSameStartStep || isPrevStepDone || index === 0) && isMeTechnician && (
                       <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
                         {stepData?.startDate && !stepData?.endDate && <TimerComponent stepData={stepData} />}
                         {stepData?.startDate && stepData?.endDate && <TimerComponent stepData={stepData} updateTime={false} />}

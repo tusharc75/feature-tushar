@@ -13,7 +13,7 @@ import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-i
 import moment from 'moment';
 import { FaUser as UserIcon } from 'react-icons/fa';
 
-const Logs = ({ handleClose, workOrderId = null }) => {
+const Logs = ({ handleClose, workOrderId = null, serviceID, serviceName }) => {
   const {
     state: { selectedEntity }
   }: any = useData();
@@ -21,6 +21,8 @@ const Logs = ({ handleClose, workOrderId = null }) => {
   const [data, setData] = useState(null);
   const [rows, setRows] = useState(null);
   const [keys, setKeys] = useState(null);
+
+  // console.log(rows);
 
   useEffect(() => {
     fetchData();
@@ -39,7 +41,7 @@ const Logs = ({ handleClose, workOrderId = null }) => {
     axiosInstance()
       .get(`${routes.workOrder.path}/${workOrderId}/log`)
       .then(({ data: { data } }) => {
-        setData(data);
+        setData(data.filter((item) => item.service?.optionValue === serviceID || item.operation === 'consumed'));
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -124,30 +126,33 @@ const Logs = ({ handleClose, workOrderId = null }) => {
 
   const getHeadMessage = (row: any = 'Fail') => {
     let message;
+    const serviceName = row?.service?.optionLabel ? row?.service?.optionLabel : '';
+    const stepName = row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : '';
+
     switch (row?.operation) {
       default:
-        message = `<span>Updated value</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Updated value</span> ${stepName} ${serviceName}`;
         break;
       case operations.completed:
-        message = `<span>Completed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Completed</span> ${stepName} ${serviceName}`;
         break;
       case operations.start:
-        message = `<span>Started</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Started</span> ${stepName} ${serviceName}`;
         break;
       case operations.passed:
-        message = `<span>Passed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Passed</span> ${stepName} ${serviceName}`;
         break;
       case operations.failed:
-        message = `<span>Failed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Failed</span> ${stepName} ${serviceName}`;
         break;
       case operations.valueAdded:
-        message = `<span>Added value</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Added value</span> ${stepName} ${serviceName}`;
         break;
       case operations.consumed:
-        message = `<span>Consumed</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Consumed</span> ${stepName} ${serviceName}`;
         break;
       case operations.valueUpdated:
-        message = `<span>Updated value</span> ${row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : null} ${row?.service?.optionLabel}`;
+        message = `<span>Updated value</span> ${stepName} ${serviceName}`;
         break;
     }
     return message;
@@ -155,7 +160,13 @@ const Logs = ({ handleClose, workOrderId = null }) => {
 
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="logs-dialog">
-      <CustomDialogHeader title={`Logs`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
+      <CustomDialogHeader
+        title={`${serviceName ? serviceName : ''} Logs`}
+        showManimizeMaximize={false}
+        showRequiredLabel={false}
+        onClose={handleClose}
+        style={{ textTransform: 'capitalize' }}
+      />
       <CustomDialogContent>
         {keys ? (
           keys?.length > 0 ? (
