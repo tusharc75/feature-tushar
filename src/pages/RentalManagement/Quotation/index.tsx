@@ -700,7 +700,14 @@ const Quotation = ({
           quotationId={quotationData?._id}
           setCurrentStep={() => {
             fetchQuotationData(currentVersion);
-            setNextStep(true);
+          }}
+          setNextStep={(type:string) => {
+            console.log(type.split(" ")[0])
+            if(type && type.includes("Rejectd")) {
+              setNextStep(false)
+            } else {
+              setNextStep(true)
+            }
           }}
           updateStatus={() => {
             fetchQuotationData(currentVersion);
