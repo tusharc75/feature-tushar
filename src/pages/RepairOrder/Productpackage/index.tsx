@@ -154,7 +154,7 @@ const Productpackage = ({
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {allowedToDelete && row.original?.allowedToDelete && (
+            <HtmlTooltip title={allowedToDelete && row.original?.allowedToDelete ? 'Asset is already assigned' : 'Delete'}>
             <IconButton
               size="small"
               aria-label="Details"
@@ -162,10 +162,12 @@ const Productpackage = ({
                 const obj: any = [row.original._id];
                 setDeleteData(obj);
               }}
+              disabled={allowedToDelete && row.original?.allowedToDelete }
             >
-              <DeleteIcon fontSize="small" color="error" />
+              <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.allowedToDelete ? "disabled" : "error"} />
             </IconButton>
-          )}
+            </HtmlTooltip>
+          
         </>
       )
     })
