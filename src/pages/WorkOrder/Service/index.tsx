@@ -1001,6 +1001,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 };
 export default Service;
 
+// INTERFACES
 interface totalTimeInterface {
   stepTimes: stepTimesInterface[];
 }
@@ -1008,24 +1009,23 @@ interface stepTimesInterface {
   startTime?: number | null;
   endTime?: number | null;
 }
+// RETURN TOTAL TIME IN MS AND SHOULD TIME UPDATE, TAKES LIST OF STARTTIME AND END TIME LIST
 const getToalTime = (stepTimes: stepTimesInterface[]) => {
   let totalTimes = 0;
   let shouldTimerRun = stepTimes.filter((item) => item.startTime && item.endTime).length !== stepTimes.length;
-
   stepTimes.forEach((item) => {
     if (item.startTime && item.endTime) {
       totalTimes += item.endTime - item.startTime;
     }
   });
-
   return { shouldTimerRun, totalTimes };
 };
 
+// RENDER TOTAL TIME COMPONENT
 const RenderTotalTime = ({ stepTimes }: totalTimeInterface) => {
   const [time, setTime] = useState(null);
 
   useEffect(() => {
-    console.log(stepTimes);
     const { shouldTimerRun, totalTimes } = getToalTime(stepTimes);
     if (shouldTimerRun) {
       let currentDifference = totalTimes;

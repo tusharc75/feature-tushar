@@ -32,6 +32,7 @@ const customNodeStyles = {
 
 const WorkOrderViews = (props) => {
   const { workOrderName, workOrderId, workOrderStatus } = props;
+  console.log(workOrderId);
 
   const [flowData, setFlowData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -67,6 +68,7 @@ const WorkOrderViews = (props) => {
       var flowEdge: any[] = [];
       const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`);
       const allServices = workOrderServices?.data?.data || [];
+      console.log(allServices);
       const allSteps = [];
 
       if (allServices?.length) xPosition += 300;
