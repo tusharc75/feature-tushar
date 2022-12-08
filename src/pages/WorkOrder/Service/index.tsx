@@ -69,43 +69,6 @@ function convertMsToTime(milliseconds) {
   return time;
 }
 
-const RenderTotalTime = ({ steps, startTimes, endTimes }) => {
-  const [time, setTime] = useState(null);
-  useEffect(() => {
-    startTimes = startTimes.filter((item) => !isNaN(item));
-    endTimes = endTimes.filter((item) => !isNaN(item));
-    const min = Math.min(...startTimes);
-    const max = Math.max(...endTimes);
-    if (startTimes.length !== endTimes.length) {
-      const interval = setInterval(() => {
-        setTime(convertMsToTime(new Date().getTime() - min));
-      }, 1000);
-      return () => {
-        clearInterval(interval);
-      };
-    } else {
-      setTime(convertMsToTime(max - min));
-    }
-  }, [startTimes, endTimes]);
-  if (startTimes.length === 0) return <></>;
-  return (
-    <Box
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        border: '1px solid rgba(0, 0, 0, 0.23)',
-        backgroundColor: 'transparent',
-        padding: '2px 7px',
-        borderRadius: '8px'
-      }}
-    >
-      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
-      {time}
-    </Box>
-  );
-};
-
 const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -452,9 +415,15 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const getFieldsWithOtherDetails = (step: any, serviceData) => {
     const id = step?._id;
     const steps = serviceData?.filter((item: any) => item.serviceId === id);
-    let startTimes = steps.map((item) => new Date(item?.startDate).getTime());
-    let endTimes = steps.map((item) => new Date(item?.endDate).getTime());
-    return { steps, startTimes, endTimes };
+    const stepTimes = [];
+    steps.forEach((item) => {
+      let obj: any = {};
+      obj.startTime = item?.startDate ? new Date(item?.startDate).getTime() : null;
+      obj.endTime = item?.endDate ? new Date(item?.endDate).getTime() : null;
+      stepTimes.push(obj);
+    });
+
+    return stepTimes;
   };
 
   return (
@@ -521,7 +490,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 >
                   {serviceSteps?.map((data, index) => {
                     const style = stylesForEveryTab(selectedService, data);
-                    const { steps, startTimes, endTimes } = getFieldsWithOtherDetails(data, serviceData);
+                    const stepTimes = getFieldsWithOtherDetails(data, serviceData);
                     return (
                       Boolean(allowedToEdit || data?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) && (
                         <Grid item xs={12} key={index}>
@@ -619,7 +588,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                           <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
                                         </Box>
                                       )}
-                                      <RenderTotalTime steps={steps} startTimes={startTimes} endTimes={endTimes} />
+                                      <RenderTotalTime stepTimes={stepTimes} />
                                     </>
                                   )}
                                 </Box>
@@ -1033,3 +1002,62 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   );
 };
 export default Service;
+
+// INTERFACES
+interface totalTimeInterface {
+  stepTimes: stepTimesInterface[];
+}
+interface stepTimesInterface {
+  startTime?: number | null;
+  endTime?: number | null;
+}
+// RETURN TOTAL TIME IN MS AND SHOULD TIME UPDATE, TAKES LIST OF STARTTIME AND END TIME LIST
+const getToalTime = (stepTimes: stepTimesInterface[]) => {
+  let totalTimes = 0;
+  let shouldTimerRun = stepTimes.filter((item) => item.startTime && item.endTime).length !== stepTimes.length;
+  stepTimes.forEach((item) => {
+    if (item.startTime && item.endTime) {
+      totalTimes += item.endTime - item.startTime;
+    }
+  });
+  return { shouldTimerRun, totalTimes };
+};
+
+// RENDER TOTAL TIME COMPONENT
+const RenderTotalTime = ({ stepTimes }: totalTimeInterface) => {
+  const [time, setTime] = useState(null);
+
+  useEffect(() => {
+    const { shouldTimerRun, totalTimes } = getToalTime(stepTimes);
+    if (shouldTimerRun) {
+      let currentDifference = totalTimes;
+      const interval = setInterval(() => {
+        currentDifference += 1000;
+        setTime(convertMsToTime(currentDifference));
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      };
+    } else {
+      setTime(convertMsToTime(totalTimes));
+    }
+  }, [stepTimes]);
+
+  if (stepTimes.length === 0) return <></>;
+  return (
+    <Box
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        border: '1px solid rgba(0, 0, 0, 0.23)',
+        backgroundColor: 'transparent',
+        padding: '2px 7px',
+        borderRadius: '8px'
+      }}
+    >
+      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+      {time}
+    </Box>
+  );
+};

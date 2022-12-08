@@ -81,23 +81,21 @@ const WorkOrder = ({
             </Box>
             <Chip
               className="ml-1"
-              label={`${
-                row.original.type === 'service'
+              label={`${row.original.type === 'service'
                   ? 'Service'
                   : row.original.type === 'product'
-                  ? 'Product'
-                  : row.original.type === 'serializedAsset'
-                  ? 'Asset'
-                  : 'Package'
-              }`}
+                    ? 'Product'
+                    : row.original.type === 'serializedAsset'
+                      ? 'Asset'
+                      : 'Package'
+                }`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === 'service'
-                      ? routes.serviceMasterDetail.path
-                      : row.original.type === 'product'
+                  `${row.original.type === 'service'
+                    ? routes.serviceMasterDetail.path
+                    : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
                       ? routes.serializedAssetDetail.path
@@ -177,7 +175,7 @@ const WorkOrder = ({
       },
       {
         accessor: 'assignedUsers',
-        Header: 'Assigned Users',
+        Header: 'Assigned Technician',
         Cell: ({ row }) =>
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers'].map((e, i) => {
@@ -223,7 +221,7 @@ const WorkOrder = ({
         canDrag: false,
         Cell: ({ row }) => {
           return (
-            row?.original?.type === 'service' && (
+            (row?.original?.type === 'service' || (row?.original?.type === 'package' && row?.original?.packageDetail?.packageType === "Service")) && (
               <>
                 <IconButton
                   disabled={!allowedToDelete}
@@ -288,15 +286,14 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
+      parent.detail = `${parent.type === 'service'
           ? parent?.serviceDetail?.serviceName
           : parent.type === 'product'
-          ? parent?.productDetail?.productName
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAsset?.assetNumber
-          : parent?.packageDetail?.packageName
-      }`;
+            ? parent?.productDetail?.productName
+            : parent.type === 'serializedAsset'
+              ? parent?.serializedAsset?.assetNumber
+              : parent?.packageDetail?.packageName
+        }`;
       parent.qty = parent.qty;
       parent.status = parent?.workOrder?.status;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
@@ -344,10 +341,10 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow?.serializedAsset?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.productDetail?.productName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow?.serializedAsset?.assetNumber
+              : _subRow?.packageDetail?.packageName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.preWork = _subRow.type === 'service' ? _subRow?.serviceDetail?.preWork : false;
       _subRow.workOrder = parent?.workOrder;
@@ -475,7 +472,7 @@ const WorkOrder = ({
                     setUserAssignDialog(true);
                   }}
                 >
-                  Assign Users
+                  Assign Technician
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
@@ -512,12 +509,12 @@ const WorkOrder = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >

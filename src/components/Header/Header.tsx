@@ -455,7 +455,7 @@ const Header = ({ toggleDrawer }) => {
       if (!isEmpty(account)) {
         await instance.logout({
           account: account,
-          authority:"https://login.microsoftonline.com/common/.well-known/openid-configuration"
+          authority: 'https://login.microsoftonline.com/common/.well-known/openid-configuration'
         });
       }
     } catch (e) {
@@ -1261,7 +1261,7 @@ const sectionVariations = (sec) => {
       color = '#FFEFEE';
       break;
     case 'Inventory Management':
-      icon = <img src={SVGImages(IconConst.INV_ICON)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
+      icon = <img src={SVGImages(IconConst.INVENTORY_MANAGEMENT)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
       text = 'Manage Inventory and Purchases Smartly.';
       color = '#F3F8FF';
       break;

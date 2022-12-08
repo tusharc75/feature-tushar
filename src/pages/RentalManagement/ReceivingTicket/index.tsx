@@ -415,7 +415,8 @@ const ReceivingTicket = ({
               INVENTORY_STATUS.available,
               INVENTORY_STATUS.repair,
               INVENTORY_STATUS.scrap,
-              INVENTORY_STATUS.lost
+              INVENTORY_STATUS.lost,
+              INVENTORY_STATUS.notApplied
             ].includes(e.status) ||
             [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
               e.rentalAssetStatus
@@ -1236,7 +1237,10 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {selectedRecords?.filter(
-              (f) => f.type === 'Product' && f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+              (f) => f.type === 'Product'
+                && f.hasOwnProperty('loadingTicketId')
+                && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+                && Number(f?.consumeQty) + Number(f?.returnQty) < Number(f?.qty)
             ).length === selectedRecords.length && (
                 <MenuItem
                   onClick={() => {

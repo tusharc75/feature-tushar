@@ -35,6 +35,89 @@ interface EditDialogProps {
   isQtyOnly?: Boolean
 }
 
+export const resetValueZero = (rows, allFields) => {
+  const resetFields = []
+  allFields.forEach((element) => {
+    if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
+      if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+        element.displayUnits.forEach((_unit) => {
+          resetFields.push(element.fieldName + "_" + _unit.toLowerCase())
+        })
+      }
+      else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+        element.displayUnits.forEach((_unit) => {
+          element.displayCurrency.forEach((_currency) => {
+            resetFields.push(element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase())
+          })
+        })
+      }
+      else if (element.type === "currencyAmount") {
+        element.displayCurrency.forEach((_currency) => {
+          resetFields.push(element.fieldName + "_" + _currency.toLowerCase())
+        })
+      }
+    }
+    else if (element.type === "percent") {
+      resetFields.push(element.fieldName)
+    }
+  })
+  rows.forEach((row) => {
+    resetFields.forEach((fieldName) => {
+      row[fieldName] = 0;
+    })
+  })
+}
+
+export const sumOnParent = (packages, product, allFields, currency) => {
+  const resetFields = []
+  allFields.forEach((element) => {
+    if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
+      if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+        element.displayUnits.forEach((_unit) => {
+          resetFields.push({ fieldName: element.fieldName + "_" + _unit.toLowerCase(), type: "amount" })
+        })
+      }
+      else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+        element.displayUnits.forEach((_unit) => {
+          element.displayCurrency.forEach((_currency) => {
+            resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), type: "amount" })
+          })
+        })
+      }
+      else if (element.type === "currencyAmount") {
+        element.displayCurrency.forEach((_currency) => {
+          resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase(), type: "amount" })
+        })
+      }
+    }
+    else if (element.type === "percent") {
+      resetFields.push({ fieldName: element.fieldName, type: "percent" })
+    }
+  })
+  const sumValues: any = {}
+  resetFields.forEach((_field: any) => {
+    sumValues[_field.fieldName] = 0;
+    product.forEach(element => {
+      sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
+    });
+  });
+  packages.forEach((row) => {
+    resetFields.forEach((ele) => {
+      if (ele.type === "amount") {
+        row[ele.fieldName] = sumValues[ele.fieldName];
+      }
+      else {
+        if (ele.fieldName === "discountPercentage") {
+          row[ele.fieldName] = parseFloat(((sumValues[`discount_${currency}`] / sumValues[`totalPrice_${currency}`]) * 100)?.toFixed(2));
+        }
+        if (ele.fieldName === "taxPercentage") {
+          row[ele.fieldName] = parseFloat(((sumValues[`tax_${currency}`] / (sumValues[`totalPrice_${currency}`] - sumValues[`discount_${currency}`])) * 100)?.toFixed(2));
+        }
+      }
+    })
+  })
+}
+
 const rateChangeFields = ["unit", "pricingMethod", "pricingCondition"]
 
 const RentalJobQtyDialog: FC<EditDialogProps> = (
@@ -92,6 +175,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       });
       const unitOptions: any = arrayToDropwdownOption(unit)
       const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
+
       data.forEach((element) => {
         if (element.fieldName === "unit") {
           element.option = unitOptions;
@@ -99,6 +183,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         if (element.fieldName === "pricingMethod") {
           element.option = pricingMethodOptions;
         }
+        
+        
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
@@ -106,7 +192,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit)
       setInitialData({
         fields: data,
-        values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", estimateJobDuration: "", actualJobDuration: "" },
+        values: { ...getObjKeys("", data), estimateStartDate: "", estimateEndDate: "", actualStartDate: "", actualEndDate: "", estimateJobDuration: "", actualJobDuration: "" }
       });
     }
     else {
@@ -138,10 +224,29 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         data = data.filter((e) => !["actualStartDate", "actualEndDate", "actualJobDuration"].includes(e.fieldName))
       }
 
-      setInitialData({
-        fields: data,
-        values: getObjKeysWithValues(rowData, data),
-      });
+      let initialValues = getObjKeysWithValues(rowData, data)
+      const priceFieldName = "price_" + rentalManagementData?.currency?.toLowerCase();
+
+      if(rowData[priceFieldName]) {
+        getPricing({ ...initialValues, [priceFieldName]: rowData[priceFieldName] }).then((price: any) => {
+          const result = autoCalculateSpecificFields({ [priceFieldName]: price, [priceFieldName]: rowData[priceFieldName] }, initialValues, data)
+          initialValues = {...initialValues, ...result}
+          setInitialData({
+            fields: data,
+            values: initialValues
+          });
+       })
+     } else {
+       setInitialData({
+         fields: data,
+         values: initialValues
+       });
+     }
+    // setInitialData({
+    //        fields: data,
+    //        values: initialValues
+    //      });
+
     }
     EvaluteproductFields(data);
   }
@@ -172,90 +277,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     } else {
       return "Bulk Edit";
     }
-  }
-
-  const resetValueZero = (rows) => {
-    const resetFields = []
-    allFields.forEach((element) => {
-      if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
-        if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            resetFields.push(element.fieldName + "_" + _unit.toLowerCase())
-          })
-        }
-        else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              resetFields.push(element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase())
-            })
-          })
-        }
-        else if (element.type === "currencyAmount") {
-          element.displayCurrency.forEach((_currency) => {
-            resetFields.push(element.fieldName + "_" + _currency.toLowerCase())
-          })
-        }
-      }
-      else if (element.type === "percent") {
-        resetFields.push(element.fieldName)
-      }
-    })
-    rows.forEach((row) => {
-      resetFields.forEach((fieldName) => {
-        row[fieldName] = 0;
-      })
-    })
-  }
-
-  const sumOnParent = (packages, product) => {
-    const resetFields = []
-    allFields.forEach((element) => {
-      if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
-        if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            resetFields.push({ fieldName: element.fieldName + "_" + _unit.toLowerCase(), type: "amount" })
-          })
-        }
-        else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), type: "amount" })
-            })
-          })
-        }
-        else if (element.type === "currencyAmount") {
-          element.displayCurrency.forEach((_currency) => {
-            resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase(), type: "amount" })
-          })
-        }
-      }
-      else if (element.type === "percent") {
-        resetFields.push({ fieldName: element.fieldName, type: "percent" })
-      }
-    })
-    const sumValues: any = {}
-    resetFields.forEach((_field: any) => {
-      sumValues[_field.fieldName] = 0;
-      product.forEach(element => {
-        sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
-      });
-    });
-    packages.forEach((row) => {
-      resetFields.forEach((ele) => {
-        if (ele.type === "amount") {
-          row[ele.fieldName] = sumValues[ele.fieldName];
-        }
-        else {
-          const cur = rentalManagementData?.currency?.toLowerCase();
-          if (ele.fieldName === "discountPercentage") {
-            row[ele.fieldName] = parseFloat(((sumValues[`discount_${cur}`] / sumValues[`totalPrice_${cur}`]) * 100)?.toFixed(2));
-          }
-          if (ele.fieldName === "taxPercentage") {
-            row[ele.fieldName] = parseFloat(((sumValues[`tax_${cur}`] / (sumValues[`totalPrice_${cur}`] - sumValues[`discount_${cur}`])) * 100)?.toFixed(2));
-          }
-        }
-      })
-    })
   }
 
   const handleSubmit = async (values) => {
@@ -309,7 +330,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
             }
           })
 
-          sumOnParent(parent, sameParent)
+          sumOnParent(parent, sameParent, allFields, currency)
           rows = [...rows, ...parent]
         }
 
@@ -331,7 +352,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
               }
             }
           })
-          sumOnParent(packages, product)
+          sumOnParent(packages, product, allFields, currency)
           rows = [...rows, ...packages]
         })
       }
@@ -345,7 +366,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         let rows: any = [{ ...rowData, ...values }]
         if (rowData.type === "package") {
           const product = material.filter((e) => e.parentId === rowData._id)
-          resetValueZero(product)
+          resetValueZero(product, allFields)
           rows = [...rows, ...product]
         }
         else if (rowData.type === "product" && rowData.parentId) {
@@ -359,7 +380,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                 }
               }
             })
-            sumOnParent(packages, product)
+            sumOnParent(packages, product, allFields, currency)
             rows = [...rows, ...packages]
           }
         }
@@ -369,7 +390,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     }
   };
 
-  const getPricing = async (values: any, pricingMethodOptions: any = null) => {
+  async function getPricing(values: any, pricingMethodOptions: any = null) {
     if (rowData) {
       if (values?.qty > 0 && values?.pricingMethod !== '' && values?.unit !== '') {
         const priceData: any = await calculatePrice(rentalManagementData, [{
