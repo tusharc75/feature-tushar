@@ -43,7 +43,6 @@ const ServiceTable = ({ packageId, packageData }) => {
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
 
   let canServiceAdd = packageData?.packageType === 'Product' && !packageData?.products?.length ? false : true;
-  console.log('canServiceAdd', canServiceAdd);
   useEffect(() => {
     fetchGridColumns();
     fetchData();
