@@ -9,6 +9,7 @@ export const groupByKey = (arr = [], keyGetter) => {
     r[keyGetter(a)].push(a);
     return r;
   }, Object.create(null));
+  console.log(result);
   return result;
 };
 
@@ -57,6 +58,22 @@ const setDataBySectionName = (secName) => {
     case 'Inventory Management':
       text = 'Manage Inventory and Purchases Smartly.';
       break;
+
+    case 'Sales Management':
+      text = 'Convert leads and close sales deals faster.';
+      break;
+    case 'Rental Management':
+      text = 'Fulfill Rental Orders Faster.';
+      break;
+    case 'eCommerce':
+      text = 'Simplified eCommerce functionalities to smoothen your lives.';
+      break;
+    case 'Repair & Maintenance Management':
+      text = 'Repair and Maintain your product and services at ease.';
+      break;
+    case 'Service Management':
+      text = 'Build your own Template, Manage Roles and Entities.';
+      break;
     default:
       text = '';
   }
@@ -76,5 +93,10 @@ const colorPalette = {
   Accounts: '#FFFAEC',
   Activities: '#F6F1FF',
   'Dynamic Forms': '#FFEFEE',
-  'Inventory Management': '#F3F8FF'
+  'Inventory Management': '#FFF7F2',
+  'Sales Management': '#FFEFEE',
+  'Rental Management': '#F3F8FF',
+  eCommerce: '#F9FDEC',
+  'Repair & Maintenance Management': '#FFFAEC',
+  'Service Management': '#F6F1FF'
 };
