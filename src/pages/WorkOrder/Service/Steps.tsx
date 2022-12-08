@@ -595,7 +595,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                           <Box ml={1}>
                             <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
                           </Box>
-                        ) : stepData?.status === 'start' && isStepValid ? (
+                        ) : stepData?.status === 'start' ? (
                           step?.isPassFail ? (
                             <Box display="inline-flex">
                               <Button
