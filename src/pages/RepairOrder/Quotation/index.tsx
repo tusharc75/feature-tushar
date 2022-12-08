@@ -72,11 +72,12 @@ const Quotation = ({
   allowedToEdit,
   allowedToDelete,
   setQuotationVersionData,
-  invoiceStep = false,
+  invoiceStep = false
 }) => {
-
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
@@ -114,10 +115,10 @@ const Quotation = ({
       .then(({ data: { data } }) => {
         setQuotationData(data);
         let keys = Object.keys(data.versions);
-        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1])
+        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1]);
         setCurrentVersion(tempCurrentVersion);
-        setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] })
-        setNextStep(data?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false)
+        setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
+        setNextStep(data?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
       });
   };
 
@@ -140,7 +141,7 @@ const Quotation = ({
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
-        },
+        }
       },
       {
         accessor: 'detail',
@@ -168,17 +169,50 @@ const Quotation = ({
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'serializedAsset'
-                    ? routes.serializedAssetDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'serializedAsset'
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'package'
-                        ? routes.packagesDetail.path
-                        : routes.serviceMasterDetail.path
+                      ? routes.packagesDetail.path
+                      : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
                 );
               }}
             />
+          </div>
+        )
+      },
+      {
+        accessor: 'productDetail',
+        Header: 'Product Detail',
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
+            <p
+              className="text-truncate"
+              title={
+                row.original?.productDetail?.productName
+                  ? row.original?.productDetail?.productName
+                  : row.original?.serializedAssetDetail?.product?.optionLabel
+              }
+            >
+              {row.original?.productDetail?.productName ? (
+                <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productDetail?._id}`} target="_blank">
+                  {row.original?.productDetail?.productName}
+                </a>
+              ) : row.original?.serializedAssetDetail?.product?.optionLabel ? (
+                <a
+                  className="link text-truncate"
+                  href={`${routes.productDetail.path}/${row.original?.serializedAssetDetail?.product?.optionValue}`}
+                  target="_blank"
+                >
+                  {row.original?.serializedAssetDetail?.product?.optionLabel}
+                </a>
+              ) : (
+                <NoDataCell />
+              )}
+            </p>
           </div>
         )
       },
@@ -313,7 +347,7 @@ const Quotation = ({
       //     return <>Total</>;
       //   };
       // } else
-       if (element.accessor === 'qtyDisplay') {
+      if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
             .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
@@ -339,21 +373,24 @@ const Quotation = ({
   const fetchProductInventory = async () => {
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
+    const response = await axiosInstance().get(
+      `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
+    );
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -370,14 +407,15 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -576,7 +614,7 @@ const Quotation = ({
             {allowedToEdit && (
               <div>
                 {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                   <Button
                     disabled={material
                       .filter((e) => e.parentId === null)
