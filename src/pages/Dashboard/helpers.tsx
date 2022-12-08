@@ -9,7 +9,6 @@ export const groupByKey = (arr = [], keyGetter) => {
     r[keyGetter(a)].push(a);
     return r;
   }, Object.create(null));
-  console.log(result);
   return result;
 };
 
