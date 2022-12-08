@@ -120,6 +120,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceId = null, referenceD
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
     if (reference === "repairOrder") {
       deepFilter = `${deepFilter}&entityWise=0`;
+      deepFilter += "&repairOrder=1"
       if (referenceData?.customerAccount) {
         deepFilter = `${deepFilter}&owner=${referenceData?.customerAccount}`;
       }
