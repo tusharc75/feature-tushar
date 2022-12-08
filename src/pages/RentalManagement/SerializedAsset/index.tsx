@@ -917,7 +917,7 @@ const SerializedAsset = ({
                     closeActions();
                   }}
                 >
-                  {`Remove Asset/Inventory`}
+                  {`Remove Asset/Serial Number`}
                 </MenuItem>
               </Menu>
               {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
