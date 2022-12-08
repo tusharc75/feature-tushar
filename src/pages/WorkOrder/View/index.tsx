@@ -113,8 +113,6 @@ const WorkOrderViews = (props) => {
           target: `${s._id}`
         });
         s?.steps?.map((step) => {
-          console.log(stepDatas, step?._id);
-          console.log(stepDatas[step?._id]);
           flow.push({
             id: `${step?._id}`,
             sourcePosition: 'right',
