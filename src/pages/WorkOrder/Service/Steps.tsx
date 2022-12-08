@@ -508,7 +508,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             ?.map((step, index) => {
               const { stepData, isStepValid } = getFields(step);
               let isPrevStepDone: any = false;
-              const isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
+              let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
               let isSameStartStep = false;
               if (index > 0) {
                 const prevStep = serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)[index - 1];
@@ -519,6 +519,9 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                 isSameStartStep = true;
               } else {
                 isSameStartStep = false;
+              }
+              if (referencType === 'workOrderTechnician') {
+                isMeTechnician = true;
               }
               startIdx = step?.order || 0;
               return (
@@ -592,7 +595,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                           <Box ml={1}>
                             <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
                           </Box>
-                        ) : stepData?.status === 'start' && isStepValid ? (
+                        ) : stepData?.status === 'start' ? (
                           step?.isPassFail ? (
                             <Box display="inline-flex">
                               <Button

@@ -422,7 +422,7 @@ export default function StepDialog({
                             {values['isPassAddon'] && (
                               <Autocomplete
                                 options={[
-                                  { optionValue: 'all', optionLabel: 'Select All' },
+                                  { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
                                   ...services?.filter((data: any) => data.optionValue !== serviceId)
                                 ]}
                                 fullWidth

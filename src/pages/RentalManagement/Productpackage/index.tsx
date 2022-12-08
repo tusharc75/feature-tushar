@@ -29,7 +29,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import moment from 'moment';
 import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import RentalJobQtyDialog from './RentalJobQtyDialog';
+import RentalJobQtyDialog, { resetValueZero, sumOnParent } from './RentalJobQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
@@ -76,7 +76,7 @@ const Productpackage = ({
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
-
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState({open: false, data: null});
   const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -625,6 +625,62 @@ const Productpackage = ({
     setDeleteData(obj);
   };
 
+  const onSaveEdit = (inputField, updatedData) => {
+    const currency = rentalManagementData?.currency.toLowerCase()
+    const requiredItems = [];
+    allFields.forEach(({ fieldName, required, type }) => {
+      fieldName = type === 'currencyAmount' ? `${fieldName}_${currency}` : fieldName;
+      if (required) {
+        if (isNaN(updatedData[fieldName]) && !updatedData[fieldName]) {
+          requiredItems.push(fieldName);
+        } else if (!isNaN(updatedData[fieldName]) && updatedData[fieldName] <= 0) {
+          requiredItems.push(fieldName);
+        }
+      }
+    });
+
+    if (requiredItems.length > 0) {
+      handleOpen({ ...updatedData });
+    } else {
+      onConfirmSave(inputField, updatedData)
+    }
+  };
+
+  const onConfirmSave = (inputField, updatedData) => {
+    const currency = rentalManagementData?.currency.toLowerCase();
+    const rowData = material.find((d) => d._id === updatedData._id)
+      if (rowData.parentId && !showConfirmationDialog.open) {
+        setShowConfirmationDialog({open: true, data: {
+          inputField, updatedData
+        }});
+      } else {
+        let rows: any = [{ ...rowData, ...updatedData }]
+        if (rowData.type === "package") {
+          const product = material.filter((e) => e.parentId === rowData._id)
+          resetValueZero(product, allFields)
+          rows = [...rows, ...product]
+        }
+        else if (rowData.type === "product" && rowData.parentId) {
+          if (updatedData[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
+            const packages: any = material.filter((e) => e._id === rowData.parentId)
+            const product: any = material.filter((e) => e.parentId === rowData.parentId)
+            product.forEach((element) => {
+              if (element._id === rowData._id) {
+                for (let key in updatedData) {
+                  element[key] = updatedData[key];
+                }
+              }
+            })
+            sumOnParent(packages, product, allFields, currency)
+            rows = [...rows, ...packages]
+          }
+        }
+        rows = calculateRowsField(material, inputField, allFields, updatedData);
+        handleSaveData(rows)
+        setShowConfirmationDialog({open: false, data: {}});
+      }
+  }
+
   return (
     <Fragment>
       <Grid container spacing={2}>
@@ -755,10 +811,7 @@ const Productpackage = ({
                 hideSelection={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_product_package"
                 isClientSideGrid={true}
-                onSaveEdit={(inputField, updatedData) => {
-                  let rows = calculateRowsField(material, inputField, allFields, updatedData);
-                  handleSaveData(rows);
-                }}
+                onSaveEdit={onSaveEdit}
                 material={material}
               />
             </Box>
@@ -852,6 +905,18 @@ const Productpackage = ({
             </MenuItem> */}
           </MenuList>
         </Popover>
+      )}
+      {showConfirmationDialog.open && (
+        <ConfirmationDialog
+          open={true}
+          message="Would you prefer to override the product-level price configuration?"
+          onOk={() => {
+            onConfirmSave(showConfirmationDialog.data?.inputField, showConfirmationDialog.data?.updatedData)
+          }}
+          onClose={() => {
+            setShowConfirmationDialog({open: false, data: {}});
+          }}
+        />
       )}
       {priceDataDialog.open && (
         <CalculatePriceDialog

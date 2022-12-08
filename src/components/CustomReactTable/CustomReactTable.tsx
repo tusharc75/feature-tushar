@@ -105,7 +105,7 @@ export default function CustomReactTable({
     []
   );
 
-  const [cellValue, setCellValue] = React.useState('');
+  const [cellValue, setCellValue] = React.useState(null);
   const [isCellEditing, setIsCellEditing] = React.useState(false);
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
 
@@ -503,7 +503,7 @@ export default function CustomReactTable({
                               const value = parseInt(e.target.value)
                               if(value < 0 || isNaN(value)) return
 
-                              setCellValue(e.target.value)
+                              setCellValue(value)
                             }}
                           />
                         ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
