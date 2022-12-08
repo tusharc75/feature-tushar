@@ -145,14 +145,20 @@ const WorkOrder = ({
       },
       {
         accessor: 'assignedUsers',
-        Header: 'Assigned Users',
+        Header: 'Assigned Technician',
         Cell: ({ row }) =>
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
-            row?.original['assignedUsers'].map((e, i)=>{
-              return (i === row?.original['assignedUsers'].length - 1 ) ?
-                 <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`}>{e?.optionLabel}</a> : 
-                 <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`}>{e?.optionLabel}, </a>
-              })
+            row?.original['assignedUsers'].map((e, i) => {
+              return i === row?.original['assignedUsers'].length - 1 ? (
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`}>
+                  {e?.optionLabel}
+                </a>
+              ) : (
+                <a className="link text-truncate" target="_blank" href={`${routes.userDetail.path}/${e.optionValue}`}>
+                  {e?.optionLabel},{' '}
+                </a>
+              );
+            })
           ) : (
             <NoDataCell />
           )
@@ -439,7 +445,7 @@ const WorkOrder = ({
                     setUserAssignDialog(true);
                   }}
                 >
-                  Assign Users
+                  Assign Technician
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
