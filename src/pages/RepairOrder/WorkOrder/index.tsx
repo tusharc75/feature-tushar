@@ -175,7 +175,7 @@ const WorkOrder = ({
       },
       {
         accessor: 'assignedUsers',
-        Header: 'Assigned Users',
+        Header: 'Assigned Technician',
         Cell: ({ row }) =>
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers'].map((e, i) => {
@@ -472,7 +472,7 @@ const WorkOrder = ({
                     setUserAssignDialog(true);
                   }}
                 >
-                  Assign Users
+                  Assign Technician
                 </MenuItem>
                 <MenuItem
                   onClick={() => {

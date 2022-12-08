@@ -282,7 +282,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
     <div className={styles.cardSection}>
       <div className={styles.cardContainer}>
         {sections.map((section) => {
-          if (section.head === 'Collaboration Tools' || section.head === 'Setups') return <></>;
+          if (section.head === 'Collaboration Tools' || section.head === 'Setups' || section.head === 'Activities') return <></>;
           const style = { '--bg_color': section.color, textAlign: 'left' } as React.CSSProperties;
           return (
             <button
@@ -366,12 +366,12 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
     (mode === 'Collaboration Tools' && `By using Collaboration tools, collaborate with or within team members easily`) ||
     (mode === 'Setups' && `List of all product and category setups`);
 
-  const checkLinkAvailAvailability = ['Product Master', 'Pricing Setup', 'Lead Time Master'];
+  const checkLinkAvailability = ['Product Master', 'Pricing Setup', 'Lead Time Master'];
 
   useEffect(() => {
     if (objBySectionName) {
-      if (mode === 'Collaboration Tools') setColabData(objBySectionName['Activities'] || null);
-      else setColabData(objBySectionName['Product Setup'] || null);
+      if (mode === 'Collaboration Tools') setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || null);
+      else setColabData(objBySectionName['Setups'] || objBySectionName['Product Setup'] || null);
     }
   }, [objBySectionName]);
 
@@ -389,7 +389,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
             <>
               <ul className={styles.linkList}>
                 {colabData
-                  ?.filter((item) => !item?.isHidden && checkLinkAvailAvailability.includes(item.resourceLabel || item.name))
+                  ?.filter((item) => !item?.isHidden && checkLinkAvailability.includes(item.resourceLabel || item.name))
                   .map((item) => (
                     <li key={item.name}>
                       <Link to={handleRoutes(item)} className={styles.dialogLinks}>
