@@ -502,6 +502,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                             p={2}
                             onClick={() => {
                               if (
+                                ((workOrderData?.owner?.optionValue === user._id ||
+                                  workOrderData?.owner?.collaborator?.find((u) => u?.optionValue === user._id)) &&
+                                  data?.type === 'service') ||
                                 !(
                                   data?.type !== 'service' ||
                                   data?.order > disabledServicesOrder ||
@@ -595,11 +598,14 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                               </Grid>
                               {!isColapsed && (
                                 <>
-                                  {!(
-                                    data?.type !== 'service' ||
-                                    data?.order > disabledServicesOrder ||
-                                    (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-                                  ) && (
+                                  {(((workOrderData?.owner?.optionValue === user._id ||
+                                    workOrderData?.owner?.collaborator?.find((u) => u?.optionValue === user._id)) &&
+                                    data?.type === 'service') ||
+                                    !(
+                                      data?.type !== 'service' ||
+                                      data?.order > disabledServicesOrder ||
+                                      (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
+                                    )) && (
                                     <Grid item xs={2} container justify="flex-end">
                                       <IconButton
                                         size="small"
@@ -719,7 +725,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                     )}
                                   </Box>
                                 </Box>
-                                {!(
+                                {((workOrderData?.owner?.optionValue === user._id ||
+                                  workOrderData?.owner?.collaborator?.find((u) => u?.optionValue === user._id)) &&
+                                  data?.type === 'service') ||
+                                !(
                                   data?.type !== 'service' ||
                                   data?.order > disabledServicesOrder ||
                                   (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
