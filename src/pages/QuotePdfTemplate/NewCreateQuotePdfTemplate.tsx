@@ -165,12 +165,14 @@ export default function NewCreateQuotePdfTemplate() {
     if (id && id !== '0') {
       (async () => {
         let tempPdfTemplate = null
+        let tempQuoteData = null
         if (queryParams.quote && queryParams.version) {
           history.replace(`?quote=${queryParams.quote}&version=${queryParams.version}`)
           try {
             const res = await axiosInstance().get(`${qbApi}/${queryParams?.quote}?entity=${selectedEntity}`);
             const { data: { data } } = res;
             setQuoteData(data)
+            tempQuoteData = data
             setVersion(queryParams.version)
             if (data?._id) {
               setHasPermissionToUpdate(true);
@@ -230,7 +232,7 @@ export default function NewCreateQuotePdfTemplate() {
               aboveTable: data?.aboveTable,
               belowTable: data?.belowTable
             });
-            if (quoteData?._id) {
+            if (tempQuoteData?._id) {
               setHasPermissionToUpdate(true);
             } else if (
               data?.owner &&
