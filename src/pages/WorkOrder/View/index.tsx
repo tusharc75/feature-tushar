@@ -23,6 +23,18 @@ const customNodeStyles = {
     background: WORKORDER_SERVICE_COLOR.postWork,
     borderColor: 'green'
   },
+  stepPassed: {
+    name: 'Step Passed',
+    background: '#ffd65b',
+    borderColor: 'green',
+    cursor: 'pointer'
+  },
+  stepFailed: {
+    name: 'Step Failed',
+    background: '#ffd65b',
+    borderColor: 'red',
+    cursor: 'pointer'
+  },
   step: {
     name: 'Step',
     ...COLOUR_MASTER.assets,
@@ -48,6 +60,11 @@ const WorkOrderViews = (props) => {
   async function fetchViewsData() {
     setLoading(true);
     try {
+      const workOrderData: any = await axiosInstance().get(`${routes.workOrder.path}/${workOrderId}/steps-data`);
+      const stepDatas = {};
+      workOrderData?.data?.data?.map((s) => {
+        stepDatas[s?.stepId] = s?.passFailStatus;
+      });
       var xPosition = 0;
       var flow: any[] = [
         {
@@ -68,7 +85,6 @@ const WorkOrderViews = (props) => {
       const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`);
       const allServices = workOrderServices?.data?.data || [];
       const allSteps = [];
-
       if (allServices?.length) xPosition += 300;
       let serviceStepIdx = 0;
       allServices?.map((s, sIdx) => {
@@ -97,6 +113,8 @@ const WorkOrderViews = (props) => {
           target: `${s._id}`
         });
         s?.steps?.map((step) => {
+          console.log(stepDatas, step?._id);
+          console.log(stepDatas[step?._id]);
           flow.push({
             id: `${step?._id}`,
             sourcePosition: 'right',
@@ -106,13 +124,28 @@ const WorkOrderViews = (props) => {
               ref_type: 'step',
               // ref_id: item.inventory,
               label: (
-                <HtmlTooltip arrow placement="top" title={'Step'}>
+                <HtmlTooltip
+                  arrow
+                  placement="top"
+                  title={
+                    stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
+                      ? 'Step Passed'
+                      : stepDatas[step?._id] === 'Failed'
+                      ? 'Step Failed'
+                      : 'Step'
+                  }
+                >
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step?.stepName || ''}</div>
                 </HtmlTooltip>
               )
             },
             position: { x: xPosition + 300, y: serviceStepIdx * 80 },
-            style: customNodeStyles.step
+            style:
+              stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
+                ? customNodeStyles.stepPassed
+                : stepDatas[step?._id] === 'Failed'
+                ? customNodeStyles.stepFailed
+                : customNodeStyles.step
           });
           flowEdge.push({
             id: `workOrder-service-steps-${step._id}`,
