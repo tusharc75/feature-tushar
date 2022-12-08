@@ -283,6 +283,7 @@ const Productpackage = ({
         });
       }
     });
+    // eslint-disable-next-line no-lone-blocks
     {
       isMobile ? (
         <Box display={'none'} />
@@ -295,8 +296,10 @@ const Productpackage = ({
           sticky: 'right',
           disableFilters: true,
           canDrag: false,
-          Cell: ({ row }) => (
-            <HtmlTooltip title={row.original.hideSelection && !allowedToEdit ? '' : 'Edit'}>
+          Cell: ({ row }) => {
+            return (
+              <HtmlTooltip title={row.original.hideSelection && !allowedToEdit ? 'Asset is already assigned' : 'Delete'}>
+              <span>
               <IconButton
                 size="small"
                 aria-label="Details"
@@ -307,10 +310,14 @@ const Productpackage = ({
                   setDeleteData(obj);
                 }}
               >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            </HtmlTooltip>
-          )
+                
+                <DeleteIcon fontSize="small" color={row.original.hideSelection && !allowedToEdit ? "disabled" : "error"} />
+             </IconButton>
+              </span>
+              </HtmlTooltip>
+             
+            )
+          }
         })
       );
     }

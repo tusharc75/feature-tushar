@@ -779,15 +779,17 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 
           {anchorEl && (
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-              <MenuItem
-                disabled={!allowedToEdit}
-                onClick={() => {
-                  setUserAssignDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Assign Technicians
-              </MenuItem>
+              {allowedToEdit && (
+                <MenuItem
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setUserAssignDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Assign Technicians
+                </MenuItem>
+              )}
               <MenuItem
                 disabled={!allowedToEdit}
                 onClick={() => {

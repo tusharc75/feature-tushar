@@ -265,6 +265,7 @@ const Services = ({
         });
       }
     });
+    // eslint-disable-next-line no-lone-blocks
     {
       isMobile ? (
         <Box display={'none'} />
@@ -278,20 +279,23 @@ const Services = ({
           disableFilters: true,
           canDrag: false,
           Cell: ({ row }) =>
-            !row.original.hideSelection &&
-            allowedToEdit && (
-              <IconButton
+              <HtmlTooltip title={ row.original.hideSelection && !allowedToEdit ? "Service is already assigned" : "Delete"}>
+                <span>
+                <IconButton
                 size="small"
                 aria-label="Details"
+                disabled={ row.original.hideSelection && !allowedToEdit }
                 onClick={() => {
                   const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
                   getNestedSubRows(obj, row.original);
                   setDeleteData(obj);
-                }}
+                }} 
               >
-                <DeleteIcon fontSize="small" color="error" />
+                <DeleteIcon fontSize="small" color={ row.original.hideSelection && !allowedToEdit ? "disabled" : "error" } />
               </IconButton>
-            )
+                </span>
+              </HtmlTooltip>
+            
         })
       );
     }
