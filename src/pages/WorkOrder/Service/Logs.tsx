@@ -128,6 +128,7 @@ const Logs = ({ handleClose, workOrderId = null, serviceID, serviceName }) => {
     let message;
     const serviceName = row?.service?.optionLabel ? row?.service?.optionLabel : '';
     const stepName = row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : '';
+    const consumedProd = row?.data?.products?.map((item) => item.productName);
 
     switch (row?.operation) {
       default:
@@ -149,7 +150,7 @@ const Logs = ({ handleClose, workOrderId = null, serviceID, serviceName }) => {
         message = `<span>Added value</span> ${stepName} ${serviceName}`;
         break;
       case operations.consumed:
-        message = `<span>Consumed</span> ${stepName} ${serviceName}`;
+        message = `<span>Consumed</span> <br><strong>Products: </strong>${consumedProd.join(', ')}`;
         break;
       case operations.valueUpdated:
         message = `<span>Updated value</span> ${stepName} ${serviceName}`;
