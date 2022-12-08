@@ -364,7 +364,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   };
 
   const handleApplyDate = async () => {
-    let values = {
+    let tempValues = {
       actualEndDate: endDate,
       estimateEndDate: endDate
     };
@@ -388,6 +388,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       }
       let priceFieldName = Object.keys(element).find(d => d.includes("price_"))
       let calValues: any
+      let values = JSON.parse(JSON.stringify(tempValues))
       if (element.pricingMethod === "Per Week") {
         values["pricingMethod"] = "Per Day"
         if (priceFieldName) values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 7 //original becaause element is change when apply

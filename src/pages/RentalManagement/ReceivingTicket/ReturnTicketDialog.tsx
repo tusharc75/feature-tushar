@@ -155,6 +155,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
                                                   type="number"
                                                   size="small"
                                                   component={TextField}
+                                                  disabled
                                                   name="consumeQuantity"
                                                   placeholder="Consume Quantity"
                                                   value={data.consumeQuantity}
