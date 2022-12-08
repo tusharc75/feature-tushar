@@ -12,6 +12,7 @@ import { BiRefresh, BiMinus } from 'react-icons/bi';
 import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-icons/bs';
 import moment from 'moment';
 import { FaUser as UserIcon } from 'react-icons/fa';
+import { MdBolt } from 'react-icons/md';
 
 const Logs = ({ handleClose, workOrderId = null, serviceID, serviceName }) => {
   const {
@@ -93,6 +94,10 @@ const Logs = ({ handleClose, workOrderId = null, serviceID, serviceName }) => {
         break;
       case operations.valueUpdated:
         icon = <BiRefresh />;
+        break;
+      case operations.consumed:
+        icon = <MdBolt />;
+        break;
     }
     return icon;
   };
