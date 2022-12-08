@@ -100,9 +100,9 @@ const WorkOrder = ({
                       : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
-                      ? routes.serializedAsset.path
+                      ? routes.serializedAssetDetail.path
                       : routes.packagesDetail.path
-                  }/detail/${row.original.materialId}`
+                  }/${row.original.materialId}`
                 );
               }}
             />
@@ -142,6 +142,38 @@ const WorkOrder = ({
           ) : (
             <NoDataCell />
           )
+      },
+      {
+        accessor: 'productDetail',
+        Header: 'Product Detail',
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
+            <p
+              className="text-truncate"
+              title={
+                row.original?.productDetail?.productName
+                  ? row.original?.productDetail?.productName
+                  : row.original?.serializedAssetDetail?.product?.optionLabel
+              }
+            >
+              {row.original?.productDetail?.productName ? (
+                <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productDetail?._id}`} target="_blank">
+                  {row.original?.productDetail?.productName}
+                </a>
+              ) : row.original?.serializedAssetDetail?.product?.optionLabel ? (
+                <a
+                  className="link text-truncate"
+                  href={`${routes.productDetail.path}/${row.original?.serializedAssetDetail?.product?.optionValue}`}
+                  target="_blank"
+                >
+                  {row.original?.serializedAssetDetail?.product?.optionLabel}
+                </a>
+              ) : (
+                <NoDataCell />
+              )}
+            </p>
+          </div>
+        )
       },
       {
         accessor: 'assignedUsers',
@@ -407,18 +439,16 @@ const WorkOrder = ({
         <Box display="flex" alignItems="center" justifyContent={'flex-end'} paddingX={1} gridColumnGap={8} flex={1}>
           {allowedToEdit && (
             <Box display="flex" gridColumnGap={5}>
-              {!isPostWorkService && (
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedProducts.length === 0}
-                >
-                  Actions <ExpandMore />
-                </Button>
-              )}
+              <Button
+                variant="outlined"
+                color="default"
+                size="small"
+                onClick={openActions}
+                aria-controls="action-menu"
+                disabled={!isPostWorkService && selectedProducts.length === 0}
+              >
+                Actions <ExpandMore />
+              </Button>
               <Menu
                 anchorEl={anchorActionEl}
                 keepMounted

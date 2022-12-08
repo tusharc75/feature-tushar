@@ -2122,9 +2122,11 @@ export const WORKORDER_SERVICE_COLOR = {
 
 export const WORKORDER_SERVICE_STATUS = {
   pending: 'Pending',
+  backlog: 'Backlog',
   inProgress: 'In-Progress',
   completed: 'Completed',
-  failed: 'Failed'
+  failed: 'Failed',
+  
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
