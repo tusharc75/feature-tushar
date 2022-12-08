@@ -155,23 +155,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
           const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
           setServiceSteps(services);
-          const isMeOwnerOrAssignee =
-            workOrderData?.collaborator?.find((d) => d?.optionValue === user._id) || workOrderData?.owner?.optionValue === user._id;
-          if (services?.length && isMeOwnerOrAssignee) {
+          if (services?.length) {
             let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
             if (pendingServiceIndex === -1) {
               pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
-            }
-            setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
-          }
-          if (services?.length) {
-            let pendingServiceIndex = services.findIndex(
-              (d) => d.status === WORKORDER_SERVICE_STATUS.inProgress && d?.assignedUsers?.find((d) => d?.optionValue === user._id)
-            );
-            if (pendingServiceIndex === -1) {
-              pendingServiceIndex = services.findIndex(
-                (d) => d.status === WORKORDER_SERVICE_STATUS.pending && d?.assignedUsers?.find((d) => d?.optionValue === user._id)
-              );
             }
             setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
           }
@@ -371,7 +358,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         borderWidth: '1px',
         borderStyle: 'solid',
         borderColor: 'rgba(25, 24, 24, 0.19)',
-        cursor: 'not-allowed',
+        cursor: isOwnerOrCollaborator ? 'pointer' : 'not-allowed',
         PointerEvent: 'none',
         opacity: '.5'
       };
@@ -392,29 +379,18 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         borderRadius: '3px'
       };
     } else {
-      if (!isOwnerOrCollaborator && !isTechnician) {
-        return {
-          borderWidth: '1px',
-          borderStyle: 'solid',
-          borderColor: 'rgba(25, 24, 24, 0.19)',
-          cursor: 'not-allowed',
-          PointerEvent: 'none',
-          opacity: '.5'
-        };
-      } else {
-        return {
-          borderWidth: '1px',
-          borderStyle: 'solid',
-          backgroundColor:
-            data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
-              ? '#E9FFE8'
-              : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-              ? '#FFE9EA'
-              : 'white',
-          borderColor: 'rgb(224, 224, 224)',
-          cursor: 'pointer'
-        };
-      }
+      return {
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        backgroundColor:
+          data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
+            ? '#E9FFE8'
+            : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
+            ? '#FFE9EA'
+            : 'white',
+        borderColor: 'rgb(224, 224, 224)',
+        cursor: 'pointer'
+      };
     }
   };
 
@@ -514,8 +490,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                   }}
                 >
                   {serviceSteps?.map((data, index) => {
-                    // !selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) &&
-                    //   !(workOrderData?.owner?.optionValue === user._id || workOrderData?.owner?.collaborator?.find((u) => u?.optionValue === user._id))
                     let isOwnerOrCollaborator =
                       workOrderData?.owner?.optionValue === user._id || workOrderData?.owner?.collaborator?.find((u) => u?.optionValue === user._id);
                     let isTechnician = data?.assignedUsers?.some((u: any) => u?.optionValue === user?._id);
