@@ -302,7 +302,7 @@ export const genrateColoum = (fields, column, rendererNames, editable, renderedF
                         col.width = 180
                         col.show = true
                         col.leval = ele.leval
-                        if (!ele.isFormula && !ele.isUneditable && editable) {
+                        if (!ele.isFormula && !ele.isUneditable && (ele?.isColumnEditable || editable)) {
                             col.cellRenderer = "commonRenderer";
                             col.cellEditor = "numericCellEditor";
                             col.editable = true;
@@ -325,7 +325,7 @@ export const genrateColoum = (fields, column, rendererNames, editable, renderedF
                             col.width = 180
                             col.show = true
                             col.leval = ele.leval
-                            if (!ele.isFormula && !ele.isUneditable && editable) {
+                            if (!ele.isFormula && !ele.isUneditable && (ele?.isColumnEditable || editable)) {
                                 col.cellRenderer = "commonRenderer";
                                 col.cellEditor = "numericCellEditor";
                                 col.editable = true;
@@ -348,7 +348,7 @@ export const genrateColoum = (fields, column, rendererNames, editable, renderedF
                         col.width = 180
                         col.show = true
                         col.leval = ele.leval
-                        if (!ele.isFormula && !ele.isUneditable && editable) {
+                        if (!ele.isFormula && !ele.isUneditable && (ele?.isColumnEditable || editable)) {
                             col.cellRenderer = "commonRenderer";
                             col.cellEditor = "numericCellEditor";
                             col.editable = true;
@@ -364,7 +364,7 @@ export const genrateColoum = (fields, column, rendererNames, editable, renderedF
             if (column.filter((_c) => _c.field === ele.fieldName && _c.headerName === ele.fieldLabel).length === 0) {
                 let currentColumn: any = getColumnData(renderedFrom ? renderedFrom : routes.productBuilder.title, ele, routes.productBuilder.path, true)
                 if (ele.type === "decimal" || ele.type === "percent" || ele.type === "singleLine" || ele.type === "multiLine") {
-                    if (!ele.isFormula && !ele.isUneditable && editable) {
+                    if (!ele.isFormula && !ele.isUneditable && (ele?.isColumnEditable || editable)) {
                         if (ele.type === "decimal" || ele.type === "percent") {
                             currentColumn.columnData.cellEditor = "numericCellEditor";
                         }

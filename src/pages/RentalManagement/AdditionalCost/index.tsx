@@ -48,7 +48,7 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
     fetchFields();
   }, []);
   const fetchFields = async () => {
-    setNextStep(false)
+    setNextStep(false);
     const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
     let rendererNames = [];
     genrateColoum(fields, columns, rendererNames, false, renderedFrom);
@@ -67,14 +67,14 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
     setFrameWorkComponent({ ...tempFrameworkComponent });
     //column array 2 to last element
     const tempColumns = columns.slice(2);
-    
+
     setColumns([...columns]);
     fetchAdditionalCost();
-    setNextStep(false)
+    setNextStep(false);
   };
 
   const fetchAdditionalCost = async () => {
-    setNextStep(false)
+    setNextStep(false);
     try {
       dispatch({ type: 'loading', loading: true });
       if (gridApi) {
@@ -281,7 +281,16 @@ const AdditionalCost = ({ rentalManagementData, setNextStep, renderedFrom, allow
             isClientSideGrid={true}
             loading={loading}
             onCellValueChanged={(row) => {
-              //handleUpdateOrderProduct(row.data)
+              const newData = { ...row.data };
+              const currency = rentalManagementData?.currency?.toLowerCase();
+              newData[`price_${currency}`] = parseFloat(newData[`price_${currency}`]);
+              newData[`finalPrice_${currency}`] = parseFloat(newData[`price_${currency}`]);
+              
+              delete newData.allowedToEdit;
+              delete newData.canDelete;
+              delete newData.id;
+              delete newData.isChecked;
+              handleUpdateCost([newData]);
             }}
             renderedFrom={renderedFrom}
             refreshGrid={fetchAdditionalCost}
