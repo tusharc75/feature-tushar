@@ -81,21 +81,23 @@ const WorkOrder = ({
             </Box>
             <Chip
               className="ml-1"
-              label={`${row.original.type === 'service'
+              label={`${
+                row.original.type === 'service'
                   ? 'Service'
                   : row.original.type === 'product'
-                    ? 'Product'
-                    : row.original.type === 'serializedAsset'
-                      ? 'Asset'
-                      : 'Package'
-                }`}
+                  ? 'Product'
+                  : row.original.type === 'serializedAsset'
+                  ? 'Asset'
+                  : 'Package'
+              }`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'service'
+                      ? routes.serviceMasterDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
                       ? routes.serializedAssetDetail.path
@@ -213,7 +215,7 @@ const WorkOrder = ({
       ...coloum,
       {
         accessor: 'action',
-        Header: '',
+        Header: 'Action',
         minWidth: 70,
         width: 70,
         sticky: 'right',
@@ -221,7 +223,7 @@ const WorkOrder = ({
         canDrag: false,
         Cell: ({ row }) => {
           return (
-            (row?.original?.type === 'service' || (row?.original?.type === 'package' && row?.original?.packageDetail?.packageType === "Service")) && (
+            (row?.original?.type === 'service' || (row?.original?.type === 'package' && row?.original?.packageDetail?.packageType === 'Service')) && (
               <>
                 <IconButton
                   disabled={!allowedToDelete}
@@ -232,7 +234,7 @@ const WorkOrder = ({
                     setShowConfirmBox(true);
                   }}
                 >
-                  <Delete fontSize="small" color="error" />
+                  <Delete fontSize="small" color={!allowedToDelete ? 'disabled' : 'error'} />
                 </IconButton>
               </>
             )
@@ -286,16 +288,25 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
+      parent.detail = `${
+        parent.type === 'service'
           ? parent?.serviceDetail?.serviceName
           : parent.type === 'product'
-            ? parent?.productDetail?.productName
-            : parent.type === 'serializedAsset'
-              ? parent?.serializedAsset?.assetNumber
-              : parent?.packageDetail?.packageName
-        }`;
+          ? parent?.productDetail?.productName
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAsset?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.qty = parent.qty;
-      parent.status = parent?.workOrder?.status;
+      parent.status = `${
+        parent.type === 'service'
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
+          ? parent.productDetail?.status
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -341,10 +352,10 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.preWork = _subRow.type === 'service' ? _subRow?.serviceDetail?.preWork : false;
       _subRow.workOrder = parent?.workOrder;
@@ -442,7 +453,7 @@ const WorkOrder = ({
                 size="small"
                 onClick={openActions}
                 aria-controls="action-menu"
-                disabled={!isPostWorkService && selectedProducts.length === 0}
+                disabled={selectedProducts.length === 0}
               >
                 Actions <ExpandMore />
               </Button>
@@ -509,12 +520,12 @@ const WorkOrder = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -528,7 +539,7 @@ const WorkOrder = ({
                 }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
-                hideSelection={!allowedToEdit || isPostWorkService}
+                hideSelection={!allowedToEdit}
                 renderedFrom="repair_order_workorder"
                 isClientSideGrid={true}
               />

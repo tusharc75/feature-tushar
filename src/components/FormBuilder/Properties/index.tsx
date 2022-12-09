@@ -117,6 +117,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.isDefaultValue = false;
         values.defaultValue = '';
       }
+      if (!values.isColumnEditable && fieldData.resource === "Rental Management Product" && module !== 'price-template' && module !== 'product-template') {
+        values.isColumnEditable = false;
+      }
       if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template') {
         values.disableOnEdit = false;
       }
@@ -254,8 +257,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
             ele.isSystemGenerate = values?.isSystemGenerate || false;
+            ele.isColumnEditable = values?.isColumnEditable || false;
 
-            if (values.hasOwnProperty('isWarningTooltip')) {
+            if (values?.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip;
               ele.warningTooltipMessage = values.warningTooltipMessage;
             }
@@ -982,6 +986,21 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         />
                       }
                       label="Default Value"
+                    />
+
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isColumnEditable"
+                          checked={values['isColumnEditable']}
+                          onChange={(e) => {
+                            setFieldValue('isColumnEditable', e.target.checked);
+                            handleValuesChange({ isColumnEditable: e.target.checked });
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Editable Column"
                     />
 
                     <FormControlLabel

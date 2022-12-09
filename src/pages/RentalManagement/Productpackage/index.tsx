@@ -70,13 +70,14 @@ const Productpackage = ({
   const [isDeleting, setDeleting] = useState(false);
 
   const [material, setMaterial] = useState([]);
+  const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState({open: false, data: null});
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
   const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -322,8 +323,9 @@ const Productpackage = ({
       );
     }
     coloum.forEach((element) => {
+      const priceField = allFields.find((f) => f.fieldName === 'price')
       if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
-        element.editable = allowedToEdit;
+        element.editable = allowedToEdit && priceField?.isColumnEditable ;
       }
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
@@ -632,8 +634,9 @@ const Productpackage = ({
     setDeleteData(obj);
   };
 
-  const onSaveEdit = (inputField, updatedData) => {
-    const currency = rentalManagementData?.currency.toLowerCase()
+  const onSaveInlineEdit = (inputField, updatedData) => {
+    setIsInlineEdit(true)
+    const currency = rentalManagementData?.currency.toLowerCase();
     const requiredItems = [];
     allFields.forEach(({ fieldName, required, type }) => {
       fieldName = type === 'currencyAmount' ? `${fieldName}_${currency}` : fieldName;
@@ -647,46 +650,52 @@ const Productpackage = ({
     });
 
     if (requiredItems.length > 0) {
-      handleOpen({ ...updatedData });
+      handleOpen({
+        ...updatedData,
+        detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName,
+      });
     } else {
-      onConfirmSave(inputField, updatedData)
+      onConfirmSave(inputField, updatedData);
     }
   };
 
   const onConfirmSave = (inputField, updatedData) => {
     const currency = rentalManagementData?.currency.toLowerCase();
-    const rowData = material.find((d) => d._id === updatedData._id)
-      if (rowData.parentId && !showConfirmationDialog.open) {
-        setShowConfirmationDialog({open: true, data: {
-          inputField, updatedData
-        }});
-      } else {
-        let rows: any = [{ ...rowData, ...updatedData }]
-        if (rowData.type === "package") {
-          const product = material.filter((e) => e.parentId === rowData._id)
-          resetValueZero(product, allFields)
-          rows = [...rows, ...product]
+    const rowData = material.find((d) => d._id === updatedData._id);
+    if (rowData.parentId && !showConfirmationDialog.open) {
+      setShowConfirmationDialog({
+        open: true,
+        data: {
+          inputField,
+          updatedData
         }
-        else if (rowData.type === "product" && rowData.parentId) {
-          if (updatedData[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
-            const packages: any = material.filter((e) => e._id === rowData.parentId)
-            const product: any = material.filter((e) => e.parentId === rowData.parentId)
-            product.forEach((element) => {
-              if (element._id === rowData._id) {
-                for (let key in updatedData) {
-                  element[key] = updatedData[key];
-                }
+      });
+    } else {
+      let rows: any = [{ ...rowData, ...updatedData }];
+      if (rowData.type === 'package') {
+        const product = material.filter((e) => e.parentId === rowData._id);
+        resetValueZero(product, allFields);
+        rows = [...rows, ...product];
+      } else if (rowData.type === 'product' && rowData.parentId) {
+        if (updatedData[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
+          const packages: any = material.filter((e) => e._id === rowData.parentId);
+          const product: any = material.filter((e) => e.parentId === rowData.parentId);
+          product.forEach((element) => {
+            if (element._id === rowData._id) {
+              for (let key in updatedData) {
+                element[key] = updatedData[key];
               }
-            })
-            sumOnParent(packages, product, allFields, currency)
-            rows = [...rows, ...packages]
-          }
+            }
+          });
+          sumOnParent(packages, product, allFields, currency);
+          rows = [...rows, ...packages];
         }
-        rows = calculateRowsField(material, inputField, allFields, updatedData);
-        handleSaveData(rows)
-        setShowConfirmationDialog({open: false, data: {}});
       }
-  }
+      rows = calculateRowsField(material, inputField, allFields, updatedData);
+      handleSaveData(rows);
+      setShowConfirmationDialog({ open: false, data: {} });
+    }
+  };
 
   return (
     <Fragment>
@@ -818,7 +827,7 @@ const Productpackage = ({
                 hideSelection={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_product_package"
                 isClientSideGrid={true}
-                onSaveEdit={onSaveEdit}
+                onSaveEdit={onSaveInlineEdit}
                 material={material}
               />
             </Box>
@@ -843,6 +852,10 @@ const Productpackage = ({
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);
+
+            if(isInlineEdit) {
+              setIsInlineEdit(false)
+            }
           }}
           isBulkedit={isProductEdit.isBulkedit}
           handleSaveData={handleSaveData}
@@ -852,6 +865,7 @@ const Productpackage = ({
           selectedProducts={selectedProducts.filter((e) => !e.hideSelection)}
           loading={isUpdating}
           from={'product'}
+          isInlineEdit={isInlineEdit}
         />
       )}
       {addExistingProductDialog.open && (
@@ -918,10 +932,10 @@ const Productpackage = ({
           open={true}
           message="Would you prefer to override the product-level price configuration?"
           onOk={() => {
-            onConfirmSave(showConfirmationDialog.data?.inputField, showConfirmationDialog.data?.updatedData)
+            onConfirmSave(showConfirmationDialog.data?.inputField, showConfirmationDialog.data?.updatedData);
           }}
           onClose={() => {
-            setShowConfirmationDialog({open: false, data: {}});
+            setShowConfirmationDialog({ open: false, data: {} });
           }}
         />
       )}

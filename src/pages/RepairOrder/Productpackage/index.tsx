@@ -141,7 +141,13 @@ const Productpackage = ({
                   : <NoDataCell />}
             </p>
           </div>),
-      }
+      },
+      {
+        accessor: 'status',
+        Header: 'Status',
+        width: 100,
+        Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
+      },
     ];
 
     coloum.push({
@@ -205,6 +211,8 @@ const Productpackage = ({
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
+      parent.status = `${parent.type === 'service' ? parent.serviceDetail?.status : parent.type === 'product' ? parent.productDetail?.status :
+        parent.type === 'serializedAsset' ? parent.serializedAssetDetail.status : parent.packageDetail?.status}`;
     });
 
     if (rows.length !== 0) {
@@ -236,7 +244,9 @@ const Productpackage = ({
       _subRow.isValid = true;
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
-      _subRow.type === 'service' ? serviceIndex++ : productIndex++
+      _subRow.type === 'service' ? serviceIndex++ : productIndex++;
+      parent.status = `${parent.type === 'service' ? parent.serviceDetail?.status : parent.type === 'product' ? parent.productDetail?.status :
+        parent.type === 'serializedAsset' ? parent.serializedAssetDetail.status : parent.packageDetail?.status}`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
