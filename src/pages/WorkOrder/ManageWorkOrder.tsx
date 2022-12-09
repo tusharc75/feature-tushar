@@ -111,6 +111,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                 data = response?.data?.data
                 setWorkOrderData(data)
                 setDisableOwnerSelection(workOrderId && user.user._id !== data?.owner?.optionValue);
+                setAssetOptions(assetOptionsData.filter((i)=>i.warehouse === data?.warehouse?.optionValue))
                 if (isClone) {
                     const { _id, createdBy, updatedBy, workOrderNumber, status, ...rest } = data
                     rest['workOrderNumber'] = `WO_${generateUniqueIdOnly()}`;
