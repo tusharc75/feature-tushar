@@ -33,6 +33,7 @@ interface EditDialogProps {
   loading: any
   from?: any
   isQtyOnly?: Boolean
+  isInlineEdit?: Boolean
 }
 
 export const resetValueZero = (rows, allFields) => {
@@ -131,7 +132,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     isBulkedit,
     loading,
     isQtyOnly = false,
-    from
+    from,
+    isInlineEdit = false
   }) => {
 
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
@@ -242,14 +244,29 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
          values: initialValues
        });
      }
-    // setInitialData({
-    //        fields: data,
-    //        values: initialValues
-    //      });
 
     }
     EvaluteproductFields(data);
   }
+
+  useEffect(() => {
+    if(ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
+      const {setErrors, setTouched} = ref.current
+      let errors:any = {}
+      let touched:any = {}
+      initialData.fields.forEach(({fieldName, required, fieldLabel}) => {
+        
+        if(required && !initialData.values[fieldName]) {
+          errors[fieldName] = fieldLabel + " is a required field"
+          touched[fieldName] = true
+        }
+      })
+      setErrors(errors)
+      setTouched(touched)
+      
+    }
+
+  }, [initialData, ref.current, isInlineEdit])
 
   const EvaluteproductFields = (fields) => {
     if (isQtyOnly) {
