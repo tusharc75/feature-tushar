@@ -183,7 +183,7 @@ const Header = ({ toggleDrawer }) => {
   const account = useAccount(accounts[0] || {});
 
   const {
-    state: { user, selectedEntity, cartItems, permissions },
+    state: { user, selectedEntity },
     dispatch
   }: any = useData();
 
