@@ -75,6 +75,13 @@ const WorkOrderTechnician = () => {
   const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
   const [serviceDetailsShow, setServiceDetailsShow] = useState(false);
 
+  const WORKORDER_TECHNICIAN_SERVICE_STATUS = {
+    backlog: 'Backlog',
+    pending: 'Pending',
+    inProgress: 'In-Progress',
+    completed: 'Completed'
+  };
+
   useEffect(() => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=Work Order,Repair Order`)
@@ -100,7 +107,26 @@ const WorkOrderTechnician = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
-        setServiceData(data);
+        const otherThanPendingData = data?.filter((item) => item.status !== 'Pending');
+        const allPending = data
+          ?.filter((item) => item.status === 'Pending')
+          ?.sort((a, b) => {
+            return a.order - b.order;
+          });
+
+        const allPendingData = allPending?.map((item, idx) => {
+          let d: any = item;
+          if (idx > 0 && item?.order !== allPending[0]?.order) {
+            d.status = WORKORDER_SERVICE_STATUS.backlog;
+          }
+          return d;
+        });
+
+        const sortedServiceData = [...allPendingData, ...otherThanPendingData]?.sort((a, b) => {
+          return a.order - b.order;
+        });
+
+        setServiceData(sortedServiceData);
       });
   };
 
@@ -150,7 +176,7 @@ const WorkOrderTechnician = () => {
             </Grid>
 
             <Grid container spacing={2} className={` ${classes.activityMainBlock}`}>
-              {Object.keys(WORKORDER_SERVICE_STATUS).map((key, i) => {
+              {Object.keys(WORKORDER_TECHNICIAN_SERVICE_STATUS).map((key, i) => {
                 return (
                   <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={i} className={classes.mediumDevice}>
                     <div className={classes.block}>
@@ -167,7 +193,6 @@ const WorkOrderTechnician = () => {
                             <Box
                               key={index}
                               onClick={() => {
-                                console.log(data);
                                 let tempServiceData = data?.service;
                                 tempServiceData['uniqueId'] = data?._id;
                                 tempServiceData['status'] = data?.status;

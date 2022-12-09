@@ -69,43 +69,6 @@ function convertMsToTime(milliseconds) {
   return time;
 }
 
-const RenderTotalTime = ({ steps, startTimes, endTimes }) => {
-  const [time, setTime] = useState(null);
-  useEffect(() => {
-    startTimes = startTimes.filter((item) => !isNaN(item));
-    endTimes = endTimes.filter((item) => !isNaN(item));
-    const min = Math.min(...startTimes);
-    const max = Math.max(...endTimes);
-    if (startTimes.length !== endTimes.length) {
-      const interval = setInterval(() => {
-        setTime(convertMsToTime(new Date().getTime() - min));
-      }, 1000);
-      return () => {
-        clearInterval(interval);
-      };
-    } else {
-      setTime(convertMsToTime(max - min));
-    }
-  }, [startTimes, endTimes]);
-  if (startTimes.length === 0) return <></>;
-  return (
-    <Box
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        border: '1px solid rgba(0, 0, 0, 0.23)',
-        backgroundColor: 'transparent',
-        padding: '2px 7px',
-        borderRadius: '8px'
-      }}
-    >
-      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
-      {time}
-    </Box>
-  );
-};
-
 const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -199,6 +162,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
             }
             setSelectedService(services[pendingServiceIndex > -1 ? pendingServiceIndex : 0]);
           }
+
           let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
           let tempServiceIndex = tempServiceSortedArray.findIndex((d) =>
             [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status)
@@ -356,7 +320,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 
   const isAllowedToServiceEdit = allowedToEdit || selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id);
 
-  const stylesForEveryTab = (selectedService, data) => {
+  const stylesForEveryTab = (selectedService, data, isOwnerOrCollaborator, isTechnician = false) => {
     if (data?.type === 'quotation' && selectedService?.type !== 'quotation') {
       return {
         borderColor: 'rgb(224, 224, 224)',
@@ -394,7 +358,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         borderWidth: '1px',
         borderStyle: 'solid',
         borderColor: 'rgba(25, 24, 24, 0.19)',
-        cursor: 'not-allowed',
+        cursor: isOwnerOrCollaborator ? 'pointer' : 'not-allowed',
         PointerEvent: 'none',
         opacity: '.5'
       };
@@ -452,9 +416,15 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const getFieldsWithOtherDetails = (step: any, serviceData) => {
     const id = step?._id;
     const steps = serviceData?.filter((item: any) => item.serviceId === id);
-    let startTimes = steps.map((item) => new Date(item?.startDate).getTime());
-    let endTimes = steps.map((item) => new Date(item?.endDate).getTime());
-    return { steps, startTimes, endTimes };
+    const stepTimes = [];
+    steps.forEach((item) => {
+      let obj: any = {};
+      obj.startTime = item?.startDate ? new Date(item?.startDate).getTime() : null;
+      obj.endTime = item?.endDate ? new Date(item?.endDate).getTime() : null;
+      stepTimes.push(obj);
+    });
+
+    return stepTimes;
   };
 
   return (
@@ -520,138 +490,144 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                   }}
                 >
                   {serviceSteps?.map((data, index) => {
-                    const style = stylesForEveryTab(selectedService, data);
-                    const { steps, startTimes, endTimes } = getFieldsWithOtherDetails(data, serviceData);
+                    let isOwnerOrCollaborator =
+                      workOrderData?.owner?.optionValue === user._id || workOrderData?.owner?.collaborator?.find((u) => u?.optionValue === user._id);
+                    let isTechnician = data?.assignedUsers?.some((u: any) => u?.optionValue === user?._id);
+
+                    const style = stylesForEveryTab(selectedService, data, isOwnerOrCollaborator, isTechnician);
+                    const stepTimes = getFieldsWithOtherDetails(data, serviceData);
                     return (
-                      Boolean(allowedToEdit || data?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) && (
-                        <Grid item xs={12} key={index}>
-                          <Box
-                            style={{
-                              ...style,
-                              transition: '.3s'
-                            }}
-                            p={2}
-                            onClick={() => {
-                              if (
-                                !(
-                                  data?.type !== 'service' ||
-                                  data?.order > disabledServicesOrder ||
-                                  (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-                                )
-                              ) {
-                                setSelectedService(data);
-                              }
-                            }}
-                          >
-                            <Grid container>
-                              <Grid item xs={10}>
-                                <Box
-                                  display="flex"
-                                  style={{
-                                    flexWrap: 'wrap',
-                                    alignItems: 'center',
-                                    position: 'relative',
-                                    paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
-                                    gap: '5px'
-                                  }}
-                                >
-                                  {data?.type === 'service' ? (
-                                    <Box
-                                      style={{
-                                        backgroundColor: 'var(--primary)',
-                                        color: 'white',
-                                        width: '20px',
-                                        height: '20px',
-                                        borderRadius: '50%',
-                                        lineHeight: '21px',
-                                        textAlign: 'center',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '10px',
-                                        flexShrink: 0,
-                                        top: '4px',
-                                        left: 0
-                                      }}
-                                      sx={{ position: !isColapsed ? 'absolute' : '' }}
-                                    >
-                                      <span>{data?.order}</span>
+                      <Grid item xs={12} key={index}>
+                        <Box
+                          style={{
+                            ...style,
+                            transition: '.3s'
+                          }}
+                          p={2}
+                          onClick={() => {
+                            if (
+                              (isOwnerOrCollaborator && data?.type === 'service') ||
+                              (!(
+                                data?.type !== 'service' ||
+                                data?.order > disabledServicesOrder ||
+                                (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
+                              ) &&
+                                data?.assignedUsers?.some((u: any) => u?.optionValue === user?._id))
+                            ) {
+                              setSelectedService(data);
+                            }
+                          }}
+                        >
+                          <Grid container>
+                            <Grid item xs={10}>
+                              <Box
+                                display="flex"
+                                style={{
+                                  flexWrap: 'wrap',
+                                  alignItems: 'center',
+                                  position: 'relative',
+                                  paddingLeft: !isColapsed && data?.type !== 'quotation' ? '20px' : '',
+                                  gap: '5px'
+                                }}
+                              >
+                                {data?.type === 'service' ? (
+                                  <Box
+                                    style={{
+                                      backgroundColor: 'var(--primary)',
+                                      color: 'white',
+                                      width: '20px',
+                                      height: '20px',
+                                      borderRadius: '50%',
+                                      lineHeight: '21px',
+                                      textAlign: 'center',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      fontSize: '10px',
+                                      flexShrink: 0,
+                                      top: '4px',
+                                      left: 0
+                                    }}
+                                    sx={{ position: !isColapsed ? 'absolute' : '' }}
+                                  >
+                                    <span>{data?.order}</span>
+                                  </Box>
+                                ) : (
+                                  data?.type === 'quotation' && <FormatQuoteIcon />
+                                )}
+                                {!isColapsed && (
+                                  <>
+                                    <Box ml={'10px'}>
+                                      <Typography>{data?.serviceName}</Typography>
                                     </Box>
-                                  ) : (
-                                    data?.type === 'quotation' && <FormatQuoteIcon />
-                                  )}
-                                  {!isColapsed && (
-                                    <>
-                                      <Box ml={'10px'}>
-                                        <Typography>{data?.serviceName}</Typography>
-                                      </Box>
-                                      {data?.type === 'service' && (
-                                        <Box ml={1}>
-                                          {data?.preWork ? (
-                                            <HtmlTooltip title="Pre Work Service">
-                                              <span>
-                                                <PreWorkIcon style={{ verticalAlign: 'middle' }} />
-                                              </span>
-                                            </HtmlTooltip>
-                                          ) : (
-                                            <HtmlTooltip title="Post Work Service">
-                                              <span>
-                                                <PostWorkIcon style={{ verticalAlign: 'middle' }} />
-                                              </span>
-                                            </HtmlTooltip>
-                                          )}
-                                        </Box>
-                                      )}
-                                      {data?.type === 'service' && (
-                                        <Box ml={1}>
-                                          <Chip label={data?.status} variant="outlined" color="primary" />
-                                        </Box>
-                                      )}
-                                      {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
-                                        <Box ml={1}>
-                                          <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                            <PeopleIcon />
+                                    {data?.type === 'service' && (
+                                      <Box ml={1}>
+                                        {data?.preWork ? (
+                                          <HtmlTooltip title="Pre Work Service">
+                                            <span>
+                                              <PreWorkIcon style={{ verticalAlign: 'middle' }} />
+                                            </span>
                                           </HtmlTooltip>
-                                        </Box>
-                                      )}
-                                      {data?.type === 'quotation' && quotationData && (
-                                        <Box ml={1}>
-                                          <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
-                                        </Box>
-                                      )}
-                                      <RenderTotalTime steps={steps} startTimes={startTimes} endTimes={endTimes} />
-                                    </>
-                                  )}
-                                </Box>
-                              </Grid>
-                              {!isColapsed && (
-                                <>
-                                  {!(
+                                        ) : (
+                                          <HtmlTooltip title="Post Work Service">
+                                            <span>
+                                              <PostWorkIcon style={{ verticalAlign: 'middle' }} />
+                                            </span>
+                                          </HtmlTooltip>
+                                        )}
+                                      </Box>
+                                    )}
+                                    {data?.type === 'service' && (
+                                      <Box ml={1}>
+                                        <Chip label={data?.status} variant="outlined" color="primary" />
+                                      </Box>
+                                    )}
+                                    {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
+                                      <Box ml={1}>
+                                        <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                          <PeopleIcon />
+                                        </HtmlTooltip>
+                                      </Box>
+                                    )}
+                                    {data?.type === 'quotation' && quotationData && (
+                                      <Box ml={1}>
+                                        <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />
+                                      </Box>
+                                    )}
+                                    <RenderTotalTime stepTimes={stepTimes} />
+                                  </>
+                                )}
+                              </Box>
+                            </Grid>
+                            {!isColapsed && (
+                              <>
+                                {((isOwnerOrCollaborator && data?.type === 'service') ||
+                                  (!(
                                     data?.type !== 'service' ||
                                     data?.order > disabledServicesOrder ||
                                     (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-                                  ) && (
-                                    <Grid item xs={2} container justify="flex-end">
-                                      <IconButton
-                                        size="small"
-                                        color="primary"
-                                        aria-label="delete"
-                                        disabled={!isAllowedToServiceEdit}
-                                        onClick={(event) => {
-                                          handleOpenMenu(event);
-                                          setSelectedService(data);
-                                        }}
-                                      >
-                                        <MoreHorizIcon />
-                                      </IconButton>
-                                    </Grid>
-                                  )}
-                                </>
-                              )}
-                            </Grid>
-                          </Box>
-                        </Grid>
-                      )
+                                  ) &&
+                                    isTechnician)) && (
+                                  <Grid item xs={2} container justify="flex-end">
+                                    <IconButton
+                                      size="small"
+                                      color="primary"
+                                      aria-label="delete"
+                                      disabled={!isAllowedToServiceEdit}
+                                      onClick={(event) => {
+                                        handleOpenMenu(event);
+                                        setSelectedService(data);
+                                      }}
+                                    >
+                                      <MoreHorizIcon />
+                                    </IconButton>
+                                  </Grid>
+                                )}
+                              </>
+                            )}
+                          </Grid>
+                        </Box>
+                      </Grid>
                     );
                   })}
                 </Grid>
@@ -665,7 +641,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               <Box>
                 <Tabs aria-label="scrollable Tabs">
                   {serviceSteps?.map((data, index) => {
-                    const style = stylesForEveryTab(selectedService, data);
+                    let isOwnerOrCollaborator =
+                      workOrderData?.owner?.optionValue === user._id || workOrderData?.owner?.collaborator?.find((u) => u?.optionValue === user._id);
+                    let isTechnician = data?.assignedUsers?.some((u: any) => u?.optionValue === user?._id);
+
+                    const style = stylesForEveryTab(selectedService, data, isOwnerOrCollaborator, isTechnician);
                     return (
                       Boolean(allowedToEdit || data?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) && (
                         <Tab
@@ -683,6 +663,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                               }}
                               onClick={() => {
                                 if (
+                                  (isOwnerOrCollaborator && data?.type === 'service') ||
                                   !(
                                     data?.type !== 'service' ||
                                     data?.order > disabledServicesOrder ||
@@ -750,11 +731,13 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                     )}
                                   </Box>
                                 </Box>
-                                {!(
+                                {(isOwnerOrCollaborator && data?.type === 'service') ||
+                                (!(
                                   data?.type !== 'service' ||
                                   data?.order > disabledServicesOrder ||
                                   (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-                                ) ? (
+                                ) &&
+                                  isTechnician) ? (
                                   <IconButton
                                     style={{ width: '18px', height: '25px' }}
                                     size="small"
@@ -810,15 +793,17 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 
           {anchorEl && (
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-              <MenuItem
-                disabled={!allowedToEdit}
-                onClick={() => {
-                  setUserAssignDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Assign Technicians
-              </MenuItem>
+              {allowedToEdit && (
+                <MenuItem
+                  disabled={!allowedToEdit}
+                  onClick={() => {
+                    setUserAssignDialog(true);
+                    setAnchorEl(null);
+                  }}
+                >
+                  Assign Technicians
+                </MenuItem>
+              )}
               <MenuItem
                 disabled={!allowedToEdit}
                 onClick={() => {
@@ -1031,3 +1016,62 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   );
 };
 export default Service;
+
+// INTERFACES
+interface totalTimeInterface {
+  stepTimes: stepTimesInterface[];
+}
+interface stepTimesInterface {
+  startTime?: number | null;
+  endTime?: number | null;
+}
+// RETURN TOTAL TIME IN MS AND SHOULD TIME UPDATE, TAKES LIST OF STARTTIME AND END TIME LIST
+const getToalTime = (stepTimes: stepTimesInterface[]) => {
+  let totalTimes = 0;
+  let shouldTimerRun = stepTimes.filter((item) => item.startTime && item.endTime).length !== stepTimes.length;
+  stepTimes.forEach((item) => {
+    if (item.startTime && item.endTime) {
+      totalTimes += item.endTime - item.startTime;
+    }
+  });
+  return { shouldTimerRun, totalTimes };
+};
+
+// RENDER TOTAL TIME COMPONENT
+const RenderTotalTime = ({ stepTimes }: totalTimeInterface) => {
+  const [time, setTime] = useState(null);
+
+  useEffect(() => {
+    const { shouldTimerRun, totalTimes } = getToalTime(stepTimes);
+    if (shouldTimerRun) {
+      let currentDifference = totalTimes;
+      const interval = setInterval(() => {
+        currentDifference += 1000;
+        setTime(convertMsToTime(currentDifference));
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      };
+    } else {
+      setTime(convertMsToTime(totalTimes));
+    }
+  }, [stepTimes]);
+
+  if (stepTimes.length === 0) return <></>;
+  return (
+    <Box
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        border: '1px solid rgba(0, 0, 0, 0.23)',
+        backgroundColor: 'transparent',
+        padding: '2px 7px',
+        borderRadius: '8px'
+      }}
+    >
+      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+      {time}
+    </Box>
+  );
+};

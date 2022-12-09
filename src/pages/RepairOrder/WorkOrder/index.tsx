@@ -175,7 +175,7 @@ const WorkOrder = ({
       },
       {
         accessor: 'assignedUsers',
-        Header: 'Assigned Users',
+        Header: 'Assigned Technician',
         Cell: ({ row }) =>
           row?.original['assignedUsers'] && row?.original['assignedUsers']?.length ? (
             row?.original['assignedUsers'].map((e, i) => {
@@ -213,7 +213,7 @@ const WorkOrder = ({
       ...coloum,
       {
         accessor: 'action',
-        Header: '',
+        Header: 'Action',
         minWidth: 70,
         width: 70,
         sticky: 'right',
@@ -223,18 +223,18 @@ const WorkOrder = ({
           return (
             (row?.original?.type === 'service' || (row?.original?.type === 'package' && row?.original?.packageDetail?.packageType === "Service")) && (
               <>
-                <IconButton
-                  disabled={!allowedToDelete}
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setDeleteData([row.original]);
-                    setShowConfirmBox(true);
-                  }}
-                >
-                  <Delete fontSize="small" color="error" />
-                </IconButton>
-              </>
+              <IconButton
+                disabled={!allowedToDelete }
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  setDeleteData([row.original]);
+                  setShowConfirmBox(true);
+                }}
+              >
+                <Delete fontSize="small" color={!allowedToDelete  ? "disabled" : "error"} />
+              </IconButton>
+            </>
             )
           );
         }
@@ -429,7 +429,7 @@ const WorkOrder = ({
         toastConfig.setToastConfig(err);
       });
   };
-
+  
   return (
     <Fragment>
       <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
@@ -442,7 +442,7 @@ const WorkOrder = ({
                 size="small"
                 onClick={openActions}
                 aria-controls="action-menu"
-                disabled={!isPostWorkService && selectedProducts.length === 0}
+                disabled={ selectedProducts.length === 0}
               >
                 Actions <ExpandMore />
               </Button>
@@ -472,7 +472,7 @@ const WorkOrder = ({
                     setUserAssignDialog(true);
                   }}
                 >
-                  Assign Users
+                  Assign Technician
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
@@ -483,7 +483,7 @@ const WorkOrder = ({
                 >
                   Arrange Services
                 </MenuItem>
-                <MenuItem
+              <MenuItem
                   onClick={() => {
                     setDeleteData(services);
                     setShowConfirmBox(true);
@@ -528,7 +528,7 @@ const WorkOrder = ({
                 }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
-                hideSelection={!allowedToEdit || isPostWorkService}
+                hideSelection={!allowedToEdit}
                 renderedFrom="repair_order_workorder"
                 isClientSideGrid={true}
               />
