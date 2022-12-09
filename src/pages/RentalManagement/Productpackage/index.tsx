@@ -323,8 +323,9 @@ const Productpackage = ({
       );
     }
     coloum.forEach((element) => {
+      const priceField = allFields.find((f) => f.fieldName === 'price')
       if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
-        element.editable = allowedToEdit;
+        element.editable = allowedToEdit && priceField?.isColumnEditable ;
       }
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
