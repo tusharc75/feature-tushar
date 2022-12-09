@@ -189,6 +189,7 @@ const WorkOrderTechnician = () => {
                       {serviceData
                         ?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key])
                         .map((data, index) => {
+                          console.log(data);
                           return (
                             <Box
                               key={index}
@@ -205,20 +206,35 @@ const WorkOrderTechnician = () => {
                               <Box>
                                 <Grid container>
                                   <Grid item xs={11}>
-                                    <Box display="flex" mr="10px">
-                                      <Typography
-                                        style={{
-                                          textOverflow: 'ellipsis',
-                                          overflow: 'hidden',
-                                          whiteSpace: 'nowrap',
-                                          marginRight: '5px'
-                                        }}
-                                        variant="subtitle2"
-                                      >
-                                        {data?.service?.serviceName}
-                                      </Typography>
-                                      <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
-                                    </Box>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                      <Box display="flex" mr="10px">
+                                        <Typography
+                                          style={{
+                                            textOverflow: 'ellipsis',
+                                            overflow: 'hidden',
+                                            whiteSpace: 'nowrap',
+                                            marginRight: '5px'
+                                          }}
+                                          variant="subtitle2"
+                                        >
+                                          {data?.service?.serviceName}
+                                        </Typography>
+                                        <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
+                                      </Box>
+                                      {data?.overAllStepStatus && (
+                                        <Box ml={1}>
+                                          <Chip
+                                            label={data?.overAllStepStatus}
+                                            variant="outlined"
+                                            // color={data?.overAllStepStatus === 'Fail' ? 'default' : 'primary'}
+                                            style={{
+                                              borderColor: data?.overAllStepStatus === 'Fail' ? 'red' : 'green',
+                                              color: data?.overAllStepStatus === 'Fail' ? 'red' : 'green'
+                                            }}
+                                          />
+                                        </Box>
+                                      )}
+                                    </div>
                                   </Grid>
                                   <Grid item xs={1}></Grid>
                                 </Grid>
