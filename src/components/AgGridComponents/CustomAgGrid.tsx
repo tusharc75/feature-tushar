@@ -178,11 +178,20 @@ export default function CustomAgGrid({
   }: any = useData();
 
   useEffect(() => {
+    let timer;
     if (searchQuery) {
-      dispatch({ type: 'search', search: searchQuery });
+      timer = setTimeout(() => {
+        let query = searchQuery?.trim();
+        if (query !== '') {
+          dispatch({ type: 'search', search: query });
+        }
+      }, 300);
     } else {
-      dispatch({ type: 'search', search: '' });
+      timer = setTimeout(() => {
+        dispatch({ type: 'search', search: '' });
+      }, 300);
     }
+    return () => clearTimeout(timer);
   }, [searchQuery]);
 
   const [currentGridApi, setCurrentGridApi] = useState<GridApi | any>(null);
