@@ -372,7 +372,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
   const handleDeleteData = async (rows) => {
     const data = {
       invoiceId: invoiceData?._id,
-      materialIds: selectedProducts?.map((e) => e.materialId) || []
+      materialIds: rows?.map((e) => e.materialId) || []
     };
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
@@ -400,7 +400,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   size="small"
                   onClick={handleClick}
                   aria-controls="action-menu"
-                  disabled={selectedProducts?.length === 0}
+                  disabled={selectedProducts.filter(d => !['Per Day', 'Per Week', 'Per Month'].includes(d?.pricingMethod))?.length === 0}
                 >
                   Actions <ExpandMore />
                 </Button>
@@ -423,7 +423,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   <MenuItem
                     onClick={() => {
                       setAnchorEl(null);
-                      handleDeleteData(selectedProducts);
+                      handleDeleteData(selectedProducts.filter(d => !['Per Day', 'Per Week', 'Per Month'].includes(d?.pricingMethod)));
                     }}
                   >
                     Delete
