@@ -589,6 +589,19 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                         </HtmlTooltip>
                                       </Box>
                                     )}
+                                    {data?.type === 'service' && data?.overAllStepStatus && (
+                                      <Box ml={1}>
+                                        <Chip
+                                          label={data?.overAllStepStatus}
+                                          variant="outlined"
+                                          color={data?.overAllStepStatus === 'Fail' ? 'default' : 'primary'}
+                                          style={{
+                                            borderColor: data?.overAllStepStatus === 'Fail' ? 'red' : 'green',
+                                            color: data?.overAllStepStatus === 'Fail' ? 'red' : 'green'
+                                          }}
+                                        />
+                                      </Box>
+                                    )}
                                     {data?.type === 'quotation' && quotationData && (
                                       <Box ml={1}>
                                         <Chip label={`Status : ${quotationData?.status}`} variant="outlined" color="primary" />

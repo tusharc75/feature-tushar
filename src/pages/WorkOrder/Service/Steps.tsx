@@ -185,7 +185,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
 
   const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
-  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, values: null });
+  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, values: null, type: '' });
   const [selectedStep, setSelectedStep] = useState(null);
   const [inSteps, setInSteps] = useState(false);
   const [stepState, setStepState] = useState(null);
@@ -303,7 +303,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           const type = automatePassFail(values, step);
           handlePassFail(type, step?._id);
         }
-        setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
+        setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
         fetchService();
       })
       .catch((err) => {
@@ -383,7 +383,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
           });
           if (services.length > 0) {
-            setAddServiceConfirmation({ open: true, status: '', services, step, values });
+            setAddServiceConfirmation({ open: true, status: '', services, step, values, type: '' });
           }
         } else if (step?.isPassFail) {
           const type = automatePassFail(values, step);
@@ -482,6 +482,39 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, services }));
           }
         }
+
+        if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
+          const services = result?.jumpStepsPass.filter((s) => {
+            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
+          });
+
+          if (services.length > 0) {
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, services, type: 'jumpStep' }));
+          }
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isJumpStepFail && result?.jumpStepsFail?.length) {
+          const services = result?.jumpStepsFail.filter((s) => {
+            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
+          });
+          if (services.length > 0) {
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, services, type: 'jumpStep' }));
+          }
+        }
+
+        if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isQuoteRevisionOnFail) {
+
+          setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'isQuoteRevisionOnFail' }));
+        }
+
+        if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
+
+          const services = [result?.returnToStepOnFail].filter((s) => {
+            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
+          });
+          if (services.length > 0) {
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, services, type: 'returnToStepOnFail' }));
+          }
+        }
+
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -534,15 +567,13 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                     transition: 'background .5s ease',
                     backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                   }}
-                  className={`${classes.accordionHeading}  ${
-                    Boolean(stepData?.passFailStatus)
-                      ? `${
-                          Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                            ? classes.green
-                            : ''
-                        } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                      : classes.white
-                  }`}
+                  className={`${classes.accordionHeading}  ${Boolean(stepData?.passFailStatus)
+                    ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                      ? classes.green
+                      : ''
+                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                    : classes.white
+                    }`}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!stepData?.status) return;
@@ -671,25 +702,27 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           <ConfirmationDialog
             open={true}
             message={
-              addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.failed
-                ? `Since the previous step was failed, the service requested in the add-on service will then be added. ` +
-                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : addServiceConfirmation.status === WORKORDER_SERVICE_STEP_STATUS.passed
-                ? `On pass, a new service has been added in compliance with the configuration ` +
-                  addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()
-                : `You have to add addional services based on your recent action`
+              addServiceConfirmation.type === "returnToStepOnFail"
+                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()}. Do you want to continue ?`
+                : addServiceConfirmation.type === "isQuoteRevisionOnFail"
+                  ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                  : addServiceConfirmation.type === "jumpStep"
+                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
-              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
+              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
             }}
             onOk={() => {
-              handleAddService(
-                addServiceConfirmation.services?.map((e) => e._id),
-                addServiceConfirmation.status === '' ? true : false,
-                addServiceConfirmation.step,
-                addServiceConfirmation.values
-              );
-              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null });
+              if (addServiceConfirmation.type === '') {
+                handleAddService(
+                  addServiceConfirmation.services?.map((e) => e._id),
+                  addServiceConfirmation.status === '' ? true : false,
+                  addServiceConfirmation.step,
+                  addServiceConfirmation.values
+                );
+              }
+              setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
             }}
           />
         )}

@@ -315,6 +315,7 @@ const ReceivingTicket = ({
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
           obj.loadingTicketStatus = ele?.loadingTicketStatus;
+          obj.currentLocation = element?.currentLocation?.optionValue || rentalManagementData?.shippingAddress?.optionValue || rentalManagementData?.billingAddress?.optionValue
           productAssets.push(obj);
           qty = qty - ele.qty;
         });
@@ -354,6 +355,8 @@ const ReceivingTicket = ({
                   ? 'Returned'
                   : ''
             : element?.status;
+          obj.currentLocation = element?.currentLocation?.optionValue || rentalManagementData?.shippingAddress?.optionValue || rentalManagementData?.billingAddress?.optionValue
+
           productAssets.push(obj);
         }
       });
