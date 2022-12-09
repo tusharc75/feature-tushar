@@ -244,7 +244,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
          values: initialValues
        });
      }
-
     }
     EvaluteproductFields(data);
   }
