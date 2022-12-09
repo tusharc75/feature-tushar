@@ -378,7 +378,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                         {...field}
                                                                         fieldData={field}
                                                                         isNew={!Boolean(workOrderId)}
-                                                                        disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.serializedAsset && field.fieldName === 'serializedAsset') || Boolean(workOrderId) && field.disableOnEdit}
+                                                                        disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.warehouse && field.fieldName === 'warehouse') || Boolean(workOrderId) && field.disableOnEdit}
                                                                         values={values}
                                                                         errors={errors}
                                                                         touched={touched}
@@ -403,7 +403,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                                                            {...field}
                                                                            fieldData={field}
                                                                            isNew={!Boolean(workOrderId)}
-                                                                           disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.serializedAsset && field.fieldName === 'serializedAsset') || Boolean(workOrderId) && field.disableOnEdit}
+                                                                           disabled={(refrenceType && refrenceData && disabledFieldArray.includes(field.fieldName)) || (refrenceData?.product && field.fieldName === 'product') || Boolean(workOrderId) && field.disableOnEdit}
                                                                            values={values}
                                                                            errors={errors}
                                                                            touched={touched}
