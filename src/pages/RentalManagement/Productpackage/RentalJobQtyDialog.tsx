@@ -185,8 +185,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         if (element.fieldName === "pricingMethod") {
           element.option = pricingMethodOptions;
         }
-        
-        
+
+
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
@@ -229,10 +229,10 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
       let initialValues = getObjKeysWithValues(rowData, data)
       const priceFieldName = "price_" + rentalManagementData?.currency?.toLowerCase();
 
-      if(rowData[priceFieldName]) {
+      if (rowData[priceFieldName]) {
         getPricing({ ...initialValues, [priceFieldName]: rowData[priceFieldName] }).then((price: any) => {
           const result = autoCalculateSpecificFields({ [priceFieldName]: price, [priceFieldName]: rowData[priceFieldName] }, initialValues, data)
-          initialValues = {...initialValues, ...result}
+          initialValues = { ...initialValues, ...result }
           setInitialData({
             fields: data,
             values: initialValues
@@ -426,6 +426,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         }), 'optionValue'))
         if (pricingMethodOptions) {
           setPriceConditionListConst(tempPriceData)
+          setPriceMethodList(tempPriceData.filter(d => d.conditionId === rowData["pricingCondition"]).map(d => {
+            return {
+              "optionLabel": d?.pricingMethod,
+              "optionValue": d?.pricingMethod
+            }
+          }))
           return uniqBy(tempPriceData.map(d => {
             return {
               "optionLabel": d?.conditionName,
@@ -579,26 +585,35 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                               "optionValue": d?.pricingMethod
                                             }
                                           }))
-                                        }
-                                        getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
-                                          // if (price) {
                                           let priceFieldName = "price_" + rentalManagementData?.currency?.toLowerCase()
-                                          const result = autoCalculateSpecificFields({ [priceFieldName]: price, [field.fieldName]: value }, values, initialData.fields)
+                                          const result = autoCalculateSpecificFields({ [priceFieldName]: 0, [field.fieldName]: value }, values, initialData.fields)
                                           if (Object.keys(result).length >= 1) {
                                             for (var x in result) {
                                               setFieldValue(x, result[x]);
                                             }
                                           }
-                                          // }
-                                          // else {
-                                          //   const result = handleAutoCalculation(field, initialData.fields, values, field.fieldName, '', '', value);
-                                          //   if (Object.keys(result).length >= 1) {
-                                          //     for (var x in result) {
-                                          //       setFieldValue(x, result[x]);
-                                          //     }
-                                          //   }
-                                          // }
-                                        });
+                                        }
+                                        else {
+                                          getPricing({ ...values, [field.fieldName]: value }).then((price: any) => {
+                                            // if (price) {
+                                            let priceFieldName = "price_" + rentalManagementData?.currency?.toLowerCase()
+                                            const result = autoCalculateSpecificFields({ [priceFieldName]: price, [field.fieldName]: value }, values, initialData.fields)
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
+                                            // }
+                                            // else {
+                                            //   const result = handleAutoCalculation(field, initialData.fields, values, field.fieldName, '', '', value);
+                                            //   if (Object.keys(result).length >= 1) {
+                                            //     for (var x in result) {
+                                            //       setFieldValue(x, result[x]);
+                                            //     }
+                                            //   }
+                                            // }
+                                          });
+                                        }
                                       }}
                                       required={field.required}
                                       fullWidth
