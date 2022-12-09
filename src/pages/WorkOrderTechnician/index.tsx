@@ -8,6 +8,7 @@ import { CustomDialogTransition, WORKORDER_SERVICE_STATUS } from 'src/constants/
 import Steps from '../WorkOrder/Service/Steps';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Autocomplete } from '@material-ui/lab';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 
 const useStyles = makeStyles(() => ({
   activityContainer: {
@@ -129,6 +130,17 @@ const WorkOrderTechnician = () => {
         setServiceData(sortedServiceData);
       });
   };
+  const getFieldsWithOtherDetails = (steps) => {
+    const stepTimes = [];
+    steps?.forEach((item) => {
+      let obj: any = {};
+      obj.startTime = item?.startDate ? new Date(item?.startDate).getTime() : null;
+      obj.endTime = item?.endDate ? new Date(item?.endDate).getTime() : null;
+      stepTimes.push(obj);
+    });
+
+    return stepTimes;
+  };
 
   return (
     <Fragment>
@@ -189,7 +201,7 @@ const WorkOrderTechnician = () => {
                       {serviceData
                         ?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key])
                         .map((data, index) => {
-                          console.log(data);
+                          const stepTime = getFieldsWithOtherDetails(data?.stepData || []);
                           return (
                             <Box
                               key={index}
@@ -219,6 +231,8 @@ const WorkOrderTechnician = () => {
                                         >
                                           {data?.service?.serviceName}
                                         </Typography>
+                                      </Box>
+                                      <Box>
                                         <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
                                       </Box>
                                       {data?.overAllStepStatus && (
@@ -234,6 +248,9 @@ const WorkOrderTechnician = () => {
                                           />
                                         </Box>
                                       )}
+                                      <Box>
+                                        <RenderTotalTime stepTimes={stepTime} />
+                                      </Box>
                                     </div>
                                   </Grid>
                                   <Grid item xs={1}></Grid>
@@ -272,6 +289,96 @@ const WorkOrderTechnician = () => {
         </Dialog>
       )}
     </Fragment>
+  );
+};
+
+// INTERFACES
+interface totalTimeInterface {
+  stepTimes: stepTimesInterface[];
+}
+interface stepTimesInterface {
+  startTime?: number | null;
+  endTime?: number | null;
+}
+// RETURN TOTAL TIME IN MS AND SHOULD TIME UPDATE, TAKES LIST OF STARTTIME AND END TIME LIST
+const getToalTime = (stepTimes: stepTimesInterface[]) => {
+  let totalTimes = 0;
+  let shouldTimerRun = stepTimes.filter((item) => item.startTime && item.endTime).length !== stepTimes.length;
+  stepTimes.forEach((item) => {
+    if (item.startTime && item.endTime) {
+      totalTimes += item.endTime - item.startTime;
+    }
+  });
+  return { shouldTimerRun, totalTimes };
+};
+
+function convertMsToTime(milliseconds) {
+  milliseconds = Math.abs(milliseconds);
+
+  function padTo2Digits(num) {
+    num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
+    return num.toString().padStart(2, '0');
+  }
+  let seconds = Math.floor(milliseconds / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+
+  let time = '';
+
+  if (hours === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours === 0 && minutes === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours > 0 && hours < 24) {
+    time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours >= 24) {
+    time = `${padTo2Digits(hours / 24)}d`;
+  }
+  return time;
+}
+
+// RENDER TOTAL TIME COMPONENT
+const RenderTotalTime = ({ stepTimes }: totalTimeInterface) => {
+  const [time, setTime] = useState(null);
+
+  useEffect(() => {
+    const { shouldTimerRun, totalTimes } = getToalTime(stepTimes);
+    if (shouldTimerRun) {
+      let currentDifference = totalTimes;
+      const interval = setInterval(() => {
+        currentDifference += 1000;
+        setTime(convertMsToTime(currentDifference));
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      };
+    } else {
+      setTime(convertMsToTime(totalTimes));
+    }
+  }, [stepTimes]);
+
+  if (stepTimes.length === 0) return <></>;
+  return (
+    <Box
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        border: '1px solid rgba(0, 0, 0, 0.23)',
+        backgroundColor: 'transparent',
+        padding: '2px 7px',
+        borderRadius: '8px'
+      }}
+    >
+      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+      {time}
+    </Box>
   );
 };
 
