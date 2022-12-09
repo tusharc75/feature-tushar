@@ -373,7 +373,7 @@ const RepairOrderDetails = () => {
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
                           allowedToEdit={
-                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                            [ QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                               quotationVersionData?.status
                             )
                               ? false
