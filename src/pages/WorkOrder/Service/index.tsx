@@ -1043,18 +1043,19 @@ const RenderTotalTime = ({ stepTimes }: totalTimeInterface) => {
 
   useEffect(() => {
     const { shouldTimerRun, totalTimes } = getToalTime(stepTimes);
+    let interval;
     if (shouldTimerRun) {
       let currentDifference = totalTimes;
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         currentDifference += 1000;
         setTime(convertMsToTime(currentDifference));
       }, 1000);
-      return () => {
-        clearInterval(interval);
-      };
     } else {
       setTime(convertMsToTime(totalTimes));
     }
+    return () => {
+      clearInterval(interval);
+    };
   }, [stepTimes]);
 
   if (stepTimes.length === 0) return <></>;
