@@ -577,15 +577,13 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                     transition: 'background .5s ease',
                     backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
                   }}
-                  className={`${classes.accordionHeading}  ${
-                    Boolean(stepData?.passFailStatus)
-                      ? `${
-                          Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                            ? classes.green
-                            : ''
-                        } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                      : classes.white
-                  }`}
+                  className={`${classes.accordionHeading}  ${Boolean(stepData?.passFailStatus)
+                    ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                      ? classes.green
+                      : ''
+                    } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                    : classes.white
+                    }`}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!stepData?.status) return;
@@ -677,23 +675,26 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                             </Box>
                           )
                         ) : null}
-                        <Box marginX={1} />
-                        <Box>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            disabled={!allowedToEdit}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!stepData?.status) return;
-                              setSelectedStep(step);
-                              setStepState(stepData);
-                            }}
-                          >
-                            Enter Value
-                          </Button>
-                        </Box>
+                        {stepData?.status &&
+                          <>
+                            <Box marginX={1} />
+                            <Box>
+                              <Button
+                                variant="outlined"
+                                color="inherit"
+                                size="small"
+                                disabled={!allowedToEdit}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedStep(step);
+                                  setStepState(stepData);
+                                }}
+                              >
+                                Enter Value
+                              </Button>
+                            </Box>
+                          </>
+                        }
                       </Box>
                     )}
                   </Box>
@@ -733,15 +734,15 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
                 ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
-                    ?.map((e) => e.serviceName)
-                    ?.toString()}. Do you want to continue ?`
+                  ?.map((e) => e.serviceName)
+                  ?.toString()}. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                : addServiceConfirmation.type === 'jumpStep'
-                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                    ?.map((e) => e.serviceName)
-                    ?.toString()} has been added. Do you want to Add ? `
+                  ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                  : addServiceConfirmation.type === 'jumpStep'
+                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                      ?.map((e) => e.serviceName)
+                      ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
