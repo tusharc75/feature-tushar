@@ -44,6 +44,7 @@ import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import { orderBy, startCase } from 'lodash';
 import SendEmail from './SendEmail';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const Quotation = ({
   rentalManagementData,
@@ -174,7 +175,7 @@ const Quotation = ({
                 }
               }}
               >
-              <InfoIcon fontSize="small" color="primary" />
+              <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
           </div>
         )
