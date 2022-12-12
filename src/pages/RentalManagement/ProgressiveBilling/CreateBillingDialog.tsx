@@ -276,7 +276,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         data?.inventory?.filter(d => d.product === element?.materialId)?.forEach((ele: any) => {
           ele.type = 'asset';
           ele.qty = 1;
-          ele.materialId = ele._id
+          ele._id = ele?.inventoryDetail?._id
+          ele.materialId = ele?.inventoryDetail?._id
           let values = { qty: 1 };
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           const { materialId, qty, type, _id, ...rest } = element
@@ -398,10 +399,14 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     let rows: any = [];
     selectedProducts.forEach((element) => {
       const product = invoicedProducts.find((p) => p._id === element._id);
-      if (product) {
-        const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
-        const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
+      const productStartDateTime = new Date(new Date(element.estimateStartDate).toLocaleDateString()).getTime();
+      const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
 
+      if (selectedEndDateTime < productStartDateTime) {
+        element.invalidDate = true;
+      }
+      else if (product) {
+        const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
         if (selectedEndDateTime < productEndDateTime) {
           element.invalidDate = true;
         } else {
@@ -622,7 +627,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             variant="contained"
             color="primary"
             size="small"
-            disabled={!appliedDate}
+            disabled={!appliedDate || rowsApplied.some(d => d.invalidDate === true)}
             onClick={() => {
               handleCreateBill();
             }}
