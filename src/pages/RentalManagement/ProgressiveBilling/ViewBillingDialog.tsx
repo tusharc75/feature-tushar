@@ -297,6 +297,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         ? parent.productDetail?.productName
         : parent.type === 'package'
           ? parent.packageDetail?.packageName
+          : parent.type === 'asset'
+          ? parent.inventoryDetail?.assetNumber
           : parent.serviceDetail?.serviceName
         }`;
       parent.description =
@@ -304,7 +306,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
             ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
+              :parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
@@ -323,6 +325,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         ? _subRow?.productDetail?.productName
         : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
+          : _subRow?.type === 'asset'
+          ? _subRow?.inventoryDetail?.assetNumber
           : _subRow?.serviceDetail?.serviceName
         }`;
       _subRow.description =
