@@ -81,7 +81,7 @@ const Productpackage = ({
           return <>Total</>;
         }
       },
-      
+
       {
         accessor: 'detail',
         Header: 'Asset Details',
@@ -160,7 +160,7 @@ const Productpackage = ({
       canDrag: false,
       Cell: ({ row }) => (
         <>
-            <HtmlTooltip title={allowedToDelete && row.original?.allowedToDelete ? 'Asset is already assigned' : 'Delete'}>
+          <HtmlTooltip title={allowedToDelete && row.original?.allowedToDelete ? 'Asset is already assigned' : 'Delete'}>
             <IconButton
               size="small"
               aria-label="Details"
@@ -168,12 +168,12 @@ const Productpackage = ({
                 const obj: any = [row.original._id];
                 setDeleteData(obj);
               }}
-              disabled={allowedToDelete && row.original?.allowedToDelete }
+              disabled={allowedToDelete && row.original?.allowedToDelete}
             >
               <DeleteIcon fontSize="small" color={allowedToDelete && row.original?.allowedToDelete ? "disabled" : "error"} />
             </IconButton>
-            </HtmlTooltip>
-          
+          </HtmlTooltip>
+
         </>
       )
     })
@@ -209,15 +209,15 @@ const Productpackage = ({
         parent.type === 'serializedAsset' ? parent.serializedAssetDetail.assetNumber : parent.packageDetail?.packageName}`;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.allowedToDelete = parent.workOrder ? false : true;
+      parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${parent.type === 'service' ? parent.serviceDetail?.status : parent.type === 'product' ? parent.productDetail?.status :
-        parent.type === 'serializedAsset' ? parent.serializedAssetDetail.status : parent.packageDetail?.status}`;
+      parent.status = `${parent.type === 'service' ? parent.serviceDetail?.status : parent.type === 'product' ? parent?.productDetail?.status :
+        parent.type === 'serializedAsset' ? parent?.serializedAssetDetail?.status : parent.packageDetail?.status}`;
     });
 
     if (rows.length !== 0) {
       setHasAssetsAdded(true)
-      if(rows.filter((_rows) => _rows.isValid === false).length > 0) {
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
         setNextStep(false);
       } else {
         setNextStep(true)
@@ -446,7 +446,7 @@ const Productpackage = ({
                   onClose={closeActions}
                 >
                   <MenuItem
-                    disabled={allowedToDelete && selectedProducts?.filter((e) => e.allowedToDelete)?.length === selectedProducts?.length ? false : true}
+                    disabled={allowedToDelete && selectedProducts?.filter((e) => e.allowedToDelete)?.length === selectedProducts?.length ? true : false}
                     onClick={() => {
                       closeActions()
                       handleDeleteMultiple();
