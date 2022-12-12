@@ -133,14 +133,14 @@ const RepairOrderDetails = () => {
     axiosInstance()
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        setRepairOrderData({ ...data });
         setCurrentStep(repairOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? repairOrderProcessSteps.indexOf(data?.processStatus) : 0);
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
           setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, `Invoice`]?.includes(d)));
         }
-        setAllowedToDelete(data.owner.optionValue === user?.user?._id);
+        setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+        setRepairOrderData({ ...data });
         if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
@@ -177,8 +177,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -363,26 +363,25 @@ const RepairOrderDetails = () => {
                         allowedToDelete={allowedToDelete}
                       />
                     )}
-                    {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') &&
-                      repairOrderData && (
-                        <WorkOrder
-                          repairOrderData={repairOrderData}
-                          setNextStep={setNextStep}
-                          isSmallScreen={isSmallScreen}
-                          isTabletScreen={isTabletScreen}
-                          showActivity={showActivity}
-                          stepFullScreen={stepFullScreen}
-                          allowedToEdit={
-                            [ QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                              quotationVersionData?.status
-                            )
-                              ? false
-                              : allowedToEdit
-                          }
-                          allowedToDelete={allowedToDelete}
-                          isPostWorkService={Boolean(currentStep === 3)}
-                        />
-                      )}
+                    {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') && repairOrderData && (
+                      <WorkOrder
+                        repairOrderData={repairOrderData}
+                        setNextStep={setNextStep}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={
+                          [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                            quotationVersionData?.status
+                          )
+                            ? false
+                            : allowedToEdit
+                        }
+                        allowedToDelete={allowedToDelete}
+                        isPostWorkService={Boolean(currentStep === 3)}
+                      />
+                    )}
                     {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (
                       <Quotation
                         repairOrderData={repairOrderData}
@@ -445,7 +444,7 @@ const RepairOrderDetails = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>

@@ -230,7 +230,13 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
         setDisableCompleteFail(!allStepsDone);
 
         if (inSteps && allStepsDone && selectedService.status === WORKORDER_SERVICE_STATUS.inProgress) {
-          setOpenCompleteDialog(true);
+          let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id);
+          if (isMeTechnician) {
+            updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
+          } else {
+            setOpenCompleteDialog(true);
+          }
+
           setInSteps(false);
         }
       })
@@ -501,17 +507,21 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
         }
 
         if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isQuoteRevisionOnFail) {
-
           setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'isQuoteRevisionOnFail' }));
         }
 
         if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
-
           const services = [result?.returnToStepOnFail].filter((s) => {
             return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
           });
           if (services.length > 0) {
-            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, services, type: 'returnToStepOnFail' }));
+            setAddServiceConfirmation((s) => ({
+              ...s,
+              status: WORKORDER_SERVICE_STEP_STATUS.failed,
+              open: true,
+              services,
+              type: 'returnToStepOnFail'
+            }));
           }
         }
 
@@ -665,6 +675,26 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                             </Box>
                           )
                         ) : null}
+                        {stepData?.status &&
+                          <>
+                            <Box marginX={1} />
+                            <Box>
+                              <Button
+                                variant="outlined"
+                                color="inherit"
+                                size="small"
+                                disabled={!allowedToEdit}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedStep(step);
+                                  setStepState(stepData);
+                                }}
+                              >
+                                Enter Value
+                              </Button>
+                            </Box>
+                          </>
+                        }
                       </Box>
                     )}
                   </Box>
@@ -702,13 +732,17 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           <ConfirmationDialog
             open={true}
             message={
-              addServiceConfirmation.type === "returnToStepOnFail"
-                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()}. Do you want to continue ?`
-                : addServiceConfirmation.type === "isQuoteRevisionOnFail"
+              addServiceConfirmation.type === 'returnToStepOnFail'
+                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
+                  ?.map((e) => e.serviceName)
+                  ?.toString()}. Do you want to continue ?`
+                : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
                   ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                  : addServiceConfirmation.type === "jumpStep"
+                  : addServiceConfirmation.type === 'jumpStep'
                     ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()} has been added. Do you want to Add ? `
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                      ?.map((e) => e.serviceName)
+                      ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });

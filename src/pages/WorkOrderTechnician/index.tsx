@@ -1,4 +1,19 @@
-import { Box, Chip, Dialog, Grid, IconButton, makeStyles, Paper, TextField, Tooltip, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Dialog,
+  FormControlLabel,
+  FormGroup,
+  Grid,
+  IconButton,
+  makeStyles,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography
+} from '@material-ui/core';
 import { Fragment, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
@@ -7,8 +22,12 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
 import Steps from '../WorkOrder/Service/Steps';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete, Skeleton } from '@material-ui/lab';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import SettingsIcon from '@material-ui/icons/Settings';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import React from 'react';
 
 const useStyles = makeStyles(() => ({
   activityContainer: {
@@ -75,6 +94,8 @@ const WorkOrderTechnician = () => {
   const [repairOrderOptions, setRepairOrderOptions] = useState([]);
   const [selectedRepairOrder, setSelectedRepairOrder] = useState(null);
   const [serviceDetailsShow, setServiceDetailsShow] = useState(false);
+  const [servicesShowDialog, setServicesShowDialog] = useState(false);
+  const [loadingWO, setLoadingWO] = useState(false);
 
   const WORKORDER_TECHNICIAN_SERVICE_STATUS = {
     backlog: 'Backlog',
@@ -82,6 +103,12 @@ const WorkOrderTechnician = () => {
     inProgress: 'In-Progress',
     completed: 'Completed'
   };
+  const WORKORDER_STATUS_COLOR = {
+    pending: '#FFFFE0',
+    inProgress: '#FFD580'
+  };
+
+  const [servicesToKeep, setServicesToKeep] = useState(['pending', 'inProgress']);
 
   useEffect(() => {
     axiosInstance()
@@ -97,6 +124,7 @@ const WorkOrderTechnician = () => {
   }, [selectedWorkOrder, selectedRepairOrder]);
 
   const fetchWorkOrderTechnician = () => {
+    setLoadingWO(true);
     let api =
       selectedWorkOrder && selectedRepairOrder
         ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}&repairOrder=${selectedRepairOrder.optionValue}`
@@ -128,6 +156,10 @@ const WorkOrderTechnician = () => {
         });
 
         setServiceData(sortedServiceData);
+        setLoadingWO(false);
+      })
+      ?.catch((err) => {
+        setLoadingWO(false);
       });
   };
   const getFieldsWithOtherDetails = (steps) => {
@@ -141,6 +173,13 @@ const WorkOrderTechnician = () => {
 
     return stepTimes;
   };
+  const handleToggleServices = (key) => {
+    if (servicesToKeep.includes(key)) {
+      setServicesToKeep(servicesToKeep.filter((k) => k !== key));
+    } else {
+      setServicesToKeep([...servicesToKeep, key]);
+    }
+  };
 
   return (
     <Fragment>
@@ -152,118 +191,181 @@ const WorkOrderTechnician = () => {
       <CustomContainer>
         <Fragment>
           <Box className={classes.activityContainer}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={3}>
-                {workOrderOptions && (
-                  <Autocomplete
-                    options={workOrderOptions}
-                    fullWidth
-                    getOptionLabel={(option: any) => option.optionLabel}
-                    getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                    value={selectedWorkOrder}
-                    onChange={(event, newValue) => {
-                      setSelectedWorkOrder(newValue);
-                    }}
-                    size="small"
-                    renderInput={(params) => <TextField {...params} label={`Select Work Order`} variant="outlined" />}
-                  />
-                )}
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                {repairOrderOptions && (
-                  <Autocomplete
-                    options={repairOrderOptions}
-                    fullWidth
-                    getOptionLabel={(option: any) => option.optionLabel}
-                    getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
-                    value={selectedRepairOrder}
-                    onChange={(event, newValue) => {
-                      setSelectedRepairOrder(newValue);
-                    }}
-                    size="small"
-                    renderInput={(params) => <TextField {...params} label={`Select Repair Order`} variant="outlined" />}
-                  />
-                )}
-              </Grid>
-            </Grid>
+            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+              {servicesShowDialog ? (
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={3}>
+                    {workOrderOptions && (
+                      <Autocomplete
+                        options={workOrderOptions}
+                        fullWidth
+                        getOptionLabel={(option: any) => option.optionLabel}
+                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                        value={selectedWorkOrder}
+                        onChange={(event, newValue) => {
+                          setSelectedWorkOrder(newValue);
+                        }}
+                        size="small"
+                        renderInput={(params) => <TextField {...params} label={`Select Work Order`} variant="outlined" />}
+                      />
+                    )}
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    {repairOrderOptions && (
+                      <Autocomplete
+                        options={repairOrderOptions}
+                        fullWidth
+                        getOptionLabel={(option: any) => option.optionLabel}
+                        getOptionSelected={(option: any, value: any) => option.optionValue === value.optionValue}
+                        value={selectedRepairOrder}
+                        onChange={(event, newValue) => {
+                          setSelectedRepairOrder(newValue);
+                        }}
+                        size="small"
+                        renderInput={(params) => <TextField {...params} label={`Select Repair Order`} variant="outlined" />}
+                      />
+                    )}
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Autocomplete
+                      fullWidth
+                      multiple
+                      options={Object.keys(WORKORDER_TECHNICIAN_SERVICE_STATUS)?.map((key) => key) || []}
+                      disableCloseOnSelect
+                      getOptionLabel={(option) => WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
+                      renderOption={(option: any, { selected }: any) => (
+                        <React.Fragment>
+                          <Checkbox disabled={['pending', 'inProgress']?.includes(option)} checked={servicesToKeep?.includes(option)} />
+                          {WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
+                        </React.Fragment>
+                      )}
+                      size="small"
+                      renderInput={(params) => <TextField {...params} label="Services Show" placeholder="Services" variant="outlined" />}
+                      value={servicesToKeep}
+                      onChange={(event: any, newValue: any) => {
+                        if (!newValue.includes('pending') || !newValue.includes('inProgress')) {
+                          return;
+                        }
+                        setServicesToKeep(newValue);
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              ) : (
+                <div></div>
+              )}
+
+              <Box className={classes.activityContainer} display={'flex'}>
+                <Box>
+                  <IconButton size="small" onClick={() => setServicesShowDialog(!servicesShowDialog)}>
+                    <SettingsIcon />
+                  </IconButton>
+                </Box>
+                <Box ml={1} />
+                <Box>
+                  <IconButton size="small" onClick={() => fetchWorkOrderTechnician()}>
+                    <RefreshIcon />
+                  </IconButton>
+                </Box>
+              </Box>
+            </Box>
 
             <Grid container spacing={2} className={` ${classes.activityMainBlock}`}>
-              {Object.keys(WORKORDER_TECHNICIAN_SERVICE_STATUS).map((key, i) => {
-                return (
-                  <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={i} className={classes.mediumDevice}>
-                    <div className={classes.block}>
-                      <Box p={1} className="fixedBoardHeader">
-                        <Typography variant="subtitle2" style={{ width: '50%' }}>
-                          {WORKORDER_SERVICE_STATUS[key]}
-                          {' (' + serviceData?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
-                        </Typography>
-                      </Box>
-                      {serviceData
-                        ?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key])
-                        .map((data, index) => {
-                          const stepTime = getFieldsWithOtherDetails(data?.stepData || []);
-                          return (
-                            <Box
-                              key={index}
-                              onClick={() => {
-                                let tempServiceData = data?.service;
-                                tempServiceData['uniqueId'] = data?._id;
-                                tempServiceData['status'] = data?.status;
-                                setService(tempServiceData);
-                                setWorkOrderId(data?.workOrderDetail?._id);
-                                setServiceDetailsShow(true);
-                              }}
-                              className={` ${classes.activitybox}`}
-                            >
-                              <Box>
-                                <Grid container>
-                                  <Grid item xs={11}>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                                      <Box display="flex" mr="10px">
-                                        <Typography
-                                          style={{
-                                            textOverflow: 'ellipsis',
-                                            overflow: 'hidden',
-                                            whiteSpace: 'nowrap',
-                                            marginRight: '5px'
-                                          }}
-                                          variant="subtitle2"
-                                        >
-                                          {data?.service?.serviceName}
-                                        </Typography>
-                                      </Box>
-                                      <Box>
-                                        <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
-                                      </Box>
-                                      {data?.overAllStepStatus && (
-                                        <Box ml={1}>
-                                          <Chip
-                                            label={data?.overAllStepStatus}
-                                            variant="outlined"
-                                            // color={data?.overAllStepStatus === 'Fail' ? 'default' : 'primary'}
-                                            style={{
-                                              borderColor: data?.overAllStepStatus === 'Fail' ? 'red' : 'green',
-                                              color: data?.overAllStepStatus === 'Fail' ? 'red' : 'green'
-                                            }}
-                                          />
-                                        </Box>
-                                      )}
-                                      <Box>
-                                        <RenderTotalTime stepTimes={stepTime} />
-                                      </Box>
-                                    </div>
-                                  </Grid>
-                                  <Grid item xs={1}></Grid>
-                                </Grid>
-                              </Box>
-                              <Box pt={2}></Box>
-                            </Box>
-                          );
-                        })}
-                    </div>
-                  </Grid>
-                );
-              })}
+              {Object.keys(WORKORDER_TECHNICIAN_SERVICE_STATUS)
+                ?.filter((key) => {
+                  return servicesToKeep.includes(key);
+                })
+                ?.map((key, i) => {
+                  return (
+                    <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={i} className={classes.mediumDevice}>
+                      <div className={classes.block}>
+                        <Box p={1} className="fixedBoardHeader">
+                          <Typography variant="subtitle2" style={{ width: '50%' }}>
+                            {WORKORDER_SERVICE_STATUS[key]}
+                            {' (' + serviceData?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
+                          </Typography>
+                        </Box>
+                        {!loadingWO
+                          ? serviceData
+                              ?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key])
+                              .map((data, index) => {
+                                const stepTime = getFieldsWithOtherDetails(data?.stepData || []);
+                                return (
+                                  <Box
+                                    key={index}
+                                    onClick={() => {
+                                      let tempServiceData = data?.service;
+                                      tempServiceData['uniqueId'] = data?._id;
+                                      tempServiceData['status'] = data?.status;
+                                      setService(tempServiceData);
+                                      setWorkOrderId(data?.workOrderDetail?._id);
+                                      setServiceDetailsShow(true);
+                                    }}
+                                    style={{ backgroundColor: WORKORDER_STATUS_COLOR[key] }}
+                                    className={` ${classes.activitybox}`}
+                                  >
+                                    <Box>
+                                      <Grid container>
+                                        <Grid item xs={11}>
+                                          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                            <Box display="flex" mr="10px">
+                                              <Typography
+                                                style={{
+                                                  textOverflow: 'ellipsis',
+                                                  overflow: 'hidden',
+                                                  whiteSpace: 'nowrap',
+                                                  marginRight: '5px'
+                                                }}
+                                                variant="subtitle2"
+                                              >
+                                                {data?.service?.serviceName}
+                                              </Typography>
+                                            </Box>
+                                            <Box>
+                                              <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
+                                            </Box>
+                                            {data?.overAllStepStatus && (
+                                              <Box ml={1}>
+                                                <Chip
+                                                  label={data?.overAllStepStatus}
+                                                  variant="outlined"
+                                                  // color={data?.overAllStepStatus === 'Fail' ? 'default' : 'primary'}
+                                                  style={{
+                                                    borderColor: data?.overAllStepStatus === 'Fail' ? 'red' : 'green',
+                                                    color: data?.overAllStepStatus === 'Fail' ? 'red' : 'green'
+                                                  }}
+                                                />
+                                              </Box>
+                                            )}
+                                            <Box>
+                                              <RenderTotalTime stepTimes={stepTime} />
+                                            </Box>
+                                          </div>
+                                        </Grid>
+                                        <Grid item xs={1}></Grid>
+                                      </Grid>
+                                    </Box>
+                                    <Box pt={2}></Box>
+                                  </Box>
+                                );
+                              })
+                          : [...Array(3).keys()]?.map((data, index) => {
+                              return (
+                                <Box key={index} className={` ${classes.activitybox}`} style={{ padding: '0' }}>
+                                  <Skeleton
+                                    variant="rect"
+                                    animation="wave"
+                                    width={'100%'}
+                                    height={100}
+                                    style={{ borderRadius: 6, backgroundColor: WORKORDER_STATUS_COLOR[key] }}
+                                  />
+                                </Box>
+                              );
+                            })}
+                      </div>
+                    </Grid>
+                  );
+                })}
             </Grid>
           </Box>
         </Fragment>
