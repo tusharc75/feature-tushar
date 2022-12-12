@@ -359,7 +359,7 @@ const WorkOrder = () => {
                   style={isMobile ? { flex: 1 } : {}}
                 />
               </Grid>
-              {permissions?.workOrder?.isCreate &&
+              {/* {permissions?.workOrder?.isCreate &&
                 <Button
                   className={styles.add_submit_btn}
                   onClick={() => setShowManageWorkOrder({ open: true, isClone: false, idToClone: null })}
@@ -368,7 +368,7 @@ const WorkOrder = () => {
                   color="primary"
                   startIcon={<AddOutlined />}>
                   Add</Button>
-              }
+              } */}
               {permissions?.workOrder?.isDelete &&
                 <Button
                   className={styles.action_submit_btn}
