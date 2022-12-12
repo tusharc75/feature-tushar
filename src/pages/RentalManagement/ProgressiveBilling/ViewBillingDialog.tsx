@@ -223,9 +223,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             disableFilters: true,
             canDrag: false,
             Cell: ({ row }) =>
-              row.original.isEditable && (
-                <Grid container spacing={1}>
-                  <IconButton
+            (
+              <Grid container spacing={1}>
+                {row.original.isEditable &&
+                  <><IconButton
                     size="small"
                     aria-label="Details"
                     onClick={() => {
@@ -234,18 +235,19 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   >
                     <EditIcon color="primary" />
                   </IconButton>
-                  <Box ml={1} />
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      handleDeleteData([row.original]);
-                    }}
-                  >
-                    <Delete color="error" />
-                  </IconButton>
-                </Grid>
-              )
+                    <Box ml={1} />
+                  </>}
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    handleDeleteData([row.original]);
+                  }}
+                >
+                  <Delete color="error" />
+                </IconButton>
+              </Grid>
+            )
           })
         );
       }
@@ -298,15 +300,15 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         : parent.type === 'package'
           ? parent.packageDetail?.packageName
           : parent.type === 'asset'
-          ? parent.inventoryDetail?.assetNumber
-          : parent.serviceDetail?.serviceName
+            ? parent.inventoryDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
         }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
             ? parent?.productDetail?.productDesc || ''
-              :parent.type === 'package'
+            : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
@@ -326,8 +328,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === 'asset'
-          ? _subRow?.inventoryDetail?.assetNumber
-          : _subRow?.serviceDetail?.serviceName
+            ? _subRow?.inventoryDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
         }`;
       _subRow.description =
         _subRow.type === 'service'
