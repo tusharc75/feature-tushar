@@ -104,8 +104,8 @@ const WorkOrderTechnician = () => {
     completed: 'Completed'
   };
   const WORKORDER_STATUS_COLOR = {
-    pending: 'yellow',
-    inProgress: 'orange'
+    pending: '#FFFFE0',
+    inProgress: '#FFD580'
   };
 
   const [servicesToKeep, setServicesToKeep] = useState(['pending', 'inProgress']);
