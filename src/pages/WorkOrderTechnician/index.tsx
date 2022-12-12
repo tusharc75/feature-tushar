@@ -232,7 +232,7 @@ const WorkOrderTechnician = () => {
                       multiple
                       options={Object.keys(WORKORDER_TECHNICIAN_SERVICE_STATUS)?.map((key) => key) || []}
                       disableCloseOnSelect
-                      getOptionLabel={(option) => option}
+                      getOptionLabel={(option) => WORKORDER_TECHNICIAN_SERVICE_STATUS[option]}
                       renderOption={(option: any, { selected }: any) => (
                         <React.Fragment>
                           <Checkbox disabled={['pending', 'inProgress']?.includes(option)} checked={servicesToKeep?.includes(option)} />
@@ -278,14 +278,14 @@ const WorkOrderTechnician = () => {
                 ?.map((key, i) => {
                   return (
                     <Grid item md={3} xs={12} sm={4} style={{ paddingTop: '0px' }} key={i} className={classes.mediumDevice}>
-                      <div className={classes.block} style={{ backgroundColor: WORKORDER_STATUS_COLOR[key] }}>
-                        <Box p={1} className="fixedBoardHeader" bgcolor={WORKORDER_STATUS_COLOR[key]}>
+                      <div className={classes.block}>
+                        <Box p={1} className="fixedBoardHeader">
                           <Typography variant="subtitle2" style={{ width: '50%' }}>
                             {WORKORDER_SERVICE_STATUS[key]}
                             {' (' + serviceData?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key]).length + ')'}
                           </Typography>
                         </Box>
-                        {serviceData?.length && !loadingWO
+                        {!loadingWO
                           ? serviceData
                               ?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key])
                               .map((data, index) => {
@@ -301,6 +301,7 @@ const WorkOrderTechnician = () => {
                                       setWorkOrderId(data?.workOrderDetail?._id);
                                       setServiceDetailsShow(true);
                                     }}
+                                    style={{ backgroundColor: WORKORDER_STATUS_COLOR[key] }}
                                     className={` ${classes.activitybox}`}
                                   >
                                     <Box>
@@ -356,7 +357,7 @@ const WorkOrderTechnician = () => {
                                     animation="wave"
                                     width={'100%'}
                                     height={100}
-                                    style={{ borderRadius: 6, backgroundColor: 'white' }}
+                                    style={{ borderRadius: 6, backgroundColor: WORKORDER_STATUS_COLOR[key] }}
                                   />
                                 </Box>
                               );

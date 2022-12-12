@@ -40,6 +40,7 @@ import { BiChevronDown } from 'react-icons/bi';
 import { calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 
 const Productpackage = ({
@@ -183,7 +184,7 @@ const Productpackage = ({
                   }
                 }}
               >
-                <InfoIcon fontSize="small" color="primary" />
+                <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
             )}
           </div>

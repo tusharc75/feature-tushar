@@ -28,7 +28,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { useHistory } from 'react-router-dom';
-import InfoIcon from '@material-ui/icons/Info';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
@@ -165,7 +165,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <InfoIcon fontSize="small" color={'primary'} />
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -179,7 +179,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <InfoIcon fontSize="small" color={'primary'} />
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -193,7 +193,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <InfoIcon fontSize="small" color={'primary'} />
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -254,7 +254,7 @@ const SerializedAsset = ({
                         });
                       }}
                     >
-                      <InfoIcon fontSize="small" color={'primary'} />
+                      <OpenInNewIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </HtmlTooltip>
                 )}
