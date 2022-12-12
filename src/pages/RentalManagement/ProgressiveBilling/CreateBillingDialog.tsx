@@ -385,9 +385,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   };
 
   const handleApplyDate = async () => {
+    
     let tempValues = {
+      estimateEndDate: endDate,
       actualEndDate: endDate,
-      estimateEndDate: endDate
     };
 
     const {
@@ -412,19 +413,24 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       let values = JSON.parse(JSON.stringify(tempValues))
       if (element.pricingMethod === "Per Week") {
         values["pricingMethod"] = "Per Day"
-        if (priceFieldName) values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 7 //original becaause element is change when apply
+        if (priceFieldName) {
+          values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 7
+        }
         calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         calValues["pricingMethod"] = "Per Week"
       }
       else if (element.pricingMethod === "Per Month") {
         values["pricingMethod"] = "Per Day"
-        if (priceFieldName) values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 30
+        if (priceFieldName) {
+          values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 30
+        }
         calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         calValues["pricingMethod"] = "Per Month"
       }
       else {
         calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
       }
+      console.log(values)
       element.isAppliedBill = true // row color
       rows.push({ ...element, ...calValues });
     });
