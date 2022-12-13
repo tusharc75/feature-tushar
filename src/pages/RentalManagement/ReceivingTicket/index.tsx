@@ -210,7 +210,6 @@ const ReceivingTicket = ({
         productAssets = response?.data?.data;
         productAssets = productAssets
         .map((d) => {
-          console.log(d.actualStartDate, d.actualEndDate)
           return({
           ...d.inventory,
           rentalAssetStatus: d.status,
@@ -234,7 +233,6 @@ const ReceivingTicket = ({
           startDate: u?.startDate,
           endDate: u?.endDate
         }));
-        console.log("ASSETS",productAssets)
 
         const result = await axiosInstance().get(
           `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`
