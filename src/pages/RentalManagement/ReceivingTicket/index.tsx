@@ -282,7 +282,6 @@ const ReceivingTicket = ({
           });
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
-          console.log(element);
           const obj: any = {};
           obj.uniqueId = element._id;
           // this is the material id
@@ -911,6 +910,26 @@ const ReceivingTicket = ({
       });
   };
 
+
+  const handelRevertTickets = () => {
+    let data = {};
+    const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
+    if (receivingTicketIds.length) {
+      data['ids'] = receivingTicketIds?.map((e) => e);
+      axiosInstance().put(`${deliveryTicket.api}/revert`, data).then(({ data: { data } }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Reverted Successfully`
+        });
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   useEffect(() => {
     const product = selectedRecords?.filter((e) => e.type === 'Product');
     if (product.length) {
@@ -1127,6 +1146,19 @@ const ReceivingTicket = ({
             >
               Create Receiving Ticket (Chargeable)
             </MenuItem>
+
+            {selectedRecords.length &&
+              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length ===
+              selectedRecords?.length ? (
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  handelRevertTickets()
+                }}
+              >
+                Revert Receiving Ticket
+              </MenuItem>
+            ) : null}
 
             {selectedRecords.length &&
               selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)

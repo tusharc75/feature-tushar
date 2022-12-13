@@ -11,17 +11,21 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
       open
       fullWidth
       maxWidth="sm"
-      onClose={(e, reason) => {
-        if (reason !== 'backdropClick') {
-          handleClose()
-        }
-      }}>
-      <CustomDialogHeader title="Confirmation" onClose={handleClose} />
+    // onClose={(e, reason) => {
+    //   if (reason !== 'backdropClick') {
+    //     handleClose()
+    //   }
+    // }}
+    >
+      <CustomDialogHeader
+        title="Confirmation"
+        showRequiredLabel={false}
+      // onClose={handleClose}
+      />
       <CustomDialogContent>
         <Box>
           <Typography>  All steps are performed for{' '}
-            <Box component="span" fontWeight="bold">{serviceName}</Box>
-            , do you want to mark it complete?
+            <Box component="span" fontWeight="bold">{serviceName}</Box>, do you want to mark it complete?
           </Typography>
           <Box mt={2}>
             <TextField
@@ -38,9 +42,9 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <Button variant="outlined" size="small" onClick={handleClose} color='primary'>
+        {/* <Button variant="outlined" size="small" onClick={handleClose} color='primary'>
           Cancel
-        </Button>
+        </Button> */}
         <Button variant="contained" size="small" onClick={updateStatus} color='primary'>
           Complete
         </Button>

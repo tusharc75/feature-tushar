@@ -223,9 +223,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             disableFilters: true,
             canDrag: false,
             Cell: ({ row }) =>
-              row.original.isEditable && (
-                <Grid container spacing={1}>
-                  <IconButton
+            (
+              <Grid container spacing={1}>
+                {row.original.isEditable &&
+                  <><IconButton
                     size="small"
                     aria-label="Details"
                     onClick={() => {
@@ -234,18 +235,19 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   >
                     <EditIcon color="primary" />
                   </IconButton>
-                  <Box ml={1} />
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      handleDeleteData([row.original]);
-                    }}
-                  >
-                    <Delete color="error" />
-                  </IconButton>
-                </Grid>
-              )
+                    <Box ml={1} />
+                  </>}
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    handleDeleteData([row.original]);
+                  }}
+                >
+                  <Delete color="error" />
+                </IconButton>
+              </Grid>
+            )
           })
         );
       }
@@ -297,7 +299,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         ? parent.productDetail?.productName
         : parent.type === 'package'
           ? parent.packageDetail?.packageName
-          : parent.serviceDetail?.serviceName
+          : parent.type === 'asset'
+            ? parent.inventoryDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
         }`;
       parent.description =
         parent.type === 'service'
@@ -323,7 +327,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
         ? _subRow?.productDetail?.productName
         : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
-          : _subRow?.serviceDetail?.serviceName
+          : _subRow?.type === 'asset'
+            ? _subRow?.inventoryDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
         }`;
       _subRow.description =
         _subRow.type === 'service'

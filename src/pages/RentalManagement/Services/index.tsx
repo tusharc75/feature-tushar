@@ -32,6 +32,7 @@ import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
 import StorefrontIcon from '@material-ui/icons/Storefront';
 import AllOutIcon from '@material-ui/icons/AllOut';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 
 const Services = ({
@@ -164,7 +165,7 @@ const Services = ({
                     }
                   }}
                 >
-                  <InfoIcon fontSize="small" color="primary" />
+                  <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
               </>
             )}
