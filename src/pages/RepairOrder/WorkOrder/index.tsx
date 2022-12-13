@@ -128,6 +128,11 @@ const WorkOrder = ({
         Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
       },
       {
+        accessor:"Result",
+        Header: 'Result',
+        Cell: ({ row }) => (row?.original['overAllStepStatus'] ? <p> {row?.original?.overAllStepStatus}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'workOrderNumber',
         Header: 'Work Order',
         Cell: ({ row }) =>
