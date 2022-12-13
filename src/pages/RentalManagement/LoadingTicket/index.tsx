@@ -732,43 +732,8 @@ const LoadingTicket = ({
                 >
                   Delivered to Customer
                 </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    const products = [];
-                    selectedRecords?.forEach((element) => {
-                      const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
-                      if (foundProduct.length) {
-                        foundProduct[0].qty += 1;
-                      } else {
-                        products.push({
-                          _id: element?.product?.optionValue,
-                          id: element?.product?.optionValue,
-                          productName: element?.product?.optionLabel,
-                          qty: 1
-                        });
-                      }
-                    });
-                    setAddSerializedAssetDialog({ open: true, products: products });
-                    closeActions();
-                  }}
-                  disabled={
-                    selectedRecords.length === 0 ||
-                    isOffline ||
-                    selectedRecords.some(
-                      (f: any) =>
-                        f.type !== 'Asset' ||
-                        !f.hasOwnProperty('loadingTicketId') ||
-                        f.hasOwnProperty('receivingTicketId') ||
-                        f.hasOwnProperty('returnTicketId')
-                    )
-                  }
-                >
-                  Replace Products
-                </MenuItem>
-
                 {selectedRecords.length &&
-                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length ===
-                  selectedRecords?.length ? (
+                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length === selectedRecords?.length ? (
                   <MenuItem
                     onClick={() => {
                       closeActions();
@@ -778,6 +743,37 @@ const LoadingTicket = ({
                     Revert Loading Ticket
                   </MenuItem>
                 ) : null}
+
+                {selectedRecords.length &&
+                  selectedRecords?.filter((f) =>
+                    f.hasOwnProperty('loadingTicketId')
+                    && f?.type === 'Asset'
+                    && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+                    && f?.status === INVENTORY_STATUS.inUse)?.length === selectedRecords?.length
+                  &&
+                  <MenuItem
+                    onClick={() => {
+                      const products = [];
+                      selectedRecords?.forEach((element) => {
+                        const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
+                        if (foundProduct.length) {
+                          foundProduct[0].qty += 1;
+                        } else {
+                          products.push({
+                            _id: element?.product?.optionValue,
+                            id: element?.product?.optionValue,
+                            productName: element?.product?.optionLabel,
+                            qty: 1
+                          });
+                        }
+                      });
+                      setAddSerializedAssetDialog({ open: true, products: products });
+                      closeActions();
+                    }}
+                  >
+                    Replace Asset
+                  </MenuItem>
+                }
               </Menu>
               <Box mx={1} />
               {selectedRecords.length &&
