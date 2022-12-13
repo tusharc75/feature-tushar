@@ -102,6 +102,7 @@ const LoadingTicket = ({
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
+  const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
 
   useEffect(() => {
     fetchRecords();
@@ -737,7 +738,7 @@ const LoadingTicket = ({
                   <MenuItem
                     onClick={() => {
                       closeActions();
-                      handelRevertTickets()
+                      setShowConformationRevertTicket(true);
                     }}
                   >
                     Revert Loading Ticket
@@ -1050,6 +1051,19 @@ const LoadingTicket = ({
           handleSucess={(data) => {
             handleReplaceAsset(data?.reason);
           }}
+        />
+      )}
+      {showConformationRevertTicket && (
+        <ConfirmationDialog
+          open={showConformationRevertTicket}
+          message={`Are you sure you want to revert Loading Ticket?`}
+          onClose={() => {
+            setShowConformationRevertTicket(false);
+          }}
+          onOk={() => {
+            handelRevertTickets();
+          }}
+          okBtnLoading={okBtnLoading}
         />
       )}
     </>
