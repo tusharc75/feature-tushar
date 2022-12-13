@@ -575,6 +575,25 @@ const LoadingTicket = ({
     }
   };
 
+  const handelRevertTickets = () => {
+    let data = {};
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      data['ids'] = loadingTicketIds?.map((e) => e);
+      axiosInstance().put(`${deliveryTicket.api}/revert`, data).then(({ data: { data } }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Reverted Successfully`
+        });
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   return (
     <>
       <Box display="flex" justifyContent="flex-end" pt={1}>
@@ -746,6 +765,19 @@ const LoadingTicket = ({
                 >
                   Replace Products
                 </MenuItem>
+
+                {selectedRecords.length &&
+                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length ===
+                  selectedRecords?.length ? (
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      handelRevertTickets()
+                    }}
+                  >
+                    Revert Loading Ticket
+                  </MenuItem>
+                ) : null}
               </Menu>
               <Box mx={1} />
               {selectedRecords.length &&

@@ -30,7 +30,7 @@ const CalculatePriceDialog = ({
     const fetchCalculatePrice = () => {
         const data: any = {};
         data.conditionType = ['Rent'];
-        data.material = material.filter((d) => d.parentId === null &&(d.listPrice === null || d.listPrice === undefined || d.listPrice === 0)).map((ele) => ({
+        data.material = material.filter((d) => d.parentId === null && (d.listPrice === null || d.listPrice === undefined || d.listPrice === 0)).map((ele) => ({
             materialId: ele?.materialId,
             materialType: ele?.type,
             qty: ele?.qty,
@@ -109,7 +109,7 @@ const CalculatePriceDialog = ({
                                                             [`${obj.productData?.materialId}`]: val
                                                         }))
                                                     }}
-                                                    renderInput={(params) => <TextField {...params} label={`select Pricing condition`} variant="outlined" />}
+                                                    renderInput={(params) => <TextField {...params} label={`Select Pricing Condition`} variant="outlined" />}
                                                 />
                                             </Grid>
                                         </Grid>
