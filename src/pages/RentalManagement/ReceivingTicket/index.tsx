@@ -1237,7 +1237,7 @@ const ReceivingTicket = ({
               <MenuItem onClick={() => setShowRepairOrderDialog(true)}>Create Repair Order</MenuItem>
             ) : null}
 
-            <MenuItem
+            {/* <MenuItem
               onClick={() => {
                 const products = [];
                 selectedRecords?.forEach((element) => {
@@ -1269,7 +1269,7 @@ const ReceivingTicket = ({
               }
             >
               Replace Products
-            </MenuItem>
+            </MenuItem> */}
 
             {selectedRecords?.filter(
               (f) => f.type === 'Product'
