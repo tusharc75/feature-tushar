@@ -238,7 +238,12 @@ const SerializedAsset = ({
                         ]);
                       }}
                     >
-                      <Delete fontSize="small" color="error" />
+                      <Delete fontSize="small" color={ !(
+                          row.original.status === INVENTORY_STATUS.reserved ||
+                          [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(row.original.status)
+                        ) &&
+                        row?.original?.rentalAssetStatus &&
+                        !allowedToEdit ? "disabled" : "error"} />
                     </IconButton>
                   </HtmlTooltip>
                 }
