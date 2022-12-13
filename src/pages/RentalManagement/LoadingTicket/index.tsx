@@ -1062,6 +1062,7 @@ const LoadingTicket = ({
           }}
           onOk={() => {
             handelRevertTickets();
+            setShowConformationRevertTicket(false);
           }}
           okBtnLoading={okBtnLoading}
         />

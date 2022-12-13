@@ -1727,6 +1727,7 @@ const ReceivingTicket = ({
           }}
           onOk={() => {
             handelRevertTickets();
+            setShowConformationRevertTicket(false);
           }}
           okBtnLoading={okBtnLoading}
         />
