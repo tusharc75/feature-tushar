@@ -57,6 +57,8 @@ import ConsumeProduct from '../../../components/RentalManagment/ConsumeProduct';
 import { useData } from '../../../StateProvider/Provider';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import ReturnTicketDialog from './ReturnTicketDialog';
+import Edit from '@material-ui/icons/Edit';
+import ChangeActualDateDialog from './ChangeActualDateDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -91,6 +93,7 @@ const ReceivingTicket = ({
 
   const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: 'add' });
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
+  const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);setShowConformationRevertTicket(false);
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
@@ -125,6 +128,7 @@ const ReceivingTicket = ({
   const [columnHeader, setColumnHeader] = useState(null);
 
   const [invoiceQtyData, setInvoiceQtyData] = useState(null);
+  const [openDateDialog, setOpenDateDialog] = useState({ open: false, data: null, loading: false })
 
   const {
     state: { user, permissions, selectedEntity }
@@ -193,7 +197,9 @@ const ReceivingTicket = ({
           warehouseId: u?.warehouse?.optionValue,
           currentOwner: u?.currentOwner,
           currentLocation: u?.currentLocation?.optionValue,
-          rentalAssetStatus: u?.status
+          rentalAssetStatus: u?.status,
+          startDate: u?.actualStartDate,
+          endDate: u?.actualEndDate
         }));
 
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
@@ -204,15 +210,17 @@ const ReceivingTicket = ({
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
         productAssets = productAssets
-          .map((d) => ({
-            ...d.inventory,
-            rentalAssetStatus: d.status,
-            startDate: d.startDate,
-            endDate: d.endDate,
-            isReplaced: d.isReplaced,
-            replaceReason: d.replaceReason,
-            replaceAsset: d.replaceAsset
-          }))
+          .map((d) => {
+            return ({
+              ...d.inventory,
+              rentalAssetStatus: d.status,
+              startDate: d.actualStartDate || d.startDate,
+              endDate: d.actualEndDate || d.endDate,
+              isReplaced: d.isReplaced,
+              replaceReason: d.replaceReason,
+              replaceAsset: d.replaceAsset
+            })
+          })
           .map((u) => ({
             ...u,
             type: 'Asset',
@@ -223,7 +231,9 @@ const ReceivingTicket = ({
             warehouse: u?.warehouse?.optionLabel,
             warehouseId: u?.warehouse?.optionValue,
             currentOwner: u?.currentOwner,
-            currentLocation: u?.currentLocation?.optionValue
+            currentLocation: u?.currentLocation?.optionValue,
+            startDate: u?.startDate,
+            endDate: u?.endDate
           }));
 
         const result = await axiosInstance().get(
@@ -259,8 +269,7 @@ const ReceivingTicket = ({
           });
         }
       });
-      console.log(returnTicketProducts);
-
+  
       products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
       products?.forEach((element) => {
         var qty = element.qty;
@@ -272,7 +281,6 @@ const ReceivingTicket = ({
           });
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
         ticketProduct?.forEach((ele) => {
-          console.log(element);
           const obj: any = {};
           obj.uniqueId = element._id;
           // this is the material id
@@ -545,6 +553,19 @@ const ReceivingTicket = ({
       <NoDataCell />
     );
 
+  const ActionRenderer = (params) => (
+    allowedToEdit && params?.data?.startDate && params?.data?.endDate ?
+      <HtmlTooltip title={`Update Actual Start Date and End Date`}>
+        <IconButton
+          size='small'
+          onClick={() => {
+            setOpenDateDialog({ ...openDateDialog, open: true, data: params?.data })
+          }}>
+          <Edit fontSize='small' color='primary' />
+        </IconButton>
+      </HtmlTooltip> : ""
+  )
+
   const frameworkComponents = {
     receivingTicketRenderer: ReceivingTicketRenderer,
     deliveryTicketRenderer: DeliveryTicketRenderer,
@@ -554,7 +575,8 @@ const ReceivingTicket = ({
     parentNameRenderer: ParentNameRenderer,
     warehouseRenderer: WarehouseRenderer,
     commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer
+    dateRenderer: DateRenderer,
+    actionsRenderer: ActionRenderer
   };
 
   const getColumn = async () => {
@@ -624,7 +646,7 @@ const ReceivingTicket = ({
     { field: 'startDate', headerName: 'Actual Start Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'Actual End Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'rentalAssetStatus', headerName: 'Rental Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' },
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -892,6 +914,26 @@ const ReceivingTicket = ({
       });
   };
 
+
+  const handelRevertTickets = () => {
+    let data = {};
+    const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
+    if (receivingTicketIds.length) {
+      data['ids'] = receivingTicketIds?.map((e) => e);
+      axiosInstance().put(`${deliveryTicket.api}/revert`, data).then(({ data: { data } }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Reverted Successfully`
+        });
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   useEffect(() => {
     const product = selectedRecords?.filter((e) => e.type === 'Product');
     if (product.length) {
@@ -912,6 +954,30 @@ const ReceivingTicket = ({
       setSeletedProducts([]);
     }
   }, [selectedRecords]);
+
+
+  const handleSubmitChangeDates = (values) => {
+    if (!openDateDialog.data) return
+    setOpenDateDialog({ ...openDateDialog, loading: true })
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, {
+      "material": openDateDialog?.data?.displayType !== "Asset" ? openDateDialog?.data?.uniqueId : "",
+      "inventory": openDateDialog?.data?.displayType === "Asset" ? openDateDialog?.data?._id : "",
+      "endDate": values.actualEndDate,
+      "startDate": values.actualStartDate
+    })
+      .then(() => {
+        toastConfig.setToastConfig({
+          open: true,
+          message: "Dates Updated Successfully",
+          type: "success"
+        })
+        setOpenDateDialog({ open: false, data: null, loading: false })
+        fetchRecords()
+      }).catch((err) => {
+        toastConfig.setToastConfig(err)
+        setOpenDateDialog({ open: false, data: null, loading: false })
+      })
+  }
 
   return (
     <>
@@ -1205,7 +1271,7 @@ const ReceivingTicket = ({
               <MenuItem onClick={() => setShowRepairOrderDialog(true)}>Create Repair Order</MenuItem>
             ) : null}
 
-            <MenuItem
+            {/* <MenuItem
               onClick={() => {
                 const products = [];
                 selectedRecords?.forEach((element) => {
@@ -1237,7 +1303,20 @@ const ReceivingTicket = ({
               }
             >
               Replace Products
-            </MenuItem>
+            </MenuItem> */}
+
+            {selectedRecords.length &&
+              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length ===
+              selectedRecords?.length ? (
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  setShowConformationRevertTicket(true)
+                }}
+              >
+                Revert Receiving Ticket
+              </MenuItem>
+            ) : null}
 
             {selectedRecords?.filter(
               (f) => f.type === 'Product'
@@ -1389,12 +1468,14 @@ const ReceivingTicket = ({
               limit={limit}
               pageSizes={pageSizes}
               page={page}
-              allowAction={false}
+              allowAction={true}
               loading={loading || loadingData}
               isClientSideGrid={true}
               renderedFrom={renderedFrom}
               allowSelection={allowedToEdit || isProcessor}
               refreshGrid={fetchRecords}
+              actionWidth={80}
+
             />
           )
         ) : (
@@ -1634,6 +1715,31 @@ const ReceivingTicket = ({
             handleConsumProduct(null);
           }}
           okBtnLoading={okBtnLoading}
+        />
+      )}
+      {showConformationRevertTicket && (
+        <ConfirmationDialog
+          open={showConformationRevertTicket}
+          message={`Are you sure you want to revert Receiving Ticket?`}
+          onClose={() => {
+            setShowConformationRevertTicket(false);
+          }}
+          onOk={() => {
+            handelRevertTickets();
+            setShowConformationRevertTicket(false);
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      )}
+      {openDateDialog.open && (
+        <ChangeActualDateDialog
+          data={openDateDialog.data}
+          open={openDateDialog.open}
+          loading={openDateDialog.loading}
+          onClose={() => {
+            setOpenDateDialog({ open: false, data: null, loading: false })
+          }}
+          handleSubmit={handleSubmitChangeDates}
         />
       )}
     </>

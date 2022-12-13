@@ -47,6 +47,8 @@ import InfoIcon from '@material-ui/icons/Info';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import { ExpandMore } from '@material-ui/icons';
+import AddSerializedAsset from '../SerializedAsset/AddSerializedAsset';
+import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -97,6 +99,11 @@ const LoadingTicket = ({
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
+  const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
+  const [replaceLoading, setReplaceLoading] = useState(false);
+  const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
+
   useEffect(() => {
     fetchRecords();
     getColumn();
@@ -140,7 +147,12 @@ const LoadingTicket = ({
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
         productAssets = productAssets
-          .map((d) => d.inventory)
+          .map((d) => ({
+            ...d.inventory,
+            isReplaced: d.isReplaced,
+            replaceReason: d.replaceReason,
+            replaceAsset: d.replaceAsset
+          }))
           .map((u) => ({
             ...u,
             type: 'Asset',
@@ -151,7 +163,7 @@ const LoadingTicket = ({
             warehouse: u?.warehouse?.optionLabel,
             warehouseId: u?.warehouse?.optionValue,
             currentOwner: u?.currentOwner,
-            currentLocation: u?.currentLocation?.optionValue
+            currentLocation: u?.currentLocation?.optionValue,
           }));
 
         const result = await axiosInstance().get(
@@ -193,10 +205,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDesc || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDesc || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -222,10 +234,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDesc || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDesc || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
@@ -248,7 +260,6 @@ const LoadingTicket = ({
       // }
 
       deliveryTicketList.map((obj) => {
-        console.log(obj?.productName)
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
             if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
@@ -262,15 +273,13 @@ const LoadingTicket = ({
       });
 
       productAssets.forEach((d) => {
-        console.log(d?.type, d?.parentId)
         d['parentName'] = d?.hasOwnProperty('parentName') && d?.parentName !== '' ? d?.parentName : d?.productName;
         d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;
         d['hideSelection'] =
-          [INVENTORY_STATUS.inUse, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(
+          [INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(
             d.status
           ) ||
-          d.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered ||
           d?.manualStatus === INVENTORY_STATUS.reserved;
       });
 
@@ -342,6 +351,13 @@ const LoadingTicket = ({
           </HtmlTooltip>
         </Box>
       )}
+      {params?.data?.isReplaced && (
+        <Box ml={1} mt={1}>
+          <HtmlTooltip title={`This asset has replaced ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
+            <InfoIcon fontSize="small" color={'primary'} />
+          </HtmlTooltip>
+        </Box>
+      )}
     </Fragment>
   );
 
@@ -402,6 +418,9 @@ const LoadingTicket = ({
         }
         if (params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue) {
           return { backgroundColor: COLOUR_MASTER.transferAsset.background };
+        }
+        if (params?.data?.isReplaced) {
+          return { backgroundColor: COLOUR_MASTER.replaceAssetColor.background };
         }
         return null;
       }
@@ -494,6 +513,42 @@ const LoadingTicket = ({
     }
   };
 
+  const handleOpenReplaceAssetReason = (rows) => {
+    const data: any = {};
+    data.refrenceType = 'rentalJob';
+    data.referenceId = rentalManagementData._id;
+    const assets: any = [];
+    selectedRecords?.forEach((element: any) => {
+      const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
+      if (result.length) {
+        assets.push({ _id: element._id, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id });
+        result[0].isCounted = true;
+      }
+    });
+    data.assets = assets;
+    setShowReplaceReason({ open: true, data: data });
+  };
+
+  const handleReplaceAsset = (reason) => {
+    setReplaceLoading(true);
+    axiosInstance()
+      .post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
+      .then(({ data }) => {
+        setShowReplaceReason({ open: false, data: [] });
+        setAddSerializedAssetDialog({ open: false, products: [] });
+        setReplaceLoading(false);
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Assets Replaced Successfully`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handelProcessTickets = () => {
     let data = {};
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
@@ -518,6 +573,25 @@ const LoadingTicket = ({
         });
     }
   };
+
+  const handelRevertTickets = () => {
+    let data = {};
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      data['ids'] = loadingTicketIds?.map((e) => e);
+      axiosInstance().put(`${deliveryTicket.api}/revert`, data).then(({ data: { data } }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Reverted Successfully`
+        });
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
 
   return (
     <>
@@ -657,10 +731,52 @@ const LoadingTicket = ({
                 >
                   Delivered to Customer
                 </MenuItem>
+                {selectedRecords.length &&
+                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length === selectedRecords?.length ? (
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      setShowConformationRevertTicket(true);
+                    }}
+                  >
+                    Revert Loading Ticket
+                  </MenuItem>
+                ) : null}
+
+                {selectedRecords.length &&
+                  selectedRecords?.filter((f) =>
+                    f.hasOwnProperty('loadingTicketId')
+                    && f?.type === 'Asset'
+                    && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+                    && f?.status === INVENTORY_STATUS.inUse)?.length === selectedRecords?.length
+                  &&
+                  <MenuItem
+                    onClick={() => {
+                      const products = [];
+                      selectedRecords?.forEach((element) => {
+                        const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
+                        if (foundProduct.length) {
+                          foundProduct[0].qty += 1;
+                        } else {
+                          products.push({
+                            _id: element?.product?.optionValue,
+                            id: element?.product?.optionValue,
+                            productName: element?.product?.optionLabel,
+                            qty: 1
+                          });
+                        }
+                      });
+                      setAddSerializedAssetDialog({ open: true, products: products });
+                      closeActions();
+                    }}
+                  >
+                    Replace Asset
+                  </MenuItem>
+                }
               </Menu>
               <Box mx={1} />
               {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+                selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
                 selectedRecords?.length ? (
                 <Fragment>
                   <Tooltip title="Remove Assets From Loading Ticket(s)">
@@ -738,7 +854,7 @@ const LoadingTicket = ({
               owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
               onCreate={false}
               showClone={false}
-              onClone={() => {}}
+              onClone={() => { }}
               renderedFrom={renderedFrom}
             />
           ) : (
@@ -909,6 +1025,45 @@ const LoadingTicket = ({
       )}
       {showNonSerializeAsset.open && (
         <ShowNonSerializeAssets data={showNonSerializeAsset.data} onClose={() => setShowNonSerializeAsset({ open: false, data: {} })} />
+      )}
+      {addSerializedAssetDialog.open && (
+        <AddSerializedAsset
+          addSerializedAsset={handleOpenReplaceAssetReason}
+          handleSerializedAssetClose={() => {
+            setAddSerializedAssetDialog({ open: false, products: [] });
+          }}
+          refrenceType={'ReplaceAsset'}
+          refrenceData={{
+            _id: rentalManagementData?._id,
+            warehouse: rentalManagementData?.warehouse?.optionValue
+          }}
+          isAdding={replaceLoading}
+          selectedProducts={addSerializedAssetDialog.products}
+          filterByPlant={rentalManagementData?.warehouse?.optionValue}
+        />
+      )}
+      {showReplaceReason.open && (
+        <ReplaceAssetReason
+          handleClose={() => setShowReplaceReason({ open: false, data: {} })}
+          loading={replaceLoading}
+          handleSucess={(data) => {
+            handleReplaceAsset(data?.reason);
+          }}
+        />
+      )}
+      {showConformationRevertTicket && (
+        <ConfirmationDialog
+          open={showConformationRevertTicket}
+          message={`Are you sure you want to revert Loading Ticket?`}
+          onClose={() => {
+            setShowConformationRevertTicket(false);
+          }}
+          onOk={() => {
+            handelRevertTickets();
+            setShowConformationRevertTicket(false);
+          }}
+          okBtnLoading={okBtnLoading}
+        />
       )}
     </>
   );

@@ -13,7 +13,8 @@ import {
     CheckboxRenderer
 } from '../components/AgGridComponents/CustomAgGridCellRenderers';
 
-import { sidebarResourceObjectFromValues } from './helpers';
+import { formatAmountWithCurrency, sidebarResourceObjectFromValues } from './helpers';
+import NoDataCell from "src/components/Helpers/NoDataCell";
 
 const permissions: any = {}
 
@@ -376,6 +377,109 @@ export const genrateColoum = (fields, column, rendererNames, editable, renderedF
                     currentColumn.columnData.sortable = false;
                 }
                 column.push({ ...currentColumn.columnData, leval: ele.leval });
+                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                    rendererNames.push(currentColumn?.rendererName)
+                }
+            }
+        }
+    })
+}
+export const genrateCustomTableColumns = (fields, column, rendererNames, renderedFrom = null, currency, currencySymbol) => {
+    let _fields = fields;
+    _fields.forEach((ele) => {
+        if (ele.type === 'converter' || ele.type === 'currencyAmount' || ele.isConverter === true) {
+            if (ele.type !== 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+              ele.displayUnits.forEach((_unit) => {
+                let fieldName = ele.fieldName + '_' + _unit.toLowerCase();
+                let fieldLabel = ele.fieldLabel + ' ' + _unit;
+                column.push({
+                  accessor: fieldName,
+                  Header: fieldLabel,
+                  Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />),
+                  editable: Boolean(ele?.isColumnEditable)
+                });
+              });
+            } else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+              ele.displayUnits.forEach((_unit) => {
+                ele.displayCurrency.forEach((_currency) => {
+                  let fieldName = ele.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
+                  let fieldLabel = ele.fieldLabel + ' ' + _unit + '/' + _currency;
+                  column.push({
+                    accessor: fieldName,
+                    Header: fieldLabel,
+                    editable: Boolean(ele?.isColumnEditable),
+                    Cell: ({ row }) =>
+                      row.original[fieldName] ? (
+                        <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                      ) : (
+                        <NoDataCell />
+                      )
+                  });
+                });
+              });
+            } else if (ele.type === 'currencyAmount') {
+              ele.displayCurrency.forEach((_currency) => {
+                let fieldName = ele.fieldName + '_' + _currency.toLowerCase();
+                let fieldLabel = ele.fieldLabel + ' ' + _currency;
+                column.push({
+                  accessor: fieldName,
+                  Header: fieldLabel,
+                  editable: Boolean(ele?.isColumnEditable),
+                  Cell: ({ row }) =>
+                    row.original[fieldName] ? (
+                      <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                    ) : (
+                      <NoDataCell />
+                    ),
+                  Footer: (info) => {
+                    const total = info?.rows
+                      ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
+                      .reduce((sum, row) => row.values[fieldName] + sum, 0);
+                    return (
+                      <>
+                        {currencySymbol} {formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}
+                      </>
+                    );
+                  }
+                });
+              });
+            }
+          } 
+        else {
+            if (column.filter((_c) => _c.accessor === ele.fieldName && _c.Header === ele.fieldLabel).length === 0) {
+                let currentColumn: any = getColumnData(renderedFrom ? renderedFrom : routes.productBuilder.title, ele, routes.productBuilder.path, true)
+
+                let fieldName=currentColumn.columnData.field
+                let label = currentColumn.columnData.headerName
+
+                if (currentColumn.columnData.field === 'qty') {
+                    fieldName = 'qtyDisplay'
+                    currentColumn.footer = (info) => {
+                        const qtyTotal = info.rows
+                          .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
+                          .reduce((sum, row) => row.values[fieldName] + sum, 0);
+                        return <>{qtyTotal}</>;
+                      }
+                  } else if (currentColumn.columnData.field === 'pricingCondition') {
+                    fieldName = 'pricingConditionDisplay';
+                  }
+
+                currentColumn = {
+                    accessor: fieldName,
+                    Header: label,
+                    width: 150,
+                    sticky: false,
+                    editable: Boolean(ele?.isColumnEditable),
+                    Footer: currentColumn?.footer ? currentColumn.footer : <></>,
+                    Cell: ({row}) => {
+                        return (
+                            <p>{row.original[fieldName]}</p>
+                        )
+                    }
+
+                }
+                
+                column.push(currentColumn);
                 if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
                     rendererNames.push(currentColumn?.rendererName)
                 }
