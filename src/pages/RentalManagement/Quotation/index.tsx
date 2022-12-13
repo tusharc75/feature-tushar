@@ -703,7 +703,6 @@ const Quotation = ({
             fetchQuotationData(currentVersion);
           }}
           setNextStep={(type:string) => {
-            console.log(type.split(" ")[0])
             if(type && type.includes("Rejectd")) {
               setNextStep(false)
             } else {

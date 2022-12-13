@@ -23,7 +23,6 @@ const Logs = ({ handleClose, workOrderId = null, serviceID, serviceName }) => {
   const [rows, setRows] = useState(null);
   const [keys, setKeys] = useState(null);
 
-  // console.log(rows);
 
   useEffect(() => {
     fetchData();

@@ -315,7 +315,6 @@ const Invoice = ({
               ? parent?.serviceDetail?.serviceName
               : parent.packageDetail?.packageName
           }`;
-        console.log(parent?.productDetail?.productDesc);
         parent.description =
           parent?.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''

@@ -435,7 +435,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       else {
         calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
       }
-      console.log(values)
       element.isAppliedBill = true // row color
       rows.push({ ...element, ...calValues });
     });

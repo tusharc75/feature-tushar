@@ -260,7 +260,6 @@ const LoadingTicket = ({
       // }
 
       deliveryTicketList.map((obj) => {
-        console.log(obj?.productName)
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
             if (obj?.productInventory?.some((p) => d?._id === p?.optionValue)) {
@@ -274,7 +273,6 @@ const LoadingTicket = ({
       });
 
       productAssets.forEach((d) => {
-        console.log(d?.type, d?.parentId)
         d['parentName'] = d?.hasOwnProperty('parentName') && d?.parentName !== '' ? d?.parentName : d?.productName;
         d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;

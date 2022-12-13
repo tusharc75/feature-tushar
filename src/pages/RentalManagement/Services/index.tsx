@@ -680,7 +680,6 @@ const Services = ({
         <AssignPackageDialog
           referenceType={renderedFrom}
           onSuccess={(packages) => {
-            // console.log(packages)
             handleAdd(packages.map((d) => ({ ...d, detail: d.packageName })));
           }}
           handleClose={() => {
@@ -710,7 +709,6 @@ const Services = ({
         <AssignServiceDialog
           reference={'service'}
           onSuccess={(services) => {
-            // console.log(services)
             handleAdd(services.map((d) => ({ ...d, detail: d.serviceName })));
           }}
           handleClose={() => {
