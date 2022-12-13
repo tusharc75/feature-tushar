@@ -127,7 +127,7 @@ const ReceivingTicket = ({
   const [columnHeader, setColumnHeader] = useState(null);
 
   const [invoiceQtyData, setInvoiceQtyData] = useState(null);
-  const [openDateDialog, setOpenDateDialog] = useState({open: false, data: null, loading: false})
+  const [openDateDialog, setOpenDateDialog] = useState({ open: false, data: null, loading: false })
 
   const {
     state: { user, permissions, selectedEntity }
@@ -209,30 +209,31 @@ const ReceivingTicket = ({
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
         productAssets = productAssets
-        .map((d) => {
-          return({
-          ...d.inventory,
-          rentalAssetStatus: d.status,
-          startDate: d.actualStartDate || d.startDate,
-          endDate: d.actualEndDate || d.endDate,
-          isReplaced: d.isReplaced,
-          replaceReason: d.replaceReason,
-          replaceAsset: d.replaceAsset
-        })})
-        .map((u) => ({
-          ...u,
-          type: 'Asset',
-          displayType: 'Asset',
-          qty: 1,
-          productName: u?.product?.optionLabel,
-          productId: u?.product?.optionValue,
-          warehouse: u?.warehouse?.optionLabel,
-          warehouseId: u?.warehouse?.optionValue,
-          currentOwner: u?.currentOwner,
-          currentLocation: u?.currentLocation?.optionValue,
-          startDate: u?.startDate,
-          endDate: u?.endDate
-        }));
+          .map((d) => {
+            return ({
+              ...d.inventory,
+              rentalAssetStatus: d.status,
+              startDate: d.actualStartDate || d.startDate,
+              endDate: d.actualEndDate || d.endDate,
+              isReplaced: d.isReplaced,
+              replaceReason: d.replaceReason,
+              replaceAsset: d.replaceAsset
+            })
+          })
+          .map((u) => ({
+            ...u,
+            type: 'Asset',
+            displayType: 'Asset',
+            qty: 1,
+            productName: u?.product?.optionLabel,
+            productId: u?.product?.optionValue,
+            warehouse: u?.warehouse?.optionLabel,
+            warehouseId: u?.warehouse?.optionValue,
+            currentOwner: u?.currentOwner,
+            currentLocation: u?.currentLocation?.optionValue,
+            startDate: u?.startDate,
+            endDate: u?.endDate
+          }));
 
         const result = await axiosInstance().get(
           `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`
@@ -552,13 +553,18 @@ const ReceivingTicket = ({
       <NoDataCell />
     );
 
-    const ActionRenderer = (params) => (
-      <IconButton size='small' onClick={() => {
-          setOpenDateDialog({...openDateDialog, open: true, data: params?.data})
-        }}>
-        <Edit fontSize='small' color='primary' />
-      </IconButton>
-    )
+  const ActionRenderer = (params) => (
+    allowedToEdit && params?.data?.startDate && params?.data?.endDate ?
+      <HtmlTooltip title={`Update Actual Start Date and End Date`}>
+        <IconButton
+          size='small'
+          onClick={() => {
+            setOpenDateDialog({ ...openDateDialog, open: true, data: params?.data })
+          }}>
+          <Edit fontSize='small' color='primary' />
+        </IconButton>
+      </HtmlTooltip> : ""
+  )
 
   const frameworkComponents = {
     receivingTicketRenderer: ReceivingTicketRenderer,
@@ -951,26 +957,26 @@ const ReceivingTicket = ({
 
 
   const handleSubmitChangeDates = (values) => {
-    if(!openDateDialog.data) return
-    setOpenDateDialog({...openDateDialog, loading: true})
+    if (!openDateDialog.data) return
+    setOpenDateDialog({ ...openDateDialog, loading: true })
     axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, {
       "material": openDateDialog?.data?.displayType !== "Asset" ? openDateDialog?.data?.uniqueId : "",
-      "inventory": openDateDialog?.data?.displayType === "Asset" ? openDateDialog?.data?._id : "", 
+      "inventory": openDateDialog?.data?.displayType === "Asset" ? openDateDialog?.data?._id : "",
       "endDate": values.actualEndDate,
       "startDate": values.actualStartDate
     })
-    .then(() => {
-      toastConfig.setToastConfig({
-        open: true,
-        message: "Successfully updated the dates",
-        type: "success"
+      .then(() => {
+        toastConfig.setToastConfig({
+          open: true,
+          message: "Dates Updated Successfully",
+          type: "success"
+        })
+        setOpenDateDialog({ open: false, data: null, loading: false })
+        fetchRecords()
+      }).catch((err) => {
+        toastConfig.setToastConfig(err)
+        setOpenDateDialog({ open: false, data: null, loading: false })
       })
-      setOpenDateDialog({open: false, data: null, loading: false})
-      fetchRecords()
-    }).catch((err) => {
-      toastConfig.setToastConfig(err)
-      setOpenDateDialog({open: false, data: null, loading: false})
-    })
   }
 
   return (
@@ -1146,19 +1152,6 @@ const ReceivingTicket = ({
             </MenuItem>
 
             {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length ===
-              selectedRecords?.length ? (
-              <MenuItem
-                onClick={() => {
-                  closeActions();
-                  handelRevertTickets()
-                }}
-              >
-                Revert Receiving Ticket
-              </MenuItem>
-            ) : null}
-
-            {selectedRecords.length &&
               selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
                 ?.length === selectedRecords?.length ? (
               <MenuItem
@@ -1311,6 +1304,19 @@ const ReceivingTicket = ({
             >
               Replace Products
             </MenuItem> */}
+
+            {selectedRecords.length &&
+              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length ===
+              selectedRecords?.length ? (
+              <MenuItem
+                onClick={() => {
+                  closeActions();
+                  handelRevertTickets()
+                }}
+              >
+                Revert Receiving Ticket
+              </MenuItem>
+            ) : null}
 
             {selectedRecords?.filter(
               (f) => f.type === 'Product'
@@ -1469,7 +1475,7 @@ const ReceivingTicket = ({
               allowSelection={allowedToEdit || isProcessor}
               refreshGrid={fetchRecords}
               actionWidth={80}
-              
+
             />
           )
         ) : (
@@ -1713,13 +1719,13 @@ const ReceivingTicket = ({
       )}
       {openDateDialog.open && (
         <ChangeActualDateDialog
-           data={openDateDialog.data}
-           open={openDateDialog.open}
-           loading={openDateDialog.loading}
-           onClose={() => {
-            setOpenDateDialog({open: false, data: null, loading: false})
-           }}
-           handleSubmit={handleSubmitChangeDates}
+          data={openDateDialog.data}
+          open={openDateDialog.open}
+          loading={openDateDialog.loading}
+          onClose={() => {
+            setOpenDateDialog({ open: false, data: null, loading: false })
+          }}
+          handleSubmit={handleSubmitChangeDates}
         />
       )}
     </>
