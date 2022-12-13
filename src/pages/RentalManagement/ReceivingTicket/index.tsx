@@ -93,6 +93,7 @@ const ReceivingTicket = ({
 
   const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: 'add' });
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
+  const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);setShowConformationRevertTicket(false);
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
@@ -1311,7 +1312,7 @@ const ReceivingTicket = ({
               <MenuItem
                 onClick={() => {
                   closeActions();
-                  handelRevertTickets()
+                  setShowConformationRevertTicket(true)
                 }}
               >
                 Revert Receiving Ticket
@@ -1713,6 +1714,20 @@ const ReceivingTicket = ({
           }}
           onOk={() => {
             handleConsumProduct(null);
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      )}
+      {showConformationRevertTicket && (
+        <ConfirmationDialog
+          open={showConformationRevertTicket}
+          message={`Are you sure you want to revert Receiving Ticket?`}
+          onClose={() => {
+            setShowConformationRevertTicket(false);
+          }}
+          onOk={() => {
+            handelRevertTickets();
+            setShowConformationRevertTicket(false);
           }}
           okBtnLoading={okBtnLoading}
         />
