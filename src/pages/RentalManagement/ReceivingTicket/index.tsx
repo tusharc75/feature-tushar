@@ -57,6 +57,8 @@ import ConsumeProduct from '../../../components/RentalManagment/ConsumeProduct';
 import { useData } from '../../../StateProvider/Provider';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import ReturnTicketDialog from './ReturnTicketDialog';
+import Edit from '@material-ui/icons/Edit';
+import ChangeActualDateDialog from './ChangeActualDateDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -125,6 +127,7 @@ const ReceivingTicket = ({
   const [columnHeader, setColumnHeader] = useState(null);
 
   const [invoiceQtyData, setInvoiceQtyData] = useState(null);
+  const [openDateDialog, setOpenDateDialog] = useState({open: false, data: null, loading: false})
 
   const {
     state: { user, permissions, selectedEntity }
@@ -193,7 +196,9 @@ const ReceivingTicket = ({
           warehouseId: u?.warehouse?.optionValue,
           currentOwner: u?.currentOwner,
           currentLocation: u?.currentLocation?.optionValue,
-          rentalAssetStatus: u?.status
+          rentalAssetStatus: u?.status,
+          startDate: u?.actualStartDate,
+          endDate: u?.actualEndDate
         }));
 
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
@@ -204,27 +209,32 @@ const ReceivingTicket = ({
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
         productAssets = productAssets
-          .map((d) => ({
-            ...d.inventory,
-            rentalAssetStatus: d.status,
-            startDate: d.startDate,
-            endDate: d.endDate,
-            isReplaced: d.isReplaced,
-            replaceReason: d.replaceReason,
-            replaceAsset: d.replaceAsset
-          }))
-          .map((u) => ({
-            ...u,
-            type: 'Asset',
-            displayType: 'Asset',
-            qty: 1,
-            productName: u?.product?.optionLabel,
-            productId: u?.product?.optionValue,
-            warehouse: u?.warehouse?.optionLabel,
-            warehouseId: u?.warehouse?.optionValue,
-            currentOwner: u?.currentOwner,
-            currentLocation: u?.currentLocation?.optionValue
-          }));
+        .map((d) => {
+          console.log(d.actualStartDate, d.actualEndDate)
+          return({
+          ...d.inventory,
+          rentalAssetStatus: d.status,
+          startDate: d.actualStartDate || d.startDate,
+          endDate: d.actualEndDate || d.endDate,
+          isReplaced: d.isReplaced,
+          replaceReason: d.replaceReason,
+          replaceAsset: d.replaceAsset
+        })})
+        .map((u) => ({
+          ...u,
+          type: 'Asset',
+          displayType: 'Asset',
+          qty: 1,
+          productName: u?.product?.optionLabel,
+          productId: u?.product?.optionValue,
+          warehouse: u?.warehouse?.optionLabel,
+          warehouseId: u?.warehouse?.optionValue,
+          currentOwner: u?.currentOwner,
+          currentLocation: u?.currentLocation?.optionValue,
+          startDate: u?.startDate,
+          endDate: u?.endDate
+        }));
+        console.log("ASSETS",productAssets)
 
         const result = await axiosInstance().get(
           `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`
@@ -545,6 +555,14 @@ const ReceivingTicket = ({
       <NoDataCell />
     );
 
+    const ActionRenderer = (params) => (
+      <IconButton size='small' onClick={() => {
+          setOpenDateDialog({...openDateDialog, open: true, data: params?.data})
+        }}>
+        <Edit fontSize='small' color='primary' />
+      </IconButton>
+    )
+
   const frameworkComponents = {
     receivingTicketRenderer: ReceivingTicketRenderer,
     deliveryTicketRenderer: DeliveryTicketRenderer,
@@ -554,7 +572,8 @@ const ReceivingTicket = ({
     parentNameRenderer: ParentNameRenderer,
     warehouseRenderer: WarehouseRenderer,
     commonRenderer: CommonRenderer,
-    dateRenderer: DateRenderer
+    dateRenderer: DateRenderer,
+    actionsRenderer: ActionRenderer
   };
 
   const getColumn = async () => {
@@ -624,7 +643,7 @@ const ReceivingTicket = ({
     { field: 'startDate', headerName: 'Actual Start Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'endDate', headerName: 'Actual End Date', show: true, cellRenderer: 'dateRenderer' },
     { field: 'rentalAssetStatus', headerName: 'Rental Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' },
   ];
 
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
@@ -912,6 +931,30 @@ const ReceivingTicket = ({
       setSeletedProducts([]);
     }
   }, [selectedRecords]);
+
+
+  const handleSubmitChangeDates = (values) => {
+    if(!openDateDialog.data) return
+    setOpenDateDialog({...openDateDialog, loading: true})
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, {
+      "material": openDateDialog?.data?.displayType !== "Asset" ? openDateDialog?.data?.uniqueId : "",
+      "inventory": openDateDialog?.data?.displayType === "Asset" ? openDateDialog?.data?._id : "", 
+      "endDate": values.actualEndDate,
+      "startDate": values.actualStartDate
+    })
+    .then(() => {
+      toastConfig.setToastConfig({
+        open: true,
+        message: "Successfully updated the dates",
+        type: "success"
+      })
+      setOpenDateDialog({open: false, data: null, loading: false})
+      fetchRecords()
+    }).catch((err) => {
+      toastConfig.setToastConfig(err)
+      setOpenDateDialog({open: false, data: null, loading: false})
+    })
+  }
 
   return (
     <>
@@ -1389,12 +1432,14 @@ const ReceivingTicket = ({
               limit={limit}
               pageSizes={pageSizes}
               page={page}
-              allowAction={false}
+              allowAction={true}
               loading={loading || loadingData}
               isClientSideGrid={true}
               renderedFrom={renderedFrom}
               allowSelection={allowedToEdit || isProcessor}
               refreshGrid={fetchRecords}
+              actionWidth={80}
+              
             />
           )
         ) : (
@@ -1634,6 +1679,17 @@ const ReceivingTicket = ({
             handleConsumProduct(null);
           }}
           okBtnLoading={okBtnLoading}
+        />
+      )}
+      {openDateDialog.open && (
+        <ChangeActualDateDialog
+           data={openDateDialog.data}
+           open={openDateDialog.open}
+           loading={openDateDialog.loading}
+           onClose={() => {
+            setOpenDateDialog({open: false, data: null, loading: false})
+           }}
+           handleSubmit={handleSubmitChangeDates}
         />
       )}
     </>
