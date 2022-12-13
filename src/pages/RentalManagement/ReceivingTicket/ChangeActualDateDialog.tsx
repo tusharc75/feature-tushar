@@ -29,7 +29,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
       onClose={onClose}
       maxWidth="sm"
       fullWidth>
-      <Formik initialValues={initialValues} onSubmit={(values) => console.log(values)}>
+      <Formik initialValues={initialValues} onSubmit={(values) => {}}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form>
             <CustomDialogHeader title={data?.assetNumber || ''} onClose={onClose} />

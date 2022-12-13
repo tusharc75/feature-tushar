@@ -250,7 +250,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       .get(`${workOrder.api}/${workOrderId}/steps-data`)
       .then(({ data: { data } }) => {
         setServiceData(data);
-        // console.log(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
