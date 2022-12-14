@@ -217,7 +217,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -337,8 +337,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
@@ -378,8 +378,8 @@ const RentalManagementDetailsPage = () => {
   const handleRentalReOpen = () => {
     axiosInstance()
       .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: RENTAL_STATUS.inProgress })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   return (
@@ -628,15 +628,10 @@ const RentalManagementDetailsPage = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={
-                          [
-                            QUOTATION_STATUS.acceptByCustomer,
-                            QUOTATION_STATUS.rejectByCustomer,
-                            QUOTATION_STATUS.sentToCustomer,
-                            QUOTATION_STATUS.waitingForSupplierPrice
-                          ].includes(quotationData?.versions[currentVersion]?.status)
-                            ? false
-                            : allowedToEdit
+                        allowedToEdit={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.waitingForSupplierPrice].includes(quotationData?.versions[currentVersion]?.status)
+                          ? false
+                          : allowedToEdit
                         }
                       />
                     )}
@@ -801,8 +796,8 @@ const RentalManagementDetailsPage = () => {
                           resource={ACTIVITY_RESOURCE.rentalManagement}
                           restrictedAddActivities={
                             permissions &&
-                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
-                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
+                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
+                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }
@@ -813,7 +808,7 @@ const RentalManagementDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>
