@@ -161,18 +161,26 @@ const resetValueZero = (rows, fields) => {
     })
 }
 
-export const calculateRowsField = (material: any[], values: any, fields: any[], rowData: any) => {
+const calculateParentRows = (material: any[], rows: any, fields: any[], rowData: any, parent) => {
+    let tempParent: any = material.filter((e) => e._id === rowData.parentId)
+    const sameParent: any = material.filter((e) => e.parentId === rowData.parentId && e._id !== rowData._id)
+    tempParent = sumOnParent(tempParent, [...sameParent, ...rows], fields)
+    parent.push(tempParent[0])
+    if (tempParent[0].parentId) {
+        calculateParentRows(material, tempParent, fields, tempParent[0], parent)
+    }
+};
+
+export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any) => {  
     let rows: any = []
     const calValues = autoCalculateSpecificFields(values, { ...values, ...rowData }, fields)
     rows.push({ ...rowData, ...calValues })
-
     if (rowData.parentId) {
-        let parent: any = material.filter((e) => e._id === rowData.parentId)
-        const sameParent: any = material.filter((e) => e.parentId === rowData.parentId && e._id !== rowData._id)
-        parent = sumOnParent(parent, [...sameParent, ...rows], fields)
+        let parent: any = []
+        await calculateParentRows(material, rows, fields, rowData, parent)
         rows = [...rows, ...parent]
     }
     const child = material.filter((e) => e.parentId === rowData._id)
     resetValueZero(child, fields)
     return [...rows, ...child];
-};
+};                                 

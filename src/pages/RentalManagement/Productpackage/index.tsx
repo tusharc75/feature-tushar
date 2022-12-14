@@ -97,7 +97,7 @@ const Productpackage = ({
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     setAllFields(JSON.parse(JSON.stringify(allFields)));
 
-    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, currencySymbol, renderedFrom)
+    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, currencySymbol, renderedFrom);
 
     let column: any = [
       {
@@ -125,12 +125,12 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -204,8 +204,8 @@ const Productpackage = ({
         }
       }
     ];
-    const isPriceRequired = data.filter((el) => el.fieldName === "price" && el.required).length > 0;
-    setIsRateRequired(isPriceRequired)
+    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
     // data.forEach((element) => {
     //   if (element.fieldName === 'price' && element.required) {
     //     setIsRateRequired(true);
@@ -293,7 +293,7 @@ const Productpackage = ({
     // });
     // eslint-disable-next-line no-lone-blocks
 
-    column = [...column, ...newColumns]
+    column = [...column, ...newColumns];
     {
       isMobile ? (
         <Box display={'none'} />
@@ -320,13 +320,11 @@ const Productpackage = ({
                       setDeleteData(obj);
                     }}
                   >
-
-                    <DeleteIcon fontSize="small" color={row.original.hideSelection && !allowedToEdit ? "disabled" : "error"} />
+                    <DeleteIcon fontSize="small" color={row.original.hideSelection && !allowedToEdit ? 'disabled' : 'error'} />
                   </IconButton>
                 </span>
               </HtmlTooltip>
-
-            )
+            );
           }
         })
       );
@@ -372,22 +370,23 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-        }`;
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
@@ -414,22 +413,23 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service'
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === 'package'
+      _subRow.detail = `${
+        _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === 'package'
           ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : ''
-        } `;
+          ? _subRow.productDetail?.productName
+          : ''
+      } `;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -642,7 +642,7 @@ const Productpackage = ({
   };
 
   const onSaveInlineEdit = (inputField, updatedData) => {
-    setIsInlineEdit(true)
+    setIsInlineEdit(true);
     const currency = rentalManagementData?.currency.toLowerCase();
     const requiredItems = [];
     allFields.forEach(({ fieldName, required, type }) => {
@@ -659,15 +659,14 @@ const Productpackage = ({
     if (requiredItems.length > 0) {
       handleOpen({
         ...updatedData,
-        detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName,
+        detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
       });
     } else {
       onConfirmSave(inputField, updatedData);
     }
   };
 
-  const onConfirmSave = (inputField, updatedData) => {
-    const currency = rentalManagementData?.currency.toLowerCase();
+  const onConfirmSave = async (inputField, updatedData) => {
     const rowData = material.find((d) => d._id === updatedData._id);
     if (rowData.parentId && !showConfirmationDialog.open) {
       setShowConfirmationDialog({
@@ -679,26 +678,7 @@ const Productpackage = ({
       });
     } else {
       let rows: any = [{ ...rowData, ...updatedData }];
-      if (rowData.type === 'package') {
-        const product = material.filter((e) => e.parentId === rowData._id);
-        resetValueZero(product, allFields);
-        rows = [...rows, ...product];
-      } else if (rowData.type === 'product' && rowData.parentId) {
-        if (updatedData[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
-          const packages: any = material.filter((e) => e._id === rowData.parentId);
-          const product: any = material.filter((e) => e.parentId === rowData.parentId);
-          product.forEach((element) => {
-            if (element._id === rowData._id) {
-              for (let key in updatedData) {
-                element[key] = updatedData[key];
-              }
-            }
-          });
-          sumOnParent(packages, product, allFields, currency);
-          rows = [...rows, ...packages];
-        }
-      }
-      rows = calculateRowsField(material, inputField, allFields, updatedData);
+      rows = await calculateRowsField(material, inputField, allFields, updatedData);
       handleSaveData(rows);
       setShowConfirmationDialog({ open: false, data: {} });
     }
@@ -814,12 +794,12 @@ const Productpackage = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -861,7 +841,7 @@ const Productpackage = ({
             setRecordToUpdate(null);
 
             if (isInlineEdit) {
-              setIsInlineEdit(false)
+              setIsInlineEdit(false);
             }
           }}
           isBulkedit={isProductEdit.isBulkedit}

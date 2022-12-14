@@ -661,8 +661,8 @@ const Services = ({
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
                 renderedFrom="rental_management_sevices_1"
-                onSaveEdit={(inputField, updatedData) => {
-                  let rows = calculateRowsField(material, inputField, allFields, updatedData);
+                onSaveEdit={async (inputField, updatedData) => {
+                  let rows = await calculateRowsField(material, inputField, allFields, updatedData);
                   handleSaveData(rows);
                 }}
                 material={material}
