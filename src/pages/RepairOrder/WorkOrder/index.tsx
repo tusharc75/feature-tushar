@@ -57,11 +57,22 @@ const WorkOrder = ({
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [services, setServices] = useState([]);
+  const [allAssignedUsers, setAllAssignedUsers] = useState([]);
 
   useEffect(() => {
     fetchFields();
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const assignedUsersArrays = selectedProducts?.filter((product) => product?.assignedUsers).map((product) => product?.assignedUsers);
+    const assignedUsers = assignedUsersArrays?.flat();
+
+    const uniqueArray = assignedUsers.filter((obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj)));
+
+    console.log(uniqueArray);
+    setAllAssignedUsers(uniqueArray);
+  }, [selectedProducts]);
 
   const fetchFields = async () => {
     const coloum: any = [
@@ -289,6 +300,7 @@ const WorkOrder = ({
   };
 
   const fetchData = async () => {
+    console.log('repairOrder', repairOrderData._id);
     setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
@@ -590,7 +602,7 @@ const WorkOrder = ({
                     workOrderId: d?.workOrder?._id
                   };
                 })}
-              assignedUsers={[]}
+              assignedUsers={allAssignedUsers}
               handleClose={() => {
                 setUserAssignDialog(false);
               }}
