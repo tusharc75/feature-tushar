@@ -41,7 +41,8 @@ import {
   repairOrder,
   CustomDialogTransition,
   currencyCodeToSymbol,
-  QUOTATION_STATUS
+  QUOTATION_STATUS,
+  REPAIR_ORDER_STATUS
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -72,7 +73,8 @@ const Quotation = ({
   allowedToEdit,
   allowedToDelete,
   setQuotationVersionData,
-  invoiceStep = false
+  invoiceStep = false,
+  updateOrderStatus = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -108,6 +110,12 @@ const Quotation = ({
   useEffect(() => {
     fetchQuotationData();
   }, [repairOrderData]);
+
+  useEffect(() => {
+    if (updateOrderStatus && invoiceStep && repairOrderData.status !== REPAIR_ORDER_STATUS.completed) {
+      updateOrderStatus(REPAIR_ORDER_STATUS.completed);
+    }
+  }, [invoiceStep]);
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
@@ -215,7 +223,7 @@ const Quotation = ({
             </p>
           </div>
         )
-      },
+      }
       // {
       //   accessor: 'leadTime',
       //   Header: 'Lead Time (Days)',
@@ -629,6 +637,10 @@ const Quotation = ({
                         .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
                         .then(() => {
                           fetchQuotationData(currentVersion);
+                          if(updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.waitingQuote) {
+                            updateOrderStatus(REPAIR_ORDER_STATUS.waitingQuote);
+                          }
+
                           toastConfig.setToastConfig({
                             open: true,
                             type: 'success',
@@ -836,6 +848,7 @@ const Quotation = ({
             fetchQuotationData(currentVersion);
           }}
           setCustomerAcceptable={setCustomerAcceptable}
+          updateOrderStatus={updateOrderStatus}
         />
       )}
       {showQuotationSummaryDialog && (
@@ -852,4 +865,3 @@ const Quotation = ({
 };
 
 export default Quotation;
-

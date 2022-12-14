@@ -367,7 +367,7 @@ export default function CustomReactTable({
     updatedData[rowData[0]] = cellValue;
     const inputField = { [`${rowData[0]}`]: cellValue };
 
-    if (onSaveEdit && cellValue) {
+    if (onSaveEdit && (cellValue > -1 && ![undefined,null].includes(cellValue))) {
       onSaveEdit(inputField, updatedData);
     }
 
@@ -465,6 +465,7 @@ export default function CustomReactTable({
                           //   }
                           // });
 
+                          console.log(cell);
                           if (!cell?.column?.editable) return;
 
                           setCellValue(cell?.value || '');
@@ -501,8 +502,11 @@ export default function CustomReactTable({
                             }}
                             value={cellValue}
                             onChange={(e) => {
-                              const value = parseInt(e.target.value);
-                              if (value < 0 || isNaN(value)) return;
+                              let value: any = e.target.value;
+
+                              value = parseInt(value);
+
+                              if (value < 0 ) return;
 
                               setCellValue(value);
                             }}
