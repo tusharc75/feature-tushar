@@ -276,39 +276,48 @@ const Services = ({
     // eslint-disable-next-line no-lone-blocks
 
     column = [...column, ...newColumns]
-    {
-      isMobile ? (
-        <Box display={'none'} />
-      ) : (
-        column.push({
-          accessor: 'action',
-          Header: '',
-          minWidth: 50,
-          width: 50,
-          sticky: 'right',
-          disableFilters: true,
-          canDrag: false,
-          Cell: ({ row }) =>
-              <HtmlTooltip title={ row.original.hideSelection && !allowedToEdit ? "Service is already assigned" : "Delete"}>
+    column.push({
+      accessor: 'action',
+      Header: '',
+      minWidth: 50,
+      width: 50,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => {
+        return (
+          allowedToEdit ?
+            row.original.hideSelection ?
+              <HtmlTooltip title={'Asset is already assigned'} >
                 <span>
-                <IconButton
-                size="small"
-                aria-label="Details"
-                disabled={ row.original.hideSelection && !allowedToEdit }
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  getNestedSubRows(obj, row.original);
-                  setDeleteData(obj);
-                }} 
-              >
-                <DeleteIcon fontSize="small" color={ row.original.hideSelection && !allowedToEdit ? "disabled" : "error" } />
-              </IconButton>
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    disabled={true}
+                  >
+                    <DeleteIcon fontSize="small" color={"disabled"} />
+                  </IconButton>
                 </span>
-              </HtmlTooltip>
-            
-        })
-      );
-    }
+              </HtmlTooltip> :
+              < HtmlTooltip title={'Delete'} >
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    onClick={() => {
+                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                      getNestedSubRows(obj, row.original);
+                      setDeleteData(obj);
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" color={"error"} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip >
+            : ""
+        )
+      }
+    })
     // column.forEach((element) => {
     //   if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
     //     element.editable = true;

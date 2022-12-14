@@ -28,7 +28,7 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
     open={true}
   >
     <CustomDialogHeader
-      title="Are you sure want replace?"
+      title="Do you want to replace?"
       showRequiredLabel={false}
       onClose={handleClose}
     />
@@ -44,7 +44,7 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
               <TextField
                 variant="outlined"
                 type="text"
-                label={`reason for replacement`}
+                label={`Reason For Replacement`}
                 required={true}
                 name="reason"
                 fullWidth
