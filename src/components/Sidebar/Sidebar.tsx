@@ -47,28 +47,29 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const pathnames = location.pathname.split('/').filter((x) => x);
 
   const renderIcon = (sectionName: string) => {
+    console.log(sectionName);
     let icon = <FaReact size={16} className="sidebar-icon" />;
     switch (sectionName) {
       case 'Brand Admin':
         icon = <FaRegUserCircle size={15} className="sidebar-icon" />;
         break;
       case 'Master Data':
-        icon: <AiOutlineDatabase size={15} className="sidebar-icon" />;
+        icon = <AiOutlineDatabase size={15} className="sidebar-icon" />;
         break;
       case 'Product Setup':
-        icon: <ProductSetup size={15} className="sidebar-icon" />;
+        icon = <ProductSetup size={15} className="sidebar-icon" />;
         break;
       case 'Admin Portal':
-        icon: <RiShieldUserLine size={15} className="sidebar-icon" />;
+        icon = <RiShieldUserLine size={15} className="sidebar-icon" />;
         break;
       case 'Accounts':
-        icon: <FaRegUser size={15} className="sidebar-icon" />;
+        icon = <FaRegUser size={15} className="sidebar-icon" />;
         break;
       case 'CRM +':
-        icon: <SiCivicrm size={15} className="sidebar-icon" />;
+        icon = <SiCivicrm size={15} className="sidebar-icon" />;
         break;
       case 'ROM':
-        icon: <FaRegRegistered size={15} className="sidebar-icon" />;
+        icon = <FaRegRegistered size={15} className="sidebar-icon" />;
         break;
       case 'Sales Management':
         icon = <SiCivicrm size={15} className="sidebar-icon" />;
