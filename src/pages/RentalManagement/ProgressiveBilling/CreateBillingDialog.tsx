@@ -132,7 +132,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         )
       }
     ];
-    data.forEach((element) => {
+    data.filter(d => !d.fieldName?.includes('estimate')).forEach((element) => {
       if (element.type === 'date') {
         coloum.push({
           accessor: element.fieldName,
@@ -386,7 +386,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   };
 
   const handleApplyDate = async () => {
-    
+
     let tempValues = {
       estimateEndDate: endDate,
       actualEndDate: endDate,
@@ -399,7 +399,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     let rows: any = [];
     selectedProducts.forEach((element) => {
       const product = invoicedProducts.find((p) => p._id === element._id);
-      const productStartDateTime = new Date(new Date(element.estimateStartDate).toLocaleDateString()).getTime();
+      const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
       const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
 
       if (selectedEndDateTime < productStartDateTime) {
