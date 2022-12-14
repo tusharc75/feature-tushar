@@ -92,7 +92,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         icon = <BiCog size={16} className="sidebar-icon" />;
         break;
       case 'Activities':
-        console.log('hi');
         icon = <IoPeopleOutline size={16} className="sidebar-icon" />;
         break;
 
