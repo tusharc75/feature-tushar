@@ -100,8 +100,6 @@ const RentalManagementDetailsPage = () => {
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
 
-  const [disabledEditButton, setDisabledEditButton] = useState(false);
-
   const [rentalSteps, setRentalSteps] = useState(
     user?.role?.selectedEntity?.policy?.isQuotationRentalManagement
       ? rentalManagementSteps
@@ -110,19 +108,6 @@ const RentalManagementDetailsPage = () => {
 
   const [versionNotClonned, setVersionNotClonned] = useState(false);
 
-  useEffect(() => {
-    if (quotationData) {
-      const keys = Object.keys(quotationData?.versions);
-
-      keys.forEach((k) => {
-        if (quotationData?.versions[k].status?.includes('Customer')) {
-          setDisabledEditButton(true);
-        } else {
-          setDisabledEditButton(false);
-        }
-      });
-    }
-  }, [quotationData]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -457,7 +442,6 @@ const RentalManagementDetailsPage = () => {
                       ) && (
                         <Fragment>
                           <Button
-                            disabled={disabledEditButton}
                             className="buttonStyleBigScreen"
                             variant="contained"
                             color="primary"
