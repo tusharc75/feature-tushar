@@ -107,7 +107,7 @@ const RentalManagementDetailsPage = () => {
   );
 
   const [versionNotClonned, setVersionNotClonned] = useState(false);
-
+  const [reOpening, setReOpening] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -217,7 +217,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -337,8 +337,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -376,10 +376,22 @@ const RentalManagementDetailsPage = () => {
   };
 
   const handleRentalReOpen = () => {
+    setReOpening(true);
     axiosInstance()
       .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: RENTAL_STATUS.inProgress })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {
+        setReOpening(false);
+        fetchRentalManagementData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to In-Progress`
+        });
+      })
+      .catch((error) => {
+        setReOpening(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -424,6 +436,8 @@ const RentalManagementDetailsPage = () => {
                         variant="contained"
                         color="primary"
                         size="small"
+                        endIcon={reOpening ? <CircularProgress size={20} /> : null}
+                        disabled={reOpening}
                         onClick={() => {
                           handleRentalReOpen();
                         }}
@@ -441,13 +455,7 @@ const RentalManagementDetailsPage = () => {
                         ) && ['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep])
                       ) && (
                         <Fragment>
-                          <Button
-                            className="buttonStyleBigScreen"
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={handleOpenUpdateDialog}
-                          >
+                          <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
                             Edit
                           </Button>
                           <Button
@@ -628,10 +636,15 @@ const RentalManagementDetailsPage = () => {
                         showActivity={showActivity}
                         renderedFrom={`${renderedFrom}_grid-1`}
                         stepFullScreen={stepFullScreen}
-                        allowedToEdit={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.waitingForSupplierPrice].includes(quotationData?.versions[currentVersion]?.status)
-                          ? false
-                          : allowedToEdit
+                        allowedToEdit={
+                          [
+                            QUOTATION_STATUS.acceptByCustomer,
+                            QUOTATION_STATUS.rejectByCustomer,
+                            QUOTATION_STATUS.sentToCustomer,
+                            QUOTATION_STATUS.waitingForSupplierPrice
+                          ].includes(quotationData?.versions[currentVersion]?.status)
+                            ? false
+                            : allowedToEdit
                         }
                       />
                     )}
@@ -796,8 +809,8 @@ const RentalManagementDetailsPage = () => {
                           resource={ACTIVITY_RESOURCE.rentalManagement}
                           restrictedAddActivities={
                             permissions &&
-                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
-                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
+                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
+                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }
@@ -808,7 +821,7 @@ const RentalManagementDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>
