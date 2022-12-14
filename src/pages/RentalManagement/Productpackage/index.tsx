@@ -42,6 +42,7 @@ import { startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const Productpackage = ({
   rentalManagementData,
@@ -85,16 +86,20 @@ const Productpackage = ({
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [allowedToEdit]);
 
   useEffect(() => {
     fetchProductInventory();
   }, [columns]);
 
   const fetchFields = async () => {
+    setColumns(null);
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     setAllFields(JSON.parse(JSON.stringify(allFields)));
-    const coloum: any = [
+
+    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, currencySymbol, renderedFrom)
+
+    let column: any = [
       {
         accessor: 'srno',
         Header: 'Index',
@@ -120,12 +125,12 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -199,98 +204,101 @@ const Productpackage = ({
         }
       }
     ];
-
-    data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) => {
-            return row.original[element.fieldName] && isNaN(row.original[element.fieldName]) ? (
-              <p>{moment(row.original[element.fieldName]?.slice(0, 10)).format(dateFormat)}</p>
-            ) : (
-              <NoDataCell />
-            );
-          }
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              Footer: (info) => {
-                const total = info?.rows
-                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                return (
-                  <>
-                    {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                  </>
-                );
-              }
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        if (element.fieldName === 'pricingCondition') {
-          element.fieldName = 'pricingConditionDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
+    const isPriceRequired = data.filter((el) => el.fieldName === "price" && el.required).length > 0;
+    setIsRateRequired(isPriceRequired)
+    // data.forEach((element) => {
+    //   if (element.fieldName === 'price' && element.required) {
+    //     setIsRateRequired(true);
+    //   }
+    //   if (element.type === 'date') {
+    //     column.push({
+    //       accessor: element.fieldName,
+    //       Header: element.fieldLabel,
+    //       disableFilters: true,
+    //       Cell: ({ row }) => {
+    //         return row.original[element.fieldName] && isNaN(row.original[element.fieldName]) ? (
+    //           <p>{moment(row.original[element.fieldName]?.slice(0, 10)).format(dateFormat)}</p>
+    //         ) : (
+    //           <NoDataCell />
+    //         );
+    //       }
+    //     });
+    //   } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
+    //     if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+    //       element.displayUnits.forEach((_unit) => {
+    //         let fieldName = element.fieldName + '_' + _unit.toLowerCase();
+    //         let fieldLabel = element.fieldLabel + ' ' + _unit;
+    //         column.push({
+    //           accessor: fieldName,
+    //           Header: fieldLabel,
+    //           Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
+    //         });
+    //       });
+    //     } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+    //       element.displayUnits.forEach((_unit) => {
+    //         element.displayCurrency.forEach((_currency) => {
+    //           let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
+    //           let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
+    //           column.push({
+    //             accessor: fieldName,
+    //             Header: fieldLabel,
+    //             Cell: ({ row }) =>
+    //               row.original[fieldName] ? (
+    //                 <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+    //               ) : (
+    //                 <NoDataCell />
+    //               )
+    //           });
+    //         });
+    //       });
+    //     } else if (element.type === 'currencyAmount') {
+    //       element.displayCurrency.forEach((_currency) => {
+    //         let fieldName = element.fieldName + '_' + _currency.toLowerCase();
+    //         let fieldLabel = element.fieldLabel + ' ' + _currency;
+    //         column.push({
+    //           accessor: fieldName,
+    //           Header: fieldLabel,
+    //           Cell: ({ row }) =>
+    //             row.original[fieldName] ? (
+    //               <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+    //             ) : (
+    //               <NoDataCell />
+    //             ),
+    //           Footer: (info) => {
+    //             const total = info?.rows
+    //               ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
+    //               .reduce((sum, row) => row.values[fieldName] + sum, 0);
+    //             return (
+    //               <>
+    //                 {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
+    //               </>
+    //             );
+    //           }
+    //         });
+    //       });
+    //     }
+    //   } else {
+    //     if (element.fieldName === 'qty') {
+    //       element.fieldName = 'qtyDisplay';
+    //     }
+    //     if (element.fieldName === 'pricingCondition') {
+    //       element.fieldName = 'pricingConditionDisplay';
+    //     }
+    //     column.push({
+    //       accessor: element.fieldName,
+    //       Header: element.fieldLabel,
+    //       Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+    //     });
+    //   }
+    // });
     // eslint-disable-next-line no-lone-blocks
+
+    column = [...column, ...newColumns]
     {
       isMobile ? (
         <Box display={'none'} />
       ) : (
-        coloum.push({
+        column.push({
           accessor: 'action',
           Header: '',
           minWidth: 50,
@@ -301,43 +309,43 @@ const Productpackage = ({
           Cell: ({ row }) => {
             return (
               <HtmlTooltip title={row.original.hideSelection && !allowedToEdit ? 'Asset is already assigned' : 'Delete'}>
-              <span>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                disabled={row.original.hideSelection && !allowedToEdit}
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  getNestedSubRows(obj, row.original);
-                  setDeleteData(obj);
-                }}
-              >
-                
-                <DeleteIcon fontSize="small" color={row.original.hideSelection && !allowedToEdit ? "disabled" : "error"} />
-             </IconButton>
-              </span>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    disabled={row.original.hideSelection && !allowedToEdit}
+                    onClick={() => {
+                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                      getNestedSubRows(obj, row.original);
+                      setDeleteData(obj);
+                    }}
+                  >
+
+                    <DeleteIcon fontSize="small" color={row.original.hideSelection && !allowedToEdit ? "disabled" : "error"} />
+                  </IconButton>
+                </span>
               </HtmlTooltip>
-             
+
             )
           }
         })
       );
     }
-    coloum.forEach((element) => {
-      const priceField = allFields.find((f) => f.fieldName === 'price')
-      if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
-        element.editable = allowedToEdit && priceField?.isColumnEditable ;
-      }
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
-    setColumns(coloum);
+    // column.forEach((element) => {
+    //   const priceField = allFields.find((f) => f.fieldName === 'price')
+    //   if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
+    //     element.editable = allowedToEdit && priceField?.isColumnEditable ;
+    //   }
+    //   if (element.accessor === 'qtyDisplay') {
+    //     element['Footer'] = (info) => {
+    //       const qtyTotal = info.rows
+    //         .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+    //         .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+    //       return <>{qtyTotal}</>;
+    //     };
+    //   }
+    // });
+    setColumns(column);
   };
 
   const fetchProductInventory = async () => {
@@ -364,23 +372,22 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-      }`;
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
@@ -407,23 +414,22 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'package'
+      _subRow.detail = `${_subRow.type === 'service'
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'package'
           ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : ''
-      } `;
+            ? _subRow.productDetail?.productName
+            : ''
+        } `;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDesc || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -808,12 +814,12 @@ const Productpackage = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -854,7 +860,7 @@ const Productpackage = ({
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);
 
-            if(isInlineEdit) {
+            if (isInlineEdit) {
               setIsInlineEdit(false)
             }
           }}

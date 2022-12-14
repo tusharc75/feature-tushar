@@ -72,13 +72,14 @@ const Services = ({
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [allowedToEdit]);
 
   useEffect(() => {
     fetchProductInventory();
   }, [columns]);
 
   const fetchFields = async () => {
+    setColumns(null);
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     setAllFields(JSON.parse(JSON.stringify(allFields)));
     const coloum: any = [

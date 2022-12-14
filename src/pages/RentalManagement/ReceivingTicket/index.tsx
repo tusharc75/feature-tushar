@@ -93,7 +93,7 @@ const ReceivingTicket = ({
 
   const [showConformationConsume, setShowConformationConsume] = useState({ open: false, type: 'add' });
   const [showConformationConsumeMultiple, setShowConformationConsumeMultiple] = useState(false);
-  const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);setShowConformationRevertTicket(false);
+  const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
