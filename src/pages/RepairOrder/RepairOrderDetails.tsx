@@ -60,7 +60,7 @@ const RepairOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const [hasAssetsAdded, setHasAssetsAdded] = useState(false)
+  const [hasAssetsAdded, setHasAssetsAdded] = useState(false);
   const [repairOrderData, setRepairOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -177,8 +177,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -363,25 +363,26 @@ const RepairOrderDetails = () => {
                         allowedToDelete={allowedToDelete}
                       />
                     )}
-                    {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') && repairOrderData && (
-                      <WorkOrder
-                        repairOrderData={repairOrderData}
-                        setNextStep={setNextStep}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={
-                          [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                            quotationVersionData?.status
-                          )
-                            ? false
-                            : allowedToEdit
-                        }
-                        allowedToDelete={allowedToDelete}
-                        isPostWorkService={Boolean(currentStep === 3)}
-                      />
-                    )}
+                    {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') &&
+                      repairOrderData && (
+                        <WorkOrder
+                          repairOrderData={repairOrderData}
+                          setNextStep={setNextStep}
+                          isSmallScreen={isSmallScreen}
+                          isTabletScreen={isTabletScreen}
+                          showActivity={showActivity}
+                          stepFullScreen={stepFullScreen}
+                          allowedToEdit={
+                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                              quotationVersionData?.status
+                            )
+                              ? false
+                              : allowedToEdit
+                          }
+                          allowedToDelete={allowedToDelete}
+                          isPostWorkService={Boolean(currentStep === 3)}
+                        />
+                      )}
                     {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (
                       <Quotation
                         repairOrderData={repairOrderData}
@@ -444,7 +445,7 @@ const RepairOrderDetails = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>
