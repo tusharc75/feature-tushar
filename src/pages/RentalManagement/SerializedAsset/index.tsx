@@ -384,6 +384,7 @@ const SerializedAsset = ({
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         data = response?.data?.data;
+        data.inventory = data.inventory?.filter((e) => !e.isReplaced)
         offlineAssetErrorLog = data?.offlineAssetErrorLog;
 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
