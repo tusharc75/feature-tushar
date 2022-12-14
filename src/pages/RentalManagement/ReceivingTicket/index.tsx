@@ -916,11 +916,17 @@ const ReceivingTicket = ({
 
 
   const handelRevertTickets = () => {
-    let data = {};
     const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (receivingTicketIds.length) {
-      data['ids'] = receivingTicketIds?.map((e) => e);
-      axiosInstance().put(`${deliveryTicket.api}/revert`, data).then(({ data: { data } }) => {
+      let data = [];
+      receivingTicketIds?.forEach((receivingTicketId) => {
+        const ele: any = {};
+        ele._id = receivingTicketId;
+        ele.products = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === "Product")?.map((e) => e?.productId);
+        ele.assets = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === "Asset")?.map((e) => e?._id);
+        data.push(ele);
+      })
+      axiosInstance().put(`${deliveryTicket.api}/remove-tickets-items`, data).then(({ data: { data } }) => {
         fetchRecords();
         toastConfig.setToastConfig({
           open: true,
@@ -1720,7 +1726,7 @@ const ReceivingTicket = ({
       {showConformationRevertTicket && (
         <ConfirmationDialog
           open={showConformationRevertTicket}
-          message={`Are you sure you want to revert Receiving Ticket?`}
+          message={`Are you sure you want to revert receiving ticket?`}
           onClose={() => {
             setShowConformationRevertTicket(false);
           }}

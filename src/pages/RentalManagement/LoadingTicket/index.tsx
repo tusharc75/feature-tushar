@@ -266,7 +266,6 @@ const LoadingTicket = ({
               productAssets[index]['loadingTicket'] = obj?.ticketName;
               productAssets[index]['loadingTicketId'] = obj?._id;
               productAssets[index]['loadingTicketStatus'] = obj?.status;
-
             }
           });
         }
@@ -575,11 +574,17 @@ const LoadingTicket = ({
   };
 
   const handelRevertTickets = () => {
-    let data = {};
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
     if (loadingTicketIds.length) {
-      data['ids'] = loadingTicketIds?.map((e) => e);
-      axiosInstance().put(`${deliveryTicket.api}/revert`, data).then(({ data: { data } }) => {
+      let data = [];
+      loadingTicketIds?.forEach((loadingTicketId) => {
+        const ele: any = {};
+        ele._id = loadingTicketId;
+        ele.products = selectedRecords?.filter((e) => e.loadingTicketId === loadingTicketId && e.type === "Product")?.map((e) => e.productId);
+        ele.assets = selectedRecords?.filter((e) => e.loadingTicketId === loadingTicketId && e.type === "Asset")?.map((e) => e._id);
+        data.push(ele);
+      })
+      axiosInstance().put(`${deliveryTicket.api}/remove-tickets-items`, data).then(({ data: { data } }) => {
         fetchRecords();
         toastConfig.setToastConfig({
           open: true,
@@ -1054,7 +1059,7 @@ const LoadingTicket = ({
       {showConformationRevertTicket && (
         <ConfirmationDialog
           open={showConformationRevertTicket}
-          message={`Are you sure you want to revert Loading Ticket?`}
+          message={`Are you sure you want to revert loading ticket?`}
           onClose={() => {
             setShowConformationRevertTicket(false);
           }}
