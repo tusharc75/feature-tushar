@@ -715,7 +715,7 @@ export default function StepDialog({
                     </Box>
                   )}
                 </CustomDialogContent>
-                {!notEditable && (
+                {(!notEditable || reference === 'workOrder') && (
                   <CustomDialogFooter>
                     <Button
                       size="small"

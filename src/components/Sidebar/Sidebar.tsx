@@ -27,6 +27,9 @@ import { FaRegUser } from 'react-icons/fa';
 import { AccountCircle } from '@material-ui/icons';
 import useStyles from './style';
 import routes from '../Helpers/Routes';
+import { IoPeopleOutline } from 'react-icons/io5';
+import { BiCart, BiCog } from 'react-icons/bi';
+import { RiSuitcaseLine } from 'react-icons/ri';
 
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
@@ -43,40 +46,61 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
 
-  const iconMapping = [
-    {
-      key: 'Brand Admin',
-      icon: <FaRegUserCircle size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'Master Data',
-      icon: <AiOutlineDatabase size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'Product Setup',
-      icon: <ProductSetup size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'Admin Portal',
-      icon: <RiShieldUserLine size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'Activities',
-      icon: <MdOutlineLocalActivity size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'Accounts',
-      icon: <FaRegUser size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'CRM +',
-      icon: <SiCivicrm size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'ROM',
-      icon: <FaRegRegistered size={15} className="sidebar-icon" />
+  const renderIcon = (sectionName: string) => {
+    let icon = <FaReact size={16} className="sidebar-icon" />;
+    switch (sectionName) {
+      case 'Brand Admin':
+        icon = <FaRegUserCircle size={15} className="sidebar-icon" />;
+        break;
+      case 'Master Data':
+        icon = <AiOutlineDatabase size={15} className="sidebar-icon" />;
+        break;
+      case 'Product Setup':
+        icon = <ProductSetup size={15} className="sidebar-icon" />;
+        break;
+      case 'Admin Portal':
+        icon = <RiShieldUserLine size={15} className="sidebar-icon" />;
+        break;
+      case 'Accounts':
+        icon = <FaRegUser size={15} className="sidebar-icon" />;
+        break;
+      case 'CRM +':
+        icon = <SiCivicrm size={15} className="sidebar-icon" />;
+        break;
+      case 'ROM':
+        icon = <FaRegRegistered size={15} className="sidebar-icon" />;
+        break;
+      case 'Sales Management':
+        icon = <SiCivicrm size={15} className="sidebar-icon" />;
+        break;
+      case 'Rental Management':
+        icon = <FaRegRegistered size={15} className="sidebar-icon" />;
+        break;
+      case 'Inventory Management':
+        icon = <RiSuitcaseLine size={15} className="sidebar-icon" />;
+        break;
+      case 'eCommerce':
+        icon = <BiCart size={16} className="sidebar-icon" />;
+        break;
+      case 'Repair & Maintenance Management':
+        icon = <ProductSetup size={15} className="sidebar-icon" />;
+        break;
+      case 'Service Management':
+        icon = <FaRegUser size={15} className="sidebar-icon" />;
+        break;
+      case 'Setups':
+        icon = <BiCog size={16} className="sidebar-icon" />;
+        break;
+      case 'Activities':
+        icon = <IoPeopleOutline size={16} className="sidebar-icon" />;
+        break;
+
+      default:
+        icon = <FaReact size={16} className="sidebar-icon" />;
+        break;
     }
-  ];
+    return icon;
+  };
 
   let toggleTimeout;
 
@@ -270,11 +294,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         }
                       }}
                     >
-                      <ListItemIcon>
-                        {iconMapping.find((mapping) => {
-                          return mapping.key === listItem.section;
-                        })?.icon || <FaReact size={16} className="sidebar-icon" />}
-                      </ListItemIcon>
+                      <ListItemIcon>{renderIcon(listItem.section)}</ListItemIcon>
                       <ListItemText primary={listItem.section} className={`wordWrap`} />
                       {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>

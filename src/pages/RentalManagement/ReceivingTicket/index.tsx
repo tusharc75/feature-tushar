@@ -218,7 +218,7 @@ const ReceivingTicket = ({
               endDate: d.actualEndDate || d.endDate,
               isReplaced: d.isReplaced,
               replaceReason: d.replaceReason,
-              replaceAsset: d.replaceAsset
+              replaceAsset: d?.replaceAsset ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset : ""
             })
           })
           .map((u) => ({
@@ -269,7 +269,7 @@ const ReceivingTicket = ({
           });
         }
       });
-  
+
       products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
       products?.forEach((element) => {
         var qty = element.qty;
@@ -283,7 +283,6 @@ const ReceivingTicket = ({
         ticketProduct?.forEach((ele) => {
           const obj: any = {};
           obj.uniqueId = element._id;
-          // this is the material id
           obj.serialized = element?.productDetail?.serializedProduct;
           obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
           obj.materialId = element?.productDetail?._id;
@@ -438,6 +437,9 @@ const ReceivingTicket = ({
       }
 
       setUniqueReceivingTicket([...new Set(productAssets.filter((d) => d.receivingTicketId !== undefined).map((d) => d.receivingTicketId))]);
+
+      productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)]
+
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -619,9 +621,6 @@ const ReceivingTicket = ({
           [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert].includes(params?.data?.status)
         ) {
           return { backgroundColor: COLOUR_MASTER.lostAssets.background };
-        }
-        if (params?.data?.isReplaced) {
-          return { backgroundColor: COLOUR_MASTER.replaceAssetColor.background };
         }
         return null;
       }
@@ -916,11 +915,17 @@ const ReceivingTicket = ({
 
 
   const handelRevertTickets = () => {
-    let data = {};
     const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (receivingTicketIds.length) {
-      data['ids'] = receivingTicketIds?.map((e) => e);
-      axiosInstance().put(`${deliveryTicket.api}/revert`, data).then(({ data: { data } }) => {
+      let data = [];
+      receivingTicketIds?.forEach((receivingTicketId) => {
+        const ele: any = {};
+        ele._id = receivingTicketId;
+        ele.products = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === "Product")?.map((e) => e?.productId);
+        ele.assets = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === "Asset")?.map((e) => e?._id);
+        data.push(ele);
+      })
+      axiosInstance().put(`${deliveryTicket.api}/remove-tickets-items`, data).then(({ data: { data } }) => {
         fetchRecords();
         toastConfig.setToastConfig({
           open: true,
@@ -1475,7 +1480,12 @@ const ReceivingTicket = ({
               allowSelection={allowedToEdit || isProcessor}
               refreshGrid={fetchRecords}
               actionWidth={80}
-
+              rowClassRules={{
+                "light-grey-data-row":
+                  function (params) {
+                    return params?.data?.isReplaced;
+                  },
+              }}
             />
           )
         ) : (
@@ -1720,7 +1730,7 @@ const ReceivingTicket = ({
       {showConformationRevertTicket && (
         <ConfirmationDialog
           open={showConformationRevertTicket}
-          message={`Are you sure you want to revert Receiving Ticket?`}
+          message={`Are you sure you want to revert receiving ticket?`}
           onClose={() => {
             setShowConformationRevertTicket(false);
           }}

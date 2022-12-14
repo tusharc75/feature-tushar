@@ -1795,6 +1795,12 @@ export const SUBLEASE_STATUS = {
 
 export const REPAIR_ORDER_STATUS = {
   new: 'New',
+  preWork: 'Pre-Work In-Progress',
+  postWork: 'Post-Work In-Progress',
+  buildingQuote: 'Building Quote',
+  waitingQuote: 'Waiting On Quote',
+  quoteAccepted: 'Quote Accepted',
+  quoteRejected: 'Quote Rejected',
   inProgress: 'In-Progress',
   completed: 'Completed'
 };

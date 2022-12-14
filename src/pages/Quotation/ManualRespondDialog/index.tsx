@@ -5,10 +5,10 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 
-import { quotation, QUOTATION_STATUS } from 'src/constants/helpers';
+import { quotation, QUOTATION_STATUS, REPAIR_ORDER_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCurrentStep, updateStatus, setCustomerAcceptable }) => {
+const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCurrentStep, updateStatus, setCustomerAcceptable, updateOrderStatus = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const [selectedOption, setSelectedOption] = useState(null);
   const options = { Accept: QUOTATION_STATUS.acceptByCustomer, Reject: QUOTATION_STATUS.rejectByCustomer };
@@ -48,6 +48,15 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
             return newStep;
           });
           setCustomerAcceptable(false);
+          if(updateOrderStatus) {
+            if(selectedOption === 'Accept') {
+              updateOrderStatus(REPAIR_ORDER_STATUS.quoteAccepted)
+            }
+            else{
+              updateOrderStatus(REPAIR_ORDER_STATUS.quoteRejected)
+            }
+          }
+          
         })
         .catch((error) => {
           setSubmitting(false);
@@ -55,7 +64,6 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
         });
     }
   };
-
   return (
     <Dialog fullWidth maxWidth="xs" open onClose={closeManualDiaog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title={`Reason For Ending`} />
