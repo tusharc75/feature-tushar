@@ -34,6 +34,7 @@ import AllOutIcon from '@material-ui/icons/AllOut';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const Services = ({
   rentalManagementData,
@@ -81,7 +82,9 @@ const Services = ({
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     setAllFields(JSON.parse(JSON.stringify(allFields)));
-    const coloum: any = [
+
+    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, currencySymbol, renderedFrom)
+    let column: any = [
       {
         accessor: 'srno',
         Header: 'Index',
@@ -186,92 +189,97 @@ const Services = ({
         }
       },
     ];
-    data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              Footer: (info) => {
-                const total = info?.rows
-                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                return (
-                  <>
-                    {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                  </>
-                );
-              }
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        if (element.fieldName === 'pricingCondition') {
-          element.fieldName = 'pricingConditionDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
-      }
-    });
+
+    const isPriceRequired = data.filter((el) => el.fieldName === "price" && el.required).length > 0;
+    setIsRateRequired(isPriceRequired)
+    // data.forEach((element) => {
+    //   if (element.fieldName === 'price' && element.required) {
+    //     setIsRateRequired(true);
+    //   }
+    //   if (element.type === 'date') {
+    //     column.push({
+    //       accessor: element.fieldName,
+    //       Header: element.fieldLabel,
+    //       disableFilters: true,
+    //       Cell: ({ row }) =>
+    //         row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+    //     });
+    //   } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
+    //     if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+    //       element.displayUnits.forEach((_unit) => {
+    //         let fieldName = element.fieldName + '_' + _unit.toLowerCase();
+    //         let fieldLabel = element.fieldLabel + ' ' + _unit;
+    //         column.push({
+    //           accessor: fieldName,
+    //           Header: fieldLabel,
+    //           Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
+    //         });
+    //       });
+    //     } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+    //       element.displayUnits.forEach((_unit) => {
+    //         element.displayCurrency.forEach((_currency) => {
+    //           let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
+    //           let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
+    //           column.push({
+    //             accessor: fieldName,
+    //             Header: fieldLabel,
+    //             Cell: ({ row }) =>
+    //               row.original[fieldName] ? (
+    //                 <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+    //               ) : (
+    //                 <NoDataCell />
+    //               )
+    //           });
+    //         });
+    //       });
+    //     } else if (element.type === 'currencyAmount') {
+    //       element.displayCurrency.forEach((_currency) => {
+    //         let fieldName = element.fieldName + '_' + _currency.toLowerCase();
+    //         let fieldLabel = element.fieldLabel + ' ' + _currency;
+    //         column.push({
+    //           accessor: fieldName,
+    //           Header: fieldLabel,
+    //           Cell: ({ row }) =>
+    //             row.original[fieldName] ? (
+    //               <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+    //             ) : (
+    //               <NoDataCell />
+    //             ),
+    //           Footer: (info) => {
+    //             const total = info?.rows
+    //               ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
+    //               .reduce((sum, row) => row.values[fieldName] + sum, 0);
+    //             return (
+    //               <>
+    //                 {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
+    //               </>
+    //             );
+    //           }
+    //         });
+    //       });
+    //     }
+    //   } else {
+    //     if (element.fieldName === 'qty') {
+    //       element.fieldName = 'qtyDisplay';
+    //     }
+    //     if (element.fieldName === 'pricingCondition') {
+    //       element.fieldName = 'pricingConditionDisplay';
+    //     }
+    //     column.push({
+    //       accessor: element.fieldName,
+    //       Header: element.fieldLabel,
+    //       Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+    //     });
+    //   }
+    // });
     // eslint-disable-next-line no-lone-blocks
+
+    column = [...column, ...newColumns]
     {
       isMobile ? (
         <Box display={'none'} />
       ) : (
-        coloum.push({
+        column.push({
           accessor: 'action',
           Header: '',
           minWidth: 50,
@@ -300,20 +308,20 @@ const Services = ({
         })
       );
     }
-    coloum.forEach((element) => {
-      if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
-        element.editable = true;
-      }
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
-    setColumns(coloum);
+    // column.forEach((element) => {
+    //   if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
+    //     element.editable = true;
+    //   }
+    //   if (element.accessor === 'qtyDisplay') {
+    //     element['Footer'] = (info) => {
+    //       const qtyTotal = info.rows
+    //         .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+    //         .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+    //       return <>{qtyTotal}</>;
+    //     };
+    //   }
+    // });
+    setColumns(column);
   };
 
   const fetchProductInventory = async () => {
