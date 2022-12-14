@@ -465,7 +465,6 @@ export default function CustomReactTable({
                           //   }
                           // });
 
-                          console.log(cell);
                           if (!cell?.column?.editable) return;
 
                           setCellValue(cell?.value || '');
