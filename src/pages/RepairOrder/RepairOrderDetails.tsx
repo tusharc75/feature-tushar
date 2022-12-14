@@ -60,7 +60,7 @@ const RepairOrderDetails = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const [hasAssetsAdded, setHasAssetsAdded] = useState(false)
+  const [hasAssetsAdded, setHasAssetsAdded] = useState(false);
   const [repairOrderData, setRepairOrderData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -177,8 +177,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -208,6 +208,28 @@ const RepairOrderDetails = () => {
       });
   };
 
+  const handleStatusChange = (o) => {
+    if (o.optionValue && repairOrderData?.status !== o.optionValue) {
+      updateOrderStatus(o.optionValue);
+    }
+  };
+
+  const updateOrderStatus = (status) => {
+    axiosInstance()
+      .patch(`${repairOrder.api}/status/${repairOrderData._id}`, { status: status })
+      .then(({ data: { data } }) => {
+        fetchRepairOrderData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   useEffect(() => {
     if (isSmallScreen && tabValue === 0) {
       setActivityShow(true);
@@ -215,7 +237,7 @@ const RepairOrderDetails = () => {
       setActivityShow(false);
     }
   }, [isSmallScreen, tabValue]);
-
+  console.log(repairOrderData);
   return (
     <>
       <Grid container className="headerbox">
@@ -361,27 +383,30 @@ const RepairOrderDetails = () => {
                             : allowedToEdit
                         }
                         allowedToDelete={allowedToDelete}
+                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
-                    {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') && repairOrderData && (
-                      <WorkOrder
-                        repairOrderData={repairOrderData}
-                        setNextStep={setNextStep}
-                        isSmallScreen={isSmallScreen}
-                        isTabletScreen={isTabletScreen}
-                        showActivity={showActivity}
-                        stepFullScreen={stepFullScreen}
-                        allowedToEdit={
-                          [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                            quotationVersionData?.status
-                          )
-                            ? false
-                            : allowedToEdit
-                        }
-                        allowedToDelete={allowedToDelete}
-                        isPostWorkService={Boolean(currentStep === 3)}
-                      />
-                    )}
+                    {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') &&
+                      repairOrderData && (
+                        <WorkOrder
+                          repairOrderData={repairOrderData}
+                          setNextStep={setNextStep}
+                          isSmallScreen={isSmallScreen}
+                          isTabletScreen={isTabletScreen}
+                          showActivity={showActivity}
+                          stepFullScreen={stepFullScreen}
+                          allowedToEdit={
+                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                              quotationVersionData?.status
+                            )
+                              ? false
+                              : allowedToEdit
+                          }
+                          allowedToDelete={allowedToDelete}
+                          isPostWorkService={Boolean(currentStep === 3)}
+                          updateOrderStatus={updateOrderStatus}
+                        />
+                      )}
                     {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (
                       <Quotation
                         repairOrderData={repairOrderData}
@@ -393,6 +418,7 @@ const RepairOrderDetails = () => {
                         allowedToEdit={allowedToEdit}
                         allowedToDelete={allowedToDelete}
                         setQuotationVersionData={setQuotationVersionData}
+                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
                     {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (
@@ -407,6 +433,7 @@ const RepairOrderDetails = () => {
                         allowedToDelete={false}
                         invoiceStep={true}
                         setQuotationVersionData={setQuotationVersionData}
+                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
                   </ContentFullScreen>
@@ -444,7 +471,7 @@ const RepairOrderDetails = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>

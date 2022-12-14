@@ -1,15 +1,9 @@
-import React from 'react';
 import moment from 'moment';
-import { AiOutlineLoading } from 'react-icons/ai';
 import CustomRenderCell from '../Helpers/CustomRenderCell';
 import NoDataCell from '../Helpers/NoDataCell';
-import { dateFormat, dateTimeFormat } from '../../constants/helpers';
-import Avatar from '@material-ui/core/Avatar';
-import Tooltip from '@material-ui/core/Tooltip';
-import { Link } from 'react-router-dom';
+import { dateFormat } from '../../constants/helpers';
 
 type RendererTypes = 'date' | 'common';
-
 
 export const getRenderer = (rendererName: RendererTypes) => {
   switch (rendererName) {

@@ -11,17 +11,7 @@ import { FormBuilder } from '../../../components/FormBuilder';
 import { uniq, map } from 'lodash';
 import { CustomDialogTransition } from '../../../constants/helpers';
 
-const FieldDialog = ({
-  handleClose,
-  handleSucess,
-  serviceId,
-  steps,
-  stepIds,
-  reference = '',
-  fields = null,
-  notEditable = false,
-}) => {
-
+const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, reference = '', fields = null, notEditable = false }) => {
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
 
@@ -40,8 +30,7 @@ const FieldDialog = ({
         });
       });
       setSection(_data);
-    }
-    else {
+    } else {
       axiosInstance()
         .get(`${serviceMaster.api}/fields/${serviceId}/${stepIds[0]}`)
         .then(({ data: { data } }) => {
@@ -82,8 +71,7 @@ const FieldDialog = ({
     });
     if (reference === 'workOrder') {
       handleSucess(data);
-    }
-    else {
+    } else {
       axiosInstance()
         .post(`${serviceMaster.api}/fields/${serviceId}`, { stepIds: stepIds, fields: data })
         .then(({ data }) => {
@@ -160,7 +148,7 @@ const FieldDialog = ({
           resource={null}
         />
       </CustomDialogContent>
-      {!notEditable && (
+      {(!notEditable || reference === 'workOrder') && (
         <CustomDialogFooter>
           <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
             Close
