@@ -47,7 +47,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const pathnames = location.pathname.split('/').filter((x) => x);
 
   const renderIcon = (sectionName: string) => {
-    console.log(sectionName);
     let icon = <FaReact size={16} className="sidebar-icon" />;
     switch (sectionName) {
       case 'Brand Admin':
