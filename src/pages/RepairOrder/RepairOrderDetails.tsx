@@ -208,6 +208,28 @@ const RepairOrderDetails = () => {
       });
   };
 
+  const handleStatusChange = (o) => {
+    if (o.optionValue && repairOrderData?.status !== o.optionValue) {
+      updateOrderStatus(o.optionValue);
+    }
+  };
+
+  const updateOrderStatus = (status) => {
+    axiosInstance()
+      .patch(`${repairOrder.api}/status/${repairOrderData._id}`, { status: status })
+      .then(({ data: { data } }) => {
+        fetchRepairOrderData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   useEffect(() => {
     if (isSmallScreen && tabValue === 0) {
       setActivityShow(true);
@@ -215,7 +237,7 @@ const RepairOrderDetails = () => {
       setActivityShow(false);
     }
   }, [isSmallScreen, tabValue]);
-
+  console.log(repairOrderData);
   return (
     <>
       <Grid container className="headerbox">
@@ -361,6 +383,7 @@ const RepairOrderDetails = () => {
                             : allowedToEdit
                         }
                         allowedToDelete={allowedToDelete}
+                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
                     {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') && repairOrderData && (
@@ -380,6 +403,7 @@ const RepairOrderDetails = () => {
                         }
                         allowedToDelete={allowedToDelete}
                         isPostWorkService={Boolean(currentStep === 3)}
+                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
                     {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (
@@ -393,6 +417,7 @@ const RepairOrderDetails = () => {
                         allowedToEdit={allowedToEdit}
                         allowedToDelete={allowedToDelete}
                         setQuotationVersionData={setQuotationVersionData}
+                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
                     {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (
@@ -405,8 +430,9 @@ const RepairOrderDetails = () => {
                         stepFullScreen={stepFullScreen}
                         allowedToEdit={false}
                         allowedToDelete={false}
-                        invoiceStep={true}
+                        invoiceStep={true}  
                         setQuotationVersionData={setQuotationVersionData}
+                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
                   </ContentFullScreen>
