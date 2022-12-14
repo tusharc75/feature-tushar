@@ -133,28 +133,28 @@ const Quotation = ({
               {`${startCase(row.original?.type)} `}
               {row.original['type'] === 'product'
                 ? row.original?.productDetail?.serializedProduct
-                ? '(Serialized)'
-                : '(Non-Serialized)'
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                ? '(Product)'
-                : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
-            )
-          },
-          {
-            accessor: 'detail',
-            Header: 'Details',
-            minWidth: 300,
-            width: 300,
-            sticky: isMobile ? 'none' : 'left',
-            Cell: ({ row }) => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+          )
+      },
+      {
+        accessor: 'detail',
+        Header: 'Details',
+        minWidth: 300,
+        width: 300,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <p title={row.original.detail}>{row.original.detail}</p>
             <Box ml={1} mr={1} className="d-flex align-items-center">
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
@@ -174,7 +174,7 @@ const Quotation = ({
                   window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                 }
               }}
-              >
+            >
               <OpenInNewIcon fontSize="small" color="primary" />
             </IconButton>
           </div>
@@ -189,7 +189,7 @@ const Quotation = ({
         }
       }
     ];
-    
+
     data.forEach((element) => {
       if (element.type === 'date') {
         coloum.push({
@@ -197,7 +197,7 @@ const Quotation = ({
           Header: element.fieldLabel,
           disableFilters: true,
           Cell: ({ row }) =>
-          row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
         });
       } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
         if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
@@ -219,33 +219,33 @@ const Quotation = ({
                 accessor: fieldName,
                 Header: fieldLabel,
                 Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                    )
-                  });
-                });
-              });
-            } else if (element.type === 'currencyAmount') {
-              element.displayCurrency.forEach((_currency) => {
-                let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-                let fieldLabel = element.fieldLabel + ' ' + _currency;
-                coloum.push({
-                  accessor: fieldName,
-                  Header: fieldLabel,
-                  Cell: ({ row }) =>
                   row.original[fieldName] ? (
                     <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                    ) : (
-                      <NoDataCell />
-                      ),
-                      Footer: (info) => {
-                        const total = info?.rows
-                        ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                        .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                        return (
-                          <>
+                  ) : (
+                    <NoDataCell />
+                  )
+              });
+            });
+          });
+        } else if (element.type === 'currencyAmount') {
+          element.displayCurrency.forEach((_currency) => {
+            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
+            let fieldLabel = element.fieldLabel + ' ' + _currency;
+            coloum.push({
+              accessor: fieldName,
+              Header: fieldLabel,
+              Cell: ({ row }) =>
+                row.original[fieldName] ? (
+                  <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                ) : (
+                  <NoDataCell />
+                ),
+              Footer: (info) => {
+                const total = info?.rows
+                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
+                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
+                return (
+                  <>
                     {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
                   </>
                 );
@@ -261,52 +261,51 @@ const Quotation = ({
           accessor: element.fieldName,
           Header: element.fieldLabel,
           Cell: ({ row }) =>
-          row.original[element.fieldName]?.optionLabel ? (
-            <p>{row.original[element.fieldName].optionLabel}</p>
+            row.original[element.fieldName]?.optionLabel ? (
+              <p>{row.original[element.fieldName].optionLabel}</p>
             ) : row.original[element.fieldName] ? (
               <p>{row.original[element.fieldName]}</p>
-              ) : (
-                <NoDataCell />
-                )
-              });
-            }
-          });
-          coloum.forEach((element) => {
-            if (element.accessor === 'qtyDisplay') {
-              element['Footer'] = (info) => {
-                const qtyTotal = info.rows
-                .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-                .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-                return <>{qtyTotal}</>;
-              };
-            }
-          });
-          setColumns(coloum);
-          setAllColumn(coloum.map((d) => d.Header));
+            ) : (
+              <NoDataCell />
+            )
+        });
+      }
+    });
+    coloum.forEach((element) => {
+      if (element.accessor === 'qtyDisplay') {
+        element['Footer'] = (info) => {
+          const qtyTotal = info.rows
+            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+          return <>{qtyTotal}</>;
         };
-        
-        const generateNestedData = (material, inventory, parent) => {
-          const subRows: any = material.filter((e) => e.parentId === parent._id);
-          subRows.forEach((_subRow, j) => {
-            _subRow.srno = parent.srno + '.' + (j + 1);
-            _subRow.detail = `${
-              _subRow.type === 'serializedAsset'
-              ? _subRow?.serializedAssetDetail?.assetNumber
-              : _subRow.type === 'product'
-              ? _subRow?.productDetail?.productName
-              : _subRow.type === 'service'
+      }
+    });
+    setColumns(coloum);
+    setAllColumn(coloum.map((d) => d.Header));
+  };
+
+  const generateNestedData = (material, inventory, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + (j + 1);
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
+            ? _subRow?.productDetail?.productName
+            : _subRow.type === 'service'
               ? _subRow?.serviceDetail?.serviceName
               : _subRow?.packageDetail?.packageName
-            }`;
-            _subRow.description =
-            _subRow.type === 'service'
-            ? _subRow?.serviceDetail?.serviceDescription || ''
-            : _subRow.type === 'product'
+        }`;
+      _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
             ? _subRow?.productDetail?.productDesc || ''
             : _subRow.type === 'package'
-            ? _subRow?.packageDetail?.packageDescription || ''
-            : '';
-            _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
+      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
@@ -322,37 +321,36 @@ const Quotation = ({
     // setNextStep(true)
     return orderBy(subRows, ['order'], ['asc']);
   };
-  
+
   const fetchProductInventory = async () => {
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
     const response = await axiosInstance().get(
       `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
-      );
-      data = response?.data?.data;
-      setMaterial(JSON.parse(JSON.stringify(data.material)));
-      inventory = data?.inventory ? data?.inventory : [];
-      const rows = data.material.filter((e) => e.parentId === null);
+    );
+    data = response?.data?.data;
+    setMaterial(JSON.parse(JSON.stringify(data.material)));
+    inventory = data?.inventory ? data?.inventory : [];
+    const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
+      parent.detail = `${parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.productDetail?.productName
+            : parent.type === 'service'
+              ? parent.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -388,18 +386,18 @@ const Quotation = ({
     setNextStep(false);
     setDeleting(true);
     axiosInstance()
-    .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
-    .then(() => {
-      setDeleting(false);
-      fetchProductInventory();
-      setDeleteData(null);
-      setNextStep(true);
-    })
-    .catch((error) => {
-      setDeleting(false);
-      toastConfig.setToastConfig(error);
-      setDeleteData(null);
-      setNextStep(true);
+      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
+      .then(() => {
+        setDeleting(false);
+        fetchProductInventory();
+        setDeleteData(null);
+        setNextStep(true);
+      })
+      .catch((error) => {
+        setDeleting(false);
+        toastConfig.setToastConfig(error);
+        setDeleteData(null);
+        setNextStep(true);
       });
   };
 
@@ -447,14 +445,14 @@ const Quotation = ({
     });
     setUpdating(true);
     axiosInstance()
-    .put(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
-    .then(() => {
-      setUpdating(false);
-      setIsProductEdit({ open: false, isBulkedit: false });
-      fetchProductInventory();
-      setNextStep(true);
-    })
-    .catch((error) => {
+      .put(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
+      .then(() => {
+        setUpdating(false);
+        setIsProductEdit({ open: false, isBulkedit: false });
+        fetchProductInventory();
+        setNextStep(true);
+      })
+      .catch((error) => {
         setNextStep(true);
         setUpdating(false);
         toastConfig.setToastConfig(error);
@@ -482,6 +480,7 @@ const Quotation = ({
             setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
             currentVersion={currentVersion}
             isSendEmail={true}
+            hideSummary={true}
           />
         </Box>
         <Box display="flex">
@@ -506,7 +505,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)
@@ -702,8 +701,8 @@ const Quotation = ({
           setCurrentStep={() => {
             fetchQuotationData(currentVersion);
           }}
-          setNextStep={(type:string) => {
-            if(type && type.includes("Rejectd")) {
+          setNextStep={(type: string) => {
+            if (type && type.includes("Rejectd")) {
               setNextStep(false)
             } else {
               setNextStep(true)

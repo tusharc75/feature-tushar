@@ -26,7 +26,8 @@ import { VscVersions } from 'react-icons/vsc';
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnly = false, allowedToEdit, versionId, allColumn, columns, setShowAllVersionStatus, setShowQuotationSummaryDialog, currentVersion }) => {
+const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnly = false, allowedToEdit, versionId, allColumn, columns,
+  setShowAllVersionStatus, setShowQuotationSummaryDialog, currentVersion, hideSummary = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -193,18 +194,19 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center">
           <Box display="flex">
-            <Button
-              onClick={() => {
-                setShowQuotationSummaryDialog(true);
-              }}
-              variant="outlined"
-              size="small"
-              className="mx-1"
-              startIcon={<GiReceiveMoney />}
-              color="primary"
-            >
-              Summary
-            </Button>
+            {!hideSummary &&
+              <Button
+                onClick={() => {
+                  setShowQuotationSummaryDialog(true);
+                }}
+                variant="outlined"
+                size="small"
+                className="mx-1"
+                startIcon={<GiReceiveMoney />}
+                color="primary"
+              >
+                Summary
+              </Button>}
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="primary"
