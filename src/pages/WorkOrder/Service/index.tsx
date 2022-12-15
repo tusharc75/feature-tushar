@@ -112,7 +112,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               if (data.type !== REPAIR_ORDER_TYPE.internal) {
                 setIsQuotationStep(true);
                 axiosInstance()
-                  .get(`${repairOrder.api}/${tempRepairOrderId}/workorder/quotation`)
+                  .get(`${repairOrder.api}/${tempRepairOrderId}/check/quotation`)
                   .then(({ data: { data } }) => {
                     if (data) {
                       let keys = Object.keys(data?.versions);

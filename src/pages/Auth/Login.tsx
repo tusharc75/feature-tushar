@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { Grid, Paper, Button, Box, TextField, CircularProgress, Link as MuiLink } from '@material-ui/core';
 import { Formik, Form } from 'formik';
@@ -21,6 +21,7 @@ import { SiMicrosoftoffice } from 'react-icons/si';
 import { SVG } from '../../assets';
 import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import { entity, eProduct } from '../../constants/helpers';
+import routes from 'src/components/Helpers/Routes';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -58,6 +59,7 @@ const Login = () => {
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const history = useHistory();
 
   const { entityApi } = entity;
 
@@ -139,6 +141,15 @@ const Login = () => {
             type: SET_SELECTED_ENTITY,
             payload: data.role.selectedEntity._id
           });
+        }
+
+        if (data?.role && data?.role?.selectedEntity && data?.role?.selectedEntity?.resource?.length) {
+          const result = data?.role?.selectedEntity?.resource?.filter((e) => e.isRead === true && !e.isHidden);
+          if (result?.length === 1) {
+            history.push({
+              pathname: routes.workOrderTechnician.path
+            });
+          }
         }
 
         axiosInstance()

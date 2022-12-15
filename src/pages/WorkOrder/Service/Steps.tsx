@@ -226,7 +226,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
 
       setDisableCompleteFail(!allStepsDone);
 
-      if (inSteps && allStepsDone && selectedService.status === WORKORDER_SERVICE_STATUS.inProgress) {
+      if (inSteps && allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)) {
         //let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id);
         // if (isMeTechnician) {
         //   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
