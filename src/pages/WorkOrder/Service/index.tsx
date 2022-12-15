@@ -841,7 +841,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                   setAnchorEl(null);
                 }}
               >
-                Consume
+                Consume Products
               </MenuItem>
               <MenuItem
                 disabled={

@@ -189,6 +189,7 @@ export default function CustomAgGrid({
     } else {
       timer = setTimeout(() => {
         dispatch({ type: 'search', search: '' });
+        dispatch({ type: 'loading', loading: false });
       }, 300);
     }
     return () => clearTimeout(timer);
