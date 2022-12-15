@@ -199,7 +199,9 @@ const ReceivingTicket = ({
           currentLocation: u?.currentLocation?.optionValue,
           rentalAssetStatus: u?.status,
           startDate: u?.actualStartDate,
-          endDate: u?.actualEndDate
+          endDate: u?.actualEndDate,
+          manualStartDate: u?.manualStartDate,
+          manualEndDate: u?.manualEndDate,
         }));
 
         deliveryTicketList = await getRentalDeliveryTicket(rentalManagementData._id);
@@ -216,6 +218,8 @@ const ReceivingTicket = ({
               rentalAssetStatus: d.status,
               startDate: d.actualStartDate || d.startDate,
               endDate: d.actualEndDate || d.endDate,
+              manualStartDate: d.manualStartDate,
+              manualEndDate: d.manualEndDate,
               isReplaced: d.isReplaced,
               replaceReason: d.replaceReason,
               replaceAsset: d?.replaceAsset ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset : ""
@@ -233,7 +237,9 @@ const ReceivingTicket = ({
             currentOwner: u?.currentOwner,
             currentLocation: u?.currentLocation?.optionValue,
             startDate: u?.startDate,
-            endDate: u?.endDate
+            endDate: u?.endDate,
+            manualStartDate: u?.manualStartDate,
+            manualEndDate: u?.manualEndDate,
           }));
 
         const result = await axiosInstance().get(
@@ -318,6 +324,8 @@ const ReceivingTicket = ({
             : element?.status;
           obj.startDate = element?.actualStartDate;
           obj.endDate = element?.actualEndDate;
+          obj.manualStartDate = element?.manualStartDate;
+          obj.manualEndDate = element?.manualEndDate;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
@@ -502,7 +510,7 @@ const ReceivingTicket = ({
         </Box>
       )}
       {params?.data?.isReplaced && (
-        <Box ml={1} mt={1}>
+        <Box ml={1}>
           <HtmlTooltip title={`This asset has replaced ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
             <InfoIcon fontSize="small" color={'primary'} />
           </HtmlTooltip>
@@ -556,8 +564,8 @@ const ReceivingTicket = ({
     );
 
   const ActionRenderer = (params) => (
-    allowedToEdit && params?.data?.startDate && params?.data?.endDate ?
-      <HtmlTooltip title={`Update Actual Start Date and End Date`}>
+    allowedToEdit && params?.data?.startDate ?
+      <HtmlTooltip title={`Update Start Date / End Date`}>
         <IconButton
           size='small'
           onClick={() => {
@@ -642,8 +650,10 @@ const ReceivingTicket = ({
     { field: 'returnTicket', headerName: 'Return Ticket', show: true, cellRenderer: 'returnTicketRenderer' },
     { field: 'returnQty', headerName: 'Returned Qty', show: true, cellRenderer: 'returnTicketRenderer' },
     { field: 'status', headerName: 'Asset Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'startDate', headerName: 'Actual Start Date', show: true, cellRenderer: 'dateRenderer' },
-    { field: 'endDate', headerName: 'Actual End Date', show: true, cellRenderer: 'dateRenderer' },
+    { field: 'manualStartDate', headerName: 'Start Date', show: true, cellRenderer: 'dateRenderer' },
+    { field: 'manualEndDate', headerName: 'End Date', show: true, cellRenderer: 'dateRenderer' },
+    { field: 'startDate', headerName: 'System Start Date', show: false, cellRenderer: 'dateRenderer' },
+    { field: 'endDate', headerName: 'System End Date', show: false, cellRenderer: 'dateRenderer' },
     { field: 'rentalAssetStatus', headerName: 'Rental Status', show: true, cellRenderer: 'commonRenderer' },
     { field: 'consumeQty', headerName: 'Consumed Qty', show: true, cellRenderer: 'commonRenderer' },
   ];
@@ -913,7 +923,6 @@ const ReceivingTicket = ({
       });
   };
 
-
   const handelRevertTickets = () => {
     const receivingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
     if (receivingTicketIds.length) {
@@ -964,12 +973,17 @@ const ReceivingTicket = ({
   const handleSubmitChangeDates = (values) => {
     if (!openDateDialog.data) return
     setOpenDateDialog({ ...openDateDialog, loading: true })
-    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, {
+    const data: any = {
       "material": openDateDialog?.data?.displayType !== "Asset" ? openDateDialog?.data?.uniqueId : "",
       "inventory": openDateDialog?.data?.displayType === "Asset" ? openDateDialog?.data?._id : "",
-      "endDate": values.actualEndDate,
-      "startDate": values.actualStartDate
-    })
+    }
+    if (values.manualStartDate) {
+      data.startDate = values.manualStartDate;
+    }
+    if (values.manualEndDate) {
+      data.endDate = values.manualEndDate;
+    }
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then(() => {
         toastConfig.setToastConfig({
           open: true,
@@ -1181,7 +1195,8 @@ const ReceivingTicket = ({
                     f.hasOwnProperty('receivingTicketId') ||
                     f.hasOwnProperty('returnTicketId') ||
                     [INVENTORY_STATUS.lost].includes(f.status) ||
-                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair, INVENTORY_STATUS.needRecert, INVENTORY_STATUS.notApplied].includes(f.status)
+                    ![INVENTORY_STATUS.inUse, INVENTORY_STATUS.reserved, INVENTORY_STATUS.scrap, INVENTORY_STATUS.needRepair,
+                    INVENTORY_STATUS.needRecert, INVENTORY_STATUS.notApplied].includes(f.status)
                 )
               }
             >
