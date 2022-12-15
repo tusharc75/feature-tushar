@@ -949,7 +949,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           reference="workorder"
           referenceId={workOrderId}
           handleClose={() => setServiceDialog({ open: false, uniqueId: null, preWork: null })}
-          ids={serviceSteps?.filter((e) => e.type === 'service')?.map((e) => e._id)}
+          ids={[]}
           onSuccess={(data) => {
             handleAddService(
               data?.map((e) => e.service),

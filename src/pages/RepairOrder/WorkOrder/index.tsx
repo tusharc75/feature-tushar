@@ -69,8 +69,6 @@ const WorkOrder = ({
     const assignedUsers = assignedUsersArrays?.flat();
 
     const uniqueArray = assignedUsers.filter((obj, index, self) => index === self.findIndex((t) => JSON.stringify(t) === JSON.stringify(obj)));
-
-    console.log(uniqueArray);
     setAllAssignedUsers(uniqueArray);
   }, [selectedProducts]);
 
@@ -300,7 +298,6 @@ const WorkOrder = ({
   };
 
   const fetchData = async () => {
-    console.log('repairOrder', repairOrderData._id);
     setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
@@ -585,7 +582,7 @@ const WorkOrder = ({
             <AssignServiceDialog
               reference="workorder"
               handleClose={() => setAddServicesDialog({ open: false })}
-              ids={[...selectedProducts?.filter((e) => e.type === 'service')?.map((e) => e?.materialId)]}
+              ids={[]}
               onSuccess={(data) => {
                 handleAddService(data?.map((e) => e.service));
                 setAddServicesDialog({ open: false });
