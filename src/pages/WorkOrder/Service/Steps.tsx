@@ -207,7 +207,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   useEffect(() => {
     if (addServiceConfirmation.open) return;
     axiosInstance().get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`).then(({ data: { data } }) => {
-      
+
       setServiceDetails(data);
       const steps = data?.steps?.map((d) => d.stepName);
       setStepList(steps);
@@ -668,7 +668,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                           </Box>
                         )
                       ) : null}
-                      {(stepData?.status && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) && step?.fields?.length) ? (
+                      {(stepData?.status && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) && step?.fields?.length && isMeTechnician) ? (
                         <>
                           <Box marginX={1} />
                           <Box>
