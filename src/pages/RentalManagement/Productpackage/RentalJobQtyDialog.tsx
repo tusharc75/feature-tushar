@@ -18,7 +18,7 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
-import { calculatePrice, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { object, number } from 'yup';
 
@@ -374,6 +374,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           rows = [...rows, ...packages]
         })
       }
+
+      console.log(rows)
       handleSaveData(rows)
     }
     else {
@@ -381,27 +383,31 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         setShowConfirmationDialog(true);
       }
       else {
-        let rows: any = [{ ...rowData, ...values }]
-        if (rowData.type === "package") {
-          const product = material.filter((e) => e.parentId === rowData._id)
-          resetValueZero(product, allFields)
-          rows = [...rows, ...product]
-        }
-        else if (rowData.type === "product" && rowData.parentId) {
-          if (values[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
-            const packages: any = material.filter((e) => e._id === rowData.parentId)
-            const product: any = material.filter((e) => e.parentId === rowData.parentId)
-            product.forEach((element) => {
-              if (element._id === rowData._id) {
-                for (var key in values) {
-                  element[key] = values[key];
-                }
-              }
-            })
-            sumOnParent(packages, product, allFields, currency)
-            rows = [...rows, ...packages]
-          }
-        }
+        // rowData: any = { ...rowData, ...values }
+        // if (rowData.type === "package") {
+        //   const product = material.filter((e) => e.parentId === rowData._id)
+        //   resetValueZero(product, allFields)
+        //   rows = [...rows, ...product]
+        // }
+        // else if (rowData.type === "product" && rowData.parentId) {
+        //   if (values[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
+        //     const packages: any = material.filter((e) => e._id === rowData.parentId)
+        //     const product: any = material.filter((e) => e.parentId === rowData.parentId)
+        //     product.forEach((element) => {
+        //       if (element._id === rowData._id) {
+        //         for (var key in values) {
+        //           element[key] = values[key];
+        //         }
+        //       }
+        //     })
+            
+        //     sumOnParent(packages, product, allFields, currency)
+        //     rows = [...rows, ...packages]
+        //   }
+        // }
+        
+        // console.log(rows, material, values)
+        const rows = await calculateRowsField(material, values, allFields, rowData)
         handleSaveData(rows)
         setShowConfirmationDialog(false);
       }
