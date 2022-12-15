@@ -50,17 +50,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { ExpandMore } from '@material-ui/icons';
 import { capitalize, orderBy } from 'lodash';
-import DateRangeIcon from '@material-ui/icons/DateRange';
 import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
 import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Versions from 'src/pages/Quotation/Versions';
 import { FcCancel, FcClock, FcOk, GiReceiveMoney, VscVersions } from 'react-icons/all';
-import contactClass from '../../Contact/contact.module.scss';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SendEmail from 'src/pages/RentalManagement/Quotation/SendEmail';
 
 const Quotation = ({
@@ -103,7 +98,6 @@ const Quotation = ({
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
-
   const [quotationData, setQuotationData] = useState(null);
   const [currentVersion, setCurrentVersion] = useState(null);
   const [allColumn, setAllColumn] = useState([]);
@@ -119,8 +113,9 @@ const Quotation = ({
   }, [invoiceStep]);
 
   const fetchQuotationData = (versionNumber = null) => {
+    setQuotationData(null);
     axiosInstance()
-      .get(`${repairOrder.api}/${repairOrderData?._id}/repairorder/quotation`)
+      .get(`${repairOrder.api}/${repairOrderData?._id}/check-create/quotation`)
       .then(({ data: { data } }) => {
         setQuotationData(data);
         let keys = Object.keys(data.versions);
@@ -136,9 +131,10 @@ const Quotation = ({
       fetchFields(quotationData?.currency);
       fetchProductInventory();
     }
-  }, [quotationData?.versions[currentVersion]?._id]);
+  }, [quotationData && quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async (currency) => {
+    setColumns(null)
     var data = await fetch_quotation_product_fields(currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
@@ -159,7 +155,9 @@ const Quotation = ({
         width: 300,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {
+            {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
+              <p> {row.original.detail}</p>
+            ) : (
               <p
                 onClick={() => {
                   handleOpen(row.original);
@@ -169,7 +167,7 @@ const Quotation = ({
               >
                 {row.original?.detail}
               </p>
-            }
+            )}
 
             <Chip
               className="ml-1"
@@ -377,7 +375,6 @@ const Quotation = ({
     });
     setColumns(coloum);
     setAllColumn(coloum.map((d) => d.Header));
-
   };
 
   const fetchProductInventory = async () => {
@@ -553,6 +550,24 @@ const Quotation = ({
       });
   };
 
+  const handleSendToCustomer = () => {
+    axiosInstance().put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+      .then(() => {
+        fetchQuotationData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Sent to customer Sucessfully'
+        });
+        if (updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.waitingQuote) {
+          updateOrderStatus(REPAIR_ORDER_STATUS.waitingQuote);
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <Fragment>
       <Box
@@ -605,33 +620,13 @@ const Quotation = ({
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
                 quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
-                  disabled={material
-                    .filter((e) => e.parentId === null)
-                    .some(
-                      (d) =>
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                    )}
-                  onClick={() => {
-                    axiosInstance()
-                      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
-                      .then(() => {
-                        fetchQuotationData(currentVersion);
-                        if (updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.waitingQuote) {
-                          updateOrderStatus(REPAIR_ORDER_STATUS.waitingQuote);
-                        }
-
-                        toastConfig.setToastConfig({
-                          open: true,
-                          type: 'success',
-                          message: 'Sent to customer Sucessfully'
-                        });
-                      })
-                      .catch((error) => {
-                        toastConfig.setToastConfig(error);
-                      });
-                  }}
+                  disabled={material.filter((e) => e.parentId === null).some(
+                    (d) =>
+                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                  )}
+                  onClick={handleSendToCustomer}
                   variant="outlined"
                   size="small"
                   className="mx-1"
@@ -651,7 +646,7 @@ const Quotation = ({
                 >
                   Accept / Reject
                 </Button>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+              ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
                 <Button
                   onClick={() => {
                     cloneVersion();
@@ -661,10 +656,10 @@ const Quotation = ({
                   className="mx-1"
                   color="primary"
                 >
-                  {`Clone Version-${currentVersion}`}
+                  Create New Version
                 </Button>
               ) : null}
-              <Button
+              {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationData?.versions[currentVersion]?.status) && <Button
                 variant="outlined"
                 color="default"
                 size="small"
@@ -674,7 +669,7 @@ const Quotation = ({
               >
                 Actions
                 <ExpandMore />
-              </Button>
+              </Button>}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -759,7 +754,8 @@ const Quotation = ({
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
-              hideSelection={!allowedToEdit}
+              hideSelection={!allowedToEdit || [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationData?.versions[currentVersion]?.status)}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
             />
