@@ -75,12 +75,9 @@ const RepairOrderDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [repairOrderProcessSteps, setRepairOrderProcessSteps] = useState(repairOrderSteps);
-
   const [quotationVersionData, setQuotationVersionData] = useState(null);
   const [showQuotationConfirmBox, setShowQuotationConfirmBox] = useState(false);
-
   const [quoteClonning, setQuoteClonning] = useState(false);
-
   const [isAnyMaterial, setIsAnyMaterial] = useState(false);
 
   useEffect(() => {
@@ -136,7 +133,7 @@ const RepairOrderDetails = () => {
     axiosInstance()
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        if (data?.materialLen) {
+        if (data?.material?.length) {
           setIsAnyMaterial(true);
         }
         setCurrentStep(repairOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? repairOrderProcessSteps.indexOf(data?.processStatus) : 0);
