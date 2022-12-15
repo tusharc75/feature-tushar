@@ -159,7 +159,10 @@ const Quotation = ({
         width: 300,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {
+            {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              quotationData?.versions[currentVersion]?.status) ? (
+              <p> {row.original.detail}</p>
+            ) : (
               <p
                 onClick={() => {
                   handleOpen(row.original);
@@ -169,7 +172,7 @@ const Quotation = ({
               >
                 {row.original?.detail}
               </p>
-            }
+            )}
 
             <Chip
               className="ml-1"
@@ -664,7 +667,7 @@ const Quotation = ({
                   {`Clone Version-${currentVersion}`}
                 </Button>
               ) : null}
-              <Button
+              {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationData?.versions[currentVersion]?.status) && <Button
                 variant="outlined"
                 color="default"
                 size="small"
@@ -674,7 +677,7 @@ const Quotation = ({
               >
                 Actions
                 <ExpandMore />
-              </Button>
+              </Button>}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -759,7 +762,8 @@ const Quotation = ({
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
-              hideSelection={!allowedToEdit}
+              hideSelection={!allowedToEdit || [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationData?.versions[currentVersion]?.status)}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
             />
