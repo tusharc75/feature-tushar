@@ -145,7 +145,7 @@ const WorkOrderDetails = () => {
     setPreviewPdf(true);
 
     axiosInstance()
-      .get(`${workOrder.api}/${id}/pdf`)
+      .get(`${workOrder.api}/${id}/pdf/service`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
