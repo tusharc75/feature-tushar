@@ -9,19 +9,6 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 
 const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) => {
 
-  const [initialValues, setInitialValues] = useState({
-    actualStartDate: '',
-    actualEndDate: ''
-  });
-
-  useEffect(() => {
-    if (!data) return;
-    setInitialValues({
-      actualStartDate: data?.startDate,
-      actualEndDate: data?.endDate || new Date(),
-    });
-  }, []);
-
   return (
     <Dialog
       open={open}
@@ -29,45 +16,53 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
       onClose={onClose}
       maxWidth="sm"
       fullWidth>
-      <Formik initialValues={initialValues} onSubmit={(values) => {}}>
+      <Formik
+        initialValues={data?.manualStartDate && data?.manualEndDate ? {
+          manualStartDate: data?.manualStartDate,
+          manualEndDate: data?.manualEndDate,
+        } : { manualStartDate: data?.manualStartDate }}
+        onSubmit={(values) => { }}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form>
             <CustomDialogHeader title={data?.assetNumber || ''} onClose={onClose} />
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12}>
-                    <FormTypes
-                      size="small"
-                      fullWidth
-                      values={values}
-                      maxDate={values.actualEndDate}
-                      error={errors}
-                      touched={touched}
-                      type="date"
-                      label="Actual Start Date"
-                      name="actualStartDate"
-                      onChange={(date) => {
-                        setFieldValue('actualStartDate', date);
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={12}>
-                    <FormTypes
-                      size="small"
-                      fullWidth
-                      minDate={values.actualStartDate}
-                      values={values}
-                      error={errors}
-                      touched={touched}
-                      type="date"
-                      label="Actual End Date"
-                      name="actualEndDate"
-                      onChange={(date) => {
-                        setFieldValue('actualEndDate', date);
-                      }}
-                    />
-                  </Grid>
+                  {data?.manualStartDate &&
+                    <Grid item xs={12} sm={12}>
+                      <FormTypes
+                        size="small"
+                        fullWidth
+                        values={values}
+                        maxDate={values.manualEndDate || new Date()}
+                        error={errors}
+                        touched={touched}
+                        type="date"
+                        label="Start Date"
+                        name="manualStartDate"
+                        onChange={(date) => {
+                          setFieldValue('manualStartDate', date);
+                        }}
+                      />
+                    </Grid>}
+                  {data?.manualEndDate &&
+                    <Grid item xs={12} sm={12}>
+                      <FormTypes
+                        size="small"
+                        fullWidth
+                        minDate={values.manualStartDate}
+                        values={values}
+                        error={errors}
+                        touched={touched}
+                        type="date"
+                        label="End Date"
+                        name="manualEndDate"
+                        onChange={(date) => {
+                          setFieldValue('manualEndDate', date);
+                        }}
+                      />
+                    </Grid>
+                  }
                 </Grid>
               </Box>
             </CustomDialogContent>
@@ -82,9 +77,12 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  const newValues = {
-                    actualStartDate: new Date(values.actualStartDate).toISOString(),
-                    actualEndDate: new Date(values.actualEndDate).toISOString()
+                  const newValues: any = {};
+                  if (values.manualStartDate) {
+                    newValues.manualStartDate = new Date(values.manualStartDate).toISOString()
+                  }
+                  if (values.manualEndDate) {
+                    newValues.manualEndDate = new Date(values.manualEndDate).toISOString()
                   }
                   handleSubmit(newValues);
                 }}

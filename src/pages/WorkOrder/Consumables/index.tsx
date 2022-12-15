@@ -110,7 +110,7 @@ const Consumables = ({ workOrderId, allowedToEdit }) => {
       <Box p={1}>
         {allowedToEdit && (
           <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
-            Add Product/Consumables
+            Add Products/Consumables
           </Button>
         )}
       </Box>

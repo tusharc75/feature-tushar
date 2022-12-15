@@ -345,7 +345,7 @@ const LoadingTicket = ({
         </Box>
       )}
       {params?.data?.isReplaced && (
-        <Box ml={1} mt={1}>
+        <Box ml={1}>
           <HtmlTooltip title={`This asset has replaced ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
             <InfoIcon fontSize="small" color={'primary'} />
           </HtmlTooltip>
