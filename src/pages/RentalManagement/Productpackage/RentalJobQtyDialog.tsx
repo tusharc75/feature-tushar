@@ -216,7 +216,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           element.option = pricingMethodOptions;
         }
         if (element.fieldName === "pricingCondition") {
-          element.option = pricingConditionOptions;
+          if (Array.isArray(pricingConditionOptions)) {
+            element.option = pricingConditionOptions;
+          }
         }
         // if (element.fieldName === "qty" && rowData?.serializedProduct === false && rowData?.hideSelection) {
         //   element.isUneditable = true;
@@ -237,32 +239,32 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
             fields: data,
             values: initialValues
           });
-       })
-     } else {
-       setInitialData({
-         fields: data,
-         values: initialValues
-       });
-     }
+        })
+      } else {
+        setInitialData({
+          fields: data,
+          values: initialValues
+        });
+      }
     }
     EvaluteproductFields(data);
   }
 
   useEffect(() => {
-    if(ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
-      const {setErrors, setTouched} = ref.current
-      let errors:any = {}
-      let touched:any = {}
-      initialData.fields.forEach(({fieldName, required, fieldLabel}) => {
-        
-        if(required && !initialData.values[fieldName]) {
+    if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
+      const { setErrors, setTouched } = ref.current
+      let errors: any = {}
+      let touched: any = {}
+      initialData.fields.forEach(({ fieldName, required, fieldLabel }) => {
+
+        if (required && !initialData.values[fieldName]) {
           errors[fieldName] = fieldLabel + " is a required field"
           touched[fieldName] = true
         }
       })
       setErrors(errors)
       setTouched(touched)
-      
+
     }
 
   }, [initialData, ref.current, isInlineEdit])
@@ -584,7 +586,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                         const value = val && val.optionValue ? val.optionValue : '';
                                         if (field.fieldName === "pricingCondition") {
                                           setFieldValue("pricingMethod", "");
-                                          setPriceMethodList(priceConditionListConst.filter(d => d.conditionId === value).map(d => {
+                                          setPriceMethodList(priceConditionListConst?.filter(d => d.conditionId === value).map(d => {
                                             return {
                                               "optionLabel": d?.pricingMethod,
                                               "optionValue": d?.pricingMethod

@@ -27,7 +27,7 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnly = false, allowedToEdit, versionId, allColumn, columns,
-  setShowAllVersionStatus, setShowQuotationSummaryDialog, currentVersion, hideSummary = false }) => {
+  setShowAllVersionStatus, setShowQuotationSummaryDialog, currentVersion, hideSummary = false, hideVersions = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -207,19 +207,20 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
               >
                 Summary
               </Button>}
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              size="small"
-              className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
-              onClick={() => {
-                setShowAllVersionStatus(true);
-              }}
-              style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-              startIcon={isMobile && !isTablet ? null : <VscVersions />}
-            >
-              {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-            </Button>
+            {!hideVersions &&
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                size="small"
+                className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+                onClick={() => {
+                  setShowAllVersionStatus(true);
+                }}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+              >
+                {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+              </Button>}
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="primary"

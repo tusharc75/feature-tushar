@@ -44,7 +44,7 @@ function Parts({ id }) {
     if (id) {
       fetchBOMData();
     }
-  }, [id, page, limit, filters, sorting, selectedEntity]);
+  }, [id, page, limit, search, filters, sorting, selectedEntity]);
 
   useEffect(() => {
     fetchGridColumns()

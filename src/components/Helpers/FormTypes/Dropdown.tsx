@@ -47,8 +47,8 @@ function Dropdown({
                                 {...rest}
                                 disabled={fieldData?.isUneditable || rest?.disabled}
                                 options={(fieldData && fieldData?.isDependentDropdown) ?
-                                    option.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn]) :
-                                    option.filter(f => f.optionLabel)}
+                                    option?.filter((_f) => _f[fieldData?.dropdowDependentOn] === values[fieldData?.dropdowDependentOn]) :
+                                    option?.filter(f => f?.optionLabel)}
                                 freeSolo={type === 'dropDown' && !lookup}
                                 getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                                 getOptionSelected={(option: any, val) => option.optionValue === val}
