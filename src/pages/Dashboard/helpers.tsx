@@ -12,6 +12,7 @@ export const groupByKey = (arr = [], keyGetter) => {
   }, Object.create(null));
   return result;
 };
+
 // CREATE LIST FROM OBJECT SEPATATED BY KEY SECTIONNAME AND ASSGIN ICON, DESCRIPTOIN, AND COLOR
 export const assignIconAndText = (groupedData) => {
   let dataList = [];
