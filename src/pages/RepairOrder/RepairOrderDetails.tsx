@@ -113,6 +113,7 @@ const RepairOrderDetails = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= repairOrderProcessSteps.length) {
+      fetchQuotationData();
       updateProcessStatus(repairOrderProcessSteps[currentStep]);
     }
     if (['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep])) fetchQuotationData();
