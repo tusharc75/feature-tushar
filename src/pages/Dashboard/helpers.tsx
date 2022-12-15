@@ -16,7 +16,6 @@ export const groupByKey = (arr = [], keyGetter) => {
 // CREATE LIST FROM OBJECT SEPATATED BY KEY SECTIONNAME AND ASSGIN ICON, DESCRIPTOIN, AND COLOR
 export const assignIconAndText = (groupedData) => {
   let dataList = [];
-  console.log(groupedData);
   for (const [key, values] of Object.entries(groupedData)) {
     if (key !== '') {
       let obj: any = { ...setDataBySectionName(key) };
