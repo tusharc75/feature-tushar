@@ -333,13 +333,13 @@ const Quotation = ({
       `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
     );
     const additionalCost = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
-    console.log(additionalCost, 'additionalCost');
     const additionalCostData = additionalCost?.data?.data?.map((e) => {
       const detail = e?.description;
       return {
         ...e,
         type: e?.costType,
-        detail: detail
+        detail: detail,
+        parentId: null
       };
     });
     data = response?.data?.data;
