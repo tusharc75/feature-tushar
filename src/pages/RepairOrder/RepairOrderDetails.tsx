@@ -180,17 +180,19 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
-      .get(`${repairOrder.api}/${repairOrderData?._id}/repairorder/quotation`)
+      .get(`${repairOrder.api}/${id}/check/quotation`)
       .then(({ data: { data } }) => {
-        let keys = Object.keys(data?.versions);
-        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1]);
-        setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
+        if (data) {
+          let keys = Object.keys(data?.versions);
+          let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1]);
+          setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
+        }
       });
   };
 
@@ -474,7 +476,7 @@ const RepairOrderDetails = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>

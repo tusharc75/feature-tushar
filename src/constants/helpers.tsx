@@ -202,6 +202,7 @@ export const sidebarResource = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
+  workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician'
 };
 
@@ -272,6 +273,7 @@ export const resourceNames = {
   quotation: 'Quotation',
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
+  workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician'
 };
 
