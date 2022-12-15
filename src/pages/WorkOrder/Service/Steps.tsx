@@ -193,7 +193,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
-  const [openFieldDialog, setOpenFieldDialog] = useState(false);
   const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
   const {
     state: {
@@ -207,39 +206,37 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
 
   useEffect(() => {
     if (addServiceConfirmation.open) return;
-    axiosInstance()
-      .get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`)
-      .then(({ data: { data } }) => {
-        setServiceDetails(data);
-        const steps = data?.steps?.map((d) => d.stepName);
-        setStepList(steps);
-        const completedSteps = serviceData.filter(
-          (d) =>
-            d.uniqueId === selectedService?.uniqueId &&
-            d.serviceId === selectedService._id &&
-            [
-              WORKORDER_SERVICE_STEP_STATUS.passed,
-              WORKORDER_SERVICE_STEP_STATUS.completed,
-              WORKORDER_SERVICE_STEP_STATUS.failed,
-              WORKORDER_SERVICE_STEP_STATUS.skipped,
-              WORKORDER_SERVICE_STEP_STATUS.end
-            ].includes(d?.passFailStatus)
-        );
+    axiosInstance().get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`).then(({ data: { data } }) => {
+      
+      setServiceDetails(data);
+      const steps = data?.steps?.map((d) => d.stepName);
+      setStepList(steps);
 
-        const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
-        setDisableCompleteFail(!allStepsDone);
+      const completedSteps = serviceData.filter((d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id &&
+        [
+          WORKORDER_SERVICE_STEP_STATUS.passed,
+          WORKORDER_SERVICE_STEP_STATUS.completed,
+          WORKORDER_SERVICE_STEP_STATUS.failed,
+          WORKORDER_SERVICE_STEP_STATUS.skipped,
+          WORKORDER_SERVICE_STEP_STATUS.end
+        ].includes(d?.passFailStatus)
+      );
 
-        if (inSteps && allStepsDone && selectedService.status === WORKORDER_SERVICE_STATUS.inProgress) {
-          let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id);
-          if (isMeTechnician) {
-            updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
-          } else {
-            setOpenCompleteDialog(true);
-          }
+      const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
 
-          setInSteps(false);
-        }
-      })
+      setDisableCompleteFail(!allStepsDone);
+
+      if (inSteps && allStepsDone && selectedService.status === WORKORDER_SERVICE_STATUS.inProgress) {
+        //let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id);
+        // if (isMeTechnician) {
+        //   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
+        // } else {
+        //   setOpenCompleteDialog(true);
+        // }
+        setOpenCompleteDialog(true);
+        setInSteps(false);
+      }
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -564,7 +561,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
               isMeTechnician = true;
             }
             startIdx = step?.order || 0;
-            console.log(step)
             return (
               <Box
                 key={step._id}
@@ -672,7 +668,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                           </Box>
                         )
                       ) : null}
-                      {(stepData?.status && step?.fields?.length) ? (
+                      {(stepData?.status && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) && step?.fields?.length) ? (
                         <>
                           <Box marginX={1} />
                           <Box>
