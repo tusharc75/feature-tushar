@@ -18,7 +18,7 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
-import { calculatePrice, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { object, number } from 'yup';
 
@@ -216,7 +216,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           element.option = pricingMethodOptions;
         }
         if (element.fieldName === "pricingCondition") {
-          element.option = pricingConditionOptions;
+          if (Array.isArray(pricingConditionOptions)) {
+            element.option = pricingConditionOptions;
+          }
         }
         // if (element.fieldName === "qty" && rowData?.serializedProduct === false && rowData?.hideSelection) {
         //   element.isUneditable = true;
@@ -237,32 +239,32 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
             fields: data,
             values: initialValues
           });
-       })
-     } else {
-       setInitialData({
-         fields: data,
-         values: initialValues
-       });
-     }
+        })
+      } else {
+        setInitialData({
+          fields: data,
+          values: initialValues
+        });
+      }
     }
     EvaluteproductFields(data);
   }
 
   useEffect(() => {
-    if(ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
-      const {setErrors, setTouched} = ref.current
-      let errors:any = {}
-      let touched:any = {}
-      initialData.fields.forEach(({fieldName, required, fieldLabel}) => {
-        
-        if(required && !initialData.values[fieldName]) {
+    if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
+      const { setErrors, setTouched } = ref.current
+      let errors: any = {}
+      let touched: any = {}
+      initialData.fields.forEach(({ fieldName, required, fieldLabel }) => {
+
+        if (required && !initialData.values[fieldName]) {
           errors[fieldName] = fieldLabel + " is a required field"
           touched[fieldName] = true
         }
       })
       setErrors(errors)
       setTouched(touched)
-      
+
     }
 
   }, [initialData, ref.current, isInlineEdit])
@@ -372,6 +374,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           rows = [...rows, ...packages]
         })
       }
+
+      console.log(rows)
       handleSaveData(rows)
     }
     else {
@@ -379,27 +383,31 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         setShowConfirmationDialog(true);
       }
       else {
-        let rows: any = [{ ...rowData, ...values }]
-        if (rowData.type === "package") {
-          const product = material.filter((e) => e.parentId === rowData._id)
-          resetValueZero(product, allFields)
-          rows = [...rows, ...product]
-        }
-        else if (rowData.type === "product" && rowData.parentId) {
-          if (values[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
-            const packages: any = material.filter((e) => e._id === rowData.parentId)
-            const product: any = material.filter((e) => e.parentId === rowData.parentId)
-            product.forEach((element) => {
-              if (element._id === rowData._id) {
-                for (var key in values) {
-                  element[key] = values[key];
-                }
-              }
-            })
-            sumOnParent(packages, product, allFields, currency)
-            rows = [...rows, ...packages]
-          }
-        }
+        // rowData: any = { ...rowData, ...values }
+        // if (rowData.type === "package") {
+        //   const product = material.filter((e) => e.parentId === rowData._id)
+        //   resetValueZero(product, allFields)
+        //   rows = [...rows, ...product]
+        // }
+        // else if (rowData.type === "product" && rowData.parentId) {
+        //   if (values[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
+        //     const packages: any = material.filter((e) => e._id === rowData.parentId)
+        //     const product: any = material.filter((e) => e.parentId === rowData.parentId)
+        //     product.forEach((element) => {
+        //       if (element._id === rowData._id) {
+        //         for (var key in values) {
+        //           element[key] = values[key];
+        //         }
+        //       }
+        //     })
+            
+        //     sumOnParent(packages, product, allFields, currency)
+        //     rows = [...rows, ...packages]
+        //   }
+        // }
+        
+        // console.log(rows, material, values)
+        const rows = await calculateRowsField(material, values, allFields, rowData)
         handleSaveData(rows)
         setShowConfirmationDialog(false);
       }
@@ -578,7 +586,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
                                         const value = val && val.optionValue ? val.optionValue : '';
                                         if (field.fieldName === "pricingCondition") {
                                           setFieldValue("pricingMethod", "");
-                                          setPriceMethodList(priceConditionListConst.filter(d => d.conditionId === value).map(d => {
+                                          setPriceMethodList(priceConditionListConst?.filter(d => d.conditionId === value).map(d => {
                                             return {
                                               "optionLabel": d?.pricingMethod,
                                               "optionValue": d?.pricingMethod

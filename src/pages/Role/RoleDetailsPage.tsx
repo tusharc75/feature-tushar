@@ -43,6 +43,7 @@ import { startCase, camelCase } from 'lodash';
 import { RiNurseFill } from 'react-icons/ri';
 import PolicyResources from './PolicyResources';
 import DashboardResources from './DashboardResources';
+import DefaultResources from './DefaultResources';
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -75,6 +76,7 @@ const RoleDetailsPage = () => {
   const showRecordsBeforeViewAll = 2;
   const [showUsers, setShowUsers] = useState(showRecordsBeforeViewAll);
   const [entityAccess, setEntityAccess] = useState([]);
+  const [resourceOption, setResourceOption] = useState([]);
 
   const [open, setOpen] = useState({
     rentalManagement: false,
@@ -103,6 +105,7 @@ const RoleDetailsPage = () => {
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false);
   const [dashBoardOption, setDashBoardOption] = useState([]);
   const [dashboardName, setDashboardName] = useState([]);
+  const [defaultResourceName, setDefaultResourceName] = useState([]);
 
   const policyResources = [
     {
@@ -275,6 +278,12 @@ const RoleDetailsPage = () => {
         SetPolicyFieldCheckBox((prevState) => ({ ...prevState, ...copyOfResourcePolicy }));
         handlePolicyResourceCheckBox(copyOfResourcePolicy);
       }
+      let copyOfDashBoardOption =
+        data?.resource?.map((obj) => {
+          return obj?.resourceLabel;
+        }) || [];
+      setResourceOption([...copyOfDashBoardOption]);
+      setDefaultResourceName(data?.defaultResource || '');
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -334,7 +343,8 @@ const RoleDetailsPage = () => {
         resource,
         type: roleData.type,
         policy: policyFieldCheckBox,
-        dashBoards: dashBoardIds
+        dashBoards: dashBoardIds,
+        defaultResource: defaultResourceName
       })
       .then(({ data }) => {
         fetchRoleData();
@@ -575,6 +585,7 @@ const RoleDetailsPage = () => {
                       {dashBoardOption?.length > 0 && (
                         <DashboardResources dashboardList={dashBoardOption} dashboardName={dashboardName} setDashboardName={setDashboardName} />
                       )}
+                      <DefaultResources resourceList={resourceOption} resourceName={defaultResourceName} setResourceName={setDefaultResourceName} />
                     </>
                   )
                 )}
