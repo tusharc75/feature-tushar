@@ -81,6 +81,8 @@ const RepairOrderDetails = () => {
 
   const [quoteClonning, setQuoteClonning] = useState(false);
 
+  const [isAnyMaterial, setIsAnyMaterial] = useState(false);
+
   useEffect(() => {
     return history.listen((location) => {
       const { tab }: any = queryString.parse(history.location.search);
@@ -133,6 +135,9 @@ const RepairOrderDetails = () => {
     axiosInstance()
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
+        if (data?.materialLen) {
+          setIsAnyMaterial(true);
+        }
         setCurrentStep(repairOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? repairOrderProcessSteps.indexOf(data?.processStatus) : 0);
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
@@ -237,7 +242,7 @@ const RepairOrderDetails = () => {
       setActivityShow(false);
     }
   }, [isSmallScreen, tabValue]);
-  console.log(repairOrderData);
+
   return (
     <>
       <Grid container className="headerbox">
@@ -517,6 +522,7 @@ const RepairOrderDetails = () => {
       )}
       {openUpdateDialog && (
         <ManageRepairOrder
+          isAnyMaterial={isAnyMaterial}
           isEditable={!hasAssetsAdded}
           isClone={false}
           repairOrderId={id}
