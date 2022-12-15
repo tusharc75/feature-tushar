@@ -3,7 +3,7 @@ import { SVGImages, IMAGE_WIDTH, IMAGE_HEIGHT, IconConst } from '../../assets/da
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
 export const groupByKey = (arr = [], keyGetter) => {
-  arr = arr.filter((item) => item.isRead && !item.isHidden && item.isRead && !item.isHidden);
+  arr = arr.filter((item) => item.isRead && !item.isHidden);
   let result = [];
   result = arr.reduce((r, a) => {
     r[keyGetter(a)] = r[keyGetter(a)] || [];
@@ -16,7 +16,6 @@ export const groupByKey = (arr = [], keyGetter) => {
 // CREATE LIST FROM OBJECT SEPATATED BY KEY SECTIONNAME AND ASSGIN ICON, DESCRIPTOIN, AND COLOR
 export const assignIconAndText = (groupedData) => {
   let dataList = [];
-  console.log(groupedData);
   for (const [key, values] of Object.entries(groupedData)) {
     if (key !== '') {
       let obj: any = { ...setDataBySectionName(key) };
