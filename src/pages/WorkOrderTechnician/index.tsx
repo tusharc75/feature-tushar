@@ -25,7 +25,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import SettingsIcon from '@material-ui/icons/Settings';
+import FilterListIcon from '@material-ui/icons/FilterList';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import React from 'react';
 
@@ -258,7 +258,7 @@ const WorkOrderTechnician = () => {
               <Box className={classes.activityContainer} display={'flex'}>
                 <Box>
                   <IconButton size="small" onClick={() => setServicesShowDialog(!servicesShowDialog)}>
-                    <SettingsIcon />
+                    <FilterListIcon />
                   </IconButton>
                 </Box>
                 <Box ml={1} />
