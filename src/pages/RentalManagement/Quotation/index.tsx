@@ -106,7 +106,7 @@ const Quotation = ({
       setNextStep(true);
     }
   }, [quotationData?.versions[currentVersion]?._id]);
-
+  const additionalCost = ['service', 'product', 'package', 'asset'];
   const fetchFields = async (currency) => {
     // setNextStep(false)
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
@@ -136,12 +136,12 @@ const Quotation = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -161,22 +161,24 @@ const Quotation = ({
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </span>
             </Box>
-            <IconButton
-              size="small"
-              onClick={() => {
-                if (row.original.type === 'service') {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'product') {
-                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'asset') {
-                  window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                } else {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                }
-              }}
-            >
-              <OpenInNewIcon fontSize="small" color="primary" />
-            </IconButton>
+            {additionalCost.includes(row.original.type) && (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else if (row.original.type === 'package') {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            )}
           </div>
         )
       },
@@ -289,22 +291,23 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
           ? _subRow?.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === 'service'
-              ? _subRow?.serviceDetail?.serviceName
-              : _subRow?.packageDetail?.packageName
-        }`;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -329,28 +332,42 @@ const Quotation = ({
     const response = await axiosInstance().get(
       `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
     );
+    const additionalCost = await axiosInstance().get(`${quotation.api}/service/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
+    console.log(additionalCost, 'additionalCost');
+    const additionalCostData = additionalCost?.data?.data?.map((e) => {
+      const detail = e?.description;
+      return {
+        ...e,
+        type: e?.costType,
+        detail: detail
+      };
+    });
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
-    const rows = data.material.filter((e) => e.parentId === null);
+    const rowsMaterial = data.material.filter((e) => e.parentId === null);
+    const rows = [...rowsMaterial, ...additionalCostData];
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'service'
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
-        }`;
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.type === 'package'
+          ? parent.packageDetail?.packageName
+          : parent.detail
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent?.description;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -505,7 +522,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)
@@ -702,10 +719,10 @@ const Quotation = ({
             fetchQuotationData(currentVersion);
           }}
           setNextStep={(type: string) => {
-            if (type && type.includes("Rejectd")) {
-              setNextStep(false)
+            if (type && type.includes('Rejectd')) {
+              setNextStep(false);
             } else {
-              setNextStep(true)
+              setNextStep(true);
             }
           }}
           updateStatus={() => {
