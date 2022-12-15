@@ -272,7 +272,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     data = response?.data?.data;
     let materialDataConst: any = []
     data?.material?.forEach(element => {
-      if (element?.productDetail?.serializedProduct === true) {
+      if (element?.productDetail?.serializedProduct === true && (element?.parentId === null || element?.parentId === undefined)) {
         data?.inventory?.filter(d => d.product === element?.materialId)?.forEach((ele: any) => {
           ele.type = 'asset';
           ele.qty = 1;
