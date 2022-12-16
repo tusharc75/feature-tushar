@@ -232,7 +232,7 @@ const WorkOrder = ({
             (row?.original?.type === 'service' || (row?.original?.type === 'package' && row?.original?.packageDetail?.packageType === 'Service')) && (
               <>
                 <IconButton
-                  disabled={row?.original?.status === 'Pending' && allowedToDelete ? false : true}
+                  disabled={row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete ? false : true}
                   size="small"
                   aria-label="Details"
                   onClick={() => {
@@ -240,7 +240,7 @@ const WorkOrder = ({
                     setShowConfirmBox(true);
                   }}
                 >
-                  <Delete fontSize="small" color={row?.original?.status === 'Pending' && allowedToDelete ? 'error' : 'disabled'} />
+                  <Delete fontSize="small" color={row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete ? 'error' : 'disabled'} />
                 </IconButton>
               </>
             )
@@ -433,9 +433,9 @@ const WorkOrder = ({
   };
 
   const setPreWorkStatus = (data) => {
-      const preServiceStarted = data?.filter((obj) => obj?.type === 'service' && obj.serviceDetail.preWork && obj.status === WORKORDER_SERVICE_STATUS.inProgress);
-      if(preServiceStarted.length > 0 && updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.preWork) {
-        updateOrderStatus(REPAIR_ORDER_STATUS.preWork);
+    const preServiceStarted = data?.filter((obj) => obj?.type === 'service' && obj.serviceDetail.preWork && obj.status === WORKORDER_SERVICE_STATUS.inProgress);
+    if (preServiceStarted.length > 0 && updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.preWork) {
+      updateOrderStatus(REPAIR_ORDER_STATUS.preWork);
     }
   }
 
@@ -519,7 +519,9 @@ const WorkOrder = ({
                     setShowConfirmBox(true);
                     closeActions();
                   }}
-                  disabled={services?.length && services?.every((d) => d.type === 'service' && d.workOrder?._id === services[0].workOrder?._id) ? false : true}
+                  disabled={services?.length &&
+                    services?.filter((d) => d.type === 'service'
+                      && d.workOrder?._id === services[0].workOrder?._id && d.status === WORKORDER_SERVICE_STATUS.pending)?.length === services?.length ? false : true}
                 >
                   Delete
                 </MenuItem>
