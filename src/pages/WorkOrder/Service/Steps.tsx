@@ -180,6 +180,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '' }) => {
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -194,11 +195,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
   const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
+  const { state: { user: { user } } } = useData();
 
   useEffect(() => {
     getServiceData();
@@ -206,37 +203,41 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
 
   useEffect(() => {
     if (addServiceConfirmation.open) return;
-    axiosInstance().get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`).then(({ data: { data } }) => {
+    axiosInstance()
+      .get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`)
+      .then(({ data: { data } }) => {
+        setServiceDetails(data);
+        const steps = data?.steps?.map((d) => d.stepName);
+        setStepList(steps);
 
-      setServiceDetails(data);
-      const steps = data?.steps?.map((d) => d.stepName);
-      setStepList(steps);
+        const completedSteps = serviceData.filter(
+          (d) =>
+            d.uniqueId === selectedService?.uniqueId &&
+            d.serviceId === selectedService._id &&
+            [
+              WORKORDER_SERVICE_STEP_STATUS.passed,
+              WORKORDER_SERVICE_STEP_STATUS.completed,
+              WORKORDER_SERVICE_STEP_STATUS.failed,
+              WORKORDER_SERVICE_STEP_STATUS.skipped,
+              WORKORDER_SERVICE_STEP_STATUS.end
+            ].includes(d?.passFailStatus)
+        );
 
-      const completedSteps = serviceData.filter((d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id &&
-        [
-          WORKORDER_SERVICE_STEP_STATUS.passed,
-          WORKORDER_SERVICE_STEP_STATUS.completed,
-          WORKORDER_SERVICE_STEP_STATUS.failed,
-          WORKORDER_SERVICE_STEP_STATUS.skipped,
-          WORKORDER_SERVICE_STEP_STATUS.end
-        ].includes(d?.passFailStatus)
-      );
+        const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
 
-      const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
+        setDisableCompleteFail(!allStepsDone);
 
-      setDisableCompleteFail(!allStepsDone);
-
-      if (inSteps && allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)) {
-        //let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id);
-        // if (isMeTechnician) {
-        //   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
-        // } else {
-        //   setOpenCompleteDialog(true);
-        // }
-        setOpenCompleteDialog(true);
-        setInSteps(false);
-      }
-    })
+        if (inSteps && allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)) {
+          //let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id);
+          // if (isMeTechnician) {
+          //   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
+          // } else {
+          //   setOpenCompleteDialog(true);
+          // }
+          setOpenCompleteDialog(true);
+          setInSteps(false);
+        }
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -316,11 +317,8 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const getFields = (step) => {
     let stepData = null;
     let fieldData = { fields: [], formsData: [], values: {} };
-
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
-    let tempServiceData = serviceData.find(
-      (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === step?._id
-    );
+    let tempServiceData = serviceData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
 
     if (tempServiceData) {
       stepData = tempServiceData;
@@ -536,15 +534,12 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   let startIdx = 0;
   return stepList ? (
     stepList?.length ? (
-      <Box
-        className={classes.mainContainer}
-        sx={{ position: 'relative', overflow: 'hidden' }}
-        style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}
-      >
+      <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}>
         <div className={classes.root}>
           {serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)?.map((step, index) => {
             const { stepData, isStepValid } = getFields(step);
             let isPrevStepDone: any = false;
+            let isAnyTechnician = selectedService?.assignedUsers?.length ? true : false;
             let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
             let isSameStartStep = false;
             if (index > 0) {
@@ -563,7 +558,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             startIdx = step?.order || 0;
             return (
               <Box
-                key={step._id}
+                key={`${step._id}_${selectedService?.uniqueId}}`}
                 border={1}
                 borderColor={'grey.300'}
                 style={{
@@ -578,122 +573,125 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                   } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
                   : classes.white
                   }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!stepData?.status) return;
-                  setSelectedStep(step);
-                  setStepState(stepData);
-                }}
-              >
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
-                  <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px' }}>
-                    <Box>
-                      <Chip
-                        color="primary"
-                        label={
-                          referencType === 'workOrderTechnician'
-                            ? index + 1
-                            : `${serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}.${index + 1}`
-                        }
-                      />
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!stepData?.status) return;
+                    setSelectedStep(step);
+                    setStepState(stepData);
+                  }}
+                >
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', marginLeft: '-10px', marginTop: '-10px' }}>
+                    <Box sx={{ display: 'flex', paddingLeft: '10px', paddingTop: '10px' }}>
+                      <Box>
+                        <Chip
+                          color="primary"
+                          label={
+                            referencType === 'workOrderTechnician'
+                              ? index + 1
+                              : `${serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}.${index + 1}`
+                          }
+                        />
+                      </Box>
+                      <Box ml={1}>
+                        <Typography className={classes.heading} style={{ fontWeight: '600' }}>
+                          {step.stepName}
+                        </Typography>
+                      </Box>
                     </Box>
-                    <Box ml={1}>
-                      <Typography className={classes.heading} style={{ fontWeight: '600' }}>
-                        {step.stepName}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  {(isSameStartStep || isPrevStepDone || index === 0) && (
-                    <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
-                      {stepData?.startDate && !stepData?.endDate && <TimerComponent stepData={stepData} />}
-                      {stepData?.startDate && stepData?.endDate && <TimerComponent stepData={stepData} updateTime={false} />}
-                      {!stepData?.startDate && isMeTechnician ? (
-                        <Box>
-                          <Button
-                            variant="outlined"
-                            color="secondary"
-                            size="small"
-                            disabled={!allowedToEdit}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
-                                updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
-                              }
-                              handleStartEnd('start', step._id);
-                            }}
-                          >
-                            Start
-                          </Button>
-                        </Box>
-                      ) : stepData?.passFailStatus ? (
-                        <Box ml={1}>
-                          <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
-                        </Box>
-                      ) : stepData?.status === 'start' && isStepValid && isMeTechnician ? (
-                        step?.isPassFail ? (
-                          <Box display="inline-flex">
-                            <Button
-                              variant="outlined"
-                              color="secondary"
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step._id);
-                              }}
-                            >
-                              Pass
-                            </Button>
-                            <Box marginX={1} />
-                            <DeleteButton
-                              text="Fail"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id);
-                              }}
-                            />
-                          </Box>
-                        ) : (
-                          <Box display="inline-flex">
-                            <Button
-                              variant="outlined"
-                              color="secondary"
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step._id);
-                              }}
-                            >
-                              Complete
-                            </Button>
-                          </Box>
-                        )
-                      ) : null}
-                      {(stepData?.status && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) && step?.fields?.length && isMeTechnician) ? (
-                        <>
-                          <Box marginX={1} />
+                    {(isSameStartStep || isPrevStepDone || index === 0) && (
+                      <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
+                        {stepData?.startDate && !stepData?.endDate && <TimerComponent stepData={stepData} />}
+                        {stepData?.startDate && stepData?.endDate && <TimerComponent stepData={stepData} updateTime={false} />}
+                        {!stepData?.startDate && (isMeTechnician || !isAnyTechnician) ? (
                           <Box>
                             <Button
                               variant="outlined"
-                              color="inherit"
+                              color="secondary"
                               size="small"
                               disabled={!allowedToEdit}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedStep(step);
-                                setStepState(stepData);
+                                if (selectedService.status === WORKORDER_SERVICE_STATUS.pending) {
+                                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.inProgress);
+                                }
+                                handleStartEnd('start', step._id);
                               }}
                             >
-                              Enter Value
+                              Start
                             </Button>
                           </Box>
-                        </>
-                      ) : null}
-                    </Box>
-                  )}
+                        ) : stepData?.passFailStatus ? (
+                          <Box ml={1}>
+                            <Chip label={stepData?.passFailStatus} variant="outlined" color="primary" />
+                          </Box>
+                        ) : stepData?.status === 'start' && isStepValid && (isMeTechnician || !isAnyTechnician) ? (
+                          step?.isPassFail ? (
+                            <Box display="inline-flex">
+                              <Button
+                                variant="outlined"
+                                color="secondary"
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step._id);
+                                }}
+                              >
+                                Pass
+                              </Button>
+                              <Box marginX={1} />
+                              <DeleteButton
+                                text="Fail"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id);
+                                }}
+                              />
+                            </Box>
+                          ) : (
+                            <Box display="inline-flex">
+                              <Button
+                                variant="outlined"
+                                color="secondary"
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step._id);
+                                }}
+                              >
+                                Complete
+                              </Button>
+                            </Box>
+                          )
+                        ) : null}
+                        {stepData?.status &&
+                        ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                        step?.fields?.length &&
+                        (isMeTechnician || !isAnyTechnician) ? (
+                          <>
+                            <Box marginX={1} />
+                            <Box>
+                              <Button
+                                variant="outlined"
+                                color="inherit"
+                                size="small"
+                                disabled={!allowedToEdit}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedStep(step);
+                                  setStepState(stepData);
+                                }}
+                              >
+                                Enter Value
+                              </Button>
+                            </Box>
+                          </>
+                        ) : null}
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            );
-          })}
+              );
+            })}
         </div>
         <StepFieldsDialog
           isOpen={Boolean(selectedStep)}
@@ -727,15 +725,15 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
                 ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
-                  ?.map((e) => e.serviceName)
-                  ?.toString()}. Do you want to continue ?`
+                    ?.map((e) => e.serviceName)
+                    ?.toString()}. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                  ? ` Step fail requires Quote Revision. Do you confirm on this?`
-                  : addServiceConfirmation.type === 'jumpStep'
-                    ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                      ?.map((e) => e.serviceName)
-                      ?.toString()} has been added. Do you want to Add ? `
+                ? ` Step fail requires Quote Revision. Do you confirm on this?`
+                : addServiceConfirmation.type === 'jumpStep'
+                ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
+                : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
+                    ?.map((e) => e.serviceName)
+                    ?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });

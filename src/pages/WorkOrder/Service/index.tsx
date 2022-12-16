@@ -95,6 +95,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const [bottomBarOpen, setBottomBarOpen] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
   const [isQuotationStep, setIsQuotationStep] = useState(false);
+  const [repairOrderData, setRepairOrderData] = useState({ repairOrderId: "", type: "" });
 
   useEffect(() => {
     fetchRepairOrderData();
@@ -109,24 +110,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           axiosInstance()
             .get(`${repairOrder.api}/${tempRepairOrderId}`)
             .then(({ data: { data } }) => {
-              if (data.type !== REPAIR_ORDER_TYPE.internal) {
+              setRepairOrderData({ repairOrderId: tempRepairOrderId, type: data.type })
+              if (data.type === REPAIR_ORDER_TYPE.external) {
                 setIsQuotationStep(true);
-                axiosInstance()
-                  .get(`${repairOrder.api}/${tempRepairOrderId}/check/quotation`)
-                  .then(({ data: { data } }) => {
-                    if (data) {
-                      let keys = Object.keys(data?.versions);
-                      if (keys?.length) {
-                        const version = data.versions[parseInt(keys[keys.length - 1])];
-                        setQuotationData({
-                          _id: data?._id,
-                          versionId: version?._id,
-                          quotationNumber: data?.quotationNumber,
-                          status: version?.status
-                        });
-                      }
-                    }
-                  });
+                fetchQuotationData(tempRepairOrderId)
                 fetchService(true);
               } else {
                 fetchService(false);
@@ -141,15 +128,32 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       });
   };
 
+  const fetchQuotationData = (id) => {
+    axiosInstance()
+      .get(`${repairOrder.api}/${id}/check/quotation`)
+      .then(({ data: { data } }) => {
+        if (data) {
+          let keys = Object.keys(data?.versions);
+          if (keys?.length) {
+            const version = data.versions[parseInt(keys[keys.length - 1])];
+            setQuotationData({
+              _id: data?._id,
+              versionId: version?._id,
+              quotationNumber: data?.quotationNumber,
+              status: version?.status
+            });
+          }
+        }
+      });
+  }
+
   const fetchService = (isQuote: any = isQuotationStep) => {
     getServiceData();
     axiosInstance()
       .get(`${routes.workOrder.path}/service/${workOrderId}`)
       .then(({ data: { data } }) => {
         if (data?.length) {
-          data?.forEach((e) => {
-            e.type = 'service';
-          });
+          data?.forEach((e) => { e.type = 'service' });
           const preWorkService = data?.filter((e) => e.preWork);
           const postWorkService = data?.filter((e) => !e.preWork);
           const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
@@ -185,6 +189,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           }
         } else {
           setServiceSteps([]);
+        }
+        if (repairOrderData.type === REPAIR_ORDER_TYPE.external) {
+          fetchQuotationData(repairOrderData.repairOrderId)
         }
       })
       .catch((err) => {
@@ -363,7 +370,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         opacity: '.5'
       };
     }
-    if (selectedService?._id == data?._id) {
+    if (selectedService?.uniqueId == data?.uniqueId) {
       return {
         borderColor: '#329592',
         borderWidth: '1px',
@@ -414,8 +421,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   };
 
   const getFieldsWithOtherDetails = (step: any, serviceData) => {
-    const id = step?._id;
-    const steps = serviceData?.filter((item: any) => item.serviceId === id);
+    const steps = serviceData?.filter((item: any) => item?.uniqueId === step?.uniqueId);
     const stepTimes = [];
     steps.forEach((item) => {
       let obj: any = {};
@@ -423,7 +429,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
       obj.endTime = item?.endDate ? new Date(item?.endDate).getTime() : null;
       stepTimes.push(obj);
     });
-
     return stepTimes;
   };
 
@@ -899,8 +904,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
             {selectedService && (
               <Box>
                 {selectedService?.type === 'service' ? (
-                  allowedToEdit ||
-                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                  allowedToEdit || (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                     <Steps
                       workOrderId={workOrderId}
                       selectedService={selectedService}
@@ -1039,7 +1043,7 @@ interface stepTimesInterface {
   endTime?: number | null;
 }
 // RETURN TOTAL TIME IN MS AND SHOULD TIME UPDATE, TAKES LIST OF STARTTIME AND END TIME LIST
-const getToalTime = (stepTimes: stepTimesInterface[]) => {
+const getTotalTime = (stepTimes: stepTimesInterface[]) => {
   let totalTimes = 0;
   let shouldTimerRun = stepTimes.filter((item) => item.startTime && item.endTime).length !== stepTimes.length;
   stepTimes.forEach((item) => {
@@ -1055,7 +1059,7 @@ const RenderTotalTime = ({ stepTimes }: totalTimeInterface) => {
   const [time, setTime] = useState(null);
 
   useEffect(() => {
-    const { shouldTimerRun, totalTimes } = getToalTime(stepTimes);
+    const { shouldTimerRun, totalTimes } = getTotalTime(stepTimes);
     let interval;
     if (shouldTimerRun) {
       let currentDifference = totalTimes;
