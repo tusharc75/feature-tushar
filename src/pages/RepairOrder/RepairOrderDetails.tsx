@@ -75,12 +75,9 @@ const RepairOrderDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [repairOrderProcessSteps, setRepairOrderProcessSteps] = useState(repairOrderSteps);
-
   const [quotationVersionData, setQuotationVersionData] = useState(null);
   const [showQuotationConfirmBox, setShowQuotationConfirmBox] = useState(false);
-
   const [quoteClonning, setQuoteClonning] = useState(false);
-
   const [isAnyMaterial, setIsAnyMaterial] = useState(false);
 
   useEffect(() => {
@@ -115,6 +112,7 @@ const RepairOrderDetails = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= repairOrderProcessSteps.length) {
+      fetchQuotationData();
       updateProcessStatus(repairOrderProcessSteps[currentStep]);
     }
     if (['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep])) fetchQuotationData();
@@ -135,7 +133,7 @@ const RepairOrderDetails = () => {
     axiosInstance()
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        if (data?.materialLen) {
+        if (data?.material?.length) {
           setIsAnyMaterial(true);
         }
         setCurrentStep(repairOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? repairOrderProcessSteps.indexOf(data?.processStatus) : 0);
@@ -182,17 +180,19 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
-      .get(`${repairOrder.api}/${repairOrderData?._id}/repairorder/quotation`)
+      .get(`${repairOrder.api}/${id}/check/quotation`)
       .then(({ data: { data } }) => {
-        let keys = Object.keys(data?.versions);
-        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1]);
-        setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
+        if (data) {
+          let keys = Object.keys(data?.versions);
+          let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1]);
+          setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
+        }
       });
   };
 
@@ -476,7 +476,7 @@ const RepairOrderDetails = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>

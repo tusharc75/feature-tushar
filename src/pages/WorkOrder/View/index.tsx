@@ -91,7 +91,7 @@ const WorkOrderViews = (props) => {
       const allServices = workOrderServices?.data?.data || [];
       const allSteps = [];
       if (allServices?.length) xPosition += 300;
-      // let serviceStepIdx = 0;
+      let serviceStepIdx = 0;
       allServices?.map((s, sIdx) => {
         allSteps.push(...(s?.steps || []));
         // all assigned users should output as a single string
@@ -109,7 +109,7 @@ const WorkOrderViews = (props) => {
                 arrow
                 placement="top"
                 title={`${allAssignUsers !== '' ? `Technician: ${allAssignUsers}` : 'Service'}${
-                  s?.overAllStepStatus ? `, Status: ${s?.overAllStepStatus}` : ''
+                  s?.serviceStatus ? `, Status: ${s?.serviceStatus}` : ''
                 }`}
               >
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s?.serviceName || ''}</div>
@@ -125,51 +125,51 @@ const WorkOrderViews = (props) => {
           arrowHeadType: 'arrow',
           target: `${s._id}`
         });
-        // s?.steps?.map((step) => {
-        //   flow.push({
-        //     id: `${step?._id}`,
-        //     sourcePosition: 'right',
-        //     targetPosition: 'left',
-        //     type: 'default',
-        //     data: {
-        //       ref_type: 'step',
-        //       // ref_id: item.inventory,
-        //       label: (
-        //         <HtmlTooltip
-        //           arrow
-        //           placement="top"
-        //           title={
-        //             stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
-        //               ? 'Step Passed'
-        //               : stepDatas[step?._id] === 'Failed'
-        //               ? 'Step Failed'
-        //               : stepDatas[step?._id] === 'Skipped'
-        //               ? 'Step Skipped'
-        //               : 'Step'
-        //           }
-        //         >
-        //           <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step?.stepName || ''}</div>
-        //         </HtmlTooltip>
-        //       )
-        //     },
-        //     position: { x: xPosition + 300, y: serviceStepIdx * 80 },
-        //     style:
-        //       stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
-        //         ? customNodeStyles.stepPassed
-        //         : stepDatas[step?._id] === 'Failed'
-        //         ? customNodeStyles.stepFailed
-        //         : stepDatas[step?._id] === 'Skipped'
-        //         ? customNodeStyles?.stepSkipped
-        //         : customNodeStyles.step
-        //   });
-        //   flowEdge.push({
-        //     id: `workOrder-service-steps-${step._id}`,
-        //     source: `${s?._id}`,
-        //     arrowHeadType: 'arrow',
-        //     target: `${step._id}`
-        //   });
-        //   serviceStepIdx++;
-        // });
+        s?.steps?.map((step) => {
+          flow.push({
+            id: `${step?._id}`,
+            sourcePosition: 'right',
+            targetPosition: 'left',
+            type: 'default',
+            data: {
+              ref_type: 'step',
+              // ref_id: item.inventory,
+              label: (
+                <HtmlTooltip
+                  arrow
+                  placement="top"
+                  title={
+                    stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
+                      ? 'Step Passed'
+                      : stepDatas[step?._id] === 'Failed'
+                      ? 'Step Failed'
+                      : stepDatas[step?._id] === 'Skipped'
+                      ? 'Step Skipped'
+                      : 'Step'
+                  }
+                >
+                  <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step?.stepName || ''}</div>
+                </HtmlTooltip>
+              )
+            },
+            position: { x: xPosition + 300, y: serviceStepIdx * 80 },
+            style:
+              stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
+                ? customNodeStyles.stepPassed
+                : stepDatas[step?._id] === 'Failed'
+                ? customNodeStyles.stepFailed
+                : stepDatas[step?._id] === 'Skipped'
+                ? customNodeStyles?.stepSkipped
+                : customNodeStyles.step
+          });
+          flowEdge.push({
+            id: `workOrder-service-steps-${step._id}`,
+            source: `${s?._id}`,
+            arrowHeadType: 'arrow',
+            target: `${step._id}`
+          });
+          serviceStepIdx++;
+        });
       });
       if (allSteps?.length) xPosition += 300;
       setFlowData([...flow, ...flowEdge]);

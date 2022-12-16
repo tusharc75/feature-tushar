@@ -186,12 +186,13 @@ export default function CustomAgGrid({
           dispatch({ type: 'search', search: query });
         }
       }, 300);
-    } else {
-      timer = setTimeout(() => {
-        dispatch({ type: 'search', search: '' });
-        dispatch({ type: 'loading', loading: false });
-      }, 300);
-    }
+    } 
+    // else {
+    //   timer = setTimeout(() => {
+    //     dispatch({ type: 'search', search: '' });
+    //     dispatch({ type: 'loading', loading: false });
+    //   }, 300);
+    // }
     return () => clearTimeout(timer);
   }, [searchQuery]);
 

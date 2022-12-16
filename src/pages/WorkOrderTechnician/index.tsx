@@ -19,13 +19,13 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
+import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
 import Steps from '../WorkOrder/Service/Steps';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import SettingsIcon from '@material-ui/icons/Settings';
+import FilterListIcon from '@material-ui/icons/FilterList';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import React from 'react';
 
@@ -137,21 +137,30 @@ const WorkOrderTechnician = () => {
       .get(api)
       .then(({ data: { data } }) => {
         const otherThanPendingData = data?.filter((item) => item.status !== 'Pending');
-        const allPending = data
+
+        const allPostNotAcceptedByCustomer = data
           ?.filter((item) => item.status === 'Pending')
-          ?.sort((a, b) => {
-            return a.order - b.order;
+          .map((i) => {
+            if (i?.customerAccepted === false && i?.service?.preWork === false) {
+              i.status = WORKORDER_SERVICE_STATUS.backlog;
+            }
+            return i;
           });
 
-        const allPendingData = allPending?.map((item, idx) => {
-          let d: any = item;
-          if (idx > 0 && item?.order !== allPending[0]?.order) {
-            d.status = WORKORDER_SERVICE_STATUS.backlog;
-          }
-          return d;
-        });
+        const allPending = data?.filter((item) => item.status === 'Pending');
 
-        const sortedServiceData = [...allPendingData, ...otherThanPendingData]?.sort((a, b) => {
+        const allPendingData = allPostNotAcceptedByCustomer
+          ?.filter((item) => item.status === 'Pending')
+          ?.map((item, idx) => {
+            let d: any = item;
+            if (idx > 0 && item?.order !== allPending[0]?.order) {
+              d.status = WORKORDER_SERVICE_STATUS.backlog;
+            }
+            return d;
+          });
+        const allBacklogData = allPostNotAcceptedByCustomer?.filter((item) => item.status === WORKORDER_SERVICE_STATUS.backlog);
+
+        const sortedServiceData = [...allPendingData, ...allBacklogData, ...otherThanPendingData]?.sort((a, b) => {
           return a.order - b.order;
         });
 
@@ -258,7 +267,7 @@ const WorkOrderTechnician = () => {
               <Box className={classes.activityContainer} display={'flex'}>
                 <Box>
                   <IconButton size="small" onClick={() => setServicesShowDialog(!servicesShowDialog)}>
-                    <SettingsIcon />
+                    <FilterListIcon />
                   </IconButton>
                 </Box>
                 <Box ml={1} />
@@ -324,15 +333,15 @@ const WorkOrderTechnician = () => {
                                             <Box>
                                               <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
                                             </Box>
-                                            {data?.overAllStepStatus && (
+                                            {data?.serviceStatus && (
                                               <Box ml={1}>
                                                 <Chip
-                                                  label={data?.overAllStepStatus}
+                                                  label={data?.serviceStatus}
                                                   variant="outlined"
-                                                  // color={data?.overAllStepStatus === 'Fail' ? 'default' : 'primary'}
+                                                  // color={data?.serviceStatus === 'Fail' ? 'default' : 'primary'}
                                                   style={{
-                                                    borderColor: data?.overAllStepStatus === 'Fail' ? 'red' : 'green',
-                                                    color: data?.overAllStepStatus === 'Fail' ? 'red' : 'green'
+                                                    borderColor: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed ? 'red' : 'green',
+                                                    color: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? 'red' : 'green'
                                                   }}
                                                 />
                                               </Box>
