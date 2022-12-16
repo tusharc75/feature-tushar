@@ -109,7 +109,7 @@ const WorkOrderViews = (props) => {
                 arrow
                 placement="top"
                 title={`${allAssignUsers !== '' ? `Technician: ${allAssignUsers}` : 'Service'}${
-                  s?.overAllStepStatus ? `, Status: ${s?.overAllStepStatus}` : ''
+                  s?.serviceStatus ? `, Status: ${s?.serviceStatus}` : ''
                 }`}
               >
                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s?.serviceName || ''}</div>
