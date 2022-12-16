@@ -14,12 +14,12 @@ const ConsumeProduct = ({ handleClose, type, loading, handleSucess, products }) 
 
 
   const [initialValues, setInitialValues] = useState({
-    qty: products?.length ? type === "revert" ? (products[0].consumeQty) : (products[0].qty - products[0].consumeQty) : 0
+    qty: products?.length ? type === "revert" ? (products[0].consumeQty) : (products[0].qty - products[0].consumeQty - products[0].returnQty) : 0
   });
 
   function validate(values) {
     const errors = {};
-    var qty = products?.length ? type === "revert" ? (products[0].consumeQty) : (products[0].qty - products[0].consumeQty) : 0
+    var qty = products?.length ? type === "revert" ? (products[0].consumeQty) : (products[0].qty - products[0].consumeQty - products[0].returnQty) : 0
     if (!values.qty || values.qty === "") {
       errors['qty'] = 'Please enter qty';
     }
