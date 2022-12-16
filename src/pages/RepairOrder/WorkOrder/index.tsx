@@ -290,6 +290,7 @@ const WorkOrder = ({
     data = response?.data?.data;
     // sort rows by prework true/false
     const rows = data.material?.filter((e) => e.parentId === null);
+    setPreWorkStatus(data?.material);
 
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
@@ -343,14 +344,8 @@ const WorkOrder = ({
         )?.length
       ) {
         setNextStep(false);
-        if (updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.preWork) {
-          updateOrderStatus(REPAIR_ORDER_STATUS.preWork);
-        }
       } else {
         setNextStep(true);
-        if (updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.buildingQuote) {
-          updateOrderStatus(REPAIR_ORDER_STATUS.buildingQuote);
-        }
       }
     }
     setRowsData(rows);
@@ -436,6 +431,13 @@ const WorkOrder = ({
   const closeActions = () => {
     setAnchorActionEl(null);
   };
+
+  const setPreWorkStatus = (data) => {
+      const preServiceStarted = data?.filter((obj) => obj?.type === 'service' && obj.serviceDetail.preWork && obj.status === WORKORDER_SERVICE_STATUS.inProgress);
+      if(preServiceStarted.length > 0 && updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.preWork) {
+        updateOrderStatus(REPAIR_ORDER_STATUS.preWork);
+    }
+  }
 
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
     rows?.forEach((e: any) => {
