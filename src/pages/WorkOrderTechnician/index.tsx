@@ -19,7 +19,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
+import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
 import Steps from '../WorkOrder/Service/Steps';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
@@ -324,15 +324,15 @@ const WorkOrderTechnician = () => {
                                             <Box>
                                               <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
                                             </Box>
-                                            {data?.overAllStepStatus && (
+                                            {data?.serviceStatus && (
                                               <Box ml={1}>
                                                 <Chip
-                                                  label={data?.overAllStepStatus}
+                                                  label={data?.serviceStatus}
                                                   variant="outlined"
-                                                  // color={data?.overAllStepStatus === 'Fail' ? 'default' : 'primary'}
+                                                  // color={data?.serviceStatus === 'Fail' ? 'default' : 'primary'}
                                                   style={{
-                                                    borderColor: data?.overAllStepStatus === 'Fail' ? 'red' : 'green',
-                                                    color: data?.overAllStepStatus === 'Fail' ? 'red' : 'green'
+                                                    borderColor: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed ? 'red' : 'green',
+                                                    color: data?.serviceStatus ===  WORKORDER_SERVICE_STEP_STATUS.failed ? 'red' : 'green'
                                                   }}
                                                 />
                                               </Box>
