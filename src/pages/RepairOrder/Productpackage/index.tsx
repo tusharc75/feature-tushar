@@ -331,15 +331,15 @@ const Productpackage = ({
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
         fetchData();
-        if (updateOrderStatus && repairOrderData?.status !== REPAIR_ORDER_STATUS.preWork) {
-          updateOrderStatus(REPAIR_ORDER_STATUS.preWork);
+        if (updateOrderStatus && repairOrderData?.status !== REPAIR_ORDER_STATUS.inProgress) {
+          updateOrderStatus(REPAIR_ORDER_STATUS.inProgress);
         }
         setAddingProducts(false);
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
-        if (updateOrderStatus && repairOrderData?.status !== REPAIR_ORDER_STATUS.preWork) {
-          updateOrderStatus(REPAIR_ORDER_STATUS.preWork);
+        if (updateOrderStatus && repairOrderData?.status !== REPAIR_ORDER_STATUS.inProgress) {
+          updateOrderStatus(REPAIR_ORDER_STATUS.inProgress);
         }
         toastConfig.setToastConfig(error);
         setAddingProducts(false);

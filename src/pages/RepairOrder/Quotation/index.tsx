@@ -117,6 +117,12 @@ const Quotation = ({
     }
   }, [invoiceStep]);
 
+  useEffect(() => {
+    if (updateOrderStatus && [REPAIR_ORDER_STATUS.preWork, REPAIR_ORDER_STATUS.inProgress].includes(repairOrderData.status)) {
+      updateOrderStatus(REPAIR_ORDER_STATUS.buildingQuote);
+    }
+  })
+
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
       .get(`${repairOrder.api}/${repairOrderData?._id}/repairorder/quotation`)
@@ -127,6 +133,7 @@ const Quotation = ({
         setCurrentVersion(tempCurrentVersion);
         setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
         setNextStep(data?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
+        setHeaderStatus();
       });
   };
 
@@ -136,6 +143,12 @@ const Quotation = ({
       fetchProductInventory();
     }
   }, [quotationData?.versions[currentVersion]?._id]);
+
+  const setHeaderStatus = () => {
+    if (updateOrderStatus && (repairOrderData.status !== REPAIR_ORDER_STATUS.buildingQuote) && (repairOrderData.status === REPAIR_ORDER_STATUS.preWork)) {
+          updateOrderStatus(REPAIR_ORDER_STATUS.buildingQuote);
+        }
+  }
 
   const fetchFields = async (currency) => {
     var data = await fetch_quotation_product_fields(currency);
