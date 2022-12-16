@@ -66,7 +66,8 @@ const ServiceMaster = (props: Props) => {
     {
       field: 'serviceName', headerName: 'Service Name', show: true, cellRenderer: 'serviceRenderer', disabled: true, lockPosition: true, primaryField: true
     },
-    { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'order', headerName: 'Order', show: true, cellRenderer: 'commonRenderer' },
+    { field: 'preWork', headerName: 'Pre Work', show: true, cellRenderer: 'commonRenderer',}
   ];
 
   const fetchGridColumns = () => {
@@ -77,7 +78,9 @@ const ServiceMaster = (props: Props) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (o?.fieldData?.fieldName !== 'serviceName') {
+          if (o?.fieldData?.fieldName !== 'serviceName'
+           && o?.fieldData?.fieldName !== "preWork"
+           ) {
             let currentColumn = getColumnData(routes.serviceMaster?.title, o?.fieldData, routes.serviceMasterDetail.path);
             if (currentColumn !== null) {
               columns = [...columns, currentColumn?.columnData];
@@ -91,7 +94,7 @@ const ServiceMaster = (props: Props) => {
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           serviceRenderer: ServiceRenderer,
-          actionsRenderer: ActionsRenderer
+          actionsRenderer: ActionsRenderer,
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         setColumns([...defaultColumns, ...columns]);
@@ -107,7 +110,8 @@ const ServiceMaster = (props: Props) => {
       .get(`${routes.product.path}/${id}/service-master`)
       .then(({ data: { data } }) => {
         let rows = data?.map((u) => {
-          let finalObject = prepareDataForGrid(u);
+        let  finalObject = prepareDataForGrid(u);
+         finalObject['preWork'] = u?.preWork  ?  "Yes" : "No"     
           let res = {
             ...finalObject
           };
