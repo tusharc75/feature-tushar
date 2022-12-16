@@ -141,7 +141,7 @@ const WorkOrderTechnician = () => {
         const allPostNotAcceptedByCustomer = data
           ?.filter((item) => item.status === 'Pending')
           .map((i) => {
-            if (i?.customerAccepted === false) {
+            if (i?.customerAccepted === false && i?.service?.preWork === false) {
               i.status = WORKORDER_SERVICE_STATUS.backlog;
             }
             return i;
