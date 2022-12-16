@@ -6,7 +6,6 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { workOrder, yupSchema } from 'src/constants/helpers';
 import { dateTimeFormat } from 'src/constants/helpers';
 import moment from 'moment';
-import { isMobile, isTablet } from 'react-device-detect';
 import styles from './StepFieldsDialog.module.scss';
 import CloseIcon from '@material-ui/icons/Close';
 import Details from 'src/components/Shared/DetailsPage';

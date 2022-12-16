@@ -180,6 +180,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '' }) => {
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -194,11 +195,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
   const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
+  const { state: { user: { user } } } = useData();
 
   useEffect(() => {
     getServiceData();
@@ -316,11 +313,8 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const getFields = (step) => {
     let stepData = null;
     let fieldData = { fields: [], formsData: [], values: {} };
-
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
-    let tempServiceData = serviceData.find(
-      (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === step?._id
-    );
+    let tempServiceData = serviceData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
 
     if (tempServiceData) {
       stepData = tempServiceData;
@@ -536,11 +530,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   let startIdx = 0;
   return stepList ? (
     stepList?.length ? (
-      <Box
-        className={classes.mainContainer}
-        sx={{ position: 'relative', overflow: 'hidden' }}
-        style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}
-      >
+      <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}>
         <div className={classes.root}>
           {serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)?.map((step, index) => {
             const { stepData, isStepValid } = getFields(step);
@@ -563,7 +553,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             startIdx = step?.order || 0;
             return (
               <Box
-                key={step._id}
+                key={`${step._id}_${selectedService?.uniqueId}}`}
                 border={1}
                 borderColor={'grey.300'}
                 style={{
