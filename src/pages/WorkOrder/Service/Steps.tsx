@@ -180,6 +180,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '' }) => {
+
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
@@ -194,11 +195,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
   const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
+  const { state: { user: { user } } } = useData();
 
   useEffect(() => {
     getServiceData();
@@ -320,11 +317,8 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const getFields = (step) => {
     let stepData = null;
     let fieldData = { fields: [], formsData: [], values: {} };
-
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
-    let tempServiceData = serviceData.find(
-      (d) => d.uniqueId === selectedService?.uniqueId && d.serviceId === selectedService._id && d.stepId === step?._id
-    );
+    let tempServiceData = serviceData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
 
     if (tempServiceData) {
       stepData = tempServiceData;
@@ -540,52 +534,44 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   let startIdx = 0;
   return stepList ? (
     stepList?.length ? (
-      <Box
-        className={classes.mainContainer}
-        sx={{ position: 'relative', overflow: 'hidden' }}
-        style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}
-      >
+      <Box className={classes.mainContainer} sx={{ position: 'relative', overflow: 'hidden' }} style={{ backgroundColor: 'rgba(242, 243, 247, 0.6)' }}>
         <div className={classes.root}>
-          {serviceDetails?.steps
-            ?.sort((a, b) => a?.order - b?.order)
-            ?.map((step, index) => {
-              const { stepData, isStepValid } = getFields(step);
-              let isPrevStepDone: any = false;
-              let isAnyTechnician = selectedService?.assignedUsers?.length ? true : false;
-              let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
-              let isSameStartStep = false;
-              if (index > 0) {
-                const prevStep = serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)[index - 1];
-                const pD = getFields(prevStep);
-                isPrevStepDone = pD?.stepData?.passFailStatus ? true : stepData?.passFailStatus ? true : false;
-              }
-              if (startIdx === step?.order) {
-                isSameStartStep = true;
-              } else {
-                isSameStartStep = false;
-              }
-              if (referencType === 'workOrderTechnician') {
-                isMeTechnician = true;
-              }
-              startIdx = step?.order || 0;
-              return (
-                <Box
-                  key={step._id}
-                  border={1}
-                  borderColor={'grey.300'}
-                  style={{
-                    cursor: !stepData?.status ? 'default' : 'pointer',
-                    transition: 'background .5s ease',
-                    backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
-                  }}
-                  className={`${classes.accordionHeading}  ${
-                    Boolean(stepData?.passFailStatus)
-                      ? `${
-                          Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
-                            ? classes.green
-                            : ''
-                        } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
-                      : classes.white
+          {serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)?.map((step, index) => {
+            const { stepData, isStepValid } = getFields(step);
+            let isPrevStepDone: any = false;
+            let isAnyTechnician = selectedService?.assignedUsers?.length ? true : false;
+            let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) || false;
+            let isSameStartStep = false;
+            if (index > 0) {
+              const prevStep = serviceDetails?.steps?.sort((a, b) => a?.order - b?.order)[index - 1];
+              const pD = getFields(prevStep);
+              isPrevStepDone = pD?.stepData?.passFailStatus ? true : stepData?.passFailStatus ? true : false;
+            }
+            if (startIdx === step?.order) {
+              isSameStartStep = true;
+            } else {
+              isSameStartStep = false;
+            }
+            if (referencType === 'workOrderTechnician') {
+              isMeTechnician = true;
+            }
+            startIdx = step?.order || 0;
+            return (
+              <Box
+                key={`${step._id}_${selectedService?.uniqueId}}`}
+                border={1}
+                borderColor={'grey.300'}
+                style={{
+                  cursor: !stepData?.status ? 'default' : 'pointer',
+                  transition: 'background .5s ease',
+                  backgroundColor: selectedStep?._id === step._id ? '#ecfdf7' : ''
+                }}
+                className={`${classes.accordionHeading}  ${Boolean(stepData?.passFailStatus)
+                  ? `${Boolean([WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.completed].includes(stepData?.passFailStatus))
+                    ? classes.green
+                    : ''
+                  } ${stepData?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? classes.red : ''}`
+                  : classes.white
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();
