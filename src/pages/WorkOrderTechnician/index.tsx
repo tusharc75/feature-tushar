@@ -137,21 +137,30 @@ const WorkOrderTechnician = () => {
       .get(api)
       .then(({ data: { data } }) => {
         const otherThanPendingData = data?.filter((item) => item.status !== 'Pending');
-        const allPending = data
+
+        const allPostNotAcceptedByCustomer = data
           ?.filter((item) => item.status === 'Pending')
-          ?.sort((a, b) => {
-            return a.order - b.order;
+          .map((i) => {
+            if (i?.customerAccepted === false) {
+              i.status = WORKORDER_SERVICE_STATUS.backlog;
+            }
+            return i;
           });
 
-        const allPendingData = allPending?.map((item, idx) => {
-          let d: any = item;
-          if (idx > 0 && item?.order !== allPending[0]?.order) {
-            d.status = WORKORDER_SERVICE_STATUS.backlog;
-          }
-          return d;
-        });
+        const allPending = data?.filter((item) => item.status === 'Pending');
 
-        const sortedServiceData = [...allPendingData, ...otherThanPendingData]?.sort((a, b) => {
+        const allPendingData = allPostNotAcceptedByCustomer
+          ?.filter((item) => item.status === 'Pending')
+          ?.map((item, idx) => {
+            let d: any = item;
+            if (idx > 0 && item?.order !== allPending[0]?.order) {
+              d.status = WORKORDER_SERVICE_STATUS.backlog;
+            }
+            return d;
+          });
+        const allBacklogData = allPostNotAcceptedByCustomer?.filter((item) => item.status === WORKORDER_SERVICE_STATUS.backlog);
+
+        const sortedServiceData = [...allPendingData, ...allBacklogData, ...otherThanPendingData]?.sort((a, b) => {
           return a.order - b.order;
         });
 
@@ -332,7 +341,7 @@ const WorkOrderTechnician = () => {
                                                   // color={data?.serviceStatus === 'Fail' ? 'default' : 'primary'}
                                                   style={{
                                                     borderColor: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed ? 'red' : 'green',
-                                                    color: data?.serviceStatus ===  WORKORDER_SERVICE_STEP_STATUS.failed ? 'red' : 'green'
+                                                    color: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? 'red' : 'green'
                                                   }}
                                                 />
                                               </Box>
