@@ -866,7 +866,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 Fail
               </MenuItem>
               <MenuItem
-                disabled={!allowedToEdit}
+                disabled={!allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
                 onClick={() => {
                   handleRemoveService(selectedService?.uniqueId);
                   setAnchorEl(null);

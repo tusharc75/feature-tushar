@@ -380,6 +380,9 @@ const WorkOrder = ({
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
       _subRow.isValid = true;
+      if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed) {
+        _subRow.hideSelection = true;
+      }
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -387,10 +390,7 @@ const WorkOrder = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return sortBy(
-      subRows.filter((e) => e.type !== 'product'),
-      ['type']
-    );
+    return sortBy(subRows.filter((e) => e.type !== 'product'), ['type']);
   };
 
   const handleAddService = (ids) => {
@@ -517,9 +517,7 @@ const WorkOrder = ({
                     setShowConfirmBox(true);
                     closeActions();
                   }}
-                  disabled={
-                    services?.length && services?.every((d) => d.type === 'service' && d.workOrder?._id === services[0].workOrder?._id) ? false : true
-                  }
+                  disabled={services?.length && services?.every((d) => d.type === 'service' && d.workOrder?._id === services[0].workOrder?._id) ? false : true}
                 >
                   Delete
                 </MenuItem>
