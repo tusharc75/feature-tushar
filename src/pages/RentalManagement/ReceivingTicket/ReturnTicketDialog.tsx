@@ -8,13 +8,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
-import { rentalManagement } from 'src/constants/helpers';
-import axiosInstance from 'src/axios/axiosInstance';
 
-const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData }) => {
+const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  if (!productList?.length) {
+  if (!products?.length) {
     onSuccess([]);
   }
 
@@ -28,23 +27,23 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
     if (values.length > 0) {
       values.map((d) => {
         const returnQty = parseInt(d.returnQuantity);
-        const consumeQty = parseInt(d.consumeQuantity);
+        const consumeQty = parseInt(d.consumeQty);
         const invoiceData = invoiceQtyData?.find((i) => i?._id === d?.row?.uniqueId);
         const invoiceQuantity = invoiceData?.qty || 0;
         let product = d?.row;
-        if (!product?.serialized && returnQty > product.qty - invoiceQuantity) {
-          errors.returnQuantity = `Return quantity can not be greater than Returnable quantity (${product.qty - invoiceQuantity})`;
+        if (!product?.serialized && returnQty > product.qty - invoiceQuantity - consumeQty) {
+          errors.returnQuantity = `Return quantity can not be greater than ${product.qty - invoiceQuantity - consumeQty}`;
         } else if (returnQty > product.qty) {
           errors.returnQuantity = 'Return quantity should not be more then order quantity';
         } else {
           errors.returnQuantity = '';
         }
         if (consumeQty > product.qty) {
-          errors.consumeQuantity = 'Consume quantity should not be more then order quantity';
+          errors.consumeQty = 'Consume quantity should not be more then order quantity';
         } else {
-          errors.consumeQuantity = '';
+          errors.consumeQty = '';
         }
-        if (consumeQty + returnQty > product.qty && !errors?.returnQuantity && !errors?.consumeQuantity) {
+        if (consumeQty + returnQty > product.qty && !errors?.returnQuantity && !errors?.consumeQty) {
           errors['sum'] = 'The sum of the quantities you return and consume cannot exceed the quantity you ordered.';
         } else {
           errors['sum'] = '';
@@ -53,6 +52,8 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
     }
     return errors;
   };
+
+  console.log(products)
 
   return (
     <Dialog
@@ -78,18 +79,18 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
       <MuiPickersUtilsProvider utils={MomentUtils}>
         <Formik
           initialValues={{
-            products: productList.map((d) => ({
+            products: products?.map((d) => ({
               _id: d._id,
               product: d.productName,
               productId: d.productId,
               returnQuantity: 0,
-              consumeQuantity: 0,
+              consumeQty: d.consumeQty,
               orderQuantity: d.qty || 0,
               row: d
             }))
           }}
           enableReinitialize={true}
-          onSubmit={() => {}}
+          onSubmit={() => { }}
         >
           {({ values }) => (
             <>
@@ -128,7 +129,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
                                               <Grid item xs={12} md={4}>
                                                 <Field
                                                   fullWidth
-                                                  label="Return"
+                                                  label="Return Quantity"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
@@ -150,24 +151,24 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
                                               <Grid item xs={12} md={4}>
                                                 <Field
                                                   fullWidth
-                                                  label="Consumed"
+                                                  label="Consumed Quantity"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
                                                   component={TextField}
                                                   disabled
-                                                  name="consumeQuantity"
-                                                  placeholder="Consume Quantity"
-                                                  value={data.consumeQuantity}
+                                                  name="consumeQty"
+                                                  placeholder="Consumed Quantity"
+                                                  value={data.consumeQty}
                                                   onChange={(e) => {
                                                     const value = e.target.value.replace(/[^0-9]/g, '');
                                                     arrayHelpers.replace(index, {
                                                       ...values.products[index],
-                                                      ['consumeQuantity']: parseInt(value)
+                                                      ['consumeQty']: parseInt(value)
                                                     });
                                                   }}
-                                                  error={validate([data])?.consumeQuantity}
-                                                  helperText={validate([data]).consumeQuantity ? validate([data]).consumeQuantity : ''}
+                                                  error={validate([data])?.consumeQty}
+                                                  helperText={validate([data]).consumeQty ? validate([data]).consumeQty : ''}
                                                 />
                                               </Grid>
                                               <Grid item xs={12} md={4}>
@@ -210,7 +211,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, productList, invoiceQtyData })
                 </Button>
                 <Button
                   onClick={() => {
-                    if (!validate(values.products).returnQuantity && !validate(values.products).consumeQuantity && !validate(values.products).sum) {
+                    if (!validate(values.products).returnQuantity && !validate(values.products).consumeQty && !validate(values.products).sum) {
                       handleSubmit(values);
                     }
                   }}

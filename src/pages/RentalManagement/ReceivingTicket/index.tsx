@@ -1206,10 +1206,7 @@ const ReceivingTicket = ({
             <MenuItem
               disabled={
                 selectedRecords?.length === 0 ||
-                selectedRecords?.filter(
-                  (e: any) =>
-                    e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.indTransit
-                )?.length !== selectedRecords?.length ||
+                selectedRecords?.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.indTransit || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length !== selectedRecords?.length ||
                 anchorActionEl === null
               }
               onClick={() => {
@@ -1539,7 +1536,7 @@ const ReceivingTicket = ({
       )}
       {showQtyDialog.open && (
         <ReturnTicketDialog
-          productList={selectedRecords.filter((d: any) => d?.type === 'Product')}
+          products={selectedRecords.filter((d: any) => d?.type === 'Product')}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data?.products, open: false });
             setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
