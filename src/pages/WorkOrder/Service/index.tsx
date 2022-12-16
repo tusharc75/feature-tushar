@@ -176,7 +176,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           }
           if (
             preWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status))?.length ===
-              preWorkService?.length &&
+            preWorkService?.length &&
             postWorkService?.filter((d: any) => [WORKORDER_SERVICE_STATUS.pending].includes(d.status))?.length === postWorkService?.length
           ) {
             if (isQuote && services.findIndex((d) => d.type === 'quotation') > -1) {
@@ -330,8 +330,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         borderRadius: '3px'
       };
@@ -344,8 +344,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           quotationData?.status === QUOTATION_STATUS.acceptByCustomer
             ? '#E9FFE8'
             : quotationData?.status === QUOTATION_STATUS.rejectByCustomer
-            ? '#FFE9EA'
-            : 'white',
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -369,11 +369,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         borderWidth: '1px',
         borderStyle: 'solid',
         backgroundColor:
-          data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
+          data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
             ? '#E9FFE8'
-            : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
+            : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
+              ? '#FFE9EA'
+              : 'white',
         cursor: 'pointer',
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
@@ -383,11 +383,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         borderWidth: '1px',
         borderStyle: 'solid',
         backgroundColor:
-          data?.status === WORKORDER_SERVICE_STEP_STATUS.completed
+          data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed
             ? '#E9FFE8'
-            : data?.status === WORKORDER_SERVICE_STEP_STATUS.failed
-            ? '#FFE9EA'
-            : 'white',
+            : data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed
+              ? '#FFE9EA'
+              : 'white',
         borderColor: 'rgb(224, 224, 224)',
         cursor: 'pointer'
       };
@@ -577,15 +577,15 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                         )}
                                       </Box>
                                     )}
-                                    {data?.type === 'service' && data?.overAllStepStatus && (
+                                    {data?.type === 'service' && data?.serviceStatus && (
                                       <Box ml={1}>
                                         <Chip
-                                          label={data?.overAllStepStatus}
+                                          label={data?.serviceStatus}
                                           variant="outlined"
-                                          color={data?.overAllStepStatus === 'Fail' ? 'default' : 'primary'}
+                                          color={data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed ? 'default' : 'primary'}
                                           style={{
-                                            borderColor: data?.overAllStepStatus === 'Fail' ? 'red' : 'green',
-                                            color: data?.overAllStepStatus === 'Fail' ? 'red' : 'green'
+                                            borderColor: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? 'red' : 'green',
+                                            color: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? 'red' : 'green'
                                           }}
                                         />
                                       </Box>
@@ -621,21 +621,21 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                     (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
                                   ) &&
                                     isTechnician)) && (
-                                  <Grid item xs={2} container justify="flex-end">
-                                    <IconButton
-                                      size="small"
-                                      color="primary"
-                                      aria-label="delete"
-                                      disabled={!isAllowedToServiceEdit}
-                                      onClick={(event) => {
-                                        handleOpenMenu(event);
-                                        setSelectedService(data);
-                                      }}
-                                    >
-                                      <MoreHorizIcon />
-                                    </IconButton>
-                                  </Grid>
-                                )}
+                                    <Grid item xs={2} container justify="flex-end">
+                                      <IconButton
+                                        size="small"
+                                        color="primary"
+                                        aria-label="delete"
+                                        disabled={!isAllowedToServiceEdit}
+                                        onClick={(event) => {
+                                          handleOpenMenu(event);
+                                          setSelectedService(data);
+                                        }}
+                                      >
+                                        <MoreHorizIcon />
+                                      </IconButton>
+                                    </Grid>
+                                  )}
                               </>
                             )}
                           </Grid>
@@ -745,12 +745,12 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                                   </Box>
                                 </Box>
                                 {(isOwnerOrCollaborator && data?.type === 'service') ||
-                                (!(
-                                  data?.type !== 'service' ||
-                                  data?.order > disabledServicesOrder ||
-                                  (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-                                ) &&
-                                  isTechnician) ? (
+                                  (!(
+                                    data?.type !== 'service' ||
+                                    data?.order > disabledServicesOrder ||
+                                    (data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
+                                  ) &&
+                                    isTechnician) ? (
                                   <IconButton
                                     style={{ width: '18px', height: '25px' }}
                                     size="small"
@@ -866,7 +866,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 Fail
               </MenuItem>
               <MenuItem
-                disabled={!allowedToEdit}
+                disabled={!allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
                 onClick={() => {
                   handleRemoveService(selectedService?.uniqueId);
                   setAnchorEl(null);
@@ -900,7 +900,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               <Box>
                 {selectedService?.type === 'service' ? (
                   allowedToEdit ||
-                  (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
+                    (selectedService?.assignedUsers?.length > 0 && selectedService?.assignedUsers?.map((u) => u?.optionValue).includes(user?._id)) ? (
                     <Steps
                       workOrderId={workOrderId}
                       selectedService={selectedService}
