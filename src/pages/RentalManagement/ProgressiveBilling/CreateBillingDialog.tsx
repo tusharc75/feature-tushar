@@ -206,7 +206,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
               <p>{row.original[element.fieldName].optionLabel}</p>
             ) : row.original[element.fieldName] ? (
               <>{
-                ['Per Week', 'Per Month'].includes(row.original[element.fieldName]) ?
+                ['Per Week', 'Per Month'].includes(row.original[element.fieldName]) && row.original.isAppliedBill ?
                   <Box display="flex" alignItems="center">
                     <p>{row.original[element.fieldName]}</p>
                     <Box ml={1} /><Tooltip title="Per Day Price is calculated">
@@ -278,9 +278,15 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           ele.qty = 1;
           ele._id = ele?.inventoryDetail?._id
           ele.materialId = ele?.inventoryDetail?._id
-          ele.manualStartDate = ele?.manualStartDate
-          ele.manualEndDate = ele?.manualEndDate
-          let values = { qty: 1 };
+          let values = { qty: 1, };
+          if (ele?.manualStartDate) {
+            values["actualStartDate"] = ele?.manualStartDate
+            values["estimateStartDate"] = ele?.manualStartDate
+          }
+          if (ele?.manualEndDate) {
+            values["actualEndDate"] = ele?.manualEndDate
+            values["estimateEndDate"] = ele?.manualEndDate
+          }
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           const { materialId, qty, type, _id, ...rest } = element
           materialDataConst.push({ ...rest, ...ele, ...calValues })
