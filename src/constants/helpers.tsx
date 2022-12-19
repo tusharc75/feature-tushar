@@ -2150,3 +2150,34 @@ export const REPAIR_ORDER_TYPE = {
   internal: 'Asset Repair',
   external: 'Customer Owned Asset Repair',
 };
+
+export const convertMsToTime = (milliseconds: any) => {
+
+  function padTo2Digits(num) {
+    num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
+    return num.toString().padStart(2, '0');
+  }
+  
+  let seconds = Math.floor(milliseconds / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+
+  let time = '';
+
+  if (hours === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours === 0 && minutes === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours > 0 && hours < 24) {
+    time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours >= 24) {
+    time = `${padTo2Digits(hours / 24)}d`;
+  }
+  return time;
+}

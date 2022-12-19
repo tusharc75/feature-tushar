@@ -132,7 +132,7 @@ export default function StepDialog({
             returnToServiceOnFail: data?.returnToServiceOnFail
           });
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       setStepDetails({
         stepName: '',
@@ -335,9 +335,8 @@ export default function StepDialog({
                       <TextField
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">{`${
-                              values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                            }`}</InputAdornment>
+                            <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                              }`}</InputAdornment>
                           )
                         }}
                         margin="dense"
@@ -359,9 +358,8 @@ export default function StepDialog({
                       <TextField
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">{`${
-                              values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                            }`}</InputAdornment>
+                            <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                              }`}</InputAdornment>
                           )
                         }}
                         margin="dense"
@@ -715,22 +713,21 @@ export default function StepDialog({
                     </Box>
                   )}
                 </CustomDialogContent>
-                {(!notEditable || reference === 'workOrder') && (
-                  <CustomDialogFooter>
-                    <Button
-                      size="small"
-                      color="primary"
-                      onClick={() => {
-                        handleClose();
-                      }}
-                    >
-                      Cancel
-                    </Button>
+                <CustomDialogFooter>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => {
+                      handleClose();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  {reference === 'workOrder' && notEditable ? null :
                     <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
                       Save
-                    </CustomButton>
-                  </CustomDialogFooter>
-                )}
+                    </CustomButton>}
+                </CustomDialogFooter>
               </Form>
             )}
           </Formik>
