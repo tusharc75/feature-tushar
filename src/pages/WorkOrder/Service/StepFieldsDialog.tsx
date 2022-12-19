@@ -51,6 +51,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
   }
 
   const RenderStepData = () => {
+    
     const [time, setTime] = React.useState(convertMsToTime(new Date().getTime() - new Date(stepData?.startDate).getTime()));
     React.useEffect(() => {
       const interval = setInterval(() => {
