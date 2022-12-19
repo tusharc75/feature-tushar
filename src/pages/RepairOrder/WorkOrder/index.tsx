@@ -39,7 +39,8 @@ const WorkOrder = ({
   allowedToEdit,
   allowedToDelete,
   isPostWorkService,
-  updateOrderStatus = null
+  updateOrderStatus = null,
+  setCurrentStep
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -97,25 +98,27 @@ const WorkOrder = ({
             </Box>
             <Chip
               className="ml-1"
-              label={`${row.original.type === 'service'
-                ? 'Service'
-                : row.original.type === 'product'
+              label={`${
+                row.original.type === 'service'
+                  ? 'Service'
+                  : row.original.type === 'product'
                   ? 'Product'
                   : row.original.type === 'serializedAsset'
-                    ? 'Asset'
-                    : 'Package'
-                }`}
+                  ? 'Asset'
+                  : 'Package'
+              }`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'service'
+                      ? routes.serviceMasterDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : routes.packagesDetail.path
+                      ? routes.serializedAssetDetail.path
+                      : routes.packagesDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -231,7 +234,8 @@ const WorkOrder = ({
         disableFilters: true,
         canDrag: false,
         Cell: ({ row }) => {
-          return row?.original?.type === 'service' || (row?.original?.type === 'package' && row?.original?.packageDetail?.packageType === 'Service') ?
+          return row?.original?.type === 'service' ||
+            (row?.original?.type === 'package' && row?.original?.packageDetail?.packageType === 'Service') ? (
             <>
               <IconButton
                 disabled={row?.original?.status === WORKORDER_SERVICE_STATUS.pending && allowedToDelete ? false : true}
@@ -248,44 +252,36 @@ const WorkOrder = ({
                 />
               </IconButton>
             </>
-            : row?.original?.type === 'serializedAsset' ?
-              <>
-                <IconButton
-                  disabled={row.original?.subRows?.length === 0 ? false : true}
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    alert(1)
-                  }}
-                >
-                  <Delete fontSize="small" color={row.original?.subRows?.length === 0 ? 'error' : 'disabled'} />
-                </IconButton>
-              </>
-              : null;
+          ) : row?.original?.type === 'serializedAsset' ? (
+            <>
+              <IconButton
+                disabled={row.original?.subRows?.length === 0 ? false : true}
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  setDeleteData([row.original]);
+                  setShowConfirmBox(true);
+                }}
+              >
+                <Delete fontSize="small" color={row.original?.subRows?.length === 0 ? 'error' : 'disabled'} />
+              </IconButton>
+            </>
+          ) : null;
         }
       }
     ]);
   };
 
-  const handleDelete = () => {
-    let ids = [];
-    let workOrderId = '';
-    if (deleteData.length > 0) {
-      workOrderId = deleteData[0]?.workOrder?._id;
-      deleteData.forEach((d) => {
-        ids.push(d.uniqueId);
-      });
-    }
-    setDeleting(true);
+  const handleWorkOrderDelete = (data) => {
     axiosInstance()
-      .put(`${workOrder.api}/service/${workOrderId}/remove`, {
-        uniqueIds: ids
-      })
+      .put(`${workOrder.api}/remove`, { ids: [data?.workOrder?._id] })
       .then(({ data }) => {
         setDeleting(false);
         setShowConfirmBox(false);
-        fetchData();
-
+        setCurrentStep((prevStep) => {
+          const newStep = prevStep - 1;
+          return newStep;
+        });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -300,6 +296,43 @@ const WorkOrder = ({
       });
   };
 
+  const handleDelete = () => {
+    if (deleteData[0]?.type === 'serializedAsset' && deleteData.length === 1 && !deleteData[0]?.subRows?.length) {
+      handleWorkOrderDelete(deleteData[0]);
+    } else {
+      let ids = [];
+      let workOrderId = '';
+      if (deleteData.length > 0) {
+        workOrderId = deleteData[0]?.workOrder?._id;
+        deleteData.forEach((d) => {
+          ids.push(d.uniqueId);
+        });
+      }
+      setDeleting(true);
+      axiosInstance()
+        .put(`${workOrder.api}/service/${workOrderId}/remove`, {
+          uniqueIds: ids
+        })
+        .then(({ data }) => {
+          setDeleting(false);
+          setShowConfirmBox(false);
+          fetchData();
+
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
+        })
+        .catch((err) => {
+          setShowConfirmBox(false);
+          setDeleting(false);
+
+          toastConfig.setToastConfig(err);
+        });
+    }
+  };
+
   const fetchData = async () => {
     setNextStep(false);
     var data: any = [];
@@ -312,25 +345,27 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'serializedAsset'
-            ? parent?.serializedAsset?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+          ? parent?.serializedAsset?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
+      parent.status = `${
+        parent.type === 'service'
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -379,10 +414,10 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -402,7 +437,10 @@ const WorkOrder = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return sortBy(subRows.filter((e) => e.type !== 'product'), ['type']);
+    return sortBy(
+      subRows.filter((e) => e.type !== 'product'),
+      ['type']
+    );
   };
 
   const handleAddService = (ids) => {
@@ -540,9 +578,9 @@ const WorkOrder = ({
                   }}
                   disabled={
                     services?.length &&
-                      services?.filter(
-                        (d) => d.type === 'service' && d.workOrder?._id === services[0].workOrder?._id && d.status === WORKORDER_SERVICE_STATUS.pending
-                      )?.length === services?.length
+                    services?.filter(
+                      (d) => d.type === 'service' && d.workOrder?._id === services[0].workOrder?._id && d.status === WORKORDER_SERVICE_STATUS.pending
+                    )?.length === services?.length
                       ? false
                       : true
                   }
@@ -563,12 +601,12 @@ const WorkOrder = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
