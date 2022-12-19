@@ -422,24 +422,23 @@ const ReceivingTicket = ({
 
       productAssets.forEach((d) => {
         d['isChecked'] = false;
-        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved;
+        d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved
+          || d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered ? false : true;
       });
 
-      if (
-        productAssets.filter(
-          (e) =>
-            [
-              INVENTORY_STATUS.underReview,
-              INVENTORY_STATUS.available,
-              INVENTORY_STATUS.repair,
-              INVENTORY_STATUS.scrap,
-              INVENTORY_STATUS.lost,
-              INVENTORY_STATUS.notApplied
-            ].includes(e.status) ||
-            [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
-              e.rentalAssetStatus
-            )
-        ).length === productAssets.length
+      if (productAssets.filter((e) =>
+        [
+          INVENTORY_STATUS.underReview,
+          INVENTORY_STATUS.available,
+          INVENTORY_STATUS.repair,
+          INVENTORY_STATUS.scrap,
+          INVENTORY_STATUS.lost,
+          INVENTORY_STATUS.notApplied
+        ].includes(e.status) ||
+        [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
+          e.rentalAssetStatus
+        )
+      ).length === productAssets.length
       ) {
         setNextStep(true);
       }
@@ -511,7 +510,7 @@ const ReceivingTicket = ({
       )}
       {params?.data?.isReplaced && (
         <Box ml={1}>
-          <HtmlTooltip title={`This asset has replaced ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
+          <HtmlTooltip title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
             <InfoIcon fontSize="small" color={'primary'} />
           </HtmlTooltip>
         </Box>

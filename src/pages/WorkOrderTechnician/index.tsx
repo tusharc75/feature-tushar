@@ -304,13 +304,18 @@ const WorkOrderTechnician = () => {
                                     key={index}
                                     onClick={() => {
                                       let tempServiceData = data?.service;
-                                      tempServiceData['uniqueId'] = data?._id;
-                                      tempServiceData['status'] = data?.status;
-                                      setService(tempServiceData);
-                                      setWorkOrderId(data?.workOrderDetail?._id);
-                                      setServiceDetailsShow(true);
+                                      if (data.status !== WORKORDER_SERVICE_STATUS.backlog) {
+                                        tempServiceData['uniqueId'] = data?._id;
+                                        tempServiceData['status'] = data?.status;
+                                        setService(tempServiceData);
+                                        setWorkOrderId(data?.workOrderDetail?._id);
+                                        setServiceDetailsShow(true);
+                                      }
                                     }}
-                                    style={{ backgroundColor: WORKORDER_STATUS_COLOR[key] }}
+                                    style={{
+                                      backgroundColor: WORKORDER_STATUS_COLOR[key],
+                                      cursor: `${data.status === WORKORDER_SERVICE_STATUS.backlog ? 'not-allowed' : 'pointer'}`
+                                    }}
                                     className={` ${classes.activitybox}`}
                                   >
                                     <Box>

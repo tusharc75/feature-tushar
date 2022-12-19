@@ -180,8 +180,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -410,6 +410,7 @@ const RepairOrderDetails = () => {
                           allowedToDelete={allowedToDelete}
                           isPostWorkService={Boolean(currentStep === 3)}
                           updateOrderStatus={updateOrderStatus}
+                          setCurrentStep={setCurrentStep}
                         />
                       )}
                     {repairOrderProcessSteps[currentStep] === 'Quotation' && repairOrderData && (
@@ -476,7 +477,7 @@ const RepairOrderDetails = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>

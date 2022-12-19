@@ -34,7 +34,7 @@ const RejectProduct = ({ handleClose, handleSuccess, product, POId, warehouse, p
     axiosInstance()
       .get(`${productInventory.api}/serial-number/${product.productId}?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
-        if (!data || data.lenght === 0) return;
+        if (!data || data.length === 0) return;
         setSerialNumbers(data);
         setLoading(false);
       })

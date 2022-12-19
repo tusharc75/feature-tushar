@@ -18,6 +18,7 @@ import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../con
 import moment from "moment";
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { isNull } from 'util';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 
 
 interface EditDialogProps {
@@ -256,23 +257,31 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
       handleSaveData(rows)
     }
     else {
-      let rows: any = [{ ...rowData, ...values }]
-      if (rowData.parentId) {
-        const parent: any = material.filter((e) => e._id === rowData.parentId)
-        const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
-        sameParent.forEach((element) => {
-          if (element.materialId === rowData.materialId) {
-            for (var key in values) {
-              element[key] = values[key];
-            }
-          }
-        })
-        sumOnParent(parent, sameParent)
-        rows = [...rows, ...parent]
+      if (rowData.parentId && !showConfirmationDialog) {
+        setShowConfirmationDialog(true);
       }
-      const child = material.filter((e) => e.parentId === rowData._id)
-      resetValueZero(child)
-      handleSaveData([...rows, ...child])
+      else {
+        // let rows: any = [{ ...rowData, ...values }]
+        // if (rowData.parentId) {
+        //   const parent: any = material.filter((e) => e._id === rowData.parentId)
+        //   const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
+        //   sameParent.forEach((element) => {
+        //     if (element.materialId === rowData.materialId) {
+        //       for (var key in values) {
+        //         element[key] = values[key];
+        //       }
+        //     }
+        //   })
+        //   sumOnParent(parent, sameParent)
+        //   rows = [...rows, ...parent]
+        // }
+        // const child = material.filter((e) => e.parentId === rowData._id)
+        // resetValueZero(child)
+        const rows = await calculateRowsField(material, values, allFields, rowData)
+
+        handleSaveData(rows)
+        setShowConfirmationDialog(false);
+      }
     }
   };
 
