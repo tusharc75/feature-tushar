@@ -54,7 +54,7 @@ const ConsumeProduct = ({ handleClose, type, loading, handleSucess, products }) 
               <TextField
                 variant="outlined"
                 type="number"
-                label='Consume Qty'
+                label={"Qty"}
                 required={true}
                 name="qty"
                 fullWidth

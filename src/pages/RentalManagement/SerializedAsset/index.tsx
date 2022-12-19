@@ -591,16 +591,10 @@ const SerializedAsset = ({
         offlineAssetErrorLog
       );
       _subRow.subRows = tempSubRows;
-      _subRow.assetQty =
-        tempSubRows.filter((d) => d.type !== 'asset').length === 0
-          ? _subRow.assetQty
-          : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
-      _subRow.isValid = _subRow.serializedProduct
-        ? _subRow.assetAssignedQty === _subRow.assetQty
-          ? true
-          : false
-        : _subRow.assetAssignedQty ===
-        tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0);
+      _subRow.assetQty = tempSubRows.filter((d) => d.type !== 'asset').length === 0 ? _subRow.assetQty : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+      _subRow.isValid = _subRow.serializedProduct ? _subRow.assetAssignedQty === _subRow.assetQty ? true : false
+        : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length ? true :
+          _subRow.assetAssignedQty === tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ? true : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
