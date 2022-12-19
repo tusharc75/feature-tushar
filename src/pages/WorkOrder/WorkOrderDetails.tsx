@@ -221,9 +221,9 @@ const WorkOrderDetails = () => {
               }}
             >
               <Tab label="Header" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-              <Tab label="Services" value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-              <Tab label="Products/Consumables" value={2} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-              <Tab label="Views" value={3} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              {workOrderData?.deleted ? null : <Tab label="Services" value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />}
+              {workOrderData?.deleted ? null : <Tab label="Products/Consumables" value={2} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />}
+              {workOrderData?.deleted ? null : <Tab label="Views" value={3} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />}
             </Tabs>
             <TabPanel value={tabValue} index={0}>
               <Box>
@@ -277,7 +277,7 @@ const WorkOrderDetails = () => {
                             access: true
                           }
                         ]}
-                        handleActivityRefresh={() => {}}
+                        handleActivityRefresh={() => { }}
                         emails={[]}
                       />
                     </div>
