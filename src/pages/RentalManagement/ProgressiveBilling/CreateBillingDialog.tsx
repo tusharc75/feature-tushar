@@ -87,7 +87,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
+                  ? row.original?.packageDetail?.packageType === 'Product'
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === 'service'
