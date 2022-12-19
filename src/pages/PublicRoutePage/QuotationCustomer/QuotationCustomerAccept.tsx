@@ -177,7 +177,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       }
     });
     coloum.forEach((element) => {
-       if (element.accessor === 'qtyDisplay') {
+      if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
             .filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
@@ -198,7 +198,8 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         };
       }
     });
-    setColumns(coloum);
+    const columnToShow = coloum?.filter((i) => i.accessor !== 'pricingCondition');
+    setColumns(columnToShow);
     setLoading(false);
   };
 
