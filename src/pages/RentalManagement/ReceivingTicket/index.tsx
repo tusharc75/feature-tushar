@@ -153,21 +153,12 @@ const ReceivingTicket = ({
   useEffect(() => {
     getColumn();
     fetchRecords();
-    fetchInvoiceQty();
     if (!isOffline) {
       if (permissions?.repairJob?.isRead) {
         fetchRepairJob();
       }
     }
   }, []);
-
-  const fetchInvoiceQty = async () => {
-    await axiosInstance()
-      .get(`/rental-management/${rentalManagementData._id}/invoice/material-invoice-qty`)
-      .then((res) => {
-        setInvoiceQtyData(res?.data?.data);
-      });
-  };
 
   const fetchRecords = async () => {
     setLoadingData(true);
@@ -184,6 +175,7 @@ const ReceivingTicket = ({
       var products: any = [];
       var nonSerializeAsset: any = [];
       var consumeProducts: any = [];
+      var invoiceQty: any = [];
 
       if (isOffline) {
         productAssets = await getRentalProductAssets(rentalManagementData._id);
@@ -251,6 +243,10 @@ const ReceivingTicket = ({
         material = productResponse?.data?.data?.material;
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
+
+        const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-invoice-qty`)
+        invoiceQty = invoiceResponse?.data?.data
+        setInvoiceQtyData(invoiceQty);
       }
 
       const loadingTicketProducts = [];
@@ -424,6 +420,7 @@ const ReceivingTicket = ({
         d['isChecked'] = false;
         d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved
           || d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered ? false : true;
+        d['isAllowedToEdit'] = d?.startDate && (!invoiceQty.some(obj => obj?._id === d?._id || obj?._id === d?.uniqueId) || d?.endDate) ? true : false
       });
 
       if (productAssets.filter((e) =>
@@ -563,7 +560,7 @@ const ReceivingTicket = ({
     );
 
   const ActionRenderer = (params) => (
-    allowedToEdit && params?.data?.startDate ?
+    allowedToEdit && params?.data?.isAllowedToEdit ?
       <HtmlTooltip title={`Update Start Date / End Date`}>
         <IconButton
           size='small'
