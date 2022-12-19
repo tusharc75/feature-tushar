@@ -148,11 +148,11 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
           resource={null}
         />
       </CustomDialogContent>
-      {(!notEditable || reference === 'workOrder') && (
-        <CustomDialogFooter>
-          <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
-            Close
-          </Button>
+      <CustomDialogFooter>
+        <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
+          Close
+        </Button>
+        {reference === 'workOrder' && notEditable ? null :
           <Button
             variant="contained"
             size="small"
@@ -162,9 +162,8 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
             endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
           >
             Save
-          </Button>
-        </CustomDialogFooter>
-      )}
+          </Button>}
+      </CustomDialogFooter>
     </Dialog>
   );
 };
