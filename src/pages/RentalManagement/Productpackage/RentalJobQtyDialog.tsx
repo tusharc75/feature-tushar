@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from "../../../axios/axiosInstance";
-import { groupBy, uniqBy } from 'lodash';
+import { groupBy, unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from "../../../constants/helpers";
 import { isMobile, isTablet } from "react-device-detect";
@@ -338,8 +338,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         rows.push({ ...element, ...calValues })
 
         if (element.parentId) {
-          const parent: any = material.filter((e) => e._id === element.parentId)
-          const sameParent: any = material.filter((e) => e.parentId === element.parentId)
+          const parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId)
+          const sameParent: any =  unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId)
           sameParent.forEach((element) => {
             if (element._id === element._id) {
               for (var key in values) {
@@ -400,12 +400,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         //         }
         //       }
         //     })
-            
+
         //     sumOnParent(packages, product, allFields, currency)
         //     rows = [...rows, ...packages]
         //   }
         // }
-        
+
         // console.log(rows, material, values)
         const rows = await calculateRowsField(material, values, allFields, rowData)
         handleSaveData(rows)
