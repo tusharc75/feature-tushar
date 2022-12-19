@@ -425,8 +425,11 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     const stepTimes = [];
     steps.forEach((item) => {
       let obj: any = {};
-      obj.startTime = item?.startDate ? new Date(item?.startDate).getTime() : null;
-      obj.endTime = item?.endDate ? new Date(item?.endDate).getTime() : null;
+      obj.startDate = item?.startDate;
+      obj.endDate = item?.endDate;
+      obj.pauseDate = item?.pauseDate;
+      obj.duration = item?.duration || 0;
+      obj.status = item?.status;
       stepTimes.push(obj);
     });
     return stepTimes;
@@ -1034,30 +1037,22 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
 };
 export default Service;
 
-// INTERFACES
-interface totalTimeInterface {
-  stepTimes: stepTimesInterface[];
-}
-interface stepTimesInterface {
-  startTime?: number | null;
-  endTime?: number | null;
-}
-// RETURN TOTAL TIME IN MS AND SHOULD TIME UPDATE, TAKES LIST OF STARTTIME AND END TIME LIST
-const getTotalTime = (stepTimes: stepTimesInterface[]) => {
+const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
-  let shouldTimerRun = stepTimes.filter((item) => item.startTime && item.endTime).length !== stepTimes.length;
+  let shouldTimerRun = stepTimes?.filter((e) => e.status === WORKORDER_SERVICE_STEP_STATUS.start)?.length ? true : false;
   stepTimes.forEach((item) => {
-    if (item.startTime && item.endTime) {
-      totalTimes += item.endTime - item.startTime;
+    totalTimes += item?.duration || 0;
+    if (item.startDate && item.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+      totalTimes += (new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime());
     }
+  });
+  stepTimes.forEach((item) => {
   });
   return { shouldTimerRun, totalTimes };
 };
 
-// RENDER TOTAL TIME COMPONENT
-const RenderTotalTime = ({ stepTimes }: totalTimeInterface) => {
+const RenderTotalTime = ({ stepTimes }: any) => {
   const [time, setTime] = useState(null);
-
   useEffect(() => {
     const { shouldTimerRun, totalTimes } = getTotalTime(stepTimes);
     let interval;
