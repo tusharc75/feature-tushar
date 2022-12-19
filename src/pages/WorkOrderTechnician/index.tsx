@@ -19,7 +19,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition, QUOTATION_STATUS, REPAIR_ORDER_TYPE, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
+import { convertMsToTime, CustomDialogTransition, QUOTATION_STATUS, REPAIR_ORDER_TYPE, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
 import Steps from '../WorkOrder/Service/Steps';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
@@ -427,37 +427,6 @@ const WorkOrderTechnician = () => {
     </Fragment>
   );
 };
-
-function convertMsToTime(milliseconds) {
-  milliseconds = Math.abs(milliseconds);
-
-  function padTo2Digits(num) {
-    num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
-    return num.toString().padStart(2, '0');
-  }
-  let seconds = Math.floor(milliseconds / 1000);
-  let minutes = Math.floor(seconds / 60);
-  let hours = Math.floor(minutes / 60);
-
-  seconds = seconds % 60;
-  minutes = minutes % 60;
-
-  let time = '';
-
-  if (hours === 0) {
-    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours === 0 && minutes === 0) {
-    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours > 0 && hours < 24) {
-    time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours >= 24) {
-    time = `${padTo2Digits(hours / 24)}d`;
-  }
-  return time;
-}
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;

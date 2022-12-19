@@ -2,6 +2,7 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import {
+  convertMsToTime,
   QUOTATION_STATUS,
   repairOrder,
   REPAIR_ORDER_TYPE,
@@ -38,36 +39,57 @@ import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
 
-function convertMsToTime(milliseconds) {
-  milliseconds = Math.abs(milliseconds);
+const getTotalTime = (stepTimes: any) => {
+  let totalTimes = 0;
+  let shouldTimerRun = stepTimes?.filter((e) => e.status === WORKORDER_SERVICE_STEP_STATUS.start)?.length ? true : false;
+  stepTimes.forEach((item) => {
+    totalTimes += item?.duration || 0;
+    if (item.startDate && item.status === WORKORDER_SERVICE_STEP_STATUS.start) {
+      totalTimes += (new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime());
+    }
+  });
+  stepTimes.forEach((item) => {
+  });
+  return { shouldTimerRun, totalTimes };
+};
 
-  function padTo2Digits(num) {
-    num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
-    return num.toString().padStart(2, '0');
-  }
-  let seconds = Math.floor(milliseconds / 1000);
-  let minutes = Math.floor(seconds / 60);
-  let hours = Math.floor(minutes / 60);
+const RenderTotalTime = ({ stepTimes }: any) => {
+  const [time, setTime] = useState(null);
+  useEffect(() => {
+    const { shouldTimerRun, totalTimes } = getTotalTime(stepTimes);
+    let interval;
+    if (shouldTimerRun) {
+      let currentDifference = totalTimes;
+      interval = setInterval(() => {
+        currentDifference += 1000;
+        setTime(convertMsToTime(currentDifference));
+      }, 1000);
+    } else {
+      setTime(convertMsToTime(totalTimes));
+    }
+    return () => {
+      clearInterval(interval);
+    };
+  }, [stepTimes]);
 
-  seconds = seconds % 60;
-  minutes = minutes % 60;
-
-  let time = '';
-
-  if (hours === 0) {
-    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours === 0 && minutes === 0) {
-    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours > 0 && hours < 24) {
-    time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
-  }
-  if (hours >= 24) {
-    time = `${padTo2Digits(hours / 24)}d`;
-  }
-  return time;
-}
+  if (stepTimes.length === 0) return <></>;
+  return (
+    <Box
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        border: '1px solid rgba(0, 0, 0, 0.23)',
+        backgroundColor: 'transparent',
+        padding: '2px 7px',
+        borderRadius: '8px'
+      }}
+    >
+      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
+      {time}
+    </Box>
+  );
+};
 
 const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -158,7 +180,9 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
           const postWorkService = data?.filter((e) => !e.preWork);
           const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
           const services = isQuote ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
+          
           setServiceSteps(services);
+          
           if (services?.length) {
             let pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
             if (pendingServiceIndex === -1) {
@@ -357,10 +381,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
         boxShadow: 'rgb(0 0 0 / 21%) 0px 25px 20px -20px',
         borderRadius: '3px'
       };
-    } else if (
-      data?.order > disabledServicesOrder ||
-      (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)
-    ) {
+    } else if (data?.order > disabledServicesOrder || (isQuotationStep && data?.preWork === false && quotationData?.status !== QUOTATION_STATUS.acceptByCustomer)) {
       return {
         borderWidth: '1px',
         borderStyle: 'solid',
@@ -811,7 +832,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               </Box>
             </Box>
           )}
-
           {anchorEl && (
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
               {allowedToEdit && (
@@ -1035,56 +1055,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
     </Box>
   );
 };
+
 export default Service;
 
-const getTotalTime = (stepTimes: any) => {
-  let totalTimes = 0;
-  let shouldTimerRun = stepTimes?.filter((e) => e.status === WORKORDER_SERVICE_STEP_STATUS.start)?.length ? true : false;
-  stepTimes.forEach((item) => {
-    totalTimes += item?.duration || 0;
-    if (item.startDate && item.status === WORKORDER_SERVICE_STEP_STATUS.start) {
-      totalTimes += (new Date().getTime() - new Date(item?.pauseDate || item?.startDate).getTime());
-    }
-  });
-  stepTimes.forEach((item) => {
-  });
-  return { shouldTimerRun, totalTimes };
-};
 
-const RenderTotalTime = ({ stepTimes }: any) => {
-  const [time, setTime] = useState(null);
-  useEffect(() => {
-    const { shouldTimerRun, totalTimes } = getTotalTime(stepTimes);
-    let interval;
-    if (shouldTimerRun) {
-      let currentDifference = totalTimes;
-      interval = setInterval(() => {
-        currentDifference += 1000;
-        setTime(convertMsToTime(currentDifference));
-      }, 1000);
-    } else {
-      setTime(convertMsToTime(totalTimes));
-    }
-    return () => {
-      clearInterval(interval);
-    };
-  }, [stepTimes]);
-
-  if (stepTimes.length === 0) return <></>;
-  return (
-    <Box
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        border: '1px solid rgba(0, 0, 0, 0.23)',
-        backgroundColor: 'transparent',
-        padding: '2px 7px',
-        borderRadius: '8px'
-      }}
-    >
-      <AccessTimeIcon style={{ marginRight: '3px', color: 'gray', fontSize: '1rem' }} />
-      {time}
-    </Box>
-  );
-};
