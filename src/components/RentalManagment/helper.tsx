@@ -128,7 +128,7 @@ const sumOnParent = (parent, child, fields) => {
     return parent;
 }
 
-const resetValueZero = (rows, fields) => {
+const resetValueZero = (material, fields, _id) => {
     const resetFields = []
     fields.forEach((element) => {
         if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
@@ -154,11 +154,20 @@ const resetValueZero = (rows, fields) => {
             resetFields.push(element.fieldName)
         }
     })
-    rows.forEach((row) => {
+    const result = [];
+    material?.filter((e) => e.parentId === _id)?.forEach((child) => {
         resetFields.forEach((fieldName) => {
-            row[fieldName] = 0;
+            child[fieldName] = 0;
+        })
+        result.push(child)
+        material?.filter((e) => e?.parentId === child?._id)?.forEach((subChild) => {
+            resetFields.forEach((fieldName) => {
+                subChild[fieldName] = 0;
+            })
+            result.push(subChild)
         })
     })
+    return result;
 }
 
 const calculateParentRows = (material: any[], rows: any, fields: any[], rowData: any, parent) => {
@@ -171,7 +180,7 @@ const calculateParentRows = (material: any[], rows: any, fields: any[], rowData:
     }
 };
 
-export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any) => {  
+export const calculateRowsField = async (material: any[], values: any, fields: any[], rowData: any) => {
     let rows: any = []
     const calValues = autoCalculateSpecificFields(values, { ...values, ...rowData }, fields)
     rows.push({ ...rowData, ...calValues })
@@ -180,7 +189,6 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
         await calculateParentRows(material, rows, fields, rowData, parent)
         rows = [...rows, ...parent]
     }
-    const child = material.filter((e) => e.parentId === rowData._id)
-    resetValueZero(child, fields)
+    const child = resetValueZero(material, fields, rowData._id)
     return [...rows, ...child];
 };                                 

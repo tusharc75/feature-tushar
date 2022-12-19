@@ -19,7 +19,11 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
 
   const handleSubmit = (values) => {
     delete values['orderQuantity'];
-    onSuccess(values);
+    const rows = values?.products?.filter((e) => e.returnQuantity > 0);
+    if (rows?.length) {
+      onSuccess(rows);
+    }
+    else { onClose() }
   };
 
   const validate = (values) => {
@@ -52,8 +56,6 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
     }
     return errors;
   };
-
-  console.log(products)
 
   return (
     <Dialog

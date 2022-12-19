@@ -17,7 +17,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
       maxWidth="sm"
       fullWidth>
       <Formik
-        initialValues={data?.manualStartDate && data?.manualEndDate ? {
+        initialValues={data?.isAllowedStartDate && data?.isAllowedEndDate ? {
           manualStartDate: data?.manualStartDate,
           manualEndDate: data?.manualEndDate,
         } : { manualStartDate: data?.manualStartDate }}
@@ -28,7 +28,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
-                  {data?.manualStartDate &&
+                  {data?.isAllowedStartDate &&
                     <Grid item xs={12} sm={12}>
                       <FormTypes
                         size="small"
@@ -45,7 +45,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                         }}
                       />
                     </Grid>}
-                  {data?.manualEndDate &&
+                  {data?.isAllowedEndDate &&
                     <Grid item xs={12} sm={12}>
                       <FormTypes
                         size="small"
@@ -78,10 +78,10 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                 color="primary"
                 onClick={() => {
                   const newValues: any = {};
-                  if (values.manualStartDate) {
+                  if (data.isAllowedStartDate) {
                     newValues.manualStartDate = new Date(values.manualStartDate).toISOString()
                   }
-                  if (values.manualEndDate) {
+                  if (data.isAllowedEndDate) {
                     newValues.manualEndDate = new Date(values.manualEndDate).toISOString()
                   }
                   handleSubmit(newValues);
