@@ -2134,15 +2134,16 @@ export const WORKORDER_SERVICE_STATUS = {
   inProgress: 'In-Progress',
   completed: 'Completed',
   failed: 'Failed',
-  
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
+  start: 'start',
+  pause: 'pause',
+  end: 'end',
   completed: 'Completed',
   passed: 'Passed',
   failed: 'Failed',
   skipped: 'Skipped',
-  end: 'end',
 };
 
 export const REPAIR_ORDER_TYPE = {
