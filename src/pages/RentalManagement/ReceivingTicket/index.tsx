@@ -417,10 +417,13 @@ const ReceivingTicket = ({
       });
 
       productAssets.forEach((d) => {
+        d['parentName'] = d?.hasOwnProperty('parentName') && d?.parentName !== '' ? d?.parentName : d?.productName;
+        d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;
         d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved
           || d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered ? false : true;
-        d['isAllowedToEdit'] = d?.startDate && (!invoiceQty.some(obj => obj?._id === d?._id || obj?._id === d?.uniqueId) || d?.endDate) ? true : false
+        d['isAllowedStartDate'] = d?.manualStartDate && (!invoiceQty.some(obj => obj?._id === d?._id || obj?._id === d?.uniqueId) || d?.endDate) ? true : false
+        d['isAllowedEndDate'] = d?.manualEndDate ? true : false
       });
 
       if (productAssets.filter((e) =>
@@ -560,7 +563,7 @@ const ReceivingTicket = ({
     );
 
   const ActionRenderer = (params) => (
-    allowedToEdit && params?.data?.isAllowedToEdit ?
+    allowedToEdit && (params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate) ?
       <HtmlTooltip title={`Update Start Date / End Date`}>
         <IconButton
           size='small'
@@ -1534,7 +1537,7 @@ const ReceivingTicket = ({
         <ReturnTicketDialog
           products={selectedRecords.filter((d: any) => d?.type === 'Product')}
           onSuccess={(data) => {
-            setShowQtyDialog({ data: data?.products, open: false });
+            setShowQtyDialog({ data: data, open: false });
             setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
             fetchRecords();
             fetchRentalData();

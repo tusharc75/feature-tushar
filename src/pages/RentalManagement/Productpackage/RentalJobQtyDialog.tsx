@@ -374,8 +374,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
           rows = [...rows, ...packages]
         })
       }
-
-      console.log(rows)
       handleSaveData(rows)
     }
     else {
@@ -383,30 +381,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         setShowConfirmationDialog(true);
       }
       else {
-        // rowData: any = { ...rowData, ...values }
-        // if (rowData.type === "package") {
-        //   const product = material.filter((e) => e.parentId === rowData._id)
-        //   resetValueZero(product, allFields)
-        //   rows = [...rows, ...product]
-        // }
-        // else if (rowData.type === "product" && rowData.parentId) {
-        //   if (values[`totalPrice_${currency}`] !== rowData[`totalPrice_${currency}`]) {
-        //     const packages: any = material.filter((e) => e._id === rowData.parentId)
-        //     const product: any = material.filter((e) => e.parentId === rowData.parentId)
-        //     product.forEach((element) => {
-        //       if (element._id === rowData._id) {
-        //         for (var key in values) {
-        //           element[key] = values[key];
-        //         }
-        //       }
-        //     })
-
-        //     sumOnParent(packages, product, allFields, currency)
-        //     rows = [...rows, ...packages]
-        //   }
-        // }
-
-        // console.log(rows, material, values)
         const rows = await calculateRowsField(material, values, allFields, rowData)
         handleSaveData(rows)
         setShowConfirmationDialog(false);

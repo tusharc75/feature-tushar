@@ -278,11 +278,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           ele.qty = 1;
           ele._id = ele?.inventoryDetail?._id
           ele.materialId = ele?.inventoryDetail?._id
-          let values = { qty: 1, };
+          let values = { qty: 1 };
           values["actualStartDate"] = ele?.manualStartDate
-          values["estimateStartDate"] = ele?.manualStartDate
           values["actualEndDate"] = ele?.manualEndDate || element?.estimateEndDate
-          values["estimateEndDate"] = ele?.manualEndDate || element?.estimateEndDate
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           const { materialId, qty, type, _id, ...rest } = element
           materialDataConst.push({ ...rest, ...ele, ...calValues })
@@ -394,6 +392,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
     let rows: any = [];
     selectedProducts.forEach((element) => {
+      element.invalidDate = false;
+      
       const product = invoicedProducts.find((p) => p._id === element._id);
       const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
       const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
@@ -525,7 +525,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                         autoOk
                         fullWidth
                         size="small"
-                        disablePast
                         variant="inline"
                         inputVariant="outlined"
                         // minDate={endDate || new Date()}
