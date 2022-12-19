@@ -271,28 +271,25 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     } = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`);
     data = response?.data?.data;
     let materialDataConst: any = []
-    data?.material?.forEach(element => {
+    data?.material?.filter(d => d.actualStartDate !== "" && d.actualStartDate !== null && (d.parentId === null || d.parentId === undefined)).forEach(element => {
       if (element?.productDetail?.serializedProduct === true && (element?.parentId === null || element?.parentId === undefined)) {
-        data?.inventory?.filter(d => d.product === element?.materialId && !d.isReplaced)?.forEach((ele: any) => {
+        data?.inventory?.filter(d => d.product === element?.materialId && !d.isReplaced && d?.manualStartDate)?.forEach((ele: any) => {
           ele.type = 'asset';
           ele.qty = 1;
           ele._id = ele?.inventoryDetail?._id
           ele.materialId = ele?.inventoryDetail?._id
           let values = { qty: 1, };
-          if (ele?.manualStartDate) {
-            values["actualStartDate"] = ele?.manualStartDate
-            values["estimateStartDate"] = ele?.manualStartDate
-          }
-          if (ele?.manualEndDate) {
-            values["actualEndDate"] = ele?.manualEndDate
-            values["estimateEndDate"] = ele?.manualEndDate
-          }
+          values["actualStartDate"] = ele?.manualStartDate
+          values["estimateStartDate"] = ele?.manualStartDate
+          values["actualEndDate"] = ele?.manualEndDate || element?.estimateEndDate
+          values["estimateEndDate"] = ele?.manualEndDate || element?.estimateEndDate
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           const { materialId, qty, type, _id, ...rest } = element
           materialDataConst.push({ ...rest, ...ele, ...calValues })
         });
       }
       else {
+        element["actualEndDate"] = element?.actualEndDate || element?.estimateEndDate
         materialDataConst.push(element)
       }
     });
