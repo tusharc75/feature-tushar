@@ -142,8 +142,8 @@ const Quotation = ({
 
   const setHeaderStatus = () => {
     if (updateOrderStatus && (repairOrderData.status !== REPAIR_ORDER_STATUS.buildingQuote) && (repairOrderData.status === REPAIR_ORDER_STATUS.preWork)) {
-          updateOrderStatus(REPAIR_ORDER_STATUS.buildingQuote);
-        }
+      updateOrderStatus(REPAIR_ORDER_STATUS.buildingQuote);
+    }
   }
 
   const fetchFields = async (currency) => {
@@ -204,37 +204,27 @@ const Quotation = ({
         )
       },
       {
-        accessor: 'productDetail',
-        Header: 'Product Detail',
+        accessor: 'productName',
+        Header: 'Product',
+        width: 200,
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
-            <p
-              className="text-truncate"
-              title={
-                row.original?.productDetail?.productName
-                  ? row.original?.productDetail?.productName
-                  : row.original?.serializedAssetDetail?.product?.optionLabel
-              }
-            >
-              {row.original?.productDetail?.productName ? (
-                <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productDetail?._id}`} target="_blank">
-                  {row.original?.productDetail?.productName}
-                </a>
-              ) : row.original?.serializedAssetDetail?.product?.optionLabel ? (
-                <a
-                  className="link text-truncate"
-                  href={`${routes.productDetail.path}/${row.original?.serializedAssetDetail?.product?.optionValue}`}
-                  target="_blank"
-                >
-                  {row.original?.serializedAssetDetail?.product?.optionLabel}
-                </a>
+            <p className="text-truncate" title={row.original?.productName}>
+              {row.original?.productName ? (
+                row.original?.productId ? (
+                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
+                    {row.original?.productName}
+                  </a>
+                ) : (
+                  row.original?.productName
+                )
               ) : (
                 <NoDataCell />
               )}
             </p>
           </div>
         )
-      }
+      },
       // {
       //   accessor: 'leadTime',
       //   Header: 'Lead Time (Days)',
@@ -329,50 +319,8 @@ const Quotation = ({
         });
       }
     });
-    // coloum.push({
-    //   accessor: 'action',
-    //   Header: '',
-    //   minWidth: 100,
-    //   width: 100,
-    //   sticky: 'right',
-    //   disableFilters: true,
-    //   canDrag: false,
-    //   Cell: ({ row }) =>
-    //     !row.original.hideSelection && (
-    //       <Grid container spacing={1}>
-    //         {allowedToEdit && (
-    //           <IconButton
-    //             size="small"
-    //             aria-label="Details"
-    //             onClick={() => {
-    //               setLeadTimeDialog({ open: true, data: row.original });
-    //             }}
-    //           >
-    //             <DateRangeIcon fontSize="small" color="primary" />
-    //           </IconButton>
-    //         )}
-    //         <Box ml={1} />
-    //         {allowedToDelete && (
-    //           <IconButton
-    //             size="small"
-    //             aria-label="Details"
-    //             onClick={() => {
-    //               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-    //               setDeleteData(obj);
-    //             }}
-    //           >
-    //             <DeleteIcon fontSize="small" color="error" />
-    //           </IconButton>
-    //         )}
-    //       </Grid>
-    //     )
-    // })
+
     coloum.forEach((element) => {
-      // if (element.accessor.includes('detail')) {
-      //   element['Footer'] = () => {
-      //     return <>Total</>;
-      //   };
-      // } else
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
@@ -417,6 +365,8 @@ const Quotation = ({
             ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
         }`;
+      parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
+      parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -441,6 +391,8 @@ const Quotation = ({
             ? _subRow.serviceDetail?.serviceName
             : _subRow.packageDetail?.packageName
         }`;
+      _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
+      _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -489,6 +441,8 @@ const Quotation = ({
       delete element.subRows;
       delete element.leadTime;
       delete element.leadTimeData;
+      delete element.productName;
+      delete element.productId;
     });
     setUpdating(true);
     axiosInstance()
@@ -602,7 +556,7 @@ const Quotation = ({
             versionData={quotationData?.versions[currentVersion]}
             quotationData={quotationData}
             previewOnly={true}
-            allowedToEdit={invoiceStep ?  !allowedToEdit : allowedToEdit}
+            allowedToEdit={invoiceStep ? !allowedToEdit : allowedToEdit}
             versionId={quotationData?.versions[currentVersion]?._id}
             columns={columns}
             allColumn={allColumn}

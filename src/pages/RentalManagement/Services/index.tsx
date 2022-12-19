@@ -82,8 +82,12 @@ const Services = ({
   const fetchFields = async () => {
     setColumns(null);
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    if (!allowedToEdit) {
+      allFields?.forEach((e) => {
+        e.isColumnEditable = false;
+      })
+    }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
-
     const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, currencySymbol, renderedFrom)
     let column: any = [
       {
@@ -190,7 +194,6 @@ const Services = ({
         }
       },
     ];
-
     const isPriceRequired = data.filter((el) => el.fieldName === "price" && el.required).length > 0;
     setIsRateRequired(isPriceRequired)
     // data.forEach((element) => {
