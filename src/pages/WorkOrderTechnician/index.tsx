@@ -19,7 +19,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomDialogTransition, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
+import { CustomDialogTransition, QUOTATION_STATUS, REPAIR_ORDER_TYPE, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
 import Steps from '../WorkOrder/Service/Steps';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { Autocomplete, Skeleton } from '@material-ui/lab';
@@ -125,46 +125,57 @@ const WorkOrderTechnician = () => {
 
   const fetchWorkOrderTechnician = () => {
     setLoadingWO(true);
-    let api =
-      selectedWorkOrder && selectedRepairOrder
-        ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}&repairOrder=${selectedRepairOrder.optionValue}`
-        : selectedWorkOrder
+    let api = selectedWorkOrder && selectedRepairOrder
+      ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}&repairOrder=${selectedRepairOrder.optionValue}`
+      : selectedWorkOrder
         ? `/work-order-technician?workOrder=${selectedWorkOrder.optionValue}`
         : selectedRepairOrder
-        ? `/work-order-technician?repairOrder=${selectedRepairOrder.optionValue}`
-        : `/work-order-technician`;
+          ? `/work-order-technician?repairOrder=${selectedRepairOrder.optionValue}`
+          : `/work-order-technician`;
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
-        const otherThanPendingData = data?.filter((item) => item.status !== 'Pending');
+        const otherThanPendingData = data?.filter((item) => item.status !== WORKORDER_SERVICE_STATUS.pending);
+        var allPendingData: any = [];
 
-        const allPostNotAcceptedByCustomer = data
-          ?.filter((item) => item.status === 'Pending')
-          .map((i) => {
-            if (i?.customerAccepted === false && i?.service?.preWork === false) {
-              i.status = WORKORDER_SERVICE_STATUS.backlog;
-            }
-            return i;
-          });
-
-        const allPending = data?.filter((item) => item.status === 'Pending');
-
-        const allPendingData = allPostNotAcceptedByCustomer
-          ?.filter((item) => item.status === 'Pending')
-          ?.map((item, idx) => {
-            let d: any = item;
-            if (idx > 0 && item?.order !== allPending[0]?.order) {
-              d.status = WORKORDER_SERVICE_STATUS.backlog;
-            }
-            return d;
-          });
-        const allBacklogData = allPostNotAcceptedByCustomer?.filter((item) => item.status === WORKORDER_SERVICE_STATUS.backlog);
-
-        const sortedServiceData = [...allPendingData, ...allBacklogData, ...otherThanPendingData]?.sort((a, b) => {
-          return a.order - b.order;
+        const workOrders: any = []
+        data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.pending).forEach(item => {
+          if (!workOrders?.find((e) => e._id === item?.workOrderDetail?._id)) {
+            workOrders.push({
+              _id: item?.workOrderDetail?._id,
+              type: item?.workOrderDetail?.repairOrder?.type,
+              quotationStatus: item?.workOrderDetail?.repairOrder?.quotationStatus
+            })
+          }
         });
 
-        setServiceData(sortedServiceData);
+        workOrders?.forEach((item) => {
+          const services = data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.pending && e?.workOrderDetail?._id === item?._id)?.sort((a, b) => {
+            return a.order - b.order;
+          });
+          if (services?.length) {
+            const firstOrderService = services?.filter((e) => e.order === services[0]?.order)
+            const restOrderService = services?.filter((e) => e.order !== services[0]?.order)
+
+            if (firstOrderService?.length) {
+              if (item?.type === REPAIR_ORDER_TYPE.internal || firstOrderService[0]?.service?.preWork === true
+                || (firstOrderService[0]?.service?.preWork === false && item?.quotationStatus === QUOTATION_STATUS.acceptByCustomer)) {
+                firstOrderService?.forEach((s) => {
+                  allPendingData.push(s);
+                })
+              }
+              else {
+                firstOrderService?.forEach((s) => {
+                  allPendingData.push({ ...s, status: WORKORDER_SERVICE_STATUS.backlog });
+                })
+              }
+            }
+            restOrderService?.forEach((s) => {
+              allPendingData.push({ ...s, status: WORKORDER_SERVICE_STATUS.backlog });
+            })
+          }
+        })
+        setServiceData([...allPendingData, ...otherThanPendingData]);
         setLoadingWO(false);
       })
       ?.catch((err) => {
@@ -182,6 +193,7 @@ const WorkOrderTechnician = () => {
 
     return stepTimes;
   };
+
   const handleToggleServices = (key) => {
     if (servicesToKeep.includes(key)) {
       setServicesToKeep(servicesToKeep.filter((k) => k !== key));
@@ -296,86 +308,84 @@ const WorkOrderTechnician = () => {
                         </Box>
                         {!loadingWO
                           ? serviceData
-                              ?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key])
-                              .map((data, index) => {
-                                const stepTime = getFieldsWithOtherDetails(data?.stepData || []);
-                                return (
-                                  <Box
-                                    key={index}
-                                    onClick={() => {
-                                      let tempServiceData = data?.service;
-                                      if (data.status !== WORKORDER_SERVICE_STATUS.backlog) {
-                                        tempServiceData['uniqueId'] = data?._id;
-                                        tempServiceData['status'] = data?.status;
-                                        setService(tempServiceData);
-                                        setWorkOrderId(data?.workOrderDetail?._id);
-                                        setServiceDetailsShow(true);
-                                      }
-                                    }}
-                                    style={{
-                                      backgroundColor: WORKORDER_STATUS_COLOR[key],
-                                      cursor: `${data.status === WORKORDER_SERVICE_STATUS.backlog ? 'not-allowed' : 'pointer'}`
-                                    }}
-                                    className={` ${classes.activitybox}`}
-                                  >
-                                    <Box>
-                                      <Grid container>
-                                        <Grid item xs={11}>
-                                          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                                            <Box display="flex" mr="10px">
-                                              <Typography
-                                                style={{
-                                                  textOverflow: 'ellipsis',
-                                                  overflow: 'hidden',
-                                                  whiteSpace: 'nowrap',
-                                                  marginRight: '5px'
-                                                }}
-                                                variant="subtitle2"
-                                              >
-                                                {data?.service?.serviceName}
-                                              </Typography>
-                                            </Box>
-                                            <Box>
-                                              <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
-                                            </Box>
-                                            {data?.serviceStatus && (
-                                              <Box ml={1}>
-                                                <Chip
-                                                  label={data?.serviceStatus}
-                                                  variant="outlined"
-                                                  // color={data?.serviceStatus === 'Fail' ? 'default' : 'primary'}
-                                                  style={{
-                                                    borderColor: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed ? 'red' : 'green',
-                                                    color: data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? 'red' : 'green'
-                                                  }}
-                                                />
-                                              </Box>
-                                            )}
-                                            <Box>
-                                              <RenderTotalTime stepTimes={stepTime} />
-                                            </Box>
-                                          </div>
-                                        </Grid>
-                                        <Grid item xs={1}></Grid>
-                                      </Grid>
-                                    </Box>
-                                    <Box pt={2}></Box>
-                                  </Box>
-                                );
-                              })
-                          : [...Array(3).keys()]?.map((data, index) => {
+                            ?.filter((d) => d.status === WORKORDER_SERVICE_STATUS[key])
+                            .map((data, index) => {
+                              const stepTime = getFieldsWithOtherDetails(data?.stepData || []);
                               return (
-                                <Box key={index} className={` ${classes.activitybox}`} style={{ padding: '0' }}>
-                                  <Skeleton
-                                    variant="rect"
-                                    animation="wave"
-                                    width={'100%'}
-                                    height={100}
-                                    style={{ borderRadius: 6, backgroundColor: WORKORDER_STATUS_COLOR[key] }}
-                                  />
+                                <Box
+                                  key={index}
+                                  onClick={() => {
+                                    let tempServiceData = data?.service;
+                                    if (data.status !== WORKORDER_SERVICE_STATUS.backlog) {
+                                      tempServiceData['uniqueId'] = data?._id;
+                                      tempServiceData['status'] = data?.status;
+                                      setService(tempServiceData);
+                                      setWorkOrderId(data?.workOrderDetail?._id);
+                                      setServiceDetailsShow(true);
+                                    }
+                                  }}
+                                  style={{
+                                    backgroundColor: `${data.status === WORKORDER_SERVICE_STATUS.pending ? "#FFFFE0" :
+                                      data.status === WORKORDER_SERVICE_STATUS.inProgress ? "#FFD580" :
+                                        data?.serviceStatus ? data?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed ? '#E9FFE8' : '#FFE9EA' : "white"}`,
+                                    cursor: `${data.status === WORKORDER_SERVICE_STATUS.backlog ? 'not-allowed' : 'pointer'}`
+                                  }}
+                                  className={` ${classes.activitybox}`}
+                                >
+                                  <Box>
+                                    <Grid container>
+                                      <Grid item xs={11}>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                          <Box display="flex" mr="10px">
+                                            <Typography
+                                              style={{
+                                                textOverflow: 'ellipsis',
+                                                overflow: 'hidden',
+                                                whiteSpace: 'nowrap',
+                                                marginRight: '5px'
+                                              }}
+                                              variant="subtitle2"
+                                            >
+                                              {data?.service?.serviceName}
+                                            </Typography>
+                                          </Box>
+                                          <Box>
+                                            <Chip size="small" label={data?.workOrderDetail?.workOrderNumber} />
+                                          </Box>
+                                          {data?.serviceStatus && (
+                                            <Box ml={1}>
+                                              <Chip
+                                                label={data?.serviceStatus}
+                                                variant="outlined"
+                                                color={'primary'}
+                                              />
+                                            </Box>
+                                          )}
+                                          <Box>
+                                            <RenderTotalTime stepTimes={stepTime} />
+                                          </Box>
+                                        </div>
+                                      </Grid>
+                                      <Grid item xs={1}></Grid>
+                                    </Grid>
+                                  </Box>
+                                  <Box pt={2}></Box>
                                 </Box>
                               );
-                            })}
+                            })
+                          : [...Array(3).keys()]?.map((data, index) => {
+                            return (
+                              <Box key={index} className={` ${classes.activitybox}`} style={{ padding: '0' }}>
+                                <Skeleton
+                                  variant="rect"
+                                  animation="wave"
+                                  width={'100%'}
+                                  height={100}
+                                  style={{ borderRadius: 6, backgroundColor: WORKORDER_STATUS_COLOR[key] }}
+                                />
+                              </Box>
+                            );
+                          })}
                       </div>
                     </Grid>
                   );
@@ -398,7 +408,7 @@ const WorkOrderTechnician = () => {
             selectedService={service}
             serviceSteps={[]}
             allowedToEdit={true}
-            setDisableCompleteFail={() => {}}
+            setDisableCompleteFail={() => { }}
             fetchService={fetchWorkOrderTechnician}
             referencType={'workOrderTechnician'}
           />
