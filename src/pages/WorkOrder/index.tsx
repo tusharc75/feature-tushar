@@ -30,6 +30,8 @@ import { Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import { AddOutlined } from '@material-ui/icons';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import DeleteIcon from '@material-ui/icons/Delete';
+import HtmlTooltip from "src/components/CustomTooltipTitle";
 
 let workOrderTimeout;
 
@@ -171,16 +173,16 @@ const WorkOrder = () => {
           </IconButton>
         </Tooltip>
       )}
-      <GridDeleteIcon
-        hasDeletePermission={permissions?.workOrder?.isDelete}
-        ownerId={params.data.ownerId}
-        userId={user?.user?._id}
-        onDelete={() => {
-          setDeleteRecord(params.data);
-          setIsConformDialogVisible(true);
-        }}
-        entity="Work Order"
-      />
+      {permissions?.workOrder?.isDelete && !params?.data?.deleted &&
+        <HtmlTooltip title="Delete">
+          <IconButton size="small" aria-label="Delete" onClick={() => {
+            setDeleteRecord(params.data);
+            setIsConformDialogVisible(true);
+          }} >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </HtmlTooltip >
+      }
     </>
   );
 
@@ -393,10 +395,13 @@ const WorkOrder = () => {
                 open={Boolean(anchorEl)}
                 onClose={closeActions}
               >
-                <MenuItem onClick={() => {
-                  setIsConformDialogVisible(true)
-                  closeActions()
-                }}>Delete</MenuItem>
+                <MenuItem
+                  disabled={permissions?.workOrder?.isDelete
+                    && selectedRecords?.filter((e) => !e.deleted)?.length === selectedRecords?.length ? false : true}
+                  onClick={() => {
+                    setIsConformDialogVisible(true)
+                    closeActions()
+                  }}>Delete</MenuItem>
               </Menu>
             </Box>
           </Grid>
@@ -449,6 +454,12 @@ const WorkOrder = () => {
           renderedFrom={renderedFrom}
           refreshGrid={fetchWorkOrder}
           showOnlyShowFilteredRecordSwitch={true}
+          rowClassRules={{
+            "red-data-row":
+              function (params) {
+                return params.data.deleted;
+              },
+          }}
         />
       ) : null}
       {showDeleteWarningConfirmBox ? (
