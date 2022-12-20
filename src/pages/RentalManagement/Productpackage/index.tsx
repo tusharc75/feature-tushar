@@ -29,7 +29,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import moment from 'moment';
 import { rentalManagement, dateFormat, pricingCondition, formatAmountWithCurrency } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import RentalJobQtyDialog, { resetValueZero, sumOnParent } from './RentalJobQtyDialog';
+import RentalJobQtyDialog from './RentalJobQtyDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
@@ -381,12 +381,12 @@ const Productpackage = ({
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail = `${parent.type === 'service'
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-          : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.packageDetail?.packageName
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'service'
@@ -423,12 +423,12 @@ const Productpackage = ({
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'package'
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === 'product'
-              ? _subRow.productDetail?.productName
-              : ''
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'package'
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === 'product'
+            ? _subRow.productDetail?.productName
+            : ''
         } `;
       _subRow.description =
         _subRow.type === 'service'
