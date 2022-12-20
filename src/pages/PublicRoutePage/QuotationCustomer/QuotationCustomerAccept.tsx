@@ -246,7 +246,11 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
   };
 
   const generateNestedData = (material, inventory, parent, currency) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    const subRows: any = material
+      ?.filter((e) => e.parentId === parent._id)
+      ?.sort((a, b) => a?.order - b?.order)
+      ?.sort((a, b) => a?.preWork - b?.preWork);
+
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = `${
