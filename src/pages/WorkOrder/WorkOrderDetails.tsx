@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Divider, CircularProgress } from '@material-ui/core';
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Divider, CircularProgress, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -27,6 +27,8 @@ import Service from './Service';
 import View from './View';
 import Consumables from './Consumables';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import { ExpandMore } from '@material-ui/icons';
+import { GrStatusInfo } from 'react-icons/gr';
 
 const WorkOrderDetails = () => {
 
@@ -50,7 +52,9 @@ const WorkOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [previewPdf, setPreviewPdf] = useState(false);
+  const [statusOptions, setStatusOptions] = useState([]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -87,6 +91,12 @@ const WorkOrderDetails = () => {
       .get(`/field?resource=${sidebarResource.workOrder}`)
       .then(({ data: { data } }) => {
         setWorkOrderFields(data);
+        data.some((o) => {
+          if (o?.fieldData?.fieldName === 'status') {
+            setStatusOptions([...o.fieldData.option]);
+            return true;
+          }
+        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -170,6 +180,39 @@ const WorkOrderDetails = () => {
       });
   };
 
+  const updateJobStatus = (status) => {
+    axiosInstance()
+      .patch(`${workOrder.api}/status/${id}`, { status: status })
+      .then(({ data: { data } }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+        fetchWorkOrderData()
+      })
+
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const handleStatusChange = (o) => {
+    if (o.optionValue && workOrderData?.status !== o.optionValue) {
+      updateJobStatus(o.optionValue);
+    }
+  };
+
+
   return (
     <>
       <Grid container className="headerbox">
@@ -180,6 +223,49 @@ const WorkOrderDetails = () => {
           <Paper>
             {workOrderData ? (
               <DetailsPageHeader heading={workOrderData?.workOrderNumber} mainPoints={null} showHeading={true}>
+                {permissions?.workOrder?.isUpdate && 
+                  allowedToEdit && (
+                    <Fragment>
+                    <Button
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                    >
+                      {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      {statusOptions?.map((o, index) => {
+                        return (
+                          <MenuItem
+                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === workOrderData?.status)}
+                            onClick={() => {
+                              closeActions();
+                              handleStatusChange(o);
+                            }}
+                            value={o}
+                          >
+                            {o?.optionLabel}
+                          </MenuItem>
+                        );
+                      })}
+                    </Menu>
+                  </Fragment>
+                  )
+                }
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'outlined'}
                   color="primary"
