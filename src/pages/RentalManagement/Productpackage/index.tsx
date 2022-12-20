@@ -685,6 +685,9 @@ const Productpackage = ({
         }
       });
     } else {
+      if (inputField.hasOwnProperty("qtyDisplay")) {
+        inputField["qty"] = inputField["qtyDisplay"]
+      }
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, allFields, updatedData);
       handleSaveData(rows);
