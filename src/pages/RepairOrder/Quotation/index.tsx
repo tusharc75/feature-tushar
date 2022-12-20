@@ -1,28 +1,12 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from 'react';
 import {
-  Grid,
   Box,
   Button,
-  Paper,
   Typography,
-  IconButton,
-  CircularProgress,
   Chip,
-  Tab,
-  Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
   useMediaQuery,
   Menu,
   MenuItem,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  DialogContent,
-  makeStyles,
-  MenuList,
-  Popover
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -69,7 +53,6 @@ const Quotation = ({
   allowedToDelete,
   setQuotationVersionData,
   invoiceStep = false,
-  updateOrderStatus = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -106,18 +89,6 @@ const Quotation = ({
     fetchQuotationData();
   }, [repairOrderData]);
 
-  useEffect(() => {
-    if (updateOrderStatus && invoiceStep && repairOrderData.status !== REPAIR_ORDER_STATUS.completed) {
-      updateOrderStatus(REPAIR_ORDER_STATUS.completed);
-    }
-  }, [invoiceStep]);
-
-  useEffect(() => {
-    if (updateOrderStatus && [REPAIR_ORDER_STATUS.preWork, REPAIR_ORDER_STATUS.inProgress].includes(repairOrderData.status)) {
-      updateOrderStatus(REPAIR_ORDER_STATUS.buildingQuote);
-    }
-  });
-
   const fetchQuotationData = (versionNumber = null) => {
     setQuotationData(null);
     axiosInstance()
@@ -129,7 +100,6 @@ const Quotation = ({
         setCurrentVersion(tempCurrentVersion);
         setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
         setNextStep(data?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
-        setHeaderStatus();
       });
   };
 
@@ -139,12 +109,6 @@ const Quotation = ({
       fetchProductInventory();
     }
   }, [quotationData && quotationData?.versions[currentVersion]?._id]);
-
-  const setHeaderStatus = () => {
-    if (updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.buildingQuote && repairOrderData.status === REPAIR_ORDER_STATUS.preWork) {
-      updateOrderStatus(REPAIR_ORDER_STATUS.buildingQuote);
-    }
-  };
 
   const fetchFields = async (currency) => {
     setColumns(null);
@@ -542,9 +506,6 @@ const Quotation = ({
           type: 'success',
           message: 'Sent to customer Sucessfully'
         });
-        if (updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.waitingQuote) {
-          updateOrderStatus(REPAIR_ORDER_STATUS.waitingQuote);
-        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -816,7 +777,6 @@ const Quotation = ({
             fetchQuotationData(currentVersion);
           }}
           setCustomerAcceptable={setCustomerAcceptable}
-          updateOrderStatus={updateOrderStatus}
         />
       )}
       {showQuotationSummaryDialog && (
