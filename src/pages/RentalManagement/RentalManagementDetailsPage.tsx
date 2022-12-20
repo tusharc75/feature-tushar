@@ -96,6 +96,7 @@ const RentalManagementDetailsPage = () => {
 
   const [quotationData, setQuotationData] = useState(null);
   const [currentVersion, setCurrentVersion] = useState(null);
+  const [isDisableCustomerAccount, setIsDisableCustomerAccount] = useState(false);
 
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
@@ -200,6 +201,14 @@ const RentalManagementDetailsPage = () => {
           } else {
             setVersionNotClonned(false);
           }
+
+          for (let i = 0; i < keys.length; i++) {
+            if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(data?.versions[keys[i]]?.status)) {
+              setIsDisableCustomerAccount(true);
+              break;
+            }
+          }
+
         }
       });
   };
@@ -876,7 +885,7 @@ const RentalManagementDetailsPage = () => {
             setOpenUpdateDialog(false);
             fetchRentalManagementData();
           }}
-          isDisableCustomerAccount={quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false}
+          isDisableCustomerAccount={isDisableCustomerAccount}
         />
       )}
     </>
