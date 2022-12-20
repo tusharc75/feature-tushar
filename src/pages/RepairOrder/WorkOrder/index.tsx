@@ -578,9 +578,15 @@ const WorkOrder = ({
                   }}
                   disabled={
                     services?.length &&
-                    services?.filter(
+                    (services?.filter(
                       (d) => d.type === 'service' && d.workOrder?._id === services[0].workOrder?._id && d.status === WORKORDER_SERVICE_STATUS.pending
-                    )?.length === services?.length
+                    )?.length === services?.length ||
+                      services?.filter(
+                        (d) =>
+                          d.type === 'serializedAsset' &&
+                          d.workOrder?._id === services[0].workOrder?._id &&
+                          d.status === WORKORDER_SERVICE_STATUS.pending
+                      )?.length === services?.length)
                       ? false
                       : true
                   }
