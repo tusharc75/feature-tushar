@@ -111,7 +111,7 @@ const Quotation = ({
   }, [quotationData && quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async (currency) => {
-    setColumns(null)
+    setColumns(null);
     var data = await fetch_quotation_product_fields(currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
@@ -132,7 +132,9 @@ const Quotation = ({
         width: 300,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
+            {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              quotationData?.versions[currentVersion]?.status
+            ) ? (
               <p> {row.original.detail}</p>
             ) : (
               <p
@@ -153,13 +155,14 @@ const Quotation = ({
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'serializedAsset'
-                    ? routes.serializedAssetDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'serializedAsset'
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'package'
-                        ? routes.packagesDetail.path
-                        : routes.serviceMasterDetail.path
+                      ? routes.packagesDetail.path
+                      : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -188,7 +191,7 @@ const Quotation = ({
             </p>
           </div>
         )
-      },
+      }
       // {
       //   accessor: 'leadTime',
       //   Header: 'Lead Time (Days)',
@@ -319,16 +322,17 @@ const Quotation = ({
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
-    rows.forEach((parent, i) => {
+    rows?.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
@@ -344,17 +348,21 @@ const Quotation = ({
   };
 
   const generateNestedData = (material, inventory, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    const subRows: any = material
+      ?.filter((e) => e.parentId === parent._id)
+      ?.sort((a, b) => a?.order - b?.order)
+      ?.sort((a, b) => a?.preWork - b?.preWork);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -371,7 +379,7 @@ const Quotation = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return orderBy(subRows, ['order'], ['asc']);
+    return orderBy(subRows, ['srno'], ['asc']);
   };
 
   const getNestedSubRows = (obj, original) => {
@@ -489,7 +497,8 @@ const Quotation = ({
   };
 
   const handleSendToCustomer = () => {
-    axiosInstance().put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+    axiosInstance()
+      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
       .then(() => {
         fetchQuotationData();
         toastConfig.setToastConfig({
@@ -501,7 +510,7 @@ const Quotation = ({
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   return (
     <Fragment>
@@ -553,14 +562,16 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
-                  disabled={material.filter((e) => e.parentId === null).some(
-                    (d) =>
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                  )}
+                  disabled={material
+                    .filter((e) => e.parentId === null)
+                    .some(
+                      (d) =>
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                    )}
                   onClick={handleSendToCustomer}
                   variant="outlined"
                   size="small"
@@ -594,17 +605,21 @@ const Quotation = ({
                   Create New Version
                 </Button>
               ) : null}
-              {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationData?.versions[currentVersion]?.status) && <Button
-                variant="outlined"
-                color="default"
-                size="small"
-                onClick={openActions}
-                aria-controls="action-menu"
-                disabled={selectedProducts.length === 0}
-              >
-                Actions
-                <ExpandMore />
-              </Button>}
+              {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationData?.versions[currentVersion]?.status
+              ) && (
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedProducts.length === 0}
+                >
+                  Actions
+                  <ExpandMore />
+                </Button>
+              )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -689,8 +704,12 @@ const Quotation = ({
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
-              hideSelection={!allowedToEdit || [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                quotationData?.versions[currentVersion]?.status)}
+              hideSelection={
+                !allowedToEdit ||
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationData?.versions[currentVersion]?.status
+                )
+              }
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
             />
