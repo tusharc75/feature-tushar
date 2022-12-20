@@ -122,7 +122,7 @@ const WorkOrderViews = (props) => {
           style: s?.preWork ? customNodeStyles.preWorkService : customNodeStyles.postWorkService
         });
         flowEdge.push({
-          id: `workOrder-service-${s._id}`,
+          id: `workOrder-service-${serviceId}-${workOrderId}`,
           source: `${workOrderId}`,
           arrowHeadType: 'arrow',
           target: `${serviceId}`
@@ -166,7 +166,7 @@ const WorkOrderViews = (props) => {
                 : customNodeStyles.step
           });
           flowEdge.push({
-            id: `workOrder-service-steps-${step._id}`,
+            id: `workOrder-service-steps-${s?._id}_${s?.uniqueId}-${stepId}`,
             source: `${s?._id}_${s?.uniqueId}`,
             arrowHeadType: 'arrow',
             target: `${stepId}`
