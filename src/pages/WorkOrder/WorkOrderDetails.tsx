@@ -95,7 +95,7 @@ const WorkOrderDetails = () => {
         setWorkOrderFields(data);
         data.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions([...o.fieldData.option]);
+            setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== "Deleted")]);
             return true;
           }
         });
@@ -129,7 +129,7 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`${routes.workOrder.path}/service/${id}`)
       .then(({ data: { data } }) => {
-        if (data?.filter((e) => e.type === "service" && e.status === WORKORDER_SERVICE_STATUS.completed).length === data?.length) {
+        if (data?.length && data?.filter((e) => e.type === "service" && e.status === WORKORDER_SERVICE_STATUS.completed).length === data?.length) {
           setCanComplete(true)
         }
         if (data?.filter((e) => e.type === "service" && e.status === WORKORDER_SERVICE_STATUS.pending).length === data?.length) {
@@ -295,7 +295,7 @@ const WorkOrderDetails = () => {
                 >
                   {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
                 </Button>
-                {permissions?.workOrder?.isUpdate && allowedToEdit && (
+                {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
@@ -307,7 +307,7 @@ const WorkOrderDetails = () => {
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
-                {permissions?.workOrder?.isDelete && allowedToEdit && canDelete &&
+                {permissions?.workOrder?.isDelete && allowedToEdit && canDelete && !workOrderData?.deleted &&
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </DetailsPageHeader>
             ) : (
