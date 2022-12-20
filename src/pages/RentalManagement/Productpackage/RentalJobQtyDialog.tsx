@@ -18,7 +18,7 @@ import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog";
 import { uniq, map, orderBy, isEqual, intersection } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../constants/formulaUtility";
 import moment from "moment";
-import { calculatePrice, calculateRowsField, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField, fetch_rental_product_fields, resetValueZero } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from "../../../StateProvider/OfflineContext/OfflineContext";
 import { object, number } from 'yup';
 
@@ -36,38 +36,38 @@ interface EditDialogProps {
   isInlineEdit?: Boolean
 }
 
-export const resetValueZero = (rows, allFields) => {
-  const resetFields = []
-  allFields.forEach((element) => {
-    if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
-      if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-        element.displayUnits.forEach((_unit) => {
-          resetFields.push(element.fieldName + "_" + _unit.toLowerCase())
-        })
-      }
-      else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-        element.displayUnits.forEach((_unit) => {
-          element.displayCurrency.forEach((_currency) => {
-            resetFields.push(element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase())
-          })
-        })
-      }
-      else if (element.type === "currencyAmount") {
-        element.displayCurrency.forEach((_currency) => {
-          resetFields.push(element.fieldName + "_" + _currency.toLowerCase())
-        })
-      }
-    }
-    else if (element.type === "percent") {
-      resetFields.push(element.fieldName)
-    }
-  })
-  rows.forEach((row) => {
-    resetFields.forEach((fieldName) => {
-      row[fieldName] = 0;
-    })
-  })
-}
+// export const resetValueZero = (rows, allFields) => {
+//   const resetFields = []
+//   allFields.forEach((element) => {
+//     if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
+//       if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+//         element.displayUnits.forEach((_unit) => {
+//           resetFields.push(element.fieldName + "_" + _unit.toLowerCase())
+//         })
+//       }
+//       else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+//         element.displayUnits.forEach((_unit) => {
+//           element.displayCurrency.forEach((_currency) => {
+//             resetFields.push(element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase())
+//           })
+//         })
+//       }
+//       else if (element.type === "currencyAmount") {
+//         element.displayCurrency.forEach((_currency) => {
+//           resetFields.push(element.fieldName + "_" + _currency.toLowerCase())
+//         })
+//       }
+//     }
+//     else if (element.type === "percent") {
+//       resetFields.push(element.fieldName)
+//     }
+//   })
+//   rows.forEach((row) => {
+//     resetFields.forEach((fieldName) => {
+//       row[fieldName] = 0;
+//     })
+//   })
+// }
 
 export const sumOnParent = (packages, product, allFields, currency) => {
   const resetFields = []
@@ -324,7 +324,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         priceData = await calculatePrice(rentalManagementData, material);
       }
 
-      selectedProducts.forEach(element => {
+      selectedProducts.filter(d => !selectedProducts.some(obj => obj._id === d.parentId)).forEach(element => {
 
         const rateResult = priceData?.filter((e) => e.materialId === element.materialId &&
           e.materialType === element.type && e.unit === (values["unit"] || element.unit) && e.pricingMethod === (values["pricingMethod"] || element.pricingMethod))
@@ -337,9 +337,11 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll)
         rows.push({ ...element, ...calValues })
 
+        const child: any = resetValueZero(material, allFields, element._id)
+        rows = [...rows, ...child]
         if (element.parentId) {
           const parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId)
-          const sameParent: any =  unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId)
+          const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId)
           sameParent.forEach((element) => {
             if (element._id === element._id) {
               for (var key in values) {
