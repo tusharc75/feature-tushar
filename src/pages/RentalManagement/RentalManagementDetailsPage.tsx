@@ -217,7 +217,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -337,8 +337,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
@@ -809,8 +809,8 @@ const RentalManagementDetailsPage = () => {
                           resource={ACTIVITY_RESOURCE.rentalManagement}
                           restrictedAddActivities={
                             permissions &&
-                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
-                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
+                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
+                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }
@@ -821,7 +821,7 @@ const RentalManagementDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>
@@ -876,6 +876,7 @@ const RentalManagementDetailsPage = () => {
             setOpenUpdateDialog(false);
             fetchRentalManagementData();
           }}
+          isDisableCustomerAccount={quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false}
         />
       )}
     </>
