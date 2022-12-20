@@ -57,7 +57,8 @@ const WorkOrder = ({
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
-  const [services, setServices] = useState([]);
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [selectedAssets, setSelectedAssets] = useState([]);
   const [allAssignedUsers, setAllAssignedUsers] = useState([]);
 
   useEffect(() => {
@@ -98,27 +99,25 @@ const WorkOrder = ({
             </Box>
             <Chip
               className="ml-1"
-              label={`${
-                row.original.type === 'service'
-                  ? 'Service'
-                  : row.original.type === 'product'
+              label={`${row.original.type === 'service'
+                ? 'Service'
+                : row.original.type === 'product'
                   ? 'Product'
                   : row.original.type === 'serializedAsset'
-                  ? 'Asset'
-                  : 'Package'
-              }`}
+                    ? 'Asset'
+                    : 'Package'
+                }`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === 'service'
-                      ? routes.serviceMasterDetail.path
-                      : row.original.type === 'product'
+                  `${row.original.type === 'service'
+                    ? routes.serviceMasterDetail.path
+                    : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : routes.packagesDetail.path
+                        ? routes.serializedAssetDetail.path
+                        : routes.packagesDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -272,9 +271,9 @@ const WorkOrder = ({
     ]);
   };
 
-  const handleWorkOrderDelete = (data) => {
+  const handleWorkOrderDelete = (ids) => {
     axiosInstance()
-      .put(`${workOrder.api}/remove`, { ids: [data?.workOrder?._id] })
+      .put(`${workOrder.api}/remove`, { ids: ids })
       .then(({ data }) => {
         setDeleting(false);
         setShowConfirmBox(false);
@@ -297,9 +296,7 @@ const WorkOrder = ({
   };
 
   const handleDelete = () => {
-    if (deleteData[0]?.type === 'serializedAsset' && deleteData.length === 1 && !deleteData[0]?.subRows?.length) {
-      handleWorkOrderDelete(deleteData[0]);
-    } else {
+    if (deleteData?.some((e) => e.type === "service")) {
       let ids = [];
       let workOrderId = '';
       if (deleteData.length > 0) {
@@ -317,7 +314,6 @@ const WorkOrder = ({
           setDeleting(false);
           setShowConfirmBox(false);
           fetchData();
-
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -330,6 +326,11 @@ const WorkOrder = ({
 
           toastConfig.setToastConfig(err);
         });
+    }
+    else {
+      if (deleteData?.filter((e: any) => !e?.subRows?.length)?.length) {
+        handleWorkOrderDelete(deleteData?.filter((e: any) => !e?.subRows?.length)?.map((e) => e.workOrder?._id));
+      }
     }
   };
 
@@ -345,27 +346,25 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'service'
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'serializedAsset'
-          ? parent?.serializedAsset?.assetNumber
-          : parent?.packageDetail?.packageName
-      }`;
+            ? parent?.serializedAsset?.assetNumber
+            : parent?.packageDetail?.packageName
+        }`;
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${
-        parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
+      parent.status = `${parent.type === 'service'
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
+        }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -414,10 +413,10 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow?.serializedAsset?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.productDetail?.productName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow?.serializedAsset?.assetNumber
+              : _subRow?.packageDetail?.packageName;
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -517,6 +516,7 @@ const WorkOrder = ({
       });
   };
 
+
   return (
     <Fragment>
       <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
@@ -566,29 +566,22 @@ const WorkOrder = ({
                     closeActions();
                     setArrangeView(true);
                   }}
-                  disabled={services?.length && services?.every((d) => d.workOrder?._id === services[0].workOrder?._id) ? false : true}
+                  disabled={selectedServices?.length && selectedServices?.every((d) => d.workOrder?._id === selectedServices[0].workOrder?._id) ? false : true}
                 >
                   Arrange Services
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    setDeleteData(services);
+                    setDeleteData(selectedServices?.length ? selectedServices : selectedAssets);
                     setShowConfirmBox(true);
                     closeActions();
                   }}
-                  disabled={
-                    services?.length &&
-                    (services?.filter(
-                      (d) => d.type === 'service' && d.workOrder?._id === services[0].workOrder?._id && d.status === WORKORDER_SERVICE_STATUS.pending
-                    )?.length === services?.length ||
-                      services?.filter(
-                        (d) =>
-                          d.type === 'serializedAsset' &&
-                          d.workOrder?._id === services[0].workOrder?._id &&
-                          d.status === WORKORDER_SERVICE_STATUS.pending
-                      )?.length === services?.length)
-                      ? false
-                      : true
+                  disabled={selectedServices?.length ?
+                    selectedServices?.filter((d) => d.type === 'service' && d.workOrder?._id === selectedServices[0].workOrder?._id
+                      && d.status === WORKORDER_SERVICE_STATUS.pending)?.length === selectedServices?.length ?
+                      false : true
+                    : selectedAssets?.length ?
+                      selectedAssets?.filter((d) => !d?.subRows || d?.subRows?.length == 0)?.length === selectedAssets?.length ? false : true : true
                   }
                 >
                   Delete
@@ -607,12 +600,12 @@ const WorkOrder = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
-                  : isSmallScreen
-                  ? 'calc(100vw)'
-                  : showActivity
-                  ? '100%'
-                  : 'calc(100vw - 103px)'
+                    ? 'calc(100vw)'
+                    : isSmallScreen
+                      ? 'calc(100vw)'
+                      : showActivity
+                        ? '100%'
+                        : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -621,7 +614,8 @@ const WorkOrder = ({
                 columns={columns}
                 data={rowsData}
                 onSelect={(data) => {
-                  setServices(data?.filter((d) => d.type === 'service') || []);
+                  setSelectedServices(data?.filter((d) => d.type === 'service') || []);
+                  setSelectedAssets(data?.filter((d) => d.type === 'serializedAsset') || []);
                   setSelectedProducts(data);
                 }}
                 childrenProperty="subRows"
@@ -681,7 +675,7 @@ const WorkOrder = ({
           {arrangeView && (
             <ArrangeView
               data={
-                services
+                selectedServices
                   ?.filter((e) => e.type === 'service')
                   ?.map((d) => {
                     return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
@@ -689,7 +683,7 @@ const WorkOrder = ({
               }
               title={'Arrange Services'}
               handleClose={() => setArrangeView(false)}
-              handleSubmit={(data) => handleArrangeUpdate(data, services[0].workOrder?._id)}
+              handleSubmit={(data) => handleArrangeUpdate(data, selectedServices[0].workOrder?._id)}
               loading={false}
             />
           )}
