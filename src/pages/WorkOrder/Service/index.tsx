@@ -882,7 +882,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
               >
                 Complete
               </MenuItem>
-              <MenuItem
+              {/* <MenuItem
                 disabled={
                   disableCompleteFail || [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(selectedService?.status)
                 }
@@ -892,7 +892,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData }) => {
                 }}
               >
                 Fail
-              </MenuItem>
+              </MenuItem> */}
               <MenuItem
                 disabled={!allowedToEdit || selectedService?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
                 onClick={() => {

@@ -424,7 +424,6 @@ const RepairOrderDetails = () => {
                         allowedToEdit={allowedToEdit}
                         allowedToDelete={allowedToDelete}
                         setQuotationVersionData={setQuotationVersionData}
-                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
                     {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (
@@ -439,7 +438,6 @@ const RepairOrderDetails = () => {
                         allowedToDelete={false}
                         invoiceStep={true}
                         setQuotationVersionData={setQuotationVersionData}
-                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
                   </ContentFullScreen>
