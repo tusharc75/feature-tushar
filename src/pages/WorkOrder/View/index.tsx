@@ -10,6 +10,7 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import { MdZoomOutMap } from 'react-icons/md';
 import { ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Box, Button, Paper } from '@material-ui/core';
+import _ from 'lodash';
 
 const customNodeStyles = {
   workOrder: { name: 'WorkOrder', ...COLOUR_MASTER.repairJob },
@@ -96,8 +97,9 @@ const WorkOrderViews = (props) => {
         allSteps.push(...(s?.steps || []));
         // all assigned users should output as a single string
         const allAssignUsers = s?.assignedUsers?.map((u) => u?.optionLabel).join(', ') || '';
+        const serviceId = `${s?._id}_${s?.uniqueId}`;
         flow.push({
-          id: `${s?._id}`,
+          id: `${serviceId}`,
           sourcePosition: 'right',
           targetPosition: 'left',
           type: 'default',
@@ -123,11 +125,12 @@ const WorkOrderViews = (props) => {
           id: `workOrder-service-${s._id}`,
           source: `${workOrderId}`,
           arrowHeadType: 'arrow',
-          target: `${s._id}`
+          target: `${serviceId}`
         });
         s?.steps?.map((step) => {
+          const stepId = `${step?._id}_${_.random(1000, 9999)}`;
           flow.push({
-            id: `${step?._id}`,
+            id: `${stepId}`,
             sourcePosition: 'right',
             targetPosition: 'left',
             type: 'default',
@@ -164,9 +167,9 @@ const WorkOrderViews = (props) => {
           });
           flowEdge.push({
             id: `workOrder-service-steps-${step._id}`,
-            source: `${s?._id}`,
+            source: `${s?._id}_${s?.uniqueId}`,
             arrowHeadType: 'arrow',
-            target: `${step._id}`
+            target: `${stepId}`
           });
           serviceStepIdx++;
         });
