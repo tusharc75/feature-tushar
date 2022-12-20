@@ -11,7 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { workOrder, sidebarResource, ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
@@ -54,6 +54,8 @@ const WorkOrderDetails = () => {
   const [locationKeys, setLocationKeys] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [previewPdf, setPreviewPdf] = useState(false);
+  const [canComplete, setCanComplete] = useState(false);
+  const [canDelete, setCanDelete] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
 
   useEffect(() => {
@@ -116,11 +118,28 @@ const WorkOrderDetails = () => {
           params.delete('openEdit');
           history.push({ search: params.toString() });
         }
+        checkValidation()
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
+
+  const checkValidation = () => {
+    axiosInstance()
+      .get(`${routes.workOrder.path}/service/${id}`)
+      .then(({ data: { data } }) => {
+        if (data?.filter((e) => e.type === "service" && e.status === WORKORDER_SERVICE_STATUS.completed).length === data?.length) {
+          setCanComplete(true)
+        }
+        if (data?.filter((e) => e.type === "service" && e.status === WORKORDER_SERVICE_STATUS.pending).length === data?.length) {
+          setCanDelete(true)
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
 
   const handleDelete = () => {
     axiosInstance()
@@ -223,9 +242,8 @@ const WorkOrderDetails = () => {
           <Paper>
             {workOrderData ? (
               <DetailsPageHeader heading={workOrderData?.workOrderNumber} mainPoints={null} showHeading={true}>
-                {permissions?.workOrder?.isUpdate && 
-                  allowedToEdit && (
-                    <Fragment>
+                {permissions?.workOrder?.isUpdate && allowedToEdit && canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
+                  <Fragment>
                     <Button
                       variant="outlined"
                       color="default"
@@ -264,8 +282,7 @@ const WorkOrderDetails = () => {
                       })}
                     </Menu>
                   </Fragment>
-                  )
-                }
+                )}
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'outlined'}
                   color="primary"
@@ -290,7 +307,8 @@ const WorkOrderDetails = () => {
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
-                {permissions?.workOrder?.isDelete && allowedToEdit && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {permissions?.workOrder?.isDelete && allowedToEdit && canDelete &&
+                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </DetailsPageHeader>
             ) : (
               <Skeleton variant="text" width="150px" height="40px" />
