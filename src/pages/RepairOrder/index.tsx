@@ -287,6 +287,7 @@ const RepairOrder = () => {
                 let finalObject = prepareDataForGrid(u, user);
                 finalObject["isChecked"] = false;
                 finalObject["allowedToEdit"] = permissions?.repairOrder?.isUpdate;
+                finalObject["canDelete"] = permissions?.rentalManagement?.isDelete && u?.ownerId === user?.user?._id
                 return finalObject;
             });
             if (appendRows) {

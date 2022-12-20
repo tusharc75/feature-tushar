@@ -1795,18 +1795,6 @@ export const SUBLEASE_STATUS = {
   completed: 'Completed'
 };
 
-export const REPAIR_ORDER_STATUS = {
-  new: 'New',
-  preWork: 'Pre-Work In-Progress',
-  postWork: 'Post-Work In-Progress',
-  buildingQuote: 'Building Quote',
-  waitingQuote: 'Waiting On Quote',
-  quoteAccepted: 'Quote Accepted',
-  quoteRejected: 'Quote Rejected',
-  inProgress: 'In-Progress',
-  completed: 'Completed'
-};
-
 export const PURCHASE_ORDER_STATUS = {
   //new: 'New',
   //inProgress: 'In-Progress',
@@ -2150,6 +2138,31 @@ export const REPAIR_ORDER_TYPE = {
   internal: 'Asset Repair',
   external: 'Customer Owned Asset Repair',
 };
+
+export const REPAIR_ORDER_STATUS = {
+  new: 'New',
+  preWork: 'Pre-Work In-Progress',
+  postWork: 'Post-Work In-Progress',
+  buildingQuote: 'Building Quote',
+  waitingQuote: 'Waiting On Quote',
+  quoteAccepted: 'Quote Accepted',
+  quoteRejected: 'Quote Rejected',
+  inProgress: 'In-Progress',
+  completed: 'Completed'
+};
+
+export const WORK_ORDER_STATUS = {
+  new: 'New',
+  preWork: 'Pre-Work In-Progress',
+  postWork: 'Post-Work In-Progress',
+  buildingQuote: 'Building Quote',
+  waitingQuote: 'Waiting On Quote',
+  quoteAccepted: 'Quote Accepted',
+  quoteRejected: 'Quote Rejected',
+  inProgress: 'In-Progress',
+  completed: 'Completed'
+};
+
 
 export const convertMsToTime = (milliseconds: any) => {
 

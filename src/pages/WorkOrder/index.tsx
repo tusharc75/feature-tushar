@@ -154,7 +154,7 @@ const WorkOrder = () => {
 
   const ActionsRenderer = (params) => (
     <>
-      {permissions?.workOrder?.isCreate ? (
+      {/* {permissions?.workOrder?.isCreate ? (
         <Tooltip title="Clone">
           <IconButton
             size="small"
@@ -172,7 +172,7 @@ const WorkOrder = () => {
             <FileCopyIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-      )}
+      )} */}
       {permissions?.workOrder?.isDelete && !params?.data?.deleted &&
         <HtmlTooltip title="Delete">
           <IconButton size="small" aria-label="Delete" onClick={() => {
