@@ -341,16 +341,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         rows = [...rows, ...child]
         if (element.parentId) {
           const parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId)
-          const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId)
-          sameParent.forEach((element) => {
-            if (element._id === element._id) {
-              for (var key in values) {
-                element[key] = values[key];
-              }
-            }
-          })
-
-          sumOnParent(parent, sameParent, allFields, currency)
+          const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId && e._id !== element._id)
+          sumOnParent(parent, [...sameParent,{ ...element, ...calValues }], allFields, currency)
           rows = [...rows, ...parent]
         }
 
