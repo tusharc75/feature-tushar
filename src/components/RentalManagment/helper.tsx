@@ -81,7 +81,7 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
     }
 };
 
-const sumOnParent = (parent, child, fields) => {
+export const sumOnParent = (parent, child, fields) => {
     const resetFields = []
     fields.forEach((element) => {
         if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
@@ -128,7 +128,7 @@ const sumOnParent = (parent, child, fields) => {
     return parent;
 }
 
-const resetValueZero = (material, fields, _id) => {
+export const resetValueZero = (material, fields, _id) => {
     const resetFields = []
     fields.forEach((element) => {
         if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
