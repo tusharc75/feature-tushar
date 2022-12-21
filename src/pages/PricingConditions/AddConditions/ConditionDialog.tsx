@@ -148,7 +148,6 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
         updatedData[key] = v[key];
       }
     });
-    console.log(updatedData);
     const values: any = updatedData;
     let data = [];
 
