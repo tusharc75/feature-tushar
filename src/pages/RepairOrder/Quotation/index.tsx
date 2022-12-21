@@ -29,7 +29,6 @@ import {
   REPAIR_ORDER_STATUS
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { ExpandMore } from '@material-ui/icons';
@@ -52,7 +51,8 @@ const Quotation = ({
   allowedToEdit,
   allowedToDelete,
   setQuotationVersionData,
-  invoiceStep = false,
+  updateOrderStatus,
+  invoiceStep,
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -86,32 +86,38 @@ const Quotation = ({
   const [allColumn, setAllColumn] = useState([]);
 
   useEffect(() => {
-    fetchQuotationData();
+    fetchFields();
   }, [repairOrderData]);
 
-  const fetchQuotationData = (versionNumber = null) => {
-    setQuotationData(null);
-    axiosInstance()
-      .get(`${repairOrder.api}/${repairOrderData?._id}/check-create/quotation`)
-      .then(({ data: { data } }) => {
-        setQuotationData(data);
-        let keys = Object.keys(data.versions);
-        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1]);
-        setCurrentVersion(tempCurrentVersion);
-        setQuotationVersionData({ quotationId: data?._id, ...data?.versions[tempCurrentVersion] });
-        setNextStep(data?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
-      });
-  };
+  useEffect(() => {
+    if (invoiceStep && ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)) {
+      updateOrderStatus(REPAIR_ORDER_STATUS.readyToInvoice);
+    }
+  }, [invoiceStep]);
 
   useEffect(() => {
     if (quotationData?.versions[currentVersion] && quotationData?.versions[currentVersion]?._id) {
-      fetchFields(quotationData?.currency);
       fetchProductInventory();
     }
-  }, [quotationData && quotationData?.versions[currentVersion]?._id]);
+  }, [currentVersion]);
 
-  const fetchFields = async (currency) => {
+  const fetchFields = async () => {
+
+    setNextStep(false)
     setColumns(null);
+
+    const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${repairOrderData?._id}/check-create/quotation`);
+    const quotationInfo: any = quotationResponse?.data?.data;
+
+    setQuotationData(quotationInfo);
+    let keys = Object.keys(quotationInfo.versions);
+    let tempCurrentVersion = parseInt(keys[keys.length - 1]);
+    setCurrentVersion(tempCurrentVersion);
+    setQuotationVersionData({ quotationId: quotationInfo?._id, ...quotationInfo?.versions[tempCurrentVersion] });
+
+    setNextStep(quotationInfo?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
+
+    const currency = quotationInfo?.currency;
     var data = await fetch_quotation_product_fields(currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
@@ -133,7 +139,7 @@ const Quotation = ({
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-              quotationData?.versions[currentVersion]?.status
+              quotationInfo?.versions[tempCurrentVersion]?.status
             ) ? (
               <p> {row.original.detail}</p>
             ) : (
@@ -155,14 +161,13 @@ const Quotation = ({
               color="primary"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
+                  `${row.original.type === 'serializedAsset'
+                    ? routes.serializedAssetDetail.path
+                    : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'package'
-                      ? routes.packagesDetail.path
-                      : routes.serviceMasterDetail.path
+                        ? routes.packagesDetail.path
+                        : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -324,15 +329,14 @@ const Quotation = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows?.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
@@ -354,15 +358,14 @@ const Quotation = ({
       ?.sort((a, b) => a?.preWork - b?.preWork);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -489,7 +492,7 @@ const Quotation = ({
     axiosInstance()
       .post(`/quotation/clone-version/${quotationData._id}/${versionId}`)
       .then(() => {
-        fetchQuotationData();
+        fetchFields();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -500,7 +503,7 @@ const Quotation = ({
     axiosInstance()
       .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
       .then(() => {
-        fetchQuotationData();
+        fetchFields();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -562,7 +565,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)
@@ -608,18 +611,18 @@ const Quotation = ({
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedProducts.length === 0}
-                >
-                  Actions
-                  <ExpandMore />
-                </Button>
-              )}
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedProducts.length === 0}
+                  >
+                    Actions
+                    <ExpandMore />
+                  </Button>
+                )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -640,27 +643,6 @@ const Quotation = ({
                 >
                   Bulk Edit
                 </MenuItem>
-                {/* {allowedToDelete && (
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        const dataToDelete =
-                          selectedProducts &&
-                          selectedProducts
-                            .filter((e) => !e.hideSelection)
-                            .map((rec: any) => {
-                              const obj: any = {};
-                              obj.id = rec._id;
-                              obj.type = rec?.type;
-                              obj.materialId = rec?.materialId;
-                              return obj;
-                            });
-                        setDeleteData(dataToDelete);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  )} */}
               </Menu>
             </div>
           )}
@@ -771,10 +753,10 @@ const Quotation = ({
           versionId={quotationData?.versions[currentVersion]?._id}
           quotationId={quotationData?._id}
           setCurrentStep={() => {
-            fetchQuotationData(currentVersion);
+            fetchFields();
           }}
           updateStatus={() => {
-            fetchQuotationData(currentVersion);
+            fetchFields();
           }}
           setCustomerAcceptable={setCustomerAcceptable}
         />

@@ -270,50 +270,46 @@ const RepairOrderDetails = () => {
             <Paper>
               {repairOrderData ? (
                 <DetailsPageHeader heading={repairOrderData?.repairOrderNumber} mainPoints={null} showHeading={true}>
-                  {permissions?.repairOrder?.isUpdate &&
-                  allowedToEdit &&  repairOrderData?.status !== REPAIR_ORDER_STATUS.completed && (
+                  {permissions?.repairOrder?.isUpdate && allowedToEdit && [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status) && (
                     <Fragment>
-                         <Button
-                      variant="outlined"
-                      color="default"
-                      size="small"
-                      onClick={openActions}
-                      aria-controls="action-menu"
-                      endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                    >
-                      {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
-                    </Button>
-                    <Menu
-                      anchorEl={anchorEl}
-                      keepMounted
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      id="action-menu"
-                      open={Boolean(anchorEl)}
-                      onClose={closeActions}
-                    >
-                      {statusOptions?.map((o, index) => {
-                        return (
-                          <MenuItem
-                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status)}
-                            onClick={() => {
-                              closeActions();
-                              handleStatusChange(o);
-                            }}
-                            value={o}
-                          >
-                            {o?.optionLabel}
-                          </MenuItem>
-                        );
-                      })}
-                    </Menu>
-                    </Fragment>
-
-                  )
-                  }
+                      <Button
+                        variant="outlined"
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        aria-controls="action-menu"
+                        endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                      >
+                        {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        {statusOptions?.map((o, index) => {
+                          return (
+                            <MenuItem
+                              disabled={index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status)}
+                              onClick={() => {
+                                closeActions();
+                                handleStatusChange(o);
+                              }}
+                              value={o}
+                            >
+                              {o?.optionLabel}
+                            </MenuItem>
+                          );
+                        })}
+                      </Menu>
+                    </Fragment>)}
                   {['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep]) &&
                     [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                       quotationVersionData?.status
@@ -485,6 +481,8 @@ const RepairOrderDetails = () => {
                         allowedToEdit={allowedToEdit}
                         allowedToDelete={allowedToDelete}
                         setQuotationVersionData={setQuotationVersionData}
+                        invoiceStep={false}
+                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
                     {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (
@@ -499,6 +497,7 @@ const RepairOrderDetails = () => {
                         allowedToDelete={false}
                         invoiceStep={true}
                         setQuotationVersionData={setQuotationVersionData}
+                        updateOrderStatus={updateOrderStatus}
                       />
                     )}
                   </ContentFullScreen>
