@@ -292,6 +292,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const response = await axiosInstance().get(`${invoice.api}/productpackage/${invoiceData._id}`);
     data = response?.data?.data;
 
+    const responseAdditionalCostData = await axiosInstance().get(`${invoice.api}/${invoiceData._id}/additional-cost`);
+    let additionalCostData = responseAdditionalCostData?.data?.data;
+
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
@@ -315,6 +318,17 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
+    if (additionalCostData.length > 0) {
+      additionalCostData.forEach(element => {
+        element.srno = rows.length + 1;
+        element.detail = element.costType
+        element.type = 'additionalCost';
+        element.qtyDisplay = element.qty;
+        element.materialId = element?._id
+        element.parentId = null
+        rows.push(element)
+      });
+    }
     setRowsData(rows);
     setSelectedProducts([]);
   };

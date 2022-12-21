@@ -264,10 +264,20 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
   const fetchProductInventory = async () => {
     let data: any = {};
+    let invoicedProducts: any = [];
+    let additionalCost: any = [];
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
-
-    const { data: { data: invoicedProducts } } = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`);
     data = response?.data?.data;
+
+    const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`);
+    invoicedProducts = invoiceResponse?.data?.data?.material;
+    additionalCost = invoiceResponse?.data?.data?.additionalCost;
+
+    const responseAdditionalCostData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
+    let additionalCostData = responseAdditionalCostData?.data?.data;
+    if (additionalCost.length > 0) {
+      additionalCostData = additionalCostData.filter(d => !additionalCost.some(obj => obj._id === d._id))
+    }
 
     let newMaterial: any = []
 
@@ -312,6 +322,15 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         }
       }
     });
+
+    if (additionalCostData.length > 0) {
+      additionalCostData.forEach(element => {
+        element.type = 'additionalCost';
+        element.materialId = element?._id
+        element.parentId = null
+        newMaterial.push(element)
+      });
+    }
 
     data.material = newMaterial
     if (invoiceData) {
@@ -369,9 +388,11 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             ? parent?.serviceDetail?.serviceName
             : parent.type === 'asset'
               ? parent?.inventoryDetail?.assetNumber
-              : parent.packageDetail?.packageName;
+              : parent.type === "additionalCost"
+                ? parent?.costType
+                : parent.packageDetail?.packageName;
       parent.qtyDisplay = parent.qty;
-      parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'asset' ? false : true;
+      parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'asset' || parent.type === "additionalCost" ? false : true;
       parent.subRows = generateNestedData(material, parent);
     });
     setRowsData(rows);
@@ -406,48 +427,54 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     let rows: any = [];
     selectedProducts.forEach((element) => {
 
-      element.invalidDate = false;
+      if (element.type !== "additionalCost") {
+        element.invalidDate = false;
 
-      const product = invoicedProducts.find((p) => p._id === element._id);
+        const product = invoicedProducts.find((p) => p._id === element._id);
 
-      const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
-      const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
+        const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
+        const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
 
-      if (selectedEndDateTime < productStartDateTime) {
-        element.invalidDate = true;
-      }
-      else if (product) {
-        const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
-        if (selectedEndDateTime < productEndDateTime) {
+        if (selectedEndDateTime < productStartDateTime) {
           element.invalidDate = true;
-        } else {
-          element.invalidDate = false;
         }
-      }
-      let priceFieldName = Object.keys(element).find(d => d.includes("price_"))
-      let calValues: any
-      let values = JSON.parse(JSON.stringify(tempValues))
-      if (element.pricingMethod === "Per Week") {
-        values["pricingMethod"] = "Per Day"
-        if (priceFieldName) {
-          values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 7
+        else if (product) {
+          const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
+          if (selectedEndDateTime < productEndDateTime) {
+            element.invalidDate = true;
+          } else {
+            element.invalidDate = false;
+          }
         }
-        calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        calValues["pricingMethod"] = "Per Week"
-      }
-      else if (element.pricingMethod === "Per Month") {
-        values["pricingMethod"] = "Per Day"
-        if (priceFieldName) {
-          values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 30
+        let priceFieldName = Object.keys(element).find(d => d.includes("price_"))
+        let calValues: any
+        let values = JSON.parse(JSON.stringify(tempValues))
+        if (element.pricingMethod === "Per Week") {
+          values["pricingMethod"] = "Per Day"
+          if (priceFieldName) {
+            values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 7
+          }
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          calValues["pricingMethod"] = "Per Week"
         }
-        calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        calValues["pricingMethod"] = "Per Month"
+        else if (element.pricingMethod === "Per Month") {
+          values["pricingMethod"] = "Per Day"
+          if (priceFieldName) {
+            values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 30
+          }
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          calValues["pricingMethod"] = "Per Month"
+        }
+        else {
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        }
+        element.isAppliedBill = true // row color
+        rows.push({ ...element, ...calValues });
       }
       else {
-        calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        element.isAppliedBill = true // row color
+        rows.push(element);
       }
-      element.isAppliedBill = true // row color
-      rows.push({ ...element, ...calValues });
     });
 
     let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
@@ -488,7 +515,11 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     });
     setUpdating(true);
     axiosInstance()
-      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, { material: rowsApplied })
+      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`,
+        {
+          material: rowsApplied.filter(d => d.type !== "additionalCost"),
+          additionalCost: rowsApplied.filter(d => d.type === "additionalCost"),
+        })
       .then(() => {
         setUpdating(false);
         onSuccess();
@@ -551,12 +582,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                         margin="dense"
                       />
                       <Box style={{ display: 'flex', gap: '5px', marginTop: '15px' }}>
-                        <HtmlTooltip title={!Boolean(selectedProducts && selectedProducts.length) ? 'Please select product to apply' : ''}>
+                        <HtmlTooltip title={!Boolean(selectedProducts && selectedProducts.length && (endDate || selectedProducts.every(d => d.type === "additionalCost"))) ? 'Please select product to apply' : ''}>
                           <span>
                             <Button
                               variant="contained"
                               color="primary"
-                              disabled={!Boolean(selectedProducts && selectedProducts.length && endDate)}
+                              disabled={!Boolean(selectedProducts && selectedProducts.length && (endDate || selectedProducts.every(d => d.type === "additionalCost")))}
                               size="small"
                               onClick={() => {
                                 handleApplyDate();
