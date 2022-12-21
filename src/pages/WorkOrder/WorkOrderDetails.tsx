@@ -57,6 +57,7 @@ const WorkOrderDetails = () => {
   const [canComplete, setCanComplete] = useState(false);
   const [canDelete, setCanDelete] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
+  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -109,15 +110,16 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`${routes.workOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        setWorkOrderData({ ...data });
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
+        setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false)
         if (permissions?.workOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
           params.delete('openEdit');
           history.push({ search: params.toString() });
         }
+        setWorkOrderData({ ...data });
         checkValidation()
       })
       .catch((err) => {
@@ -216,7 +218,6 @@ const WorkOrderDetails = () => {
       });
   };
 
-
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -295,7 +296,7 @@ const WorkOrderDetails = () => {
                 >
                   {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
                 </Button>
-                {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && (
+                {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
@@ -325,9 +326,9 @@ const WorkOrderDetails = () => {
               }}
             >
               <Tab label="Header" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-              {workOrderData?.deleted ? null : <Tab label="Services" value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />}
-              {workOrderData?.deleted ? null : <Tab label="Products/Consumables" value={2} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />}
-              {workOrderData?.deleted ? null : <Tab label="Views" value={3} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />}
+              <Tab label="Services" value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              <Tab label="Products/Consumables" value={2} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              <Tab label="Views" value={3} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
             </Tabs>
             <TabPanel value={tabValue} index={0}>
               <Box>
@@ -341,10 +342,17 @@ const WorkOrderDetails = () => {
               </Box>
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-              <Service workOrderData={workOrderData} workOrderId={id} allowedToEdit={allowedToEdit} />
+              {workOrderData &&
+                <Service
+                  workOrderData={workOrderData}
+                  workOrderId={id}
+                  allowedToEdit={allowedToEdit}
+                  completed={completed}
+                />
+              }
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-              <Consumables allowedToEdit={allowedToEdit} workOrderId={id} />
+              <Consumables allowedToEdit={allowedToEdit && !completed} workOrderId={id} />
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
               <Box>
