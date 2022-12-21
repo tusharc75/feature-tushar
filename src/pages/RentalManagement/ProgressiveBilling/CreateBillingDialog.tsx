@@ -269,7 +269,6 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     const { data: { data: invoicedProducts } } = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`);
     data = response?.data?.data;
 
-
     let newMaterial: any = []
 
     data?.material?.filter(d => d?.actualStartDate && d?.parentId === null && d?.type === "product" && d?.productDetail?.serializedProduct)?.forEach(element => {
@@ -295,6 +294,22 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         values["actualEndDate"] = element?.actualEndDate || element?.estimateEndDate
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         newMaterial.push({ ...element, ...calValues })
+
+        if (element?.type === "product" && element?.productDetail?.serializedProduct) {
+          data?.inventory?.filter(d => d._id === element?._id && !d.isReplaced && d?.manualStartDate)?.forEach((ele: any) => {
+            ele.parentId = element?._id;
+            ele.type = 'asset';
+            ele.qty = 1;
+            ele._id = ele?.inventoryDetail?._id
+            ele.materialId = ele?.inventoryDetail?._id
+            let values = { qty: 1 };
+            values["actualStartDate"] = ele?.manualStartDate
+            values["actualEndDate"] = ele?.manualEndDate || element?.estimateEndDate
+            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+            const { materialId, qty, type, _id, ...rest } = element
+            newMaterial.push({ ...rest, ...ele, ...calValues })
+          });
+        }
       }
     });
 

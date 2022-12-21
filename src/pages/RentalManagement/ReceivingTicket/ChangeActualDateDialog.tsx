@@ -6,6 +6,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
+import moment from 'moment';
 
 const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) => {
 
@@ -34,7 +35,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                         size="small"
                         fullWidth
                         values={values}
-                        maxDate={values.manualEndDate || new Date()}
+                        maxDate={values.manualEndDate || moment().add(5, 'years')}
                         error={errors}
                         touched={touched}
                         type="date"
