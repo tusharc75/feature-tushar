@@ -182,6 +182,7 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
                 <Button
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                   onClick={() => { 
+                    setAssigning(true);
                     if(packageType === 'service'){
                       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service')) 
                     } else {
