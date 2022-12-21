@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -38,6 +38,8 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Productpackage from './Productpackage';
 import Quotation from './Quotation';
 import WorkOrder from './WorkOrder';
+import { ExpandMore } from '@material-ui/icons';
+import { GrStatusInfo } from 'react-icons/gr';
 
 function a11yProps(index: any) {
   return {
@@ -79,6 +81,8 @@ const RepairOrderDetails = () => {
   const [showQuotationConfirmBox, setShowQuotationConfirmBox] = useState(false);
   const [quoteClonning, setQuoteClonning] = useState(false);
   const [isAnyMaterial, setisAnyMaterial] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [statusOptions, setStatusOptions] = useState([]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -123,6 +127,12 @@ const RepairOrderDetails = () => {
       .get(`/field?resource=${sidebarResource.repairOrder}`)
       .then(({ data: { data } }) => {
         setRepairOrderFields(data);
+        data.some((o) => {
+          if (o?.fieldData?.fieldName === 'status') {
+            setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== "Deleted")]);
+            return true;
+          }
+        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -233,6 +243,14 @@ const RepairOrderDetails = () => {
       });
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   useEffect(() => {
     if (isSmallScreen && tabValue === 0) {
       setActivityShow(true);
@@ -252,6 +270,50 @@ const RepairOrderDetails = () => {
             <Paper>
               {repairOrderData ? (
                 <DetailsPageHeader heading={repairOrderData?.repairOrderNumber} mainPoints={null} showHeading={true}>
+                  {permissions?.repairOrder?.isUpdate &&
+                  allowedToEdit &&  repairOrderData?.status !== REPAIR_ORDER_STATUS.completed && (
+                    <Fragment>
+                         <Button
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                    >
+                      {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      {statusOptions?.map((o, index) => {
+                        return (
+                          <MenuItem
+                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status)}
+                            onClick={() => {
+                              closeActions();
+                              handleStatusChange(o);
+                            }}
+                            value={o}
+                          >
+                            {o?.optionLabel}
+                          </MenuItem>
+                        );
+                      })}
+                    </Menu>
+                    </Fragment>
+
+                  )
+                  }
                   {['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep]) &&
                     [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                       quotationVersionData?.status
