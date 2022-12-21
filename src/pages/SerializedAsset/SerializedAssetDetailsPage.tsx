@@ -117,6 +117,10 @@ const SerializedAssetDetailsPage = () => {
           <Link className="link" title={params.value} to={`${routes.repairJobDetail.path}/${params.data.referenceId}`}>
             {params.value}
           </Link>
+        ) : params.data.type === 'Work Order' ? (
+          <Link className="link" title={params.value} to={`${routes.workOrderDetail.path}/${params.data.referenceId}`}>
+            {params.value}
+          </Link>
         ) : params.data.type === 'Repair Order' ? (
           <Link className="link" title={params.value} to={`${routes.repairOrderDetail.path}/${params.data.referenceId}`}>
             {params.value}
