@@ -150,7 +150,7 @@ const RepairOrderDetails = () => {
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
           setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, `Invoice`]?.includes(d)));
         }
-        setAllowedToDelete(data?.owner?.optionValue === user?.user?._id && data?.canDelete ? true : false);
+        setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
         if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
@@ -348,7 +348,8 @@ const RepairOrderDetails = () => {
                         {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                       </Button>
                     )}
-                  {permissions?.repairOrder?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                  {permissions?.repairOrder?.isDelete && allowedToDelete && repairOrderData?.canDelete
+                    && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 </DetailsPageHeader>
               ) : (
                 <Skeleton variant="text" width="150px" height="40px" />
