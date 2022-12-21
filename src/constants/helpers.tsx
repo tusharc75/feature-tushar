@@ -2141,13 +2141,15 @@ export const REPAIR_ORDER_TYPE = {
 
 export const REPAIR_ORDER_STATUS = {
   new: 'New',
+  inProgress: 'In-Progress',
   preWork: 'Pre-Work In-Progress',
   postWork: 'Post-Work In-Progress',
   buildingQuote: 'Building Quote',
   waitingQuote: 'Waiting On Quote',
   quoteAccepted: 'Quote Accepted',
   quoteRejected: 'Quote Rejected',
-  inProgress: 'In-Progress',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
   completed: 'Completed'
 };
 

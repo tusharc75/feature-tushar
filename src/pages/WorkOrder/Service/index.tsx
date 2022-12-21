@@ -124,6 +124,8 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
   const fetchRepairOrderData = async () => {
 
     var quotation: any = null;
+    var isQuotation: any = false;
+
 
     if (workOrderData.type === 'Repair Order' && workOrderData?.repairOrder?.optionValue) {
 
@@ -131,6 +133,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
       const repairOrderData: any = repairOrderResponse?.data?.data;
 
       if (repairOrderData?.type === REPAIR_ORDER_TYPE.external) {
+        isQuotation = true;
         const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${workOrderData?.repairOrder?.optionValue}/check/quotation`);
         if (quotationResponse?.data?.data) {
           let keys = Object.keys(quotationResponse?.data?.data?.versions);
@@ -160,7 +163,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
       const preWorkService = data?.filter((e) => e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
       const postWorkService = data?.filter((e) => !e.preWork)?.sort((a, b) => (a.order > b.order ? 1 : -1));
       const quote = [{ _id: 'quotation', uniqueId: 'quotation', order: 9999, type: 'quotation', serviceName: 'Quote to Customer' }];
-      const services = quotation ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
+      const services = isQuotation ? [...preWorkService, ...quote, ...postWorkService] : [...preWorkService, ...postWorkService];
 
       if (services?.length) {
         let pendingServiceIndex = services?.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
@@ -171,25 +174,30 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
             pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
           }
           else {
-            pendingServiceIndex = (services?.length - pendingServiceIndex) + 1;
+            pendingServiceIndex = (services?.length - pendingServiceIndex);
+            if (!services[pendingServiceIndex]?.preWork) {
+              pendingServiceIndex = pendingServiceIndex + 1;
+            }
           }
         }
         pendingServiceIndex = pendingServiceIndex > -1 ? pendingServiceIndex : 0;
         const order = services[pendingServiceIndex]?.order;
         services?.forEach((element, index) => {
-          if (element.order === order || index <= pendingServiceIndex) {
-            if (!completed && (allowedToEdit || (element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate))) {
-              element.clickable = true;
+          if (element?.type === "service") {
+            if (element.order === order || index <= pendingServiceIndex) {
+              if (!completed && (allowedToEdit || (element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) && permissions?.workOrder?.isUpdate))) {
+                element.clickable = true;
+              }
+              else {
+                element.clickable = false;
+              }
             }
             else {
               element.clickable = false;
             }
           }
-          else {
-            element.clickable = false;
-          }
         })
-        if (quotation && quotation?.status !== QUOTATION_STATUS.acceptByCustomer) {
+        if (isQuotation || (quotation && quotation?.status !== QUOTATION_STATUS.acceptByCustomer)) {
           services?.forEach((element) => {
             if (!element?.preWork) {
               element.clickable = false;
