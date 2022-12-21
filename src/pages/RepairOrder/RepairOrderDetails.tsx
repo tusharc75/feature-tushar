@@ -78,7 +78,7 @@ const RepairOrderDetails = () => {
   const [quotationVersionData, setQuotationVersionData] = useState(null);
   const [showQuotationConfirmBox, setShowQuotationConfirmBox] = useState(false);
   const [quoteClonning, setQuoteClonning] = useState(false);
-  const [isAnyMaterial, setIsAnyMaterial] = useState(false);
+  const [isAnyMaterial, setisAnyMaterial] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -133,16 +133,14 @@ const RepairOrderDetails = () => {
     axiosInstance()
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        if (data?.material?.length) {
-          setIsAnyMaterial(true);
-        }
+        setisAnyMaterial(data?.canDelete ? false : true);
         setCurrentStep(repairOrderProcessSteps.indexOf(data?.processStatus) !== -1 ? repairOrderProcessSteps.indexOf(data?.processStatus) : 0);
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
           setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, `Invoice`]?.includes(d)));
         }
-        setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+        setAllowedToDelete(data?.owner?.optionValue === user?.user?._id && data?.canDelete ? true : false);
         setRepairOrderData({ ...data });
         if (permissions?.repairOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
@@ -161,7 +159,7 @@ const RepairOrderDetails = () => {
       .put(`${repairOrder.api}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.goBack();
+        history.push(routes.repairOrder.path);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -180,8 +178,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -475,7 +473,7 @@ const RepairOrderDetails = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => {}}
+                          handleActivityRefresh={() => { }}
                           emails={[]}
                         />
                       </div>
