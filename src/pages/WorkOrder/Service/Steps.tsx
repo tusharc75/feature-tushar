@@ -631,7 +631,8 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                     </Box>
                     {(isSameStartStep || isPrevStepDone || index === 0) && (
                       <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
-                        {stepData?.startDate && <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />}
+                        {stepData?.startDate &&
+                          <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />}
                         {(stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start || stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause) && (
                           <Box mr={1}>
                             <Button
@@ -712,10 +713,8 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                             </Box>
                           )
                         ) : null}
-                        {stepData?.status &&
-                          ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                          step?.fields?.length &&
-                          (isMeTechnician || !isAnyTechnician) ? (
+                        {stepData?.status && stepData?.status !== WORKORDER_SERVICE_STEP_STATUS.pause
+                          && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) && step?.fields?.length && (isMeTechnician || !isAnyTechnician) ? (
                           <>
                             <Box marginX={1} />
                             <Box>
