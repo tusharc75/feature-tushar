@@ -87,6 +87,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
               productId: d.productId,
               returnQuantity: 0,
               consumeQty: d.consumeQty,
+              invoiceQty: invoiceQtyData?.find((i) => i?._id === d?.uniqueId)?.qty || 0,
               orderQuantity: d.qty || 0,
               row: d
             }))
@@ -128,7 +129,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                           </Grid>
                                           <Box mt={1}>
                                             <Grid container spacing={2} alignItems="center">
-                                              <Grid item xs={12} md={4}>
+                                              <Grid item xs={12} md={3}>
                                                 <Field
                                                   fullWidth
                                                   label="Return Quantity"
@@ -150,10 +151,10 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                   helperText={validate([data]).returnQuantity ? validate([data]).returnQuantity : ''}
                                                 />
                                               </Grid>
-                                              <Grid item xs={12} md={4}>
+                                              <Grid item xs={12} md={3}>
                                                 <Field
                                                   fullWidth
-                                                  label="Consumed Quantity"
+                                                  label="Product is Consumed"
                                                   variant="outlined"
                                                   type="number"
                                                   size="small"
@@ -173,7 +174,30 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                   helperText={validate([data]).consumeQty ? validate([data]).consumeQty : ''}
                                                 />
                                               </Grid>
-                                              <Grid item xs={12} md={4}>
+                                              <Grid item xs={12} md={3}>
+                                                <Field
+                                                  fullWidth
+                                                  label="Invoiced Quantity"
+                                                  variant="outlined"
+                                                  type="number"
+                                                  size="small"
+                                                  component={TextField}
+                                                  disabled
+                                                  name="invoiceQty"
+                                                  placeholder="Invoiced Quantity"
+                                                  value={data.invoiceQty}
+                                                  onChange={(e) => {
+                                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.products[index],
+                                                      ['invoiceQty']: parseInt(value)
+                                                    });
+                                                  }}
+                                                  error={validate([data])?.invoiceQty}
+                                                  helperText={validate([data]).invoiceQty ? validate([data]).invoiceQty : ''}
+                                                />
+                                              </Grid>
+                                              <Grid item xs={12} md={3}>
                                                 <Field
                                                   fullWidth
                                                   label="Order Quantity"
