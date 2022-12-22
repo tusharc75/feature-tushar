@@ -226,7 +226,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
             Cell: ({ row }) =>
             (
               <Grid container spacing={1}>
-                {row.original.isEditable &&
+                {row.original.isEditable && row.original.qty > 1 &&
                   <><IconButton
                     size="small"
                     aria-label="Details"
