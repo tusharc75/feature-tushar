@@ -182,6 +182,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
         }
         pendingServiceIndex = pendingServiceIndex > -1 ? pendingServiceIndex : 0;
         const order = services[pendingServiceIndex]?.order;
+        console.log(pendingServiceIndex)
         services?.forEach((element, index) => {
           if (element?.type === "service") {
             if (element.order === order || index <= pendingServiceIndex) {
@@ -197,7 +198,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
             }
           }
         })
-        if (isQuotation || (quotation && quotation?.status !== QUOTATION_STATUS.acceptByCustomer)) {
+        if (isQuotation && (quotation && quotation?.status !== QUOTATION_STATUS.acceptByCustomer)) {
           services?.forEach((element) => {
             if (!element?.preWork) {
               element.clickable = false;

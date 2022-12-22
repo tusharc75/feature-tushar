@@ -106,22 +106,23 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
               <p className="text-truncate" title={row.original?.detail}>
                 {row.original?.detail}
               </p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'asset') {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <InfoIcon fontSize="small" color="primary" />
-              </IconButton>
+              {row.original['type'] !== 'additionalCost' &&
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === 'service') {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'product') {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === 'asset') {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <InfoIcon fontSize="small" color="primary" />
+                </IconButton>}
             </div>
           )
         },
