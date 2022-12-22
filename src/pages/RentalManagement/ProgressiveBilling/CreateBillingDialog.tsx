@@ -111,22 +111,23 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
               </span>
             </Box>
-            <IconButton
-              size="small"
-              onClick={() => {
-                if (row.original.type === 'service') {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'product') {
-                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'asset') {
-                  window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                } else {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                }
-              }}
-            >
-              <InfoIcon fontSize="small" color="primary" />
-            </IconButton>
+            {row.original['type'] !== 'additionalCost' &&
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === 'service') {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'product') {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === 'asset') {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <InfoIcon fontSize="small" color="primary" />
+              </IconButton>}
           </div>
         )
       }
@@ -275,8 +276,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
     const responseAdditionalCostData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
     let additionalCostData = responseAdditionalCostData?.data?.data;
-    if (additionalCost.length > 0) {
-      additionalCostData = additionalCostData.filter(d => !additionalCost.some(obj => obj._id === d._id))
+    if (additionalCost?.length > 0) {
+      additionalCostData = additionalCostData.filter(d => !additionalCost?.some(obj => obj._id === d._id))
     }
 
     let newMaterial: any = []
@@ -354,7 +355,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           materialData = { ...materialData, ...calValues };
         }
 
-        const product = invoicedProducts.find((p) => p._id === e._id);
+        const product = invoicedProducts?.find((p) => p._id === e._id);
         if (product) {
           const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
           materialData.actualStartDate = actualEndDate;
@@ -430,7 +431,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       if (element.type !== "additionalCost") {
         element.invalidDate = false;
 
-        const product = invoicedProducts.find((p) => p._id === element._id);
+        const product = invoicedProducts?.material?.find((p) => p._id === element._id);
 
         const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
         const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
