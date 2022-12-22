@@ -115,7 +115,7 @@ const Quotation = ({
         accessor: 'srno',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'none',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
@@ -124,7 +124,7 @@ const Quotation = ({
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'none',
         disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
@@ -152,7 +152,7 @@ const Quotation = ({
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'none',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p title={row.original.detail}>{row.original.detail}</p>
@@ -644,10 +644,10 @@ const Quotation = ({
             width={
               stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
             }
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
           >
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}

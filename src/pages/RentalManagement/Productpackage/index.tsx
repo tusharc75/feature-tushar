@@ -43,6 +43,7 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { genrateCustomTableColumns } from 'src/constants/columns';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 const Productpackage = ({
   rentalManagementData,
@@ -59,6 +60,8 @@ const Productpackage = ({
   const {
     state: { user, permissions }
   }: any = useData();
+
+  const tablet = useMediaQuery('(max-width: 1300px)');
 
   const [isUpdating, setUpdating] = useState(false);
 
@@ -84,6 +87,8 @@ const Productpackage = ({
 
   const { isOffline } = useContext(CustomOfflineContext);
 
+  console.log(columns);
+
   useEffect(() => {
     fetchFields();
   }, [allowedToEdit]);
@@ -98,7 +103,7 @@ const Productpackage = ({
     if (!allowedToEdit) {
       allFields?.forEach((e) => {
         e.isColumnEditable = false;
-      })
+      });
     }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
     const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, currencySymbol, renderedFrom);
@@ -107,7 +112,7 @@ const Productpackage = ({
         accessor: 'srno',
         Header: 'Index',
         width: 70,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'none',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
@@ -117,7 +122,7 @@ const Productpackage = ({
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'none',
         width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (
@@ -128,12 +133,12 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -144,7 +149,7 @@ const Productpackage = ({
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: isMobile ? 'none' : 'left',
+        sticky: 'none',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {isOffline || !allowedToEdit ? (
@@ -296,7 +301,7 @@ const Productpackage = ({
     // });
     // eslint-disable-next-line no-lone-blocks
 
-    column = [...column, ...newColumns]
+    column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
       Header: '',
@@ -306,39 +311,37 @@ const Productpackage = ({
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
-        return (
-          allowedToEdit ?
-            row.original.hideSelection ?
-              <HtmlTooltip title={'Asset is already assigned'} >
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    disabled={true}
-                  >
-                    <DeleteIcon fontSize="small" color={"disabled"} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip> :
-              < HtmlTooltip title={'Delete'} >
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                      getNestedSubRows(obj, row.original);
-                      setDeleteData(obj);
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" color={"error"} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip >
-            : ""
-        )
+        return allowedToEdit ? (
+          row.original.hideSelection ? (
+            <HtmlTooltip title={'Asset is already assigned'}>
+              <span>
+                <IconButton size="small" aria-label="Details" disabled={true}>
+                  <DeleteIcon fontSize="small" color={'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          ) : (
+            <HtmlTooltip title={'Delete'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setDeleteData(obj);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color={'error'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          )
+        ) : (
+          ''
+        );
       }
-    })
+    });
     // column.forEach((element) => {
     //   const priceField = allFields.find((f) => f.fieldName === 'price')
     //   if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
@@ -380,22 +383,23 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-        }`;
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
@@ -422,22 +426,23 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service'
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === 'package'
+      _subRow.detail = `${
+        _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === 'package'
           ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : ''
-        } `;
+          ? _subRow.productDetail?.productName
+          : ''
+      } `;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -685,8 +690,8 @@ const Productpackage = ({
         }
       });
     } else {
-      if (inputField.hasOwnProperty("qtyDisplay")) {
-        inputField["qty"] = inputField["qtyDisplay"]
+      if (inputField.hasOwnProperty('qtyDisplay')) {
+        inputField['qty'] = inputField['qtyDisplay'];
       }
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, allFields, updatedData);
@@ -805,17 +810,17 @@ const Productpackage = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             >
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
