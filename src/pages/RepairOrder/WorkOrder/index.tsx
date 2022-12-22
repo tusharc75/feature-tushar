@@ -99,25 +99,27 @@ const WorkOrder = ({
             </Box>
             <Chip
               className="ml-1"
-              label={`${row.original.type === 'service'
-                ? 'Service'
-                : row.original.type === 'product'
+              label={`${
+                row.original.type === 'service'
+                  ? 'Service'
+                  : row.original.type === 'product'
                   ? 'Product'
                   : row.original.type === 'serializedAsset'
-                    ? 'Asset'
-                    : 'Package'
-                }`}
+                  ? 'Asset'
+                  : 'Package'
+              }`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'service'
+                      ? routes.serviceMasterDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : routes.packagesDetail.path
+                      ? routes.serializedAssetDetail.path
+                      : routes.packagesDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -147,12 +149,7 @@ const WorkOrder = ({
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ?
-            <p className="text-truncate">
-              {row.original.description}</p>
-            : (
-              <NoDataCell />
-            )
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       },
       {
@@ -309,7 +306,7 @@ const WorkOrder = ({
   };
 
   const handleDelete = () => {
-    if (deleteData?.some((e) => e.type === "service")) {
+    if (deleteData?.some((e) => e.type === 'service')) {
       let ids = [];
       let workOrderId = '';
       if (deleteData.length > 0) {
@@ -339,8 +336,7 @@ const WorkOrder = ({
 
           toastConfig.setToastConfig(err);
         });
-    }
-    else {
+    } else {
       if (deleteData?.filter((e: any) => !e?.subRows?.length)?.length) {
         handleWorkOrderDelete(deleteData?.filter((e: any) => !e?.subRows?.length)?.map((e) => e.workOrder?._id));
       }
@@ -359,33 +355,35 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'serializedAsset'
-            ? parent?.serializedAsset?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+          ? parent?.serializedAsset?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
+      parent.status = `${
+        parent.type === 'service'
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
           ? parent.productDetail?.status
           : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -434,18 +432,18 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -506,7 +504,7 @@ const WorkOrder = ({
         });
     }
   };
-
+  console.log(allowedToEdit, isPostWorkService);
   const openActions = (event) => {
     setAnchorActionEl(event.currentTarget);
   };
@@ -545,12 +543,11 @@ const WorkOrder = ({
       });
   };
 
-
   return (
     <Fragment>
       <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
         <Box display="flex" alignItems="center" justifyContent={'flex-end'} paddingX={1} gridColumnGap={8} flex={1}>
-          {allowedToEdit && (
+          {(allowedToEdit || isPostWorkService) && (
             <Box display="flex" gridColumnGap={5}>
               <Button
                 variant="outlined"
@@ -595,7 +592,9 @@ const WorkOrder = ({
                     closeActions();
                     setArrangeView(true);
                   }}
-                  disabled={selectedServices?.length && selectedServices?.every((d) => d.workOrder?._id === selectedServices[0].workOrder?._id) ? false : true}
+                  disabled={
+                    selectedServices?.length && selectedServices?.every((d) => d.workOrder?._id === selectedServices[0].workOrder?._id) ? false : true
+                  }
                 >
                   Arrange Services
                 </MenuItem>
@@ -605,12 +604,21 @@ const WorkOrder = ({
                     setShowConfirmBox(true);
                     closeActions();
                   }}
-                  disabled={selectedServices?.length ?
-                    selectedServices?.filter((d) => d.type === 'service' && d.workOrder?._id === selectedServices[0].workOrder?._id
-                      && d.status === WORKORDER_SERVICE_STATUS.pending)?.length === selectedServices?.length ?
-                      false : true
-                    : selectedAssets?.length ?
-                      selectedAssets?.filter((d) => !d?.subRows || d?.subRows?.length == 0)?.length === selectedAssets?.length ? false : true : true
+                  disabled={
+                    selectedServices?.length
+                      ? selectedServices?.filter(
+                          (d) =>
+                            d.type === 'service' &&
+                            d.workOrder?._id === selectedServices[0].workOrder?._id &&
+                            d.status === WORKORDER_SERVICE_STATUS.pending
+                        )?.length === selectedServices?.length
+                        ? false
+                        : true
+                      : selectedAssets?.length
+                      ? selectedAssets?.filter((d) => !d?.subRows || d?.subRows?.length == 0)?.length === selectedAssets?.length
+                        ? false
+                        : true
+                      : true
                   }
                 >
                   Delete
@@ -629,12 +637,12 @@ const WorkOrder = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw)'
+                  : isSmallScreen
+                  ? 'calc(100vw)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
@@ -649,7 +657,7 @@ const WorkOrder = ({
                 }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
-                hideSelection={!allowedToEdit}
+                hideSelection={allowedToEdit ? false : isPostWorkService ? false : true}
                 renderedFrom="repair_order_workorder"
                 isClientSideGrid={true}
               />
@@ -668,6 +676,7 @@ const WorkOrder = ({
                 handleAddService(data?.map((e) => e.service));
                 setAddServicesDialog({ open: false });
               }}
+              extraStaticFilter={!isPostWorkService ? [] : [{ field: 'preWork', term: false }]}
             />
           )}
           {userAssignDialog && (
