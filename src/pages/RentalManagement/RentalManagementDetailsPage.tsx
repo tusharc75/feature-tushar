@@ -621,7 +621,7 @@ const RentalManagementDetailsPage = () => {
                 </Box>
               </TabPanel>
               <TabPanel value={tabValue} index={1}>
-                <Paper style={{ overflowX: 'hidden' }}>
+                <Paper>
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}

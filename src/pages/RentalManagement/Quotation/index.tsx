@@ -642,7 +642,15 @@ const Quotation = ({
             p="6px"
             zIndex={5}
             width={
-              stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
+              stepFullScreen
+                ? '100%'
+                : isTabletScreen
+                ? 'calc(100vw -30px)'
+                : isSmallScreen
+                ? 'calc(100vw -30px)'
+                : showActivity
+                ? '100%'
+                : 'calc(100vw - 100px)'
             }
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
           >

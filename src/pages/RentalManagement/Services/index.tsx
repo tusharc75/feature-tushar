@@ -675,9 +675,9 @@ const Services = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                  ? 'calc(100vw)'
+                  ? 'calc(100vw -30px)'
                   : isSmallScreen
-                  ? 'calc(100vw)'
+                  ? 'calc(100vw -30px)'
                   : showActivity
                   ? '100%'
                   : 'calc(100vw - 103px)'
