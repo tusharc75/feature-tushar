@@ -504,7 +504,6 @@ const WorkOrder = ({
         });
     }
   };
-  console.log(allowedToEdit, isPostWorkService);
   const openActions = (event) => {
     setAnchorActionEl(event.currentTarget);
   };
