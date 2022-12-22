@@ -450,7 +450,7 @@ const Quotation = ({
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
+      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });

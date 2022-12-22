@@ -409,6 +409,7 @@ export default function StepDialog({
                                   checked={values['isPassAddon']}
                                   onChange={(e) => {
                                     setFieldValue('isPassAddon', e.target.checked);
+                                    setFieldValue('passAddon', []);
                                   }}
                                   color="primary"
                                 />
@@ -457,6 +458,7 @@ export default function StepDialog({
                                   checked={values['isFailAddon']}
                                   onChange={(e) => {
                                     setFieldValue('isFailAddon', e.target.checked);
+                                    setFieldValue('failAddon', []);
                                   }}
                                   color="primary"
                                 />
@@ -506,6 +508,7 @@ export default function StepDialog({
                                   checked={values?.isJumpStepPass}
                                   onChange={(e) => {
                                     setFieldValue('isJumpStepPass', e.target.checked);
+                                    setFieldValue('jumpStepsPass', []);
                                   }}
                                   color="primary"
                                 />
@@ -554,6 +557,7 @@ export default function StepDialog({
                                   checked={values?.isJumpStepFail}
                                   onChange={(e) => {
                                     setFieldValue('isJumpStepFail', e.target.checked);
+                                    setFieldValue('jumpStepsFail', []);
                                   }}
                                   color="primary"
                                 />
@@ -620,6 +624,7 @@ export default function StepDialog({
                                   checked={values?.isReturnToStepOnFail}
                                   onChange={(e) => {
                                     setFieldValue('isReturnToStepOnFail', e.target.checked);
+                                    setFieldValue('returnToStepOnFail', '');
                                   }}
                                   color="primary"
                                 />
@@ -666,6 +671,7 @@ export default function StepDialog({
                                   checked={values?.isReturnToServiceOnFail}
                                   onChange={(e) => {
                                     setFieldValue('isReturnToServiceOnFail', e.target.checked);
+                                    setFieldValue('returnToServiceOnFail', '');
                                   }}
                                   color="primary"
                                 />

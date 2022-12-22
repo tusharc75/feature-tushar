@@ -38,6 +38,7 @@ import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import FormatQuoteIcon from '@material-ui/icons/FormatQuote';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { PreWorkIcon, PostWorkIcon } from 'src/assets/svg/svgIcons';
+import { reverse } from 'lodash';
 
 const getTotalTime = (stepTimes: any) => {
   let totalTimes = 0;
@@ -168,14 +169,15 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
       if (services?.length) {
         let pendingServiceIndex = services?.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
         if (pendingServiceIndex === -1) {
-          let tempServiceSortedArray = [...services].sort((a, b) => (a.order > b.order ? -1 : 1));
+          let tempServiceSortedArray = reverse([...services]);
+          console.log(tempServiceSortedArray)
           pendingServiceIndex = tempServiceSortedArray.findIndex((d) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status));
           if (pendingServiceIndex === -1) {
             pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
           }
           else {
             pendingServiceIndex = (services?.length - pendingServiceIndex);
-            if (!services[pendingServiceIndex]?.preWork) {
+            if (services[pendingServiceIndex]?.type === 'quotation') {
               pendingServiceIndex = pendingServiceIndex + 1;
             }
           }
@@ -198,13 +200,18 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
             }
           }
         })
-        if (isQuotation && (quotation && quotation?.status !== QUOTATION_STATUS.acceptByCustomer)) {
-          services?.forEach((element) => {
-            if (!element?.preWork) {
-              element.clickable = false;
-            }
-          })
+        if (isQuotation) {
+          if ((quotation && quotation?.status === QUOTATION_STATUS.acceptByCustomer)) {
+          }
+          else {
+            services?.forEach((element) => {
+              if (!element?.preWork) {
+                element.clickable = false;
+              }
+            })
+          }
         }
+
         setSelectedService(services[pendingServiceIndex]);
       }
 
