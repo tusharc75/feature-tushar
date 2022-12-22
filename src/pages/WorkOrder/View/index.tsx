@@ -68,9 +68,11 @@ const WorkOrderViews = (props) => {
     try {
       const workOrderData: any = await axiosInstance().get(`${routes.workOrder.path}/${workOrderId}/steps-data`);
       const stepDatas = {};
-      workOrderData?.data?.data?.map((s) => {
-        stepDatas[s?.stepId] = s?.passFailStatus;
-      });
+      workOrderData?.data?.data
+        ?.filter((s) => s?.passFailStatus)
+        ?.map((s) => {
+          stepDatas[s?.stepId] = s?.passFailStatus;
+        });
       var xPosition = 0;
       var flow: any[] = [
         {
@@ -88,7 +90,7 @@ const WorkOrderViews = (props) => {
         }
       ];
       var flowEdge: any[] = [];
-      const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}`);
+      const workOrderServices = await axiosInstance().get(`${routes.workOrder.path}/service/${workOrderId}/views`);
       const allServices = workOrderServices?.data?.data || [];
       const allSteps = [];
       if (allServices?.length) xPosition += 300;
@@ -114,7 +116,7 @@ const WorkOrderViews = (props) => {
                   s?.serviceStatus ? `, Status: ${s?.serviceStatus}` : ''
                 }`}
               >
-                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s?.serviceName || ''}</div>
+                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s?.serviceDetail?.serviceName || ''}</div>
               </HtmlTooltip>
             )
           },
@@ -142,7 +144,7 @@ const WorkOrderViews = (props) => {
                   arrow
                   placement="top"
                   title={
-                    stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
+                    stepDatas[step?._id] && stepDatas[step?._id] === 'Completed'
                       ? 'Step Passed'
                       : stepDatas[step?._id] === 'Failed'
                       ? 'Step Failed'
@@ -157,7 +159,7 @@ const WorkOrderViews = (props) => {
             },
             position: { x: xPosition + 300, y: serviceStepIdx * 80 },
             style:
-              stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
+              stepDatas[step?._id] && stepDatas[step?._id] === 'Completed'
                 ? customNodeStyles.stepPassed
                 : stepDatas[step?._id] === 'Failed'
                 ? customNodeStyles.stepFailed
