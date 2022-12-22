@@ -144,7 +144,7 @@ const WorkOrderViews = (props) => {
                   arrow
                   placement="top"
                   title={
-                    stepDatas[step?._id] && stepDatas[step?._id] === 'Completed'
+                    stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
                       ? 'Step Passed'
                       : stepDatas[step?._id] === 'Failed'
                       ? 'Step Failed'
@@ -159,7 +159,7 @@ const WorkOrderViews = (props) => {
             },
             position: { x: xPosition + 300, y: serviceStepIdx * 80 },
             style:
-              stepDatas[step?._id] && stepDatas[step?._id] === 'Completed'
+              stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
                 ? customNodeStyles.stepPassed
                 : stepDatas[step?._id] === 'Failed'
                 ? customNodeStyles.stepFailed
