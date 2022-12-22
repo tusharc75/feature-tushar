@@ -470,7 +470,7 @@ export default function StepDialog({
                             {values['isFailAddon'] && (
                               <Autocomplete
                                 options={[
-                                  { optionValue: 'all', optionLabel: 'Select All Consequent Steps' },
+                                  { optionValue: 'all', optionLabel: 'Select All Consequent Services' },
                                   ...services?.filter((data: any) => data.optionValue !== serviceId)
                                 ]}
                                 fullWidth
