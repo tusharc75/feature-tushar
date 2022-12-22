@@ -617,10 +617,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                       <Box>
                         <Chip
                           color="primary"
-                          label={referencType === 'workOrderTechnician'
-                            ? index + 1
-                            : `${serviceSteps.findIndex((item) => item?._id === selectedService?._id) + 1}.${index + 1}`
-                          }
+                          label={referencType === 'workOrderTechnician' ? index + 1 : `${selectedService?.order}.${index + 1}`}
                         />
                       </Box>
                       <Box ml={1}>
@@ -680,6 +677,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                               <Button
                                 variant="outlined"
                                 color="secondary"
+                                disabled={!allowedToEdit}
                                 size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -691,6 +689,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                               <Box marginX={1} />
                               <DeleteButton
                                 text="Fail"
+                                disabled={!allowedToEdit}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id);
@@ -703,6 +702,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                                 variant="outlined"
                                 color="secondary"
                                 size="small"
+                                disabled={!allowedToEdit}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step._id);

@@ -423,7 +423,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
     let tempValues = { actualEndDate: endDate };
 
-    const { data: { data: invoicedProducts } } = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`);
+    const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`);
+    const invoicedProducts = invoiceResponse?.data?.data?.material;
 
     let rows: any = [];
     selectedProducts.forEach((element) => {
