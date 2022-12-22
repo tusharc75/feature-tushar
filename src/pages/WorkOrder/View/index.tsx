@@ -3,7 +3,7 @@ import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flo
 import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { COLOUR_MASTER, WORKORDER_SERVICE_COLOR } from 'src/constants/helpers';
+import { COLOUR_MASTER, WORKORDER_SERVICE_COLOR, WORKORDER_SERVICE_STEP_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -144,11 +144,11 @@ const WorkOrderViews = (props) => {
                   arrow
                   placement="top"
                   title={
-                    stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
+                    stepDatas[step?._id] && stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.passed
                       ? 'Step Passed'
-                      : stepDatas[step?._id] === 'Failed'
+                      : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.failed
                       ? 'Step Failed'
-                      : stepDatas[step?._id] === 'Skipped'
+                      : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.skipped
                       ? 'Step Skipped'
                       : 'Step'
                   }
@@ -159,11 +159,11 @@ const WorkOrderViews = (props) => {
             },
             position: { x: xPosition + 300, y: serviceStepIdx * 80 },
             style:
-              stepDatas[step?._id] && stepDatas[step?._id] === 'Passed'
+              stepDatas[step?._id] && stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.passed
                 ? customNodeStyles.stepPassed
-                : stepDatas[step?._id] === 'Failed'
+                : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.failed
                 ? customNodeStyles.stepFailed
-                : stepDatas[step?._id] === 'Skipped'
+                : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.skipped
                 ? customNodeStyles?.stepSkipped
                 : customNodeStyles.step
           });
