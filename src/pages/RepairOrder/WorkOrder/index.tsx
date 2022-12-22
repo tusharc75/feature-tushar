@@ -100,12 +100,12 @@ const WorkOrder = ({
             <Chip
               className="ml-1"
               label={`${row.original.type === 'service'
-                ? 'Service'
-                : row.original.type === 'product'
-                  ? 'Product'
-                  : row.original.type === 'serializedAsset'
-                    ? 'Asset'
-                    : 'Package'
+                  ? 'Service'
+                  : row.original.type === 'product'
+                    ? 'Product'
+                    : row.original.type === 'serializedAsset'
+                      ? 'Asset'
+                      : 'Package'
                 }`}
               size="small"
               color="primary"
@@ -147,12 +147,7 @@ const WorkOrder = ({
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ?
-            <p className="text-truncate">
-              {row.original.description}</p>
-            : (
-              <NoDataCell />
-            )
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       },
       {
@@ -309,7 +304,7 @@ const WorkOrder = ({
   };
 
   const handleDelete = () => {
-    if (deleteData?.some((e) => e.type === "service")) {
+    if (deleteData?.some((e) => e.type === 'service')) {
       let ids = [];
       let workOrderId = '';
       if (deleteData.length > 0) {
@@ -339,8 +334,7 @@ const WorkOrder = ({
 
           toastConfig.setToastConfig(err);
         });
-    }
-    else {
+    } else {
       if (deleteData?.filter((e: any) => !e?.subRows?.length)?.length) {
         handleWorkOrderDelete(deleteData?.filter((e: any) => !e?.subRows?.length)?.map((e) => e.workOrder?._id));
       }
@@ -360,12 +354,12 @@ const WorkOrder = ({
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail = `${parent.type === 'service'
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === 'product'
-          ? parent?.productDetail?.productName
-          : parent.type === 'serializedAsset'
-            ? parent?.serializedAsset?.assetNumber
-            : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent.type === 'serializedAsset'
+              ? parent?.serializedAsset?.assetNumber
+              : parent?.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'service'
@@ -379,12 +373,12 @@ const WorkOrder = ({
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
       parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
-          ? parent.productDetail?.status
-          : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
+            ? parent.productDetail?.status
+            : parent.type === 'serializedAsset'
+              ? parent.serializedAssetDetail.status
+              : parent.packageDetail?.status
         }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.subRows = generateNestedData(data.material, parent);
@@ -506,7 +500,6 @@ const WorkOrder = ({
         });
     }
   };
-
   const openActions = (event) => {
     setAnchorActionEl(event.currentTarget);
   };
@@ -545,12 +538,11 @@ const WorkOrder = ({
       });
   };
 
-
   return (
     <Fragment>
       <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
         <Box display="flex" alignItems="center" justifyContent={'flex-end'} paddingX={1} gridColumnGap={8} flex={1}>
-          {allowedToEdit && (
+          {(allowedToEdit || isPostWorkService) && (
             <Box display="flex" gridColumnGap={5}>
               <Button
                 variant="outlined"
@@ -595,7 +587,9 @@ const WorkOrder = ({
                     closeActions();
                     setArrangeView(true);
                   }}
-                  disabled={selectedServices?.length && selectedServices?.every((d) => d.workOrder?._id === selectedServices[0].workOrder?._id) ? false : true}
+                  disabled={
+                    selectedServices?.length && selectedServices?.every((d) => d.workOrder?._id === selectedServices[0].workOrder?._id) ? false : true
+                  }
                 >
                   Arrange Services
                 </MenuItem>
@@ -605,12 +599,21 @@ const WorkOrder = ({
                     setShowConfirmBox(true);
                     closeActions();
                   }}
-                  disabled={selectedServices?.length ?
-                    selectedServices?.filter((d) => d.type === 'service' && d.workOrder?._id === selectedServices[0].workOrder?._id
-                      && d.status === WORKORDER_SERVICE_STATUS.pending)?.length === selectedServices?.length ?
-                      false : true
-                    : selectedAssets?.length ?
-                      selectedAssets?.filter((d) => !d?.subRows || d?.subRows?.length == 0)?.length === selectedAssets?.length ? false : true : true
+                  disabled={
+                    selectedServices?.length
+                      ? selectedServices?.filter(
+                        (d) =>
+                          d.type === 'service' &&
+                          d.workOrder?._id === selectedServices[0].workOrder?._id &&
+                          d.status === WORKORDER_SERVICE_STATUS.pending
+                      )?.length === selectedServices?.length
+                        ? false
+                        : true
+                      : selectedAssets?.length
+                        ? selectedAssets?.filter((d) => !d?.subRows || d?.subRows?.length == 0)?.length === selectedAssets?.length
+                          ? false
+                          : true
+                        : true
                   }
                 >
                   Delete
@@ -649,7 +652,7 @@ const WorkOrder = ({
                 }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
-                hideSelection={!allowedToEdit}
+                hideSelection={allowedToEdit ? false : isPostWorkService ? false : true}
                 renderedFrom="repair_order_workorder"
                 isClientSideGrid={true}
               />
@@ -668,12 +671,13 @@ const WorkOrder = ({
                 handleAddService(data?.map((e) => e.service));
                 setAddServicesDialog({ open: false });
               }}
+              extraStaticFilter={!isPostWorkService ? [] : [{ field: 'preWork', term: false }]}
             />
           )}
           {userAssignDialog && (
             <AssignUserDialog
               workOrderData={selectedProducts
-                .filter((e) => e.type === 'service')
+                .filter((e) => !e?.hideSelection && e.type === 'service')
                 .map((d) => {
                   return {
                     uniqueId: d?.uniqueId,
