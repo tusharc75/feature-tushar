@@ -69,7 +69,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
       contentType: pdfFileBase64.split(';')[0].split(':')[1],
-      name: `Rental Order-${quotationData.quotationNumber}`
+      name: `Quote-${quotationData?.quotationNumber}`
     });
   }
 
