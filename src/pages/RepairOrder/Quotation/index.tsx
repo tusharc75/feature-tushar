@@ -332,14 +332,12 @@ const Quotation = ({
 
   const fetchProductInventory = async () => {
     var data: any = [];
-    var inventory: any = [];
-    const response = await axiosInstance().get(
-      `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
-    );
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
     data = response?.data?.data;
+
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
+
     rows?.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail = `${parent.type === 'serializedAsset'
@@ -364,19 +362,18 @@ const Quotation = ({
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
-      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
-      parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-      parent.subRows = generateNestedData(data.material, inventory, parent);
+      parent.hideSelection = false;
+      parent.subRows = generateNestedData(data.material, parent);
     });
     setRowsData(rows);
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, inventory, parent) => {
-    const subRows: any = material
-      ?.filter((e) => e.parentId === parent._id)
-      ?.sort((a, b) => a?.order - b?.order)
-      ?.sort((a, b) => a?.preWork - b?.preWork);
+  const generateNestedData = (material, parent) => {
+
+    var subRows: any = orderBy(material?.filter((e) => e.parentId === parent._id), ['order'], ['asc']);
+    subRows = subRows?.sort((a, b) => a?.preWork - b?.preWork);
+
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === 'serializedAsset'
@@ -401,9 +398,8 @@ const Quotation = ({
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
-      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+      _subRow.hideSelection = false;
+      _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -411,7 +407,7 @@ const Quotation = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return orderBy(subRows, ['srno'], ['asc']);
+    return subRows;
   };
 
   const getNestedSubRows = (obj, original) => {

@@ -270,7 +270,7 @@ const WorkOrderDetails = () => {
                       {statusOptions?.map((o, index) => {
                         return (
                           <MenuItem
-                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === workOrderData?.status)}
+                            disabled={index <= statusOptions.findIndex((d) => d.optionLabel === workOrderData?.status && ![WORK_ORDER_STATUS.completed]?.includes(o?.optionLabel))}
                             onClick={() => {
                               closeActions();
                               handleStatusChange(o);

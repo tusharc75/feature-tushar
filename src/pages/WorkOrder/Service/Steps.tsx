@@ -366,7 +366,12 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
           });
           if (services.length > 0) {
-            setAddServiceConfirmation({ open: true, status: '', services, step, values, type: '' });
+            if (referencType === "workOrderTechnician") {
+              handleAddService(services?.map((e) => e._id));
+            }
+            else {
+              setAddServiceConfirmation({ open: true, status: '', services, step, values, type: '' });
+            }
           }
         } else if (step?.isPassFail) {
           const type = automatePassFail(values, step);
