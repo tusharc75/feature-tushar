@@ -74,6 +74,7 @@ const RentalManagementDetailsPage = () => {
   const isTabletScreen = useMediaQuery('(max-width:960px)');
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
+
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [rentalManagementFields, setRentalManagementFields] = useState([]);
@@ -203,12 +204,15 @@ const RentalManagementDetailsPage = () => {
           }
 
           for (let i = 0; i < keys.length; i++) {
-            if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(data?.versions[keys[i]]?.status)) {
+            if (
+              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                data?.versions[keys[i]]?.status
+              )
+            ) {
               setIsDisableCustomerAccount(true);
               break;
             }
           }
-
         }
       });
   };
@@ -226,7 +230,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -346,8 +350,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -403,12 +407,19 @@ const RentalManagementDetailsPage = () => {
       });
   };
 
+  let style = {};
+  if (isSmallScreen) {
+    style = { overflowX: 'hidden', gridTemplateColumns: '100%' };
+  } else {
+    style = { overflowX: 'hidden' };
+  }
+
   return (
     <>
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={[routes.rentalManagement, { title: `${rentalManagementData ? rentalManagementData?.rentalJobName : ''}` }]} />
       </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
+      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`} style={style}>
         <div>
           <div>
             <Paper>
@@ -818,8 +829,8 @@ const RentalManagementDetailsPage = () => {
                           resource={ACTIVITY_RESOURCE.rentalManagement}
                           restrictedAddActivities={
                             permissions &&
-                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
-                              permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
+                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`] &&
+                            permissions[`${ACTIVITY_RESOURCE.rentalManagement}`].isUpdate
                               ? []
                               : ['Attachment', 'Case']
                           }
@@ -830,7 +841,7 @@ const RentalManagementDetailsPage = () => {
                               access: true
                             }
                           ]}
-                          handleActivityRefresh={() => { }}
+                          handleActivityRefresh={() => {}}
                           emails={[]}
                         />
                       </div>

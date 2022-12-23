@@ -84,6 +84,8 @@ const Productpackage = ({
 
   const { isOffline } = useContext(CustomOfflineContext);
 
+  console.log(columns);
+
   useEffect(() => {
     fetchFields();
   }, [allowedToEdit]);
@@ -98,7 +100,7 @@ const Productpackage = ({
     if (!allowedToEdit) {
       allFields?.forEach((e) => {
         e.isColumnEditable = false;
-      })
+      });
     }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
     const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, currencySymbol, renderedFrom);
@@ -128,12 +130,12 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -296,7 +298,7 @@ const Productpackage = ({
     // });
     // eslint-disable-next-line no-lone-blocks
 
-    column = [...column, ...newColumns]
+    column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
       Header: '',
@@ -306,39 +308,37 @@ const Productpackage = ({
       disableFilters: true,
       canDrag: false,
       Cell: ({ row }) => {
-        return (
-          allowedToEdit ?
-            row.original.hideSelection ?
-              <HtmlTooltip title={'Asset is already assigned'} >
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    disabled={true}
-                  >
-                    <DeleteIcon fontSize="small" color={"disabled"} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip> :
-              < HtmlTooltip title={'Delete'} >
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                      getNestedSubRows(obj, row.original);
-                      setDeleteData(obj);
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" color={"error"} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip >
-            : ""
-        )
+        return allowedToEdit ? (
+          row.original.hideSelection ? (
+            <HtmlTooltip title={'Asset is already assigned'}>
+              <span>
+                <IconButton size="small" aria-label="Details" disabled={true}>
+                  <DeleteIcon fontSize="small" color={'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          ) : (
+            <HtmlTooltip title={'Delete'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setDeleteData(obj);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color={'error'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          )
+        ) : (
+          ''
+        );
       }
-    })
+    });
     // column.forEach((element) => {
     //   const priceField = allFields.find((f) => f.fieldName === 'price')
     //   if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
@@ -380,22 +380,23 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'service'
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.packageDetail?.packageName
-        }`;
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
@@ -422,22 +423,23 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'service'
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === 'package'
+      _subRow.detail = `${
+        _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === 'package'
           ? _subRow.packageDetail?.packageName
           : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : ''
-        } `;
+          ? _subRow.productDetail?.productName
+          : ''
+      } `;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
@@ -685,8 +687,8 @@ const Productpackage = ({
         }
       });
     } else {
-      if (inputField.hasOwnProperty("qtyDisplay")) {
-        inputField["qty"] = inputField["qtyDisplay"]
+      if (inputField.hasOwnProperty('qtyDisplay')) {
+        inputField['qty'] = inputField['qtyDisplay'];
       }
       let rows: any = [{ ...rowData, ...updatedData }];
       rows = await calculateRowsField(material, inputField, allFields, updatedData);
@@ -805,17 +807,17 @@ const Productpackage = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw -30px)'
+                  : isSmallScreen
+                  ? 'calc(100vw -30px)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             >
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
