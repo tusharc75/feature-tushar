@@ -471,7 +471,7 @@ const WorkOrder = ({
     data.serviceIds = ids;
     data.workOrderIds = [...new Set(allWorkOrders)];
     axiosInstance()
-      .post(`${workOrder.api}/service/`, data)
+      .post(`${workOrder.api}/service`, data)
       .then(() => {
         fetchData();
       })

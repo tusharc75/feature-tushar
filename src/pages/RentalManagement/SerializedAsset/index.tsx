@@ -112,12 +112,12 @@ const SerializedAsset = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -208,21 +208,23 @@ const SerializedAsset = ({
             )}
             {row.original?.type === 'asset' && (
               <span className="d-flex align-items-center gap-2">
-                {[INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(row.original.status)
-                  && !row?.original?.rentalAssetStatus && allowedToEdit &&
-                  <HtmlTooltip title={`Remove`}  >
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setShowConfirmBox(true);
-                        setDeleteData([
-                          { _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }
-                        ]);
-                      }}
-                    >
-                      <Delete fontSize="small" color={"error"} />
-                    </IconButton>
-                  </HtmlTooltip>}
+                {[INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(row.original.status) &&
+                  !row?.original?.rentalAssetStatus &&
+                  allowedToEdit && (
+                    <HtmlTooltip title={`Remove`}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setShowConfirmBox(true);
+                          setDeleteData([
+                            { _id: row.original.inventory, assetNumber: row.original.detail, isNonSerializeAsset: row.original.isNonSerializeAsset }
+                          ]);
+                        }}
+                      >
+                        <Delete fontSize="small" color={'error'} />
+                      </IconButton>
+                    </HtmlTooltip>
+                  )}
                 {row.original.isTransferAsset && (
                   <HtmlTooltip
                     title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}
@@ -384,7 +386,7 @@ const SerializedAsset = ({
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         data = response?.data?.data;
-        data.inventory = data.inventory?.filter((e) => !e.isReplaced)
+        data.inventory = data.inventory?.filter((e) => !e.isReplaced);
         offlineAssetErrorLog = data?.offlineAssetErrorLog;
 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
@@ -411,20 +413,21 @@ const SerializedAsset = ({
       let rows = data.material.filter((e) => e.parentId === null);
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
+        parent.detail = `${
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent?.packageDetail?.packageName
-          }`;
+        }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-              ? parent?.productDetail?.productDesc || ''
-              : parent.type === 'package'
-                ? parent?.packageDetail?.packageDescription || ''
-                : '';
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
@@ -451,23 +454,28 @@ const SerializedAsset = ({
           bulkAssetCreationProduct,
           offlineAssetErrorLog
         );
-        parent.assetQty = parent.subRows.filter((d) => d.type !== 'asset').length === 0 ? parent.assetQty
-          : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+        parent.assetQty =
+          parent.subRows.filter((d) => d.type !== 'asset').length === 0
+            ? parent.assetQty
+            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
         parent.assetAssignedQty =
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetAssignedQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0);
-        parent.isValid = parent.serializedProduct ? parent.assetAssignedQty === parent.assetQty ? true : false
-          : parent.subRows.length !== 0 ? parent.assetAssignedQty ===
-            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+        parent.isValid = parent.serializedProduct
+          ? parent.assetAssignedQty === parent.assetQty
+            ? true
+            : false
+          : parent.subRows.length !== 0
+          ? parent.assetAssignedQty ===
+              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
             parent.subRows.every((d) => d.isValid)
-            : true;
+          : true;
 
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
             parent.isValid = true;
-          }
-          else {
+          } else {
             parent.isValid = false;
           }
         }
@@ -548,16 +556,16 @@ const SerializedAsset = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
       // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
       _subRow.assetQty =
@@ -591,10 +599,20 @@ const SerializedAsset = ({
         offlineAssetErrorLog
       );
       _subRow.subRows = tempSubRows;
-      _subRow.assetQty = tempSubRows.filter((d) => d.type !== 'asset').length === 0 ? _subRow.assetQty : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
-      _subRow.isValid = _subRow.serializedProduct ? _subRow.assetAssignedQty === _subRow.assetQty ? true : false
-        : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length ? true :
-          _subRow.assetAssignedQty === tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ? true : false;
+      _subRow.assetQty =
+        tempSubRows.filter((d) => d.type !== 'asset').length === 0
+          ? _subRow.assetQty
+          : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+      _subRow.isValid = _subRow.serializedProduct
+        ? _subRow.assetAssignedQty === _subRow.assetQty
+          ? true
+          : false
+        : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
+        ? true
+        : _subRow.assetAssignedQty ===
+          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+        ? true
+        : false;
       subRows.push(_subRow);
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
@@ -970,17 +988,17 @@ const SerializedAsset = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw -30px)'
+                  : isSmallScreen
+                  ? 'calc(100vw -30px)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             >
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 365px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => {

@@ -342,7 +342,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
         if (element.parentId) {
           const parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId)
           const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId && e._id !== element._id)
-          sumOnParent(parent, [...sameParent,{ ...element, ...calValues }], allFields, currency)
+          sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency)
           rows = [...rows, ...parent]
         }
 
@@ -452,6 +452,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = (
     }
     if (isQtyOnly && rowData && values.qty > rowData.qty) {
       errors['qty'] = `Quantity can not be greater than ${rowData?.qty}`;
+    }
+    if (isQtyOnly && rowData && values.qty <= 0) {
+      errors['qty'] = `Quantity should be greater than 0`;
     }
     return errors;
   }

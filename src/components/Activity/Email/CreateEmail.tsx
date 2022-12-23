@@ -146,6 +146,7 @@ export const CreateEmail = ({
     let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
     return imageExtensions.indexOf(extension) >= 0;
   };
+
   const fetchEmailDetail = async () => {
     if (emailId) {
       setLoading(true);
@@ -229,7 +230,7 @@ export const CreateEmail = ({
             toastConfig.setToastConfig(err);
           });
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleSendQuoteEmail = async (values) => {
@@ -248,12 +249,7 @@ export const CreateEmail = ({
       body['graphToken'] = await getAzureAcessToken(instance);
       body['mailbox'] = azureAccount.username;
     }
-    const api =
-      refrenceType === 'purchaseOrder'
-        ? `${purchaseOrder.api}/${id}/send-email`
-        : refrenceType === 'rentalJob'
-        ? `${rentalManagement.api}/${id}/send-email`
-        : `/quote-builder/sendQuoteEmail`;
+    const api = refrenceType === 'quote' ? `/quote-builder/sendQuoteEmail` : '/send-email';
     axiosInstance()
       .post(api, body)
       .then(() => {
@@ -263,7 +259,6 @@ export const CreateEmail = ({
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setSending(false);
-        handleClose();
       });
   };
 

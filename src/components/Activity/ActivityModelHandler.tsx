@@ -88,10 +88,12 @@ const ActivityModelHandler = (props) => {
         />
       ) : null}
       {activityType === "email" ? (
-        <CreateEmail emailId={activityId} handleClose={() => {
-          handleClose()
-          setFullScreen(false);
-        }}
+        <CreateEmail
+          emailId={activityId}
+          handleClose={() => {
+            handleClose()
+            setFullScreen(false);
+          }}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
             setFullScreen(prevState => !prevState)

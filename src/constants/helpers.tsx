@@ -361,7 +361,8 @@ export const RESOURCE_LABEL = {
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
-  workOrderTechnician: 'Work Order Technician'
+  workOrderTechnician: 'Work Order Technician',
+  freqentlyAskedQuestion:'Frequently Asked Question'
 };
 
 export const CHILD_RESOURCE = {
@@ -2106,8 +2107,8 @@ export const QUOTATION_STATUS = {
   buildingQuote: 'Building Quote',
   waitingForSupplierPrice: 'Waiting for Supplier Price',
   sentToCustomer: 'Sent to Customer',
-  acceptByCustomer: 'Acceptd by Customer',
-  rejectByCustomer: 'Rejectd by Customer'
+  acceptByCustomer: 'Accepted by Customer',
+  rejectByCustomer: 'Rejected by Customer'
 };
 
 export const WORKORDER_SERVICE_COLOR = {
