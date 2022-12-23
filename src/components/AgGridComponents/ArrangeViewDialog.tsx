@@ -352,13 +352,18 @@ const RenderListItem = (props: ItemProps) => {
   });
 
   const opacity = isDragging ? 0 : 1;
-  drag(drop(ref));
+
+  if (isMobile || isTablet) {
+    drop(ref);
+  } else {
+    drag(drop(ref));
+  }
 
   return (
     <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
       <ListItem divider disableGutters disabled={column.disabled}>
         <ListItemIcon className={classes.cursor}>
-          <DragHandle />
+          <DragHandle ref={drag} />
         </ListItemIcon>
         <ListItemText id="switch-list-column" primary={column.headerName} />
         <ListItemSecondaryAction>

@@ -1004,7 +1004,11 @@ const Header = ({ toggleDrawer }) => {
   return (
     <div>
       {scrollPos?.scrolled && <div className={styles.filler}></div>}
-      <AppBar position="relative" className={`${classes.appBar} ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`} color="primary">
+      <AppBar
+        position="relative"
+        className={`${classes.appBar} ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`}
+        style={{ backgroundColor: '#162d40' }}
+      >
         <Toolbar className={`${classes.toolbar} ${styles.mainConainer}`}>
           <Box component="div" display="flex" alignItems="center" flexGrow={1}>
             <div className={classes.sectionMobile}>
