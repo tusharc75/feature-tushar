@@ -483,7 +483,12 @@ const Quotation = ({
 
   return (
     <Fragment>
-      <Box display="flex" justifyContent="space-between" m={1}>
+      <Box
+        display="flex"
+        m={1}
+        sx={{ flexWrap: isMobile ? 'wrap' : 'no-wrap', justifyContent: isMobile ? 'center' : 'space-between' }}
+        style={{ gap: isMobile ? '8px' : '0px' }}
+      >
         <Box display="flex">
           <SendEmail
             versionData={quotationData?.versions[currentVersion]}
@@ -500,86 +505,70 @@ const Quotation = ({
             hideSummary={true}
           />
         </Box>
-        <Box display="flex">
-          {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcClock size={25} />
-              <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-            </div>
-          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcOk size={25} />
-              <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-            </div>
-          ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-            <div className="d-flex align-items-center justify-content-center flex-column m-1">
-              <FcCancel size={25} />
-              <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-            </div>
-          ) : null}
-        </Box>
-        <Box display="flex">
-          {allowedToEdit && (
-            <div>
-              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-                <Button
-                  disabled={material
-                    .filter((e) => e.parentId === null)
-                    .some(
-                      (d) =>
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                    )}
-                  onClick={() => {
-                    axiosInstance()
-                      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
-                      .then(() => {
-                        fetchQuotationData(currentVersion);
-                        toastConfig.setToastConfig({
-                          open: true,
-                          type: 'success',
-                          message: 'Sent to customer Sucessfully'
-                        });
-                      })
-                      .catch((error) => {
-                        toastConfig.setToastConfig(error);
-                      });
-                  }}
-                  variant="outlined"
-                  size="small"
-                  className="mx-1"
-                  color="primary"
-                >
-                  Send to customer
-                </Button>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                <Button
-                  onClick={() => {
-                    setCustomerAcceptable(true);
-                  }}
-                  variant="outlined"
-                  size="small"
-                  className="mx-1"
-                  color="primary"
-                >
-                  Accept / Reject
-                </Button>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                <Button
-                  onClick={() => {
-                    cloneVersion();
-                  }}
-                  variant="outlined"
-                  size="small"
-                  className="mx-1"
-                  color="primary"
-                >
-                  {`Clone Version-${currentVersion}`}
-                </Button>
-              ) : null}
-              {/* <Button
+        {isMobile ? (
+          <>
+            <Box display="flex">
+              {allowedToEdit && (
+                <div>
+                  {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                    <Button
+                      disabled={material
+                        .filter((e) => e.parentId === null)
+                        .some(
+                          (d) =>
+                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                        )}
+                      onClick={() => {
+                        axiosInstance()
+                          .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+                          .then(() => {
+                            fetchQuotationData(currentVersion);
+                            toastConfig.setToastConfig({
+                              open: true,
+                              type: 'success',
+                              message: 'Sent to customer Sucessfully'
+                            });
+                          })
+                          .catch((error) => {
+                            toastConfig.setToastConfig(error);
+                          });
+                      }}
+                      variant="outlined"
+                      size="small"
+                      className="mx-1"
+                      color="primary"
+                    >
+                      Send to customer
+                    </Button>
+                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                    <Button
+                      onClick={() => {
+                        setCustomerAcceptable(true);
+                      }}
+                      variant="outlined"
+                      size="small"
+                      className="mx-1"
+                      color="primary"
+                    >
+                      Accept / Reject
+                    </Button>
+                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+                    <Button
+                      onClick={() => {
+                        cloneVersion();
+                      }}
+                      variant="outlined"
+                      size="small"
+                      className="mx-1"
+                      color="primary"
+                    >
+                      {`Clone Version-${currentVersion}`}
+                    </Button>
+                  ) : null}
+                  {/* <Button
                 variant="outlined"
                 color="default"
                 size="small"
@@ -632,9 +621,179 @@ const Quotation = ({
                   </MenuItem>
                 )}
               </Menu> */}
-            </div>
-          )}
-        </Box>
+                </div>
+              )}
+            </Box>
+            <Box display="flex" sx={{ flexBasis: isMobile ? '100%' : '', justifyContent: isMobile ? 'center' : '' }}>
+              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
+                  <FcClock size={25} />
+                  <Typography style={{ color: '#00acc1', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+                    Quote has been sent to customer
+                  </Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
+                  <FcOk size={25} />
+                  <Typography style={{ color: '#28a745', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+                    Quote has been accepted by customer
+                  </Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
+                  <FcCancel size={25} />
+                  <Typography style={{ color: '#dc3545', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+                    Quote has been rejected by customer
+                  </Typography>
+                </div>
+              ) : null}
+            </Box>
+          </>
+        ) : (
+          <>
+            <Box display="flex" sx={{ flexBasis: isMobile ? '100%' : '', justifyContent: isMobile ? 'center' : '' }}>
+              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
+                  <FcClock size={25} />
+                  <Typography style={{ color: '#00acc1', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+                    Quote has been sent to customer
+                  </Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
+                  <FcOk size={25} />
+                  <Typography style={{ color: '#28a745', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+                    Quote has been accepted by customer
+                  </Typography>
+                </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+                <div className="d-flex align-items-center justify-content-center flex-column m-1 text-center">
+                  <FcCancel size={25} />
+                  <Typography style={{ color: '#dc3545', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+                    Quote has been rejected by customer
+                  </Typography>
+                </div>
+              ) : null}
+            </Box>
+            <Box display="flex">
+              {allowedToEdit && (
+                <div>
+                  {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                    <Button
+                      disabled={material
+                        .filter((e) => e.parentId === null)
+                        .some(
+                          (d) =>
+                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                            d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                        )}
+                      onClick={() => {
+                        axiosInstance()
+                          .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+                          .then(() => {
+                            fetchQuotationData(currentVersion);
+                            toastConfig.setToastConfig({
+                              open: true,
+                              type: 'success',
+                              message: 'Sent to customer Sucessfully'
+                            });
+                          })
+                          .catch((error) => {
+                            toastConfig.setToastConfig(error);
+                          });
+                      }}
+                      variant="outlined"
+                      size="small"
+                      className="mx-1"
+                      color="primary"
+                    >
+                      Send to customer
+                    </Button>
+                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                    <Button
+                      onClick={() => {
+                        setCustomerAcceptable(true);
+                      }}
+                      variant="outlined"
+                      size="small"
+                      className="mx-1"
+                      color="primary"
+                    >
+                      Accept / Reject
+                    </Button>
+                  ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+                    <Button
+                      onClick={() => {
+                        cloneVersion();
+                      }}
+                      variant="outlined"
+                      size="small"
+                      className="mx-1"
+                      color="primary"
+                    >
+                      {`Clone Version-${currentVersion}`}
+                    </Button>
+                  ) : null}
+                  {/* <Button
+                variant="outlined"
+                color="default"
+                size="small"
+                onClick={openActions}
+                aria-controls="action-menu"
+                disabled={selectedProducts.length === 0}
+              >
+                Actions
+                <ExpandMore />
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    setIsProductEdit({ open: true, isBulkedit: true });
+                  }}
+                >
+                  Bulk Edit
+                </MenuItem>
+                {allowedToDelete && (
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      const dataToDelete =
+                        selectedProducts &&
+                        selectedProducts
+                          .filter((e) => !e.hideSelection)
+                          .map((rec: any) => {
+                            const obj: any = {};
+                            obj.id = rec._id;
+                            obj.type = rec?.type;
+                            obj.materialId = rec?.materialId;
+                            return obj;
+                          });
+                      setDeleteData(dataToDelete);
+                    }}
+                  >
+                    Delete
+                  </MenuItem>
+                )}
+              </Menu> */}
+                </div>
+              )}
+            </Box>
+          </>
+        )}
       </Box>
       {columns && rowsData ? (
         <>
