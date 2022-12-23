@@ -43,7 +43,6 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { genrateCustomTableColumns } from 'src/constants/columns';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 const Productpackage = ({
   rentalManagementData,
@@ -60,8 +59,6 @@ const Productpackage = ({
   const {
     state: { user, permissions }
   }: any = useData();
-
-  const tablet = useMediaQuery('(max-width: 1300px)');
 
   const [isUpdating, setUpdating] = useState(false);
 
@@ -112,7 +109,7 @@ const Productpackage = ({
         accessor: 'srno',
         Header: 'Index',
         width: 70,
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
@@ -122,7 +119,7 @@ const Productpackage = ({
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (
@@ -149,7 +146,7 @@ const Productpackage = ({
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {isOffline || !allowedToEdit ? (

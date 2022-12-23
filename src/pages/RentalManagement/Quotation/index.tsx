@@ -115,7 +115,7 @@ const Quotation = ({
         accessor: 'srno',
         Header: 'Index',
         width: 70,
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
@@ -124,7 +124,7 @@ const Quotation = ({
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
@@ -152,7 +152,7 @@ const Quotation = ({
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p title={row.original.detail}>{row.original.detail}</p>

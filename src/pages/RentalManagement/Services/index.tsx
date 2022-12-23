@@ -94,7 +94,7 @@ const Services = ({
         accessor: 'srno',
         Header: 'Index',
         width: 70,
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
@@ -103,7 +103,7 @@ const Services = ({
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
@@ -131,7 +131,7 @@ const Services = ({
         Header: 'Details',
         minWidth: 300,
         width: 300,
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {isOffline || !allowedToEdit ? (

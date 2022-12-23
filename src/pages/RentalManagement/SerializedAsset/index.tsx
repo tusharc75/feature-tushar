@@ -91,7 +91,7 @@ const SerializedAsset = ({
         accessor: 'srno',
         Header: 'Index',
         width: 70,
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
         Footer: () => {
           return <>Total</>;
@@ -100,7 +100,7 @@ const SerializedAsset = ({
       {
         accessor: 'type',
         Header: 'Type',
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
@@ -127,7 +127,7 @@ const SerializedAsset = ({
         accessor: 'detail',
         Header: 'Details',
         width: 300,
-        sticky: 'none',
+        sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original.detail}>
