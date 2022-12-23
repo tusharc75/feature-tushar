@@ -664,18 +664,23 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           >
             Cancel
           </Button>
-          <Button
-            type="button"
-            variant="contained"
-            color="primary"
-            size="small"
-            disabled={!appliedDate || rowsApplied.some(d => d.invalidDate === true)}
-            onClick={() => {
-              handleCreateBill();
-            }}
-          >
-            Create Bill
-          </Button>
+          <HtmlTooltip title={!appliedDate ? "Please select items and apply end date" :
+            rowsApplied?.some(d => d.invalidDate === true) ? "Please select an appropriate date !" : "Create Bill"} >
+            <span>
+              <Button
+                type="button"
+                variant="contained"
+                color="primary"
+                size="small"
+                disabled={!appliedDate || rowsApplied.some(d => d.invalidDate === true)}
+                onClick={() => {
+                  handleCreateBill();
+                }}
+              >
+                Create Bill
+              </Button>
+            </span>
+          </HtmlTooltip>
         </CustomDialogFooter>
       </Dialog>
       {isProductEdit.open && (
