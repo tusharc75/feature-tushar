@@ -14,10 +14,10 @@ import moment from 'moment';
 import { FaUser as UserIcon } from 'react-icons/fa';
 import { MdBolt } from 'react-icons/md';
 
-const Logs = ({ handleClose, workOrderId = null, serviceID, serviceName }) => {
-  const {
-    state: { selectedEntity }
-  }: any = useData();
+const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) => {
+
+  const { state: { selectedEntity } }: any = useData();
+
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [rows, setRows] = useState(null);
@@ -39,9 +39,14 @@ const Logs = ({ handleClose, workOrderId = null, serviceID, serviceName }) => {
 
   const fetchData = () => {
     axiosInstance()
-      .get(`${routes.workOrder.path}/${workOrderId}/log`)
+      .get(`${routes.workOrder.path}/${workOrderId}/log?uniqueId=${uniqueId}`)
       .then(({ data: { data } }) => {
-        setData(data.filter((item) => item.service?.optionValue === serviceID || item.operation === 'consumed'));
+        if (data && data?.length) {
+          setData(data);
+        }
+        else {
+          setData([])
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
