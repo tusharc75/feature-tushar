@@ -485,9 +485,8 @@ const Quotation = ({
     <Fragment>
       <Box
         display="flex"
-        justifyContent="space-between"
         m={1}
-        sx={{ flexWrap: isMobile ? 'wrap' : 'no-wrap' }}
+        sx={{ flexWrap: isMobile ? 'wrap' : 'no-wrap', justifyContent: isMobile ? 'center' : 'space-between' }}
         style={{ gap: isMobile ? '8px' : '0px' }}
       >
         <Box display="flex">
