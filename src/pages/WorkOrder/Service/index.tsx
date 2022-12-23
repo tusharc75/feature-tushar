@@ -981,9 +981,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
       )}
       {logsDialog && (
         <Logs
-          serviceName={selectedService?.serviceName}
-          serviceID={selectedService?._id}
           workOrderId={workOrderId}
+          serviceId={selectedService?._id}
+          uniqueId={selectedService?.uniqueId}
+          serviceName={selectedService?.serviceName}
           handleClose={() => {
             setLogsDialog(false);
           }}

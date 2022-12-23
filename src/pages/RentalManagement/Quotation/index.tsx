@@ -727,7 +727,7 @@ const Quotation = ({
             fetchQuotationData(currentVersion);
           }}
           setNextStep={(type: string) => {
-            if (type && type.includes('Rejectd')) {
+            if (type && type.includes('Rejected')) {
               setNextStep(false);
             } else {
               setNextStep(true);

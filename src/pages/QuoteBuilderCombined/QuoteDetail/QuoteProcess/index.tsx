@@ -1710,6 +1710,7 @@ export default function QuoteProcess(props) {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
+            refrenceType="quote"
           />
         </Dialog>
       )}

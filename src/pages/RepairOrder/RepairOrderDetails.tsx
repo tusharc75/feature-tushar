@@ -310,10 +310,8 @@ const RepairOrderDetails = () => {
                         })}
                       </Menu>
                     </Fragment>)}
-                  {['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep]) &&
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    ) && (
+                  {permissions?.repairOrder?.isUpdate && allowedToEdit && ['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep]) &&
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationVersionData?.status) && (
                       <Button
                         className="buttonStyleBigScreen"
                         variant="contained"
