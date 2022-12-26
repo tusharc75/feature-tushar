@@ -82,7 +82,6 @@ const RentalManagement = () => {
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  console.log(state);
 
   useEffect(() => {
     setUpindexDB();
