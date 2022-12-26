@@ -30,6 +30,7 @@ interface EditDialogProps {
   material: any[]
   selectedProducts: any[]
   isBulkedit: any
+  isInlineEdit?: Boolean
 }
 
 const rateChangeFields = ["unit", "pricingMethod"]
@@ -43,7 +44,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     rowData,
     material,
     selectedProducts,
-    isBulkedit
+    isBulkedit,
+    isInlineEdit = false
   }) => {
 
 
@@ -60,6 +62,25 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     fetchFields()
   }, []);
 
+  useEffect(() => {
+    if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
+      const { setErrors, setTouched } = ref.current
+      let errors: any = {}
+      let touched: any = {}
+      initialData.fields.forEach(({ fieldName, required, fieldLabel }) => {
+
+        if (required && !initialData.values[fieldName]) {
+          errors[fieldName] = fieldLabel + " is a required field"
+          touched[fieldName] = true
+        }
+      })
+      setErrors(errors)
+      setTouched(touched)
+
+    }
+
+  }, [initialData, ref.current, isInlineEdit])
+  
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency)
     setAllFields(JSON.parse(JSON.stringify(data)))
