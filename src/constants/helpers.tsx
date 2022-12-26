@@ -362,7 +362,7 @@ export const RESOURCE_LABEL = {
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
-  freqentlyAskedQuestion:'Frequently Asked Question'
+  freqentlyAskedQuestion: 'Frequently Asked Question'
 };
 
 export const CHILD_RESOURCE = {
@@ -889,6 +889,9 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'colorPicker') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'multiImageUpload') {
+      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
+    }
+    else if (input.type === 'multiFileUpload') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
     } else {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
@@ -2173,7 +2176,7 @@ export const convertMsToTime = (milliseconds: any) => {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
     return num.toString().padStart(2, '0');
   }
-  
+
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
   let hours = Math.floor(minutes / 60);

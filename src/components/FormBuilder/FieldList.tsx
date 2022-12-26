@@ -109,6 +109,11 @@ const FieldList = {
     type: "fileUpload",
     icon: "far fa-calendar-check",
   },
+  MULTIFILEUPLOAD: {
+    label: " Multiple File Upload",
+    type: "multiFileUpload",
+    icon: "far fa-calendar-check",
+  },
   IMAGEUPLOAD: {
     label: "Image Upload",
     type: "imageUpload",
