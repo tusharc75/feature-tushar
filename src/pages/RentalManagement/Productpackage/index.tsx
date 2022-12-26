@@ -84,7 +84,6 @@ const Productpackage = ({
 
   const { isOffline } = useContext(CustomOfflineContext);
 
-  console.log(columns);
 
   useEffect(() => {
     fetchFields();

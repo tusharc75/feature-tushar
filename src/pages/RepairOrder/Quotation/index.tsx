@@ -336,6 +336,13 @@ const Quotation = ({
     data = response?.data?.data;
 
     setMaterial(JSON.parse(JSON.stringify(data.material)));
+
+    data?.material?.forEach((e: any) => {
+      if (e.type === "service") {
+        e.preWork = e?.serviceDetail?.preWork;
+      }
+    })
+
     const rows = data.material.filter((e) => e.parentId === null);
 
     rows?.forEach((parent, i) => {
@@ -371,8 +378,7 @@ const Quotation = ({
 
   const generateNestedData = (material, parent) => {
 
-    var subRows: any = orderBy(material?.filter((e) => e.parentId === parent._id), ['order'], ['asc']);
-    subRows = subRows?.sort((a, b) => a?.preWork - b?.preWork);
+    var subRows: any = orderBy(material?.filter((e) => e.parentId === parent._id), ['preWork'], ['desc']);
 
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);

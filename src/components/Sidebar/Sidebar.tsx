@@ -185,6 +185,9 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         onMouseEnter={() => {
           toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
         }}
+        onClick={() => {
+          toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
+        }}
         onMouseLeave={() => {
           if (toggleTimeout) {
             clearTimeout(toggleTimeout);
