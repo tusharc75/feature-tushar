@@ -178,6 +178,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
     }
   } = useData();
   const [viewStep, setViewStep] = React.useState({ open: false, step: null });
+  const [isAllStepDone, setIsAllStepDone] = React.useState(false);
 
   useEffect(() => {
     getServiceData();
@@ -208,14 +209,9 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
         const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
 
         setDisableCompleteFail(!allStepsDone);
+        setIsAllStepDone(allStepsDone);
 
         if (inSteps && allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)) {
-          //let isMeTechnician = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id);
-          // if (isMeTechnician) {
-          //   updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
-          // } else {
-          //   setOpenCompleteDialog(true);
-          // }
           setOpenCompleteDialog(true);
           setInSteps(false);
         }
@@ -566,6 +562,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       });
   };
 
+
   let startIdx = 0;
   return stepList ? (
     stepList?.length ? (
@@ -757,6 +754,22 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                 </Box>
               );
             })}
+
+          {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) &&
+            <Box pt={2}>
+              <Grid container justify="flex-end">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    setOpenCompleteDialog(true);
+                  }}
+                >
+                  Complete
+                </Button>
+              </Grid>
+            </Box>}
         </div>
         <StepFieldsDialog
           isOpen={Boolean(selectedStep)}
@@ -824,10 +837,10 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             handleSucess={(data) => {
               handleUpdateStep(data)
             }}
-            stepId={''}
+            stepId={viewStep.step?._id}
             stepData={viewStep.step}
             notEditable={viewStep.step?.customStep === true ? false : true}
-            steps={[]}
+            steps={serviceDetails?.steps}
             reference={'workOrder'}
             workOrderId={workOrderId}
             serviceId={selectedService?._id}
@@ -851,7 +864,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
               handleAddStep(data);
             }}
             stepId={''}
-            steps={selectedService?.steps}
+            steps={serviceDetails?.steps}
             reference={'workOrder'}
             workOrderId={workOrderId}
             serviceId={selectedService?._id}
