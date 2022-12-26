@@ -41,6 +41,7 @@ import ServiceMaster from './ServiceMaster';
 import LeadTimeMaster from '../../components/LeadTime';
 import Package from './Package';
 import ServicePackage from './ServicePackage';
+import Digital from './Digital';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -309,6 +310,7 @@ const ProductDetailsPage = () => {
                 {permissions?.packages && <Tab label="Product Packages" value={5} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />}
                 {permissions?.serializedAsset && <Tab label="Parent Product" value={6} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" />}
                 {permissions?.productInventory?.isRead && <Tab label="History" value={7} aria-controls="a11y-tabpanel-7" id="a11y-tab-7" />}
+                {productData?.digitalProduct && <Tab label="Digital" value={9} aria-controls="a11y-tabpanel-9" id="a11y-tab-9" />}
               </Tabs>
               {tabValue === 0 && (
                 <Box>
@@ -338,6 +340,7 @@ const ProductDetailsPage = () => {
               {tabValue === 6 && <ParentProduct renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
               {tabValue === 7 && <InventoryHistory id={id} />}
               {tabValue === 8 && <ServicePackage renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
+              {tabValue === 9 && <Digital renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
             </Paper>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
