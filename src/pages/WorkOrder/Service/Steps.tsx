@@ -715,26 +715,44 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                             </Box>
                           )
                         ) : null}
-                        {stepData?.status && stepData?.status !== WORKORDER_SERVICE_STEP_STATUS.pause
-                          && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) && step?.fields?.length && (isMeTechnician || !isAnyTechnician) ? (
-                          <>
-                            <Box marginX={1} />
-                            <Box>
-                              <Button
-                                variant="outlined"
-                                color="inherit"
-                                size="small"
-                                disabled={!allowedToEdit}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedStep(step);
-                                  setStepState(stepData);
-                                }}
-                              >
-                                Enter Value
-                              </Button>
-                            </Box>
-                          </>
+                        {stepData?.status && ![WORKORDER_SERVICE_STEP_STATUS.skipped, WORKORDER_SERVICE_STEP_STATUS.pause].includes(stepData?.passFailStatus)
+                          && step?.fields?.length && (isMeTechnician || !isAnyTechnician) ? (
+                          [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.failed]?.includes(stepData?.passFailStatus) ?
+                            <>
+                              <Box marginX={1} />
+                              <Box>
+                                <Button
+                                  variant="outlined"
+                                  color="inherit"
+                                  size="small"
+                                  disabled={!allowedToEdit}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStartEnd("reopen", step._id);
+                                  }}
+                                >
+                                  Re-open
+                                </Button>
+                              </Box>
+                            </> :
+                            <>
+                              <Box marginX={1} />
+                              <Box>
+                                <Button
+                                  variant="outlined"
+                                  color="inherit"
+                                  size="small"
+                                  disabled={!allowedToEdit}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedStep(step);
+                                    setStepState(stepData);
+                                  }}
+                                >
+                                  Enter Value
+                                </Button>
+                              </Box>
+                            </>
                         ) : null}
                       </Box>
                     )}
