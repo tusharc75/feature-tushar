@@ -16,8 +16,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const arr = [...Array(9).keys()];
-
 const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, productId }) => {
 
     const fieldData = [
@@ -37,7 +35,6 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                 "isDefaultValue": false,
                 "disableOnEdit": false,
                 "unique": true,
-
                 "lookup": false,
                 "lookupResource": "",
                 "entityWiseLookup": false,
@@ -57,20 +54,20 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
             "fieldData": {
                 "_id": "62d103f69be8b23c5e3fba18",
                 "fieldLabel": "Type",
+                "required": true,
                 "type": "radio",
                 "option": [{
-                    "optionLabel": "file",
+                    "optionLabel": "File",
                     "optionValue": "File",
                     "order": 1,
                     "default": true
                 },
                 {
-                    "optionLabel": "key",
+                    "optionLabel": "Key",
                     "optionValue": "Key",
                     "order": 2,
                     "default": false
                 }],
-                "required": false,
                 "isTooltip": false,
                 "tooltipMessage": "",
                 "editAble": true,
@@ -167,6 +164,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
             "isUpdate": true
         },
     ]
+
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [digitalData, setDigitalData] = useState({ fields: [], initialValues: {} });
     const [formsData, setFormsData] = useState([]);
@@ -246,7 +244,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
 
     const handleValuesChange = (data) => {
         if (data["type"]) {
-            data["type"] === "key" ?
+            data["type"] === "Key" ?
                 setFormsData(setFieldsInAscendingOrder(digitalData.fields.filter((d) => d.fieldName !== "file")))
                 : setFormsData(setFieldsInAscendingOrder(digitalData.fields.filter((d) => d.fieldName !== "key")));
         }
@@ -272,7 +270,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                 open={open}
             >
                 <CustomDialogHeader
-                    title={'Digital Product'}
+                    title={digitalId ? 'Edit' : 'Add'}
                     onClose={(e, reason) => {
                         if (isFieldNotTouched(digitalData, formValues)) onClose()
                         else setShowConfirmDialog(true)
