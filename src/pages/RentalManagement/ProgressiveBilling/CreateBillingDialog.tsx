@@ -454,7 +454,11 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     let rows: any = [];
     selectedProducts.forEach((element) => {
 
-      if (element.type !== "additionalCost") {
+      if (element.type === "additionalCost") {
+        element.isAppliedBill = true
+        rows.push(element);
+      }
+      else {
         element.invalidDate = false;
 
         const product = invoicedProducts?.material?.find((p) => p._id === element._id);
@@ -473,7 +477,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             element.invalidDate = false;
           }
         }
+
         let priceFieldName = Object.keys(element).find(d => d.includes("price_"))
+
         let calValues: any
         let values = JSON.parse(JSON.stringify(tempValues))
         if (element.pricingMethod === "Per Week") {
@@ -495,12 +501,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         else {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         }
-        element.isAppliedBill = true // row color
+        element.isAppliedBill = true
         rows.push({ ...element, ...calValues });
-      }
-      else {
-        element.isAppliedBill = true // row color
-        rows.push(element);
+
       }
     });
 

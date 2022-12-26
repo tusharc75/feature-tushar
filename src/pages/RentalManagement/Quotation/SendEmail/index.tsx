@@ -75,7 +75,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
 
   const fetchEmailAttachment = () => {
     axiosInstance()
-      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}`)
+      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}/detail`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
