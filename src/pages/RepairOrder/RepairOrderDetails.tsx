@@ -408,11 +408,8 @@ const RepairOrderDetails = () => {
                     isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
                     setStepFullScreen={() => setStepFullScreen(true)}
                     handlePrev={() => {
-                      if (
-                        [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        ) &&
-                        repairOrderProcessSteps[currentStep] === 'Quotation'
+                      if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationVersionData?.status) &&
+                        repairOrderProcessSteps[currentStep] === 'Quotation' && allowedToEdit
                       ) {
                         setShowQuotationConfirmBox(true);
                       } else {

@@ -170,7 +170,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
         let pendingServiceIndex = services?.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.inProgress);
         if (pendingServiceIndex === -1) {
           let tempServiceSortedArray = reverse([...services]);
-          console.log(tempServiceSortedArray)
           pendingServiceIndex = tempServiceSortedArray.findIndex((d) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed].includes(d.status));
           if (pendingServiceIndex === -1) {
             pendingServiceIndex = services.findIndex((d) => d.status === WORKORDER_SERVICE_STATUS.pending);
@@ -184,7 +183,6 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
         }
         pendingServiceIndex = pendingServiceIndex > -1 ? pendingServiceIndex : 0;
         const order = services[pendingServiceIndex]?.order;
-        console.log(pendingServiceIndex)
         services?.forEach((element, index) => {
           if (element?.type === "service") {
             if (element.order === order || index <= pendingServiceIndex) {
