@@ -305,7 +305,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.detail = `${
-        parent.type === 'serializedAsset'
+        parent.type === 'asset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
           ? parent.productDetail?.productName
@@ -334,7 +334,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
+        _subRow.type === 'asset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
           ? _subRow.productDetail?.productName

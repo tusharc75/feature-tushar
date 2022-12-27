@@ -798,8 +798,10 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             setSelectedStep(null);
             getServiceData();
           }}
+          referencType={referencType}
           handleSubmit={handleSubmit}
           selectedService={selectedService}
+          allowedToEdit={allowedToEdit}
           step={selectedStep}
           stepData={stepState}
         />
@@ -897,4 +899,5 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
     </Box>
   );
 };
+
 export default Service;
