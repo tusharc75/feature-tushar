@@ -142,7 +142,7 @@ const InventoryProduct = () => {
               ...currentColumn?.columnData,
               cellEditor: 'numericCellEditor',
               cellRenderer: 'numberRenderer',
-              //filter: false, sortable: false,
+              filter: false,
               editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
             });
           }
@@ -150,7 +150,7 @@ const InventoryProduct = () => {
             columns.push({
               ...currentColumn?.columnData,
               cellRenderer: 'numberRenderer',
-              //filter: false, sortable: false
+              filter: false,
             });
           }
           else {

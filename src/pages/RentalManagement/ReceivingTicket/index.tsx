@@ -127,7 +127,7 @@ const ReceivingTicket = ({
   const [seletedProducts, setSeletedProducts] = useState([]);
   const [columnHeader, setColumnHeader] = useState(null);
 
-  const [invoiceQtyData, setInvoiceQtyData] = useState(null);
+  const [invoiceData, setInvoiceData] = useState(null);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, data: null, loading: false })
 
   const {
@@ -175,7 +175,8 @@ const ReceivingTicket = ({
       var products: any = [];
       var nonSerializeAsset: any = [];
       var consumeProducts: any = [];
-      var invoiceQty: any = [];
+
+      var invoiceData: any = [];
 
       if (isOffline) {
         productAssets = await getRentalProductAssets(rentalManagementData._id);
@@ -244,9 +245,10 @@ const ReceivingTicket = ({
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
 
-        const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-invoice-qty`)
-        invoiceQty = invoiceResponse?.data?.data
-        setInvoiceQtyData(invoiceQty);
+        const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`)
+        invoiceData = invoiceResponse?.data?.data?.material || []
+
+        setInvoiceData(invoiceData);
       }
 
       const loadingTicketProducts = [];
@@ -422,8 +424,13 @@ const ReceivingTicket = ({
         d['isChecked'] = false;
         d['hideSelection'] = [INVENTORY_STATUS.lost].includes(d.status) || d?.manualStatus === INVENTORY_STATUS.reserved
           || d?.loadingTicketId && d?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered ? false : true;
-        d['isAllowedStartDate'] = d?.manualStartDate && (!invoiceQty.some(obj => obj?._id === d?._id || obj?._id === d?.uniqueId) || d?.endDate) ? true : false
+
+        const invoiceMaterial = invoiceData?.find(obj => obj?._id === d?._id || obj?._id === d?.uniqueId)
+        d['isAllowedStartDate'] = d?.manualStartDate && !invoiceMaterial ? true : false
         d['isAllowedEndDate'] = d?.manualEndDate ? true : false
+        if (d['isAllowedEndDate'] && invoiceMaterial) {
+          d['minEndDate'] = new Date(invoiceMaterial?.endDate)
+        }
       });
 
       if (productAssets.filter((e) =>
@@ -1546,7 +1553,7 @@ const ReceivingTicket = ({
             setShowQtyDialog({ open: false, data: null });
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
           }}
-          invoiceQtyData={invoiceQtyData}
+          invoiceQtyData={invoiceData}
         />
       )}
       {isExistingRentalJob && (
