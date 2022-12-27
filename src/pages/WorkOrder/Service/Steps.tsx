@@ -715,7 +715,9 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                             </Box>
                           )
                         ) : null}
-                        {stepData?.status && ![WORKORDER_SERVICE_STEP_STATUS.skipped, WORKORDER_SERVICE_STEP_STATUS.pause].includes(stepData?.passFailStatus)
+                        {stepData?.status
+                          && ![WORKORDER_SERVICE_STEP_STATUS.pause].includes(stepData?.status)
+                          && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus)
                           && step?.fields?.length && (isMeTechnician || !isAnyTechnician) ? (
                           [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.failed]?.includes(stepData?.passFailStatus) ?
                             <>
