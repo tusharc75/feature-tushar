@@ -41,6 +41,32 @@
     }
   }
 }
+.headerbox-new-v1 {
+  background-color: #f8fffe;
+  color: #298b88;
+  padding: 10px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: space-between;
+  align-items: center;
+  ol {
+    li {
+      color: #979797 !important;
+      a {
+        margin: 0px 4px;
+        font-size: 1rem;
+        color: #298b88 !important;
+        font-weight: 600;
+      }
+      p {
+        margin: 0px 4px;
+        font-size: 1rem;
+        color: #979797 !important;
+      }
+    }
+  }
+}
 .breadcrumb ol li a,
 .breadcrumb ol li p {
   margin: 0px 4px;

@@ -99,25 +99,27 @@ const WorkOrder = ({
             </Box>
             <Chip
               className="ml-1"
-              label={`${row.original.type === 'service'
+              label={`${
+                row.original.type === 'service'
                   ? 'Service'
                   : row.original.type === 'product'
-                    ? 'Product'
-                    : row.original.type === 'serializedAsset'
-                      ? 'Asset'
-                      : 'Package'
-                }`}
+                  ? 'Product'
+                  : row.original.type === 'serializedAsset'
+                  ? 'Asset'
+                  : 'Package'
+              }`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'service'
+                      ? routes.serviceMasterDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : routes.packagesDetail.path
+                      ? routes.serializedAssetDetail.path
+                      : routes.packagesDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -353,33 +355,35 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'service'
+      parent.detail = `${
+        parent.type === 'service'
           ? parent?.serviceDetail?.serviceName
           : parent.type === 'product'
-            ? parent?.productDetail?.productName
-            : parent.type === 'serializedAsset'
-              ? parent?.serializedAsset?.assetNumber
-              : parent?.packageDetail?.packageName
-        }`;
+          ? parent?.productDetail?.productName
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAsset?.assetNumber
+          : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === 'service'
+      parent.status = `${
+        parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-            ? parent.productDetail?.status
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail.status
-              : parent.packageDetail?.status
-        }`;
+          ? parent.productDetail?.status
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -428,18 +432,18 @@ const WorkOrder = ({
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow?.serializedAsset?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow?.serializedAsset?.assetNumber
+          : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -602,18 +606,18 @@ const WorkOrder = ({
                   disabled={
                     selectedServices?.length
                       ? selectedServices?.filter(
-                        (d) =>
-                          d.type === 'service' &&
-                          d.workOrder?._id === selectedServices[0].workOrder?._id &&
-                          d.status === WORKORDER_SERVICE_STATUS.pending
-                      )?.length === selectedServices?.length
+                          (d) =>
+                            d.type === 'service' &&
+                            d.workOrder?._id === selectedServices[0].workOrder?._id &&
+                            d.status === WORKORDER_SERVICE_STATUS.pending
+                        )?.length === selectedServices?.length
                         ? false
                         : true
                       : selectedAssets?.length
-                        ? selectedAssets?.filter((d) => !d?.subRows || d?.subRows?.length == 0)?.length === selectedAssets?.length
-                          ? false
-                          : true
+                      ? selectedAssets?.filter((d) => !d?.subRows || d?.subRows?.length == 0)?.length === selectedAssets?.length
+                        ? false
                         : true
+                      : true
                   }
                 >
                   Delete
@@ -629,20 +633,21 @@ const WorkOrder = ({
             <Box
               zIndex={5}
               width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                '100%'
+                // stepFullScreen
+                //   ? '100%'
+                //   : isTabletScreen
+                //   ? 'calc(100vw)'
+                //   : isSmallScreen
+                //   ? 'calc(100vw)'
+                //   : showActivity
+                //   ? '100%'
+                //   : 'calc(100vw - 103px)'
               }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              minHeight={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             >
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}
                 data={rowsData}
                 onSelect={(data) => {

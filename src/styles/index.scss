@@ -705,6 +705,78 @@ body::-webkit-scrollbar-thumb {
   z-index: 11;
   margin-top: 5px !important;
 }
+.detail-container-new-v1 {
+  overflow-x: hidden;
+  margin-top: 5px !important;
+  position: relative;
+}
+.main-container-new-v1 {
+  padding: 10px;
+  @media all and (min-width: 768px) {
+    padding: 14px 20px 15px;
+  }
+  @media all and (min-width: 1024px) {
+    padding: 14px 30px 15px;
+  }
+  background-color: #f8fffe;
+}
+.control-buttons-new-v1 {
+  display: flex;
+  gap: 15px;
+  @media all and (max-width: 708px) {
+    width: 100%;
+    justify-content: center;
+  }
+  button {
+    & > span {
+      padding: 5px 11px;
+      line-height: 16px;
+    }
+  }
+}
+.controls-new-v1 {
+  @media all and (max-width: 708px) {
+    width: 100%;
+    justify-content: center;
+  }
+}
+.activity-new-v1 {
+  @media all and (min-width: 500px) {
+    --width: 500px;
+  }
+  @media all and (min-width: 768px) {
+    --top: 56px;
+  }
+  position: fixed;
+  width: var(--width, 100vw);
+  right: calc(var(--width, 100vw) * -1);
+  transition: right 0.3s ease-in-out;
+  z-index: 9;
+  top: var(--top, 109px);
+  bottom: 0;
+  overflow: auto;
+
+  .close-icon-v1 {
+    position: absolute;
+    top: 0;
+    right: 0;
+    @media all and (max-width: 1024px) {
+      padding: 9px;
+    }
+  }
+}
+.backdrop-new-v1 {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 6;
+}
+.show-activity-v1 {
+  right: 0;
+}
+.detail-box-new-v1 {
+  padding: 10px 0 0;
+}
 
 .fixedBoardHeader {
   position: sticky;
@@ -1370,7 +1442,8 @@ body::-webkit-scrollbar-thumb {
 }
 
 .light-grey-data-row {
-  background-color: #D3D3D3 !important;}
+  background-color: #d3d3d3 !important;
+}
 
 .light-green-data-row {
   background-color: #acf1c8 !important;

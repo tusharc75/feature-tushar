@@ -367,7 +367,7 @@ export default function CustomReactTable({
     updatedData[rowData[0]] = cellValue;
     const inputField = { [`${rowData[0]}`]: cellValue };
 
-    if (onSaveEdit && (cellValue > -1 && ![undefined,null].includes(cellValue))) {
+    if (onSaveEdit && cellValue > -1 && ![undefined, null].includes(cellValue)) {
       onSaveEdit(inputField, updatedData);
     }
 
@@ -505,7 +505,7 @@ export default function CustomReactTable({
 
                               value = parseInt(value);
 
-                              if (value < 0 ) return;
+                              if (value < 0) return;
 
                               setCellValue(value);
                             }}

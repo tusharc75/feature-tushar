@@ -361,7 +361,7 @@ const Details = (props: DetailProps) => {
         return (
           form.name && (
             <React.Fragment key={form.name}>
-              <div className="detail-box" style={containerPadding ? { padding: containerPadding } : {}}>
+              <div className="detail-box-new-v1" style={containerPadding ? { padding: containerPadding } : {}}>
                 <div className={'detail-box-content'}>
                   <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                   <h3 className="form-label-style" title={form.name}>
