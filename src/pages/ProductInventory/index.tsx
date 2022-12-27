@@ -142,12 +142,16 @@ const InventoryProduct = () => {
               ...currentColumn?.columnData,
               cellEditor: 'numericCellEditor',
               cellRenderer: 'numberRenderer',
-              filter: false, sortable: false,
+              filter: false,
               editable: plantId === "All" ? false : permissions?.productInventory?.isUpdate
             });
           }
           else if (['inventory'].includes(currentColumn?.columnData.field)) {
-            columns.push({ ...currentColumn?.columnData, cellRenderer: 'numberRenderer', filter: false, sortable: false });
+            columns.push({
+              ...currentColumn?.columnData,
+              cellRenderer: 'numberRenderer',
+              filter: false,
+            });
           }
           else {
             columns.push(currentColumn?.columnData);
