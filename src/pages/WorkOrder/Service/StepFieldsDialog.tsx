@@ -14,7 +14,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, workOrderId, stepData, isStepValid, selectedService = null }) => {
+const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, workOrderId, stepData, isStepValid, referencType, allowedToEdit, selectedService = null }) => {
 
   const [isEditing, setEditing] = React.useState(false);
   const [viewStep, setViewStep] = React.useState(false);
@@ -196,16 +196,17 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                     justifyContent: 'space-between'
                   }}
                 >
-                  <IconButton
-                    aria-label="close"
-                    onClick={() => {
-                      setViewStep(true);
-                    }}
-                    size="small"
-                    color="inherit"
-                  >
-                    <SettingsIcon color="inherit" />
-                  </IconButton>
+                  {referencType !== "workOrderTechnician" && allowedToEdit ?
+                    <IconButton
+                      aria-label="close"
+                      onClick={() => {
+                        setViewStep(true);
+                      }}
+                      size="small"
+                      color="inherit"
+                    >
+                      <SettingsIcon color="inherit" />
+                    </IconButton> : <div />}
                   <div
                     style={{
                       display: 'flex',
@@ -265,16 +266,18 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
                 justifyContent: 'space-between'
               }}
             >
-              <IconButton
-                aria-label="close"
-                onClick={() => {
-                  setViewStep(true);
-                }}
-                size="small"
-                color="inherit"
-              >
-                <SettingsIcon color="inherit" />
-              </IconButton>
+              {referencType !== "workOrderTechnician" && allowedToEdit ?
+                <IconButton
+                  aria-label="close"
+                  onClick={() => {
+                    setViewStep(true);
+                  }}
+                  size="small"
+                  color="inherit"
+                >
+                  <SettingsIcon color="inherit" />
+                </IconButton>
+                : <div />}
               <div
                 style={{
                   display: 'flex',
