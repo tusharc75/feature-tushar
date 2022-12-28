@@ -241,7 +241,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            refrenceType="purchaseOrder"
+            refrenceType="quotation"
           />
         </Dialog>
       )}

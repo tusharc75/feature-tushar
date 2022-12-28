@@ -187,14 +187,12 @@ const QuoteBuilder = ({
             });
           });
         }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
+      }  else if (element.fieldName === 'qty') {
+        element.fieldName = 'qtyDisplay';
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell:({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
         });
       }
     });

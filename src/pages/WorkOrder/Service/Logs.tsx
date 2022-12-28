@@ -11,15 +11,18 @@ import styles from './logs.module.scss';
 import { BiRefresh, BiMinus } from 'react-icons/bi';
 import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-icons/bs';
 import moment from 'moment';
+import { FaUser as UserIcon } from 'react-icons/fa';
+import { MdBolt } from 'react-icons/md';
 
-const Logs = ({ handleClose, workOrderId = null }) => {
-  const {
-    state: { selectedEntity }
-  }: any = useData();
+const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) => {
+
+  const { state: { selectedEntity } }: any = useData();
+
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [rows, setRows] = useState(null);
   const [keys, setKeys] = useState(null);
+
 
   useEffect(() => {
     fetchData();
@@ -36,9 +39,14 @@ const Logs = ({ handleClose, workOrderId = null }) => {
 
   const fetchData = () => {
     axiosInstance()
-      .get(`${routes.workOrder.path}/${workOrderId}/log`)
+      .get(`${routes.workOrder.path}/${workOrderId}/log?uniqueId=${uniqueId}`)
       .then(({ data: { data } }) => {
-        setData(data);
+        if (data && data?.length) {
+          setData(data);
+        }
+        else {
+          setData([])
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -63,7 +71,8 @@ const Logs = ({ handleClose, workOrderId = null }) => {
     passed: 'Passed',
     failed: 'Failed',
     valueAdded: 'valueAdded',
-    valueUpdated: 'valueUpdated'
+    valueUpdated: 'valueUpdated',
+    consumed: 'consumed'
   };
 
   const getIcon = (type: string = 'Fail') => {
@@ -89,6 +98,10 @@ const Logs = ({ handleClose, workOrderId = null }) => {
         break;
       case operations.valueUpdated:
         icon = <BiRefresh />;
+        break;
+      case operations.consumed:
+        icon = <MdBolt />;
+        break;
     }
     return icon;
   };
@@ -122,37 +135,51 @@ const Logs = ({ handleClose, workOrderId = null }) => {
 
   const getHeadMessage = (row: any = 'Fail') => {
     let message;
+    const serviceName = row?.service?.optionLabel ? row?.service?.optionLabel : '';
+    const stepName = row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : '';
+    const consumedProd = row?.data?.products?.map((item) => item.productName);
+
     switch (row?.operation) {
       default:
-        message = `<strong>${row.user?.optionLabel}</strong> updated <strong>${row?.service?.optionLabel}</strong> `;
+        message = `<span>Updated value</span> ${stepName} ${serviceName}`;
         break;
       case operations.completed:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>Completed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeComplete}>${operations.completed}</span>`;
+        message = `<span>Completed</span> ${stepName} ${serviceName}`;
         break;
       case operations.start:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>started</span> <strong>${row?.service?.optionLabel}</strong> `;
+        message = `<span>Started</span> ${stepName} ${serviceName}`;
         break;
       case operations.passed:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>Passed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgePass}>${operations.passed}</span>`;
+        message = `<span>Passed</span> ${stepName} ${serviceName}`;
         break;
       case operations.failed:
-        message = `<strong>${row.user?.optionLabel}</strong> <span>Failed</span> <strong>${row?.service?.optionLabel}</strong> <span class=${styles.badgeFail}>${operations.failed}</span>`;
+        message = `<span>Failed</span> ${stepName} ${serviceName}`;
         break;
       case operations.valueAdded:
-        message = `<strong>${row.user?.optionLabel}</strong> added new <strong>${row?.service?.optionLabel}</strong> `;
+        message = `<span>Added value</span> ${stepName} ${serviceName}`;
+        break;
+      case operations.consumed:
+        message = `<span>Consumed</span> <br><strong>Products: </strong>${consumedProd.join(', ')}`;
         break;
       case operations.valueUpdated:
-        message = `<strong>${row.user?.optionLabel}</strong> updated <strong>${row?.service?.optionLabel}</strong> `;
+        message = `<span>Updated value</span> ${stepName} ${serviceName}`;
+        break;
     }
     return message;
   };
 
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="logs-dialog">
-      <CustomDialogHeader title={`Logs`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
+      <CustomDialogHeader
+        title={`${serviceName ? serviceName : ''} Logs`}
+        showManimizeMaximize={false}
+        showRequiredLabel={false}
+        onClose={handleClose}
+        style={{ textTransform: 'capitalize' }}
+      />
       <CustomDialogContent>
         {keys ? (
-          keys?.length > 0 ?
+          keys?.length > 0 ? (
             <Box className={styles.main}>
               {keys?.map((key: string) => {
                 return (
@@ -171,7 +198,12 @@ const Logs = ({ handleClose, workOrderId = null }) => {
                             <div className={styles.textContainer}>
                               <h4 className={styles.logHead} dangerouslySetInnerHTML={{ __html: getHeadMessage(row) }} />
                               <p className={styles.logDetails}>
-                                {moment(row?.date).format('LT')} <span className={styles.timePassedBadge}>{moment(row?.date).fromNow()}</span>
+                                {moment(row?.date).format('LT')}
+                                <span> {moment(row?.date).fromNow()}</span>
+                                <span className={styles.timePassedBadge}>
+                                  <UserIcon style={{ marginRight: '5px' }} />
+                                  {row?.user?.optionLabel}
+                                </span>
                               </p>
                             </div>
                           </div>
@@ -181,7 +213,10 @@ const Logs = ({ handleClose, workOrderId = null }) => {
                   </div>
                 );
               })}
-            </Box> : <h5>No log found.</h5>
+            </Box>
+          ) : (
+            <h5>No log found.</h5>
+          )
         ) : (
           <Box p={2} height={500} bgcolor="white">
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

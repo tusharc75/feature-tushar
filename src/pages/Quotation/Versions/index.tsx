@@ -12,8 +12,10 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import { isMobile, isTablet } from 'react-device-detect';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
+import { Link } from 'react-router-dom';
 
-export default function Version({ onClose, quotationId, handleChangeVersion }) {
+export default function Version({ onClose, quotationId, handleChangeVersion, refrenceType = "" }) {
+
   const renderedFrom = `${camelCase(routes?.quotation.title)}_versions`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -24,8 +26,9 @@ export default function Version({ onClose, quotationId, handleChangeVersion }) {
 
   const [columns] = useState([
     { field: 'version', headerName: 'Version', show: true, width: 140, disabled: true, cellRenderer: 'nameRenderer' },
+    { field: 'quotationNumber', headerName: 'Quotation Number', show: true, cellRenderer: 'quotationNumberRenderer' },
     { field: 'status', headerName: 'Status', show: true, cellRenderer: 'commonRenderer' },
-    { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' }
+    { field: 'comment', headerName: 'Comment', show: true, cellRenderer: 'commonRenderer' },
   ]);
 
   useEffect(() => {
@@ -35,18 +38,28 @@ export default function Version({ onClose, quotationId, handleChangeVersion }) {
   }, [quotationId]);
 
   const NameRenderer = (params) => (
-    <span
-      className="link"
-      onClick={() => {
-        handleChangeVersion(params.data.version);
-      }}
-    >
-      <CustomRenderCell value={params?.value} />
-    </span>
+    refrenceType === "rentalJob" || refrenceType === "repairOrder" ?
+      <span>{params.data.version}</span> :
+      <span
+        className="link"
+        onClick={() => {
+          handleChangeVersion(params.data.version);
+        }}
+      >
+        <CustomRenderCell value={params?.value} />
+      </span>
+  );
+
+  const QuotationNumberRenderer = (params) => (
+    <Link className="link text-truncate"
+      title={params.value} to={`${routes.quotationDetail.path}/${params.data?.quotationId}`}>
+      {params.value}
+    </Link>
   );
 
   const frameworkComponents = {
     nameRenderer: NameRenderer,
+    quotationNumberRenderer: QuotationNumberRenderer,
     commonRenderer: CommonRenderer
   };
 
@@ -61,6 +74,8 @@ export default function Version({ onClose, quotationId, handleChangeVersion }) {
         const newData: any = Object.entries(data?.versions)?.map(([key, value]) => {
           return {
             ...data?.versions[key],
+            quotationNumber: data?.quotationNumber,
+            quotationId: data?._id,
             id: key
           };
         });
@@ -85,6 +100,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion }) {
           setFullScreen((prevState) => !prevState);
         }}
         showManimizeMaximize={true}
+        showRequiredLabel={false}
       />
       <CustomDialogContent>
         <CustomAgGrid

@@ -8,7 +8,6 @@ import { QUOTATION_STATUS, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [selectedOption, setSelectedOption] = useState(null);
   const options = { Accept: QUOTATION_STATUS.acceptByCustomer, Reject: QUOTATION_STATUS.rejectByCustomer };
@@ -33,11 +32,13 @@ const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
         status: options[selectedOption],
         comment: comment || ''
       };
-      axiosInstance().put(`${rentalManagement.api}/quotation/${rentalId}/response`, dataObj).then(() => {
-        setSubmitting(false);
-        onSuccess();
-        onClose();
-      })
+      axiosInstance()
+        .put(`${rentalManagement.api}/quotation/${rentalId}/response`, dataObj)
+        .then(() => {
+          setSubmitting(false);
+          onSuccess();
+          onClose();
+        })
         .catch((error) => {
           setSubmitting(false);
           toastConfig.setToastConfig(error);
@@ -45,61 +46,62 @@ const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
     }
   };
 
-  return (<Dialog fullWidth maxWidth="xs" open onClose={closeManualDiaog} aria-labelledby="assign-roles-dialog">
-    <CustomDialogHeader title={`Response By Customer`} />
-    <CustomDialogContent>
-      <List style={{ padding: 0 }}>
-        {Object.keys(options).map((option) => (
-          <ListItem divider key={option}>
-            <ListItemIcon>
-              <Checkbox
-                edge="start"
-                onChange={(e) => {
-                  e.target.checked ? setSelectedOption(option) : setSelectedOption(null);
-                }}
-                checked={option === selectedOption}
-                inputProps={{
-                  'aria-labelledby': `checkbox-list-label-${option}`
-                }}
-              />
-            </ListItemIcon>
-            <ListItemText primary={option} />
-          </ListItem>
-        ))}
-      </List>
-      {selectedOption === 'Reject' && (
-        <Box my={2}>
-          <TextField
-            fullWidth
-            id="outlined-multiline-static"
-            label="Comment"
-            multiline
-            value={comment}
-            onChange={handleChange}
-            rows={4}
-            variant="outlined"
-            error={Boolean(commentError)}
-            helperText={Boolean(commentError) && commentError}
-          />
-        </Box>
-      )}
-    </CustomDialogContent>
-    <CustomDialogFooter>
-      <Button onClick={closeManualDiaog} color="primary" size="small" disabled={submitting}>
-        Cancel
-      </Button>
-      <Button
-        disabled={!Boolean(selectedOption) || submitting}
-        onClick={manualSendToCustomer}
-        color="primary"
-        size="small"
-        variant="contained"
-        endIcon={submitting && <CircularProgress size={20} />}
-      >
-        Save
-      </Button>
-    </CustomDialogFooter>
-  </Dialog>
+  return (
+    <Dialog fullWidth maxWidth="xs" open onClose={closeManualDiaog} aria-labelledby="assign-roles-dialog">
+      <CustomDialogHeader title={`Response By Customer`} />
+      <CustomDialogContent>
+        <List style={{ padding: 0 }}>
+          {Object.keys(options).map((option) => (
+            <ListItem divider key={option}>
+              <ListItemIcon>
+                <Checkbox
+                  edge="start"
+                  onChange={(e) => {
+                    e.target.checked ? setSelectedOption(option) : setSelectedOption(null);
+                  }}
+                  checked={option === selectedOption}
+                  inputProps={{
+                    'aria-labelledby': `checkbox-list-label-${option}`
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText primary={option} />
+            </ListItem>
+          ))}
+        </List>
+        {selectedOption && (
+          <Box my={2}>
+            <TextField
+              fullWidth
+              id="outlined-multiline-static"
+              label="Comment"
+              multiline
+              value={comment}
+              onChange={handleChange}
+              rows={4}
+              variant="outlined"
+              error={Boolean(commentError)}
+              helperText={Boolean(commentError) && commentError}
+            />
+          </Box>
+        )}
+      </CustomDialogContent>
+      <CustomDialogFooter>
+        <Button onClick={closeManualDiaog} color="primary" size="small" disabled={submitting}>
+          Cancel
+        </Button>
+        <Button
+          disabled={!Boolean(selectedOption) || submitting}
+          onClick={manualSendToCustomer}
+          color="primary"
+          size="small"
+          variant="contained"
+          endIcon={submitting && <CircularProgress size={20} />}
+        >
+          Save
+        </Button>
+      </CustomDialogFooter>
+    </Dialog>
   );
 };
 

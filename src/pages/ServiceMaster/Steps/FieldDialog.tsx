@@ -11,8 +11,7 @@ import { FormBuilder } from '../../../components/FormBuilder';
 import { uniq, map } from 'lodash';
 import { CustomDialogTransition } from '../../../constants/helpers';
 
-const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, reference='', sectionData = null }) => {
-
+const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, reference = '', fields = null, notEditable = false }) => {
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
 
@@ -20,25 +19,35 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
   const [deleteField, setDeleteField] = React.useState([]);
 
   React.useEffect(() => {
-    if (stepIds?.length === 1) {
-      axiosInstance().get(`${serviceMaster.api}/fields/${serviceId}/${stepIds[0]}`).then(({ data: { data } }) => {
-        const _data = [];
-        const _section = uniq(map(data, 'sectionName'));
-        _section.forEach((element: any, index: number) => {
-          _data.push({
-            sectionId: index,
-            sectionName: element,
-            field: data?.filter((el: any) => el.sectionName === element)
-          });
+    if (reference === 'workOrder') {
+      const _data = [];
+      const _section = uniq(map(fields, 'sectionName'));
+      _section.forEach((element: any, index: number) => {
+        _data.push({
+          sectionId: index,
+          sectionName: element,
+          field: fields?.filter((el: any) => el.sectionName === element)
         });
-        setSection(_data);
-      })
+      });
+      setSection(_data);
+    } else {
+      axiosInstance()
+        .get(`${serviceMaster.api}/fields/${serviceId}/${stepIds[0]}`)
+        .then(({ data: { data } }) => {
+          const _data = [];
+          const _section = uniq(map(data, 'sectionName'));
+          _section.forEach((element: any, index: number) => {
+            _data.push({
+              sectionId: index,
+              sectionName: element,
+              field: data?.filter((el: any) => el.sectionName === element)
+            });
+          });
+          setSection(_data);
+        })
         .catch((err) => {
           toastConfig.setToastConfig(err);
         });
-    }
-    if(reference === "workOrder") {
-      setSection(sectionData && sectionData?.length  ? sectionData : [])
     }
   }, []);
 
@@ -60,21 +69,23 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
         data.push(_field_data);
       });
     });
-    if(reference === "workOrder") {
-      handleSucess({fields: data, section})
-      return
+    if (reference === 'workOrder') {
+      handleSucess(data);
+    } else {
+      axiosInstance()
+        .post(`${serviceMaster.api}/fields/${serviceId}`, { stepIds: stepIds, fields: data })
+        .then(({ data }) => {
+          handleSucess();
+          toastConfig.setToastConfig({
+            open: true,
+            message: data.message,
+            severity: 'success'
+          });
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
     }
-    axiosInstance().post(`${serviceMaster.api}/fields/${serviceId}`, { stepIds: stepIds, fields: data }).then(({ data }) => {
-      handleSucess()
-      toastConfig.setToastConfig({
-        open: true,
-        message: data.message,
-        severity: 'success'
-      });
-    })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
   };
 
   const handleExportFields = () => {
@@ -98,41 +109,34 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
   };
 
   return (
-    <Dialog
-      open
-      aria-labelledby="customized-dialog-title"
-      onClose={handleClose}
-      TransitionComponent={CustomDialogTransition}
-      fullWidth
-      fullScreen>
-      <CustomDialogHeader
-        showRequiredLabel={false}
-        title="Fields Configuration"
-        onClose={handleClose} />
+    <Dialog open aria-labelledby="customized-dialog-title" onClose={handleClose} TransitionComponent={CustomDialogTransition} fullWidth fullScreen>
+      <CustomDialogHeader showRequiredLabel={false} title="Fields Configuration" onClose={handleClose} />
       <CustomDialogContent>
-        <Box display="flex" justifyContent="flex-end">
-          <Box>
-            <label htmlFor="importField" className="cursor-pointer mr-3">
-              Import Fields
-              <input
-                onClick={(e: any) => (e.target.value = null)}
-                id="importField"
-                name="importField"
-                onChange={handleImportFields}
-                style={{
-                  opacity: '0',
-                  display: 'none',
-                  zIndex: -1
-                }}
-                type="file"
-              />
-            </label>
-            <label className="cursor-pointer mr-3" onClick={handleExportFields}>
-              Export Fields
-            </label>
-            <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
+        {!notEditable && (
+          <Box display="flex" justifyContent="flex-end">
+            <Box>
+              <label htmlFor="importField" className="cursor-pointer mr-3">
+                Import Fields
+                <input
+                  onClick={(e: any) => (e.target.value = null)}
+                  id="importField"
+                  name="importField"
+                  onChange={handleImportFields}
+                  style={{
+                    opacity: '0',
+                    display: 'none',
+                    zIndex: -1
+                  }}
+                  type="file"
+                />
+              </label>
+              <label className="cursor-pointer mr-3" onClick={handleExportFields}>
+                Export Fields
+              </label>
+              <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
+            </Box>
           </Box>
-        </Box>
+        )}
         <FormBuilder
           section={section}
           setSection={setSection}
@@ -148,16 +152,17 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
         <Button disabled={isSubmitting} variant="outlined" size="small" color="primary" onClick={handleClose}>
           Close
         </Button>
-        <Button
-          variant="contained"
-          size="small"
-          color="primary"
-          disabled={isSubmitting}
-          onClick={handleSave}
-          endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
-        >
-          Save
-        </Button>
+        {reference === 'workOrder' && notEditable ? null :
+          <Button
+            variant="contained"
+            size="small"
+            color="primary"
+            disabled={isSubmitting}
+            onClick={handleSave}
+            endIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+          >
+            Save
+          </Button>}
       </CustomDialogFooter>
     </Dialog>
   );

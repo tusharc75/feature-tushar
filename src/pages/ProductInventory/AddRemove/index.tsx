@@ -49,7 +49,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
     axiosInstance()
       .get(`${productInventory.api}/serial-number/${product[0]._id}?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
-        if (!data || data.lenght === 0) return;
+        if (!data || data.length === 0) return;
         setSerialNumbers(data);
         setLoadingData(false);
       })
@@ -64,7 +64,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
     setLoading(true);
     if (type === 'add') {
       data = {
-        products: product.lenght > 1
+        products: product.length > 1
           ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
           : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: values['serialNumbers'] })),
         warehouse: warehouse,
@@ -90,7 +90,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
       const serialNumberIds = serialNumbers.filter((item: any) => values['serialNumbers'].indexOf(item?.serialNumber) > -1);
       data = {
         products:
-          product.lenght > 1
+          product.length > 1
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: [] }))
             : product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), serialNumberIds: serialNumberIds.map((item) => item?._id) })),
         warehouse: warehouse,

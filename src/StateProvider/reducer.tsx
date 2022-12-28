@@ -1,13 +1,20 @@
-import { getPermissions } from "../constants/helpers";
+import { getPermissions } from '../constants/helpers';
 import {
-  SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER,
-  SET_CART, SET_START_TOUR, SET_GRID_METADATA
-} from "./actionTypes";
+  SET_USER,
+  USER_LOADING,
+  SET_ROLE,
+  SET_SELECTED_ENTITY,
+  SET_CHATTER,
+  SET_CART,
+  SET_START_TOUR,
+  SET_GRID_METADATA,
+  SET_SEARCH
+} from './actionTypes';
 
 export const initialState = {
   user: null,
   userLoading: false,
-  token: localStorage.getItem("token"),
+  token: localStorage.getItem('token'),
   role: null,
   selectedEntity: null,
   permissions: null,
@@ -16,7 +23,7 @@ export const initialState = {
   tour: {
     path: '',
     start: false,
-    stepIndex: 0,
+    stepIndex: 0
   },
   gridMetaData: {},
   mappedEntities: []
@@ -26,6 +33,9 @@ const reducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_USER:
       return { ...state, user: action.payload, permissions: getPermissions(action.payload) };
+
+    case SET_SEARCH:
+      return { ...state, searchQuery: action.payload };
 
     case SET_ROLE:
       return { ...state, role: action.payload };
@@ -37,16 +47,17 @@ const reducer = (state = initialState, action) => {
       return { ...state, chatter: action.payload };
 
     case SET_START_TOUR:
-      const { start, path, stepIndex } = action.payload
+      const { start, path, stepIndex } = action.payload;
       return { ...state, tour: { start, path, stepIndex } };
 
     case SET_CART:
       return { ...state, cartItems: [...action.payload] };
 
     case SET_SELECTED_ENTITY:
-      localStorage.setItem("selectedEntity", action.payload);
+      localStorage.setItem('selectedEntity', action.payload);
       return {
-        ...state, selectedEntity: action.payload,
+        ...state,
+        selectedEntity: action.payload,
         permissions: getPermissions(state.user, action.payload)
       };
     case SET_GRID_METADATA:

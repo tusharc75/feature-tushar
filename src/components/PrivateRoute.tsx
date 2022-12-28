@@ -80,7 +80,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'quotation',
         'invoice',
         'work-order-supervisor',
-        'work-order-technician'
+        'work-order-technician',
+        'frequently-asked-question'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

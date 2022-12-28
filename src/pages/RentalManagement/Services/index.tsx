@@ -32,6 +32,9 @@ import HorizontalSplitIcon from '@material-ui/icons/HorizontalSplit';
 import StorefrontIcon from '@material-ui/icons/Storefront';
 import AllOutIcon from '@material-ui/icons/AllOut';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
+import { genrateCustomTableColumns } from 'src/constants/columns';
 
 const Services = ({
   rentalManagementData,
@@ -66,27 +69,36 @@ const Services = ({
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
-
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [allowedToEdit]);
 
   useEffect(() => {
     fetchProductInventory();
   }, [columns]);
 
   const fetchFields = async () => {
+    setColumns(null);
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    if (!allowedToEdit) {
+      allFields?.forEach((e) => {
+        e.isColumnEditable = false;
+      });
+    }
     setAllFields(JSON.parse(JSON.stringify(allFields)));
-    const coloum: any = [
+    const newColumns = genrateCustomTableColumns(data, rentalManagementData?.currency, currencySymbol, renderedFrom);
+    let column: any = [
       {
         accessor: 'srno',
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
       },
       {
         accessor: 'type',
@@ -98,9 +110,17 @@ const Services = ({
           row.original['type'] ? (
             <p>
               {`${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
-                row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
-                  row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -161,158 +181,165 @@ const Services = ({
                     }
                   }}
                 >
-                  <InfoIcon fontSize="small" color="primary" />
+                  <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>
               </>
             )}
           </div>
-        ),
-        Footer: () => {
-          return <>Total</>;
-        }
+        )
       },
       {
         accessor: 'description',
         Header: 'Description',
         width: 200,
-        Cell: ({ row }) =>
-          row.original['type'] ? (
-            row.original['type'] === 'product' && row.original?.productDetail?.productDesc ?
-              <p>{row.original?.productDetail?.productDesc}</p>
-              : row.original?.type === 'package' && row.original?.packageDetail.packageDescription ?
-                <p>{row.original?.packageDetail.packageDescription}</p>
-                : row.original.type === 'service' && row?.original?.serviceDetail?.serviceDescription ?
-                  <p>{row?.original?.serviceDetail?.serviceDescription}</p> : <NoDataCell />
-          ) : (
-            <NoDataCell />
-          )
-      },
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      }
     ];
-    data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              Footer: (info) => {
-                const total = info?.rows
-                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                return (
-                  <>
-                    {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                  </>
-                );
-              }
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
-        });
+    const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
+    // data.forEach((element) => {
+    //   if (element.fieldName === 'price' && element.required) {
+    //     setIsRateRequired(true);
+    //   }
+    //   if (element.type === 'date') {
+    //     column.push({
+    //       accessor: element.fieldName,
+    //       Header: element.fieldLabel,
+    //       disableFilters: true,
+    //       Cell: ({ row }) =>
+    //         row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName].slice(0, 10)).format(dateFormat)}</p> : <NoDataCell />
+    //     });
+    //   } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
+    //     if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+    //       element.displayUnits.forEach((_unit) => {
+    //         let fieldName = element.fieldName + '_' + _unit.toLowerCase();
+    //         let fieldLabel = element.fieldLabel + ' ' + _unit;
+    //         column.push({
+    //           accessor: fieldName,
+    //           Header: fieldLabel,
+    //           Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
+    //         });
+    //       });
+    //     } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+    //       element.displayUnits.forEach((_unit) => {
+    //         element.displayCurrency.forEach((_currency) => {
+    //           let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
+    //           let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
+    //           column.push({
+    //             accessor: fieldName,
+    //             Header: fieldLabel,
+    //             Cell: ({ row }) =>
+    //               row.original[fieldName] ? (
+    //                 <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+    //               ) : (
+    //                 <NoDataCell />
+    //               )
+    //           });
+    //         });
+    //       });
+    //     } else if (element.type === 'currencyAmount') {
+    //       element.displayCurrency.forEach((_currency) => {
+    //         let fieldName = element.fieldName + '_' + _currency.toLowerCase();
+    //         let fieldLabel = element.fieldLabel + ' ' + _currency;
+    //         column.push({
+    //           accessor: fieldName,
+    //           Header: fieldLabel,
+    //           Cell: ({ row }) =>
+    //             row.original[fieldName] ? (
+    //               <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+    //             ) : (
+    //               <NoDataCell />
+    //             ),
+    //           Footer: (info) => {
+    //             const total = info?.rows
+    //               ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
+    //               .reduce((sum, row) => row.values[fieldName] + sum, 0);
+    //             return (
+    //               <>
+    //                 {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
+    //               </>
+    //             );
+    //           }
+    //         });
+    //       });
+    //     }
+    //   } else {
+    //     if (element.fieldName === 'qty') {
+    //       element.fieldName = 'qtyDisplay';
+    //     }
+    //     if (element.fieldName === 'pricingCondition') {
+    //       element.fieldName = 'pricingConditionDisplay';
+    //     }
+    //     column.push({
+    //       accessor: element.fieldName,
+    //       Header: element.fieldLabel,
+    //       Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+    //     });
+    //   }
+    // });
+    // eslint-disable-next-line no-lone-blocks
+
+    column = [...column, ...newColumns];
+    column.push({
+      accessor: 'action',
+      Header: '',
+      minWidth: 50,
+      width: 50,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => {
+        return allowedToEdit ? (
+          row.original.hideSelection ? (
+            <HtmlTooltip title={'Asset is already assigned'}>
+              <span>
+                <IconButton size="small" aria-label="Details" disabled={true}>
+                  <DeleteIcon fontSize="small" color={'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          ) : (
+            <HtmlTooltip title={'Delete'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setDeleteData(obj);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color={'error'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          )
+        ) : (
+          ''
+        );
       }
     });
-    {
-      isMobile ? (
-        <Box display={'none'} />
-      ) : (
-        coloum.push({
-          accessor: 'action',
-          Header: '',
-          minWidth: 50,
-          width: 50,
-          sticky: 'right',
-          disableFilters: true,
-          canDrag: false,
-          Cell: ({ row }) =>
-            !row.original.hideSelection &&
-            allowedToEdit && (
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  getNestedSubRows(obj, row.original);
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
-            )
-        })
-      );
-    }
-    coloum.forEach((element) => {
-      if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
-        element.editable = true;
-      }
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      }
-    });
-    setColumns(coloum);
+    // column.forEach((element) => {
+    //   if (element.accessor === `price_${rentalManagementData?.currency?.toLowerCase()}`) {
+    //     element.editable = true;
+    //   }
+    //   if (element.accessor === 'qtyDisplay') {
+    //     element['Footer'] = (info) => {
+    //       const qtyTotal = info.rows
+    //         .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
+    //         .reduce((sum, row) => row.values[element.accessor] + sum, 0);
+    //       return <>{qtyTotal}</>;
+    //     };
+    //   }
+    // });
+    setColumns(column);
   };
 
   const fetchProductInventory = async () => {
-    // setNextStep(false);
+    setNextStep(false);
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
@@ -324,7 +351,7 @@ const Services = ({
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
       data = response?.data?.data;
       setMaterial(JSON.parse(JSON.stringify(data.material)));
-      inventory = data.inventory;
+      inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
     }
     let rows = data.material.filter((e) => e.parentId === null);
@@ -332,11 +359,28 @@ const Services = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = parent.type === 'product' ? parent?.productDetail?.productName : parent.type === 'service' ? parent?.serviceDetail?.serviceName : parent?.packageDetail?.packageName;
+      parent.detail =
+        parent.type === 'product'
+          ? parent?.productDetail?.productName
+          : parent.type === 'service'
+          ? parent?.serviceDetail?.serviceName
+          : parent?.packageDetail?.packageName;
+      parent.description =
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.type === 'product'
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
+      parent.pricingConditionDisplay = parent.pricingCondition?.optionLabel;
+      parent.pricingCondition = parent.pricingCondition?.optionValue;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty = parent.serializedProduct ? inventory?.filter((e) => e._id === parent._id).length : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+      parent.assetQty = parent.serializedProduct
+        ? inventory?.filter((e) => e._id === parent._id).length
+        : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
     });
@@ -346,7 +390,9 @@ const Services = ({
     } else {
       setNextStep(true);
     }
-    setNextStep(true);
+    if (rows?.length === 0) {
+      setNextStep(true);
+    }
     setRowsData(rows);
     setSelectedProducts([]);
   };
@@ -355,11 +401,28 @@ const Services = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow.type === 'product' ? _subRow?.productDetail?.productName : _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow?.packageDetail?.packageName;
+      _subRow.detail =
+        _subRow.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow?.packageDetail?.packageName;
+      _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
+      _subRow.pricingCondition = _subRow.pricingCondition?.optionValue;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      _subRow.assetQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+      _subRow.assetQty = _subRow.serializedProduct
+        ? inventory?.filter((e) => e._id === _subRow._id).length
+        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
     });
@@ -387,9 +450,10 @@ const Services = ({
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
+      element.detail = d?.serviceName || d?.packageName || '';
       element.type = addExistingProductDialog.type;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : d.unit ? d.unit : '';
+      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.estimateStartDate = rentalManagementData ? rentalManagementData?.estimateStartDate : new Date();
       element.estimateEndDate = rentalManagementData ? rentalManagementData?.estimateEndDate : new Date();
@@ -404,26 +468,34 @@ const Services = ({
       }
       material.push(element);
     });
+    if (material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).length === 0) {
+      AddMaterial(material, []);
+    } else {
+      const priceData: any = await calculatePrice(rentalManagementData, material);
+      AddMaterial(material, priceData);
+    }
+  };
 
-    const priceData: any = await calculatePrice(rentalManagementData, material);
-    material.forEach((element) => {
-      const rateResult = priceData?.filter(
-        (e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === element.unit &&
-          e.pricingMethod === element.pricingMethod
-      );
-      if (rateResult.length && rateResult[0].mrp) {
+  const AddMaterial = async (material, priceData) => {
+    const tempMaterial = [...material];
+    tempMaterial.forEach((element) => {
+      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type && e.unit === element.unit);
+      if (element.listPrice) {
+        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+        element[priceFieldName] = element.listPrice;
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+        Object.assign(element, calValues);
+      } else if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
+        element['pricingCondition'] = rateResult[0].conditionId;
+        element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
         Object.assign(element, calValues);
       }
     });
-
     axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material })
+      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`, { material: tempMaterial })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
@@ -438,10 +510,12 @@ const Services = ({
 
   const handleSaveData = async (rows: any) => {
     rows.forEach((element) => {
+      element.pricingCondition = element.pricingCondition?.optionValue ? element.pricingCondition?.optionValue : element.pricingCondition; // temporary fix
       delete element.srno;
       delete element.detail;
       delete element.serializedProduct;
       delete element.qtyDisplay;
+      delete element.pricingConditionDisplay;
       delete element.isValid;
       delete element.hideSelection;
       delete element.assetQty;
@@ -601,17 +675,17 @@ const Services = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw -30px)'
+                  : isSmallScreen
+                  ? 'calc(100vw -30px)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             >
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
@@ -619,9 +693,9 @@ const Services = ({
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 hideSelection={isOffline || !allowedToEdit}
-                renderedFrom="rental_management_sevices"
-                onSaveEdit={(inputField, updatedData) => {
-                  let rows = calculateRowsField(material, inputField, allFields, updatedData);
+                renderedFrom="rental_management_sevices_1"
+                onSaveEdit={async (inputField, updatedData) => {
+                  let rows = await calculateRowsField(material, inputField, allFields, updatedData);
                   handleSaveData(rows);
                 }}
                 material={material}
@@ -648,7 +722,6 @@ const Services = ({
         <AssignPackageDialog
           referenceType={renderedFrom}
           onSuccess={(packages) => {
-            // console.log(packages)
             handleAdd(packages.map((d) => ({ ...d, detail: d.packageName })));
           }}
           handleClose={() => {
@@ -671,13 +744,13 @@ const Services = ({
           material={material}
           selectedProducts={selectedProducts}
           loading={isUpdating}
+          from={'service'}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
           reference={'service'}
           onSuccess={(services) => {
-            // console.log(services)
             handleAdd(services.map((d) => ({ ...d, detail: d.serviceName })));
           }}
           handleClose={() => {

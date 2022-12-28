@@ -79,42 +79,7 @@
       content: unset;
     }
   }
-  .badgeComplete,
-  .badgePass,
-  .badgeFail {
-    font-weight: 600;
-    font-size: 12px;
-    line-height: 17px;
-    padding: 7px 26px;
-    margin-left: 15px;
-    border-radius: 20px;
-    display: inline;
-  }
-  .badgeFail {
-    background-color: #fee4e0;
-    color: #d15241;
-  }
-  .badgePass {
-    background-color: #d9f9da;
-    color: #109f16;
-  }
-  .badgeComplete {
-    background-color: #d9f9da;
-    color: #109f16;
-  }
-  .logHead {
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 19px;
-    color: #3a3a3a;
-    strong {
-      font-weight: 600;
-    }
-    span {
-      color: #13ab19;
-    }
-    margin: 4px 0 8px;
-  }
+
   .logDetails {
     font-size: 12px;
   }
@@ -128,5 +93,50 @@
     border-radius: 20px;
     display: inline-block;
     margin-left: 15px;
+  }
+}
+.logHead {
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 19px;
+  color: #3a3a3a;
+  strong {
+    font-weight: 600;
+  }
+  span {
+    color: #13ab19;
+  }
+  margin: 4px 0 6px;
+}
+.badge {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 17px;
+  padding: 7px 26px;
+
+  border-radius: 20px;
+  display: inline;
+  &.badgeFail {
+    background-color: #fee4e0;
+    color: #d15241;
+    margin-left: 15px;
+  }
+  &.badgePass {
+    background-color: #d9f9da;
+    color: #109f16;
+    margin-left: 15px;
+  }
+  &.badgeComplete {
+    background-color: #d9f9da;
+    color: #109f16;
+    margin-left: 15px;
+  }
+  &.service {
+    background-color: #f3e2ee;
+    color: #863a6f;
+  }
+  &.step {
+    background-color: #dde5ee;
+    color: #344d67;
   }
 }

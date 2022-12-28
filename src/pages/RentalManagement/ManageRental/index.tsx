@@ -29,7 +29,7 @@ import ManageContactDialog from "../../Contact/ManageContact";
 import ManageWarehouse from '../../Warehouse/ManageWarehouse';
 import ManageAddressDialog from "src/components/Address/ManageAddressDialog";
 
-const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open, referenceData = null }) => {
+const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManagementData = null, onClose, onSuccess, open, referenceData = null, isDisableCustomerAccount = false }) => {
 
     const history = useHistory()
     const toastConfig = useContext(CustomToastContext);
@@ -503,7 +503,7 @@ const ManageRentalManagementDialog = ({ isClone, rentalManagementId, rentalManag
                                                                                         name={field.fieldName}
                                                                                         type={field.type}
                                                                                         options={accountData}
-                                                                                        disabled={!isClone ? (rentalManagementId && field.disableOnEdit) : false}
+                                                                                        disabled={!isClone ? (rentalManagementId && field.disableOnEdit) || isDisableCustomerAccount : false}
                                                                                         required={field.required}
                                                                                         fullWidth
                                                                                         isTooltip={

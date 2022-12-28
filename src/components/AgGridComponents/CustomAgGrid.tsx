@@ -11,6 +11,7 @@ import { orderBy } from 'lodash';
 import { checkStaticField, staticColumns } from '../../constants/columns';
 import { GridApi } from 'ag-grid-community';
 import { uniqBy } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 export function reducer(state, action) {
   switch (action.type) {
@@ -171,6 +172,29 @@ export default function CustomAgGrid({
 }) {
   const [columns, setColumns] = useState([]);
   const [columnApi, setColumnApi] = useState(null);
+
+  const {
+    state: { searchQuery }
+  }: any = useData();
+
+  useEffect(() => {
+    let timer;
+    if (searchQuery) {
+      timer = setTimeout(() => {
+        let query = searchQuery?.trim();
+        if (query !== '') {
+          dispatch({ type: 'search', search: query });
+        }
+      }, 300);
+    } 
+    // else {
+    //   timer = setTimeout(() => {
+    //     dispatch({ type: 'search', search: '' });
+    //     dispatch({ type: 'loading', loading: false });
+    //   }, 300);
+    // }
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const [currentGridApi, setCurrentGridApi] = useState<GridApi | any>(null);
   const enableRowDrag = cols.some((d) => d.rowDrag);

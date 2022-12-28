@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Divider, CircularProgress } from '@material-ui/core';
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery, Divider, CircularProgress, Menu, MenuItem } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { useParams, useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,7 +11,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { workOrder, sidebarResource, ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { workOrder, sidebarResource, ACTIVITY_RESOURCE, WORKORDER_SERVICE_STATUS, WORK_ORDER_STATUS } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import queryString from 'query-string';
@@ -27,6 +27,8 @@ import Service from './Service';
 import View from './View';
 import Consumables from './Consumables';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import { ExpandMore } from '@material-ui/icons';
+import { GrStatusInfo } from 'react-icons/gr';
 
 const WorkOrderDetails = () => {
 
@@ -50,7 +52,12 @@ const WorkOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [previewPdf, setPreviewPdf] = useState(false);
+  const [canComplete, setCanComplete] = useState(false);
+  const [canDelete, setCanDelete] = useState(false);
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -87,6 +94,12 @@ const WorkOrderDetails = () => {
       .get(`/field?resource=${sidebarResource.workOrder}`)
       .then(({ data: { data } }) => {
         setWorkOrderFields(data);
+        data.some((o) => {
+          if (o?.fieldData?.fieldName === 'status') {
+            setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue !== "Deleted")]);
+            return true;
+          }
+        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -97,20 +110,38 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`${routes.workOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        setWorkOrderData({ ...data });
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
+        setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false)
         if (permissions?.workOrder?.isUpdate && openEdit === 'true') {
           setOpenUpdateDialog(true);
           const params = new URLSearchParams();
           params.delete('openEdit');
           history.push({ search: params.toString() });
         }
+        setWorkOrderData({ ...data });
+        checkValidation()
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
+
+  const checkValidation = () => {
+    axiosInstance()
+      .get(`${routes.workOrder.path}/service/${id}`)
+      .then(({ data: { data } }) => {
+        if (data?.length && data?.filter((e) => e.type === "service" && e.status === WORKORDER_SERVICE_STATUS.completed).length === data?.length) {
+          setCanComplete(true)
+        }
+        if (data?.filter((e) => e.type === "service" && e.status === WORKORDER_SERVICE_STATUS.pending).length === data?.length) {
+          setCanDelete(true)
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
 
   const handleDelete = () => {
     axiosInstance()
@@ -145,7 +176,7 @@ const WorkOrderDetails = () => {
     setPreviewPdf(true);
 
     axiosInstance()
-      .get(`${workOrder.api}/${id}/pdf`)
+      .get(`${workOrder.api}/${id}/pdf/service`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -170,6 +201,38 @@ const WorkOrderDetails = () => {
       });
   };
 
+  const updateJobStatus = (status) => {
+    axiosInstance()
+      .patch(`${workOrder.api}/status/${id}`, { status: status })
+      .then(({ data: { data } }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+        fetchWorkOrderData()
+      })
+
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const handleStatusChange = (o) => {
+    if (o.optionValue && workOrderData?.status !== o.optionValue) {
+      updateJobStatus(o.optionValue);
+    }
+  };
+
+
   return (
     <>
       <Grid container className="headerbox">
@@ -180,6 +243,47 @@ const WorkOrderDetails = () => {
           <Paper>
             {workOrderData ? (
               <DetailsPageHeader heading={workOrderData?.workOrderNumber} mainPoints={null} showHeading={true}>
+                {permissions?.workOrder?.isUpdate && allowedToEdit && canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
+                  <Fragment>
+                    <Button
+                      variant="outlined"
+                      color="default"
+                      size="small"
+                      onClick={openActions}
+                      aria-controls="action-menu"
+                      endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                    >
+                      {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      keepMounted
+                      getContentAnchorEl={null}
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(anchorEl)}
+                      onClose={closeActions}
+                    >
+                      {statusOptions?.map((o, index) => {
+                        return (
+                          <MenuItem
+                            disabled={![WORK_ORDER_STATUS.completed]?.includes(o?.optionLabel)}
+                            onClick={() => {
+                              closeActions();
+                              handleStatusChange(o);
+                            }}
+                            value={o}
+                          >
+                            {o?.optionLabel}
+                          </MenuItem>
+                        );
+                      })}
+                    </Menu>
+                  </Fragment>
+                )}
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'outlined'}
                   color="primary"
@@ -192,7 +296,7 @@ const WorkOrderDetails = () => {
                 >
                   {isMobile && !isTablet ? <VisibilityIcon color="primary" /> : 'Preview'}
                 </Button>
-                {permissions?.workOrder?.isUpdate && allowedToEdit && (
+                {permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
@@ -204,7 +308,8 @@ const WorkOrderDetails = () => {
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
-                {permissions?.workOrder?.isDelete && allowedToEdit && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {permissions?.workOrder?.isDelete && allowedToEdit && canDelete && !workOrderData?.deleted &&
+                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </DetailsPageHeader>
             ) : (
               <Skeleton variant="text" width="150px" height="40px" />
@@ -222,7 +327,7 @@ const WorkOrderDetails = () => {
             >
               <Tab label="Header" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
               <Tab label="Services" value={1} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
-              <Tab label="Product/Consumables" value={2} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              <Tab label="Products/Consumables" value={2} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
               <Tab label="Views" value={3} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
             </Tabs>
             <TabPanel value={tabValue} index={0}>
@@ -237,10 +342,17 @@ const WorkOrderDetails = () => {
               </Box>
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-              <Service workOrderData={workOrderData} workOrderId={id} allowedToEdit={allowedToEdit} />
+              {workOrderData &&
+                <Service
+                  workOrderData={workOrderData}
+                  workOrderId={id}
+                  allowedToEdit={allowedToEdit}
+                  completed={completed}
+                />
+              }
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-              <Consumables allowedToEdit={allowedToEdit} workOrderId={id} />
+              <Consumables allowedToEdit={allowedToEdit && !completed} workOrderId={id} />
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
               <Box>
@@ -277,7 +389,7 @@ const WorkOrderDetails = () => {
                             access: true
                           }
                         ]}
-                        handleActivityRefresh={() => {}}
+                        handleActivityRefresh={() => { }}
                         emails={[]}
                       />
                     </div>

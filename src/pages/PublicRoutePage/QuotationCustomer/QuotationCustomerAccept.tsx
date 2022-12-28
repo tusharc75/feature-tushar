@@ -14,7 +14,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Skeleton } from '@material-ui/lab';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import QCcomment from './QCcomment';
-import { orderBy } from 'lodash';
+import { orderBy, startCase } from 'lodash';
 
 const QuotationCustomerAccept = ({ openAuthId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -34,6 +34,42 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     var data = await fetch_quotation_product_fields(quotationData?.currency);
     const coloum: any = [
       {
+        accessor: 'srno',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        disableFilters: true,
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
         accessor: 'detail',
         Header: 'Detail',
         minWidth: 300,
@@ -47,27 +83,18 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
             }
             {row.original?.parentId === null && row.original?.type !== 'Service' && (
               <Box ml={1} className="d-flex align-items-center">
-                <span>({row.original?.subRows?.length})</span>
+                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </Box>
             )}
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}`}
-              size="small"
-              color="primary"
-            />
           </div>
         )
       },
       {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => (row.original?.leadTime && row.original?.leadTime?.length ? <p>{row.original['leadTime']}</p> : <p>0</p>),
-        Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-          return <>{total}</>;
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       }
     ];
@@ -150,11 +177,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       }
     });
     coloum.forEach((element) => {
-      if (element.accessor.includes('detail')) {
-        element['Footer'] = () => {
-          return <>Total</>;
-        };
-      } else if (element.accessor === 'qtyDisplay') {
+      if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
             .filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
@@ -175,7 +198,8 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         };
       }
     });
-    setColumns(coloum);
+    const columnToShow = coloum?.filter((i) => i.accessor !== 'pricingCondition');
+    setColumns(columnToShow);
     setLoading(false);
   };
 
@@ -190,6 +214,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
+      parent.srno = i + 1;
       parent.detail = `${
         parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
@@ -199,9 +224,17 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
       }`;
+      parent.description =
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.type === 'product'
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
-      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
-      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      // parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
+      // parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + response?.data?.data?.quoteData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : !isRateRequired;
@@ -213,8 +246,13 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
   };
 
   const generateNestedData = (material, inventory, parent, currency) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    const subRows: any = material
+      ?.filter((e) => e.parentId === parent._id)
+      ?.sort((a, b) => a?.order - b?.order)
+      ?.sort((a, b) => a?.preWork - b?.preWork);
+
     subRows.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = `${
         _subRow.type === 'serializedAsset'
           ? _subRow.serializedAssetDetail?.assetNumber
@@ -224,9 +262,17 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
       }`;
+      _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
-      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
+      // _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
+      // _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = true;
       _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : !isRateRequired;
@@ -308,7 +354,6 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                       size="small"
                       disabled={isSubmitting.accept}
                       onClick={() => {
-                        handleSubmit('accept');
                         setIsSubmitting({ accept: true, reject: false });
                       }}
                     >
@@ -378,8 +423,9 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
           </Box>
         </>
       )}
-      {isSubmitting.reject && (
+      {(isSubmitting.reject || isSubmitting.accept) && (
         <QCcomment
+          type={isSubmitting.reject ? 'reject' : 'accept'}
           onClose={() => {
             setIsSubmitting({ accept: false, reject: false });
           }}

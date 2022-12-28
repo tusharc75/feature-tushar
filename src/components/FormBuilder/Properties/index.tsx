@@ -117,6 +117,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.isDefaultValue = false;
         values.defaultValue = '';
       }
+      if (!values.isColumnEditable && fieldData.resource === "Rental Management Product" && module !== 'price-template' && module !== 'product-template') {
+        values.isColumnEditable = false;
+      }
       if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template') {
         values.disableOnEdit = false;
       }
@@ -254,8 +257,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
             ele.isSystemGenerate = values?.isSystemGenerate || false;
+            ele.isColumnEditable = values?.isColumnEditable || false;
 
-            if (values.hasOwnProperty('isWarningTooltip')) {
+            if (values?.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip;
               ele.warningTooltipMessage = values.warningTooltipMessage;
             }
@@ -418,6 +422,18 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       errors['warningTooltipMessage'] = 'Please enter warning message.';
     }
 
+    if (values?.isMinMaxValue) {
+      if (!values?.minValue) {
+        errors["minValue"] = "Please enter min value";
+      }
+      if (!values?.maxValue) {
+        errors["maxValue"] = "Please enter max value";
+      }
+      if (values?.minValue >= values?.maxValue) {
+        errors["minValue"] = "Please enter valid min value";
+      }
+    }
+
     return errors;
   }
 
@@ -453,7 +469,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
             <CustomDialogHeader
-              title={`${values['fieldLabel']} - ${FieldList[fieldData.type.toUpperCase()].label} Properties`}
+              title={`${values['fieldLabel']} - ${FieldList[fieldData?.type?.toUpperCase()]?.label} Properties`}
               onClose={() => {
                 if (Object.keys(formValues).length > 0) {
                   setShowConfirmDialog(true);
@@ -975,6 +991,21 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     <FormControlLabel
                       control={
                         <Checkbox
+                          name="isColumnEditable"
+                          checked={values['isColumnEditable']}
+                          onChange={(e) => {
+                            setFieldValue('isColumnEditable', e.target.checked);
+                            handleValuesChange({ isColumnEditable: e.target.checked });
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Editable Column"
+                    />
+
+                    <FormControlLabel
+                      control={
+                        <Checkbox
                           name="Uneditable"
                           disabled={values['type'] === 'freeStyleMultiSelect'}
                           checked={values['isUneditable']}
@@ -1224,9 +1255,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       values={values}
                       setFieldValue={setFieldValue}
                       handleValuesChange={handleValuesChange}
+                      errors={errors}
+                      touched={touched}
                     />
                   )}
-
                   {module === "form-builder-master" &&
                     <Box>
                       <hr />

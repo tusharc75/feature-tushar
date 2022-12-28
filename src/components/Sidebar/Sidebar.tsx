@@ -27,6 +27,9 @@ import { FaRegUser } from 'react-icons/fa';
 import { AccountCircle } from '@material-ui/icons';
 import useStyles from './style';
 import routes from '../Helpers/Routes';
+import { IoPeopleOutline } from 'react-icons/io5';
+import { BiCart, BiCog } from 'react-icons/bi';
+import { RiSuitcaseLine } from 'react-icons/ri';
 
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
@@ -43,40 +46,61 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
 
-  const iconMapping = [
-    {
-      key: 'Brand Admin',
-      icon: <FaRegUserCircle size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'Master Data',
-      icon: <AiOutlineDatabase size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'Product Setup',
-      icon: <ProductSetup size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'Admin Portal',
-      icon: <RiShieldUserLine size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'Activities',
-      icon: <MdOutlineLocalActivity size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'Accounts',
-      icon: <FaRegUser size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'CRM +',
-      icon: <SiCivicrm size={15} className="sidebar-icon" />
-    },
-    {
-      key: 'ROM',
-      icon: <FaRegRegistered size={15} className="sidebar-icon" />
+  const renderIcon = (sectionName: string) => {
+    let icon = <FaReact size={16} className="sidebar-icon" />;
+    switch (sectionName) {
+      case 'Brand Admin':
+        icon = <FaRegUserCircle size={15} className="sidebar-icon" />;
+        break;
+      case 'Master Data':
+        icon = <AiOutlineDatabase size={15} className="sidebar-icon" />;
+        break;
+      case 'Product Setup':
+        icon = <ProductSetup size={15} className="sidebar-icon" />;
+        break;
+      case 'Admin Portal':
+        icon = <RiShieldUserLine size={15} className="sidebar-icon" />;
+        break;
+      case 'Accounts':
+        icon = <FaRegUser size={15} className="sidebar-icon" />;
+        break;
+      case 'CRM +':
+        icon = <SiCivicrm size={15} className="sidebar-icon" />;
+        break;
+      case 'ROM':
+        icon = <FaRegRegistered size={15} className="sidebar-icon" />;
+        break;
+      case 'Sales Management':
+        icon = <SiCivicrm size={15} className="sidebar-icon" />;
+        break;
+      case 'Rental Management':
+        icon = <FaRegRegistered size={15} className="sidebar-icon" />;
+        break;
+      case 'Inventory Management':
+        icon = <RiSuitcaseLine size={15} className="sidebar-icon" />;
+        break;
+      case 'eCommerce':
+        icon = <BiCart size={16} className="sidebar-icon" />;
+        break;
+      case 'Repair & Maintenance Management':
+        icon = <ProductSetup size={15} className="sidebar-icon" />;
+        break;
+      case 'Service Management':
+        icon = <FaRegUser size={15} className="sidebar-icon" />;
+        break;
+      case 'Setups':
+        icon = <BiCog size={16} className="sidebar-icon" />;
+        break;
+      case 'Activities':
+        icon = <IoPeopleOutline size={16} className="sidebar-icon" />;
+        break;
+
+      default:
+        icon = <FaReact size={16} className="sidebar-icon" />;
+        break;
     }
-  ];
+    return icon;
+  };
 
   let toggleTimeout;
 
@@ -154,11 +178,14 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   };
 
   return (
-    <div className={classes.root}>
+    <div>
       <CssBaseline />
       <Header toggleDrawer={handleToggleDrawer} />
       <Drawer
         onMouseEnter={() => {
+          toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
+        }}
+        onClick={() => {
           toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
         }}
         onMouseLeave={() => {
@@ -171,7 +198,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             }, 500);
         }}
         variant="permanent"
-        className={clsx(classes.drawer, {
+        className={clsx(classes.drawer, 'sidebar-drawer', {
           [classes.drawerOpen]: toggleDrawer,
           [classes.drawerClose]: !toggleDrawer,
           'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
@@ -182,7 +209,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             [classes.drawerOpen]: toggleDrawer,
             [classes.drawerClose]: !toggleDrawer,
             'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
-            'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1
+            'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1,
+            'sidebar-drawer': true
           })
         }}
       >
@@ -215,7 +243,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   history.push('/');
                 }}
                 primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
-              // className={`wordWrap`}
+                // className={`wordWrap`}
               />
             </ListItem>
             {permissions?.dashboard?.isRead && !isOffline && (
@@ -259,7 +287,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 <React.Fragment key={i}>
                   <Tooltip title={!toggleDrawer ? listItem.section : ''}>
                     <ListItem
-                      className={`list-item ${itemToAddActiveClass == i ? 'active_element' : ''}`}
+                      className={`list-item dropdown-items ${itemToAddActiveClass == i ? 'active_element' : ''}`}
                       button
                       key={listItem.section + '' + i}
                       onClick={() => {
@@ -269,11 +297,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         }
                       }}
                     >
-                      <ListItemIcon>
-                        {iconMapping.find((mapping) => {
-                          return mapping.key === listItem.section;
-                        })?.icon || <FaReact size={16} className="sidebar-icon" />}
-                      </ListItemIcon>
+                      <ListItemIcon>{renderIcon(listItem.section)}</ListItemIcon>
                       <ListItemText primary={listItem.section} className={`wordWrap`} />
                       {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
@@ -304,7 +328,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         {!isOffline && (
           <List style={{ bottom: '0px', marginTop: 'auto' }}>
             <ListItem button onClick={() => setChatOpen((prevState) => !prevState)}>
-              <ListItemIcon>
+              <ListItemIcon style={{ color: 'white' }}>
                 <BsChatLeftTextFill size={16} className="sidebar-icon chat-icon" />
               </ListItemIcon>
               <ListItemText primary="Chat" />

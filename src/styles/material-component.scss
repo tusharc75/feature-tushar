@@ -1,5 +1,13 @@
 .MuiToolbar-root {
   min-height: 55px !important;
+  @media all and (max-width: 768px) {
+    min-height: 0px !important;
+  }
+}
+@media all and (max-width: 768px) {
+  .MuiButtonBase-root.MuiListItem-root.list-item.MuiListItem-gutters.MuiListItem-button.Mui-selected {
+    margin-top: 106px;
+  }
 }
 
 .MuiButton-root {
@@ -81,7 +89,7 @@
   border: none;
 }
 
-.MuiAutocomplete-inputRoot[class*="MuiOutlinedInput-root"] .MuiAutocomplete-endAdornment {
+.MuiAutocomplete-inputRoot[class*='MuiOutlinedInput-root'] .MuiAutocomplete-endAdornment {
   .MuiIconButton-root {
     padding: 2px !important;
   }
@@ -107,7 +115,6 @@
 }
 
 .MuiOutlinedInput-root {
-
   .MuiInputAdornment-positionEnd {
     .MuiIconButton-root {
       padding: 2px !important;
@@ -213,14 +220,14 @@ Button.MuiButtonBase-root:not(.MuiFab-root) {
   }
 
   .MuiStepLabel-label {
-    color: #bab9b9 ;
+    color: #bab9b9;
     font-weight: 500 !important;
     &.MuiStepLabel-completed {
-      color: white ;
+      color: white;
     }
 
     &.MuiStepLabel-active {
-      color: var(--primary) ;
+      color: var(--primary);
     }
   }
 

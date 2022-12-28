@@ -1,12 +1,15 @@
 .sidebarContainer {
   --sidebar-width: 440px;
   --spacing: 12px;
+
   @media all and (min-width: 768px) and (max-width: 857px) {
     --sidebar-width: 340px;
   }
+
   @media all and (max-width: 507px) {
     --sidebar-width: 340px;
   }
+
   @media all and (max-width: 387px) {
     --sidebar-width: 278px;
   }
@@ -40,6 +43,7 @@
     top: 0;
     z-index: 5;
   }
+
   .footerSection {
     flex: 0 0 auto;
     display: flex;
@@ -47,21 +51,26 @@
     align-items: center;
     justify-content: flex-end;
     background: hsl(0deg, 0%, 88%);
-    & > *:not(:first-child) {
+
+    &>*:not(:first-child) {
       margin-left: 8px;
     }
+
     position: sticky;
     bottom: 0;
     z-index: 5;
   }
+
   .content {
     padding: var(--spacing, 10px);
     height: calc(100% - calc(64px + 37px));
     overflow-y: auto;
     position: relative;
   }
+
   .formHead {
     position: relative;
+
     // &::after {
     //   content: '';
     //   position: absolute;
@@ -75,6 +84,7 @@
       color: inherit;
     }
   }
+
   .dates {
     position: relative;
     // &::before {
@@ -86,7 +96,8 @@
     //   background-color: lightgray;
     // }
   }
-  .centerText{
+
+  .centerText {
     position: absolute;
     top: 30%;
     text-align: center;
@@ -94,7 +105,8 @@
     right: 10px;
     transform: translateY(-50%);
   }
-  .fixedBottom{
+
+  .fixedBottom {
     position: absolute;
     bottom: 10px;
     left: 10px;

@@ -18,6 +18,7 @@ import { autoCalculateSpecificFields, handleAutoCalculation } from "../../../con
 import moment from "moment";
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { isNull } from 'util';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 
 
 interface EditDialogProps {
@@ -29,6 +30,7 @@ interface EditDialogProps {
   material: any[]
   selectedProducts: any[]
   isBulkedit: any
+  isInlineEdit?: Boolean
 }
 
 const rateChangeFields = ["unit", "pricingMethod"]
@@ -42,7 +44,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     rowData,
     material,
     selectedProducts,
-    isBulkedit
+    isBulkedit,
+    isInlineEdit = false
   }) => {
 
 
@@ -59,6 +62,25 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     fetchFields()
   }, []);
 
+  useEffect(() => {
+    if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
+      const { setErrors, setTouched } = ref.current
+      let errors: any = {}
+      let touched: any = {}
+      initialData.fields.forEach(({ fieldName, required, fieldLabel }) => {
+
+        if (required && !initialData.values[fieldName]) {
+          errors[fieldName] = fieldLabel + " is a required field"
+          touched[fieldName] = true
+        }
+      })
+      setErrors(errors)
+      setTouched(touched)
+
+    }
+
+  }, [initialData, ref.current, isInlineEdit])
+  
   const fetchFields = async () => {
     var data = await fetch_quotation_product_fields(quotationData?.currency)
     setAllFields(JSON.parse(JSON.stringify(data)))
@@ -256,23 +278,31 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
       handleSaveData(rows)
     }
     else {
-      let rows: any = [{ ...rowData, ...values }]
-      if (rowData.parentId) {
-        const parent: any = material.filter((e) => e._id === rowData.parentId)
-        const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
-        sameParent.forEach((element) => {
-          if (element.materialId === rowData.materialId) {
-            for (var key in values) {
-              element[key] = values[key];
-            }
-          }
-        })
-        sumOnParent(parent, sameParent)
-        rows = [...rows, ...parent]
+      if (rowData.parentId && !showConfirmationDialog) {
+        setShowConfirmationDialog(true);
       }
-      const child = material.filter((e) => e.parentId === rowData._id)
-      resetValueZero(child)
-      handleSaveData([...rows, ...child])
+      else {
+        // let rows: any = [{ ...rowData, ...values }]
+        // if (rowData.parentId) {
+        //   const parent: any = material.filter((e) => e._id === rowData.parentId)
+        //   const sameParent: any = material.filter((e) => e.parentId === rowData.parentId)
+        //   sameParent.forEach((element) => {
+        //     if (element.materialId === rowData.materialId) {
+        //       for (var key in values) {
+        //         element[key] = values[key];
+        //       }
+        //     }
+        //   })
+        //   sumOnParent(parent, sameParent)
+        //   rows = [...rows, ...parent]
+        // }
+        // const child = material.filter((e) => e.parentId === rowData._id)
+        // resetValueZero(child)
+        const rows = await calculateRowsField(material, values, allFields, rowData)
+
+        handleSaveData(rows)
+        setShowConfirmationDialog(false);
+      }
     }
   };
 
@@ -308,7 +338,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = (
     }
     if (rowData && rowData.hideSelection) {
       if (values.qty < rowData.assetQty) {
-        errors['qty'] = 'Quantity is less than that which has been assigned.';
+        errors['qty'] = 'The quantity is less than what was assigned.';
       }
     }
     return errors;

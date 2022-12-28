@@ -19,13 +19,14 @@ import {
 } from 'react-table';
 import { useSticky } from 'react-table-sticky';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import EditIcon from '@material-ui/icons/Edit';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import CustomReactTableHeaderOptions from './CustomReactTableHeaderOptions';
 import { isMobile, isTablet } from 'react-device-detect';
 import Checkbox from '@material-ui/core/Checkbox';
 import HtmlTooltip from '../CustomTooltipTitle';
-import { Check } from '@material-ui/icons';
+import { Check, Edit } from '@material-ui/icons';
 
 const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, ...rest }: any, ref) => {
   const defaultRef = React.useRef();
@@ -105,7 +106,7 @@ export default function CustomReactTable({
     []
   );
 
-  const [cellValue, setCellValue] = React.useState('');
+  const [cellValue, setCellValue] = React.useState(null);
   const [isCellEditing, setIsCellEditing] = React.useState(false);
   const [currentRowEditing, setCurrentRowEditing] = React.useState(null);
 
@@ -298,7 +299,7 @@ export default function CustomReactTable({
           const rowOneColumn = row1.values[columnName];
           const rowTwoColumn = row2.values[columnName];
           if (isString(rowOneColumn)) {
-            return rowOneColumn.toUpperCase() > rowTwoColumn.toUpperCase() ? 1 : -1;
+            return rowOneColumn?.toUpperCase() > rowTwoColumn?.toUpperCase() ? 1 : -1;
           }
           return Number(rowOneColumn) > Number(rowTwoColumn) ? 1 : -1;
         }
@@ -363,10 +364,10 @@ export default function CustomReactTable({
   const submitInput = () => {
     const rowData = Object.keys(rowState[currentRowEditing.id].cellState).filter((k) => rowState[currentRowEditing.id].cellState[k].isEditing);
     const updatedData = material.find((row) => row?._id == currentRowEditing?.original?._id);
-    updatedData[rowData[0]] = parseFloat(cellValue.replace(/[^0-9\.]/g, '')) || 0;
-    const inputField = { [`${rowData[0]}`]: parseFloat(cellValue.replace(/[^0-9\.]/g, '')) || 0 };
+    updatedData[rowData[0]] = cellValue;
+    const inputField = { [`${rowData[0]}`]: cellValue };
 
-    if (onSaveEdit && cellValue && cellValue !== updatedData[rowData[0]]) {
+    if (onSaveEdit && (cellValue > -1 && ![undefined,null].includes(cellValue))) {
       onSaveEdit(inputField, updatedData);
     }
 
@@ -488,6 +489,7 @@ export default function CustomReactTable({
                         rowState.hasOwnProperty(row.id) &&
                         rowState[row.id].cellState[cell?.column.id]?.isEditing ? (
                           <input
+                            type="number"
                             autoFocus
                             style={{
                               borderLeft: '0',
@@ -498,7 +500,15 @@ export default function CustomReactTable({
                               outline: 'none'
                             }}
                             value={cellValue}
-                            onChange={(e) => setCellValue(e.target.value)}
+                            onChange={(e) => {
+                              let value: any = e.target.value;
+
+                              value = parseInt(value);
+
+                              if (value < 0 ) return;
+
+                              setCellValue(value);
+                            }}
                           />
                         ) : isCellEditing && currentRowEditing && currentRowEditing.id === row.id && cell?.column.id === 'action' ? (
                           <HtmlTooltip title="Save">
@@ -507,7 +517,12 @@ export default function CustomReactTable({
                             </IconButton>
                           </HtmlTooltip>
                         ) : cell.column?.editable && cell?.value ? (
-                          <p style={{ borderBottom: '1px dashed #8a8a8a', cursor: 'pointer' }}>{cell?.value}</p>
+                          <div style={{ borderBottom: '1px dashed #8a8a8a', cursor: 'pointer', display: 'flex', justifyContent: 'space-between' }}>
+                            <p>{cell?.value}</p>
+                            <span>
+                              <Edit color="disabled" fontSize="small" />
+                            </span>
+                          </div>
                         ) : (
                           cell.render('Cell')
                         )}

@@ -26,7 +26,8 @@ import { VscVersions } from 'react-icons/vsc';
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnly = false, allowedToEdit, versionId, allColumn, columns, setShowAllVersionStatus, setShowQuotationSummaryDialog, currentVersion }) => {
+const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnly = false, allowedToEdit, versionId, allColumn, columns,
+  setShowAllVersionStatus, setShowQuotationSummaryDialog, currentVersion, hideSummary = false, hideVersions = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -57,8 +58,8 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
       ownerCollaboratorEmails.push(quotationData.owner.email);
     }
     let toEmails = [];
-    if (quotationData?.supplier?.email) {
-      toEmails.push(quotationData.supplier.email);
+    if (quotationData?.customerContact?.email) {
+      toEmails.push(quotationData.customerContact.email);
     }
     setUserEmails({ cc: [...ownerCollaboratorEmails], to: [...toEmails] });
   };
@@ -68,13 +69,13 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
     attachments.push({
       base64: pdfFileBase64.substring(parseInt(pdfFileBase64.indexOf(',') + 1)),
       contentType: pdfFileBase64.split(';')[0].split(':')[1],
-      name: `Purchase Order-${quotationData.quotationNumber}`
+      name: `Quote-${quotationData?.quotationNumber}`
     });
   }
 
   const fetchEmailAttachment = () => {
     axiosInstance()
-      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}`)
+      .get(`${quotation.api}/${quotationData?._id}/pdf/${versionData._id}/detail`)
       .then(({ data }) => {
         axiosInstance()
           .get(`user/download?fileName=${data.data.fileName}`, {
@@ -193,31 +194,33 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center">
           <Box display="flex">
-            <Button
-              onClick={() => {
-                setShowQuotationSummaryDialog(true);
-              }}
-              variant="outlined"
-              size="small"
-              className="mx-1"
-              startIcon={<GiReceiveMoney />}
-              color="primary"
-            >
-              Summary
-            </Button>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="primary"
-              size="small"
-              className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
-              onClick={() => {
-                setShowAllVersionStatus(true);
-              }}
-              style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-              startIcon={isMobile && !isTablet ? null : <VscVersions />}
-            >
-              {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-            </Button>
+            {!hideSummary &&
+              <Button
+                onClick={() => {
+                  setShowQuotationSummaryDialog(true);
+                }}
+                variant="outlined"
+                size="small"
+                className="mx-1"
+                startIcon={<GiReceiveMoney />}
+                color="primary"
+              >
+                Summary
+              </Button>}
+            {!hideVersions &&
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                color="primary"
+                size="small"
+                className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
+                onClick={() => {
+                  setShowAllVersionStatus(true);
+                }}
+                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                startIcon={isMobile && !isTablet ? null : <VscVersions />}
+              >
+                {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+              </Button>}
             <Button
               variant={isMobile && !isTablet ? 'text' : 'outlined'}
               color="primary"
@@ -329,7 +332,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
               setFullScreen(false);
             }}
             fetchData={onSendEmailSuccess}
-            id={quotationData._id}
+            id={quotationData.rentalManagement}
             isQuoteBuilder={true}
             options={userEmails?.to}
             cc={userEmails?.cc ?? []}
@@ -342,7 +345,7 @@ const SendEmail = ({ quotationData, versionData, isSendEmail = false, previewOnl
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            refrenceType="purchaseOrder"
+            refrenceType="rentalJob"
           />
         </Dialog>
       )}

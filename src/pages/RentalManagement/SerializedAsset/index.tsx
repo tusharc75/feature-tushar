@@ -15,7 +15,7 @@ import {
   rentalManagement,
   sidebarResource,
   treeToFlatArray,
-  INVENTORY_STATUS,
+  INVENTORY_STATUS
 } from '../../../constants/helpers';
 import moment from 'moment';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -28,7 +28,7 @@ import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/Offl
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { useHistory } from 'react-router-dom';
-import InfoIcon from '@material-ui/icons/Info';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
@@ -84,6 +84,7 @@ const SerializedAsset = ({
   }, []);
 
   const fetchFields = async () => {
+    setNextStep(false);
     var { fields: data } = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     const coloum: any = [
       {
@@ -91,7 +92,10 @@ const SerializedAsset = ({
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
       },
       {
         accessor: 'type',
@@ -102,10 +106,18 @@ const SerializedAsset = ({
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
-              {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? "Inventory" : `${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product' ? row.original?.productDetail?.serializedProduct ? '(Serialized)' : '(Non-Serialized)' :
-                row.original?.type === 'package' ? row.original?.packageDetail.packageType === 'Product' ? '(Product)' : '(Service)' :
-                  row.original.type === 'service' ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})` : ''}
+              {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? 'Inventory' : `${startCase(row.original?.type)} `}
+              {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -153,7 +165,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <InfoIcon fontSize="small" color={'primary'} />
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -167,7 +179,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <InfoIcon fontSize="small" color={'primary'} />
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -181,7 +193,7 @@ const SerializedAsset = ({
                     });
                   }}
                 >
-                  <InfoIcon fontSize="small" color={'primary'} />
+                  <OpenInNewIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -196,7 +208,8 @@ const SerializedAsset = ({
             )}
             {row.original?.type === 'asset' && (
               <span className="d-flex align-items-center gap-2">
-                {(row.original.status === INVENTORY_STATUS.reserved || [INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost].includes(row.original.status)) && !row?.original?.rentalAssetStatus &&
+                {[INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.reserved].includes(row.original.status) &&
+                  !row?.original?.rentalAssetStatus &&
                   allowedToEdit && (
                     <HtmlTooltip title={`Remove`}>
                       <IconButton
@@ -208,12 +221,14 @@ const SerializedAsset = ({
                           ]);
                         }}
                       >
-                        <Delete fontSize="small" color="error" />
+                        <Delete fontSize="small" color={'error'} />
                       </IconButton>
                     </HtmlTooltip>
                   )}
                 {row.original.isTransferAsset && (
-                  <HtmlTooltip title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`} >
+                  <HtmlTooltip
+                    title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}
+                  >
                     <IconButton
                       size="small"
                       onClick={() => {
@@ -222,7 +237,7 @@ const SerializedAsset = ({
                         });
                       }}
                     >
-                      <InfoIcon fontSize="small" color={'primary'} />
+                      <OpenInNewIcon fontSize="small" color={'primary'} />
                     </IconButton>
                   </HtmlTooltip>
                 )}
@@ -230,9 +245,6 @@ const SerializedAsset = ({
             )}
           </div>
         ),
-        Footer: () => {
-          return <>Total</>;
-        },
         setCellClassNames: (row) => {
           if (row?.isTransferAsset || (row?.type === 'asset' && row?.warehouse && row?.warehouse !== rentalManagementData?.warehouse?.optionValue))
             return 'isTransferAsset';
@@ -240,8 +252,16 @@ const SerializedAsset = ({
         }
       },
       {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      },
+      {
         accessor: 'assets',
-        Header: 'Assets Assigned',
+        Header: 'Qty Assigned',
         Cell: ({ row }) => getAssetAssignedValues(row)
       }
     ];
@@ -312,7 +332,14 @@ const SerializedAsset = ({
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) =>
+            row.original[element.fieldName]?.optionLabel ? (
+              <p>{row.original[element.fieldName].optionLabel}</p>
+            ) : row.original[element.fieldName] ? (
+              <p>{row.original[element.fieldName]}</p>
+            ) : (
+              <NoDataCell />
+            )
         });
       }
     });
@@ -328,6 +355,7 @@ const SerializedAsset = ({
     });
     setColumns(coloum);
     fetchProductInventory();
+    setNextStep(true);
   };
 
   const fetchProductInventory = async () => {
@@ -358,6 +386,7 @@ const SerializedAsset = ({
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         data = response?.data?.data;
+        data.inventory = data.inventory?.filter((e) => !e.isReplaced);
         offlineAssetErrorLog = data?.offlineAssetErrorLog;
 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
@@ -382,19 +411,31 @@ const SerializedAsset = ({
       }
 
       let rows = data.material.filter((e) => e.parentId === null);
-      // let products = rows.filter((e) => e.type === 'product' && !e?.isConsumbale);
-      // let packages = rows.filter((e) => e.type === 'package' && e?.packageDetail?.packageType !== 'Service');
-      // rows = [...products, ...packages];
-
       rows.forEach((parent, i) => {
         parent.srno = i + 1;
-        parent.detail = `${parent.type === 'service' ? parent?.serviceDetail?.serviceName : parent.type === 'product' ? parent?.productDetail?.productName : parent?.packageDetail?.packageName}`;
+        parent.detail = `${
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
+        }`;
+        parent.description =
+          parent.type === 'service'
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent.type === 'product'
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+            ? parent?.packageDetail?.packageDescription || ''
+            : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
-        parent.assetAssignedQty = parent.serializedProduct ? data.inventory?.filter((e) => e._id === parent._id).length : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+        parent.assetAssignedQty = parent.serializedProduct
+          ? data.inventory?.filter((e) => e._id === parent._id).length
+          : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty = parent.assetAssignedQty;
-        parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
+        // parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
         parent.isSublease = subleaseProduct?.some((e) => e.materialId === parent.materialId);
         parent.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === parent.materialId);
         parent.isBulkAssetCreation = bulkAssetCreationProduct?.some((e) => e.productId === parent.materialId);
@@ -402,8 +443,44 @@ const SerializedAsset = ({
         if (parent.isOfflineError) {
           parent.offlineErrorAsset = offlineAssetErrorLog?.filter((e) => e._id === parent._id).map((e) => e.assetNumber);
         }
-        parent.subRows = generateNestedData(data.material, data.inventory, data?.nonSerializeAsset, parent, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct, offlineAssetErrorLog);
+        parent.subRows = generateNestedData(
+          data.material,
+          data.inventory,
+          data?.nonSerializeAsset,
+          parent,
+          transferAssets,
+          subleaseProduct,
+          purchaseOrderProduct,
+          bulkAssetCreationProduct,
+          offlineAssetErrorLog
+        );
+        parent.assetQty =
+          parent.subRows.filter((d) => d.type !== 'asset').length === 0
+            ? parent.assetQty
+            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+        parent.assetAssignedQty =
+          parent.subRows.filter((d) => d.type !== 'asset').length === 0
+            ? parent.assetAssignedQty
+            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0);
+        parent.isValid = parent.serializedProduct
+          ? parent.assetAssignedQty === parent.assetQty
+            ? true
+            : false
+          : parent.subRows.length !== 0
+          ? parent.assetAssignedQty ===
+              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+            parent.subRows.every((d) => d.isValid)
+          : true;
+
+        if (parent.subRows.length && parent.isValid) {
+          if (parent.subRows.every((d) => d.isValid)) {
+            parent.isValid = true;
+          } else {
+            parent.isValid = false;
+          }
+        }
       });
+
       if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
         setNextStep(false);
       } else {
@@ -475,13 +552,34 @@ const SerializedAsset = ({
     var assetAssignedQtySUM = 0;
     childProduct.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = _subRow.type === 'service' ? _subRow?.serviceDetail?.serviceName : _subRow.type === 'product' ? _subRow?.productDetail?.productName : _subRow?.packageDetail?.packageName;
+      _subRow.detail =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceName
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productName
+          : _subRow?.packageDetail?.packageName;
+      _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
-      _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
-      _subRow.assetAssignedQty = _subRow.serializedProduct ? inventory?.filter((e) => e._id === _subRow._id).length : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+      // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
+      _subRow.assetQty =
+        _subRow.type === 'product' || _subRow.type === 'package'
+          ? parent.type === 'product' || parent.type === 'package'
+            ? _subRow.qty * parent.assetQty
+            : _subRow.qty * parent.qty
+          : 0;
+      _subRow.assetAssignedQty = _subRow.serializedProduct
+        ? inventory?.filter((e) => e._id === _subRow._id).length
+        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.realAssetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.realAssetQty : 0;
       _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
-      _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
+      // _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
       _subRow.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === _subRow.materialId);
       _subRow.isBulkAssetCreation = bulkAssetCreationProduct?.some((e) => e.productId === _subRow.materialId);
@@ -489,14 +587,35 @@ const SerializedAsset = ({
       if (_subRow.isOfflineError) {
         _subRow.offlineErrorAsset = offlineAssetErrorLog?.filter((e) => e._id === _subRow._id).map((e) => e.assetNumber);
       }
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, transferAssets, subleaseProduct, purchaseOrderProduct, bulkAssetCreationProduct, offlineAssetErrorLog);
+      let tempSubRows = generateNestedData(
+        material,
+        inventory,
+        nonSerializeAsset,
+        _subRow,
+        transferAssets,
+        subleaseProduct,
+        purchaseOrderProduct,
+        bulkAssetCreationProduct,
+        offlineAssetErrorLog
+      );
+      _subRow.subRows = tempSubRows;
+      _subRow.assetQty =
+        tempSubRows.filter((d) => d.type !== 'asset').length === 0
+          ? _subRow.assetQty
+          : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0);
+      _subRow.isValid = _subRow.serializedProduct
+        ? _subRow.assetAssignedQty === _subRow.assetQty
+          ? true
+          : false
+        : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
+        ? true
+        : _subRow.assetAssignedQty ===
+          tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+        ? true
+        : false;
       subRows.push(_subRow);
-      assetQtySUM += _subRow.serializedProduct ? _subRow.assetQty : 0;
       assetAssignedQtySUM += _subRow.serializedProduct ? _subRow.assetAssignedQty : 0;
     });
-
-    parent.assetQty += assetQtySUM - (parent.type === 'package' ? parent.qty : 0);
-    parent.assetQty = parent.assetQty < 0 ? 0 : parent.assetQty;
 
     parent.assetAssignedQty += assetAssignedQtySUM;
     parent.isValid = parent.serializedProduct || parent.type === 'package' ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
@@ -505,8 +624,8 @@ const SerializedAsset = ({
   };
 
   const getAssetAssignedValues = (row) => {
-    if (row?.original?.type === 'asset') {
-      return '';
+    if (row?.original?.type === 'asset' || row?.original?.assetQty === 0) {
+      return ' N/A ';
     }
     // if (!row?.original?.serializedProduct && row?.original?.assetAssignedQty === 0) {
     //   return <p>---</p>;
@@ -519,6 +638,7 @@ const SerializedAsset = ({
   };
 
   const handleAddSerializedAsset = (assets) => {
+    setNextStep(false);
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
     flatArray = uniqBy(flatArray, '_id');
@@ -555,15 +675,18 @@ const SerializedAsset = ({
             type: 'success',
             message: data.message
           });
+          setNextStep(true);
         })
         .catch((error) => {
           setAdding(false);
           toastConfig.setToastConfig(error);
+          setNextStep(true);
         });
     }
   };
 
   const handleRemoveInventory = async () => {
+    setNextStep(false);
     if (deleteData.length >= 1) {
       if (isOffline) {
         setDeleting(true);
@@ -584,11 +707,13 @@ const SerializedAsset = ({
             fetchProductInventory();
             setDeleteData(null);
             setShowConfirmBox(false);
+            setNextStep(true);
           })
           .catch((error) => {
             setDeleting(false);
             toastConfig.setToastConfig(error);
             setDeleteData(null);
+            setNextStep(true);
           });
       }
     }
@@ -598,11 +723,21 @@ const SerializedAsset = ({
     let flatArray = treeToFlatArray(selectedRecords, 'subRows').filter(
       (f) => f.type === 'product' && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
     );
+    let newFlatArray = treeToFlatArray(selectedRecords, 'subRows').filter((d) => d.type === 'product');
+    newFlatArray = uniqBy(newFlatArray, '_id');
+
     flatArray = uniqBy(flatArray, '_id');
-    const products = flatArray.map((m) => {
-      return { _id: m.materialId, unit: m.unit, assetsCount: m.realAssetQty - m.realAssetAssignedQty };
+    const products = newFlatArray.map((m) => {
+      return {
+        _id: m.materialId,
+        unit: m.unit,
+        serialized: m.serializedProduct,
+        assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : 0
+      };
     });
+
     const uniqProduct = [];
+
     products.forEach((element: any) => {
       const foundProduct = uniqProduct.filter((e) => e._id === element._id);
       if (foundProduct.length) {
@@ -775,7 +910,7 @@ const SerializedAsset = ({
                     closeActions();
                   }}
                 >
-                  {`Remove ${routes.serializedAsset.title}`}
+                  {`Remove Asset/Serial Number`}
                 </MenuItem>
               </Menu>
               {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
@@ -853,17 +988,17 @@ const SerializedAsset = ({
                 stepFullScreen
                   ? '100%'
                   : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
+                  ? 'calc(100vw -30px)'
+                  : isSmallScreen
+                  ? 'calc(100vw -30px)'
+                  : showActivity
+                  ? '100%'
+                  : 'calc(100vw - 103px)'
               }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 350px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
             >
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 365px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => {

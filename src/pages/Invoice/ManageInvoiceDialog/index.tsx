@@ -217,7 +217,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
         }
       });
       setErrors({ ...errors });
-      console.log(errors);
     } else {
       handleUpdateInvoice(values);
     }
@@ -225,7 +224,6 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
 
   const handleUpdateInvoice = (values) => {
     setLoading(true);
-    console.log(values);
     if (invoiceId && isClone === false) {
       values._id = invoiceId;
       axiosInstance()

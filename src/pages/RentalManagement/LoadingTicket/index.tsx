@@ -40,12 +40,15 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { makeStyles } from '@material-ui/core/styles';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from '../../DeliveryTicket/MultipleTicket';
-import { groupBy, uniq, map } from 'lodash';
+import { groupBy, uniq, map, sortBy } from 'lodash';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
+import HelpIcon from '@material-ui/icons/HelpOutline';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import { ExpandMore } from '@material-ui/icons';
+import AddSerializedAsset from '../SerializedAsset/AddSerializedAsset';
+import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -79,6 +82,7 @@ const LoadingTicket = ({
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [downlodingFile, setDownlodingFile] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -95,12 +99,18 @@ const LoadingTicket = ({
   const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
+  const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
+  const [replaceLoading, setReplaceLoading] = useState(false);
+  const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
+
   useEffect(() => {
     fetchRecords();
     getColumn();
   }, []);
 
   const fetchRecords = async () => {
+    setLoadingData(true)
     setNextStep(false);
     try {
       localStorage.setItem(`${renderedFrom}_selected`, JSON.stringify([]));
@@ -120,6 +130,7 @@ const LoadingTicket = ({
         productAssets = productAssets?.map((u) => ({
           ...u,
           type: 'Asset',
+          displayType: 'Asset',
           qty: 1,
           productName: u?.product?.optionLabel,
           warehouse: u?.warehouse?.optionLabel,
@@ -135,23 +146,25 @@ const LoadingTicket = ({
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
-        productAssets = productAssets
-          .map((d) => d.inventory)
-          .map((u) => ({
-            ...u,
-            type: 'Asset',
-            qty: 1,
-            productName: u?.product?.optionLabel,
-            productId: u?.product?.optionValue,
-            warehouse: u?.warehouse?.optionLabel,
-            warehouseId: u?.warehouse?.optionValue,
-            currentOwner: u?.currentOwner,
-            currentLocation: u?.currentLocation?.optionValue
-          }));
+        productAssets = productAssets?.filter((e) => e.replace != true).map((d) => ({
+          ...d.inventory,
+          isReplaced: d.isReplaced,
+          replaceReason: d.replaceReason,
+          replaceAsset: d?.replaceAsset ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset : ""
+        })).map((u) => ({
+          ...u,
+          type: 'Asset',
+          displayType: 'Asset',
+          qty: 1,
+          productName: u?.product?.optionLabel,
+          productId: u?.product?.optionValue,
+          warehouse: u?.warehouse?.optionLabel,
+          warehouseId: u?.warehouse?.optionValue,
+          currentOwner: u?.currentOwner,
+          currentLocation: u?.currentLocation?.optionValue,
+        }));
 
-        const result = await axiosInstance().get(
-          `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
-        );
+        const result = await axiosInstance().get(`${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`);
         deliveryTicketList = result?.data?.data;
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
@@ -178,21 +191,28 @@ const LoadingTicket = ({
       products?.forEach((element) => {
         var qty = element.qty;
         const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
-        const parentProduct = material.find((p) => p?._id === element?.parentId)?.productDetail;
         ticketProduct?.forEach((ele) => {
           const obj: any = {};
           obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
           obj.type = 'Product';
+          obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = ele.qty;
+          obj.description =
+            element.type === 'service'
+              ? element?.serviceDetail?.serviceDescription || ''
+              : element.type === 'product'
+                ? element?.productDetail?.productDesc || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
           obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
           obj.parentId = element?.parentId;
-          obj.parentProductId = parentProduct ? parentProduct?._id : '';
           obj.parentName = element?.parentName;
           obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-          obj.status = element?.status;
+          obj.status = element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true ? element?.status : "N/A";
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
@@ -204,10 +224,18 @@ const LoadingTicket = ({
           const obj: any = {};
           obj._id = element.materialId;
           obj.type = 'Product';
+          obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.qty = qty;
+          obj.description =
+            element.type === 'service'
+              ? element?.serviceDetail?.serviceDescription || ''
+              : element.type === 'product'
+                ? element?.productDetail?.productDesc || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
-          obj.parentProductId = parentProduct ? parentProduct?._id : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -240,13 +268,11 @@ const LoadingTicket = ({
       });
 
       productAssets.forEach((d) => {
+        d['parentName'] = d?.hasOwnProperty('parentName') && d?.parentName !== '' ? d?.parentName : d?.productName;
+        d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;
-        d['hideSelection'] =
-          [INVENTORY_STATUS.inUse, INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(
-            d.status
-          ) ||
-          d.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered ||
-          d?.manualStatus === INVENTORY_STATUS.reserved;
+        d['hideSelection'] = [INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status) ||
+          d?.manualStatus === INVENTORY_STATUS.reserved || d?.isReplaced;
       });
 
       if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
@@ -254,13 +280,16 @@ const LoadingTicket = ({
       }
 
       setUniqueLoadingTicket([...new Set(productAssets.filter((d) => d.loadingTicketId !== undefined).map((d) => d.loadingTicketId))]);
+
+      productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)]
+
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
+      setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
+      setLoadingData(false)
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
       toastConfig.setToastConfig(error);
+      setLoadingData(false)
     }
   };
 
@@ -291,6 +320,13 @@ const LoadingTicket = ({
       >
         {params.value}
       </Link>
+      {params?.data?.warehouseId && params?.data?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
+        <HtmlTooltip title="This asset will be shipped from different facility">
+          <IconButton size="small">
+            <HelpIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
+      )}
       {params?.data?.nonSerializeAsset && params?.data?.nonSerializeAsset?.length > 0 && (
         <Box ml={1}>
           <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
@@ -308,6 +344,13 @@ const LoadingTicket = ({
           </HtmlTooltip>
         </Box>
       )}
+      {params?.data?.isReplaced && (
+        <Box ml={1}>
+          <HtmlTooltip title={`This Asset has been Replaced by ${params?.data?.replaceAsset} (Due to following reason-"${params?.data?.replaceReason}")`}>
+            <InfoIcon fontSize="small" color={'primary'} />
+          </HtmlTooltip>
+        </Box>
+      )}
     </Fragment>
   );
 
@@ -317,14 +360,7 @@ const LoadingTicket = ({
     </Link>
   );
 
-  const ParentNameRenderer = (params) =>
-    params.data?.parentId ? (
-      <Link className="link text-truncate" title={params.value} to={`${routes.productDetail.path}/${params.data?.parentProductId}`}>
-        {params?.data?.parentName}
-      </Link>
-    ) : (
-      <NoDataCell />
-    );
+  const ParentNameRenderer = (params) => (params.data?.parentId ? <span>{params?.data?.parentName}</span> : <NoDataCell />);
 
   const frameworkComponents = {
     ticketRenderer: TicketRenderer,
@@ -363,7 +399,7 @@ const LoadingTicket = ({
   const columns = [
     {
       field: 'assetNumber',
-      headerName: "Details",
+      headerName: 'Details',
       show: true,
       disabled: true,
       cellRenderer: 'inventoryRenderer',
@@ -379,7 +415,13 @@ const LoadingTicket = ({
         return null;
       }
     },
-    { field: 'type', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
+    {
+      field: 'description',
+      headerName: 'Description',
+      show: true,
+      cellRenderer: 'commonRenderer'
+    },
+    { field: 'displayType', headerName: 'Type', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'parent', headerName: 'Parent', show: true, disabled: true, cellRenderer: 'parentNameRenderer' },
     { field: 'qty', headerName: 'Qty', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'serialNumber', headerName: findHeader(columnHeader?.assetFields, 'serialNumber'), show: true, cellRenderer: 'commonRenderer' },
@@ -461,6 +503,42 @@ const LoadingTicket = ({
     }
   };
 
+  const handleOpenReplaceAssetReason = (rows) => {
+    const data: any = {};
+    data.refrenceType = 'rentalJob';
+    data.referenceId = rentalManagementData._id;
+    const assets: any = [];
+    selectedRecords?.forEach((element: any) => {
+      const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
+      if (result.length) {
+        assets.push({ _id: element._id, status: element.status, deliveryTicketId: element.loadingTicketId, newId: result[0]._id });
+        result[0].isCounted = true;
+      }
+    });
+    data.assets = assets;
+    setShowReplaceReason({ open: true, data: data });
+  };
+
+  const handleReplaceAsset = (reason) => {
+    setReplaceLoading(true);
+    axiosInstance()
+      .post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
+      .then(({ data }) => {
+        setShowReplaceReason({ open: false, data: [] });
+        setAddSerializedAssetDialog({ open: false, products: [] });
+        setReplaceLoading(false);
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Assets Replaced Successfully`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handelProcessTickets = () => {
     let data = {};
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
@@ -485,6 +563,31 @@ const LoadingTicket = ({
         });
     }
   };
+
+  const handelRevertTickets = () => {
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      let data = [];
+      loadingTicketIds?.forEach((loadingTicketId) => {
+        const ele: any = {};
+        ele._id = loadingTicketId;
+        ele.products = selectedRecords?.filter((e) => e.loadingTicketId === loadingTicketId && e.type === "Product")?.map((e) => e.productId);
+        ele.assets = selectedRecords?.filter((e) => e.loadingTicketId === loadingTicketId && e.type === "Asset")?.map((e) => e._id);
+        data.push(ele);
+      })
+      axiosInstance().put(`${deliveryTicket.api}/remove-tickets-items`, data).then(({ data: { data } }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Reverted Successfully`
+        });
+      })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
 
   return (
     <>
@@ -622,8 +725,50 @@ const LoadingTicket = ({
                     closeActions();
                   }}
                 >
-                  Delivered to customer
+                  Delivered to Customer
                 </MenuItem>
+                {selectedRecords.length &&
+                  selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit)?.length === selectedRecords?.length ? (
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      setShowConformationRevertTicket(true);
+                    }}
+                  >
+                    Revert Loading Ticket
+                  </MenuItem>
+                ) : null}
+
+                {selectedRecords.length &&
+                  selectedRecords?.filter((f) =>
+                    f.hasOwnProperty('loadingTicketId')
+                    && f?.type === 'Asset'
+                    && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+                    && f?.status === INVENTORY_STATUS.inUse)?.length === selectedRecords?.length
+                  &&
+                  <MenuItem
+                    onClick={() => {
+                      const products = [];
+                      selectedRecords?.forEach((element) => {
+                        const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
+                        if (foundProduct.length) {
+                          foundProduct[0].qty += 1;
+                        } else {
+                          products.push({
+                            _id: element?.product?.optionValue,
+                            id: element?.product?.optionValue,
+                            productName: element?.product?.optionLabel,
+                            qty: 1
+                          });
+                        }
+                      });
+                      setAddSerializedAssetDialog({ open: true, products: products });
+                      closeActions();
+                    }}
+                  >
+                    Replace Asset
+                  </MenuItem>
+                }
               </Menu>
               <Box mx={1} />
               {selectedRecords.length &&
@@ -723,12 +868,12 @@ const LoadingTicket = ({
               loading={loading}
               isClientSideGrid={true}
               allowSelection={allowedToEdit || isProcessor}
-              // rowClassRules={{
-              //   "red-data-row":
-              //     function (params) {
-              //       return [INVENTORY_STATUS.lost, INVENTORY_STATUS.scrap].some(s => s === params.data.status);
-              //     },
-              // }}
+              rowClassRules={{
+                "light-grey-data-row":
+                  function (params) {
+                    return params?.data?.isReplaced;
+                  },
+              }}
               renderedFrom={renderedFrom}
               refreshGrid={fetchRecords}
             />
@@ -876,6 +1021,45 @@ const LoadingTicket = ({
       )}
       {showNonSerializeAsset.open && (
         <ShowNonSerializeAssets data={showNonSerializeAsset.data} onClose={() => setShowNonSerializeAsset({ open: false, data: {} })} />
+      )}
+      {addSerializedAssetDialog.open && (
+        <AddSerializedAsset
+          addSerializedAsset={handleOpenReplaceAssetReason}
+          handleSerializedAssetClose={() => {
+            setAddSerializedAssetDialog({ open: false, products: [] });
+          }}
+          refrenceType={'ReplaceAsset'}
+          refrenceData={{
+            _id: rentalManagementData?._id,
+            warehouse: rentalManagementData?.warehouse?.optionValue
+          }}
+          isAdding={replaceLoading}
+          selectedProducts={addSerializedAssetDialog.products}
+          filterByPlant={rentalManagementData?.warehouse?.optionValue}
+        />
+      )}
+      {showReplaceReason.open && (
+        <ReplaceAssetReason
+          handleClose={() => setShowReplaceReason({ open: false, data: {} })}
+          loading={replaceLoading}
+          handleSucess={(data) => {
+            handleReplaceAsset(data?.reason);
+          }}
+        />
+      )}
+      {showConformationRevertTicket && (
+        <ConfirmationDialog
+          open={showConformationRevertTicket}
+          message={`Are you sure you want to revert loading ticket?`}
+          onClose={() => {
+            setShowConformationRevertTicket(false);
+          }}
+          onOk={() => {
+            handelRevertTickets();
+            setShowConformationRevertTicket(false);
+          }}
+          okBtnLoading={okBtnLoading}
+        />
       )}
     </>
   );

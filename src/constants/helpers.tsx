@@ -53,7 +53,7 @@ export const rentalManagementSteps = [
   'Add Products',
   'Add Services',
   // 'Add Consumables',
-  'Extra Add-on',
+  'Add-on',
   'Quotation',
   'Serialized Asset',
   'Loading Ticket',
@@ -202,6 +202,7 @@ export const sidebarResource = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
+  workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician'
 };
 
@@ -272,6 +273,7 @@ export const resourceNames = {
   quotation: 'Quotation',
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
+  workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician'
 };
 
@@ -358,8 +360,9 @@ export const RESOURCE_LABEL = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
-  workOrderSupervisor:'Work Order Supervisor',
-  workOrderTechnician: 'Work Order Technician'
+  workOrderSupervisor: 'Work Order Supervisor',
+  workOrderTechnician: 'Work Order Technician',
+  freqentlyAskedQuestion: 'Frequently Asked Question'
 };
 
 export const CHILD_RESOURCE = {
@@ -543,10 +546,10 @@ export const serializedAsset = {
 };
 
 export const workOrderSupervisor = {
-  api:'/work-order-supervisor',
-  route:'/work-order-supervisor',
-  permission:'workOrderSupervisor',
-  resource:'Work Order Supervisor'
+  api: '/work-order-supervisor',
+  route: '/work-order-supervisor',
+  permission: 'workOrderSupervisor',
+  resource: 'Work Order Supervisor'
 }
 
 export const convertInventory = {
@@ -887,6 +890,9 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'multiImageUpload') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
+    }
+    else if (input.type === 'multiFileUpload') {
+      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
     } else {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
     }
@@ -900,7 +906,7 @@ export const UnCamelCase = (str) => {
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/\b([A-Z]+)([A-Z])([a-z])/, '$1 $2$3')
     .replace(/^./, function (str) {
-      return str.toUpperCase();
+      return str?.toUpperCase();
     });
 };
 
@@ -1700,7 +1706,8 @@ export const INVENTORY_STATUS = {
   supplier: 'With Supplier',
   returned: 'Returned',
   needRepair: 'Need Repair',
-  needRecert: 'Need Recert'
+  needRecert: 'Need Recert',
+  notApplied: "N/A",
 };
 
 
@@ -1789,12 +1796,6 @@ export const SUBLEASE_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   issued: 'Issued',
-  completed: 'Completed'
-};
-
-export const REPAIR_ORDER_STATUS = {
-  new: 'New',
-  inProgress: 'In-Progress',
   completed: 'Completed'
 };
 
@@ -2109,8 +2110,8 @@ export const QUOTATION_STATUS = {
   buildingQuote: 'Building Quote',
   waitingForSupplierPrice: 'Waiting for Supplier Price',
   sentToCustomer: 'Sent to Customer',
-  acceptByCustomer: 'Acceptd by Customer',
-  rejectByCustomer: 'Rejectd by Customer'
+  acceptByCustomer: 'Accepted by Customer',
+  rejectByCustomer: 'Rejected by Customer'
 };
 
 export const WORKORDER_SERVICE_COLOR = {
@@ -2121,20 +2122,80 @@ export const WORKORDER_SERVICE_COLOR = {
 
 export const WORKORDER_SERVICE_STATUS = {
   pending: 'Pending',
+  backlog: 'Backlog',
   inProgress: 'In-Progress',
   completed: 'Completed',
-  failed: 'Failed'
+  failed: 'Failed',
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
+  start: 'start',
+  pause: 'pause',
+  end: 'end',
   completed: 'Completed',
   passed: 'Passed',
   failed: 'Failed',
   skipped: 'Skipped',
-  end: 'end',
 };
 
 export const REPAIR_ORDER_TYPE = {
   internal: 'Asset Repair',
   external: 'Customer Owned Asset Repair',
 };
+
+export const REPAIR_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  preWork: 'Pre-Work In-Progress',
+  postWork: 'Post-Work In-Progress',
+  buildingQuote: 'Building Quote',
+  waitingQuote: 'Waiting On Quote',
+  quoteAccepted: 'Quote Accepted',
+  quoteRejected: 'Quote Rejected',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  completed: 'Completed'
+};
+
+export const WORK_ORDER_STATUS = {
+  new: 'New',
+  preWork: 'Pre-Work In-Progress',
+  // buildingQuote: 'Building Quote',
+  // waitingQuote: 'Waiting On Quote',
+  // quoteAccepted: 'Quote Accepted',
+  // quoteRejected: 'Quote Rejected',
+  postWork: 'Post-Work In-Progress',
+  completed: 'Completed'
+};
+
+
+export const convertMsToTime = (milliseconds: any) => {
+
+  function padTo2Digits(num) {
+    num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
+    return num.toString().padStart(2, '0');
+  }
+
+  let seconds = Math.floor(milliseconds / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+
+  let time = '';
+
+  if (hours === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours === 0 && minutes === 0) {
+    time = `00:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours > 0 && hours < 24) {
+    time = `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  }
+  if (hours >= 24) {
+    time = `${padTo2Digits(hours / 24)}d`;
+  }
+  return time;
+}

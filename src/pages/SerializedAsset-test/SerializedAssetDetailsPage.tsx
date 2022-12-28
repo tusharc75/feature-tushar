@@ -82,7 +82,6 @@ const SerializedAssetDetailsPage = () => {
   const [updateLoading, setUpdateLoading] = useState(false)
   const [loadingBOMData, setLoadingBOMData] = useState(false)
   const [customField, setCustomField] = useState(null)
-  const [productInventoryHistoryData, setProductInventoryHistoryData] = useState(null)
   const [BOMData, setBOMData] = useState([])
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -195,10 +194,9 @@ const SerializedAssetDetailsPage = () => {
         ...u,
         _id: (index + 1),
         id: (index + 1),
-        reference: u.reference?.optionLabel,
-        referenceId: u.reference?.optionValue
+        reference: u?.reference?.optionLabel,
+        referenceId: u?.reference?.optionValue
       }));
-      setProductInventoryHistoryData(data)
       dispatch({ type: "initialize", data: data, count: data.length });
       dispatch({ type: "loading", loading: false });
     }).catch((error) => {
@@ -626,7 +624,9 @@ const SerializedAssetDetailsPage = () => {
                             />
                             :
                             isMobile ? <div>
-                              <CustomTimeline dataRows={productInventoryHistoryData} />
+                              <CustomTimeline
+                                dataRows={dataRows}
+                              />
                             </div> :
                               <Box
                                 p={2}

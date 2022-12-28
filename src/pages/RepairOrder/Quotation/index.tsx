@@ -1,28 +1,12 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from 'react';
 import {
-  Grid,
   Box,
   Button,
-  Paper,
   Typography,
-  IconButton,
-  CircularProgress,
   Chip,
-  Tab,
-  Tabs,
-  ButtonGroup,
-  Container,
-  InputAdornment,
   useMediaQuery,
   Menu,
   MenuItem,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  DialogContent,
-  makeStyles,
-  MenuList,
-  Popover
 } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -41,26 +25,22 @@ import {
   repairOrder,
   CustomDialogTransition,
   currencyCodeToSymbol,
-  QUOTATION_STATUS
+  QUOTATION_STATUS,
+  REPAIR_ORDER_STATUS
 } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile, isTablet } from 'react-device-detect';
 import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { ExpandMore } from '@material-ui/icons';
 import { capitalize, orderBy } from 'lodash';
-import DateRangeIcon from '@material-ui/icons/DateRange';
 import QuotationQtyDialog from 'src/pages/Quotation/Productpackage/QuotationQtyDialog';
 import LeadTimeDialog from 'src/pages/Quotation/Productpackage/LeadTimeDialog';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Versions from 'src/pages/Quotation/Versions';
 import { FcCancel, FcClock, FcOk, GiReceiveMoney, VscVersions } from 'react-icons/all';
-import contactClass from '../../Contact/contact.module.scss';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
-import SendEmail from 'src/pages/Quotation/SendEmail';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import SendEmail from 'src/pages/RentalManagement/Quotation/SendEmail';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 
 const Quotation = ({
   repairOrderData,
@@ -71,11 +51,14 @@ const Quotation = ({
   stepFullScreen,
   allowedToEdit,
   allowedToDelete,
-  invoiceStep = false,
+  setQuotationVersionData,
+  updateOrderStatus,
+  invoiceStep,
 }) => {
-
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user, permissions } }: any = useData();
+  const {
+    state: { user, permissions }
+  }: any = useData();
 
   const isSmallScreen = useMediaQuery('(max-width:1300px)');
   const isTabletScreen = useMediaQuery('(max-width:960px)');
@@ -99,37 +82,58 @@ const Quotation = ({
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
-
   const [quotationData, setQuotationData] = useState(null);
   const [currentVersion, setCurrentVersion] = useState(null);
+  const [allColumn, setAllColumn] = useState([]);
+  const [isInlineEdit, setIsInlineEdit] = useState(false);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
-    fetchQuotationData();
-  }, []);
+    fetchFields();
+  }, [repairOrderData]);
 
-  const fetchQuotationData = (versionNumber = null) => {
-    axiosInstance()
-      .get(`${repairOrder.api}/${repairOrderData?._id}/repairorder/quotation`)
-      .then(({ data: { data } }) => {
-        setQuotationData(data);
-        let keys = Object.keys(data.versions);
-        let tempCurrentVersion = versionNumber ? versionNumber : parseInt(keys[keys.length - 1])
-        setCurrentVersion(tempCurrentVersion);
-        setNextStep(data?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false)
-      });
-  };
+  useEffect(() => {
+    if (invoiceStep && ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)) {
+      updateOrderStatus(REPAIR_ORDER_STATUS.readyToInvoice);
+    }
+  }, [invoiceStep]);
 
   useEffect(() => {
     if (quotationData?.versions[currentVersion] && quotationData?.versions[currentVersion]?._id) {
-      fetchFields(quotationData?.currency);
       fetchProductInventory();
     }
-  }, [quotationData?.versions[currentVersion]?._id]);
+  }, [currentVersion]);
 
-  const fetchFields = async (currency) => {
+  const fetchFields = async () => {
+
+    setNextStep(false)
+    setColumns(null);
+
+    const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${repairOrderData?._id}/check-create/quotation`);
+    const quotationInfo: any = quotationResponse?.data?.data;
+
+    setQuotationData(quotationInfo);
+    let keys = Object.keys(quotationInfo.versions);
+    let tempCurrentVersion = parseInt(keys[keys.length - 1]);
+    setCurrentVersion(tempCurrentVersion);
+    setQuotationVersionData({ quotationId: quotationInfo?._id, ...quotationInfo?.versions[tempCurrentVersion] });
+
+    setNextStep(quotationInfo?.versions[tempCurrentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? true : false);
+
+    const currency = quotationInfo?.currency;
     var data = await fetch_quotation_product_fields(currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
+      {
+        accessor: 'srno',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
       {
         accessor: 'detail',
         Header: 'Detail',
@@ -137,7 +141,11 @@ const Quotation = ({
         width: 300,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {
+            {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              quotationInfo?.versions[tempCurrentVersion]?.status
+            ) ? (
+              <p> {row.original.detail}</p>
+            ) : (
               <p
                 onClick={() => {
                   handleOpen(row.original);
@@ -147,7 +155,7 @@ const Quotation = ({
               >
                 {row.original?.detail}
               </p>
-            }
+            )}
 
             <Chip
               className="ml-1"
@@ -171,18 +179,55 @@ const Quotation = ({
         )
       },
       {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-        Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-          return <>{total}</>;
+        accessor: 'productName',
+        Header: 'Product',
+        width: 200,
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
+            <p className="text-truncate" title={row.original?.productName}>
+              {row.original?.productName ? (
+                row.original?.productId ? (
+                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
+                    {row.original?.productName}
+                  </a>
+                ) : (
+                  row.original?.productName
+                )
+              ) : (
+                <NoDataCell />
+              )}
+            </p>
+          </div>
+        )
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ?
+            <p className="text-truncate">
+              {row.original.description}</p>
+            : (
+              <NoDataCell />
+            )
         }
-      }
+      },
+      // {
+      //   accessor: 'leadTime',
+      //   Header: 'Lead Time (Days)',
+      //   Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+      //   Footer: (info) => {
+      //     const total = info.rows
+      //       .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
+      //       .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
+      //     return <>{total}</>;
+      //   }
+      // }
     ];
     data.forEach((element) => {
+      let isEditable= Boolean(![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+        quotationInfo?.versions[tempCurrentVersion]?.status ) && !invoiceStep && allowedToEdit && element?.isColumnEditable)
       if (element.type === 'date') {
         coloum.push({
           accessor: element.fieldName,
@@ -200,7 +245,8 @@ const Quotation = ({
               <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
             ) : (
               <NoDataCell />
-            )
+            ),
+          editable: isEditable
         });
       } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
         if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
@@ -210,7 +256,8 @@ const Quotation = ({
             coloum.push({
               accessor: fieldName,
               Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
+              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />),
+              editable: isEditable
             });
           });
         } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
@@ -226,7 +273,8 @@ const Quotation = ({
                     <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                   ) : (
                     <NoDataCell />
-                  )
+                  ),
+                editable: isEditable
               });
             });
           });
@@ -242,7 +290,8 @@ const Quotation = ({
                   <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                 ) : (
                   <NoDataCell />
-                )
+                ),
+              editable: isEditable
             });
           });
         }
@@ -253,54 +302,32 @@ const Quotation = ({
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) =>
+            row.original[element.fieldName]?.optionLabel ? (
+              <p>{row.original[element.fieldName].optionLabel}</p>
+            ) : row.original[element.fieldName] ? (
+              <p>{row.original[element.fieldName]}</p>
+            ) : (
+              <NoDataCell />
+            ),
+          editable: isEditable
         });
       }
     });
-    // coloum.push({
-    //   accessor: 'action',
-    //   Header: '',
-    //   minWidth: 100,
-    //   width: 100,
-    //   sticky: 'right',
-    //   disableFilters: true,
-    //   canDrag: false,
-    //   Cell: ({ row }) =>
-    //     !row.original.hideSelection && (
-    //       <Grid container spacing={1}>
-    //         {allowedToEdit && (
-    //           <IconButton
-    //             size="small"
-    //             aria-label="Details"
-    //             onClick={() => {
-    //               setLeadTimeDialog({ open: true, data: row.original });
-    //             }}
-    //           >
-    //             <DateRangeIcon fontSize="small" color="primary" />
-    //           </IconButton>
-    //         )}
-    //         <Box ml={1} />
-    //         {allowedToDelete && (
-    //           <IconButton
-    //             size="small"
-    //             aria-label="Details"
-    //             onClick={() => {
-    //               const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-    //               setDeleteData(obj);
-    //             }}
-    //           >
-    //             <DeleteIcon fontSize="small" color="error" />
-    //           </IconButton>
-    //         )}
-    //       </Grid>
-    //     )
-    // })
+    coloum.push({
+      accessor: 'action',
+      Header: '',
+      minWidth: 50,
+      width: 50,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => {
+        return <></>;
+      }
+    });
     coloum.forEach((element) => {
-      if (element.accessor.includes('detail')) {
-        element['Footer'] = () => {
-          return <>Total</>;
-        };
-      } else if (element.accessor === 'qtyDisplay') {
+      if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
             .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
@@ -321,18 +348,26 @@ const Quotation = ({
       }
     });
     setColumns(coloum);
+    setAllColumn(coloum.map((d) => d.Header));
   };
 
   const fetchProductInventory = async () => {
-    setNextStep(false);
     var data: any = [];
-    var inventory: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
     data = response?.data?.data;
+
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    inventory = data?.inventory ? data?.inventory : [];
+
+    data?.material?.forEach((e: any) => {
+      if (e.type === "service") {
+        e.preWork = e?.serviceDetail?.preWork;
+      }
+    })
+
     const rows = data.material.filter((e) => e.parentId === null);
-    rows.forEach((parent, i) => {
+
+    rows?.forEach((parent, i) => {
+      parent.srno = i + 1;
       parent.detail = `${parent.type === 'serializedAsset'
         ? parent.serializedAssetDetail?.assetNumber
         : parent.type === 'product'
@@ -341,26 +376,33 @@ const Quotation = ({
             ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
         }`;
+      parent.description =
+        parent.type === 'service'
+          ? parent?.serviceDetail?.serviceDescription || ''
+          : parent.type === 'product'
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
+      parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
+      parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
-      parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
-      parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
-      parent.subRows = generateNestedData(data.material, inventory, parent);
+      parent.hideSelection = false;
+      parent.subRows = generateNestedData(data.material, parent);
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(true);
-    } else {
-      setNextStep(true);
-    }
     setRowsData(rows);
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, inventory, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
+  const generateNestedData = (material, parent) => {
+
+    var subRows: any = orderBy(material?.filter((e) => e.parentId === parent._id), ['preWork'], ['desc']);
+
     subRows.forEach((_subRow, j) => {
+      _subRow.srno = parent.srno + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === 'serializedAsset'
         ? _subRow.serializedAssetDetail?.assetNumber
         : _subRow.type === 'product'
@@ -369,13 +411,22 @@ const Quotation = ({
             ? _subRow.serviceDetail?.serviceName
             : _subRow.packageDetail?.packageName
         }`;
+      _subRow.description =
+        _subRow.type === 'service'
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === 'product'
+            ? _subRow?.productDetail?.productDesc || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
+      _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
+      _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
-      _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
-      _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
-      _subRow.subRows = generateNestedData(material, inventory, _subRow);
+      _subRow.hideSelection = false;
+      _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -383,7 +434,7 @@ const Quotation = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return orderBy(subRows, ['order'], ['asc']);
+    return subRows;
   };
 
   const getNestedSubRows = (obj, original) => {
@@ -417,10 +468,12 @@ const Quotation = ({
       delete element.subRows;
       delete element.leadTime;
       delete element.leadTimeData;
+      delete element.productName;
+      delete element.productId;
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
+      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
@@ -491,218 +544,228 @@ const Quotation = ({
     axiosInstance()
       .post(`/quotation/clone-version/${quotationData._id}/${versionId}`)
       .then(() => {
-        fetchQuotationData();
+        fetchFields();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
+  const handleSendToCustomer = () => {
+    axiosInstance()
+      .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
+      .then(() => {
+        fetchFields();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Sent to customer Sucessfully'
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const onSaveInlineEdit = (inputField, updatedData) => {
+    setIsInlineEdit(true);
+    const currency = quotationData?.currency.toLowerCase();
+    const requiredItems = [];
+    allFields.forEach(({ fieldName, required, type }) => {
+      fieldName = type === 'currencyAmount' ? `${fieldName}_${currency}` : fieldName;
+      if (required) {
+        if (isNaN(updatedData[fieldName]) && !updatedData[fieldName]) {
+          requiredItems.push(fieldName);
+        } else if (!isNaN(updatedData[fieldName]) && updatedData[fieldName] <= 0) {
+          requiredItems.push(fieldName);
+        }
+      }
+    });
+
+    if (requiredItems.length > 0) {
+      handleOpen({
+        ...updatedData,
+        detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
+      });
+    } else {
+      onConfirmSave(inputField, updatedData);
+    }
+  };
+
+  const onConfirmSave = async (inputField, updatedData) => {
+    const rowData = material.find((d) => d._id === updatedData._id);
+    if (rowData.parentId && !showConfirmationDialog.open) {
+      setShowConfirmationDialog({
+        open: true,
+        data: {
+          inputField,
+          updatedData
+        }
+      });
+    } else {
+      if (inputField.hasOwnProperty('qtyDisplay')) {
+        inputField['qty'] = inputField['qtyDisplay'];
+      }
+      let rows: any = [{ ...rowData, ...updatedData }];
+      rows = await calculateRowsField(material, inputField, allFields, updatedData);
+      handleSaveData(rows);
+      setShowConfirmationDialog({ open: false, data: {} });
+    }
+  };
+
   return (
     <Fragment>
-      {invoiceStep ? (
-        <Box pb={2} display="flex" justifyContent="space-between">
-          <Box display="flex">
-            <SendEmail versionData={quotationData?.versions[currentVersion]} quotationData={quotationData} isSendEmail={true} />
-          </Box>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        m={1}
+        className={`flex-wrap`}
+        style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
+      >
+        <Box display="flex">
+          <SendEmail
+            versionData={quotationData?.versions[currentVersion]}
+            quotationData={quotationData}
+            previewOnly={true}
+            allowedToEdit={invoiceStep ? !allowedToEdit : allowedToEdit}
+            versionId={quotationData?.versions[currentVersion]?._id}
+            columns={columns}
+            allColumn={allColumn}
+            setShowAllVersionStatus={setShowAllVersionStatus}
+            setShowQuotationSummaryDialog={setShowQuotationSummaryDialog}
+            currentVersion={currentVersion}
+            isSendEmail={true}
+            hideSummary={true}
+            hideVersions={invoiceStep}
+          />
         </Box>
-      ) : (
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          m={1}
-          className={`flex-wrap`}
-          style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
-        >
+        {!isMobileScreen && !invoiceStep && (
           <Box display="flex">
-            <div>
-              <Button
-                onClick={() => {
-                  setShowQuotationSummaryDialog(true);
-                }}
-                variant="outlined"
-                size="small"
-                className="mx-1"
-                startIcon={<GiReceiveMoney />}
-                color="primary"
-              >
-                Summary
-              </Button>
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                color="primary"
-                size="small"
-                className={isMobile && !isTablet ? contactClass.mobile_button_layout : 'mx-1'}
-                onClick={() => {
-                  setShowAllVersionStatus(true);
-                }}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                startIcon={isMobile && !isTablet ? null : <VscVersions />}
-              >
-                {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-              </Button>
-            </div>
-          </Box>
-          {!isMobileScreen && (
-            <Box display="flex">
-              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                  <FcClock size={25} />
-                  <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-                </div>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                  <FcOk size={25} />
-                  <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-                </div>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                  <FcCancel size={25} />
-                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-                </div>
-              ) : null}
-            </Box>
-          )}
-          <Box display="flex">
-            {allowedToEdit && (
-              <div>
-                {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
-                  <Button
-                    disabled={material
-                      .filter((e) => e.parentId === null)
-                      .some(
-                        (d) =>
-                          d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                          d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                          d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                      )}
-                    onClick={() => {
-                      axiosInstance()
-                        .put(`${quotation.api}/${quotationData?._id}/send-to-customer/${quotationData?.versions[currentVersion]?._id}`)
-                        .then(() => {
-                          fetchQuotationData(currentVersion);
-                          toastConfig.setToastConfig({
-                            open: true,
-                            type: 'success',
-                            message: 'Sent to customer Sucessfully'
-                          });
-                        })
-                        .catch((error) => {
-                          toastConfig.setToastConfig(error);
-                        });
-                    }}
-                    variant="outlined"
-                    size="small"
-                    className="mx-1"
-                    color="primary"
-                  >
-                    Send to customer
-                  </Button>
-                ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                  <Button
-                    onClick={() => {
-                      setCustomerAcceptable(true);
-                    }}
-                    variant="outlined"
-                    size="small"
-                    className="mx-1"
-                    color="primary"
-                  >
-                    Accept / Reject
-                  </Button>
-                ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                  <Button
-                    onClick={() => {
-                      cloneVersion();
-                    }}
-                    variant="outlined"
-                    size="small"
-                    className="mx-1"
-                    color="primary"
-                  >
-                    {`Clone Version-${currentVersion}`}
-                  </Button>
-                ) : null}
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedProducts.length === 0}
-                >
-                  Actions
-                  <ExpandMore />
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      setIsProductEdit({ open: true, isBulkedit: true });
-                    }}
-                  >
-                    Bulk Edit
-                  </MenuItem>
-                  {/* {allowedToDelete && (
-                    <MenuItem
-                      onClick={() => {
-                        closeActions();
-                        const dataToDelete =
-                          selectedProducts &&
-                          selectedProducts
-                            .filter((e) => !e.hideSelection)
-                            .map((rec: any) => {
-                              const obj: any = {};
-                              obj.id = rec._id;
-                              obj.type = rec?.type;
-                              obj.materialId = rec?.materialId;
-                              return obj;
-                            });
-                        setDeleteData(dataToDelete);
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-                  )} */}
-                </Menu>
+            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <FcClock size={25} />
+                <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
               </div>
-            )}
+            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <FcOk size={25} />
+                <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+              </div>
+            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <FcCancel size={25} />
+                <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+              </div>
+            ) : null}
           </Box>
-          {isMobileScreen && (
-            <Box display="flex" style={{ margin: '0 auto' }}>
-              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                  <FcClock size={25} />
-                  <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
-                </div>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                  <FcOk size={25} />
-                  <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
-                </div>
-              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
-                  <FcCancel size={25} />
-                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
-                </div>
+        )}
+        <Box display="flex">
+          {allowedToEdit && (
+            <div>
+              {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                <Button
+                  disabled={material
+                    .filter((e) => e.parentId === null)
+                    .some(
+                      (d) =>
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+                        d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+                    )}
+                  onClick={handleSendToCustomer}
+                  variant="outlined"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  Send to customer
+                </Button>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+                <Button
+                  onClick={() => {
+                    setCustomerAcceptable(true);
+                  }}
+                  variant="outlined"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  Accept / Reject
+                </Button>
+              ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(quotationData?.versions[currentVersion]?.status) ? (
+                <Button
+                  onClick={() => {
+                    cloneVersion();
+                  }}
+                  variant="outlined"
+                  size="small"
+                  className="mx-1"
+                  color="primary"
+                >
+                  Create New Version
+                </Button>
               ) : null}
-            </Box>
+              {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                quotationData?.versions[currentVersion]?.status
+              ) && (
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedProducts.length === 0}
+                  >
+                    Actions
+                    <ExpandMore />
+                  </Button>
+                )}
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                getContentAnchorEl={null}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                }}
+                id="action-menu"
+                open={Boolean(anchorEl)}
+                onClose={closeActions}
+              >
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    setIsProductEdit({ open: true, isBulkedit: true });
+                  }}
+                >
+                  Bulk Edit
+                </MenuItem>
+              </Menu>
+            </div>
           )}
         </Box>
-      )}
-
+        {isMobileScreen && (
+          <Box display="flex" style={{ margin: '0 auto' }}>
+            {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
+              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <FcClock size={25} />
+                <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quote has been sent to customer</Typography>
+              </div>
+            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
+              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <FcOk size={25} />
+                <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quote has been accepted by customer</Typography>
+              </div>
+            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+              <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <FcCancel size={25} />
+                <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quote has been rejected by customer</Typography>
+              </div>
+            ) : null}
+          </Box>
+        )}
+      </Box>
       {columns && rowsData ? (
         <>
           <Box
@@ -721,9 +784,16 @@ const Quotation = ({
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
-              hideSelection={!allowedToEdit}
+              hideSelection={
+                !allowedToEdit ||
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationData?.versions[currentVersion]?.status
+                )
+              }
+              onSaveEdit={onSaveInlineEdit}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
+              material={material}
             />
           </Box>
         </>
@@ -747,6 +817,9 @@ const Quotation = ({
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);
+            if (isInlineEdit) {
+              setIsInlineEdit(false);
+            }
           }}
           isBulkedit={isProductEdit.isBulkedit}
           handleSaveData={handleSaveData}
@@ -754,6 +827,7 @@ const Quotation = ({
           rowData={recordToUpdate}
           material={material}
           selectedProducts={selectedProducts}
+          isInlineEdit={isInlineEdit}
         />
       )}
       {leadTimeDialog.open && (
@@ -771,17 +845,22 @@ const Quotation = ({
         />
       )}
       {quotationData && showAllVersionStatus && (
-        <Versions onClose={() => setShowAllVersionStatus(false)} quotationId={quotationData?._id} handleChangeVersion={handleChangeVersion} />
+        <Versions
+          onClose={() => setShowAllVersionStatus(false)}
+          quotationId={quotationData?._id}
+          handleChangeVersion={handleChangeVersion}
+          refrenceType="repairOrder"
+        />
       )}
       {customerAcceptable && (
         <ManualReponseDialog
           versionId={quotationData?.versions[currentVersion]?._id}
           quotationId={quotationData?._id}
           setCurrentStep={() => {
-            fetchQuotationData(currentVersion);
+            fetchFields();
           }}
           updateStatus={() => {
-            fetchQuotationData(currentVersion);
+            fetchFields();
           }}
           setCustomerAcceptable={setCustomerAcceptable}
         />
@@ -792,6 +871,18 @@ const Quotation = ({
           versionId={quotationData?.versions[currentVersion]?._id}
           onClose={() => {
             setShowQuotationSummaryDialog(false);
+          }}
+        />
+      )}
+      {showConfirmationDialog.open && (
+        <ConfirmationDialog
+          open={true}
+          message="Would you prefer to override the product-level price configuration?"
+          onOk={() => {
+            onConfirmSave(showConfirmationDialog.data?.inputField, showConfirmationDialog.data?.updatedData);
+          }}
+          onClose={() => {
+            setShowConfirmationDialog({ open: false, data: {} });
           }}
         />
       )}

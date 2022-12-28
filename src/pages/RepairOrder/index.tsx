@@ -23,7 +23,8 @@ import { CustomOfflineContext } from '../../StateProvider/OfflineContext/Offline
 import { FaSuitcase, SiStatuspage, FaWarehouse, GiAutoRepair, GrStatusInfo, BsFillPersonFill, GiCargoShip, FaShippingFast, RiSpaceShipFill } from "react-icons/all"
 import ManageRepairOrder from './ManageRepairOrder';
 import RepairOrderHeader from './RepairOrderHeader';
-import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
+import HtmlTooltip from "src/components/CustomTooltipTitle";
+import DeleteIcon from '@material-ui/icons/Delete';
 
 
 let repairOrderTimeout;
@@ -191,20 +192,19 @@ const RepairOrder = () => {
                     </IconButton>
                 </Tooltip>
             )}
-            <GridDeleteIcon
-                hasDeletePermission={permissions?.repairOrder?.isDelete}
-                ownerId={params.data.ownerId}
-                userId={user?.user?._id}
-                onDelete={() =>
-                    setSingleRepairOrderDelete({
-                        show: true,
-                        id: params.data._id,
-                        repairOrderNumber: `${params.data.repairOrderNumber}`
-                    })
-                }
-                entity="repair order"
-            />
-
+            {params?.data?.canDelete &&
+                <HtmlTooltip title="Delete">
+                    <IconButton size="small" aria-label="Delete" onClick={() => {
+                        setSingleRepairOrderDelete({
+                            show: true,
+                            id: params.data._id,
+                            repairOrderNumber: `${params.data.repairOrderNumber}`
+                        })
+                    }} >
+                        <DeleteIcon color="error" />
+                    </IconButton>
+                </HtmlTooltip >
+            }
         </>
     );
 
@@ -284,9 +284,10 @@ const RepairOrder = () => {
             data = response?.data?.data;
             count = response?.data?.count;
             let rows = data.map((u) => {
-                let finalObject = prepareDataForGrid(u, user);
+                let finalObject: any = prepareDataForGrid(u, user);
                 finalObject["isChecked"] = false;
                 finalObject["allowedToEdit"] = permissions?.repairOrder?.isUpdate;
+                finalObject["canDelete"] = permissions?.repairOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete
                 return finalObject;
             });
             if (appendRows) {
