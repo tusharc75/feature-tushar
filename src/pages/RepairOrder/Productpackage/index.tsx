@@ -13,7 +13,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import moment from 'moment';
-import { repairOrder, dateFormat, REPAIR_ORDER_STATUS } from '../../../constants/helpers';
+import { repairOrder, dateFormat } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
@@ -35,7 +35,6 @@ const Productpackage = ({
   allowedToEdit,
   allowedToDelete,
   setHasAssetsAdded,
-  updateOrderStatus = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -344,16 +343,10 @@ const Productpackage = ({
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
         fetchData();
-        if (updateOrderStatus && repairOrderData?.status !== REPAIR_ORDER_STATUS.inProgress) {
-          updateOrderStatus(REPAIR_ORDER_STATUS.inProgress);
-        }
         setAddingProducts(false);
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
-        if (updateOrderStatus && repairOrderData?.status !== REPAIR_ORDER_STATUS.inProgress) {
-          updateOrderStatus(REPAIR_ORDER_STATUS.inProgress);
-        }
         toastConfig.setToastConfig(error);
         setAddingProducts(false);
       });
