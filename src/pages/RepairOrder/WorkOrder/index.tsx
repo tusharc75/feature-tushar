@@ -15,7 +15,6 @@ import {
   getObjKeys,
   generateUniqueIdOnly,
   WORKORDER_SERVICE_STATUS,
-  REPAIR_ORDER_STATUS,
   WORK_ORDER_STATUS
 } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -40,7 +39,6 @@ const WorkOrder = ({
   allowedToEdit,
   allowedToDelete,
   isPostWorkService,
-  updateOrderStatus = null,
   setCurrentStep
 }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -347,9 +345,8 @@ const WorkOrder = ({
     var data: any = [];
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
-    // sort rows by prework true/false
+
     const rows = data.material?.filter((e) => e.parentId === null);
-    setPreWorkStatus(data?.material);
 
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
@@ -391,27 +388,16 @@ const WorkOrder = ({
     });
 
     if (isPostWorkService) {
-      if (data?.material?.filter((e) => e?.type === 'service' &&
-        !e?.serviceDetail?.preWork &&
-        [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status)
-      )?.length
+      if (data?.material?.filter((e) => e?.type === 'service' && !e?.serviceDetail?.preWork &&
+        [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length
       ) {
         setNextStep(false);
       } else {
         setNextStep(true);
-        if (updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.postWork) {
-          updateOrderStatus(REPAIR_ORDER_STATUS.postWork);
-        }
       }
     } else {
-      if (
-        data?.material?.filter(
-          (e) =>
-            e?.type === 'service' &&
-            e?.serviceDetail?.preWork &&
-            [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status)
-        )?.length
-      ) {
+      if (data?.material?.filter((e) => e?.type === 'service' && e?.serviceDetail?.preWork &&
+        [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
         setNextStep(false);
       } else {
         setNextStep(true);
@@ -510,14 +496,6 @@ const WorkOrder = ({
     setAnchorActionEl(null);
   };
 
-  const setPreWorkStatus = (data) => {
-    const preServiceStarted = data?.filter(
-      (obj) => obj?.type === 'service' && obj.serviceDetail.preWork && obj.status === WORKORDER_SERVICE_STATUS.inProgress
-    );
-    if (preServiceStarted.length > 0 && updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.preWork) {
-      updateOrderStatus(REPAIR_ORDER_STATUS.preWork);
-    }
-  };
 
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
     rows?.forEach((e: any) => {
