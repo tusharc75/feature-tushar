@@ -83,6 +83,7 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
 
 export const sumOnParent = (parent, child, fields) => {
     const resetFields = []
+    var currency = "USD";
     fields.forEach((element) => {
         if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
             if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
@@ -120,11 +121,13 @@ export const sumOnParent = (parent, child, fields) => {
                 row[ele.fieldName] = sumValues[ele.fieldName];
             }
             else {
-                row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / parent.length).toFixed(2));
+                //row[ele.fieldName] = parseFloat((sumValues[ele.fieldName] / (sumCount[ele.fieldName] || 1)).toFixed(2));
+                var percentValue: any = sumValues[`${ele.fieldName?.replace("Percentage", "")}_${currency.toLowerCase()}`]
+                var totalPriceValue: any = sumValues[`totalPrice_${currency.toLowerCase()}`]
+                row[ele.fieldName] = parseFloat(((percentValue * 100) / totalPriceValue).toFixed(2))
             }
         })
     })
-
     return parent;
 }
 
