@@ -126,7 +126,7 @@ const Report = () => {
             resourceFieldData.push(field);
             resourceFieldData.push({
               ...field,
-              fieldData: { ...field.fieldData, fieldLabel: 'Date', fieldName: 'date', type: 'date' }
+              fieldData: { ...field.fieldData, fieldLabel: 'Received Date', fieldName: 'date', type: 'date' }
             });
             columns.push({
               field: 'purchaseOrderDate',
