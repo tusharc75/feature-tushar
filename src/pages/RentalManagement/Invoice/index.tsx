@@ -280,7 +280,8 @@ const Invoice = ({
       } else {
         const resultMaterial = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         material = resultMaterial?.data?.data?.material;
-        inventory = resultMaterial?.data?.data?.inventory;
+        inventory = resultMaterial?.data?.data?.inventory?.filter((e) => !e.isReplaced);
+
         const resultCost = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
         additionalcost = resultCost?.data?.data;
       }
