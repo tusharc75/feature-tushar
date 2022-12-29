@@ -203,7 +203,9 @@ export const sidebarResource = {
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
-  workOrderTechnician: 'Work Order Technician'
+  workOrderTechnician: 'Work Order Technician',
+  freqentlyAskedQuestion: 'Frequently Asked Question',
+  blog: 'Blog'
 };
 
 export const resourceNames = {
@@ -274,7 +276,9 @@ export const resourceNames = {
   repairOrder: 'Repair Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
-  workOrderTechnician: 'Work Order Technician'
+  workOrderTechnician: 'Work Order Technician',
+  freqentlyAskedQuestion: 'Frequently Asked Question',
+  blog: 'Blog'
 };
 
 export const primaryFields = {
