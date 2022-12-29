@@ -186,24 +186,24 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       <CssBaseline />
       <Header toggleDrawer={handleToggleDrawer} isDrawerOpen={toggleDrawer} />
       <Drawer
-        // onClick={() => {
-        //   toggleTimeout = setTimeout(() => setToggleDrawer((prev) => !prev), 300);
-        // }}
+        onClick={() => {
+          toggleTimeout = setTimeout(() => setToggleDrawer((prev) => !prev), 300);
+        }}
         onMouseEnter={() => {
           toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
         }}
         // onClick={() => {
         //   toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
         // }}
-        // onMouseLeave={() => {
-        //   if (toggleTimeout) {
-        //     clearTimeout(toggleTimeout);
-        //   }
-        //   if (toggleDrawer)
-        //     setTimeout(() => {
-        //       setToggleDrawer(false);
-        //     }, 500);
-        // }}
+        onMouseLeave={() => {
+          if (toggleTimeout) {
+            clearTimeout(toggleTimeout);
+          }
+          if (toggleDrawer)
+            setTimeout(() => {
+              setToggleDrawer(false);
+            }, 500);
+        }}
         variant="permanent"
         className={clsx(styles.drawer, 'sidebar-drawer', {
           [classes.drawerOpen]: toggleDrawer,
