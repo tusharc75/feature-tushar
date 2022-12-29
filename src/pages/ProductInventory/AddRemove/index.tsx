@@ -49,8 +49,9 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse }) => 
     axiosInstance()
       .get(`${productInventory.api}/serial-number/${product[0]._id}?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
-        if (!data || data.length === 0) return;
-        setSerialNumbers(data);
+        if (data?.length) {
+          setSerialNumbers(data);
+        }
         setLoadingData(false);
       })
       .catch((err) => {
