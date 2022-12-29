@@ -228,7 +228,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
           ) : (
             <img className={styles.logo} src={SVG('LogoNewShort')} alt="equip logo" title="eQuipt Logo" />
           )}
-          <List className="sidebar-list">
+          <List className={`${styles.listContainer} sidebar-list`}>
             <ListItem
               button
               selected={location.pathname === '/'}
@@ -236,6 +236,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
               onClick={() => {
                 setItemToAddActiveClass(NaN);
                 setSubItemToAddActiveClass(NaN);
+                history.push('/');
               }}
             >
               {pathName === '' && (
@@ -258,9 +259,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 )}
               </ListItemIcon>
               <ListItemText
-                onClick={() => {
-                  history.push('/');
-                }}
+                onClick={() => {}}
                 primary={[user?.user?.firstName, user?.user?.lastName].filter((f) => f).join(' ')}
                 // className={`wordWrap`}
               />

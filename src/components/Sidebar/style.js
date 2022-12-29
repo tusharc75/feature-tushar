@@ -1,5 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
 const drawerWidth = 306;
+const closedDrawerWidth = 66;
 
 export default makeStyles((theme) => ({
   root: {
@@ -39,7 +40,7 @@ export default makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
     }),
-    width: '66px',
+    width: `${closedDrawerWidth}px`,
     overflow: 'hidden',
     [theme.breakpoints.down('sm')]: {
       width: 0,

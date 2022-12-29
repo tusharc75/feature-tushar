@@ -3,6 +3,10 @@
   color: #dbdbdb !important;
   border-right: 0 !important;
 
+  // List container
+  .listContainer {
+    margin-top: 6px;
+  }
   //   list Items
   .listItem {
     padding-left: 21px;
@@ -52,10 +56,11 @@
       bottom: 0;
     }
     i {
+      --height: 18px;
       position: absolute;
       width: 100%;
       background-color: #f8fffe;
-      height: 10px;
+      height: var(--height, 10px);
       left: 0;
       &::before {
         content: '';
@@ -67,15 +72,15 @@
         background-color: #163340;
       }
       &:first-of-type {
-        top: -10px;
+        top: calc(var(--height, 10px) * -1);
         &::before {
-          border-radius: 0 0 10px 0;
+          border-radius: 0 0 var(--height, 10px) 0;
         }
       }
       &:last-of-type {
-        bottom: -10px;
+        bottom: calc(var(--height, 10px) * -1);
         &::before {
-          border-radius: 0 10px 0 0;
+          border-radius: 0 var(--height, 10px) 0 0;
         }
       }
     }
