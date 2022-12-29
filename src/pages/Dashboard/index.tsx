@@ -123,6 +123,7 @@ function Dashboard() {
             ) : (
               <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
             )}
+            <Chart />
           </div>
           <div className={styles.rightContainer}>
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups" />
@@ -229,7 +230,6 @@ function Dashboard() {
           </div> */}
         </div>
       </div>
-      <Chart/>
     </Fragment>
   );
 }
