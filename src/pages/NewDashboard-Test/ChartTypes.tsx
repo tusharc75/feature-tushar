@@ -2,9 +2,10 @@ import React from 'react';
 import Chart from 'react-chartjs-2';
 import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge, IconButton } from '@material-ui/core';
 import { ImportExport, TableChart, Timeline, Maximize } from '@material-ui/icons';
-import { BsFilter } from 'react-icons/bs';
+import { BsFilter, BsFillPinFill } from 'react-icons/bs';
 import { FiMaximize2 } from 'react-icons/fi';
 import { Skeleton } from '@material-ui/lab';
+import {TbPinnedOff} from "react-icons/tb"
 
 import styles from '../KpiDashboard/dashboard.module.scss';
 import FiltersDropdown from './FiltersDropdown';
@@ -23,8 +24,10 @@ import getStaticData from './getStaticData';
 import StaticCards from './StaticCards';
 
 export interface ChartDataType extends IFormDataType {
+  _id: any;
   horizontalChart?: string;
   numberOfCards?: number;
+  pin:boolean;
 }
 interface Props {
   chart: ChartDataType;
@@ -32,9 +35,11 @@ interface Props {
   filterData: any;
   globalFilters: GlobalFiltersType;
   setSelectedChart?: (Chart: ChartDataType) => void;
+  selectedDashboardId: String;
+  fetchDashboards:any
 }
 
-const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen }: Props) => {
+const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId,fetchDashboards}: Props) => {
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
   const { setToastConfig } = React.useContext(CustomToastContext);
@@ -138,6 +143,45 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
       });
   };
 
+  const handlePin = async()=>{
+    setLoading(true);
+   try{
+    let res = await axiosInstance().put(`/dashboard-master/${selectedDashboardId}/pin/${chart?._id}`)
+    let data = res?.data
+    setToastConfig({
+      open:true,
+      type:'success',
+      message:data?.message
+    })
+    setLoading(false);
+    fetchDashboards()
+   }catch(error){
+    setLoading(false)
+    setToastConfig(error);
+
+   }
+  }
+
+
+  const handleUnpin = async()=>{
+    setLoading(true);
+  try{
+    let res = await axiosInstance().put(`/dashboard-master/${selectedDashboardId}/un-pin/${chart?._id}`)
+    let data = res?.data
+    setToastConfig({
+      open:true,
+      type:'success',
+      message:data?.message
+    })
+    setLoading(false);
+    fetchDashboards()
+  }catch(error){
+    setLoading(false)
+    setToastConfig(error);
+  }}
+
+
+
   const idsWithAdditionStatus = ['openQuotesByCustomer', 'openQuoteByRep'];
 
   return (
@@ -194,7 +238,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   <Button
                     disabled={loading}
                     color="primary"
-                    style={{ marginRight: setSelectedChart ? 16 : 0 }}
+                    style={{ marginRight: chart.pin ? 16 : 0 }}
                     onClick={() => {
                       setTableView(!tableView);
                     }}
@@ -203,6 +247,29 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   >
                     {!tableView ? 'Table' : 'Chart'} View
                   </Button>
+                )}
+
+                {!chart?.pin ? (
+                  <IconButton
+                    disabled={loading}
+                    style={{ marginRight: setSelectedChart ? 16 : 0 }}
+                    onClick={handlePin}
+                    color="primary"
+                    size="small"
+                  >
+                    
+                    <BsFillPinFill fontSize="16px" />
+                  </IconButton>
+                ) : (
+                  <IconButton
+                    disabled={loading}
+                    style={{ marginRight: setSelectedChart ? 16 : 0 }}
+                    onClick={handleUnpin}
+                    color="primary"
+                    size="small"
+                  >
+                    <TbPinnedOff fontSize="16px" />
+                  </IconButton>
                 )}
                 {setSelectedChart && (
                   <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
