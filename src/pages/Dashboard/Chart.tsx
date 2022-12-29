@@ -15,7 +15,7 @@ import { periodOption } from '../DashboardBuilder/builderHelpers';
 
 const Chart = () => {
 
-    const { state: { user: { user }, userLoading, selectedEntity } } = useData();
+    const { state: { userLoading, selectedEntity } } = useData();
     const { setToastConfig } = React.useContext(CustomToastContext);
     const [filtersOptions, setFilterOptions] = React.useState(null);
     const [charts, setCharts] = React.useState(null);
