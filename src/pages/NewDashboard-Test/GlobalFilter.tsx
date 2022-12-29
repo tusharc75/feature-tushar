@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export type GlobalFiltersType = {
-  dashboardType: string;
+  dashboardType?: string;
   currency: string;
   between: {
     from: Date;
@@ -102,7 +102,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              {dashboardList.length !== 0 && <Grid item xs={12} sm={6}>
                 <FormControl disabled={disabled} fullWidth size="small" variant="outlined">
                   <InputLabel id="dashboard-type">Dashboard</InputLabel>
                   <Select labelId="dashboard-type" id="type" value={globalFilters.dashboardType} onChange={handleSelectDashboard}>
@@ -113,7 +113,7 @@ const GlobalFilter = ({ globalFilters, setGlobalFilters, dashboardList, disabled
                     ))}
                   </Select>
                 </FormControl>
-              </Grid>
+              </Grid>}
               <Grid item xs={12} sm={6}>
                 <FormTypes
                   disabled={disabled}

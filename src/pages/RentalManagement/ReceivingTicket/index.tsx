@@ -940,7 +940,7 @@ const ReceivingTicket = ({
         ele.assets = selectedRecords?.filter((e) => e?.receivingTicketId === receivingTicketId && e?.type === "Asset")?.map((e) => e?._id);
         data.push(ele);
       })
-      axiosInstance().put(`${deliveryTicket.api}/remove-tickets-items`, data).then(({ data: { data } }) => {
+      axiosInstance().put(`${deliveryTicket.api}/revert-partially`, data).then(({ data: { data } }) => {
         fetchRecords();
         toastConfig.setToastConfig({
           open: true,

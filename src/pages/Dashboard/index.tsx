@@ -16,6 +16,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import { HiArrowRight } from 'react-icons/hi';
 import { groupByKey, assignIconAndText } from './helpers';
+import Chart from './Chart';
 
 function Dashboard() {
   const history = useHistory();
@@ -228,6 +229,7 @@ function Dashboard() {
           </div> */}
         </div>
       </div>
+      <Chart/>
     </Fragment>
   );
 }
