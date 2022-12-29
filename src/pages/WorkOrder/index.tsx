@@ -121,6 +121,7 @@ const WorkOrder = () => {
           ...prepareDataForGrid(u, user)
         };
         res["isChecked"] = false;
+        res['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete;
         return res;
       });
       if (appendRows) {
@@ -173,7 +174,7 @@ const WorkOrder = () => {
           </IconButton>
         </Tooltip>
       )} */}
-      {permissions?.workOrder?.isDelete && !params?.data?.deleted &&
+      {params?.data?.canDelete && !params?.data?.deleted &&
         <HtmlTooltip title="Delete">
           <IconButton size="small" aria-label="Delete" onClick={() => {
             setDeleteRecord(params.data);
@@ -399,7 +400,11 @@ const WorkOrder = () => {
                   disabled={permissions?.workOrder?.isDelete
                     && selectedRecords?.filter((e) => !e.deleted)?.length === selectedRecords?.length ? false : true}
                   onClick={() => {
-                    setIsConformDialogVisible(true)
+                    if (selectedRecords.find((d) => d.canDelete === false)) {
+                      setShowDeleteWarningConfirmBox(true);
+                    } else {
+                      setIsConformDialogVisible(true);
+                    }
                     closeActions()
                   }}>Delete</MenuItem>
               </Menu>
