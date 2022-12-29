@@ -30,6 +30,9 @@ import routes from '../Helpers/Routes';
 import { IoPeopleOutline } from 'react-icons/io5';
 import { BiCart, BiCog } from 'react-icons/bi';
 import { RiSuitcaseLine } from 'react-icons/ri';
+import { SVG } from 'src/assets';
+
+import styles from './sidebar.module.scss';
 
 function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
@@ -45,58 +48,59 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
+  const pathName = pathnames.join('');
 
   const renderIcon = (sectionName: string) => {
-    let icon = <FaReact size={16} className="sidebar-icon" />;
+    let icon = <FaReact size={20} className={styles.sidebarIcon} />;
     switch (sectionName) {
       case 'Brand Admin':
-        icon = <FaRegUserCircle size={15} className="sidebar-icon" />;
+        icon = <FaRegUserCircle size={20} className={styles.sidebarIcon} />;
         break;
       case 'Master Data':
-        icon = <AiOutlineDatabase size={15} className="sidebar-icon" />;
+        icon = <AiOutlineDatabase size={20} className={styles.sidebarIcon} />;
         break;
       case 'Product Setup':
-        icon = <ProductSetup size={15} className="sidebar-icon" />;
+        icon = <ProductSetup size={20} className={styles.sidebarIcon} />;
         break;
       case 'Admin Portal':
-        icon = <RiShieldUserLine size={15} className="sidebar-icon" />;
+        icon = <RiShieldUserLine size={20} className={styles.sidebarIcon} />;
         break;
       case 'Accounts':
-        icon = <FaRegUser size={15} className="sidebar-icon" />;
+        icon = <FaRegUser size={20} className={styles.sidebarIcon} />;
         break;
       case 'CRM +':
-        icon = <SiCivicrm size={15} className="sidebar-icon" />;
+        icon = <SiCivicrm size={20} className={styles.sidebarIcon} />;
         break;
       case 'ROM':
-        icon = <FaRegRegistered size={15} className="sidebar-icon" />;
+        icon = <FaRegRegistered size={20} className={styles.sidebarIcon} />;
         break;
       case 'Sales Management':
-        icon = <SiCivicrm size={15} className="sidebar-icon" />;
+        icon = <SiCivicrm size={20} className={styles.sidebarIcon} />;
         break;
       case 'Rental Management':
-        icon = <FaRegRegistered size={15} className="sidebar-icon" />;
+        icon = <FaRegRegistered size={20} className={styles.sidebarIcon} />;
         break;
       case 'Inventory Management':
-        icon = <RiSuitcaseLine size={15} className="sidebar-icon" />;
+        icon = <RiSuitcaseLine size={20} className={styles.sidebarIcon} />;
         break;
       case 'eCommerce':
-        icon = <BiCart size={16} className="sidebar-icon" />;
+        icon = <BiCart size={20} className={styles.sidebarIcon} />;
         break;
       case 'Repair & Maintenance Management':
-        icon = <ProductSetup size={15} className="sidebar-icon" />;
+        icon = <ProductSetup size={20} className={styles.sidebarIcon} />;
         break;
       case 'Service Management':
-        icon = <FaRegUser size={15} className="sidebar-icon" />;
+        icon = <FaRegUser size={20} className={styles.sidebarIcon} />;
         break;
       case 'Setups':
-        icon = <BiCog size={16} className="sidebar-icon" />;
+        icon = <BiCog size={20} className={styles.sidebarIcon} />;
         break;
       case 'Activities':
-        icon = <IoPeopleOutline size={16} className="sidebar-icon" />;
+        icon = <IoPeopleOutline size={20} className={styles.sidebarIcon} />;
         break;
 
       default:
-        icon = <FaReact size={16} className="sidebar-icon" />;
+        icon = <FaReact size={20} className={styles.sidebarIcon} />;
         break;
     }
     return icon;
@@ -180,32 +184,35 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   return (
     <div>
       <CssBaseline />
-      <Header toggleDrawer={handleToggleDrawer} />
+      <Header toggleDrawer={handleToggleDrawer} isDrawerOpen={toggleDrawer} />
       <Drawer
+        // onClick={() => {
+        //   toggleTimeout = setTimeout(() => setToggleDrawer((prev) => !prev), 300);
+        // }}
         onMouseEnter={() => {
           toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
         }}
-        onClick={() => {
-          toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
-        }}
-        onMouseLeave={() => {
-          if (toggleTimeout) {
-            clearTimeout(toggleTimeout);
-          }
-          if (toggleDrawer)
-            setTimeout(() => {
-              setToggleDrawer(false);
-            }, 500);
-        }}
+        // onClick={() => {
+        //   toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
+        // }}
+        // onMouseLeave={() => {
+        //   if (toggleTimeout) {
+        //     clearTimeout(toggleTimeout);
+        //   }
+        //   if (toggleDrawer)
+        //     setTimeout(() => {
+        //       setToggleDrawer(false);
+        //     }, 500);
+        // }}
         variant="permanent"
-        className={clsx(classes.drawer, 'sidebar-drawer', {
+        className={clsx(styles.drawer, 'sidebar-drawer', {
           [classes.drawerOpen]: toggleDrawer,
           [classes.drawerClose]: !toggleDrawer,
           'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
           'sidebar-overflow-auto': toggleDrawer && tour.stepIndex !== 1
         })}
         classes={{
-          paper: clsx({
+          paper: clsx(styles.drawer, {
             [classes.drawerOpen]: toggleDrawer,
             [classes.drawerClose]: !toggleDrawer,
             'sidebar-overflow-hide': !toggleDrawer && tour.stepIndex !== 1,
@@ -216,26 +223,38 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       >
         <Toolbar />
         <div id="sidebarOrDrawer">
+          {toggleDrawer ? (
+            <img className={styles.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
+          ) : (
+            <img className={styles.logo} src={SVG('LogoNewShort')} alt="equip logo" title="eQuipt Logo" />
+          )}
           <List className="sidebar-list">
             <ListItem
               button
               selected={location.pathname === '/'}
-              className="list-item"
+              className={`${styles.listItem} ${pathName === '' ? styles.activeList : ''}`}
               onClick={() => {
                 setItemToAddActiveClass(NaN);
                 setSubItemToAddActiveClass(NaN);
               }}
             >
-              <ListItemIcon>
+              {pathName === '' && (
+                <>
+                  <i />
+                  <i />
+                </>
+              )}
+              <ListItemIcon className={`${styles.listIcon} hi`}>
                 {toggleDrawer ? (
                   <FaRegUserCircle
-                    className="sidebar-icon"
+                    className={styles.sidebarIcon}
+                    size={20}
                     onClick={() => {
                       history.push('/');
                     }}
                   />
                 ) : (
-                  <ChevronRight className="sidebar-icon open_sidebar" />
+                  <ChevronRight className={styles.sidebarIcon} />
                 )}
               </ListItemIcon>
               <ListItemText
@@ -255,9 +274,19 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 }}
               >
                 <Tooltip title={!toggleDrawer ? 'Dashboards' : ''}>
-                  <ListItem button selected={location.pathname === '/dashboards'} className="list-item">
-                    <ListItemIcon>
-                      <MdOutlineDashboard size={15} className="sidebar-icon" />
+                  <ListItem
+                    button
+                    selected={location.pathname === '/dashboards'}
+                    className={`${styles.listItem} ${pathName === 'dashboards' && styles.activeList}`}
+                  >
+                    {pathName === 'dashboards' && (
+                      <>
+                        <i />
+                        <i />
+                      </>
+                    )}
+                    <ListItemIcon className={styles.listIcon}>
+                      <MdOutlineDashboard size={20} className={styles.sidebarIcon} />
                     </ListItemIcon>
                     <ListItemText primary="Dashboards" className={`wordWrap`} />
                   </ListItem>
@@ -273,9 +302,19 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 }}
               >
                 <Tooltip title={!toggleDrawer ? 'Reports' : ''}>
-                  <ListItem button selected={location.pathname === '/reports'} className="list-item">
-                    <ListItemIcon>
-                      <AiOutlineFileText size={16} className="sidebar-icon" />
+                  <ListItem
+                    button
+                    selected={location.pathname === '/reports'}
+                    className={`${styles.listItem} ${pathName === 'reports' && styles.activeList}`}
+                  >
+                    {pathName === 'reports' && (
+                      <>
+                        <i />
+                        <i />
+                      </>
+                    )}
+                    <ListItemIcon className={styles.listIcon}>
+                      <AiOutlineFileText size={20} className={styles.sidebarIcon} />
                     </ListItemIcon>
                     <ListItemText primary="Reports" className={`wordWrap`} />
                   </ListItem>
@@ -287,7 +326,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                 <React.Fragment key={i}>
                   <Tooltip title={!toggleDrawer ? listItem.section : ''}>
                     <ListItem
-                      className={`list-item dropdown-items ${itemToAddActiveClass == i ? 'active_element' : ''}`}
+                      className={`${styles.listItem} dropdown-items ${itemToAddActiveClass == i ? 'active_element' : ''}`}
                       button
                       key={listItem.section + '' + i}
                       onClick={() => {
@@ -297,13 +336,13 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                         }
                       }}
                     >
-                      <ListItemIcon>{renderIcon(listItem.section)}</ListItemIcon>
+                      <ListItemIcon className={styles.listIcon}>{renderIcon(listItem.section)}</ListItemIcon>
                       <ListItemText primary={listItem.section} className={`wordWrap`} />
                       {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
                   </Tooltip>
                   <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding className="list-item">
+                    <List component="div" disablePadding className={styles.listItem}>
                       {listItem.items.map((item, j) => (
                         <Link
                           className={`sub-list ${itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''}`}
@@ -328,8 +367,8 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         {!isOffline && (
           <List style={{ bottom: '0px', marginTop: 'auto' }}>
             <ListItem button onClick={() => setChatOpen((prevState) => !prevState)}>
-              <ListItemIcon style={{ color: 'white' }}>
-                <BsChatLeftTextFill size={16} className="sidebar-icon chat-icon" />
+              <ListItemIcon className={styles.listIcon}>
+                <BsChatLeftTextFill size={20} className={styles.sidebarIcon} />
               </ListItemIcon>
               <ListItemText primary="Chat" />
             </ListItem>
