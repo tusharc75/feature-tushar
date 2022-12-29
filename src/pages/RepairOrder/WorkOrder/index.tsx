@@ -15,7 +15,7 @@ import {
   getObjKeys,
   generateUniqueIdOnly,
   WORKORDER_SERVICE_STATUS,
-  REPAIR_ORDER_STATUS
+  WORK_ORDER_STATUS
 } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -39,7 +39,6 @@ const WorkOrder = ({
   allowedToEdit,
   allowedToDelete,
   isPostWorkService,
-  updateOrderStatus = null,
   setCurrentStep
 }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -348,9 +347,8 @@ const WorkOrder = ({
     var data: any = [];
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/work-order/service`);
     data = response?.data?.data;
-    // sort rows by prework true/false
+
     const rows = data.material?.filter((e) => e.parentId === null);
-    setPreWorkStatus(data?.material);
 
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
@@ -385,6 +383,11 @@ const WorkOrder = ({
           : parent.packageDetail?.status
       }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
+      parent.hideSelection = false;
+      if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+        parent.hideSelection = true;
+        parent.serviceStatus = parent?.workOrder?.status;
+      }
       parent.subRows = generateNestedData(data.material, parent);
     });
 
@@ -400,9 +403,6 @@ const WorkOrder = ({
         setNextStep(false);
       } else {
         setNextStep(true);
-        if (updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.postWork) {
-          updateOrderStatus(REPAIR_ORDER_STATUS.postWork);
-        }
       }
     } else {
       if (
@@ -453,6 +453,7 @@ const WorkOrder = ({
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
       _subRow.isValid = true;
+      _subRow.hideSelection = false;
       if (_subRow?.status === WORKORDER_SERVICE_STATUS.completed) {
         _subRow.hideSelection = true;
       }
@@ -464,7 +465,7 @@ const WorkOrder = ({
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return sortBy(
-      subRows.filter((e) => e.type !== 'product'),
+      subRows?.filter((e) => e.type !== 'product'),
       ['type']
     );
   };
@@ -504,21 +505,13 @@ const WorkOrder = ({
         });
     }
   };
+
   const openActions = (event) => {
     setAnchorActionEl(event.currentTarget);
   };
 
   const closeActions = () => {
     setAnchorActionEl(null);
-  };
-
-  const setPreWorkStatus = (data) => {
-    const preServiceStarted = data?.filter(
-      (obj) => obj?.type === 'service' && obj.serviceDetail.preWork && obj.status === WORKORDER_SERVICE_STATUS.inProgress
-    );
-    if (preServiceStarted.length > 0 && updateOrderStatus && repairOrderData.status !== REPAIR_ORDER_STATUS.preWork) {
-      updateOrderStatus(REPAIR_ORDER_STATUS.preWork);
-    }
   };
 
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
@@ -554,7 +547,7 @@ const WorkOrder = ({
                 size="small"
                 onClick={openActions}
                 aria-controls="action-menu"
-                disabled={selectedProducts.length === 0}
+                disabled={selectedProducts?.length === 0}
               >
                 Actions <ExpandMore />
               </Button>
@@ -592,7 +585,9 @@ const WorkOrder = ({
                     setArrangeView(true);
                   }}
                   disabled={
-                    selectedServices?.length && selectedServices?.every((d) => d.workOrder?._id === selectedServices[0].workOrder?._id) ? false : true
+                    selectedProducts?.length && selectedProducts?.every((d) => d.workOrder?._id === selectedServices[0]?.workOrder?._id)
+                      ? false
+                      : true
                   }
                 >
                   Arrange Services
@@ -604,7 +599,7 @@ const WorkOrder = ({
                     closeActions();
                   }}
                   disabled={
-                    selectedServices?.length
+                    selectedProducts?.filter((e) => e.type === 'service').length
                       ? selectedServices?.filter(
                           (d) =>
                             d.type === 'service' &&
@@ -651,9 +646,10 @@ const WorkOrder = ({
                 columns={columns}
                 data={rowsData}
                 onSelect={(data) => {
-                  setSelectedServices(data?.filter((d) => d.type === 'service') || []);
-                  setSelectedAssets(data?.filter((d) => d.type === 'serializedAsset') || []);
-                  setSelectedProducts(data);
+                  console.log(data);
+                  setSelectedServices(data?.filter((d) => d.type === 'service' && !d.hideSelection) || []);
+                  setSelectedAssets(data?.filter((d) => d.type === 'serializedAsset' && !d.hideSelection) || []);
+                  setSelectedProducts(data?.filter((d) => !d.hideSelection) || []);
                 }}
                 childrenProperty="subRows"
                 uniqueKey="_id"
@@ -682,7 +678,7 @@ const WorkOrder = ({
           {userAssignDialog && (
             <AssignUserDialog
               workOrderData={selectedProducts
-                .filter((e) => !e?.hideSelection && e.type === 'service')
+                .filter((e) => e.type === 'service')
                 .map((d) => {
                   return {
                     uniqueId: d?.uniqueId,
@@ -721,7 +717,7 @@ const WorkOrder = ({
               }
               title={'Arrange Services'}
               handleClose={() => setArrangeView(false)}
-              handleSubmit={(data) => handleArrangeUpdate(data, selectedServices[0].workOrder?._id)}
+              handleSubmit={(data) => handleArrangeUpdate(data, selectedServices[0]?.workOrder?._id)}
               loading={false}
             />
           )}

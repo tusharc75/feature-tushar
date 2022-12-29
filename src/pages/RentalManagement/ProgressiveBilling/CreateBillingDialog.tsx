@@ -9,7 +9,7 @@ import { fetch_rental_product_fields } from 'src/components/RentalManagment/help
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
-import { CustomDialogTransition, dateFormat, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -270,7 +270,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
     data = response?.data?.data;
 
-    const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`);
+    const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     invoicedProducts = invoiceResponse?.data?.data?.material;
     additionalCost = invoiceResponse?.data?.data?.additionalCost;
 
@@ -279,6 +279,17 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     if (additionalCost?.length > 0) {
       additionalCostData = additionalCostData.filter(d => !additionalCost?.some(obj => obj._id === d._id))
     }
+    const result = await axiosInstance().get(
+      `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`
+    );
+    const returnTicketProducts = {};
+    result?.data?.data?.forEach((element) => {
+      if (element.ticketType === DELIVERY_TICKET_TYPE.return && element?.products && element?.products?.length) {
+        element?.products?.forEach((ele) => {
+          returnTicketProducts[ele?.product] = ele?.qty;
+        });
+      }
+    });
 
     let newMaterial: any = []
     data?.material?.forEach((d) => {
@@ -287,6 +298,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       }
       if (d?.type === "package" && d?.packageDetail?.packageType === "Service" && d?.parentId === null && !d?.actualStartDate) {
         d["actualStartDate"] = d?.estimateStartDate
+      }
+      if (returnTicketProducts[d?.materialId] > 0) {
+        let values = { qty: d?.qty - returnTicketProducts[d?.materialId] };
+        returnTicketProducts[d?.materialId] = returnTicketProducts[d?.materialId] - d?.qty
+        const calValues = autoCalculateSpecificFields(values, { ...d, ...values }, allFields);
+        Object.assign(d, calValues);
       }
     })
 
@@ -431,13 +448,17 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
     let tempValues = { actualEndDate: endDate };
 
-    const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date`);
+    const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
     let rows: any = [];
     selectedProducts.forEach((element) => {
 
-      if (element.type !== "additionalCost") {
+      if (element.type === "additionalCost") {
+        element.isAppliedBill = true
+        rows.push(element);
+      }
+      else {
         element.invalidDate = false;
 
         const product = invoicedProducts?.material?.find((p) => p._id === element._id);
@@ -456,7 +477,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             element.invalidDate = false;
           }
         }
+
         let priceFieldName = Object.keys(element).find(d => d.includes("price_"))
+
         let calValues: any
         let values = JSON.parse(JSON.stringify(tempValues))
         if (element.pricingMethod === "Per Week") {
@@ -478,12 +501,9 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         else {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         }
-        element.isAppliedBill = true // row color
+        element.isAppliedBill = true
         rows.push({ ...element, ...calValues });
-      }
-      else {
-        element.isAppliedBill = true // row color
-        rows.push(element);
+
       }
     });
 

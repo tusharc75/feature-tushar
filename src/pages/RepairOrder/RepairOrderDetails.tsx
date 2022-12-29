@@ -563,7 +563,7 @@ const RepairOrderDetails = () => {
                         : allowedToEdit
                     }
                     allowedToDelete={allowedToDelete}
-                    updateOrderStatus={updateOrderStatus}
+                    // updateOrderStatus={updateOrderStatus}
                   />
                 )}
                 {(repairOrderProcessSteps[currentStep] === 'Work Order' || repairOrderProcessSteps[currentStep] === 'Post Work Service') &&
@@ -584,7 +584,7 @@ const RepairOrderDetails = () => {
                       }
                       allowedToDelete={allowedToDelete}
                       isPostWorkService={Boolean(currentStep === 3)}
-                      updateOrderStatus={updateOrderStatus}
+                      // updateOrderStatus={updateOrderStatus}
                       setCurrentStep={setCurrentStep}
                     />
                   )}

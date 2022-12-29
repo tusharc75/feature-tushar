@@ -84,7 +84,6 @@ const Productpackage = ({
 
   const { isOffline } = useContext(CustomOfflineContext);
 
-  console.log(columns);
 
   useEffect(() => {
     fetchFields();
@@ -369,7 +368,7 @@ const Productpackage = ({
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
       data = response?.data?.data;
       setMaterial(JSON.parse(JSON.stringify(data.material)));
-      inventory = data.inventory;
+      inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
     }
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== 'service');

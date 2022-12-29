@@ -366,7 +366,7 @@ const FormTypes = (props) => {
     return label ? (label.length > 35 ? label.substr(0, 35) + '...' : label) : '';
   };
 
-  const handleUploadFile = (ev) => {
+  const handleUploadFile = (ev, isMultiple = false) => {
     if (ev.target.files && ev.target.files.length) {
       let files = ev.target.files;
       // const file = ev.target.files[0];
@@ -381,7 +381,7 @@ const FormTypes = (props) => {
           });
           break;
         }
-        getFileUrl(file);
+        getFileUrl(file, isMultiple);
       }
       ev.target.value = '';
     }
@@ -447,7 +447,7 @@ const FormTypes = (props) => {
   };
 
   // for private upload
-  const getFileUrl = (file) => {
+  const getFileUrl = (file, isMultiple = false) => {
     setFileUploadProgress(0);
     let formData = new FormData();
     formData.append('file', file);
@@ -477,7 +477,13 @@ const FormTypes = (props) => {
         if (uploadFileUrl) {
           onAppendData(data);
         } else {
-          setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
+          if (isMultiple) {
+            let currentData = values[name] ? values[name] : []
+            setFieldValue(name, [...currentData, usePublicUrlforFileUpload ? data.fileUrl : data.fileName]);
+          }
+          else {
+            setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
+          }
         }
         setFileUploading(false);
       })
@@ -1894,6 +1900,120 @@ const FormTypes = (props) => {
             ) : null}
           </>
         )}
+      </Box>
+    </Fragment>
+  ) : type === 'multiFileUpload' ? (
+    <Fragment>
+      <Box display="flex" alignItems="center">
+        <Grid container spacing={1} alignItems="center">
+          <Grid item xs={12} sm={12} md={12}>
+            {/* <Typography color="textSecondary">{label}</Typography> */}
+            {isTooltip && Boolean(tooltipMessage) && (
+              <IconButton size="small">
+                <HtmlTooltip title={tooltipMessage}>
+                  <InfoIcon color="disabled" />
+                </HtmlTooltip>
+              </IconButton>
+            )}
+            <Box mr={1} />
+            <input
+              disabled={isFileUploading || !canEdit}
+              id={name}
+              name={name}
+              onChange={(e) => handleUploadFile(e, true)}
+              style={{ display: 'none' }}
+              onClick={(e: any) => (e.target.value = null)}
+              type="file"
+              accept={accept || documentUploadSupportExtensions}
+              multiple={true}
+            />
+            <label htmlFor={name}>
+              <Button
+                disabled={isFileUploading || !canEdit}
+                variant="contained"
+                color="primary"
+                size="small"
+                component="span"
+                startIcon={isFileUploading && <CircularProgress size={15} />}
+              >
+                {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
+              </Button>
+            </label>
+            {showErrorMessage ? (
+              <>
+                <Box ml={1} />
+                <Box flex="1" className="text-truncate">
+                  <Typography variant="body2" className="text-truncate" color={'error'}>
+                    {touched[name] && Boolean(errors[name]) ? errors[name] || 'No file choosen' : null}
+                  </Typography>
+                </Box>
+              </>
+            ) : null}
+          </Grid>
+          {doNotShowUploadedFile ? null : (
+            values[name] ? <>
+              {values[name].map((item, i) => (
+                <>
+                  <Grid item xs={10} sm={10} md={10}>
+                    <Box ml={1} />
+                    <Box flex="1" className="text-truncate">
+                      <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
+                        {item}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={2} sm={2} md={2}>
+                    <IconButton
+                      disabled={Boolean(!values[name])}
+                      title="Remove File"
+                      size="small"
+                      aria-label="delete picture"
+                      component="span"
+                      onClick={() => {
+                        setFieldValue(name, values[name].filter(d => d !== item))
+                      }}
+                    >
+                      <DeleteIcon color="error" />
+                    </IconButton>
+                  </Grid>
+                </>
+              ))}
+
+              {isFileUploading &&
+                <Grid item xs={10} sm={10} md={10}>
+                  <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
+                    {`Uploading... ${fileUploadProgress}%`}
+                  </Typography>
+                </Grid>}
+            </>
+              : <>
+                <Box ml={1} />
+                <Box flex="1" className="text-truncate">
+                  <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
+                    {isFileUploading
+                      ? `Uploading... ${fileUploadProgress}%`
+                      : values[name]
+                        ? values[name]
+                        : touched[name] && Boolean(errors[name])
+                          ? errors[name]
+                          : 'No file choosen'}
+                  </Typography>
+                </Box>
+                {values[name] ? (
+                  <IconButton
+                    disabled={Boolean(!values[name])}
+                    title="Remove File"
+                    size="small"
+                    aria-label="delete picture"
+                    component="span"
+                    onClick={() => setFieldValue(name, '')}
+                  >
+                    <DeleteIcon color="error" />
+                  </IconButton>
+                ) : null}
+              </>
+          )}
+        </Grid>
       </Box>
     </Fragment>
   ) : type === 'url' ? (

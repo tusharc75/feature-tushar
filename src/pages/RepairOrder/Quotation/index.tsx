@@ -32,6 +32,7 @@ import { FcCancel, FcClock, FcOk, GiReceiveMoney, VscVersions } from 'react-icon
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import SendEmail from 'src/pages/RentalManagement/Quotation/SendEmail';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 
 const Quotation = ({
   repairOrderData,
@@ -76,6 +77,8 @@ const Quotation = ({
   const [quotationData, setQuotationData] = useState(null);
   const [currentVersion, setCurrentVersion] = useState(null);
   const [allColumn, setAllColumn] = useState([]);
+  const [isInlineEdit, setIsInlineEdit] = useState(false);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     fetchFields();
@@ -213,6 +216,14 @@ const Quotation = ({
       // }
     ];
     data.forEach((element) => {
+      let isEditable = Boolean(
+        ![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+          quotationInfo?.versions[tempCurrentVersion]?.status
+        ) &&
+          !invoiceStep &&
+          allowedToEdit &&
+          element?.isColumnEditable
+      );
       if (element.type === 'date') {
         coloum.push({
           accessor: element.fieldName,
@@ -230,7 +241,8 @@ const Quotation = ({
               <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
             ) : (
               <NoDataCell />
-            )
+            ),
+          editable: isEditable
         });
       } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
         if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
@@ -240,7 +252,8 @@ const Quotation = ({
             coloum.push({
               accessor: fieldName,
               Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
+              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />),
+              editable: isEditable
             });
           });
         } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
@@ -256,7 +269,8 @@ const Quotation = ({
                     <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                   ) : (
                     <NoDataCell />
-                  )
+                  ),
+                editable: isEditable
               });
             });
           });
@@ -272,7 +286,8 @@ const Quotation = ({
                   <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                 ) : (
                   <NoDataCell />
-                )
+                ),
+              editable: isEditable
             });
           });
         }
@@ -290,11 +305,23 @@ const Quotation = ({
               <p>{row.original[element.fieldName]}</p>
             ) : (
               <NoDataCell />
-            )
+            ),
+          editable: isEditable
         });
       }
     });
-
+    coloum.push({
+      accessor: 'action',
+      Header: '',
+      minWidth: 50,
+      width: 50,
+      sticky: 'right',
+      disableFilters: true,
+      canDrag: false,
+      Cell: ({ row }) => {
+        return <></>;
+      }
+    });
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
@@ -328,6 +355,13 @@ const Quotation = ({
     data = response?.data?.data;
 
     setMaterial(JSON.parse(JSON.stringify(data.material)));
+
+    data?.material?.forEach((e: any) => {
+      if (e.type === 'service') {
+        e.preWork = e?.serviceDetail?.preWork;
+      }
+    });
+
     const rows = data.material.filter((e) => e.parentId === null);
 
     rows?.forEach((parent, i) => {
@@ -365,10 +399,9 @@ const Quotation = ({
   const generateNestedData = (material, parent) => {
     var subRows: any = orderBy(
       material?.filter((e) => e.parentId === parent._id),
-      ['order'],
-      ['asc']
+      ['preWork'],
+      ['desc']
     );
-    subRows = subRows?.sort((a, b) => a?.preWork - b?.preWork);
 
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
@@ -535,6 +568,52 @@ const Quotation = ({
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const onSaveInlineEdit = (inputField, updatedData) => {
+    setIsInlineEdit(true);
+    const currency = quotationData?.currency.toLowerCase();
+    const requiredItems = [];
+    allFields.forEach(({ fieldName, required, type }) => {
+      fieldName = type === 'currencyAmount' ? `${fieldName}_${currency}` : fieldName;
+      if (required) {
+        if (isNaN(updatedData[fieldName]) && !updatedData[fieldName]) {
+          requiredItems.push(fieldName);
+        } else if (!isNaN(updatedData[fieldName]) && updatedData[fieldName] <= 0) {
+          requiredItems.push(fieldName);
+        }
+      }
+    });
+
+    if (requiredItems.length > 0) {
+      handleOpen({
+        ...updatedData,
+        detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
+      });
+    } else {
+      onConfirmSave(inputField, updatedData);
+    }
+  };
+
+  const onConfirmSave = async (inputField, updatedData) => {
+    const rowData = material.find((d) => d._id === updatedData._id);
+    if (rowData.parentId && !showConfirmationDialog.open) {
+      setShowConfirmationDialog({
+        open: true,
+        data: {
+          inputField,
+          updatedData
+        }
+      });
+    } else {
+      if (inputField.hasOwnProperty('qtyDisplay')) {
+        inputField['qty'] = inputField['qtyDisplay'];
+      }
+      let rows: any = [{ ...rowData, ...updatedData }];
+      rows = await calculateRowsField(material, inputField, allFields, updatedData);
+      handleSaveData(rows);
+      setShowConfirmationDialog({ open: false, data: {} });
+    }
   };
 
   return (
@@ -715,8 +794,10 @@ const Quotation = ({
                   quotationData?.versions[currentVersion]?.status
                 )
               }
+              onSaveEdit={onSaveInlineEdit}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
+              material={material}
             />
           </Box>
         </>
@@ -740,6 +821,9 @@ const Quotation = ({
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
             setRecordToUpdate(null);
+            if (isInlineEdit) {
+              setIsInlineEdit(false);
+            }
           }}
           isBulkedit={isProductEdit.isBulkedit}
           handleSaveData={handleSaveData}
@@ -747,6 +831,7 @@ const Quotation = ({
           rowData={recordToUpdate}
           material={material}
           selectedProducts={selectedProducts}
+          isInlineEdit={isInlineEdit}
         />
       )}
       {leadTimeDialog.open && (
@@ -790,6 +875,18 @@ const Quotation = ({
           versionId={quotationData?.versions[currentVersion]?._id}
           onClose={() => {
             setShowQuotationSummaryDialog(false);
+          }}
+        />
+      )}
+      {showConfirmationDialog.open && (
+        <ConfirmationDialog
+          open={true}
+          message="Would you prefer to override the product-level price configuration?"
+          onOk={() => {
+            onConfirmSave(showConfirmationDialog.data?.inputField, showConfirmationDialog.data?.updatedData);
+          }}
+          onClose={() => {
+            setShowConfirmationDialog({ open: false, data: {} });
           }}
         />
       )}

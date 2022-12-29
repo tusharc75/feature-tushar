@@ -4,7 +4,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
-import { quotation, QUOTATION_STATUS, REPAIR_ORDER_STATUS } from 'src/constants/helpers';
+import { quotation, QUOTATION_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCurrentStep, updateStatus, setCustomerAcceptable }) => {
@@ -36,7 +36,7 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
         .put(`${quotation.api}/status/${quotationId}/${versionId}`, dataObj)
         .then(() => {
           setSubmitting(false);
-          if(setNextStep) {
+          if (setNextStep) {
             setNextStep(options[selectedOption])
           }
           setCurrentStep((prevStep) => {

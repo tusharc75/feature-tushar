@@ -91,9 +91,7 @@ const Report = () => {
           data: { data: productOption }
         } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product`);
 
-        POFields.filter((field) =>
-          ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)
-        ).forEach((field: any) => {
+        POFields.filter((field) => ['purchaseOrderNumber', 'purchaseOrderDate', 'supplierAccount', 'warehouse'].includes(field?.fieldData.fieldName)).forEach((field: any) => {
           if (field?.fieldData.fieldName === 'purchaseOrderNumber') {
             resourceFieldData.push(field);
             columns.push({
@@ -126,6 +124,10 @@ const Report = () => {
           }
           if (field?.fieldData.fieldName === 'purchaseOrderDate') {
             resourceFieldData.push(field);
+            resourceFieldData.push({
+              ...field,
+              fieldData: { ...field.fieldData, fieldLabel: 'Received Date', fieldName: 'date', type: 'date' }
+            });
             columns.push({
               field: 'purchaseOrderDate',
               headerName: field?.fieldData?.fieldLabel,
@@ -136,32 +138,30 @@ const Report = () => {
           }
         });
 
-        productFields
-          .filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName))
-          .forEach((field: any) => {
-            if (field?.fieldData.fieldName === 'productName') {
-              resourceFieldData.push({
-                ...field,
-                fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
-              });
-              columns.push({
-                field: 'productName',
-                headerName: field?.fieldData?.fieldLabel,
-                show: true,
-                disabled: false,
-                cellRenderer: 'productRenderer'
-              });
-            }
-            if (field?.fieldData.fieldName === 'productNumber') {
-              columns.push({
-                field: 'productNumber',
-                headerName: field?.fieldData?.fieldLabel,
-                show: true,
-                disabled: false,
-                cellRenderer: 'commonRenderer'
-              });
-            }
-          });
+        productFields.filter((field) => ['productName', 'productNumber'].includes(field?.fieldData.fieldName)).forEach((field: any) => {
+          if (field?.fieldData.fieldName === 'productName') {
+            resourceFieldData.push({
+              ...field,
+              fieldData: { ...field.fieldData, fieldName: 'productId', type: 'dropDown', lookup: true, option: productOption?.Product || [] }
+            });
+            columns.push({
+              field: 'productName',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'productRenderer'
+            });
+          }
+          if (field?.fieldData.fieldName === 'productNumber') {
+            columns.push({
+              field: 'productNumber',
+              headerName: field?.fieldData?.fieldLabel,
+              show: true,
+              disabled: false,
+              cellRenderer: 'commonRenderer'
+            });
+          }
+        });
 
         POProductFields.forEach((o) => {
           let currentColumn = getColumnData('Purchase Order Product', o?.fieldData, '');
@@ -172,22 +172,23 @@ const Report = () => {
             }
           }
         });
-
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
-        tempFrameworkComponent = {
-          ...tempFrameworkComponent
-        };
-        setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
         columns = [
           ...columns,
           {
-            field: 'soldQty',
-            headerName: 'Sold Qty',
+            field: 'date',
+            headerName: 'Received/Rejected Date',
             show: true,
             disabled: false,
-            cellRenderer: 'commonRenderer'
+            cellRenderer: 'dateTimeRenderer',
+            filter: false, sortable: false
           }
         ];
+
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
+        tempFrameworkComponent = {
+          ...tempFrameworkComponent,
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent, ...customFrameworkComponents });
       }
       if (resourceCamelCase === 'inventoryEvaluation') {
         let {
@@ -620,7 +621,8 @@ const Report = () => {
     supplierRenderer: SupplierRenderer,
     actionsRenderer: ActionsRenderer,
     numberRenderer: NumberRenderer,
-    dateRenderer: DateRenderer
+    dateRenderer: DateRenderer,
+    dateTimeRenderer: DateTimeRenderer
   };
 
   const fetchResourceData = () => {
@@ -650,6 +652,17 @@ const Report = () => {
       )
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
+          if (resourceCamelCase === 'purchaseOrderDetails') {
+            if (u?.productLedger?.type === "credit") {
+              u.actualReceived = u?.productLedger?.qty
+              u.rejectQuantity = 0
+            }
+            else {
+              u.rejectQuantity = u?.productLedger?.qty
+              u.actualReceived = 0
+            }
+            u.date = u?.productLedger?.date
+          }
           let finalObject: any = prepareDataForGrid(u);
           if (finalObject?.listPrice) {
             finalObject.margin = ((finalObject?.listPrice + (finalObject?.averagePrice || 0)) / finalObject?.listPrice)?.toFixed(2);

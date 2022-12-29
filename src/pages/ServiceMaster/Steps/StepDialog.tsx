@@ -56,7 +56,7 @@ export default function StepDialog({
     const thisStep = steps?.find((e: any) => e._id == stepId);
     const options = [];
     steps?.forEach((e: any) => {
-      if (e._id !== stepId && e?.order > thisStep?.order) {
+      if (e._id !== stepId && e?.order > (thisStep?.order || -1)) {
         options.push({ optionValue: e._id, optionLabel: e.stepName });
       }
     });

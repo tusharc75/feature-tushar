@@ -10,18 +10,27 @@ import moment from 'moment';
 
 const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) => {
 
+
+  console.log(data)
+
   return (
     <Dialog
       open={open}
       TransitionComponent={CustomDialogTransition}
-      onClose={onClose}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          onClose();
+        }
+      }}
       maxWidth="sm"
       fullWidth>
       <Formik
         initialValues={data?.isAllowedStartDate && data?.isAllowedEndDate ? {
-          manualStartDate: data?.manualStartDate,
-          manualEndDate: data?.manualEndDate,
-        } : { manualStartDate: data?.manualStartDate }}
+          manualStartDate: new Date(data?.manualStartDate),
+          manualEndDate: new Date(data?.manualEndDate),
+        } :
+          data?.isAllowedStartDate ? { manualStartDate: new Date(data?.manualStartDate) } :
+            data?.isAllowedEndDate ? { manualEndDate: new Date(data?.manualEndDate) } : {}}
         onSubmit={(values) => { }}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form>
@@ -51,7 +60,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                       <FormTypes
                         size="small"
                         fullWidth
-                        minDate={values.manualStartDate}
+                        minDate={data?.minEndDate || values.manualStartDate}
                         values={values}
                         error={errors}
                         touched={touched}
@@ -80,10 +89,10 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
                 onClick={() => {
                   const newValues: any = {};
                   if (data.isAllowedStartDate) {
-                    newValues.manualStartDate = new Date(values.manualStartDate).toISOString()
+                    newValues.manualStartDate = new Date(values.manualStartDate)?.toISOString()
                   }
                   if (data.isAllowedEndDate) {
-                    newValues.manualEndDate = new Date(values.manualEndDate).toISOString()
+                    newValues.manualEndDate = new Date(values.manualEndDate)?.toISOString()
                   }
                   handleSubmit(newValues);
                 }}
