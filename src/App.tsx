@@ -159,6 +159,8 @@ import WorkOrderSupervisor from './pages/WorkOrderSupervisor';
 import WorkOrderTechnician from './pages/WorkOrderTechnician';
 import FrequentlyAskedQuestion from './pages/FrequentlyAskedQuestion';
 import FrequencyAskedQuestionDetail from './pages/FrequentlyAskedQuestion/FrequencyAskedQuestionDetail';
+import Blog from './pages/Blog';
+import BlogDetail from './pages/Blog/BlogDetail';
 
 var notificationInterval: any = null;
 
@@ -824,6 +826,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.frequentlyAskedQuestionDetail.path}/:id`}>
               <FrequencyAskedQuestionDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.blog.path}`} >
+              <Blog />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.blogDetail.path}/:id`} >
+              <BlogDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
