@@ -676,7 +676,19 @@ const routes = {
     ? storedRoutes.frequentlyAskedQuestion?.title
     : RESOURCE_LABEL.freqentlyAskedQuestion,
     path:'/frequently-asked-question/detail'
-  }
+  },
+  blog:{
+    title:storedRoutes && storedRoutes.blog && storedRoutes.blog.title
+    ? storedRoutes.blog?.title
+    : RESOURCE_LABEL.blog,
+    path:'/blog'
+  },
+  blogDetail:{
+    title:storedRoutes && storedRoutes.blog && storedRoutes.blog.title
+    ? storedRoutes.blog?.title
+    : RESOURCE_LABEL.blog,
+    path:'/blog/detail'
+  },
 };
 
 export default routes;
