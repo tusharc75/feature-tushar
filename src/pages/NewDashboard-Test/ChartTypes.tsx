@@ -146,21 +146,20 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
 
   const handlePinUnpin = async (type) => {
     setLoading(true);
-    try {
-      let res = await axiosInstance().put(`/dashboard-master/${selectedDashboardId}/pin/${chart?._id}`)
-      let data = res?.data
+    axiosInstance().put(`/dashboard-master/${selectedDashboardId}/${type}/${chart?._id}`).then(async ({ data }) => {
+      console.log(data)
       setToastConfig({
         open: true,
         type: 'success',
         message: data?.message
       })
-      setLoading(false);
       fetchDashboards()
-    } catch (error) {
-      setLoading(false)
-      setToastConfig(error);
-
-    }
+      setLoading(false);
+    })
+      .catch((err: any) => {
+        setToastConfig(err);
+        setLoading(false);
+      });
   }
 
   return (
