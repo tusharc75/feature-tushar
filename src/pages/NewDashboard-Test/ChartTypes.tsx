@@ -35,7 +35,7 @@ interface Props {
   filterData: any;
   globalFilters: GlobalFiltersType;
   setSelectedChart?: (Chart: ChartDataType) => void;
-  selectedDashboardId: String;
+  selectedDashboardId?: String;
   fetchDashboards:any
 }
 
@@ -146,38 +146,38 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
   const handlePin = async()=>{
     setLoading(true);
    try{
-    let res = await axiosInstance().put(`/dashboard-master/${selectedDashboardId}/pin/${chart?._id}`)
-    let data = res?.data
-    setToastConfig({
+      let res = await axiosInstance().put(`/dashboard-master/${selectedDashboardId}/pin/${chart?._id}`)
+      let data = res?.data
+      setToastConfig({
       open:true,
       type:'success',
       message:data?.message
-    })
-    setLoading(false);
-    fetchDashboards()
+      })
+      setLoading(false);
+      fetchDashboards()
    }catch(error){
-    setLoading(false)
-    setToastConfig(error);
+      setLoading(false)
+      setToastConfig(error);
 
-   }
+    }
   }
 
 
   const handleUnpin = async()=>{
     setLoading(true);
   try{
-    let res = await axiosInstance().put(`/dashboard-master/${selectedDashboardId}/un-pin/${chart?._id}`)
-    let data = res?.data
-    setToastConfig({
+      let res = await axiosInstance().put(`/dashboard-master/${selectedDashboardId}/un-pin/${chart?._id}`)
+      let data = res?.data
+      setToastConfig({
       open:true,
       type:'success',
       message:data?.message
-    })
-    setLoading(false);
-    fetchDashboards()
+      })
+      setLoading(false);
+      fetchDashboards()
   }catch(error){
-    setLoading(false)
-    setToastConfig(error);
+      setLoading(false)
+      setToastConfig(error);
   }}
 
 
@@ -249,7 +249,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   </Button>
                 )}
 
-                {!chart?.pin ? (
+                {selectedDashboardId ? !chart?.pin ? (
                   <IconButton
                     disabled={loading}
                     style={{ marginRight: setSelectedChart ? 16 : 0 }}
@@ -257,7 +257,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                     color="primary"
                     size="small"
                   >
-                    
+
                     <BsFillPinFill fontSize="16px" />
                   </IconButton>
                 ) : (
@@ -270,7 +270,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   >
                     <TbPinnedOff fontSize="16px" />
                   </IconButton>
-                )}
+                ) : null}
                 {setSelectedChart && (
                   <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
                     <FiMaximize2 fontSize="16px" />
