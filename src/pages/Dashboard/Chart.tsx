@@ -1,0 +1,160 @@
+import { Box, Grid, Typography } from '@material-ui/core';
+import React from 'react';
+import DateFnsUtils from '@date-io/date-fns';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import moment from 'moment';
+
+import axiosInstance from 'src/axios/axiosInstance';
+import ChartTypes from '../NewDashboard-Test/ChartTypes';
+import countriesData from 'src/constants/Country.json';
+import GlobalFilter from '../NewDashboard-Test/GlobalFilter';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import Loader from 'src/components/Loader';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import placeholder_img from 'src/assets/PerformanceTuning.png';
+import { useData } from 'src/StateProvider/Provider';
+import { ChartDataType } from '../NewDashboard-Test/ChartTypes';
+import AssetStats from '../KpiDashboard/AssetDashboard/AssetStats';
+import FullScreenChart from '../NewDashboard-Test/FullScreenChart';
+import { periodOption } from '../DashboardBuilder/builderHelpers';
+
+const Chart = () => {
+    const {
+        state: {
+            user: { user },
+            userLoading,
+            selectedEntity
+        }
+    } = useData();
+    const { setToastConfig } = React.useContext(CustomToastContext);
+    const [filtersOptions, setFilterOptions] = React.useState(null);
+    const [dashboardLoading, setDashboardLoading] = React.useState(false);
+    const [charts, setCharts] = React.useState([]);
+    const [openFullScreenChart, setOpenFullScreenChart] = React.useState(false);
+    const [selectedChart, setSelectedChart] = React.useState(null);
+    const [globalFilters, setGlobalFilters] = React.useState(() => {
+        return {
+            currency: '',
+            between: {
+                from: new Date(moment().subtract(1, 'year').calendar()),
+                to: new Date()
+            }
+        };
+    });
+
+
+    React.useEffect(() => {
+        (async () => {
+            try {
+                const {
+                    data: { data }
+                } = await axiosInstance().get(`sa-formbuilder/lookup?lookupResource=Product Category,Market Segment,Customer Account,Product,User,Warehouse`);
+                if (!data) return;
+
+                Object.keys(data).forEach((_d) => {
+                    setFilterOptions({
+                        productDescription: data['Product'],
+                        productCategory: data['Product Category'],
+                        customerAccount: data['Customer Account'].filter((c: any) =>
+                            Array.isArray(c?.entity) ? c?.entity?.findIndex((entity: any) => entity === selectedEntity) !== -1 : c?.entity === selectedEntity
+                        ),
+                        salesRep: data['User'].filter((u: any) => u?.entities?.findIndex((d: any) => d.entity === selectedEntity) !== -1),
+                        marketSegment: data['Market Segment'].filter((d) => !d.parentMarketSegment),
+                        subMarketSegment: data['Market Segment'].filter((d) => d.parentMarketSegment),
+                        warehouse: data['Warehouse'],
+                        countryBillTo: countriesData,
+                        countrySellTo: countriesData,
+                        country: countriesData,
+                        period: periodOption
+                    });
+                });
+            } catch (error) {
+                alert(JSON.stringify(error));
+            }
+        })();
+        fetchDashboards();
+    }, []);
+
+    const fetchDashboards = () => {
+        setDashboardLoading(true);
+        axiosInstance()
+            .get('/dashboard-master/pin-charts')
+            .then(({ data: { data } }) => {
+                if (data?.length) {
+                    setCharts(data);
+                }
+                setDashboardLoading(false);
+            })
+            .catch((err) => {
+                setToastConfig(err);
+                setDashboardLoading(false);
+            });
+    };
+
+    return (
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                {!userLoading ? (
+                    <React.Fragment>
+                        <GlobalFilter
+                            globalFilters={globalFilters}
+                            setGlobalFilters={setGlobalFilters}
+                            disabled={false} 
+                            dashboardList={[]}                        />
+                        <Box bgcolor="#efefef" p={1} pt={1}>
+                            {dashboardLoading ? (
+                                <Loader minHeight={'100%'} height="calc(100vh - 200px)" noLoader={false} text="Loading Dashboards..." />
+                            ) : charts.length === 0 ? (
+                                <Box
+                                    style={{ height: 'calc(100vh - 110px)', minHeight: '400px' }}
+                                    width={'100%'}
+                                    display={'flex'}
+                                    flexDirection="column"
+                                    justifyContent={'center'}
+                                    alignItems={'center'}
+                                    bgcolor={'rgba(255, 255, 255, 0.7)'}
+                                >
+                                    <img width={400} height={340} src={placeholder_img} alt="dashboard" />
+                                    <Typography color="textSecondary" variant="h5">
+                                        You don't have access to any dashboard
+                                    </Typography>
+                                </Box>
+                            ) : (
+                                <Grid container spacing={1} justifyContent="space-between" alignItems="stretch">
+                                    {charts.map((chart: ChartDataType, index: number) => (
+                                        <ChartTypes
+                                            globalFilters={globalFilters}
+                                            key={chart.chartType + ' ' + index + 1}
+                                            chart={chart}
+                                            filterData={{ ...filtersOptions }}
+                                            setSelectedChart={(currentChart: ChartDataType) => {
+                                                setSelectedChart(currentChart);
+                                                setOpenFullScreenChart(true);
+                                            }}
+                                            fetchDashboards={fetchDashboards}
+                                        />
+                                    ))}
+                                </Grid>
+                            )}
+                        </Box>
+                    </React.Fragment>
+                ) : (
+                    <Loader minHeight="100%" noLoader={false} text="Loading Data..." />
+                )}
+            {openFullScreenChart && (
+                <FullScreenChart
+                    chart={selectedChart}
+                    globalFilters={globalFilters}
+                    filterData={{ ...filtersOptions }}
+                    close={() => {
+                        setOpenFullScreenChart(false);
+                        setSelectedChart(null);
+                    }}
+                    selectedDashboardId={null}
+                    fetchDashboards={fetchDashboards}
+                />
+            )}
+        </MuiPickersUtilsProvider>
+    );
+};
+
+export default Chart;

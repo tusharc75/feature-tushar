@@ -36,7 +36,7 @@ interface Props {
   filterData: any;
   globalFilters: GlobalFiltersType;
   setSelectedChart?: (Chart: ChartDataType) => void;
-  selectedDashboardId: String;
+  selectedDashboardId?: String;
   fetchDashboards: any
 }
 
@@ -226,7 +226,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                     {!tableView ? 'Table' : 'Chart'} View
                   </Button>
                 )}
-                {!chart?.pin ? (
+                {selectedDashboardId ? !chart?.pin ? (
                   <HtmlTooltip title="Pin">
                     <IconButton
                       disabled={loading}
@@ -254,7 +254,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                       <TbPinnedOff fontSize="16px" />
                     </IconButton>
                   </HtmlTooltip>
-                )}
+                ) : null}
                 {setSelectedChart && (
                   <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
                     <FiMaximize2 fontSize="16px" />
