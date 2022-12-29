@@ -45,9 +45,11 @@ const DashbaordNew = () => {
       }
     };
   });
+  const [selectedDashboardId, setSelectedDashboardId] = React.useState(null)
 
   React.useEffect(() => {
     const selectedDashboard = dashboardList.find((d) => d.name === globalFilters?.dashboardType);
+    setSelectedDashboardId(selectedDashboard?._id)
     if (selectedDashboard) {
       setCharts(selectedDashboard?.charts || []);
     }
@@ -95,11 +97,13 @@ const DashbaordNew = () => {
           if (!savedSelected) {
             setGlobalFilters((prevState) => ({ ...prevState, dashboardType: data[0].name }));
             setCharts(data[0]?.charts);
+            setSelectedDashboardId(data[0]?._id)
           } else {
             setGlobalFilters((prevState) => ({ ...prevState, dashboardType: savedSelected }));
             const selectedDashboard = data.find((d) => d.name === savedSelected);
             if (selectedDashboard) {
               setCharts(selectedDashboard?.charts || []);
+              setSelectedDashboardId(selectedDashboard?._id)
             }
           }
           setDashboardList(data);
@@ -156,6 +160,8 @@ const DashbaordNew = () => {
                         setSelectedChart(currentChart);
                         setOpenFullScreenChart(true);
                       }}
+                      selectedDashboardId={selectedDashboardId}
+                      fetchDashboards={fetchDashboards}
                     />
                   ))}
                   {globalFilters.dashboardType?.includes('Asset') && (
@@ -180,6 +186,8 @@ const DashbaordNew = () => {
             setOpenFullScreenChart(false);
             setSelectedChart(null);
           }}
+          selectedDashboardId={selectedDashboardId}
+          fetchDashboards={fetchDashboards}
         />
       )}
     </MuiPickersUtilsProvider>
