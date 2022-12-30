@@ -27,7 +27,7 @@ const useStyles = makeStyles(() => ({
     overflowX: 'hidden',
     overflowY: 'auto',
     height: '100%',
-
+    backgroundColor: '#f8fffe',
     zIndex: 1
   }
 }));
@@ -214,7 +214,7 @@ const Layout = ({ children, width }) => {
       <Sidebar toggleDrawer={toggleDrawer} setToggleDrawer={setToggleDrawer} />
       <Toolbar />
       <Box display="flex">
-        {!mobileWidths.includes(width) && <Toolbar style={{ width: '48px' }} />}
+        {!mobileWidths.includes(width) && <Toolbar style={{ width: '66px' }} />}
         <motion.div
           animate={{ opacity: 1 }}
           initial={{ opacity: 0 }}

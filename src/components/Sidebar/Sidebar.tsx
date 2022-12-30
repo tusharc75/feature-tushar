@@ -187,23 +187,23 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
       <Header toggleDrawer={handleToggleDrawer} isDrawerOpen={toggleDrawer} />
       <Drawer
         onClick={() => {
-          toggleTimeout = setTimeout(() => setToggleDrawer((prev) => !prev), 300);
-        }}
-        onMouseEnter={() => {
           toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
         }}
         // onClick={() => {
+        //   toggleTimeout = setTimeout(() => setToggleDrawer((prev) => !prev), 300);
+        // }}
+        // onMouseEnter={() => {
         //   toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
         // }}
-        onMouseLeave={() => {
-          if (toggleTimeout) {
-            clearTimeout(toggleTimeout);
-          }
-          if (toggleDrawer)
-            setTimeout(() => {
-              setToggleDrawer(false);
-            }, 500);
-        }}
+        // onMouseLeave={() => {
+        //   if (toggleTimeout) {
+        //     clearTimeout(toggleTimeout);
+        //   }
+        //   if (toggleDrawer)
+        //     setTimeout(() => {
+        //       setToggleDrawer(false);
+        //     }, 500);
+        // }}
         variant="permanent"
         className={clsx(styles.drawer, 'sidebar-drawer', {
           [classes.drawerOpen]: toggleDrawer,
@@ -321,46 +321,58 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
               </Link>
             )}
             {user &&
-              listItems().map((listItem, i) => (
-                <React.Fragment key={i}>
-                  <Tooltip title={!toggleDrawer ? listItem.section : ''}>
-                    <ListItem
-                      className={`${styles.listItem} dropdown-items ${itemToAddActiveClass == i ? 'active_element' : ''}`}
-                      button
-                      key={listItem.section + '' + i}
-                      onClick={() => {
-                        handleCollapse(listItem.section);
-                        if (!toggleDrawer) {
-                          handleToggleDrawer();
-                        }
-                      }}
-                    >
-                      <ListItemIcon className={styles.listIcon}>{renderIcon(listItem.section)}</ListItemIcon>
-                      <ListItemText primary={listItem.section} className={`wordWrap`} />
-                      {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
-                    </ListItem>
-                  </Tooltip>
-                  <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding className={styles.listItem}>
-                      {listItem.items.map((item, j) => (
-                        <Link
-                          className={`sub-list ${itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''}`}
-                          key={j}
-                          onClick={() => {
-                            setItemToAddActiveClass(i);
-                            setSubItemToAddActiveClass(j);
-                          }}
-                          to={handleRoutes(item)}
-                        >
-                          <ListItem button selected={pathnames.includes(lowerCase(item.name))} className={classes.nested}>
-                            <ListItemText primary={item.resourceLabel || item.name} />
-                          </ListItem>
-                        </Link>
-                      ))}
-                    </List>
-                  </Collapse>
-                </React.Fragment>
-              ))}
+              listItems().map((listItem, i) => {
+                const items = listItem.items.map((item) => item.name.toLowerCase().split(' ').join('-'));
+                console.log(listItem.items);
+                return (
+                  <React.Fragment key={i}>
+                    <Tooltip title={!toggleDrawer ? listItem.section : ''}>
+                      <ListItem
+                        className={`${styles.listItem} dropdown-items ${items.includes(pathName) && styles.activeList}`}
+                        button
+                        key={listItem.section + '' + i}
+                        onClick={() => {
+                          handleCollapse(listItem.section);
+                          if (!toggleDrawer) {
+                            handleToggleDrawer();
+                          }
+                        }}
+                      >
+                        {items.includes(pathName) && (
+                          <>
+                            <i />
+                            <i />
+                          </>
+                        )}
+                        <ListItemIcon className={styles.listIcon}>{renderIcon(listItem.section)}</ListItemIcon>
+                        <ListItemText primary={listItem.section} className={`wordWrap`} />
+                        {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
+                      </ListItem>
+                    </Tooltip>
+                    <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
+                      <List component="div" disablePadding className={`${styles.subList} `}>
+                        {listItem.items.map((item, j) => (
+                          <Link
+                            className={`sub-list ${pathName.includes(item.name.toLowerCase().split(' ').join('-')) && styles.active_sub} ${
+                              itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''
+                            }`}
+                            key={j}
+                            onClick={() => {
+                              setItemToAddActiveClass(i);
+                              setSubItemToAddActiveClass(j);
+                            }}
+                            to={handleRoutes(item)}
+                          >
+                            <ListItem button selected={pathnames.includes(lowerCase(item.name))} className={classes.nested}>
+                              <ListItemText primary={item.resourceLabel || item.name} />
+                            </ListItem>
+                          </Link>
+                        ))}
+                      </List>
+                    </Collapse>
+                  </React.Fragment>
+                );
+              })}
           </List>
         </div>
         {!isOffline && (

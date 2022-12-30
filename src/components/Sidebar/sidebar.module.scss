@@ -5,7 +5,7 @@
 
   // List container
   .listContainer {
-    margin-top: 6px;
+    margin-top: 10px;
   }
   //   list Items
   .listItem {
@@ -51,7 +51,7 @@
       left: 8px;
       right: 0;
       border-radius: 100vh 0 0 100vh;
-      background-color: white;
+      background-color: #f8fffe;
       top: 0;
       bottom: 0;
     }
@@ -84,5 +84,12 @@
         }
       }
     }
+  }
+  .subList {
+    background-color: hsl(199, 49%, 22%);
+  }
+  .active_sub {
+    background-color: hsl(200deg, 49%, 29%);
+    display: block;
   }
 }
