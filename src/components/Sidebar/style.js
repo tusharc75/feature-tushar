@@ -16,7 +16,10 @@ export default makeStyles((theme) => ({
     width: drawerWidth,
     flexShrink: 0,
     whiteSpace: 'nowrap',
-    borderRight: '0 !important'
+    borderRight: '0 !important',
+    '& span': {
+      fontWeight: '500'
+    }
   },
   drawerOpen: {
     borderRight: '0 !important',
@@ -26,6 +29,9 @@ export default makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen
     }),
+    '& span': {
+      fontWeight: '500'
+    },
     '& .wordWrap': {
       '& span': {
         /* word-break: break-all, */

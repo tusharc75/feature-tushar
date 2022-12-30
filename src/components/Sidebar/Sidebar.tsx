@@ -192,18 +192,18 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         // onClick={() => {
         //   toggleTimeout = setTimeout(() => setToggleDrawer((prev) => !prev), 300);
         // }}
-        // onMouseEnter={() => {
-        //   toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
-        // }}
-        // onMouseLeave={() => {
-        //   if (toggleTimeout) {
-        //     clearTimeout(toggleTimeout);
-        //   }
-        //   if (toggleDrawer)
-        //     setTimeout(() => {
-        //       setToggleDrawer(false);
-        //     }, 500);
-        // }}
+        onMouseEnter={() => {
+          toggleTimeout = setTimeout(() => setToggleDrawer(true), 300);
+        }}
+        onMouseLeave={() => {
+          if (toggleTimeout) {
+            clearTimeout(toggleTimeout);
+          }
+          if (toggleDrawer)
+            setTimeout(() => {
+              setToggleDrawer(false);
+            }, 500);
+        }}
         variant="permanent"
         className={clsx(styles.drawer, 'sidebar-drawer', {
           [classes.drawerOpen]: toggleDrawer,
@@ -224,9 +224,9 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
         <Toolbar />
         <div id="sidebarOrDrawer">
           {toggleDrawer ? (
-            <img className={styles.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
+            <img className={styles.logo} src={SVG('LogoNew')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
           ) : (
-            <img className={styles.logo} src={SVG('LogoNewShort')} alt="equip logo" title="eQuipt Logo" />
+            <img className={styles.logo} src={SVG('LogoNewShort')} onClick={() => history.push('/')} alt="equip logo" title="eQuipt Logo" />
           )}
           <List className={`${styles.listContainer} sidebar-list`}>
             <ListItem
