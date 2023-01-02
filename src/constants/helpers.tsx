@@ -2141,6 +2141,7 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   passed: 'Passed',
   failed: 'Failed',
   skipped: 'Skipped',
+  needReperform: 'Need Reperform',
 };
 
 export const REPAIR_ORDER_TYPE = {
