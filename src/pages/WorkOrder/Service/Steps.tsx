@@ -632,22 +632,23 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                       <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
                         {stepData?.startDate &&
                           <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />}
-                        {(stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start || stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause) && (
+                        {([WORKORDER_SERVICE_STEP_STATUS.start, WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) && (
                           <Box mr={1}>
                             <Button
                               variant="outlined"
-                              color="default"
+                              color="secondary"
                               size="small"
                               disabled={!allowedToEdit}
                               onClick={(e) => {
-                                if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause) {
+                                if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
                                   handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
-                                } else {
+                                } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
                                   handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
                                 }
                               }}
                             >
-                              {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause ? 'Resume' : 'Pause'}
+                              {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause ? 'Resume' :
+                                stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? 'Pause' : 'Restart'}
                             </Button>
                           </Box>
                         )}
@@ -716,7 +717,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                           )
                         ) : null}
                         {stepData?.status
-                          && ![WORKORDER_SERVICE_STEP_STATUS.pause].includes(stepData?.status)
+                          && ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)
                           && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus)
                           && step?.fields?.length && (isMeTechnician || !isAnyTechnician) ? (
                           [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.failed]?.includes(stepData?.passFailStatus) ?
