@@ -21,7 +21,7 @@ import { periodOption } from '../DashboardBuilder/builderHelpers';
 const DashbaordNew = () => {
   const {
     state: {
-      user: { user },
+      user,
       userLoading,
       selectedEntity
     }
@@ -38,7 +38,7 @@ const DashbaordNew = () => {
 
     return {
       dashboardType: selectedDashboard,
-      currency: '',
+      currency: user?.user?.currency,
       between: {
         from: new Date(moment().subtract(1, 'year').calendar()),
         to: new Date()

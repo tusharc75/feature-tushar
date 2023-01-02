@@ -38,6 +38,7 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Productpackage from './Productpackage';
 import Quotation from './Quotation';
 import WorkOrder from './WorkOrder';
+import LoadingTicket from './LoadingTicket';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
 
@@ -148,7 +149,7 @@ const RepairOrderDetails = () => {
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
-          setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, `Invoice`]?.includes(d)));
+          setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, 'Loading Ticket', `Invoice`]?.includes(d)));
         }
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
@@ -476,6 +477,14 @@ const RepairOrderDetails = () => {
                         setQuotationVersionData={setQuotationVersionData}
                         invoiceStep={false}
                         updateOrderStatus={updateOrderStatus}
+                      />
+                    )}
+                    {repairOrderProcessSteps[currentStep] === 'Loading Ticket' && repairOrderData && (
+                      <LoadingTicket
+                        repairOrderData={repairOrderData}
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-5`}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                     {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (
