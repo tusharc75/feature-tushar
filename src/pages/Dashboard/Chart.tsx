@@ -15,7 +15,7 @@ import { periodOption } from '../DashboardBuilder/builderHelpers';
 
 const Chart = () => {
 
-    const { state: { userLoading, selectedEntity } } = useData();
+    const { state: { user, userLoading, selectedEntity } } = useData();
     const { setToastConfig } = React.useContext(CustomToastContext);
     const [filtersOptions, setFilterOptions] = React.useState(null);
     const [charts, setCharts] = React.useState(null);
@@ -23,7 +23,7 @@ const Chart = () => {
     const [selectedChart, setSelectedChart] = React.useState(null);
     const [globalFilters, setGlobalFilters] = React.useState(() => {
         return {
-            currency: '',
+            currency: user?.user?.currency || `USD`,
             between: {
                 from: new Date(moment().subtract(1, 'year').calendar()),
                 to: new Date()
@@ -76,7 +76,7 @@ const Chart = () => {
                 }
             })
             .catch((err) => {
-                setToastConfig(err);
+                //setToastConfig(err);
             });
     };
 

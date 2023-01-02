@@ -627,7 +627,6 @@ const WorkOrder = ({
                 columns={columns}
                 data={rowsData}
                 onSelect={(data) => {
-                  console.log(data)
                   setSelectedServices(data?.filter((d) => d.type === 'service' && !d.hideSelection) || []);
                   setSelectedAssets(data?.filter((d) => d.type === 'serializedAsset' && !d.hideSelection) || []);
                   setSelectedProducts(data?.filter((d) => !d.hideSelection) || []);

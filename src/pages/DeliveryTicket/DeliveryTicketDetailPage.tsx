@@ -149,32 +149,37 @@ export default function DeliveryTicketDetail(props) {
       }
       data = data.filter((fields: any) => {
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairJob) {
-          if (["transferAsset", "rentalJob", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory"].includes(fields.fieldData.fieldName)) {
+          if (["transferAsset", "rentalJob", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferAsset) {
-          if (["rentalJob", "repairJob", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory"].includes(fields.fieldData.fieldName)) {
+          if (["rentalJob", "repairJob", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.rentalJob) {
-          if (["repairJob", "transferAsset", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory"].includes(fields.fieldData.fieldName)) {
+          if (["repairJob", "transferAsset", "sublease", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.salesOrder) {
-          if (["repairJob", "transferAsset", "sublease", "productInventory", "pickupFromType", "deliveryToType", "transferInventory"].includes(fields.fieldData.fieldName)) {
+          if (["repairJob", "transferAsset", "sublease", "productInventory", "pickupFromType", "deliveryToType", "transferInventory", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.sublease) {
-          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory"].includes(fields.fieldData.fieldName)) {
+          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "transferInventory", "repairOrder"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
         if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.transferInventory) {
-          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "sublease"].includes(fields.fieldData.fieldName)) {
+          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "sublease", "repairOrder"].includes(fields.fieldData.fieldName)) {
+            return false
+          }
+        }
+        if (ticket?.type === DELIVERY_TICKET_REFRENCE_TYPE.repairOrder) {
+          if (["rentalJob", "repairJob", "transferAsset", "salesOrder", "productInventory", "pickupFromType", "deliveryToType", "sublease", "transferInventory"].includes(fields.fieldData.fieldName)) {
             return false
           }
         }
@@ -706,20 +711,22 @@ export default function DeliveryTicketDetail(props) {
                             sectionName: "Actuals"
                           }
                         },
-                        { 
+                        {
                           fieldData: {
                             type: "date",
                             fieldLabel: "Creation Date",
                             fieldName: "creationDate",
                             sectionName: "Actuals"
-                          }},
-                         { 
+                          }
+                        },
+                        {
                           fieldData: {
                             type: "date",
                             fieldLabel: "Completion Date",
                             fieldName: "completionDate",
                             sectionName: "Actuals"
-                          }}
+                          }
+                        }
                         ]} /> : null
                     )}
                   </TabPanel>

@@ -63,7 +63,7 @@ export const rentalManagementSteps = [
 export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
-export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Invoice'];
+export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -1788,7 +1788,8 @@ export const DELIVERY_TICKET_REFRENCE_TYPE = {
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory'
+  transferInventory: 'Transfer Inventory',
+  repairOrder: 'Repair Order'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
