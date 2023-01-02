@@ -2,9 +2,10 @@ import React from 'react';
 import Chart from 'react-chartjs-2';
 import { Paper, Box, Grid, useTheme, useMediaQuery, Typography, Button, Badge, IconButton } from '@material-ui/core';
 import { ImportExport, TableChart, Timeline, Maximize } from '@material-ui/icons';
-import { BsFilter } from 'react-icons/bs';
+import { BsFilter, BsFillPinFill } from 'react-icons/bs';
 import { FiMaximize2 } from 'react-icons/fi';
 import { Skeleton } from '@material-ui/lab';
+import { TbPinnedOff } from "react-icons/tb"
 
 import styles from '../KpiDashboard/dashboard.module.scss';
 import FiltersDropdown from './FiltersDropdown';
@@ -21,10 +22,13 @@ import MapView from './MapView';
 import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
 import StaticCards from './StaticCards';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 export interface ChartDataType extends IFormDataType {
+  _id: any;
   horizontalChart?: string;
   numberOfCards?: number;
+  pin: boolean;
 }
 interface Props {
   chart: ChartDataType;
@@ -32,9 +36,11 @@ interface Props {
   filterData: any;
   globalFilters: GlobalFiltersType;
   setSelectedChart?: (Chart: ChartDataType) => void;
+  selectedDashboardId?: String;
+  fetchDashboards: any
 }
 
-const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen }: Props) => {
+const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId, fetchDashboards }: Props) => {
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
   const { setToastConfig } = React.useContext(CustomToastContext);
@@ -138,7 +144,23 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
       });
   };
 
-  const idsWithAdditionStatus = ['openQuotesByCustomer', 'openQuoteByRep'];
+  const handlePinUnpin = async (type) => {
+    setLoading(true);
+    axiosInstance().put(`/dashboard-master/${selectedDashboardId}/${type}/${chart?._id}`).then(async ({ data }) => {
+      console.log(data)
+      setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
+      })
+      fetchDashboards()
+      setLoading(false);
+    })
+      .catch((err: any) => {
+        setToastConfig(err);
+        setLoading(false);
+      });
+  }
 
   return (
     <Grid item xs={12} md={fullScreen ? 12 : chart.column}>
@@ -181,7 +203,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                 {chart.hasExport && (
                   <Button
                     disabled={loading}
-                    style={{ marginRight: chart.hasTableView ? 16 : 0 }}
+                    style={{ marginRight: chart.hasTableView ? 10 : 0 }}
                     onClick={handleOpenExport}
                     color="primary"
                     size="small"
@@ -194,7 +216,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   <Button
                     disabled={loading}
                     color="primary"
-                    style={{ marginRight: setSelectedChart ? 16 : 0 }}
+                    style={{ marginRight: 10 }}
                     onClick={() => {
                       setTableView(!tableView);
                     }}
@@ -204,6 +226,35 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                     {!tableView ? 'Table' : 'Chart'} View
                   </Button>
                 )}
+                {selectedDashboardId ? !chart?.pin ? (
+                  <HtmlTooltip title="Pin">
+                    <IconButton
+                      disabled={loading}
+                      style={{ marginRight: 10 }}
+                      onClick={() => {
+                        handlePinUnpin('pin')
+                      }}
+                      color="primary"
+                      size="small"
+                    >
+                      <BsFillPinFill fontSize="16px" />
+                    </IconButton>
+                  </HtmlTooltip>
+                ) : (
+                  <HtmlTooltip title="Unpin">
+                    <IconButton
+                      disabled={loading}
+                      style={{ marginRight: 10 }}
+                      onClick={() => {
+                        handlePinUnpin('un-pin')
+                      }}
+                      color="primary"
+                      size="small"
+                    >
+                      <TbPinnedOff fontSize="16px" />
+                    </IconButton>
+                  </HtmlTooltip>
+                ) : null}
                 {setSelectedChart && (
                   <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
                     <FiMaximize2 fontSize="16px" />
