@@ -264,7 +264,7 @@ const ServiceMaster = () => {
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
             permissions={permissions?.serviceMaster}
-            module="purchase order"
+            module="service master"
             api={serviceMaster.api}
             afterImportCompleted={() => {
               fetchData();
