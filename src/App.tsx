@@ -161,6 +161,7 @@ import FrequentlyAskedQuestion from './pages/FrequentlyAskedQuestion';
 import FrequencyAskedQuestionDetail from './pages/FrequentlyAskedQuestion/FrequencyAskedQuestionDetail';
 import Blog from './pages/Blog';
 import BlogDetail from './pages/Blog/BlogDetail';
+import EcommerceHome from './pages/EcommerceHome';
 
 var notificationInterval: any = null;
 
@@ -832,6 +833,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.blogDetail.path}/:id`} >
               <BlogDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.eCommerceHome.path} >
+              <EcommerceHome />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

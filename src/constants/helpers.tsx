@@ -367,7 +367,8 @@ export const RESOURCE_LABEL = {
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
-  blog: 'Blog'
+  blog: 'Blog',
+  eCommerceHome:'e-Commerce Home'
 };
 
 export const CHILD_RESOURCE = {
