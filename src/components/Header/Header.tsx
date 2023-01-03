@@ -393,7 +393,6 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
           history.push('/');
           dispatch({ type: SET_USER, payload: null });
           dispatch({ type: SET_SELECTED_ENTITY, payload: null });
-          // localStorage.removeItem("token");
           localStorage.clear();
           history.push('/login');
         })

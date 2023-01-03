@@ -11,8 +11,6 @@ import moment from 'moment';
 const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) => {
 
 
-  console.log(data)
-
   return (
     <Dialog
       open={open}

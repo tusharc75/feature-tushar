@@ -323,7 +323,6 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
             {user &&
               listItems().map((listItem, i) => {
                 const items = listItem.items.map((item) => item.name.toLowerCase().split(' ').join('-'));
-                console.log(listItem.items);
                 return (
                   <React.Fragment key={i}>
                     <Tooltip title={!toggleDrawer ? listItem.section : ''}>

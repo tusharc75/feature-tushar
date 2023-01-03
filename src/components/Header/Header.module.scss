@@ -15,7 +15,7 @@
 }
 .moreIcons,
 .profile {
-  margin-right: 0 !important;
+  margin-right: -5px !important;
 }
 
 .showIconLayout:hover {
@@ -163,6 +163,11 @@
   .mainConainer {
     display: flex;
     padding-block: 10px;
+    // max-width: 1482px;
+    // padding-inline: 24px;
+    // margin-inline: auto;
+    // width: 100%;
+
     @media all and (max-width: 768px) {
       flex-wrap: wrap;
     }
@@ -191,6 +196,7 @@
   }
   // toggleButton
   .toggleButton {
+    margin-left: -7px;
     button {
       padding: 7px;
     }
