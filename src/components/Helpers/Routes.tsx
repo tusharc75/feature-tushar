@@ -689,6 +689,11 @@ const routes = {
     : RESOURCE_LABEL.blog,
     path:'/blog/detail'
   },
+  eCommerceHome:{
+    title:storedRoutes && storedRoutes.eCommerceHome && storedRoutes.eCommerceHome.title
+    ? storedRoutes.eCommerceHome?.title : RESOURCE_LABEL?.eCommerceHome,
+    path:'/e-commerce-home'
+  }
 };
 
 export default routes;
