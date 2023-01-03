@@ -252,7 +252,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   };
 
   const handleAddStep = (values: any) => {
-    values.fields = addStepFields?.fields;
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
       .then(({ data }) => {
