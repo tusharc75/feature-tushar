@@ -765,8 +765,8 @@ export default function StepDialog({
             setOpenFieldDialog(false);
           }}
           handleSucess={(data: any) => {
-            setOpenFieldDialog(false);
             setFields(data);
+            setOpenFieldDialog(false);
           }}
         />
       )}

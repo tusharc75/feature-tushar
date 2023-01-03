@@ -300,7 +300,7 @@ const Steps = ({ serviceId }) => {
           pageSizes={pageSizes}
           page={page}
           actionWidth={150}
-          loading={null}
+          loading={loading}
           renderedFrom={renderedFrom}
           refreshGrid={fetchStepsData}
         />
