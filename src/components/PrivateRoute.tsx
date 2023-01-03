@@ -60,7 +60,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'import-export',
         'schedule-report',
         'custom-report',
-        'frequently-asked-question'
+        'frequently-asked-question',
+        'e-commerce-home'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
