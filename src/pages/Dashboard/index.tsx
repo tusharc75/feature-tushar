@@ -89,7 +89,7 @@ function Dashboard() {
     });
     setFilteredData(filteredItems);
   };
-
+  console.log(sections);
   return (
     <Fragment>
       <div className={` ${styles.contentWrapper}`}>
