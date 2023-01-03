@@ -421,6 +421,9 @@ const WorkOrderTechnician = () => {
             setDisableCompleteFail={() => { }}
             fetchService={fetchWorkOrderTechnician}
             referencType={'workOrderTechnician'}
+            handelClose={() => {
+              setServiceDetailsShow(false);
+            }}
           />
         </Dialog>
       )}

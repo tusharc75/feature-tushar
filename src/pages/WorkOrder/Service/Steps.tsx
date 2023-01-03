@@ -156,7 +156,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '' }) => {
+const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '', handelClose = null }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -812,7 +812,12 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             serviceName={selectedService?.serviceName}
             comment={comment}
             setComment={setComment}
-            updateStatus={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed)}
+            updateStatus={() => {
+              updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed)
+              if (handelClose) {
+                handelClose()
+              }
+            }}
             handleClose={() => {
               setComment('');
               setOpenCompleteDialog(false);
