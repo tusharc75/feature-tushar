@@ -41,6 +41,9 @@ const WorkOrder = ({
   isPostWorkService,
   setCurrentStep
 }) => {
+  
+  console.log(allowedToEdit)
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -63,7 +66,7 @@ const WorkOrder = ({
   useEffect(() => {
     fetchFields();
     fetchData();
-  }, []);
+  }, [repairOrderData]);
 
   useEffect(() => {
     const assignedUsersArrays = selectedProducts?.filter((product) => product?.assignedUsers).map((product) => product?.assignedUsers);
