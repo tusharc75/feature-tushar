@@ -368,7 +368,7 @@ export const RESOURCE_LABEL = {
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
   blog: 'Blog',
-  eCommerceHome:'e-Commerce Home'
+  eCommerceHome: 'e-Commerce Home'
 };
 
 export const CHILD_RESOURCE = {
@@ -1713,6 +1713,7 @@ export const INVENTORY_STATUS = {
   returned: 'Returned',
   needRepair: 'Need Repair',
   needRecert: 'Need Recert',
+  inRepair: 'In-Repair',
   notApplied: "N/A",
 };
 
