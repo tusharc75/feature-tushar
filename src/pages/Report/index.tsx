@@ -66,8 +66,22 @@ const Report = () => {
     const {
       data: { data }
     }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`);
+
+    if (resourceStartCase === 'Serialized Asset') {
+      const {
+        data: { data: lookupResource }
+      } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+      if (lookupResource) {
+        data?.forEach((e) => {
+          if (e?.fieldData?.fieldName === 'currentOwner') {
+            e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+          }
+        });
+      }
+    }
+    const resourceColumns = [...data]
     if (resourceStartCase === 'Purchase Order') {
-      data.push({
+      resourceColumns.push({
         fieldData: {
           _id: '630dc2429ec41861052355a9',
           fieldLabel: 'Received Date',
@@ -90,19 +104,7 @@ const Report = () => {
         isUpdate: true
       });
     }
-    if (resourceStartCase === 'Serialized Asset') {
-      const {
-        data: { data: lookupResource }
-      } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
-      if (lookupResource) {
-        data?.forEach((e) => {
-          if (e?.fieldData?.fieldName === 'currentOwner') {
-            e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
-          }
-        });
-      }
-    }
-    setResourceColumns(data);
+    setResourceColumns(resourceColumns);
     setLoadingColumns(false);
     let columns = [];
     let rendererNames = [];
@@ -511,7 +513,7 @@ const Report = () => {
                       selectedRecords={[]}
                       dataRows={dataRows}
                       dispatch={dispatch}
-                      onEdit={() => {}}
+                      onEdit={() => { }}
                       extraParamsToCheckDelete={false}
                       rowCount={rowCount}
                       page={page}
@@ -526,8 +528,8 @@ const Report = () => {
                       owerCollaboratorInitialsOrImages="owerCollaboratorInitialsOrImages"
                       onCreate={false}
                       showClone={false}
-                      onDelete={(data) => {}}
-                      onClone={(data) => {}}
+                      onDelete={(data) => { }}
+                      onClone={(data) => { }}
                       renderedFrom={routes.transferAsset?.title}
                     />
                   ) : (
