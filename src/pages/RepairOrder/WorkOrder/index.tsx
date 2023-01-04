@@ -41,7 +41,7 @@ const WorkOrder = ({
   isPostWorkService,
   setCurrentStep
 }) => {
-  
+
   console.log(allowedToEdit)
 
   const toastConfig = useContext(CustomToastContext);
@@ -391,12 +391,10 @@ const WorkOrder = ({
     });
 
     if (isPostWorkService) {
-      if (data?.material?.filter((e) => e?.type === 'service' && !e?.serviceDetail?.preWork &&
-        [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length
-      ) {
-        setNextStep(false);
-      } else {
+      if (rows?.some((e) => e.serviceStatus === WORK_ORDER_STATUS.completed)) {
         setNextStep(true);
+      } else {
+        setNextStep(false);
       }
     } else {
       if (data?.material?.filter((e) => e?.type === 'service' && e?.serviceDetail?.preWork &&
