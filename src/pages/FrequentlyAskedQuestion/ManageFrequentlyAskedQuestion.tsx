@@ -15,7 +15,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
-const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id = null}) => {
+const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
     state: { user }
   }: any = useData();
@@ -24,7 +24,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
   const [loading, setLoading] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
-  const [cloneHeading,setCloneHeading] = useState('')
+  const [cloneHeading, setCloneHeading] = useState('')
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const ref = useRef(null);
 
@@ -40,32 +40,32 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
       const response = await axiosInstance().get('/field?resource=Frequently Asked Question');
       data = response?.data?.data;
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);  
- 
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
       if (id) {
         axiosInstance().get(`/frequently-asked-question/${id}`).then(({ data: { data } }) => {
-            let fields = fieldsDataForUpdate
-            let tempData = data
-            if (isClone) {
-                fields = fieldsDataForCreate
-                const { label, ...rest } = data
-                setCloneHeading(label);
-                tempData = { ...rest, label }
-            }
-            setInitialData({
-                fields: fields,
-                values: getObjKeysWithValues(tempData, fields),
-            });
+          let fields = fieldsDataForUpdate
+          let tempData = data
+          if (isClone) {
+            fields = fieldsDataForCreate
+            const { label, ...rest } = data
+            setCloneHeading(label);
+            tempData = { ...rest, label }
+          }
+          setInitialData({
+            fields: fields,
+            values: getObjKeysWithValues(tempData, fields),
+          });
         }).catch((error) => {
-            toastConfig.setToastConfig(error);
+          toastConfig.setToastConfig(error);
         });
-    }else{
-      const tempInitialData = getObjKeys('', fieldsDataForCreate);
-      setInitialData({
-        fields: fieldsDataForCreate,
-        values: tempInitialData
-      });
-    }
+      } else {
+        const tempInitialData = getObjKeys('', fieldsDataForCreate);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: tempInitialData
+        });
+      }
 
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -77,41 +77,42 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
     if (id && !isClone) {
       values._id = id
       axiosInstance().put(`/frequently-asked-question`, values).then(({ data }) => {
-          setSubmitting(false);
-          onSuccess()
-          toastConfig.setToastConfig({
-              open: true,
-              type: "success",
-              message: data.message,
-          });
+        setSubmitting(false);
+        onSuccess()
+        toastConfig.setToastConfig({
+          open: true,
+          type: "success",
+          message: data.message,
+        });
       }).catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+    } else {
+      axiosInstance()
+        .post(`/frequently-asked-question`, values)
+        .then(({ data: { data } }) => {
+          setLoading(false);
+          onSuccess(data);
+          setSubmitting(true);
+          toastConfig.setToastConfig({
+            open: true,
+            type: "success",
+            message: data.message,
+          });
+        })
+        .catch((error) => {
+          setLoading(false);
           setSubmitting(false);
           toastConfig.setToastConfig(error);
-      });
-  }else{
-    axiosInstance()
-    .post(`/frequently-asked-question`, values)
-    .then(({ data: { data } }) => {
-      setLoading(false);
-      onSuccess(data);
-      setSubmitting(true);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: 'Created Successfully'
-      });
-    })
-    .catch((error) => {
-      setLoading(false);
-      setSubmitting(false);
-    })
-  } 
+        })
+    }
   };
+
   function validate(values) {
     const errors = {};
     return errors;
   }
-
 
   return (
     <Dialog
@@ -146,13 +147,12 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
                     onClose();
                   }
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
                     : `Create Frequently Asked Question`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -160,17 +160,17 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
                 showManimizeMaximize={true}
               />
               <CustomDialogContent>
-              <Form autoComplete="off" autoCorrect="off" noValidate >
-                <InputField
-                  errors={errors}
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  touched={touched}
-                  fieldsData={initialData.fields}
-                  size="small"
-                  fullWidth
-                />
-              </Form>
+                <Form autoComplete="off" autoCorrect="off" noValidate >
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
+                </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
                 <Button

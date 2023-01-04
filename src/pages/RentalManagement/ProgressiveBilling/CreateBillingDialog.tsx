@@ -692,7 +692,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                 variant="contained"
                 color="primary"
                 size="small"
-                disabled={!appliedDate || rowsApplied.some(d => d.invalidDate === true)}
+                disabled={isUpdating || !appliedDate || rowsApplied.some(d => d.invalidDate === true)}
                 onClick={() => {
                   handleCreateBill();
                 }}
