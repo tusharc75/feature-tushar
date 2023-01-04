@@ -141,6 +141,7 @@ const RepairOrderDetails = () => {
   };
 
   const fetchRepairOrderData = () => {
+    setRepairOrderData(null)
     axiosInstance()
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
@@ -208,7 +209,7 @@ const RepairOrderDetails = () => {
   const createNewVersionQuote = () => {
     setQuoteClonning(true);
     axiosInstance()
-      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`)
+      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`, { updateProcessStatus: false })
       .then(() => {
         setShowQuotationConfirmBox(false);
         fetchQuotationData();
@@ -426,7 +427,6 @@ const RepairOrderDetails = () => {
                       <Productpackage
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
@@ -452,11 +452,8 @@ const RepairOrderDetails = () => {
                           isTabletScreen={isTabletScreen}
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
-                          allowedToEdit={
-                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                              quotationVersionData?.status
-                            )
-                              ? false
+                          allowedToEdit={currentStep === 3 ? allowedToEdit :
+                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationVersionData?.status) ? false
                               : allowedToEdit
                           }
                           allowedToDelete={allowedToDelete}
