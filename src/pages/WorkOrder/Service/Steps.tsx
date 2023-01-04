@@ -171,7 +171,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
-  const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
   const {
     state: {
       user: { user }
@@ -263,7 +262,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
         setAssignSteps(false);
         getServiceData();
         fetchService();
-        setAddStepFields({ fields: [], section: [] });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
