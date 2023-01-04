@@ -51,7 +51,7 @@ const Digital = ({ renderedFrom, productId }) => {
             .get(`${routes.product.path}/${productId}/digital-product`)
             .then(({ data: { data } }) => {
                 data?.forEach((e: any) => {
-                    e.file = e?.file?.toString();
+                    e.file = e?.file?.map(d => d?.fileName)?.toString();
                 });
                 dispatch({
                     type: 'initialize',

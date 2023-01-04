@@ -479,7 +479,7 @@ const FormTypes = (props) => {
         } else {
           if (isMultiple) {
             let currentData = values[name] ? values[name] : []
-            setFieldValue(name, [...currentData, usePublicUrlforFileUpload ? data.fileUrl : data.fileName]);
+            setFieldValue(name, [...currentData, { fileName: usePublicUrlforFileUpload ? data.fileUrl : data.fileName, size: file.size }]);
           }
           else {
             setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
@@ -1958,7 +1958,7 @@ const FormTypes = (props) => {
                     <Box ml={1} />
                     <Box flex="1" className="text-truncate">
                       <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
-                        {item}
+                        {item?.fileName}
                       </Typography>
                     </Box>
                   </Grid>
@@ -1970,7 +1970,7 @@ const FormTypes = (props) => {
                       aria-label="delete picture"
                       component="span"
                       onClick={() => {
-                        setFieldValue(name, values[name].filter(d => d !== item))
+                        setFieldValue(name, values[name].filter(d => d.fileName !== item.fileName))
                       }}
                     >
                       <DeleteIcon color="error" />
