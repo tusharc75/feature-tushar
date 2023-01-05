@@ -1,5 +1,5 @@
-import { Box, Button, CircularProgress, Grid, Typography } from '@material-ui/core';
-import React, {  useContext, useEffect, useState } from 'react';
+import { Box, Button, CircularProgress, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Typography } from '@material-ui/core';
+import React, { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
 import { makeStyles } from '@material-ui/styles';
@@ -20,6 +20,9 @@ const useClasses = makeStyles(() => ({
   gridBox_layout: {
     height: 'calc(85vh-194px)',
     overflow: 'auto'
+  },
+  column: {
+    flexDirection: 'row'
   }
 }));
 
@@ -42,6 +45,7 @@ const EcommerceHome = () => {
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [oldData, setOldData] = useState([]);
+  const [columnSize, setColumnSize] = useState(6);
   const toastConfig = useContext(CustomToastContext);
 
   const fetchData = async () => {
@@ -106,8 +110,8 @@ const EcommerceHome = () => {
     [findCard, formData, setFormData]
   );
 
-  const handleImport = () => {};
-  const handleExportField = () => {};
+  const handleImport = () => { };
+  const handleExportField = () => { };
 
   useEffect(() => {
     fetchData();
@@ -162,9 +166,30 @@ const EcommerceHome = () => {
                 <Box bgcolor="white" p={3} style={{ height: '80vh' }}>
                   <Grid container spacing={1}>
                     {fields?.map((i, index) => (
-                      <DragBox key={index} name={i.name} label={i.label} type={i.type} setFormData={setFormData} />
+                      <DragBox key={index} name={i.name} label={i.label} type={i.type} columnSize={columnSize} formData={formData} setFormData={setFormData} />
                     ))}
                   </Grid>
+                  <Box mt={2}>
+                    <FormControl component="fieldset">
+                      <FormLabel required component="legend">
+                        Column Size
+                      </FormLabel>
+                      <RadioGroup
+                        aria-label="column"
+                        name="column"
+                        value={columnSize}
+                        className={classes.column}
+                        onChange={(e) => {
+                          setColumnSize(Number(e.target.value));
+                        }}
+                      >
+                        <FormControlLabel value={3} control={<Radio />} label="Col 3" />
+                        <FormControlLabel value={6} control={<Radio />} label="Col 6" />
+                        <FormControlLabel value={12} control={<Radio />} label="Col 12" />
+                        {/* <FormControlLabel value={'custom'} control={<Radio />} label="Custom" /> */}
+                      </RadioGroup>
+                    </FormControl>
+                  </Box>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={8}>
@@ -173,7 +198,7 @@ const EcommerceHome = () => {
                     <CircularProgress size={30} color="inherit" />
                   </Box>
                 ) : (
-                  <DropBox data={formData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
+                  <DropBox formData={formData} setFormData={setFormData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
                 )}
               </Grid>
             </Grid>
