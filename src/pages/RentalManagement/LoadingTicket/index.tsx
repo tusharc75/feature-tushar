@@ -284,8 +284,6 @@ const LoadingTicket = ({
 
       productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)]
 
-      console.log(productAssets)
-      
       dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
       setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
       setLoadingData(false)

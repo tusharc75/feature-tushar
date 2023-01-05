@@ -42,8 +42,6 @@ const WorkOrder = ({
   setCurrentStep
 }) => {
 
-  console.log(allowedToEdit)
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
