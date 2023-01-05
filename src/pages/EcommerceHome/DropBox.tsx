@@ -1,7 +1,8 @@
+import { Grid } from '@material-ui/core';
 import { useDrop } from 'react-dnd';
 import ItemView from './ItemView';
 
-const DropBox = ({ data, handleRemove, findCard, moveCard }) => {
+const DropBox = ({ formData, handleRemove, findCard, moveCard, setFormData }) => {
   const [{}, drop] = useDrop(
     () => ({
       accept: 'field'
@@ -10,10 +11,9 @@ const DropBox = ({ data, handleRemove, findCard, moveCard }) => {
   );
 
   return (
-    <div style={{ height: '80vh' }} ref={drop}>
-      <div>
-        {data &&
-          data?.map((i: any, index) => (
+      <Grid ref={drop} style={{ height: '80vh' }} container spacing={1} >
+        {formData &&
+          formData?.map((i: any, index) => (
             <ItemView
               key={index}
               label={i?.label}
@@ -21,11 +21,12 @@ const DropBox = ({ data, handleRemove, findCard, moveCard }) => {
               id={i?._id ? i?._id : i?.name}
               findCard={findCard}
               moveCard={moveCard}
-              formData={i}
+              itemData={i}
+              formData={formData}
+              setFormData={setFormData}
             />
           ))}
-      </div>
-    </div>
+      </Grid>
   );
 };
 
