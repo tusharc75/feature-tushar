@@ -57,7 +57,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
-  const [rateReta, setRateReta] = useState(true);
+  const [proRata, setProRata] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -513,7 +513,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           calValues['pricingMethod'] = 'Per Week';
-        } else if (element.pricingMethod === 'Per Month' && rateReta) {
+        } else if (element.pricingMethod === 'Per Month' && proRata) {
           values['pricingMethod'] = 'Per Day';
           if (priceFieldName) {
             values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30;
@@ -594,10 +594,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                     <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
                       <FormGroup>
                         <FormControlLabel
-                          control={<Checkbox checked={rateReta} />}
-                          label="RateReta"
+                          control={<Checkbox checked={proRata} />}
+                          label="Pro Rata"
                           onChange={() => {
-                            setRateReta(!rateReta);
+                            setProRata(!proRata);
                           }}
                         />
                       </FormGroup>
