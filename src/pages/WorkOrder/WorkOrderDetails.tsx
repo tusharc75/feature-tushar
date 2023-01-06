@@ -54,8 +54,6 @@ const WorkOrderDetails = () => {
   const [locationKeys, setLocationKeys] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [previewPdf, setPreviewPdf] = useState(false);
-  const [canComplete, setCanComplete] = useState(false);
-  const [canDelete, setCanDelete] = useState(false);
   const [statusOptions, setStatusOptions] = useState([]);
   const [completed, setCompleted] = useState(false);
 
@@ -120,28 +118,11 @@ const WorkOrderDetails = () => {
           history.push({ search: params.toString() });
         }
         setWorkOrderData({ ...data });
-        checkValidation()
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
-
-  const checkValidation = () => {
-    axiosInstance()
-      .get(`${routes.workOrder.path}/service/${id}`)
-      .then(({ data: { data } }) => {
-        if (data?.length && data?.filter((e) => e.type === "service" && e.status === WORKORDER_SERVICE_STATUS.completed).length === data?.length) {
-          setCanComplete(true)
-        }
-        if (data?.filter((e) => e.type === "service" && e.status === WORKORDER_SERVICE_STATUS.pending).length === data?.length) {
-          setCanDelete(true)
-        }
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  }
 
   const handleDelete = () => {
     axiosInstance()
@@ -243,7 +224,7 @@ const WorkOrderDetails = () => {
           <Paper>
             {workOrderData ? (
               <DetailsPageHeader heading={workOrderData?.workOrderNumber} mainPoints={null} showHeading={true}>
-                {permissions?.workOrder?.isUpdate && allowedToEdit && canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
+                {permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed && (
                   <Fragment>
                     <Button
                       variant="outlined"
@@ -308,7 +289,7 @@ const WorkOrderDetails = () => {
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
-                {permissions?.workOrder?.isDelete && allowedToEdit && canDelete && !workOrderData?.deleted &&
+                {permissions?.workOrder?.isDelete && allowedToEdit && workOrderData?.canDelete && !workOrderData?.deleted &&
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </DetailsPageHeader>
             ) : (
