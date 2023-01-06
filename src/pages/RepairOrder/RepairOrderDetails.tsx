@@ -450,6 +450,7 @@ const RepairOrderDetails = () => {
                   <ContentFullScreen title={repairOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {repairOrderProcessSteps[currentStep] === 'Add Assets' && repairOrderData && (
                       <Productpackage
+                        fetchRepairOrderData={fetchRepairOrderData}
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
                         isSmallScreen={isSmallScreen}
