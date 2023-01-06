@@ -367,7 +367,7 @@ export default function CustomReactTable({
     updatedData[rowData[0]] = cellValue;
     const inputField = { [`${rowData[0]}`]: cellValue };
 
-    if (onSaveEdit && (cellValue > -1 && ![undefined,null].includes(cellValue))) {
+    if (onSaveEdit && cellValue > -1 && ![undefined, null].includes(cellValue)) {
       onSaveEdit(inputField, updatedData);
     }
 
@@ -381,6 +381,11 @@ export default function CustomReactTable({
     setCellValue('');
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      submitInput();
+    }
+  };
   // Render the UI for your table
   return (
     <>
@@ -479,6 +484,7 @@ export default function CustomReactTable({
                             });
                           });
                         }}
+                        onKeyDown={isCellEditing && currentRowEditing && currentRowEditing.id === row.id && handleKeyDown}
                         {...cell.getCellProps()}
                         className={`td 
                                                     ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} 
@@ -505,7 +511,7 @@ export default function CustomReactTable({
 
                               value = parseInt(value);
 
-                              if (value < 0 ) return;
+                              if (value < 0) return;
 
                               setCellValue(value);
                             }}
