@@ -23,7 +23,11 @@ const useClasses = makeStyles(() => ({
   },
   column: {
     flexDirection: 'row'
-  }
+  },
+  screenHeightAuto: {
+    height: 'calc(100vh - 200px)',
+    overflow: 'auto'
+  },
 }));
 
 const fields = [
@@ -161,44 +165,31 @@ const EcommerceHome = () => {
         </Box>
         <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
           <Box bgcolor="#f5f5f5" p={1}>
-            <Grid container spacing={2} className={classes.root}>
-              <Grid item xs={12} sm={4}>
+            <Grid container spacing={2} >
+              <Grid item xs={12} md={3} sm={4}>
                 <Box bgcolor="white" p={3} style={{ height: '80vh' }}>
                   <Grid container spacing={1}>
                     {fields?.map((i, index) => (
                       <DragBox key={index} name={i.name} label={i.label} type={i.type} columnSize={columnSize} formData={formData} setFormData={setFormData} />
                     ))}
                   </Grid>
-                  <Box mt={2}>
-                    <FormControl component="fieldset">
-                      <FormLabel required component="legend">
-                        Column Size
-                      </FormLabel>
-                      <RadioGroup
-                        aria-label="column"
-                        name="column"
-                        value={columnSize}
-                        className={classes.column}
-                        onChange={(e) => {
-                          setColumnSize(Number(e.target.value));
-                        }}
-                      >
-                        <FormControlLabel value={3} control={<Radio />} label="Col 3" />
-                        <FormControlLabel value={6} control={<Radio />} label="Col 6" />
-                        <FormControlLabel value={12} control={<Radio />} label="Col 12" />
-                        {/* <FormControlLabel value={'custom'} control={<Radio />} label="Custom" /> */}
-                      </RadioGroup>
-                    </FormControl>
-                  </Box>
                 </Box>
               </Grid>
-              <Grid item xs={12} sm={8}>
+              <Grid item xs={12} md={9} sm={8}>
                 {loading ? (
                   <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
                     <CircularProgress size={30} color="inherit" />
                   </Box>
                 ) : (
-                  <DropBox formData={formData} setFormData={setFormData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
+                  <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={classes.screenHeightAuto} >
+                    <DropBox 
+                    formData={formData} 
+                    setFormData={setFormData} 
+                    handleRemove={handleRemove} 
+                    findCard={findCard} 
+                    moveCard={moveCard}
+                     />
+                  </Box>
                 )}
               </Grid>
             </Grid>
