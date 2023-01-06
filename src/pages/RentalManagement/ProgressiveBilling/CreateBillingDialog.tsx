@@ -61,13 +61,13 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [proRata]);
 
   useEffect(() => {
     if (columns) {
       fetchProductInventory();
     }
-  }, [columns]);
+  }, [columns, proRata]);
 
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, false);
@@ -98,12 +98,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail?.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail?.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -222,7 +222,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                 <p>{row.original[element.fieldName].optionLabel}</p>
               ) : row.original[element.fieldName] ? (
                 <>
-                  {['Per Week', 'Per Month'].includes(row.original[element.fieldName]) && row.original.isAppliedBill ? (
+                  {['Per Week', 'Per Month'].includes(row.original[element.fieldName]) && proRata && row.original.isAppliedBill ? (
                     <Box display="flex" alignItems="center">
                       <p>{row.original[element.fieldName]}</p>
                       <Box ml={1} />
@@ -337,6 +337,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             let values = { qty: 1 };
             values['actualStartDate'] = ele?.manualStartDate;
             values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
+            values['manualEndDate'] = ele?.manualEndDate
             const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
             const { materialId, qty, type, _id, ...rest } = element;
             newMaterial.push({ ...rest, ...ele, ...calValues });
@@ -350,6 +351,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         } else {
           let values: any = {};
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
+          values['manualEndDate'] = element?.actualEndDate
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
 
@@ -436,12 +438,12 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'asset'
-          ? parent?.inventoryDetail?.assetNumber
-          : parent.type === 'additionalCost'
-          ? parent?.costType
-          : parent.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === 'asset'
+              ? parent?.inventoryDetail?.assetNumber
+              : parent.type === 'additionalCost'
+                ? parent?.costType
+                : parent.packageDetail?.packageName;
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'asset' || parent.type === 'additionalCost'
@@ -461,10 +463,10 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'asset'
-          ? _subRow?.inventoryDetail?.assetNumber
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === 'asset'
+              ? _subRow?.inventoryDetail?.assetNumber
+              : _subRow?.packageDetail?.packageName;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(_subRow?.pricingMethod) ? false : true;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -473,7 +475,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   };
 
   const handleApplyDate = async () => {
-    let tempValues = { actualEndDate: endDate };
+
+    let tempValues: any = { actualEndDate: endDate };
 
     const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
@@ -493,7 +496,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
         if (selectedEndDateTime < productStartDateTime) {
           element.invalidDate = true;
-        } else if (product) {
+        }
+        else if (product) {
           const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
           if (selectedEndDateTime < productEndDateTime) {
             element.invalidDate = true;
@@ -502,21 +506,35 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           }
         }
 
+        if (element?.manualEndDate) {
+          const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
+          if (selectedEndDateTime > productManualEndDate) {
+            tempValues.actualEndDate = element?.manualEndDate;
+          }
+          if (productManualEndDate < productStartDateTime) {
+            element.invalidDate = true;
+          }
+        }
+
         let priceFieldName = Object.keys(element).find((d) => d.includes('price_'));
 
         let calValues: any;
         let values = JSON.parse(JSON.stringify(tempValues));
         if (element.pricingMethod === 'Per Week') {
-          values['pricingMethod'] = 'Per Day';
-          if (priceFieldName) {
-            values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 7;
+          if (proRata) {
+            values['pricingMethod'] = 'Per Day';
+            if (priceFieldName) {
+              values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 7;
+            }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           calValues['pricingMethod'] = 'Per Week';
-        } else if (element.pricingMethod === 'Per Month' && proRata) {
-          values['pricingMethod'] = 'Per Day';
-          if (priceFieldName) {
-            values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30;
+        } else if (element.pricingMethod === 'Per Month') {
+          if (proRata) {
+            values['pricingMethod'] = 'Per Day';
+            if (priceFieldName) {
+              values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30;
+            }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           calValues['pricingMethod'] = 'Per Month';
@@ -563,6 +581,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       delete element?.serviceDetail;
       delete element?.serviceDetail;
       delete element?.subRows;
+      delete element?.manualEndDate
     });
     setUpdating(true);
     axiosInstance()
@@ -662,8 +681,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                               disabled={
                                 !Boolean(
                                   selectedProducts &&
-                                    selectedProducts.length &&
-                                    (endDate || selectedProducts.every((d) => d.type === 'additionalCost'))
+                                  selectedProducts.length &&
+                                  (endDate || selectedProducts.every((d) => d.type === 'additionalCost'))
                                 )
                               }
                               size="small"
@@ -737,8 +756,8 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
               !appliedDate
                 ? 'Please select items and apply end date'
                 : rowsApplied?.some((d) => d.invalidDate === true)
-                ? 'Please select an appropriate date !'
-                : 'Create Bill'
+                  ? 'Please select an appropriate date !'
+                  : 'Create Bill'
             }
           >
             <span>

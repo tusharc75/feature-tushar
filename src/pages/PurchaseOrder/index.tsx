@@ -35,7 +35,8 @@ import { camelCase } from "lodash";
 import queryString from 'query-string';
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import HideWhenOffline from "src/components/HideWhenOffline";
-
+import { Autocomplete } from '@material-ui/lab';
+import { TextField } from '@material-ui/core';
 
 const PurchaseOrder = () => {
 
@@ -73,6 +74,9 @@ const PurchaseOrder = () => {
     const [fromRental, setFromRental] = useState(history.location?.state?.rental);
     const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
 
+    const [plantOptions, setPlantOptions] = useState([]);
+    const [plantId, setPlantId] = useState(null);
+
     const {
         state: { user, permissions, selectedEntity },
     }: any = useData();
@@ -80,11 +84,19 @@ const PurchaseOrder = () => {
 
     useEffect(() => {
         fetchGridColumns()
+        getPlants()
     }, [])
 
     useEffect(() => {
         fetchPurchaseOrder()
-    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder, selectedType, showFilteredRecordsOnly]);
+    }, [page, limit, filters, sorting, search, selectedEntity, fromRental, fromSalesOrder, selectedType, showFilteredRecordsOnly, plantId]);
+
+    const getPlants = () => {
+        axiosInstance().get(`/warehouse`)
+            .then(({ data: { data } }) => {
+                setPlantOptions(data);
+            });
+    };
 
     const fetchGridColumns = () => {
         axiosInstance()
@@ -161,6 +173,9 @@ const PurchaseOrder = () => {
             deepFilter = `filterPurchaseOrders=${selectedType}`;
         }
         let filterById = [];
+        if (plantId && plantId !== '') {
+            filterById.push({ field: 'warehouse', term: plantId });
+        }
         if (fromRental) {
             filterById.push({ field: "rentalJob", term: fromRental?._id });
         }
@@ -397,6 +412,31 @@ const PurchaseOrder = () => {
                                     )}
                                 </div>
                             </HideWhenOffline>}
+                        <Autocomplete
+                            style={{ width: '250px' }}
+                            options={plantOptions}
+                            getOptionLabel={(option: any) => option.warehouseName}
+                            getOptionSelected={(option: any, val) => option._id === val}
+                            value={plantOptions.filter((data) => data._id === plantId).length ? plantOptions.filter((data) => data._id === plantId)[0] : ''}
+                            onChange={(e, val) => {
+                                setPlantId(val && val._id ? val._id : '');
+                            }}
+                            renderInput={(params) =>
+                                isMobile && !isTablet ? (
+                                    <TextField
+                                        {...params}
+                                        margin="dense"
+                                        name="plant"
+                                        placeholder="Plant"
+                                        variant="standard"
+                                        fullWidth
+                                        className={isMobile ? 'serchBox' : ''}
+                                    />
+                                ) : (
+                                    <TextField {...params} margin="dense" name="plant" label="Plant" variant="outlined" fullWidth />
+                                )
+                            }
+                        />
                         {fromRental && (
                             <Chip
                                 className="ml-3"

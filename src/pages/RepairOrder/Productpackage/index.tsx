@@ -25,6 +25,7 @@ import { sortBy } from 'lodash';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const Productpackage = ({
+  fetchRepairOrderData,
   repairOrderData,
   setNextStep,
   isTabletScreen,
@@ -337,6 +338,7 @@ const Productpackage = ({
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
         fetchData();
+        fetchRepairOrderData();
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -366,6 +368,7 @@ const Productpackage = ({
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
         fetchData();
+        fetchRepairOrderData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -380,6 +383,7 @@ const Productpackage = ({
       .then(() => {
         setDeleting(false);
         fetchData();
+        fetchRepairOrderData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -387,11 +391,6 @@ const Productpackage = ({
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
-  };
-
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
   };
 
   const handleDeleteMultiple = () => {
