@@ -57,7 +57,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
-  const [proRata, setProRata] = useState(false);
+  const [proRata, setProRata] = useState(true);
 
   useEffect(() => {
     fetchFields();
@@ -592,15 +592,20 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                 <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
                   <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
                     <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
-                      <FormGroup>
-                        <FormControlLabel
-                          control={<Checkbox checked={proRata} />}
-                          label="Pro Rata"
-                          onChange={() => {
-                            setProRata(!proRata);
-                          }}
-                        />
-                      </FormGroup>
+                      <div>
+                        <FormGroup>
+                          <FormControlLabel
+                            control={<Checkbox checked={proRata} />}
+                            key="proRata"
+                            placeholder="Pro Rata"
+                            label="Pro Rata"
+                            style={{ whiteSpace: 'nowrap' }}
+                            onChange={() => {
+                              setProRata(!proRata);
+                            }}
+                          />
+                        </FormGroup>
+                      </div>
                       {/* <KeyboardDatePicker
                             autoOk
                             fullWidth
