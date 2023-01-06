@@ -154,6 +154,21 @@ const useStyles = makeStyles((theme) => ({
         display: 'none'
       }
     }
+  },
+  overflowX: {
+    overflowX: 'auto'
+  },
+  tabletClass: {
+    minWidth: '32.73333%',
+    flex: 'unset'
+  },
+  tabletStepContainer: {
+    '& .MuiStepConnector-root': {
+      display: 'none'
+    },
+    justifyContent: 'flex-start',
+    paddingBlockEnd: '9px !important',
+    overflowX: 'auto'
   }
 }));
 
@@ -202,6 +217,12 @@ const Steps = (props) => {
       return newStep;
     });
   };
+
+  if (isTablet) {
+    console.log('tablet');
+  } else if (isMobile) {
+    console.log('Mobile');
+  }
 
   return (
     <div>
@@ -314,11 +335,14 @@ const Steps = (props) => {
                   </Grid>
                 </Grid>
 
-                <Stepper className={`${classes.pbStepper} stepper-responsive mt-2`} activeStep={isStepEnded ? steps.length + 1 : activeStep}>
+                <Stepper
+                  className={`${classes.pbStepper} ${isTablet && classes.tabletStepContainer} stepper-responsive mt-2`}
+                  activeStep={isStepEnded ? steps.length + 1 : activeStep}
+                >
                   {steps.map((label, i) => (
                     <Step
                       key={label}
-                      className={clsx(classes.step, {
+                      className={clsx(classes.step, isTablet && classes.tabletClass, {
                         [classes.active]: currentStep > i || isStepEnded,
                         [classes.currentStep]: currentStep === i,
                         [classes.inActive]: currentStep !== i
