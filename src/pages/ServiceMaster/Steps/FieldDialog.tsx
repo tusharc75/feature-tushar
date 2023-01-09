@@ -30,19 +30,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
         });
       });
       setSection(_data);
-    }else if(reference === 'surveys'){
-      const _data = [];
-      const _section = uniq(map(fields, 'sectionName'));
-      _section.forEach((element: any, index: number) => {
-        _data.push({
-          sectionId: index,
-          sectionName: element,
-          field: fields?.filter((el: any) => el.sectionName === element)
-        });
-      });
-      setSection(_data);
-    } 
-    else {
+    } else {
       axiosInstance()
         .get(`${serviceMaster.api}/fields/${serviceId}/${stepIds[0]}`)
         .then(({ data: { data } }) => {
@@ -83,10 +71,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceId, steps, stepIds, ref
     });
     if (reference === 'workOrder') {
       handleSucess(data);
-    } else if(reference === 'surveys'){
-        handleSucess(data);
-    }
-    else {
+    } else {
       axiosInstance()
         .post(`${serviceMaster.api}/fields/${serviceId}`, { stepIds: stepIds, fields: data })
         .then(({ data }) => {
