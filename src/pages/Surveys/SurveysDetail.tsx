@@ -15,9 +15,12 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageSurveys from './ManageSurveys';
+import FieldDialog from './FieldDialog';
+
 
 const SurveysDetail = () => {
     const { id } = useParams();
+   const [stepFieldsDialog, setStepFieldsDialog] = useState(false);
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext);
     const [headingLbl, setHeadingLbl] = useState('');
@@ -124,6 +127,20 @@ const SurveysDetail = () => {
 
                   <Box component="span" marginX={1} />
 
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    color="primary"
+                    size="small"
+                    onClick={(e)=>{
+                setStepFieldsDialog(true);
+                        
+                    }}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                  >
+                    Fields
+                  </Button>
+
+                  <Box component="span" marginX={1} />
                   <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                   </span>
@@ -160,6 +177,18 @@ const SurveysDetail = () => {
           onSuccess={() => {
             closeUpdateDialog();
             fetchData();
+          }}
+        />
+      )}
+       {stepFieldsDialog && (
+        <FieldDialog
+          surveyId={id}
+          handleClose={() => {
+            setStepFieldsDialog(false);
+          }}
+          handleSuccess={() => {
+            setStepFieldsDialog(false);
+            fetchData()
           }}
         />
       )}
