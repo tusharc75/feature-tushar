@@ -90,7 +90,7 @@ const ItemView = ({ itemData, label, handleRemove, id, findCard, moveCard, formD
 
   return (
     <>
-      <Grid item xs={6} sm={itemData?.column} md={itemData?.column}>
+      <Grid ref={(node) => drag(drop(node))} item xs={6} sm={itemData?.column} md={itemData?.column}>
         <Box bgcolor={'white'}  border={1} p={2} borderColor="grey.300" className="text-truncate">
           <Typography variant="body1" className="text-truncate">
             {label}
@@ -117,7 +117,6 @@ const ItemView = ({ itemData, label, handleRemove, id, findCard, moveCard, formD
           />}
       </Grid>
     </>
-    // </div>
 
   );
 };
