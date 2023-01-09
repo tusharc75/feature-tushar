@@ -1238,12 +1238,7 @@ export const formatAmountWithCurrency = (currencyCode, amount, currencyShow = tr
     currency: currencyCode
   };
 
-  if (currencyShow === false) {
-    options = {
-      style: 'decimal',
-      currency: currencyCode
-    };
-  }
+  if (currencyShow === false) options.style = 'decimal';
 
   if (Number.isInteger(amount)) {
     options['maximumFractionDigits'] = 0;
