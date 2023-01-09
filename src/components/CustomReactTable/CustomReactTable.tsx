@@ -480,6 +480,7 @@ export default function CustomReactTable({
                             Object.keys(rowState[rowId].cellState).forEach((colId) => {
                               if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
                                 setCellState(rowId, colId, { isEditing: false });
+                                setIsCellEditing(false);
                               }
                             });
                           });
