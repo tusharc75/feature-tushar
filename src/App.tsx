@@ -162,6 +162,8 @@ import FrequencyAskedQuestionDetail from './pages/FrequentlyAskedQuestion/Freque
 import Blog from './pages/Blog';
 import BlogDetail from './pages/Blog/BlogDetail';
 import EcommerceHome from './pages/EcommerceHome';
+import Survey from './pages/Surveys';
+import SurveysDetail from './pages/Surveys/SurveysDetail';
 
 var notificationInterval: any = null;
 
@@ -836,6 +838,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.eCommerceHome.path} >
               <EcommerceHome />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.surveys.path} >
+              <Survey />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.surveysDetail.path}/:id`}>
+              <SurveysDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

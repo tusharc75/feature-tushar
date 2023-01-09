@@ -19,7 +19,7 @@ const useClasses = makeStyles(() => ({
   },
   gridBox_layout: {
     height: 'calc(85vh-194px)',
-    overflow: 'auto'
+    overflow: 'auto',
   },
   column: {
     flexDirection: 'row'
@@ -34,13 +34,23 @@ const fields = [
   {
     name: 'image',
     label: 'Image',
-    type: 'field'
   },
   {
     name: 'imageSlider',
     label: 'Image Slider',
-    type: 'field'
-  }
+  },
+  {
+    name: 'productCategory  ',
+    label: 'Product Category  ',
+  },
+  {
+    name: 'productList',
+    label: 'Product List',
+  },
+  {
+    name: 'menu',
+    label: 'Menu',
+  },
 ];
 
 const EcommerceHome = () => {
@@ -49,7 +59,7 @@ const EcommerceHome = () => {
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [oldData, setOldData] = useState([]);
-  const [columnSize, setColumnSize] = useState(6);
+  const [column] = useState("12");
   const toastConfig = useContext(CustomToastContext);
 
   const fetchData = async () => {
@@ -170,7 +180,7 @@ const EcommerceHome = () => {
                 <Box bgcolor="white" p={3} style={{ height: '80vh' }}>
                   <Grid container spacing={1}>
                     {fields?.map((i, index) => (
-                      <DragBox key={index} name={i.name} label={i.label} type={i.type} columnSize={columnSize} formData={formData} setFormData={setFormData} />
+                      <DragBox key={index} name={i.name} label={i.label}  column={column} formData={formData} setFormData={setFormData} />
                     ))}
                   </Grid>
                 </Box>
