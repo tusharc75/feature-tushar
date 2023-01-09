@@ -59,20 +59,6 @@ const Survey = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (['surveyName'].find((d) => d === o?.fieldData?.fieldName)) {
-            columns = [
-              ...columns,
-              {
-                disabled: false,
-                field: 'surveyName',
-                headerName: 'Survey Name',
-                pivotIndex: 0,
-                show: true,
-                cellRenderer: 'nameRenderer',
-                primaryField: true
-              }
-            ];
-          } else {
             if (o?.fieldData?.primaryField === true) {
               columns = [
                 ...columns,
@@ -88,7 +74,6 @@ const Survey = () => {
                 }
               }
             }
-          }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
