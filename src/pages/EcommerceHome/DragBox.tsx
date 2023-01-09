@@ -8,10 +8,10 @@ const style = {
   paddingTop: '8px'
 };
 
-const DragBox = ({ name, type, label, formData, columnSize, setFormData }) => {
+const DragBox = ({ name, type, label, formData, column, setFormData }) => {
   let fieldWithSameName = formData?.filter(d => d?.id === undefined && d?.label === label)
   name = fieldWithSameName?.length === 0 ? name : `${name}_${fieldWithSameName?.length}`
-  const item = { name, type, label, columnSize };
+  const item = { name, type, label, column };
   const [{ isDragging }, drag] = useDrag({
     item: item,
     type: type,

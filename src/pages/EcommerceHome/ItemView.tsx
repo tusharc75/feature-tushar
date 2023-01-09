@@ -90,8 +90,8 @@ const ItemView = ({ itemData, label, handleRemove, id, findCard, moveCard, formD
 
   return (
     <>
-      <Grid item xs={6} sm={itemData?.columnSize} md={itemData?.columnSize}>
-        <Box bgcolor={'white'} m={2} border={1} p={2} borderColor="grey.300" className="text-truncate">
+      <Grid item xs={6} sm={itemData?.column} md={itemData?.column}>
+        <Box bgcolor={'white'}  border={1} p={2} borderColor="grey.300" className="text-truncate">
           <Typography variant="body1" className="text-truncate">
             {label}
           </Typography>

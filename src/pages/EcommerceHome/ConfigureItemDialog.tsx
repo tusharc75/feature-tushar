@@ -52,7 +52,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
         {
             "fieldData": {
                 "_id": "62d103f69be8b23c5e3fba18",
-                "fieldLabel": "Column Size",
+                "fieldLabel": "Column ",
                 "type": "radio",
                 "option": [{
                     "optionLabel": "3",
@@ -77,7 +77,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                 "editAble": true,
                 "deletAble": true,
                 "order": 2,
-                "fieldName": "columnSize",
+                "fieldName": "column",
                 "sectionName": "Image Information",
                 "resource": "Product",
             },

@@ -45,6 +45,7 @@ import { orderBy, startCase } from 'lodash';
 import SendEmail from './SendEmail';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 
 const Quotation = ({
   rentalManagementData,
@@ -109,7 +110,7 @@ const Quotation = ({
   const additionalCost = ['service', 'product', 'package', 'asset'];
   const fetchFields = async (currency) => {
     // setNextStep(false)
-    var { fields: data } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    var data = await fetch_quotation_product_fields(rentalManagementData?.currency);
     const coloum: any = [
       {
         accessor: 'srno',
