@@ -702,7 +702,7 @@ const routes = {
   surveysDetail:{
     title:storedRoutes && storedRoutes.surveys && storedRoutes.surveys.title 
     ? storedRoutes.surveys?.title
-    : RESOURCE_LABEL.freqentlyAskedQuestion,
+    : RESOURCE_LABEL.surveys,
     path:'/surveys/detail'
   },
 };
