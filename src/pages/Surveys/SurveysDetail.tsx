@@ -15,9 +15,11 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageSurveys from './ManageSurveys';
+import FieldDialog from '../ServiceMaster/Steps/FieldDialog';
 
 const SurveysDetail = () => {
     const { id } = useParams();
+   const [stepFieldsDialog, setStepFieldsDialog] = useState(false);
     const history = useHistory();
     const toastConfig = useContext(CustomToastContext);
     const [headingLbl, setHeadingLbl] = useState('');
@@ -92,6 +94,20 @@ const SurveysDetail = () => {
         setOpenUpdateDialog(false);
       };
 
+
+      const handleFieldSave = (data) =>{
+        const body = {
+            _id:id,
+            fields:data
+        }
+        axiosInstance().put('/surveys',body)
+        .then((data)=>{
+         fetchData()
+        }).catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
+      }
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -124,6 +140,20 @@ const SurveysDetail = () => {
 
                   <Box component="span" marginX={1} />
 
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    color="primary"
+                    size="small"
+                    onClick={(e)=>{
+                setStepFieldsDialog(true);
+                        
+                    }}
+                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                  >
+                    Fields
+                  </Button>
+
+                  <Box component="span" marginX={1} />
                   <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                   </span>
@@ -161,6 +191,22 @@ const SurveysDetail = () => {
             closeUpdateDialog();
             fetchData();
           }}
+        />
+      )}
+       {stepFieldsDialog && (
+        <FieldDialog
+          serviceId={id}
+          stepIds={''}
+          steps={[]}
+          handleClose={() => {
+            setStepFieldsDialog(false);
+          }}
+          handleSucess={(data) => {
+            setStepFieldsDialog(false);
+            handleFieldSave(data)
+          }}
+          fields={SurveyData.fields || []}
+          reference='surveys'
         />
       )}
     </Fragment>
