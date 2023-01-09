@@ -1,4 +1,4 @@
-import React, { useContext, Fragment } from 'react';
+import React, { useContext, Fragment, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
@@ -187,6 +187,8 @@ const Steps = (props) => {
     handlePrev = null
   } = props;
 
+  const containerRef = useRef(null);
+
   const classes = useStyles();
   let activeStep = currentStep;
 
@@ -218,11 +220,24 @@ const Steps = (props) => {
     });
   };
 
-  if (isTablet) {
-    console.log('tablet');
-  } else if (isMobile) {
-    console.log('Mobile');
-  }
+  React.useEffect(() => {
+    handleScroll();
+  }, [activeStep]);
+
+  const handleScroll = () => {
+    if (containerRef.current && isTablet) {
+      const container = containerRef.current;
+      const element = container.querySelector('div.MuiStep-root');
+      if (element) {
+        const scrollpos = activeStep * (element?.clientWidth + 4);
+        container.scroll({
+          top: 0,
+          left: scrollpos,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
 
   return (
     <div>
@@ -336,6 +351,7 @@ const Steps = (props) => {
                 </Grid>
 
                 <Stepper
+                  ref={containerRef}
                   className={`${classes.pbStepper} ${isTablet && classes.tabletStepContainer} stepper-responsive mt-2`}
                   activeStep={isStepEnded ? steps.length + 1 : activeStep}
                 >

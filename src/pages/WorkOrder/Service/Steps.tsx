@@ -839,9 +839,11 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
     ) : (
       <>
         <Box p={2} height={500} bgcolor="rgba(242, 243, 247, 0.6)" textAlign="center">
-          <Button variant="contained" color="primary" onClick={() => setAssignSteps(true)}>
-            Add Step
-          </Button>
+          {referencType !== 'workOrderTechnician' &&
+            <Button variant="contained" color="primary" onClick={() => setAssignSteps(true)}>
+              Add Step
+            </Button>
+          }
         </Box>
         {assignSteps && (
           <StepDialog
