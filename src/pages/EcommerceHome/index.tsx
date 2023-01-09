@@ -34,13 +34,23 @@ const fields = [
   {
     name: 'image',
     label: 'Image',
-    type: 'field'
   },
   {
     name: 'imageSlider',
     label: 'Image Slider',
-    type: 'field'
-  }
+  },
+  {
+    name: 'productCategory  ',
+    label: 'Product Category  ',
+  },
+  {
+    name: 'productList',
+    label: 'Product List',
+  },
+  {
+    name: 'menu',
+    label: 'Menu',
+  },
 ];
 
 const EcommerceHome = () => {
@@ -170,7 +180,7 @@ const EcommerceHome = () => {
                 <Box bgcolor="white" p={3} style={{ height: '80vh' }}>
                   <Grid container spacing={1}>
                     {fields?.map((i, index) => (
-                      <DragBox key={index} name={i.name} label={i.label} type={i.type} column={column} formData={formData} setFormData={setFormData} />
+                      <DragBox key={index} name={i.name} label={i.label}  column={column} formData={formData} setFormData={setFormData} />
                     ))}
                   </Grid>
                 </Box>

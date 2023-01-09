@@ -23,7 +23,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
             "fieldData": {
                 "_id": "62d103f69be8b23c5e3fba17",
                 "fieldLabel": "URL",
-                "type": "url",
+                "type": "singleLine",
                 "option": [],
                 "isTooltip": false,
                 "tooltipMessage": "",
@@ -43,6 +43,120 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                 "defaultValue": "",
                 "fieldName": "url",
                 "sectionName": "Image Information",
+                "resource": "Product",
+            },
+            "isCreate": true,
+            "isRead": true,
+            "isUpdate": true
+        },
+        {
+            "fieldData": {
+                "_id": "62d103f69be8b23c5e1fba17",
+                "fieldLabel": "Title",
+                "type": "singleLine",
+                "option": [],
+                "isTooltip": false,
+                "tooltipMessage": "",
+                "editAble": true,
+                "deletAble": true,
+                "order": 1,
+                "hiddenField": false,
+                "isDefaultValue": false,
+                "disableOnEdit": false,
+                "unique": true,
+                "lookup": false,
+                "lookupResource": "",
+                "entityWiseLookup": false,
+                "isDropdown": false,
+                "isWarningTooltip": false,
+                "warningTooltipMessage": "",
+                "defaultValue": "",
+                "fieldName": "title",
+                "sectionName": "Image Information",
+                "resource": "Product",
+            },
+            "isCreate": true,
+            "isRead": true,
+            "isUpdate": true
+        },
+        {
+            "fieldData": {
+                "_id": "62d103f69be8b23c5e3fba111",
+                "fieldLabel": "Detail",
+                "type": "multiLine",
+                "option": [],
+                "isTooltip": false,
+                "tooltipMessage": "",
+                "editAble": true,
+                "deletAble": true,
+                "order": 1,
+                "hiddenField": false,
+                "isDefaultValue": false,
+                "disableOnEdit": false,
+                "unique": true,
+                "lookup": false,
+                "lookupResource": "",
+                "entityWiseLookup": false,
+                "isDropdown": false,
+                "isWarningTooltip": false,
+                "warningTooltipMessage": "",
+                "defaultValue": "",
+                "fieldName": "detail",
+                "sectionName": "Image Information",
+                "resource": "Product",
+            },
+            "isCreate": true,
+            "isRead": true,
+            "isUpdate": true
+        },
+        {
+            "fieldData": {
+                "_id": "631599890d0b6e3f87381b8a",
+                "fieldLabel": "KPI",
+                "type": "dropDown",
+                "option": [
+                    {
+                        "optionLabel": "Deals of The Day",
+                        "optionValue": "dealsofTheDay",
+                        "order": 1,
+                        "default": false
+                    },
+                    {
+                        "optionLabel": "Popular Listings",
+                        "optionValue": "popularListings",
+                        "order": 2,
+                        "default": false
+                    },
+                    {
+                        "optionLabel": "Top Offers On",
+                        "optionValue": "topOffers",
+                        "order": 3,
+                        "default": false
+                    },
+                    {
+                        "optionLabel": "Inspired By your Browsing History",
+                        "optionValue": "browsingHistory",
+                        "order": 4,
+                        "default": false
+                    },
+                ],
+                "required": true,
+                "isTooltip": false,
+                "tooltipMessage": "",
+                "editAble": true,
+                "hiddenField": false,
+                "isDefaultValue": false,
+                "disableOnEdit": false,
+                "addManualOptionInExcel": false,
+                "addAdditionalOption": false,
+                "lookup": false,
+                "lookupResource": "",
+                "isDropdown": false,
+                "isWarningTooltip": false,
+                "warningTooltipMessage": "",
+                "defaultValue": "",
+                "sectionName": "Image Information",
+                "fieldName": "kpi",
                 "resource": "Product",
             },
             "isCreate": true,
@@ -117,6 +231,10 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
         },
     ]
 
+    const imageFields = ['column', 'url', 'images', 'image',]
+    const productCategoryFields = ['column', 'title',]
+    const productListFields = ['column', 'title', 'kpi']
+    const menuFields = ['column', 'title',]
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
     const [digitalData, setDigitalData] = useState({ fields: [], initialValues: {} });
     const [formsData, setFormsData] = useState([]);
@@ -127,7 +245,14 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
     const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
-        var fieldsDataForCreate = fieldData?.map((d: any) => d.fieldData);
+        var fieldsDataForCreate = itemData?.name?.includes("image") ?
+            fieldData?.filter(d => imageFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
+            : itemData?.name?.includes("productCategory") ?
+                fieldData?.filter(d => productCategoryFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
+                : itemData?.name?.includes("productList") ?
+                    fieldData?.filter(d => productListFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
+                    : itemData?.name?.includes("menu") ?
+                        fieldData?.filter(d => menuFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData) : [];
         setDigitalData({
             fields: fieldsDataForCreate,
             initialValues: getObjKeysWithValues(itemData, fieldsDataForCreate),
@@ -244,10 +369,10 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                                             return (
                                                 form.name && (
                                                     <div key={i}>
-                                                        <div className={"detail-box-content"}>
+                                                        {/* <div className={"detail-box-content"}>
                                                             <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
                                                             <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
-                                                        </div>
+                                                        </div> */}
                                                         <Box marginY={2}>
                                                             <Grid spacing={3} container>
                                                                 {form.sectionFields.map((field) => (
