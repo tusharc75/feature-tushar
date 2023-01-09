@@ -45,7 +45,7 @@ export const termsAndConditionDocumentUploadMaxSize = {
 };
 
 export const repairJobProcessSteps = ['Serialized Assets', 'Repair Process'];
-export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Ready To Invoice'];
+export const salesOrderProcessSteps = ['Add Products', 'Services and Consumables', 'Invoice'];
 export const invoiceProcessSteps = ['Add Products', 'Ready To Invoice'];
 export const quotationProcessSteps = ['Add Products', 'Services and Consumables', 'Quote Builder', 'Send To Customer', 'End'];
 export const purchaseOrderSteps = ['Add Products', 'Receive Products'];
@@ -63,7 +63,7 @@ export const rentalManagementSteps = [
 export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loading Ticket'];
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
-export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Invoice'];
+export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -367,7 +367,8 @@ export const RESOURCE_LABEL = {
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
-  blog: 'Blog'
+  blog: 'Blog',
+  eCommerceHome: 'e-Commerce Home'
 };
 
 export const CHILD_RESOURCE = {
@@ -1712,6 +1713,7 @@ export const INVENTORY_STATUS = {
   returned: 'Returned',
   needRepair: 'Need Repair',
   needRecert: 'Need Recert',
+  inRepair: 'In-Repair',
   notApplied: "N/A",
 };
 
@@ -1788,7 +1790,8 @@ export const DELIVERY_TICKET_REFRENCE_TYPE = {
   repairJob: 'Repair Job',
   salesOrder: 'Sales Order',
   sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory'
+  transferInventory: 'Transfer Inventory',
+  repairOrder: 'Repair Order'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2141,6 +2144,7 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   passed: 'Passed',
   failed: 'Failed',
   skipped: 'Skipped',
+  needReperform: 'Need Reperform',
 };
 
 export const REPAIR_ORDER_TYPE = {

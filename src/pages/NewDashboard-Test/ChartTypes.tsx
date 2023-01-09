@@ -47,10 +47,11 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
   const {
     state: {
       selectedEntity,
-      user: { user }
+      user
     }
   } = useData();
-  const currency = (user && user.currency) || 'USD';
+
+  const currency = user?.user?.currency || 'USD';
   const [chartData, setChartData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [tableView, setTableView] = React.useState(false);
@@ -147,7 +148,6 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
   const handlePinUnpin = async (type) => {
     setLoading(true);
     axiosInstance().put(`/dashboard-master/${selectedDashboardId}/${type}/${chart?._id}`).then(async ({ data }) => {
-      console.log(data)
       setToastConfig({
         open: true,
         type: 'success',

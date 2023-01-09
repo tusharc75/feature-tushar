@@ -17,16 +17,17 @@ import { repairOrder, dateFormat } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
-import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';
 import { sortBy } from 'lodash';
 
+const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
 const Productpackage = ({
+  fetchRepairOrderData,
   repairOrderData,
   setNextStep,
-  currencySymbol,
   isTabletScreen,
   isSmallScreen,
   showActivity,
@@ -60,17 +61,16 @@ const Productpackage = ({
 
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
-
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [repairOrderData]);
 
   useEffect(() => {
     fetchData();
   }, [columns]);
 
   const fetchFields = async () => {
-    //var data = await fetch_repair_order_product_fields(repairOrderData?.currency);
+    setColumns(null);
     const coloum: any = [
       {
         accessor: 'srno',
@@ -166,7 +166,6 @@ const Productpackage = ({
         Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
       }
     ];
-
     coloum.push({
       accessor: 'action',
       Header: '',
@@ -193,7 +192,6 @@ const Productpackage = ({
         </>
       )
     });
-
     coloum.forEach((element) => {
       if (element.accessor === 'qty') {
         element['Footer'] = (info) => {
@@ -204,7 +202,6 @@ const Productpackage = ({
         };
       }
     });
-
     setColumns(coloum);
   };
 
@@ -267,8 +264,6 @@ const Productpackage = ({
     setRowsData(rows);
     setSelectedProducts([]);
   };
-
-  const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
@@ -343,6 +338,7 @@ const Productpackage = ({
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
         fetchData();
+        fetchRepairOrderData();
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -372,6 +368,7 @@ const Productpackage = ({
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
         fetchData();
+        fetchRepairOrderData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -386,6 +383,7 @@ const Productpackage = ({
       .then(() => {
         setDeleting(false);
         fetchData();
+        fetchRepairOrderData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -393,11 +391,6 @@ const Productpackage = ({
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
-  };
-
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
   };
 
   const handleDeleteMultiple = () => {

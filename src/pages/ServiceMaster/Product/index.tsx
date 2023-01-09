@@ -34,7 +34,7 @@ function Product({ id }) {
   const [state, dispatch] = useReducer(reducer, intialState);
   const [columns, setColumns] = useState(null);
   const [frameWorkComponent, setFrameWorkComponent] = useState(null);
-  const { dataRows, rowCount, loading: gridLoading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
+  const { dataRows, rowCount, loading, page, pageSizes, search, filters, sorting, selectedRecords, limit, appendRows } = state;
 
   const defaultColumns = [
     { field: 'qty', headerName: 'Qty', show: true, cellRenderer: 'commonRenderer', cellEditor: 'numericCellEditor', editable: true }
@@ -216,7 +216,8 @@ function Product({ id }) {
           limit={limit}
           pageSizes={pageSizes}
           page={page}
-          loading={gridLoading}
+          loading={loading}
+          actionWidth={150}
           renderedFrom={renderedFrom}
           refreshGrid={fetchBOMData}
         />

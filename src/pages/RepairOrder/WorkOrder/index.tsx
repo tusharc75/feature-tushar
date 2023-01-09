@@ -41,6 +41,7 @@ const WorkOrder = ({
   isPostWorkService,
   setCurrentStep
 }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -63,7 +64,7 @@ const WorkOrder = ({
   useEffect(() => {
     fetchFields();
     fetchData();
-  }, []);
+  }, [repairOrderData]);
 
   useEffect(() => {
     const assignedUsersArrays = selectedProducts?.filter((product) => product?.assignedUsers).map((product) => product?.assignedUsers);
@@ -388,12 +389,10 @@ const WorkOrder = ({
     });
 
     if (isPostWorkService) {
-      if (data?.material?.filter((e) => e?.type === 'service' && !e?.serviceDetail?.preWork &&
-        [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length
-      ) {
-        setNextStep(false);
-      } else {
+      if (rows?.some((e) => e.serviceStatus === WORK_ORDER_STATUS.completed)) {
         setNextStep(true);
+      } else {
+        setNextStep(false);
       }
     } else {
       if (data?.material?.filter((e) => e?.type === 'service' && e?.serviceDetail?.preWork &&
@@ -523,7 +522,7 @@ const WorkOrder = ({
     <Fragment>
       <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
         <Box display="flex" alignItems="center" justifyContent={'flex-end'} paddingX={1} gridColumnGap={8} flex={1}>
-          {(allowedToEdit || isPostWorkService) && (
+          {allowedToEdit && (
             <Box display="flex" gridColumnGap={5}>
               <Button
                 variant="outlined"
@@ -627,7 +626,6 @@ const WorkOrder = ({
                 columns={columns}
                 data={rowsData}
                 onSelect={(data) => {
-                  console.log(data)
                   setSelectedServices(data?.filter((d) => d.type === 'service' && !d.hideSelection) || []);
                   setSelectedAssets(data?.filter((d) => d.type === 'serializedAsset' && !d.hideSelection) || []);
                   setSelectedProducts(data?.filter((d) => !d.hideSelection) || []);

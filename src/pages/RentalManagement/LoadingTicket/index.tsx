@@ -40,7 +40,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { makeStyles } from '@material-ui/core/styles';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import MultipleTicket from '../../DeliveryTicket/MultipleTicket';
-import { groupBy, uniq, map, sortBy } from 'lodash';
+import { groupBy, uniq, map, sortBy, isEqual } from 'lodash';
 import { objectStore, findOne } from '../../../constants/indexdbhelper';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import InfoIcon from '@material-ui/icons/Info';
@@ -122,6 +122,7 @@ const LoadingTicket = ({
       var material: any = [];
       var products: any = [];
       var nonSerializeAsset: any = [];
+      var invoiceData: any = [];
 
       dispatch({ type: 'loading', loading: true });
 
@@ -170,6 +171,10 @@ const LoadingTicket = ({
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         material = productResponse?.data?.data?.material;
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
+
+        const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`)
+        invoiceData = invoiceResponse?.data?.data?.material || []
+
       }
 
       const loadingTicketProducts = [];
@@ -246,15 +251,6 @@ const LoadingTicket = ({
         }
       });
 
-      // if (deliveryTicketList.length) {
-      //   if ((deliveryTicketList.filter((e) => [DELIVERY_TICKET_STATUS.new, DELIVERY_TICKET_STATUS.indTransit].includes(e.status))).length > 0) {
-      //     setShowProcessDeliveryTicket(true)
-      //   }
-      //   else {
-      //     setShowProcessDeliveryTicket(false)
-      //   }
-      // }
-
       deliveryTicketList.map((obj) => {
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
           productAssets.map((d, index) => {
@@ -273,6 +269,11 @@ const LoadingTicket = ({
         d['isChecked'] = false;
         d['hideSelection'] = [INVENTORY_STATUS.repair, INVENTORY_STATUS.scrap, INVENTORY_STATUS.lost, INVENTORY_STATUS.underReview].includes(d.status) ||
           d?.manualStatus === INVENTORY_STATUS.reserved || d?.isReplaced;
+
+        d['isReplaceable'] = true;
+        if (invoiceData?.length && invoiceData?.some((e) => isEqual(e._id, d._id))) {
+          d['isReplaceable'] = false;
+        }
       });
 
       if (productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
@@ -744,7 +745,8 @@ const LoadingTicket = ({
                     f.hasOwnProperty('loadingTicketId')
                     && f?.type === 'Asset'
                     && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
-                    && f?.status === INVENTORY_STATUS.inUse)?.length === selectedRecords?.length
+                    && f?.status === INVENTORY_STATUS.inUse
+                    && f?.isReplaceable)?.length === selectedRecords?.length
                   &&
                   <MenuItem
                     onClick={() => {

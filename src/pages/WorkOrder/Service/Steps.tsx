@@ -156,12 +156,11 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '' }) => {
+const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, setDisableCompleteFail, fetchService, referencType = '', handelClose = null }) => {
 
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
 
-  const [stepList, setStepList] = useState([]);
   const [serviceDetails, setServiceDetails] = useState(null);
   const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, values: null, type: '' });
   const [selectedStep, setSelectedStep] = useState(null);
@@ -171,7 +170,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   const [comment, setComment] = useState('');
   const [openCompleteDialog, setOpenCompleteDialog] = useState(false);
   const [assignSteps, setAssignSteps] = useState(false);
-  const [addStepFields, setAddStepFields] = useState({ fields: [], section: [] });
   const {
     state: {
       user: { user }
@@ -190,30 +188,31 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       .get(`${workOrder.api}/service/detail/${selectedService._id}/${workOrderId}`)
       .then(({ data: { data } }) => {
         setServiceDetails(data);
-        const steps = data?.steps?.map((d) => d.stepName);
-        setStepList(steps);
 
-        const completedSteps = serviceData.filter(
-          (d) =>
-            d.uniqueId === selectedService?.uniqueId &&
-            d.serviceId === selectedService._id &&
-            [
-              WORKORDER_SERVICE_STEP_STATUS.passed,
-              WORKORDER_SERVICE_STEP_STATUS.completed,
-              WORKORDER_SERVICE_STEP_STATUS.failed,
-              WORKORDER_SERVICE_STEP_STATUS.skipped,
-              WORKORDER_SERVICE_STEP_STATUS.end
-            ].includes(d?.passFailStatus)
-        );
+        if (data?.steps?.length) {
+          const completedSteps = serviceData.filter(
+            (d) =>
+              d.uniqueId === selectedService?.uniqueId &&
+              d.serviceId === selectedService._id &&
+              [
+                WORKORDER_SERVICE_STEP_STATUS.passed,
+                WORKORDER_SERVICE_STEP_STATUS.completed,
+                WORKORDER_SERVICE_STEP_STATUS.failed,
+                WORKORDER_SERVICE_STEP_STATUS.skipped,
+                WORKORDER_SERVICE_STEP_STATUS.end
+              ].includes(d?.passFailStatus)
+          );
 
-        const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
+          const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), data?.steps?.map((d) => d._id).sort());
 
-        setDisableCompleteFail(!allStepsDone);
-        setIsAllStepDone(allStepsDone);
+          setDisableCompleteFail(!allStepsDone);
+          setIsAllStepDone(allStepsDone);
 
-        if (inSteps && allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)) {
-          setOpenCompleteDialog(true);
-          setInSteps(false);
+          if (inSteps && allStepsDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status)) {
+            setOpenCompleteDialog(true);
+            setInSteps(false);
+          }
+
         }
       })
       .catch((err) => {
@@ -252,7 +251,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
   };
 
   const handleAddStep = (values: any) => {
-    values.fields = addStepFields?.fields;
     axiosInstance()
       .put(`${workOrder.api}/service/${workOrderId}/${selectedService?.uniqueId}/add-step`, values)
       .then(({ data }) => {
@@ -264,7 +262,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
         setAssignSteps(false);
         getServiceData();
         fetchService();
-        setAddStepFields({ fields: [], section: [] });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -276,14 +273,14 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
     data.serviceIds = ids;
     if (selectedService?.uniqueId) {
       data.aboveServiceUniqueId = selectedService?.uniqueId;
-      data.createdFrom = selectedService?.uniqueId;
+      data.createdFromStep = step?._id;
     }
     axiosInstance()
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
         if (forMinMax) {
           const type = automatePassFail(values, step);
-          handlePassFail(type, step?._id);
+          handlePassFail(type, step);
         }
         setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
         fetchService();
@@ -363,7 +360,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           });
           if (services.length > 0) {
             if (referencType === "workOrderTechnician") {
-              handleAddService(services?.map((e) => e._id));
+              handleAddService(services?.map((e) => e._id), false, step);
             }
             else {
               setAddServiceConfirmation({ open: true, status: '', services, step, values, type: '' });
@@ -371,7 +368,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
           }
         } else if (step?.isPassFail) {
           const type = automatePassFail(values, step);
-          handlePassFail(type, step?._id);
+          handlePassFail(type, step);
         }
       })
       .catch((error) => {
@@ -438,82 +435,51 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       });
   };
 
-  const handlePassFail = (type, stepId) => {
+  const handlePassFail = (type, step) => {
     setInSteps(true);
     axiosInstance()
       .put(`${workOrder.api}/${workOrderId}/step/pass-fail`, {
         uniqueId: selectedService?.uniqueId,
         serviceId: selectedService._id,
-        stepId: stepId,
+        stepId: step._id,
         passFailStatus: type
       })
       .then(({ data }) => {
         const result = data?.data;
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isPassAddon && result?.passAddon?.length) {
-          const services = result?.passAddon.filter((s) => {
-            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
-          });
-          if (services.length > 0) {
-            if (referencType === "workOrderTechnician") {
-              handleAddService(services?.map((e) => e._id));
-            }
-            else {
-              setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, services }));
-            }
+          if (referencType === "workOrderTechnician") {
+            handleAddService(result?.passAddon?.map((e) => e._id), false, step);
+          }
+          else {
+            setAddServiceConfirmation({ open: true, status: WORKORDER_SERVICE_STEP_STATUS.passed, services: result?.passAddon, step: step, values: null, type: '' });
           }
         }
         else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
-          const services = result?.failAddon.filter((s) => {
-            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
-          });
-          if (services.length > 0) {
-            if (referencType === "workOrderTechnician") {
-              handleAddService(services?.map((e) => e._id));
-            }
-            else {
-              setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, services }))
-            }
+          if (referencType === "workOrderTechnician") {
+            handleAddService(result?.failAddon?.map((e) => e._id), false, step);
+          }
+          else {
+            setAddServiceConfirmation({ open: true, status: WORKORDER_SERVICE_STEP_STATUS.failed, services: result?.failAddon, step: step, values: null, type: '' });
           }
         }
-        if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
-          const services = result?.jumpStepsPass.filter((s) => {
-            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
-          });
-
-          if (services.length > 0) {
-            if (referencType !== "workOrderTechnician") {
-              setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, services, type: 'jumpStep' }));
-            }
-          }
-        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isJumpStepFail && result?.jumpStepsFail?.length) {
-          const services = result?.jumpStepsFail.filter((s) => {
-            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
-          });
-          if (services.length > 0) {
-            if (referencType !== "workOrderTechnician") {
-              setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, services, type: 'jumpStep' }));
-            }
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
+          if (referencType !== "workOrderTechnician") {
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, type: 'jumpStep' }));
           }
         }
-        if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isQuoteRevisionOnFail) {
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isJumpStepFail && result?.jumpStepsFail?.length) {
+          if (referencType !== "workOrderTechnician") {
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'jumpStep' }));
+          }
+        }
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isQuoteRevisionOnFail) {
           if (referencType !== "workOrderTechnician") {
             setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'isQuoteRevisionOnFail' }));
           }
         }
-        if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
-          const services = [result?.returnToStepOnFail].filter((s) => {
-            return serviceSteps.findIndex((s1) => s1._id === s._id) === -1;
-          });
-          if (services.length > 0) {
-            if (referencType !== "workOrderTechnician") {
-              setAddServiceConfirmation((s) => ({
-                ...s,
-                status: WORKORDER_SERVICE_STEP_STATUS.failed,
-                open: true,
-                services,
-                type: 'returnToStepOnFail'
-              }));
-            }
+        else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
+          if (referencType !== "workOrderTechnician") {
+            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'returnToStepOnFail' }));
           }
         }
         toastConfig.setToastConfig({
@@ -562,10 +528,9 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       });
   };
 
-
   let startIdx = 0;
-  return stepList ? (
-    stepList?.length ? (
+  return serviceDetails ? (
+    serviceDetails?.steps?.length ? (
       <Box
         className={classes.mainContainer}
         sx={{ position: 'relative', overflow: 'hidden' }}
@@ -632,22 +597,23 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                       <Box sx={{ justifyContent: 'flex-end', paddingLeft: '10px', paddingTop: '10px', marginLeft: 'auto', display: 'flex' }}>
                         {stepData?.startDate &&
                           <TimerComponent stepData={stepData} updateTime={stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? true : false} />}
-                        {(stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start || stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause) && (
+                        {([WORKORDER_SERVICE_STEP_STATUS.start, WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) && (
                           <Box mr={1}>
                             <Button
                               variant="outlined"
-                              color="default"
+                              color="secondary"
                               size="small"
                               disabled={!allowedToEdit}
                               onClick={(e) => {
-                                if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause) {
+                                if ([WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)) {
                                   handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.start, stepData);
-                                } else {
+                                } else if (stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start) {
                                   handlePauseResume(WORKORDER_SERVICE_STEP_STATUS.pause, stepData);
                                 }
                               }}
                             >
-                              {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause ? 'Resume' : 'Pause'}
+                              {stepData?.status === WORKORDER_SERVICE_STEP_STATUS.pause ? 'Resume' :
+                                stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start ? 'Pause' : 'Restart'}
                             </Button>
                           </Box>
                         )}
@@ -683,7 +649,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                                 size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step._id);
+                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.passed, step);
                                 }}
                               >
                                 Pass
@@ -694,7 +660,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                                 disabled={!allowedToEdit}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step._id);
+                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.failed, step);
                                 }}
                               />
                             </Box>
@@ -707,7 +673,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                                 disabled={!allowedToEdit}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step._id);
+                                  handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
                                 }}
                               >
                                 Complete
@@ -716,7 +682,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                           )
                         ) : null}
                         {stepData?.status
-                          && ![WORKORDER_SERVICE_STEP_STATUS.pause].includes(stepData?.status)
+                          && ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status)
                           && ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus)
                           && step?.fields?.length && (isMeTechnician || !isAnyTechnician) ? (
                           [WORKORDER_SERVICE_STEP_STATUS.passed, WORKORDER_SERVICE_STEP_STATUS.failed]?.includes(stepData?.passFailStatus) ?
@@ -774,7 +740,6 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
                 </Box>
               );
             })}
-
           {isAllStepDone && [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(selectedService.status) &&
             <Box pt={2}>
               <Grid container justify="flex-end">
@@ -812,7 +777,12 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             serviceName={selectedService?.serviceName}
             comment={comment}
             setComment={setComment}
-            updateStatus={() => updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed)}
+            updateStatus={() => {
+              updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed)
+              if (handelClose) {
+                handelClose()
+              }
+            }}
             handleClose={() => {
               setComment('');
               setOpenCompleteDialog(false);
@@ -824,16 +794,12 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
             open={true}
             message={
               addServiceConfirmation.type === 'returnToStepOnFail'
-                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services
-                  ?.map((e) => e.serviceName)
-                  ?.toString()}. Do you want to continue ?`
+                ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()}. Do you want to continue ?`
                 : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
                   ? ` Step fail requires Quote Revision. Do you confirm on this?`
                   : addServiceConfirmation.type === 'jumpStep'
                     ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                      ?.map((e) => e.serviceName)
-                      ?.toString()} has been added. Do you want to Add ? `
+                    : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()} has been added. Do you want to Add ? `
             }
             onClose={() => {
               setAddServiceConfirmation({ open: false, services: [], status: '', step: null, values: null, type: '' });
@@ -873,9 +839,11 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
     ) : (
       <>
         <Box p={2} height={500} bgcolor="rgba(242, 243, 247, 0.6)" textAlign="center">
-          <Button variant="contained" color="primary" onClick={() => setAssignSteps(true)}>
-            Add Step
-          </Button>
+          {referencType !== 'workOrderTechnician' &&
+            <Button variant="contained" color="primary" onClick={() => setAssignSteps(true)}>
+              Add Step
+            </Button>
+          }
         </Box>
         {assignSteps && (
           <StepDialog

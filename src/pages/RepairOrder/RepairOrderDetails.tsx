@@ -18,7 +18,8 @@ import {
   REPAIR_ORDER_STATUS,
   repairOrderSteps,
   REPAIR_ORDER_TYPE,
-  QUOTATION_STATUS
+  QUOTATION_STATUS,
+  WORKORDER_SERVICE_STATUS
 } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
@@ -38,6 +39,7 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Productpackage from './Productpackage';
 import Quotation from './Quotation';
 import WorkOrder from './WorkOrder';
+import LoadingTicket from './LoadingTicket';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
 
@@ -83,6 +85,7 @@ const RepairOrderDetails = () => {
   const [isAnyMaterial, setisAnyMaterial] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
+  const [enableStatusChange, setEnableStatusChange] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -140,6 +143,7 @@ const RepairOrderDetails = () => {
   };
 
   const fetchRepairOrderData = () => {
+    setRepairOrderData(null)
     axiosInstance()
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
@@ -148,7 +152,7 @@ const RepairOrderDetails = () => {
         const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
         setAllowedToEdit(isAllowedToEdit);
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
-          setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, `Invoice`]?.includes(d)));
+          setRepairOrderProcessSteps(repairOrderSteps.filter((d) => !['Quotation', `Post Work Service`, 'Loading Ticket', `Invoice`]?.includes(d)));
         }
         setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setRepairOrderData({ ...data });
@@ -158,11 +162,31 @@ const RepairOrderDetails = () => {
           params.delete('openEdit');
           history.push({ search: params.toString() });
         }
+        if (data?.type === REPAIR_ORDER_TYPE.internal && data?.status !== REPAIR_ORDER_STATUS.completed) {
+          checkStatusChange()
+        }
+        else {
+          setEnableStatusChange(false)
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
+
+  const checkStatusChange = () => {
+    axiosInstance().get(`${repairOrder.api}/${id}/work-order/service`).then(({ data: { data } }) => {
+      if (data?.material?.length) {
+        const material = data?.material?.filter((e) => !e.parentId);
+        if (material?.filter((e) => e?.workOrder?.status === WORKORDER_SERVICE_STATUS.completed)?.length === material?.length) {
+          setEnableStatusChange(true)
+        }
+      }
+    })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  }
 
   const handleDelete = () => {
     axiosInstance()
@@ -207,7 +231,7 @@ const RepairOrderDetails = () => {
   const createNewVersionQuote = () => {
     setQuoteClonning(true);
     axiosInstance()
-      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`)
+      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`, { updateProcessStatus: false })
       .then(() => {
         setShowQuotationConfirmBox(false);
         fetchQuotationData();
@@ -270,46 +294,49 @@ const RepairOrderDetails = () => {
             <Paper>
               {repairOrderData ? (
                 <DetailsPageHeader heading={repairOrderData?.repairOrderNumber} mainPoints={null} showHeading={true}>
-                  {permissions?.repairOrder?.isUpdate && allowedToEdit && [REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status) && (
-                    <Fragment>
-                      <Button
-                        variant="outlined"
-                        color="default"
-                        size="small"
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                      >
-                        {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
-                      </Button>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                      >
-                        {statusOptions?.map((o, index) => {
-                          return (
-                            <MenuItem
-                              disabled={index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status)}
-                              onClick={() => {
-                                closeActions();
-                                handleStatusChange(o);
-                              }}
-                              value={o}
-                            >
-                              {o?.optionLabel}
-                            </MenuItem>
-                          );
-                        })}
-                      </Menu>
-                    </Fragment>)}
+                  {permissions?.repairOrder?.isUpdate && allowedToEdit &&
+                    ([REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced].includes(repairOrderData?.status) || enableStatusChange) && (
+                      <Fragment>
+                        <Button
+                          variant="outlined"
+                          color="default"
+                          size="small"
+                          onClick={openActions}
+                          aria-controls="action-menu"
+                          endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
+                        >
+                          {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
+                        </Button>
+                        <Menu
+                          anchorEl={anchorEl}
+                          keepMounted
+                          getContentAnchorEl={null}
+                          anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                          }}
+                          id="action-menu"
+                          open={Boolean(anchorEl)}
+                          onClose={closeActions}
+                        >
+                          {statusOptions?.map((o, index) => {
+                            return (
+                              <MenuItem
+                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === repairOrderData?.status)
+                                  || ![REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.completed]?.includes(o?.optionLabel)
+                                }
+                                onClick={() => {
+                                  closeActions();
+                                  handleStatusChange(o);
+                                }}
+                                value={o}
+                              >
+                                {o?.optionLabel}
+                              </MenuItem>
+                            );
+                          })}
+                        </Menu>
+                      </Fragment>)}
                   {permissions?.repairOrder?.isUpdate && allowedToEdit && ['Add Assets', 'Work Order'].includes(repairOrderProcessSteps[currentStep]) &&
                     [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationVersionData?.status) && (
                       <Button
@@ -423,9 +450,9 @@ const RepairOrderDetails = () => {
                   <ContentFullScreen title={repairOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {repairOrderProcessSteps[currentStep] === 'Add Assets' && repairOrderData && (
                       <Productpackage
+                        fetchRepairOrderData={fetchRepairOrderData}
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
@@ -451,11 +478,8 @@ const RepairOrderDetails = () => {
                           isTabletScreen={isTabletScreen}
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
-                          allowedToEdit={
-                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                              quotationVersionData?.status
-                            )
-                              ? false
+                          allowedToEdit={currentStep === 3 ? allowedToEdit :
+                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationVersionData?.status) ? false
                               : allowedToEdit
                           }
                           allowedToDelete={allowedToDelete}
@@ -476,6 +500,14 @@ const RepairOrderDetails = () => {
                         setQuotationVersionData={setQuotationVersionData}
                         invoiceStep={false}
                         updateOrderStatus={updateOrderStatus}
+                      />
+                    )}
+                    {repairOrderProcessSteps[currentStep] === 'Loading Ticket' && repairOrderData && (
+                      <LoadingTicket
+                        repairOrderData={repairOrderData}
+                        setNextStep={setNextStep}
+                        renderedFrom={`${renderedFrom}_grid-5`}
+                        allowedToEdit={allowedToEdit}
                       />
                     )}
                     {repairOrderProcessSteps[currentStep] === 'Invoice' && repairOrderData && (

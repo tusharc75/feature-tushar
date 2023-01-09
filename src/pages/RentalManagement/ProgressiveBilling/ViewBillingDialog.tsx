@@ -26,8 +26,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import InvoiceFacility from 'src/pages/Invoice/Invoice/InvoiceFacility';
 import { startCase } from 'lodash';
-import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -121,7 +121,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                     }
                   }}
                 >
-                  <InfoIcon fontSize="small" color="primary" />
+                  <OpenInNewIcon fontSize="small" color="primary" />
                 </IconButton>}
             </div>
           )
