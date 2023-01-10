@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Paper } from '@material-ui/core';
+import { Box, Button, Grid, Paper, Tab, Tabs } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -16,84 +16,90 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageSurveys from './ManageSurveys';
 import FieldDialog from './FieldDialog';
-
+import SurveysData from './SurveysData';
 
 const SurveysDetail = () => {
-    const { id } = useParams();
-   const [stepFieldsDialog, setStepFieldsDialog] = useState(false);
-    const history = useHistory();
-    const toastConfig = useContext(CustomToastContext);
-    const [headingLbl, setHeadingLbl] = useState('');
-    const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.surveys]);
-    const [SurveyData, setSurveyData] = useState(null);
-    const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-    const [fields, setFields] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [showConfirmBox, setShowConfirmBox] = useState(false);
-    const {
-      state: { permissions }
-    }: any = useData();
+  const { id } = useParams();
+  const [stepFieldsDialog, setStepFieldsDialog] = useState(false);
+  const history = useHistory();
+  const toastConfig = useContext(CustomToastContext);
+  const [headingLbl, setHeadingLbl] = useState('');
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.surveys]);
+  const [SurveyData, setSurveyData] = useState(null);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [fields, setFields] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
 
-    useEffect(() => {
-        if (id) {
-          fetchFields();
-          fetchData();
-        }
-      }, [id]);
-    
-      const fetchFields = async () => {
-        axiosInstance()
-          .get('/field?resource=Surveys')
-          .then(({ data }) => {
-            setFields(data.data?.filter((field) => field.isRead));
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
+  const {
+    state: { permissions }
+  }: any = useData();
+
+  useEffect(() => {
+    if (id) {
+      fetchFields();
+      fetchData();
+    }
+  }, [id]);
+
+  const fetchFields = async () => {
+    axiosInstance()
+      .get('/field?resource=Surveys')
+      .then(({ data }) => {
+        setFields(data.data?.filter((field) => field.isRead));
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/surveys/${id}`);
+      setHeadingLbl(data.surveyName);
+      setSurveyData(data);
+      setCustomizedRoutes([routes.surveys, { title: data?.surveyName }]);
+      setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const handleDelete = () => {
+    if (id) {
+      axiosInstance()
+        .put(`/surveys/remove`, { ids: [id] })
+        .then(({ data }) => {
+          setShowConfirmBox(false);
+
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
           });
-      };
+          history.goBack();
+        })
+        .catch((err) => {
+          setShowConfirmBox(false);
+        });
+    }
+  };
 
-      const fetchData = async () => {
-        setLoading(true);
-        try {
-          const {
-            data: { data }
-          } = await axiosInstance().get(`/surveys/${id}`);
-          setHeadingLbl(data.surveyName);
-          setSurveyData(data);
-          setCustomizedRoutes([routes.surveys, { title: data?.surveyName }]);
-          setLoading(false);
-        } catch (error) {
-          toastConfig.setToastConfig(error);
-        }
-      };
-    
-      const handleDelete = () => {
-        if (id) {
-            axiosInstance()
-              .put(`/surveys/remove`, { ids: [id] })
-              .then(({ data }) => {
-                setShowConfirmBox(false);
-    
-                toastConfig.setToastConfig({
-                  open: true,
-                  type: 'success',
-                  message: data?.message
-                });
-                history.goBack();
-              })
-              .catch((err) => {
-                setShowConfirmBox(false);
-              });
-          }
-      };
-    
-      const handleOpenUpdateDialog = () => {
-        setOpenUpdateDialog(true);
-      };
-    
-      const closeUpdateDialog = () => {
-        setOpenUpdateDialog(false);
-      };
+  const handleOpenUpdateDialog = () => {
+    setOpenUpdateDialog(true);
+  };
+
+  const closeUpdateDialog = () => {
+    setOpenUpdateDialog(false);
+  };
+
+  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   return (
     <Fragment>
@@ -131,9 +137,8 @@ const SurveysDetail = () => {
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
                     size="small"
-                    onClick={(e)=>{
-                setStepFieldsDialog(true);
-                        
+                    onClick={(e) => {
+                      setStepFieldsDialog(true);
                     }}
                     style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                   >
@@ -147,15 +152,38 @@ const SurveysDetail = () => {
                 </>
               </DetailsPageHeader>
             )}
-            <Box>
-              {loading || !fields?.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
-              ) : (
-                <DetailsPage data={SurveyData} fields={fields} />
-              )}
-            </Box>
+            <Tabs
+              variant="scrollable"
+              scrollButtons="auto"
+              className="oms-tab"
+              value={tabValue}
+              onChange={handleMainTabChange}
+              indicatorColor="primary"
+              textColor="primary"
+              aria-label="Product Details Tab"
+              TabIndicatorProps={{
+                style: {
+                  height: 0
+                }
+              }}
+            >
+              <Tab label="Details" value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" />
+              <Tab label="Data" value={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" />
+            </Tabs>
+            {tabValue === 0 && (
+              <Box>
+                {loading || !fields?.length ? (
+                  <Grid container spacing={2} style={{ padding: '8px' }}>
+                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                  </Grid>
+                ) : (
+                  <DetailsPage data={SurveyData} fields={fields} />
+                )}
+              </Box>
+            )}
+            {tabValue === 1 && (
+              <SurveysData surveyId={id}/>
+            )}
           </Paper>
         </Grid>
       </Grid>
@@ -180,7 +208,7 @@ const SurveysDetail = () => {
           }}
         />
       )}
-       {stepFieldsDialog && (
+      {stepFieldsDialog && (
         <FieldDialog
           surveyId={id}
           handleClose={() => {
@@ -188,12 +216,12 @@ const SurveysDetail = () => {
           }}
           handleSuccess={() => {
             setStepFieldsDialog(false);
-            fetchData()
+            fetchData();
           }}
         />
       )}
     </Fragment>
-  )
-}
+  );
+};
 
-export default SurveysDetail
+export default SurveysDetail;
