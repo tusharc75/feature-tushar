@@ -45,6 +45,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
+  const pathName = pathnames.join('');
 
   const renderIcon = (sectionName: string) => {
     let icon = <FaReact size={16} className="sidebar-icon" />;
@@ -283,46 +284,49 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
               </Link>
             )}
             {user &&
-              listItems().map((listItem, i) => (
-                <React.Fragment key={i}>
-                  <Tooltip title={!toggleDrawer ? listItem.section : ''}>
-                    <ListItem
-                      className={`list-item dropdown-items ${itemToAddActiveClass == i ? 'active_element' : ''}`}
-                      button
-                      key={listItem.section + '' + i}
-                      onClick={() => {
-                        handleCollapse(listItem.section);
-                        if (!toggleDrawer) {
-                          handleToggleDrawer();
-                        }
-                      }}
-                    >
-                      <ListItemIcon>{renderIcon(listItem.section)}</ListItemIcon>
-                      <ListItemText primary={listItem.section} className={`wordWrap`} />
-                      {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
-                    </ListItem>
-                  </Tooltip>
-                  <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding className="list-item">
-                      {listItem.items.map((item, j) => (
-                        <Link
-                          className={`sub-list ${itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''}`}
-                          key={j}
-                          onClick={() => {
-                            setItemToAddActiveClass(i);
-                            setSubItemToAddActiveClass(j);
-                          }}
-                          to={handleRoutes(item)}
-                        >
-                          <ListItem button selected={pathnames.includes(lowerCase(item.name))} className={classes.nested}>
-                            <ListItemText primary={item.resourceLabel || item.name} />
-                          </ListItem>
-                        </Link>
-                      ))}
-                    </List>
-                  </Collapse>
-                </React.Fragment>
-              ))}
+              listItems().map((listItem, i) => {
+                const items = listItem.items.map((item) => item.name.toLowerCase().split(' ').join('-'));
+                return (
+                  <React.Fragment key={i}>
+                    <Tooltip title={!toggleDrawer ? listItem.section : ''}>
+                      <ListItem
+                        className={`list-item dropdown-items ${items.includes(pathName) ? 'active_element' : ''}`}
+                        button
+                        key={listItem.section + '' + i}
+                        onClick={() => {
+                          handleCollapse(listItem.section);
+                          if (!toggleDrawer) {
+                            handleToggleDrawer();
+                          }
+                        }}
+                      >
+                        <ListItemIcon>{renderIcon(listItem.section)}</ListItemIcon>
+                        <ListItemText primary={listItem.section} className={`wordWrap`} />
+                        {open[listItem.section] ? <ExpandLess /> : <ExpandMore />}
+                      </ListItem>
+                    </Tooltip>
+                    <Collapse in={open[listItem.section]} timeout="auto" unmountOnExit>
+                      <List component="div" disablePadding className="list-item">
+                        {listItem.items.map((item, j) => (
+                          <Link
+                            className={`sub-list ${itemToAddActiveClass == i && subItemToAddActiveClass == j ? 'active_sub' : ''}`}
+                            key={j}
+                            onClick={() => {
+                              setItemToAddActiveClass(i);
+                              setSubItemToAddActiveClass(j);
+                            }}
+                            to={handleRoutes(item)}
+                          >
+                            <ListItem button selected={pathnames.includes(lowerCase(item.name))} className={classes.nested}>
+                              <ListItemText primary={item.resourceLabel || item.name} />
+                            </ListItem>
+                          </Link>
+                        ))}
+                      </List>
+                    </Collapse>
+                  </React.Fragment>
+                );
+              })}
           </List>
         </div>
         {!isOffline && (
