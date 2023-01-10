@@ -36,9 +36,9 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
         const invoiceQuantity = invoiceData?.qty || 0;
         let product = d?.row;
         if (!product?.serialized && returnQty > product.qty - invoiceQuantity - consumeQty) {
-          errors.returnQuantity = `Return quantity can not be greater than ${product.qty - invoiceQuantity - consumeQty}`;
+          errors.returnQuantity = `Return quantity is not valid`;
         } else if (returnQty > product.qty) {
-          errors.returnQuantity = 'Return quantity should not be more then order quantity';
+          errors.returnQuantity = 'Return quantity is not valid';
         } else {
           errors.returnQuantity = '';
         }
