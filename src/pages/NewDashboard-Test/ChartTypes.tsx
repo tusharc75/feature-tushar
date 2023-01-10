@@ -5,7 +5,7 @@ import { ImportExport, TableChart, Timeline, Maximize } from '@material-ui/icons
 import { BsFilter, BsFillPinFill } from 'react-icons/bs';
 import { FiMaximize2 } from 'react-icons/fi';
 import { Skeleton } from '@material-ui/lab';
-import { TbPinnedOff } from "react-icons/tb"
+import { TbPinnedOff } from 'react-icons/tb';
 
 import styles from '../KpiDashboard/dashboard.module.scss';
 import FiltersDropdown from './FiltersDropdown';
@@ -37,18 +37,16 @@ interface Props {
   globalFilters: GlobalFiltersType;
   setSelectedChart?: (Chart: ChartDataType) => void;
   selectedDashboardId?: String;
-  fetchDashboards: any
+  fetchDashboards: any;
 }
 
 const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId, fetchDashboards }: Props) => {
+  console.log(chart, filterData, globalFilters);
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
   const { setToastConfig } = React.useContext(CustomToastContext);
   const {
-    state: {
-      selectedEntity,
-      user
-    }
+    state: { selectedEntity, user }
   } = useData();
 
   const currency = user?.user?.currency || 'USD';
@@ -147,20 +145,22 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
 
   const handlePinUnpin = async (type) => {
     setLoading(true);
-    axiosInstance().put(`/dashboard-master/${selectedDashboardId}/${type}/${chart?._id}`).then(async ({ data }) => {
-      setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+    axiosInstance()
+      .put(`/dashboard-master/${selectedDashboardId}/${type}/${chart?._id}`)
+      .then(async ({ data }) => {
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        fetchDashboards();
+        setLoading(false);
       })
-      fetchDashboards()
-      setLoading(false);
-    })
       .catch((err: any) => {
         setToastConfig(err);
         setLoading(false);
       });
-  }
+  };
 
   return (
     <Grid item xs={12} md={fullScreen ? 12 : chart.column}>
@@ -226,34 +226,36 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                     {!tableView ? 'Table' : 'Chart'} View
                   </Button>
                 )}
-                {selectedDashboardId ? !chart?.pin ? (
-                  <HtmlTooltip title="Pin">
-                    <IconButton
-                      disabled={loading}
-                      style={{ marginRight: 10 }}
-                      onClick={() => {
-                        handlePinUnpin('pin')
-                      }}
-                      color="primary"
-                      size="small"
-                    >
-                      <BsFillPinFill fontSize="16px" />
-                    </IconButton>
-                  </HtmlTooltip>
-                ) : (
-                  <HtmlTooltip title="Unpin">
-                    <IconButton
-                      disabled={loading}
-                      style={{ marginRight: 10 }}
-                      onClick={() => {
-                        handlePinUnpin('un-pin')
-                      }}
-                      color="primary"
-                      size="small"
-                    >
-                      <TbPinnedOff fontSize="16px" />
-                    </IconButton>
-                  </HtmlTooltip>
+                {selectedDashboardId ? (
+                  !chart?.pin ? (
+                    <HtmlTooltip title="Pin">
+                      <IconButton
+                        disabled={loading}
+                        style={{ marginRight: 10 }}
+                        onClick={() => {
+                          handlePinUnpin('pin');
+                        }}
+                        color="primary"
+                        size="small"
+                      >
+                        <BsFillPinFill fontSize="16px" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  ) : (
+                    <HtmlTooltip title="Unpin">
+                      <IconButton
+                        disabled={loading}
+                        style={{ marginRight: 10 }}
+                        onClick={() => {
+                          handlePinUnpin('un-pin');
+                        }}
+                        color="primary"
+                        size="small"
+                      >
+                        <TbPinnedOff fontSize="16px" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  )
                 ) : null}
                 {setSelectedChart && (
                   <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
@@ -286,6 +288,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   type={chart.chartType?.toLowerCase()}
                   chartData={chartData?.tableData}
                   isScreenSmall={isScreenSmall}
+                  isCurrency={chart.currency || false}
                   currency={globalFilters.currency || currency}
                   selectedDashboard={globalFilters?.dashboardType}
                 />
