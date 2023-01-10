@@ -101,27 +101,25 @@ const Productpackage = ({
             }
             <Chip
               className="ml-1"
-              label={`${
-                row.original.type === 'service'
+              label={`${row.original.type === 'service'
                   ? 'Service'
                   : row.original.type === 'product'
-                  ? 'Product'
-                  : row.original.type === 'serializedAsset'
-                  ? 'Asset'
-                  : 'Package'
-              }`}
+                    ? 'Product'
+                    : row.original.type === 'serializedAsset'
+                      ? 'Asset'
+                      : 'Package'
+                }`}
               size="small"
               color="primary"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === 'service'
-                      ? routes.serviceMasterDetail.path
-                      : row.original.type === 'product'
+                  `${row.original.type === 'service'
+                    ? routes.serviceMasterDetail.path
+                    : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : routes.packagesDetail.path
+                        ? routes.serializedAssetDetail.path
+                        : routes.packagesDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -218,38 +216,38 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'service'
+      parent.detail = `${parent.type === 'service'
           ? parent.serviceDetail?.serviceName
           : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.assetNumber
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.productDetail?.productName
+            : parent.type === 'serializedAsset'
+              ? parent.serializedAssetDetail.assetNumber
+              : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDesc || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${
-        parent.type === 'service'
+      parent.status = `${parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-          ? parent?.productDetail?.status
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent?.productDetail?.status
+            : parent.type === 'serializedAsset'
+              ? parent?.serializedAssetDetail?.status
+              : parent.packageDetail?.status
+        }`;
     });
 
     if (rows.length !== 0) {
@@ -273,23 +271,22 @@ const Productpackage = ({
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'service'
+      _subRow.detail = `${_subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.serializedAssetDetail.assetNumber
+              : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDesc || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -297,15 +294,14 @@ const Productpackage = ({
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      parent.status = `${
-        parent.type === 'service'
+      parent.status = `${parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-          ? parent.productDetail?.status
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.productDetail?.status
+            : parent.type === 'serializedAsset'
+              ? parent.serializedAssetDetail.status
+              : parent.packageDetail?.status
+        }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
