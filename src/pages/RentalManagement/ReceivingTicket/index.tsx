@@ -570,15 +570,20 @@ const ReceivingTicket = ({
     );
 
   const ActionRenderer = (params) => (
-    allowedToEdit && (params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate) ?
-      <HtmlTooltip title={`Update Start Date / End Date`}>
-        <IconButton
-          size='small'
-          onClick={() => {
-            setOpenDateDialog({ ...openDateDialog, open: true, data: params?.data })
-          }}>
-          <Edit fontSize='small' color='primary' />
-        </IconButton>
+    allowedToEdit ?
+      <HtmlTooltip title={(params?.data?.isAllowedStartDate === false && params?.data?.isAllowedEndDate === false) ? `Invoice created cannot update start date` :
+        params?.data?.isAllowedEndDate === false && params?.data?.isAllowedStartDate !== true ? `Can change the end date after received` : 'Update start date / end date'}>
+        <span>
+          <IconButton
+            size='small'
+            disabled={(params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate) ? false : true}
+            onClick={() => {
+              setOpenDateDialog({ ...openDateDialog, open: true, data: params?.data })
+            }}>
+            <Edit fontSize='small'
+              color={(params?.data?.isAllowedStartDate || params?.data?.isAllowedEndDate) ? 'primary' : 'inherit'} />
+          </IconButton>
+        </span>
       </HtmlTooltip> : ""
   )
 

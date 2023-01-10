@@ -31,23 +31,20 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
+  
   const toastConfig = useContext(CustomToastContext);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [material, setMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
-  const [isRateRequired, setIsRateRequired] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+ 
   const [allFields, setAllFields] = useState([]);
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
-  const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const [viewBillDialogConfirm, setViewBillDialogConfirm] = useState({ open: false, rows: [] });
-  // const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   useEffect(() => {
     fetchFields();
@@ -406,7 +403,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
       .then((res) => {
         fetchProductInventory();
-        onSuccess();
+        setViewBillDialogConfirm({ open: false, rows: [] });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -516,9 +513,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
       {viewBillDialogConfirm.open ? (
         <ConfirmationDialog
           open={viewBillDialogConfirm.open}
-          message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${
-            viewBillDialogConfirm.rows?.length === 1 ? viewBillDialogConfirm.rows[0]?.detail : ''
-          } ?`}
+          message={`Are you sure you want to delete ?`}
           onClose={() => {
             setViewBillDialogConfirm({ open: false, rows: [] });
           }}
