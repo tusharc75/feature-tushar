@@ -8,15 +8,15 @@ export const fetch_po_product_fields = async (currency) => {
     const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.purchaseOrderProduct}`);
     data = response?.data?.data;
     data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
-    var isRateRequired = false
-    data.forEach(element => {
-        if (element.fieldName === "price" && element.required) {
-            isRateRequired = true;
-        }
-    });
-    if (!isRateRequired) {
-        data = data.filter((e) => e.sectionName !== "Pricing Information")
-    }
+    // var isRateRequired = false
+    // data.forEach(element => {
+    //     if (element.fieldName === "price" && element.required) {
+    //         isRateRequired = true;
+    //     }
+    // });
+    // if (!isRateRequired) {
+    //     data = data.filter((e) => e.sectionName !== "Pricing Information")
+    // }
     return data;
 }
 
