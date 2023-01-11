@@ -164,6 +164,8 @@ import BlogDetail from './pages/Blog/BlogDetail';
 import EcommerceHome from './pages/EcommerceHome';
 import Survey from './pages/Surveys';
 import SurveysDetail from './pages/Surveys/SurveysDetail';
+import ContactUs from './pages/ContactUs';
+import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
 
 var notificationInterval: any = null;
 
@@ -269,7 +271,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -830,20 +832,26 @@ function App() {
             <PrivateRoute exact path={`${routes.frequentlyAskedQuestionDetail.path}/:id`}>
               <FrequencyAskedQuestionDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.blog.path}`} >
+            <PrivateRoute exact path={`${routes.blog.path}`}>
               <Blog />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.blogDetail.path}/:id`} >
+            <PrivateRoute exact path={`${routes.blogDetail.path}/:id`}>
               <BlogDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.eCommerceHome.path} >
+            <PrivateRoute exact path={routes.eCommerceHome.path}>
               <EcommerceHome />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.surveys.path} >
+            <PrivateRoute exact path={routes.surveys.path}>
               <Survey />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.surveysDetail.path}/:id`}>
               <SurveysDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.contactUs.path}>
+              <ContactUs />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.contactUsDetail.path}/:id`}>
+              <ContactUsDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

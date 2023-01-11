@@ -62,7 +62,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'custom-report',
         'frequently-asked-question',
         'e-commerce-home',
-        'surveys'
+        'surveys',
+        'contact-us'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);

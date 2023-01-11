@@ -369,7 +369,8 @@ export const RESOURCE_LABEL = {
   freqentlyAskedQuestion: 'Frequently Asked Question',
   blog: 'Blog',
   eCommerceHome: 'e-Commerce Home',
-  surveys: 'Surveys'
+  surveys: 'Surveys',
+  contactUs: 'Contact Us',
 };
 
 export const CHILD_RESOURCE = {
