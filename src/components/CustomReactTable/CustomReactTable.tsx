@@ -381,6 +381,11 @@ export default function CustomReactTable({
     setCellValue('');
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      submitInput();
+    }
+  };
   // Render the UI for your table
   return (
     <>
@@ -475,10 +480,12 @@ export default function CustomReactTable({
                             Object.keys(rowState[rowId].cellState).forEach((colId) => {
                               if (rowState[rowId]?.cellState[colId] !== cell.column?.id && rowState[rowId]?.cellState[colId]?.isEditing) {
                                 setCellState(rowId, colId, { isEditing: false });
+                                setIsCellEditing(false);
                               }
                             });
                           });
                         }}
+                        onKeyDown={isCellEditing && currentRowEditing && currentRowEditing.id === row.id && handleKeyDown}
                         {...cell.getCellProps()}
                         className={`td 
                                                     ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} 

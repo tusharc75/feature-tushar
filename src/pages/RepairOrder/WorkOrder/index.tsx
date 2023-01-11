@@ -63,7 +63,7 @@ const WorkOrder = ({
   useEffect(() => {
     fetchFields();
     fetchData();
-  }, []);
+  }, [repairOrderData]);
 
   useEffect(() => {
     const assignedUsersArrays = selectedProducts?.filter((product) => product?.assignedUsers).map((product) => product?.assignedUsers);
@@ -144,6 +144,28 @@ const WorkOrder = ({
         )
       },
       {
+        accessor: 'productName',
+        Header: 'Product',
+        width: 200,
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
+            <p className="text-truncate" title={row.original?.productName}>
+              {row.original?.productName ? (
+                row.original?.productId ? (
+                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
+                    {row.original?.productName}
+                  </a>
+                ) : (
+                  row.original?.productName
+                )
+              ) : (
+                <NoDataCell />
+              )}
+            </p>
+          </div>
+        )
+      },
+      {
         accessor: 'description',
         Header: 'Description',
         width: 200,
@@ -172,28 +194,6 @@ const WorkOrder = ({
           ) : (
             <NoDataCell />
           )
-      },
-      {
-        accessor: 'productName',
-        Header: 'Product',
-        width: 200,
-        Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
-            <p className="text-truncate" title={row.original?.productName}>
-              {row.original?.productName ? (
-                row.original?.productId ? (
-                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
-                    {row.original?.productName}
-                  </a>
-                ) : (
-                  row.original?.productName
-                )
-              ) : (
-                <NoDataCell />
-              )}
-            </p>
-          </div>
-        )
       },
       {
         accessor: 'assignedUsers',
@@ -369,6 +369,8 @@ const WorkOrder = ({
           ? parent?.productDetail?.productDesc || ''
           : parent.type === 'package'
           ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.product?.productDesc || ''
           : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
@@ -392,17 +394,10 @@ const WorkOrder = ({
     });
 
     if (isPostWorkService) {
-      if (
-        data?.material?.filter(
-          (e) =>
-            e?.type === 'service' &&
-            !e?.serviceDetail?.preWork &&
-            [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status)
-        )?.length
-      ) {
-        setNextStep(false);
-      } else {
+      if (rows?.some((e) => e.serviceStatus === WORK_ORDER_STATUS.completed)) {
         setNextStep(true);
+      } else {
+        setNextStep(false);
       }
     } else {
       if (
@@ -539,7 +534,7 @@ const WorkOrder = ({
     <Fragment>
       <Box display="flex" justifyContent="flex-end" pt={1} pb={2}>
         <Box display="flex" alignItems="center" justifyContent={'flex-end'} paddingX={1} gridColumnGap={8} flex={1}>
-          {(allowedToEdit || isPostWorkService) && (
+          {allowedToEdit && (
             <Box display="flex" gridColumnGap={5}>
               <Button
                 variant="outlined"
@@ -609,7 +604,8 @@ const WorkOrder = ({
                         ? false
                         : true
                       : selectedAssets?.length
-                      ? selectedAssets?.filter((d) => !d?.subRows || d?.subRows?.length == 0)?.length === selectedAssets?.length
+                      ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
+                        selectedAssets?.length
                         ? false
                         : true
                       : true

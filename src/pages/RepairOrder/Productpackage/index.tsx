@@ -17,16 +17,17 @@ import { repairOrder, dateFormat } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
-import { fetch_repair_order_product_fields } from 'src/components/RepairOrder/helper';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';
 import { sortBy } from 'lodash';
 
+const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
 const Productpackage = ({
+  fetchRepairOrderData,
   repairOrderData,
   setNextStep,
-  currencySymbol,
   isTabletScreen,
   isSmallScreen,
   showActivity,
@@ -34,7 +35,7 @@ const Productpackage = ({
   stepFullScreen,
   allowedToEdit,
   allowedToDelete,
-  setHasAssetsAdded,
+  setHasAssetsAdded
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -62,14 +63,14 @@ const Productpackage = ({
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [repairOrderData]);
 
   useEffect(() => {
     fetchData();
   }, [columns]);
 
   const fetchFields = async () => {
-    //var data = await fetch_repair_order_product_fields(repairOrderData?.currency);
+    setColumns(null);
     const coloum: any = [
       {
         accessor: 'srno',
@@ -137,6 +138,8 @@ const Productpackage = ({
             <p className="text-truncate" title={row.original?.productName}>
               {row.original?.productName ? (
                 row.original?.productId ? (
+              {row.original?.productName ? (
+                row.original?.productId ? (
                   <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
                     {row.original?.productName}
                   </a>
@@ -165,7 +168,6 @@ const Productpackage = ({
         Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
       }
     ];
-
     coloum.push({
       accessor: 'action',
       Header: '',
@@ -192,7 +194,6 @@ const Productpackage = ({
         </>
       )
     });
-
     coloum.forEach((element) => {
       if (element.accessor === 'qty') {
         element['Footer'] = (info) => {
@@ -203,7 +204,6 @@ const Productpackage = ({
         };
       }
     });
-
     setColumns(coloum);
   };
 
@@ -233,25 +233,26 @@ const Productpackage = ({
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDesc || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${
-        parent.type === 'service'
+      parent.status = `${parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-          ? parent?.productDetail?.status
-          : parent.type === 'serializedAsset'
-          ? parent?.serializedAssetDetail?.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent?.productDetail?.status
+            : parent.type === 'serializedAsset'
+              ? parent?.serializedAssetDetail?.status
+              : parent.packageDetail?.status
+        }`;
     });
 
     if (rows.length !== 0) {
@@ -269,23 +270,20 @@ const Productpackage = ({
     setSelectedProducts([]);
   };
 
-  const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
-
   const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     let productIndex = 0;
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${
-        _subRow.type === 'service'
+      _subRow.detail = `${_subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
           : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail.assetNumber
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.serializedAssetDetail.assetNumber
+              : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -301,15 +299,14 @@ const Productpackage = ({
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      parent.status = `${
-        parent.type === 'service'
+      parent.status = `${parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-          ? parent.productDetail?.status
-          : parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail.status
-          : parent.packageDetail?.status
-      }`;
+            ? parent.productDetail?.status
+            : parent.type === 'serializedAsset'
+              ? parent.serializedAssetDetail.status
+              : parent.packageDetail?.status
+        }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -346,6 +343,7 @@ const Productpackage = ({
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
         fetchData();
+        fetchRepairOrderData();
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -375,6 +373,7 @@ const Productpackage = ({
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
         fetchData();
+        fetchRepairOrderData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -389,6 +388,7 @@ const Productpackage = ({
       .then(() => {
         setDeleting(false);
         fetchData();
+        fetchRepairOrderData();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -396,11 +396,6 @@ const Productpackage = ({
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
-  };
-
-  const handleOpen = (rowData) => {
-    setIsProductEdit({ open: true, isBulkedit: false });
-    setRecordToUpdate(rowData);
   };
 
   const handleDeleteMultiple = () => {

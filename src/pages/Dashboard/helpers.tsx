@@ -100,8 +100,9 @@ const setDataBySectionName = (secName) => {
   };
 };
 
+// SET ICON COLORS BY CARD BACKGROUND COLOR
 const getIconColor = (mainColor: string) => {
-  let colors = null;
+  let colors = ['#FC5757', '#C60707'];
   switch (mainColor) {
     case '#FFEFEE':
       colors = ['#FC5757', '#C60707'];

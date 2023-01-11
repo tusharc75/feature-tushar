@@ -1488,6 +1488,9 @@ canvas {
 .grid-without-activity {
   display: grid;
   grid-template-columns: calc(100% - 26px) 26px;
+  @media all and (max-width: 900px) {
+    grid-template-columns: 100%;
+  }
 }
 
 .grid-without-activity-user {

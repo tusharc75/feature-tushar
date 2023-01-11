@@ -132,7 +132,7 @@ export default function StepDialog({
             returnToServiceOnFail: data?.returnToServiceOnFail
           });
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setStepDetails({
         stepName: '',
@@ -259,7 +259,7 @@ export default function StepDialog({
           <Formik initialValues={stepDetails} onSubmit={handleSubmit} validateOnMount validate={validate}>
             {({ submitForm, touched, errors, setFieldValue, values }) => (
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <CustomDialogContent>
+                <CustomDialogContent style={{ minHeight: fullScreen ? 'calc(100vh - 112px)' : '' }}>
                   <Grid container spacing={2}>
                     <Grid xs={12} md={6} sm={6} item>
                       <Field
@@ -335,8 +335,9 @@ export default function StepDialog({
                       <TextField
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                              }`}</InputAdornment>
+                            <InputAdornment position="start">{`${
+                              values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                            }`}</InputAdornment>
                           )
                         }}
                         margin="dense"
@@ -358,8 +359,9 @@ export default function StepDialog({
                       <TextField
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">{`${values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
-                              }`}</InputAdornment>
+                            <InputAdornment position="start">{`${
+                              values['currency'] !== '' ? currencyCodeToSymbol(values['currency']) : ''
+                            }`}</InputAdornment>
                           )
                         }}
                         margin="dense"
@@ -729,10 +731,11 @@ export default function StepDialog({
                   >
                     Cancel
                   </Button>
-                  {reference === 'workOrder' && notEditable ? null :
+                  {reference === 'workOrder' && notEditable ? null : (
                     <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
                       Save
-                    </CustomButton>}
+                    </CustomButton>
+                  )}
                 </CustomDialogFooter>
               </Form>
             )}
@@ -765,8 +768,8 @@ export default function StepDialog({
             setOpenFieldDialog(false);
           }}
           handleSucess={(data: any) => {
-            setOpenFieldDialog(false);
             setFields(data);
+            setOpenFieldDialog(false);
           }}
         />
       )}

@@ -689,6 +689,22 @@ const routes = {
     : RESOURCE_LABEL.blog,
     path:'/blog/detail'
   },
+  eCommerceHome:{
+    title:storedRoutes && storedRoutes.eCommerceHome && storedRoutes.eCommerceHome.title
+    ? storedRoutes.eCommerceHome?.title : RESOURCE_LABEL?.eCommerceHome,
+    path:'/e-commerce-home'
+  },
+  surveys:{
+    title:storedRoutes && storedRoutes.surveys && storedRoutes.surveys.title
+    ? storedRoutes.surveys?.title : RESOURCE_LABEL?.surveys,
+    path:'/surveys'
+  },
+  surveysDetail:{
+    title:storedRoutes && storedRoutes.surveys && storedRoutes.surveys.title 
+    ? storedRoutes.surveys?.title
+    : RESOURCE_LABEL.surveys,
+    path:'/surveys/detail'
+  },
 };
 
 export default routes;

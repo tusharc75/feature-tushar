@@ -18,7 +18,8 @@ import {
   REPAIR_ORDER_STATUS,
   repairOrderSteps,
   REPAIR_ORDER_TYPE,
-  QUOTATION_STATUS
+  QUOTATION_STATUS,
+  WORKORDER_SERVICE_STATUS
 } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
@@ -86,6 +87,7 @@ const RepairOrderDetails = () => {
   const [isAnyMaterial, setisAnyMaterial] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
+  const [enableStatusChange, setEnableStatusChange] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -143,6 +145,7 @@ const RepairOrderDetails = () => {
   };
 
   const fetchRepairOrderData = () => {
+    setRepairOrderData(null);
     axiosInstance()
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
@@ -160,6 +163,27 @@ const RepairOrderDetails = () => {
           const params = new URLSearchParams();
           params.delete('openEdit');
           history.push({ search: params.toString() });
+        }
+        if (data?.type === REPAIR_ORDER_TYPE.internal && data?.status !== REPAIR_ORDER_STATUS.completed) {
+          checkStatusChange();
+        } else {
+          setEnableStatusChange(false);
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const checkStatusChange = () => {
+    axiosInstance()
+      .get(`${repairOrder.api}/${id}/work-order/service`)
+      .then(({ data: { data } }) => {
+        if (data?.material?.length) {
+          const material = data?.material?.filter((e) => !e.parentId);
+          if (material?.filter((e) => e?.workOrder?.status === WORKORDER_SERVICE_STATUS.completed)?.length === material?.length) {
+            setEnableStatusChange(true);
+          }
         }
       })
       .catch((err) => {
@@ -210,7 +234,7 @@ const RepairOrderDetails = () => {
   const createNewVersionQuote = () => {
     setQuoteClonning(true);
     axiosInstance()
-      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`)
+      .post(`/quotation/clone-version/${quotationVersionData.quotationId}/${quotationVersionData?._id}`, { updateProcessStatus: false })
       .then(() => {
         setShowQuotationConfirmBox(false);
         fetchQuotationData();
@@ -539,9 +563,9 @@ const RepairOrderDetails = () => {
                   <ContentFullScreen title={repairOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {repairOrderProcessSteps[currentStep] === 'Add Assets' && repairOrderData && (
                       <Productpackage
+                        fetchRepairOrderData={fetchRepairOrderData}
                         repairOrderData={repairOrderData}
                         setNextStep={setNextStep}
-                        currencySymbol={currencySymbol}
                         isSmallScreen={isSmallScreen}
                         isTabletScreen={isTabletScreen}
                         showActivity={showActivity}
@@ -567,11 +591,8 @@ const RepairOrderDetails = () => {
                           isTabletScreen={isTabletScreen}
                           showActivity={showActivity}
                           stepFullScreen={stepFullScreen}
-                          allowedToEdit={
-                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                              quotationVersionData?.status
-                            )
-                              ? false
+                          allowedToEdit={currentStep === 3 ? allowedToEdit :
+                            [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationVersionData?.status) ? false
                               : allowedToEdit
                           }
                           allowedToDelete={allowedToDelete}

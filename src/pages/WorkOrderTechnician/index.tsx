@@ -135,47 +135,49 @@ const WorkOrderTechnician = () => {
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
-        const otherThanPendingData = data?.filter((item) => item.status !== WORKORDER_SERVICE_STATUS.pending);
-        var allPendingData: any = [];
+        
+        // const otherThanPendingData = data?.filter((item) => item.status !== WORKORDER_SERVICE_STATUS.pending);
+        // var allPendingData: any = [];
 
-        const workOrders: any = []
-        data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.pending).forEach(item => {
-          if (!workOrders?.find((e) => e._id === item?.workOrderDetail?._id)) {
-            workOrders.push({
-              _id: item?.workOrderDetail?._id,
-              type: item?.workOrderDetail?.repairOrder?.type,
-              quotationStatus: item?.workOrderDetail?.repairOrder?.quotationStatus
-            })
-          }
-        });
+        // const workOrders: any = []
+        // data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.pending).forEach(item => {
+        //   if (!workOrders?.find((e) => e._id === item?.workOrderDetail?._id)) {
+        //     workOrders.push({
+        //       _id: item?.workOrderDetail?._id,
+        //       type: item?.workOrderDetail?.repairOrder?.type,
+        //       quotationStatus: item?.workOrderDetail?.repairOrder?.quotationStatus
+        //     })
+        //   }
+        // });
 
-        workOrders?.forEach((item) => {
-          const services = data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.pending && e?.workOrderDetail?._id === item?._id)?.sort((a, b) => {
-            return a.order - b.order;
-          });
-          if (services?.length) {
-            const firstOrderService = services?.filter((e) => e.order === services[0]?.order)
-            const restOrderService = services?.filter((e) => e.order !== services[0]?.order)
+        // workOrders?.forEach((item) => {
+        //   const services = data?.filter((e) => e.status === WORKORDER_SERVICE_STATUS.pending && e?.workOrderDetail?._id === item?._id)?.sort((a, b) => {
+        //     return a.order - b.order;
+        //   });
+        //   if (services?.length) {
+        //     const firstOrderService = services?.filter((e) => e.order === services[0]?.order)
+        //     const restOrderService = services?.filter((e) => e.order !== services[0]?.order)
 
-            if (firstOrderService?.length) {
-              if (item?.type === REPAIR_ORDER_TYPE.internal || firstOrderService[0]?.service?.preWork === true
-                || (firstOrderService[0]?.service?.preWork === false && item?.quotationStatus === QUOTATION_STATUS.acceptByCustomer)) {
-                firstOrderService?.forEach((s) => {
-                  allPendingData.push(s);
-                })
-              }
-              else {
-                firstOrderService?.forEach((s) => {
-                  allPendingData.push({ ...s, status: WORKORDER_SERVICE_STATUS.backlog });
-                })
-              }
-            }
-            restOrderService?.forEach((s) => {
-              allPendingData.push({ ...s, status: WORKORDER_SERVICE_STATUS.backlog });
-            })
-          }
-        })
-        setServiceData([...allPendingData, ...otherThanPendingData]);
+        //     if (firstOrderService?.length) {
+        //       if (item?.type === REPAIR_ORDER_TYPE.internal || firstOrderService[0]?.service?.preWork === true
+        //         || (firstOrderService[0]?.service?.preWork === false && item?.quotationStatus === QUOTATION_STATUS.acceptByCustomer)) {
+        //         firstOrderService?.forEach((s) => {
+        //           allPendingData.push(s);
+        //         })
+        //       }
+        //       else {
+        //         firstOrderService?.forEach((s) => {
+        //           allPendingData.push({ ...s, status: WORKORDER_SERVICE_STATUS.backlog });
+        //         })
+        //       }
+        //     }
+        //     restOrderService?.forEach((s) => {
+        //       allPendingData.push({ ...s, status: WORKORDER_SERVICE_STATUS.backlog });
+        //     })
+        //   }
+        // })
+
+        setServiceData(data);
         setLoadingWO(false);
       })
       ?.catch((err) => {
@@ -421,6 +423,9 @@ const WorkOrderTechnician = () => {
             setDisableCompleteFail={() => { }}
             fetchService={fetchWorkOrderTechnician}
             referencType={'workOrderTechnician'}
+            handelClose={() => {
+              setServiceDetailsShow(false);
+            }}
           />
         </Dialog>
       )}

@@ -17,7 +17,8 @@ import {
     DELIVERY_TICKET_TYPE,
     DELIVERY_TICKET_REFRENCE_TYPE,
     DELIVERY_FROM_TO_TYPE,
-    repairOrder
+    repairOrder,
+    INVENTORY_STATUS
 } from '../../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -68,6 +69,8 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                     obj.status = e?.serializedAssetDetail?.status
                     obj.productName = e?.serializedAssetDetail?.product?.optionLabel
                     obj.productId = e?.serializedAssetDetail?.product?.optionValue
+                    obj.isChecked = false
+                    obj.hideSelection = [INVENTORY_STATUS.inRepair].includes(obj.status)
                     material.push(obj)
                 }
             })

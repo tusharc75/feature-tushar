@@ -1,4 +1,4 @@
-import React, { useContext, Fragment } from 'react';
+import React, { useContext, Fragment, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
@@ -154,6 +154,21 @@ const useStyles = makeStyles((theme) => ({
         display: 'none'
       }
     }
+  },
+  overflowX: {
+    overflowX: 'auto'
+  },
+  tabletClass: {
+    minWidth: '32.73333%',
+    flex: 'unset'
+  },
+  tabletStepContainer: {
+    '& .MuiStepConnector-root': {
+      display: 'none'
+    },
+    justifyContent: 'flex-start',
+    paddingBlockEnd: '9px !important',
+    overflowX: 'auto'
   }
 }));
 
@@ -171,6 +186,8 @@ const Steps = (props) => {
     handleNext = null,
     handlePrev = null
   } = props;
+
+  const containerRef = useRef(null);
 
   const classes = useStyles();
   let activeStep = currentStep;
@@ -201,6 +218,25 @@ const Steps = (props) => {
       }
       return newStep;
     });
+  };
+
+  React.useEffect(() => {
+    handleScroll();
+  }, [activeStep]);
+
+  const handleScroll = () => {
+    if (containerRef.current && isTablet) {
+      const container = containerRef.current;
+      const element = container.querySelector('div.MuiStep-root');
+      if (element) {
+        const scrollpos = activeStep * (element?.clientWidth + 4);
+        container.scroll({
+          top: 0,
+          left: scrollpos,
+          behavior: 'smooth'
+        });
+      }
+    }
   };
 
   return (
@@ -314,11 +350,15 @@ const Steps = (props) => {
                   </Grid>
                 </Grid>
 
-                <Stepper className={`${classes.pbStepper} stepper-responsive mt-2`} activeStep={isStepEnded ? steps.length + 1 : activeStep}>
+                <Stepper
+                  ref={containerRef}
+                  className={`${classes.pbStepper} ${isTablet && classes.tabletStepContainer} stepper-responsive mt-2`}
+                  activeStep={isStepEnded ? steps.length + 1 : activeStep}
+                >
                   {steps.map((label, i) => (
                     <Step
                       key={label}
-                      className={clsx(classes.step, {
+                      className={clsx(classes.step, isTablet && classes.tabletClass, {
                         [classes.active]: currentStep > i || isStepEnded,
                         [classes.currentStep]: currentStep === i,
                         [classes.inActive]: currentStep !== i

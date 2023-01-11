@@ -3,13 +3,23 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
-import { Box, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Box, Checkbox, Chip, CircularProgress, Dialog, FormControlLabel, FormGroup, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
-import { CustomDialogTransition, dateFormat, deliveryTicket, DELIVERY_TICKET_REFRENCE_TYPE, DELIVERY_TICKET_TYPE, formatAmountWithCurrency, invoice, pricingCondition, rentalManagement } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  dateFormat,
+  deliveryTicket,
+  DELIVERY_TICKET_REFRENCE_TYPE,
+  DELIVERY_TICKET_TYPE,
+  formatAmountWithCurrency,
+  invoice,
+  pricingCondition,
+  rentalManagement
+} from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
@@ -25,6 +35,7 @@ import { startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
+import { CheckBox } from '@material-ui/icons';
 
 const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -46,16 +57,17 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
+  const [proRata, setProRata] = useState(true);
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [proRata]);
 
   useEffect(() => {
     if (columns) {
       fetchProductInventory();
     }
-  }, [columns]);
+  }, [columns, proRata]);
 
   const fetchFields = async () => {
     var { fields: data, allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, false);
@@ -111,7 +123,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
               </span>
             </Box>
-            {row.original['type'] !== 'additionalCost' &&
+            {row.original['type'] !== 'additionalCost' && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -127,35 +139,55 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                 }}
               >
                 <InfoIcon fontSize="small" color="primary" />
-              </IconButton>}
+              </IconButton>
+            )}
           </div>
         )
       }
     ];
-    data.filter(d => !d.fieldName?.includes('estimate')).forEach((element) => {
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateFormat)}</p> : <NoDataCell />)
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
+    data
+      .filter((d) => !d.fieldName?.includes('estimate'))
+      .forEach((element) => {
+        if (element.type === 'date') {
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            disableFilters: true,
+            Cell: ({ row }) =>
+              row.original[element.fieldName] ? <p>{moment(row.original[element.fieldName]).format(dateFormat)}</p> : <NoDataCell />
           });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
+        } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
+          if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              let fieldName = element.fieldName + '_' + _unit.toLowerCase();
+              let fieldLabel = element.fieldLabel + ' ' + _unit;
+              coloum.push({
+                accessor: fieldName,
+                Header: fieldLabel,
+                Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
+              });
+            });
+          } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
+            element.displayUnits.forEach((_unit) => {
+              element.displayCurrency.forEach((_currency) => {
+                let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
+                let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
+                coloum.push({
+                  accessor: fieldName,
+                  Header: fieldLabel,
+                  Cell: ({ row }) =>
+                    row.original[fieldName] ? (
+                      <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                    ) : (
+                      <NoDataCell />
+                    )
+                });
+              });
+            });
+          } else if (element.type === 'currencyAmount') {
             element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
+              let fieldName = element.fieldName + '_' + _currency.toLowerCase();
+              let fieldLabel = element.fieldLabel + ' ' + _currency;
               coloum.push({
                 accessor: fieldName,
                 Header: fieldLabel,
@@ -164,65 +196,50 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                     <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                   ) : (
                     <NoDataCell />
-                  )
+                  ),
+                Footer: (info) => {
+                  const total = info?.rows
+                    ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
+                    .reduce((sum, row) => row.values[fieldName] + sum, 0);
+                  return (
+                    <>
+                      {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
+                    </>
+                  );
+                }
               });
             });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(rentalManagementData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                ),
-              Footer: (info) => {
-                const total = info?.rows
-                  ?.filter((f) => f.original.parentId === null && f.values.hasOwnProperty(fieldName) && !isNaN(f.values[fieldName]))
-                  .reduce((sum, row) => row.values[fieldName] + sum, 0);
-                return (
-                  <>
-                    {currencySymbol} {formatAmountWithCurrency(rentalManagementData?.currency, total)?.amountWithouCurrencyCode ?? total}
-                  </>
-                );
-              }
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName]?.optionLabel ? (
-              <p>{row.original[element.fieldName].optionLabel}</p>
-            ) : row.original[element.fieldName] ? (
-              <>{
-                ['Per Week', 'Per Month'].includes(row.original[element.fieldName]) && row.original.isAppliedBill ?
-                  <Box display="flex" alignItems="center">
+          }
+        } else {
+          if (element.fieldName === 'qty') {
+            element.fieldName = 'qtyDisplay';
+          }
+          coloum.push({
+            accessor: element.fieldName,
+            Header: element.fieldLabel,
+            Cell: ({ row }) =>
+              row.original[element.fieldName]?.optionLabel ? (
+                <p>{row.original[element.fieldName].optionLabel}</p>
+              ) : row.original[element.fieldName] ? (
+                <>
+                  {['Per Week', 'Per Month'].includes(row.original[element.fieldName]) && proRata && row.original.isAppliedBill ? (
+                    <Box display="flex" alignItems="center">
+                      <p>{row.original[element.fieldName]}</p>
+                      <Box ml={1} />
+                      <Tooltip title="Per Day Price is calculated">
+                        <InfoIcon fontSize="small" color="primary" />
+                      </Tooltip>
+                    </Box>
+                  ) : (
                     <p>{row.original[element.fieldName]}</p>
-                    <Box ml={1} /><Tooltip title="Per Day Price is calculated">
-                      <InfoIcon fontSize="small" color="primary" />
-                    </Tooltip>
-                  </Box>
-                  : <p>{row.original[element.fieldName]}</p>
-              }
-
-              </>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      }
-    });
+                  )}
+                </>
+              ) : (
+                <NoDataCell />
+              )
+          });
+        }
+      });
     {
       isMobile ? (
         <Box display={'none'} />
@@ -277,7 +294,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
     const responseAdditionalCostData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
     let additionalCostData = responseAdditionalCostData?.data?.data;
     if (additionalCost?.length > 0) {
-      additionalCostData = additionalCostData.filter(d => !additionalCost?.some(obj => obj._id === d._id))
+      additionalCostData = additionalCostData.filter((d) => !additionalCost?.some((obj) => obj._id === d._id));
     }
     const result = await axiosInstance().get(
       `${deliveryTicket.api}/typewise?refrenceType=${DELIVERY_TICKET_REFRENCE_TYPE.rentalJob}&refrenceId=${rentalManagementData._id}`
@@ -291,110 +308,120 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       }
     });
 
-    let newMaterial: any = []
+    let newMaterial: any = [];
     data?.material?.forEach((d) => {
-      if (d?.type === "service" && d?.parentId === null && !d?.actualStartDate) {
-        d["actualStartDate"] = d?.estimateStartDate
+      if (d?.type === 'service' && d?.parentId === null && !d?.actualStartDate) {
+        d['actualStartDate'] = d?.estimateStartDate;
       }
-      if (d?.type === "package" && d?.packageDetail?.packageType === "Service" && d?.parentId === null && !d?.actualStartDate) {
-        d["actualStartDate"] = d?.estimateStartDate
+      if (d?.type === 'package' && d?.packageDetail?.packageType === 'Service' && d?.parentId === null && !d?.actualStartDate) {
+        d['actualStartDate'] = d?.estimateStartDate;
       }
       if (returnTicketProducts[d?.materialId] > 0) {
         let values = { qty: d?.qty - returnTicketProducts[d?.materialId] };
-        returnTicketProducts[d?.materialId] = returnTicketProducts[d?.materialId] - d?.qty
+        returnTicketProducts[d?.materialId] = returnTicketProducts[d?.materialId] - d?.qty;
         const calValues = autoCalculateSpecificFields(values, { ...d, ...values }, allFields);
         Object.assign(d, calValues);
       }
-    })
-
-    data?.material?.filter(d => d?.actualStartDate && d?.parentId === null && d?.type === "product" && d?.productDetail?.serializedProduct)?.forEach(element => {
-      data?.inventory?.filter(d => d._id === element?._id && !d.isReplaced && d?.manualStartDate)?.forEach((ele: any) => {
-        ele.type = 'asset';
-        ele.qty = 1;
-        ele._id = ele?.inventoryDetail?._id
-        ele.materialId = ele?.inventoryDetail?._id
-        let values = { qty: 1 };
-        values["actualStartDate"] = ele?.manualStartDate
-        values["actualEndDate"] = ele?.manualEndDate || element?.estimateEndDate
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        const { materialId, qty, type, _id, ...rest } = element
-        newMaterial.push({ ...rest, ...ele, ...calValues })
-      });
-    })
-
-    data?.material?.filter(d => d.actualStartDate)?.forEach(element => {
-      if (element?.parentId === null && element?.type === "product" && element?.productDetail?.serializedProduct) {
-      }
-      else {
-        let values: any = {};
-        values["actualEndDate"] = element?.actualEndDate || element?.estimateEndDate
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        newMaterial.push({ ...element, ...calValues })
-
-        if (element?.type === "product" && element?.productDetail?.serializedProduct) {
-          data?.inventory?.filter(d => d._id === element?._id && !d.isReplaced && d?.manualStartDate)?.forEach((ele: any) => {
-            ele.parentId = element?._id;
-            ele.type = 'asset';
-            ele.qty = 1;
-            ele._id = ele?.inventoryDetail?._id
-            ele.materialId = ele?.inventoryDetail?._id
-            let values = { qty: 1 };
-            values["actualStartDate"] = ele?.manualStartDate
-            values["actualEndDate"] = ele?.manualEndDate || element?.estimateEndDate
-            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-            const { materialId, qty, type, _id, ...rest } = element
-            newMaterial.push({ ...rest, ...ele, ...calValues })
-          });
-        }
-      }
     });
 
+    data?.material
+      ?.filter((d) => d?.actualStartDate && d?.parentId === null && d?.type === 'product' && d?.productDetail?.serializedProduct)
+      ?.forEach((element) => {
+        data?.inventory
+          ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
+          ?.forEach((ele: any) => {
+            ele.type = 'asset';
+            ele.qty = 1;
+            ele._id = ele?.inventoryDetail?._id;
+            ele.materialId = ele?.inventoryDetail?._id;
+            let values = { qty: 1 };
+            values['actualStartDate'] = ele?.manualStartDate;
+            values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
+            values['manualEndDate'] = ele?.manualEndDate
+            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+            const { materialId, qty, type, _id, ...rest } = element;
+            newMaterial.push({ ...rest, ...ele, ...calValues });
+          });
+      });
+
+    data?.material
+      ?.filter((d) => d.actualStartDate)
+      ?.forEach((element) => {
+        if (element?.parentId === null && element?.type === 'product' && element?.productDetail?.serializedProduct) {
+        } else {
+          let values: any = {};
+          values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
+          values['manualEndDate'] = element?.actualEndDate
+          const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          newMaterial.push({ ...element, ...calValues });
+
+          if (element?.type === 'product' && element?.productDetail?.serializedProduct) {
+            data?.inventory
+              ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
+              ?.forEach((ele: any) => {
+                ele.parentId = element?._id;
+                ele.type = 'asset';
+                ele.qty = 1;
+                ele._id = ele?.inventoryDetail?._id;
+                ele.materialId = ele?.inventoryDetail?._id;
+                let values = { qty: 1 };
+                values['actualStartDate'] = ele?.manualStartDate;
+                values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
+                const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+                const { materialId, qty, type, _id, ...rest } = element;
+                newMaterial.push({ ...rest, ...ele, ...calValues });
+              });
+          }
+        }
+      });
+
     if (additionalCostData.length > 0) {
-      additionalCostData.forEach(element => {
+      additionalCostData.forEach((element) => {
         element.type = 'additionalCost';
-        element.materialId = element?._id
-        element.parentId = null
-        newMaterial.push(element)
+        element.materialId = element?._id;
+        element.parentId = null;
+        newMaterial.push(element);
       });
     }
 
-    data.material = newMaterial
+    data.material = newMaterial;
     if (invoiceData) {
+      data.material = data?.material
+        ?.map((e) => {
+          let materialData: any = { ...e };
 
-      data.material = data?.material?.map((e) => {
-        let materialData: any = { ...e };
+          let pMethod = materialData?.pricingMethod?.split(',') || [];
+          pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
 
-        let pMethod = materialData?.pricingMethod?.split(',') || [];
-        pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month'].includes(m));
+          if (!['Per Day', 'Per Week', 'Per Month'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
+            let tempTotalPrevQty = invoiceData
+              .map((obj) => {
+                let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
+                if (tempQty) return tempQty;
+              })
+              .filter((d) => d);
 
-        if (!['Per Day', 'Per Week', 'Per Month'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
-          let tempTotalPrevQty = invoiceData.map((obj) => {
-            let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
-            if (tempQty) return tempQty;
-          }).filter((d) => d);
+            tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
+            let values = { qty: materialData.qty - tempTotalPrevQty };
+            const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
 
-          tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
-          let values = { qty: materialData.qty - tempTotalPrevQty };
-          const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
+            materialData = { ...materialData, ...calValues };
+          }
 
-          materialData = { ...materialData, ...calValues };
-        }
-
-        const product = invoicedProducts?.find((p) => p._id === e._id);
-        if (product) {
-          const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-          materialData.actualStartDate = actualEndDate;
-        }
-        else {
-          materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
-        }
-        const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
-        if (row) {
-          const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-          setEndDate(actualEndDate);
-        }
-        return materialData;
-      })
+          const product = invoicedProducts?.find((p) => p._id === e._id);
+          if (product) {
+            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
+            materialData.actualStartDate = actualEndDate;
+          } else {
+            materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
+          }
+          const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
+          if (row) {
+            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
+            setEndDate(actualEndDate);
+          }
+          return materialData;
+        })
         .filter((d) => d.qty > 0);
     }
 
@@ -414,11 +441,14 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
             ? parent?.serviceDetail?.serviceName
             : parent.type === 'asset'
               ? parent?.inventoryDetail?.assetNumber
-              : parent.type === "additionalCost"
+              : parent.type === 'additionalCost'
                 ? parent?.costType
                 : parent.packageDetail?.packageName;
       parent.qtyDisplay = parent.qty;
-      parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'asset' || parent.type === "additionalCost" ? false : true;
+      parent.isEditable =
+        ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) || parent.type === 'asset' || parent.type === 'additionalCost'
+          ? false
+          : true;
       parent.subRows = generateNestedData(material, parent);
     });
     setRowsData(rows);
@@ -446,19 +476,17 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
 
   const handleApplyDate = async () => {
 
-    let tempValues = { actualEndDate: endDate };
+    let tempValues: any = { actualEndDate: endDate };
 
     const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
     let rows: any = [];
     selectedProducts.forEach((element) => {
-
-      if (element.type === "additionalCost") {
-        element.isAppliedBill = true
+      if (element.type === 'additionalCost') {
+        element.isAppliedBill = true;
         rows.push(element);
-      }
-      else {
+      } else {
         element.invalidDate = false;
 
         const product = invoicedProducts?.material?.find((p) => p._id === element._id);
@@ -478,32 +506,43 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           }
         }
 
-        let priceFieldName = Object.keys(element).find(d => d.includes("price_"))
+        if (element?.manualEndDate) {
+          const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
+          if (selectedEndDateTime > productManualEndDate) {
+            tempValues.actualEndDate = element?.manualEndDate;
+          }
+          if (productManualEndDate < productStartDateTime) {
+            element.invalidDate = true;
+          }
+        }
 
-        let calValues: any
-        let values = JSON.parse(JSON.stringify(tempValues))
-        if (element.pricingMethod === "Per Week") {
-          values["pricingMethod"] = "Per Day"
-          if (priceFieldName) {
-            values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 7
+        let priceFieldName = Object.keys(element).find((d) => d.includes('price_'));
+
+        let calValues: any;
+        let values = JSON.parse(JSON.stringify(tempValues));
+        if (element.pricingMethod === 'Per Week') {
+          if (proRata) {
+            values['pricingMethod'] = 'Per Day';
+            if (priceFieldName) {
+              values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 7;
+            }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          calValues["pricingMethod"] = "Per Week"
-        }
-        else if (element.pricingMethod === "Per Month") {
-          values["pricingMethod"] = "Per Day"
-          if (priceFieldName) {
-            values[priceFieldName] = orginalMaterial.find(d => d._id === element._id)[priceFieldName] / 30
+          calValues['pricingMethod'] = 'Per Week';
+        } else if (element.pricingMethod === 'Per Month') {
+          if (proRata) {
+            values['pricingMethod'] = 'Per Day';
+            if (priceFieldName) {
+              values[priceFieldName] = orginalMaterial.find((d) => d._id === element._id)[priceFieldName] / 30;
+            }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          calValues["pricingMethod"] = "Per Month"
-        }
-        else {
+          calValues['pricingMethod'] = 'Per Month';
+        } else {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         }
-        element.isAppliedBill = true
+        element.isAppliedBill = true;
         rows.push({ ...element, ...calValues });
-
       }
     });
 
@@ -519,7 +558,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
   };
 
   const handleSaveData = async (rows: any) => {
-    rows[0].isAppliedBill = true
+    rows[0].isAppliedBill = true;
     let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
     setMaterial(tempRows);
     initializeTable(tempRows);
@@ -542,14 +581,14 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
       delete element?.serviceDetail;
       delete element?.serviceDetail;
       delete element?.subRows;
+      delete element?.manualEndDate
     });
     setUpdating(true);
     axiosInstance()
-      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`,
-        {
-          material: rowsApplied.filter(d => d.type !== "additionalCost"),
-          additionalCost: rowsApplied.filter(d => d.type === "additionalCost"),
-        })
+      .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
+        material: rowsApplied.filter((d) => d.type !== 'additionalCost'),
+        additionalCost: rowsApplied.filter((d) => d.type === 'additionalCost')
+      })
       .then(() => {
         setUpdating(false);
         onSuccess();
@@ -571,7 +610,21 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                 <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center gap-1 layout-for-tablet"></Grid>
                 <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
                   <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                    <Grid style={{ display: 'flex', flex: 1, gap: '5px' }} className={isMobile ? styles.content_box : ''}>
+                    <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
+                      <div>
+                        <FormGroup>
+                          <FormControlLabel
+                            control={<Checkbox checked={proRata} />}
+                            key="proRata"
+                            placeholder="Pro Rata"
+                            label="Pro Rata"
+                            style={{ whiteSpace: 'nowrap' }}
+                            onChange={() => {
+                              setProRata(!proRata);
+                            }}
+                          />
+                        </FormGroup>
+                      </div>
                       {/* <KeyboardDatePicker
                             autoOk
                             fullWidth
@@ -611,13 +664,27 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                         }}
                         margin="dense"
                       />
-                      <Box style={{ display: 'flex', gap: '5px', marginTop: '15px' }}>
-                        <HtmlTooltip title={!Boolean(selectedProducts && selectedProducts.length && (endDate || selectedProducts.every(d => d.type === "additionalCost"))) ? 'Please select product to apply' : ''}>
+                      <Box style={{ display: 'flex', gap: '5px' }}>
+                        <HtmlTooltip
+                          title={
+                            !Boolean(
+                              selectedProducts && selectedProducts.length && (endDate || selectedProducts.every((d) => d.type === 'additionalCost'))
+                            )
+                              ? 'Please select product to apply'
+                              : ''
+                          }
+                        >
                           <span>
                             <Button
                               variant="contained"
                               color="primary"
-                              disabled={!Boolean(selectedProducts && selectedProducts.length && (endDate || selectedProducts.every(d => d.type === "additionalCost")))}
+                              disabled={
+                                !Boolean(
+                                  selectedProducts &&
+                                  selectedProducts.length &&
+                                  (endDate || selectedProducts.every((d) => d.type === 'additionalCost'))
+                                )
+                              }
                               size="small"
                               onClick={() => {
                                 handleApplyDate();
@@ -655,7 +722,7 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
                   data={rowsData}
                   setWholeRowsCellColor={(rowData) => {
                     if (rowData?.invalidDate) return 'error';
-                    if (rowData?.isAppliedBill) return "isAppliedBill";
+                    if (rowData?.isAppliedBill) return 'isAppliedBill';
                     return '';
                   }}
                   onSelect={setSelectedProducts}
@@ -684,15 +751,22 @@ const CreateBillingDialog = ({ rentalManagementData, currencySymbol, invoiceData
           >
             Cancel
           </Button>
-          <HtmlTooltip title={!appliedDate ? "Please select items and apply end date" :
-            rowsApplied?.some(d => d.invalidDate === true) ? "Please select an appropriate date !" : "Create Bill"} >
+          <HtmlTooltip
+            title={
+              !appliedDate
+                ? 'Please select items and apply end date'
+                : rowsApplied?.some((d) => d.invalidDate === true)
+                  ? 'Please select an appropriate date !'
+                  : 'Create Bill'
+            }
+          >
             <span>
               <Button
                 type="button"
                 variant="contained"
                 color="primary"
                 size="small"
-                disabled={!appliedDate || rowsApplied.some(d => d.invalidDate === true)}
+                disabled={isUpdating || !appliedDate || rowsApplied.some((d) => d.invalidDate === true)}
                 onClick={() => {
                   handleCreateBill();
                 }}
