@@ -705,6 +705,16 @@ const routes = {
     : RESOURCE_LABEL.surveys,
     path:'/surveys/detail'
   },
+  contactUs:{
+    title:storedRoutes && storedRoutes.contactUs && storedRoutes.contactUs.title
+    ? storedRoutes.contactUs?.title : RESOURCE_LABEL?.contactUs,
+    path:'/contact-us'
+  },
+  contactUsDetail:{
+    title:storedRoutes && storedRoutes.contactUs && storedRoutes.contactUs.title
+    ? storedRoutes.contactUs?.title : RESOURCE_LABEL?.contactUs,
+    path:'/contact-us/detail'
+  },
 };
 
 export default routes;
