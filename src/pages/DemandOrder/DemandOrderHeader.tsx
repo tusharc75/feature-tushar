@@ -12,7 +12,7 @@ import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import routes from 'src/components/Helpers/Routes';
 
-function SalesOrderHeader(props) {
+function DemandOrderHeader(props) {
   const {
     selectedRecords,
     onTypeChange,
@@ -78,7 +78,7 @@ function SalesOrderHeader(props) {
               value={searchVal}
               size="small"
               width="200px"
-              placeholder="Search Sales Orders"
+              placeholder="Search Demand Orders"
               style={isMobile ? { flex: 1 } : {}}
             />
           </Grid>
@@ -158,4 +158,4 @@ function SalesOrderHeader(props) {
     </Grid>
   );
 }
-export default SalesOrderHeader;
+export default DemandOrderHeader;

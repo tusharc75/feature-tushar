@@ -38,7 +38,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import ManageAccountDialog from '../../Account/ManageAccount';
 import ManageContactDialog from '../../Contact/ManageContact';
 
-const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, onClose, onSuccess, open }) => {
+const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, onClose, onSuccess, open }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -754,4 +754,4 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   );
 };
 
-export default ManageSalesOrderDialog;
+export default ManageDemandOrderDialog;
