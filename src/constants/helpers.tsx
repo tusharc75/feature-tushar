@@ -371,6 +371,7 @@ export const RESOURCE_LABEL = {
   eCommerceHome: 'e-Commerce Home',
   surveys: 'Surveys',
   contactUs: 'Contact Us',
+  supportTicket:'Support Ticket'
 };
 
 export const CHILD_RESOURCE = {

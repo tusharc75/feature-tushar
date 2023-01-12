@@ -166,6 +166,8 @@ import Survey from './pages/Surveys';
 import SurveysDetail from './pages/Surveys/SurveysDetail';
 import ContactUs from './pages/ContactUs';
 import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
+import SupportTicket from './components/SupportTicket';
+import SupportTicketDetail from './components/SupportTicket/SupportTicketDetail';
 
 var notificationInterval: any = null;
 
@@ -852,6 +854,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.contactUsDetail.path}/:id`}>
               <ContactUsDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.supportTicket.path}>
+              <SupportTicket />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.supportTicketDetail.path}/:id`}>
+              <SupportTicketDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
