@@ -362,7 +362,6 @@ export default function CustomReactTable({
   }, [selectedRowIds]);
 
   const submitInput = () => {
-    console.log("ORMIT")
     const rowData = Object.keys(rowState[currentRowEditing.id].cellState).filter((k) => rowState[currentRowEditing.id].cellState[k].isEditing);
     const updatedData = material.find((row) => row?._id == currentRowEditing?.original?._id);
     updatedData[rowData[0]] = cellValue;

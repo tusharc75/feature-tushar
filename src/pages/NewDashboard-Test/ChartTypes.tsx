@@ -41,7 +41,6 @@ interface Props {
 }
 
 const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId, fetchDashboards }: Props) => {
-  console.log(chart, filterData, globalFilters);
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
   const { setToastConfig } = React.useContext(CustomToastContext);
