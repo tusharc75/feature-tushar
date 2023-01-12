@@ -194,4 +194,13 @@ export const calculateRowsField = async (material: any[], values: any, fields: a
     }
     const child = resetValueZero(material, fields, rowData._id)
     return [...rows, ...child];
-};                                 
+};
+
+export const getNestedSubRows = (obj, original) => {
+    if (original?.subRows?.length) {
+        original?.subRows.forEach((element) => {
+            obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+            getNestedSubRows(obj, element);
+        });
+    }
+};

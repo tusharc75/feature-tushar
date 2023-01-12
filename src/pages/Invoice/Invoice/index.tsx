@@ -239,15 +239,6 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
     return subRows;
   };
 
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
-  };
-
   return (
     <>
       <InvoiceFacility invoiceData={invoiceData} />
