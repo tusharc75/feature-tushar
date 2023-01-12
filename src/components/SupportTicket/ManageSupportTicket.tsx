@@ -10,7 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
-import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -60,6 +60,8 @@ const ManageSupportTicket = ({onClose, onSuccess, isClone = false, id = null}) =
             });
           } else {
             const tempInitialData = getObjKeys('', fieldsDataForCreate);
+            tempInitialData['supportTicketNumber'] = `ST_${generateUniqueIdOnly()}`;
+            tempInitialData['images'] = [];
             setInitialData({
               fields: fieldsDataForCreate,
               values: tempInitialData
@@ -125,7 +127,6 @@ const ManageSupportTicket = ({onClose, onSuccess, isClone = false, id = null}) =
       if (reason !== 'backdropClick') {
         setShowConfirmDialog(true);
       }
-      onClose()
     }}
   >
     {initialData.fields.length ? (

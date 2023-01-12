@@ -207,7 +207,13 @@ export const sidebarResource = {
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
   blog: 'Blog',
-  demandOrder: 'Demand Order'
+  demandOrder: 'Demand Order',
+  surveys: 'Surveys',
+  supportTicket: 'Support Ticket',
+  eCommerceHome: 'e-Commerce Home',
+  contactUs: 'Contact Us',
+  frequentlyAskedQuestion: 'Frequently Asked Question'
+  
 };
 
 export const resourceNames = {
@@ -280,7 +286,11 @@ export const resourceNames = {
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
-  blog: 'Blog'
+  blog: 'Blog',
+  surveys: 'Surveys',
+  supportTicket: 'Support Ticket',
+  eCommerceHome: 'e-Commerce Home',
+  contactUs: 'Contact Us',
 };
 
 export const primaryFields = {

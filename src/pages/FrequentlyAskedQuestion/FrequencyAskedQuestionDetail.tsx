@@ -101,8 +101,8 @@ const FrequencyAskedQuestionDetail = () => {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
-      <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+      <div className="detail-container grid-without-activity">
+        <div>
           <Paper>
             {!frequentlyAskedQuestionData ? (
               <div>
@@ -144,8 +144,8 @@ const FrequencyAskedQuestionDetail = () => {
               )}
             </Box>
           </Paper>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}

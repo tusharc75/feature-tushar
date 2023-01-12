@@ -31,12 +31,6 @@ const FrequentlyAskedQuestion = () => {
     state: { permissions, selectedEntity }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-  const [frequentlyAskedQuestionPermissions, setFrequentlyAskedQuestionPermissions] = useState({
-    isCreate: permissions.frequentlyAskedQuestion?.isCreate,
-    isUpdate: permissions.frequentlyAskedQuestion?.isUpdate,
-    isRead: permissions.frequentlyAskedQuestion?.isRead,
-    isDelete: permissions.frequentlyAskedQuestion?.isDelete
-  });
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
@@ -129,9 +123,9 @@ const FrequentlyAskedQuestion = () => {
         let count = data?.count
         let rows = data?.data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = frequentlyAskedQuestionPermissions.isDelete;
+          finalObject['canDelete'] = permissions?.frequentlyAskedQuestion.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = frequentlyAskedQuestionPermissions.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.frequentlyAskedQuestion.isUpdate;
          
           return {
             ...finalObject
@@ -190,32 +184,48 @@ const FrequentlyAskedQuestion = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-          
+      {permissions?.freqentlyAskedQuestion?.isCreate ? (
             <Tooltip
-              title='Clone'
-            >
-              <IconButton
-                size="small"
-                aria-label="Clone"
-                onClick={() => {
-                  setFrequentlyAskedQuestionId(params.data.id);
-                  setOpen({ open: true, isClone: true });
-                }}
-              >
-                <FileCopyIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton
-            aria-label="Delete"
-            onClick={() => {
-              setDeleteRecord(params.data);
-              setShowDeleteConfirmBox(true);
-            }}
+            title='Clone'
           >
-            <DeleteIcon fontSize="small" color="error" />
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setFrequentlyAskedQuestionId(params.data.id);
+                setOpen({ open: true, isClone: true });
+              }}
+            >
+              <FileCopyIcon fontSize="small" color="primary" />
+            </IconButton>
+          </Tooltip>
+      ):(
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+        <IconButton aria-label="Clone" size="small">
+          <FileCopyIcon fontSize="small"  />
+        </IconButton>
+      </Tooltip>
+      )}
+        {permissions?.freqentlyAskedQuestion?.isDelete ? (
+           <Tooltip title="Delete">
+           <IconButton
+             aria-label="Delete"
+             onClick={() => {
+               setDeleteRecord(params.data);
+               setShowDeleteConfirmBox(true);
+             }}
+           >
+             <DeleteIcon fontSize="small" color="error" />
+           </IconButton>
+         </Tooltip>
+        ):(
+          <Tooltip className="cursor-stop" title="You do not have permission to delete">
+          <IconButton aria-label="Delete" size="small">
+            <DeleteIcon fontSize="small"/>
           </IconButton>
         </Tooltip>
+        )}
+       
     </Fragment>
   );
 
@@ -297,12 +307,6 @@ const FrequentlyAskedQuestion = () => {
     fetchFrequentlyAskedQuestionData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-
-  useEffect(() => {
-    if (permissions && permissions.freqentlyAskedQuestion) {
-      setFrequentlyAskedQuestionPermissions(permissions.freqentlyAskedQuestion);
-    }
-  }, [permissions]);
 
   return (
     <Fragment>
@@ -393,7 +397,7 @@ const FrequentlyAskedQuestion = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!frequentlyAskedQuestionPermissions?.isDelete}
+                      disabled={!permissions?.frequentlyAskedQuestion.isDelete}
                       onClick={() => {
                         closeActions();
                         // eslint-disable-next-line no-lone-blocks
