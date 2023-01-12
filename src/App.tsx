@@ -168,6 +168,8 @@ import ContactUs from './pages/ContactUs';
 import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
 import SupportTicket from './components/SupportTicket';
 import SupportTicketDetail from './components/SupportTicket/SupportTicketDetail';
+import DemandOrder from './pages/DemandOrder';
+import DemandOrderDetails from './pages/DemandOrder/SalesOrderDetails';
 
 var notificationInterval: any = null;
 
@@ -860,6 +862,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.supportTicketDetail.path}/:id`}>
               <SupportTicketDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.demandOrder.path}>
+              <DemandOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
+              <DemandOrderDetails />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
