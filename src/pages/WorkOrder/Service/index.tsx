@@ -210,9 +210,10 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
           }
         }
 
-        setSelectedService(services[pendingServiceIndex]);
+        if(!selectedService){
+          setSelectedService(services[pendingServiceIndex]);
+        }
       }
-
       setServiceSteps(services);
 
     } else {
