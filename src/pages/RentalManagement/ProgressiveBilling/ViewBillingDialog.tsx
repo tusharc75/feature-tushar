@@ -5,7 +5,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, capitalize, Chip, CircularProgress, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { useData } from 'src/StateProvider/Provider';
-import { fetch_rental_product_fields } from 'src/components/RentalManagment/helper';
+import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import moment from 'moment';
@@ -18,9 +18,6 @@ import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { Add, Delete, Edit, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { MuiPickersUtilsProvider, KeyboardDatePicker, KeyboardTimePicker } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
@@ -31,7 +28,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, estimateStartDate, onClose, onSuccess }) => {
-  
+
   const toastConfig = useContext(CustomToastContext);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -40,7 +37,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
   const [rowsData, setRowsData] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
- 
+
   const [allFields, setAllFields] = useState([]);
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
@@ -84,12 +81,12 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                  : ''}
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -244,7 +241,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   size="small"
                   aria-label="Details"
                   onClick={() => {
-                    setViewBillDialogConfirm({ open: true, rows: [row.original] });
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setViewBillDialogConfirm({ open: true, rows: obj });
                   }}
                 >
                   <Delete color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
@@ -300,23 +299,22 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'package'
+      parent.detail = `${parent.type === 'product'
+        ? parent.productDetail?.productName
+        : parent.type === 'package'
           ? parent.packageDetail?.packageName
           : parent.type === 'asset'
-          ? parent.inventoryDetail?.assetNumber
-          : parent.serviceDetail?.serviceName
-      }`;
+            ? parent.inventoryDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.qtyDisplay = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
@@ -340,23 +338,22 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow?.type === 'product'
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === 'package'
+      _subRow.detail = `${_subRow?.type === 'product'
+        ? _subRow?.productDetail?.productName
+        : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === 'asset'
-          ? _subRow?.inventoryDetail?.assetNumber
-          : _subRow?.serviceDetail?.serviceName
-      }`;
+            ? _subRow?.inventoryDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDesc || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.isEditable = false;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -424,7 +421,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   size="small"
                   onClick={handleClick}
                   aria-controls="action-menu"
-                  disabled={selectedProducts.filter((d) => !['Per Day', 'Per Week', 'Per Month'].includes(d?.pricingMethod))?.length === 0}
+                  disabled={selectedProducts?.length ? false : true}
                 >
                   Actions <ExpandMore />
                 </Button>
@@ -447,10 +444,14 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                   <MenuItem
                     onClick={() => {
                       setAnchorEl(null);
-                      setViewBillDialogConfirm({
-                        open: true,
-                        rows: selectedProducts.filter((d) => !['Per Day', 'Per Week', 'Per Month'].includes(d?.pricingMethod)) || []
+                      const obj: any = [];
+                      selectedProducts?.forEach((ele) => {
+                        obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
                       });
+                      selectedProducts?.forEach((ele) => {
+                        getNestedSubRows(obj, ele);
+                      });
+                      setViewBillDialogConfirm({ open: true, rows: obj });
                     }}
                   >
                     Delete
