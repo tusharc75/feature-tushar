@@ -78,7 +78,7 @@ function SalesOrderHeader(props) {
               value={searchVal}
               size="small"
               width="200px"
-              placeholder="Search Sales Orders"
+              placeholder="Search Demand Orders"
               style={isMobile ? { flex: 1 } : {}}
             />
           </Grid>
