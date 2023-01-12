@@ -99,7 +99,6 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, currencySymbol }) 
     <span
       className="link"
       onClick={() => {
-        console.log(params.data);
         setViewBillDialog({ open: true, invoiceData: params.data });
       }}
     >
