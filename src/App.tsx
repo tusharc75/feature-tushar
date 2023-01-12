@@ -169,7 +169,7 @@ import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
 import SupportTicket from './components/SupportTicket';
 import SupportTicketDetail from './components/SupportTicket/SupportTicketDetail';
 import DemandOrder from './pages/DemandOrder';
-import DemandOrderDetails from './pages/DemandOrder/SalesOrderDetails';
+import DemandOrderDetails from './pages/DemandOrder/DemandOrderDetails';
 
 var notificationInterval: any = null;
 

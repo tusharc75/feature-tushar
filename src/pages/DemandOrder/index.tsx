@@ -24,14 +24,14 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import GridDeleteIcon from '../../components/Helpers/GridDeleteIcon';
 import CustomAgGrid, { reducer, intialState } from '../../components/AgGridComponents/CustomAgGrid';
-import SalesOrderHeader from './SalesOrderHeader';
+import SalesOrderHeader from './DemandOrderHeader';
 import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import useColumns, { getStaticFields, getFrameworkComponents, checkStaticField } from '../../constants/useColumns';
-import ManageSalesOrderDialog from './ManageSalesOrderDialog';
+import ManageSalesOrderDialog from './ManageDemandOrderDialog';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 

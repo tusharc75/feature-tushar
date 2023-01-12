@@ -12,7 +12,7 @@ import { useData } from '../../StateProvider/Provider';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { defaultActivityShow, salesOrderProcessSteps, getUniqueCurrencies, demandOrder, demandOrderSteps } from '../../constants/helpers';
-import ManageSalesOrderDialog from './ManageSalesOrderDialog';
+import ManageSalesOrderDialog from './ManageDemandOrderDialog';
 import DeleteButton from '../../components/Helpers/DeleteButton';
 import TabPanel from '../../components/TabPanel';
 import queryString from 'query-string';
