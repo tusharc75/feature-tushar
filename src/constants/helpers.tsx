@@ -206,7 +206,8 @@ export const sidebarResource = {
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
-  blog: 'Blog'
+  blog: 'Blog',
+  demandOrder: 'Demand Order'
 };
 
 export const resourceNames = {
