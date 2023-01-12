@@ -35,15 +35,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import moment from 'moment';
-import {
-  quotation,
-  dateFormat,
-  pricingCondition,
-  formatAmountWithCurrency,
-  supplierContact,
-  salesOrder,
-  demandOrder
-} from '../../../constants/helpers';
+import { dateFormat, pricingCondition, formatAmountWithCurrency, demandOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -94,13 +86,8 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [isRateRequired, setIsRateRequired] = useState(false);
-  const [requestDialog, setRequestDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
-  const [supplierContactData, setSupplierContactData] = useState([]);
-  const [selectedType, setSelectedType] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchFields();
@@ -164,23 +151,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
             />
           </div>
         )
-      },
-      {
-        accessor: 'leadTime',
-        Header: 'Lead Time (Days)',
-        Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
-        Footer: (info) => {
-          const total = info.rows
-            .filter((f) => f.values.hasOwnProperty('leadTime') && !isNaN(f.values['leadTime']))
-            .reduce((sum, row) => parseInt(row.values['leadTime']) + sum, 0);
-          return <>{total}</>;
-        }
       }
     ];
     data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
       if (element.type === 'date') {
         coloum.push({
           accessor: element.fieldName,
@@ -307,20 +280,11 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
             .reduce((sum, row) => row.values[element.accessor] + sum, 0);
           return <>{qtyTotal}</>;
         };
-      } else if (element.accessor.includes('finalPrice')) {
-        element['Footer'] = (info) => {
-          const total = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return (
-            <>
-              {currencySymbol} {formatAmountWithCurrency(salesOrderData?.currency, total)?.amountWithouCurrencyCode ?? total}
-            </>
-          );
-        };
       }
     });
-    setColumns(coloum);
+    const showColumn = ['Detail', 'Qty', 'Unit'];
+    const purifyColumn = coloum.filter((e) => showColumn?.includes(e.Header) || e.accessor === 'action');
+    setColumns(purifyColumn);
     fetchProductInventory();
   };
 
@@ -343,8 +307,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
       }`;
-      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
-      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -372,8 +334,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
       }`;
-      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
-      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
@@ -396,14 +356,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
         getNestedSubRows(obj, element);
       });
     }
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   const handleAdd = async (rows) => {
@@ -528,6 +480,14 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
     }
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
@@ -558,35 +518,52 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
             </Button>
           )}
           <Box mx={1} />
-          {permissions?.serviceMaster?.isRead && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-              }}
-            >
-              {`Add ${routes.serviceMaster.title}`}
-            </Button>
-          )}
         </Box>
         <Box display="flex">
-          <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-            <span>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                onClick={() => setIsProductEdit({ open: true, isBulkedit: true })}
-              >
-                Bulk Edit
-              </Button>
-            </span>
-          </HtmlTooltip>
-          <Box mx={1} />
-          <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+          <Button
+            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+            variant={isMobile ? 'text' : 'contained'}
+            color="default"
+            size="small"
+            onClick={openActions}
+            aria-controls="action-menu"
+          >
+            {isMobile ? '' : 'Actions'} <ExpandMore />
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="action-menu"
+            open={Boolean(anchorEl)}
+            onClose={closeActions}
+          >
+            <MenuItem
+              onClick={() => {
+                const dataToDelete =
+                  selectedProducts &&
+                  selectedProducts
+                    .filter((e) => !e.hideSelection)
+                    .map((rec: any) => {
+                      const obj: any = {};
+                      obj.id = rec._id;
+                      obj.type = rec?.type;
+                      obj.materialId = rec?.materialId;
+                      return obj;
+                    });
+                setDeleteData(dataToDelete);
+                closeActions();
+              }}
+              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+            >
+              Delete
+            </MenuItem>
+          </Menu>
+          {/* <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
             <Button
               variant="contained"
               color="primary"
@@ -610,76 +587,8 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
             >
               Delete
             </Button>
-          </HtmlTooltip>
+          </HtmlTooltip> */}
           <Box mx={1} />
-          {/* <div className="d-flex gap-2">
-                        <span>
-                            <Button variant={'outlined'} color="default" size="small" onClick={openActions} aria-controls="action-menu">
-                                {' '}
-                                {'Actions'} <ExpandMore />
-                            </Button>
-                        </span>
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left'
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}
-                        >
-                            <MenuItem
-                                disabled={selectedProducts.length === 0}
-                                onClick={() => {
-                                    let tempSupplierAccountId = [];
-                                    selectedProducts?.forEach((element) => {
-                                        element?.supplierAccount?.forEach((e) => {
-                                            if (tempSupplierAccountId.findIndex((d) => d === e?.optionValue) === -1) {
-                                                tempSupplierAccountId.push(e?.optionValue);
-                                            }
-                                        });
-                                    });
-                                    axiosInstance()
-                                        .get(
-                                            `${supplierContact.contactApi}?filterById=${JSON.stringify([
-                                                { field: 'accountName', term: { $in: tempSupplierAccountId } }
-                                            ])}&filterType=and`
-                                        )
-                                        .then(({ data: { data, count } }) => {
-                                            setSupplierContactData(data);
-                                            setAskSupplierPriceDialog(true);
-                                        })
-                                        .catch((error) => {
-                                            toastConfig.setToastConfig(error);
-                                        });
-                                    closeActions();
-                                }}
-                            >
-                                Ask Supplier to Quote
-                            </MenuItem>
-                            <MenuItem
-                                onClick={() => {
-                                    setSelectedType('Supplier');
-                                    setRequestDialog(true);
-                                    closeActions();
-                                }}
-                            >
-                                View Supplier Quote
-                            </MenuItem>
-                            {/* <MenuItem
-                onClick={() => {
-                  setSelectedType('Customer');
-                  setRequestDialog(true);
-                  closeActions();
-                }}
-              >
-                View Customer Price
-              </MenuItem> 
-                        </Menu>
-                    </div> */}
         </Box>
       </Box>
       {columns && rowsData ? (
