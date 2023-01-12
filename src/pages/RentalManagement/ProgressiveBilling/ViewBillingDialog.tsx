@@ -239,7 +239,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, currencySymbol, 
                     <Box ml={1} />
                   </>
                 )}
-                {console.log(invoiceData)}
                 <IconButton
                   disabled={!invoiceData?.isLatestInvoice}
                   size="small"

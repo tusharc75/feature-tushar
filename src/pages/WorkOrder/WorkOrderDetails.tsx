@@ -329,6 +329,7 @@ const WorkOrderDetails = () => {
                   workOrderId={id}
                   allowedToEdit={allowedToEdit}
                   completed={completed}
+                  fetchWorkOrderData={fetchWorkOrderData}
                 />
               }
             </TabPanel>
