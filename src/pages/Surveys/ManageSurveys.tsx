@@ -124,7 +124,6 @@ const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null}) => {
       if (reason !== 'backdropClick') {
         setShowConfirmDialog(true);
       }
-      onClose()
     }}
   >
     {initialData.fields.length ? (

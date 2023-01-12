@@ -30,14 +30,8 @@ const SupportTicket = () => {
     const renderedFrom = camelCase(routes?.supportTicket.title)
     const toastConfig = useContext(CustomToastContext);
     const {
-      state: { permissions, selectedEntity }
+      state: { permissions, selectedEntity, user }
     }: any = useData();
-    const [supportTicketPermissions, setSupportTicketPermissions] = useState({
-      isCreate: permissions.supportTicket?.isCreate,
-      isUpdate: permissions.supportTicket?.isUpdate,
-      isRead: permissions.supportTicket?.isRead,
-      isDelete: permissions.supportTicket?.isDelete
-    });
     const [state, dispatch] = useReducer(reducer, intialState);
     const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
       state;
@@ -99,10 +93,10 @@ const SupportTicket = () => {
         .then(({ data: { data } }) => {
           let count = data?.count
           let rows = data?.data.map((u: any) => {
-            let finalObject = prepareDataForGrid(u);
-            finalObject['canDelete'] = supportTicketPermissions.isDelete;
+            let finalObject:any = prepareDataForGrid(u);
+            finalObject['canDelete'] = permissions?.supportTicket?.isDelete && finalObject?.ownerId === user?.user?._id;
             finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-            finalObject['allowedToEdit'] = supportTicketPermissions.isUpdate;
+            finalObject['allowedToEdit'] = permissions?.supportTicket?.isUpdate;
   
             return {
               ...finalObject
@@ -213,21 +207,31 @@ const SupportTicket = () => {
   
     const ActionsRenderer = (params) => (
       <Fragment>
-        <Tooltip
-          title='Clone'
-        >
-          <IconButton
-            size="small"
-            aria-label="Clone"
-            onClick={() => {
-              setSupportTicketId(params.data.id);
-              setOpen({ open: true, isClone: true });
-            }}
-          >
-            <FileCopyIcon fontSize="small" color="primary" />
+        {permissions?.supportTicket?.isCreate ? (
+           <Tooltip
+           title='Clone'
+         >
+           <IconButton
+             size="small"
+             aria-label="Clone"
+             onClick={() => {
+               setSupportTicketId(params.data.id);
+               setOpen({ open: true, isClone: true });
+             }}
+           >
+             <FileCopyIcon fontSize="small" color="primary" />
+           </IconButton>
+         </Tooltip>
+        ):(
+          <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton aria-label="Clone" size="small">
+            <FileCopyIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Delete">
+        )}
+
+        {params?.data?.canDelete ? (
+             <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
             onClick={() => {
@@ -238,6 +242,15 @@ const SupportTicket = () => {
             <DeleteIcon fontSize="small" color="error" />
           </IconButton>
         </Tooltip>
+        ):(
+          <Tooltip className="cursor-stop" title="You do not have permission to delete">
+          <IconButton aria-label="Delete" size="small">
+            <DeleteIcon fontSize="small"/>
+          </IconButton>
+        </Tooltip>
+        )}
+       
+       
       </Fragment>
     );
   
@@ -273,12 +286,6 @@ const SupportTicket = () => {
     useEffect(() => {
         fetchSupportTicketData();
     }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-  
-    useEffect(() => {
-      if (permissions && permissions.supportTicket) {
-        setSupportTicketPermissions(permissions.supportTicket);
-      }
-    }, [permissions]);
   
     return (
       <Fragment>
@@ -332,7 +339,8 @@ const SupportTicket = () => {
                     />
                   </Grid>
                   <Grid style={{ display: 'flex', gap: '5px' }}>
-                    <Button
+                    {permissions?.supportTicket?.isCreate && (
+                      <Button
                       className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                       onClick={() => {
                         setSupportTicketId(null)
@@ -345,7 +353,10 @@ const SupportTicket = () => {
                     >
                       {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
                     </Button>
-                    <Button
+                    )}
+                    {permissions?.supportTicket?.isDelete && (
+                      <>
+                       <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="default"
                       size="small"
@@ -381,6 +392,8 @@ const SupportTicket = () => {
                         Delete
                       </MenuItem>
                     </Menu>
+                      </>
+                    )}
                   </Grid>
                 </Box>
               </Grid>
@@ -445,7 +458,7 @@ const SupportTicket = () => {
           {showDeleteConfirmBox && (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
-              message={`Are you sure you want to delete survey  ${deleteRecord?.supportTicketNumber || ''} ?`}
+              message={`Are you sure you want to delete support ticket  ${deleteRecord?.supportTicketNumber || ''} ?`}
               onClose={() => {
                 setDeleteRecord(null)
                 setShowDeleteConfirmBox(false)

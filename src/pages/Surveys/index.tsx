@@ -1,46 +1,41 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core'
-import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react'
-import { isMobile, isTablet } from 'react-device-detect'
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs'
-import CustomContainer from 'src/components/CustomContainer'
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks'
-import routes from 'src/components/Helpers/Routes'
+import { Box, Button, Grid, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import React, { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import routes from 'src/components/Helpers/Routes';
 import styles from '../Leads/Header.module.scss';
-import { RiSurveyLine } from "react-icons/ri"
-import SearchBox from 'src/components/Helpers/SearchBox'
-import { camelCase } from 'lodash'
+import { RiSurveyLine } from 'react-icons/ri';
+import SearchBox from 'src/components/Helpers/SearchBox';
+import { camelCase } from 'lodash';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { useData } from 'src/StateProvider/Provider'
+import { useData } from 'src/StateProvider/Provider';
 import CustomAgGrid, { intialState, reducer } from '../../components/AgGridComponents/CustomAgGrid';
-import { AddOutlined, ExpandMore } from '@material-ui/icons'
-import { MdAdd } from 'react-icons/md'
-import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList'
-import axiosInstance from 'src/axios/axiosInstance'
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers'
-import { getColumnData } from 'src/constants/columns'
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { MdAdd } from 'react-icons/md';
+import CustomSwipableList from 'src/components/SwipableListComponents/CustomSwipableList';
+import axiosInstance from 'src/axios/axiosInstance';
+import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
+import { getColumnData } from 'src/constants/columns';
 import { Link } from 'react-router-dom';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ManageSurveys from './ManageSurveys'
+import ManageSurveys from './ManageSurveys';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext'
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const Survey = () => {
-  const renderedFrom = camelCase(routes?.surveys.title)
+  const renderedFrom = camelCase(routes?.surveys.title);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, selectedEntity }
+    state: { permissions, selectedEntity,user }
   }: any = useData();
-  const [surveysPermissions, setSurveysPermissions] = useState({
-    isCreate: permissions.surveys?.isCreate,
-    isUpdate: permissions.surveys?.isUpdate,
-    isRead: permissions.surveys?.isRead,
-    isDelete: permissions.surveys?.isDelete
-  });
+
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
     state;
-  const [surveyId, setSurveyId] = useState(null)
+  const [surveyId, setSurveyId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -59,21 +54,21 @@ const Survey = () => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-            if (o?.fieldData?.primaryField === true) {
-              columns = [
-                ...columns,
-                { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
-              ];
-            } else {
-              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.surveys.path);
+          if (o?.fieldData?.primaryField === true) {
+            columns = [
+              ...columns,
+              { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
+            ];
+          } else {
+            let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.surveys.path);
 
-              if (currentColumn !== null) {
-                columns = [...columns, currentColumn?.columnData];
-                if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-                  rendererNames.push(currentColumn?.rendererName);
-                }
+            if (currentColumn !== null) {
+              columns = [...columns, currentColumn?.columnData];
+              if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
+                rendererNames.push(currentColumn?.rendererName);
               }
             }
+          }
         });
         let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
@@ -84,8 +79,8 @@ const Survey = () => {
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
-      })
-  }
+      });
+  };
 
   const fetchSurveyData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -94,14 +89,15 @@ const Survey = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-    axiosInstance().get(`/surveys${queryString}`)
+    axiosInstance()
+      .get(`/surveys${queryString}`)
       .then(({ data: { data } }) => {
-        let count = data?.count
+        let count = data?.count;
         let rows = data?.data.map((u: any) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = surveysPermissions.isDelete;
+          let finalObject:any = prepareDataForGrid(u);
+          finalObject['canDelete'] = permissions.surveys.isDelete  && finalObject?.ownerId === user?.user?._id && u?.canDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = surveysPermissions.isUpdate;
+          finalObject['allowedToEdit'] = permissions.surveys.isUpdate;
 
           return {
             ...finalObject
@@ -143,7 +139,7 @@ const Survey = () => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       });
-  }
+  };
 
   const replaceFieldName = (field) => {
     switch (field) {
@@ -185,7 +181,7 @@ const Survey = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -203,40 +199,57 @@ const Survey = () => {
   };
 
   const NameRenderer = (params) => {
-    return <span className=" d-flex gap-2 align-items-center">
-      <Link className="link" to={`${routes.surveysDetail.path}/${params.data._id}`}>
-        {params.value}
-      </Link>
-    </span>
+    return (
+      <span className=" d-flex gap-2 align-items-center">
+        <Link className="link" to={`${routes.surveysDetail.path}/${params.data._id}`}>
+          {params.value}
+        </Link>
+      </span>
+    );
   };
 
   const ActionsRenderer = (params) => (
-    <Fragment>
-      <Tooltip
-        title='Clone'
-      >
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setSurveyId(params.data.id);
-            setOpen({ open: true, isClone: true });
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Delete">
-        <IconButton
-          aria-label="Delete"
-          onClick={() => {
-            setDeleteRecord(params.data);
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          <DeleteIcon fontSize="small" color="error" />
-        </IconButton>
-      </Tooltip>
+      <Fragment>
+      {permissions?.surveys?.isCreate ? (
+        <Tooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setSurveyId(params.data.id);
+              setOpen({ open: true, isClone: true });
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton aria-label="Clone" size="small">
+            <FileCopyIcon fontSize="small"  />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {params?.data?.canDelete ? (
+        <Tooltip title="Delete">
+          <IconButton
+            aria-label="Delete"
+            onClick={() => {
+              setDeleteRecord(params.data);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to delete">
+          <IconButton aria-label="Delete" size="small">
+            <DeleteIcon fontSize="small"/>
+          </IconButton>
+        </Tooltip>
+      )}
     </Fragment>
   );
 
@@ -250,14 +263,14 @@ const Survey = () => {
     axiosInstance()
       .put(`/surveys/remove`, { ids: ids })
       .then(({ data }) => {
-        removeLocalStorage(localStorageSelectedRecords)
+        removeLocalStorage(localStorageSelectedRecords);
         fetchSurveyData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
           open: true,
-          type: "success",
-          message: data?.message,
+          type: 'success',
+          message: data?.message
         });
       })
       .catch((error) => {
@@ -266,18 +279,13 @@ const Survey = () => {
   };
 
   useEffect(() => {
-    fetchGridColumns()
-  }, [])
+    fetchGridColumns();
+  }, []);
 
   useEffect(() => {
     fetchSurveyData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  useEffect(() => {
-    if (permissions && permissions.surveys) {
-      setSurveysPermissions(permissions.surveys);
-    }
-  }, [permissions]);
 
   return (
     <Fragment>
@@ -331,20 +339,24 @@ const Survey = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
-                  <Button
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                    onClick={() => {
-                      setSurveyId(null)
-                      setOpen({ open: true, isClone: false });
-                    }}
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    color="primary"
-                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                  >
-                    {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                  </Button>
-                  <Button
+                  {permissions.surveys.isCreate && (
+                    <Button
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                      onClick={() => {
+                        setSurveyId(null);
+                        setOpen({ open: true, isClone: false });
+                      }}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      size="small"
+                      color="primary"
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                    >
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                    </Button>
+                  )}
+                  {permissions?.surveys?.isDelete && (
+                      <>
+                       <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="default"
                     size="small"
@@ -380,6 +392,9 @@ const Survey = () => {
                       Delete
                     </MenuItem>
                   </Menu>
+                      </>
+                  )}
+                 
                 </Grid>
               </Box>
             </Grid>
@@ -446,8 +461,8 @@ const Survey = () => {
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete survey  ${deleteRecord?.surveyName || ''} ?`}
             onClose={() => {
-              setDeleteRecord(null)
-              setShowDeleteConfirmBox(false)
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
             }}
             onOk={handleDelete}
           />
@@ -460,13 +475,13 @@ const Survey = () => {
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchSurveyData()
+              fetchSurveyData();
             }}
           />
         )}
       </CustomContainer>
     </Fragment>
-  )
-}
+  );
+};
 
-export default Survey
+export default Survey;

@@ -126,7 +126,6 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
         if (reason !== 'backdropClick') {
           setShowConfirmDialog(true);
         }
-        onClose()
       }}
     >
       {initialData.fields.length ? (

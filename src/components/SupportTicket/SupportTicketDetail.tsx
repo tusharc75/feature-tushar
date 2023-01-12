@@ -28,8 +28,10 @@ const SupportTicketDetail = () => {
     const [fields, setFields] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showConfirmBox, setShowConfirmBox] = useState(false);
+    const [allowedToEdit, setAllowedToEdit] = useState(false);
+    const [allowedToDelete, setAllowedToDelete] = useState(false);
     const {
-      state: { permissions }
+      state: { permissions, user }
     }: any = useData();
   
     useEffect(() => {
@@ -56,6 +58,9 @@ const SupportTicketDetail = () => {
         const {
           data: { data }
         } = await axiosInstance().get(`/support-ticket/${id}`);
+        const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+        setAllowedToEdit(isAllowedToEdit);
+        setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
         setHeadingLbl(data.supportTicketNumber);
         setSupportTicketData(data);
         setCustomizedRoutes([routes.supportTicket, { title: data?.supportTicketNumber }]);
@@ -100,8 +105,8 @@ const SupportTicketDetail = () => {
         <Grid container className="headerbox">
           <CustomBreadCrumbs routes={customizedRoutes} />
         </Grid>
-        <Grid container spacing={1} className="detail-container">
-          <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+        <div className="detail-container grid-without-activity">
+          <div>
             <Paper>
               {!supportTicketData ? (
                 <div>
@@ -114,7 +119,7 @@ const SupportTicketDetail = () => {
                 </div>
               ) : (
                 <DetailsPageHeader heading={headingLbl} showHeading={true}>
-                  <>
+                   {permissions.supportTicket?.isUpdate && allowedToEdit && (
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="primary"
@@ -123,14 +128,11 @@ const SupportTicketDetail = () => {
                       style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                     >
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                    </Button>
-  
-                    <Box component="span" marginX={1} />
-  
-                    <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
+                    </Button>)}
+
+                {permissions?.supportTicket?.isDelete && allowedToDelete  && (  
                       <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                    </span>
-                  </>
+                )}
                 </DetailsPageHeader>
               )}
               <Box>
@@ -143,8 +145,8 @@ const SupportTicketDetail = () => {
                 )}
               </Box>
             </Paper>
-          </Grid>
-        </Grid>
+          </div>
+        </div>
         {showConfirmBox && (
           <ConfirmationDialog
             open={showConfirmBox}
