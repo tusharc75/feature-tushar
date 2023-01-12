@@ -715,6 +715,16 @@ const routes = {
     ? storedRoutes.contactUs?.title : RESOURCE_LABEL?.contactUs,
     path:'/contact-us/detail'
   },
+  supportTicket:{
+    title:storedRoutes && storedRoutes.supportTicket && storedRoutes.supportTicket.title
+    ? storedRoutes.supportTicket?.title : RESOURCE_LABEL?.supportTicket,
+    path:'/support-ticket'
+  },
+  supportTicketDetail:{
+    title:storedRoutes && storedRoutes.supportTicket && storedRoutes.supportTicket.title
+    ? storedRoutes.supportTicket?.title : RESOURCE_LABEL?.supportTicket,
+    path:'/support-ticket/detail'
+  },
 };
 
 export default routes;
