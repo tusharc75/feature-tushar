@@ -26,9 +26,9 @@ import { GrStatusInfo } from 'react-icons/all';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 
-const SalesOrderDetails = () => {
+const DemandOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.salesOrder.title);
+  const renderedFrom = camelCase(routes?.demandOrder.title);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -386,4 +386,4 @@ const SalesOrderDetails = () => {
   );
 };
 
-export default SalesOrderDetails;
+export default DemandOrderDetails;

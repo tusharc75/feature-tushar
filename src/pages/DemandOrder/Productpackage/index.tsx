@@ -247,16 +247,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
                   size="small"
                   aria-label="Details"
                   onClick={() => {
-                    setLeadTimeDialog({ open: true, data: row.original });
-                  }}
-                >
-                  <DateRangeIcon fontSize="small" color="primary" />
-                </IconButton>
-                <Box ml={1} />
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
                     const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
                     setDeleteData(obj);
                   }}
@@ -522,7 +512,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
         <Box display="flex">
           <Button
             disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
-            variant={isMobile ? 'text' : 'contained'}
+            variant={isMobile ? 'text' : 'outlined'}
             color="default"
             size="small"
             onClick={openActions}

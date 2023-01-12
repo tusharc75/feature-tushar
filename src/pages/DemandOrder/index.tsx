@@ -37,8 +37,8 @@ import { camelCase } from 'lodash';
 
 let salesOrderTimeout;
 
-const SalesOrder = () => {
-  const renderedFrom = camelCase(routes?.salesOrder.title);
+const DemandOrder = () => {
+  const renderedFrom = camelCase(routes?.demandOrder.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -584,4 +584,4 @@ const SalesOrder = () => {
   );
 };
 
-export default SalesOrder;
+export default DemandOrder;
