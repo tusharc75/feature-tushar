@@ -51,7 +51,7 @@ import { isMobile } from 'react-device-detect';
 import { ExpandMore } from '@material-ui/icons';
 import { capitalize } from 'lodash';
 import DateRangeIcon from '@material-ui/icons/DateRange';
-import SalesOrderQtyDialog from './SalesOrderQtyDialog';
+import SalesOrderQtyDialog from './DemandOrderQtyDialog';
 import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import LeadTimeDialog from './LeadTimeDialog';
 
