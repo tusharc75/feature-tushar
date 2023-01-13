@@ -359,15 +359,6 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     return subRows;
   };
 
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
-  };
-
   const openActions = (event) => {
     setAnchorActionEl(event.currentTarget);
   };

@@ -162,6 +162,16 @@ import FrequencyAskedQuestionDetail from './pages/FrequentlyAskedQuestion/Freque
 import Blog from './pages/Blog';
 import BlogDetail from './pages/Blog/BlogDetail';
 import EcommerceHome from './pages/EcommerceHome';
+import Survey from './pages/Surveys';
+import SurveysDetail from './pages/Surveys/SurveysDetail';
+import ProductionOrder from './pages/ProductionOrder';
+import ProductionOrderDetails from './pages/ProductionOrder/ProductionOrderDetails';
+import ContactUs from './pages/ContactUs';
+import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
+import SupportTicket from './components/SupportTicket';
+import SupportTicketDetail from './components/SupportTicket/SupportTicketDetail';
+import DemandOrder from './pages/DemandOrder';
+import DemandOrderDetails from './pages/DemandOrder/DemandOrderDetails';
 
 var notificationInterval: any = null;
 
@@ -267,7 +277,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -810,6 +820,12 @@ function App() {
             <PrivateRoute exact path={`${routes.repairOrderDetail.path}/:id`}>
               <RepairOrderDetails />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.productionOrder.path}>
+              <ProductionOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productionOrderDetail.path}/:id`}>
+              <ProductionOrderDetails />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.workOrder.path}>
               <WorkOrder />
             </PrivateRoute>
@@ -828,14 +844,38 @@ function App() {
             <PrivateRoute exact path={`${routes.frequentlyAskedQuestionDetail.path}/:id`}>
               <FrequencyAskedQuestionDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.blog.path}`} >
+            <PrivateRoute exact path={`${routes.blog.path}`}>
               <Blog />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.blogDetail.path}/:id`} >
+            <PrivateRoute exact path={`${routes.blogDetail.path}/:id`}>
               <BlogDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.eCommerceHome.path} >
+            <PrivateRoute exact path={routes.eCommerceHome.path}>
               <EcommerceHome />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.surveys.path}>
+              <Survey />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.surveysDetail.path}/:id`}>
+              <SurveysDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.contactUs.path}>
+              <ContactUs />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.contactUsDetail.path}/:id`}>
+              <ContactUsDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.supportTicket.path}>
+              <SupportTicket />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.supportTicketDetail.path}/:id`}>
+              <SupportTicketDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.demandOrder.path}>
+              <DemandOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
+              <DemandOrderDetails />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

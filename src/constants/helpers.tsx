@@ -64,6 +64,7 @@ export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loa
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
+export const demandOrderSteps = ['Add Products', 'Closed'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -201,11 +202,19 @@ export const sidebarResource = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
-  blog: 'Blog'
+  blog: 'Blog',
+  demandOrder: 'Demand Order',
+  surveys: 'Surveys',
+  supportTicket: 'Support Ticket',
+  eCommerceHome: 'e-Commerce Home',
+  contactUs: 'Contact Us',
+  frequentlyAskedQuestion: 'Frequently Asked Question'
+  
 };
 
 export const resourceNames = {
@@ -274,11 +283,16 @@ export const resourceNames = {
   productAuction: 'Product Auction',
   quotation: 'Quotation',
   repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
-  blog: 'Blog'
+  blog: 'Blog',
+  surveys: 'Surveys',
+  supportTicket: 'Support Ticket',
+  eCommerceHome: 'e-Commerce Home',
+  contactUs: 'Contact Us',
 };
 
 export const primaryFields = {
@@ -363,12 +377,17 @@ export const RESOURCE_LABEL = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
   blog: 'Blog',
-  eCommerceHome: 'e-Commerce Home'
+  eCommerceHome: 'e-Commerce Home',
+  surveys: 'Surveys',
+  contactUs: 'Contact Us',
+  supportTicket: 'Support Ticket',
+  demandOrder: 'Demand Order'
 };
 
 export const CHILD_RESOURCE = {
@@ -449,6 +468,11 @@ export const repairOrder = {
   api: '/repair-order'
 };
 
+export const productionOrder = {
+  resource: 'productionOrder',
+  api: '/production-order'
+};
+
 export const salesOrder = {
   api: '/sales-order',
   resource: 'sales-order'
@@ -462,6 +486,11 @@ export const invoice = {
 export const quotation = {
   api: '/quotation',
   resource: 'quotation'
+};
+
+export const demandOrder = {
+  api: '/demand-order',
+  resource: 'demandOrder'
 };
 
 export const packages = {
@@ -556,7 +585,7 @@ export const workOrderSupervisor = {
   route: '/work-order-supervisor',
   permission: 'workOrderSupervisor',
   resource: 'Work Order Supervisor'
-}
+};
 
 export const convertInventory = {
   api: '/convert-inventory-to-asset',
@@ -836,21 +865,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -896,8 +925,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'multiImageUpload') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
-    }
-    else if (input.type === 'multiFileUpload') {
+    } else if (input.type === 'multiFileUpload') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
     } else {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
@@ -1142,7 +1170,7 @@ export const getUniqueCurrencies = () => {
   return uniqBy(currencies, 'currencyCode');
 };
 
-export const formatAmountWithCurrency = (currencyCode, amount) => {
+export const formatAmountWithCurrency = (currencyCode, amount, currencyShow = true) => {
   if ((!currencyCode && !amount) || !amount || isNaN(amount)) {
     return {
       shortFormatAmount: '',
@@ -1233,10 +1261,12 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     language = currencyData.languages[0];
   }
 
-  let options = {
+  let options: any = {
     style: 'currency',
     currency: currencyCode
   };
+
+  if (currencyShow === false) options.style = 'decimal';
 
   if (Number.isInteger(amount)) {
     options['maximumFractionDigits'] = 0;
@@ -1714,9 +1744,8 @@ export const INVENTORY_STATUS = {
   needRepair: 'Need Repair',
   needRecert: 'Need Recert',
   inRepair: 'In-Repair',
-  notApplied: "N/A",
+  notApplied: 'N/A'
 };
-
 
 export const INVENTORY_HISTORY_TYPE = {
   rental: 'Rental',
@@ -1736,7 +1765,7 @@ export const INVENTORY_HISTORY_TYPE = {
   inventoryToAsset: 'Inventory to Asset',
   quotation: 'Quotation',
   invoice: 'Invoice'
-}
+};
 
 export const DELIVERY_TICKET_STATUS = {
   new: 'New',
@@ -1867,6 +1896,7 @@ export const ACTIVITY_RESOURCE = {
   transferInventory: 'transferInventory',
   quotation: 'quotation',
   repairOrder: 'repairOrder',
+  productionOrder: 'productionOrder',
   workOrder: 'workOrder'
 };
 
@@ -1925,8 +1955,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'customer-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'supplier-account':
@@ -1936,8 +1967,9 @@ export const getData = (resource: string, data: any) => {
       };
     case 'supplier-contact':
       return {
-        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${data?.lastName ? data?.lastName : ''
-          }`,
+        name: `${data?.salutation ? data?.salutation : ''} ${data?.firstName ? data?.firstName : ''} ${data?.middleName ? data?.middleName : ''} ${
+          data?.lastName ? data?.lastName : ''
+        }`,
         id: data._id
       };
     case 'lead':
@@ -2133,7 +2165,7 @@ export const WORKORDER_SERVICE_STATUS = {
   backlog: 'Backlog',
   inProgress: 'In-Progress',
   completed: 'Completed',
-  failed: 'Failed',
+  failed: 'Failed'
 };
 
 export const WORKORDER_SERVICE_STEP_STATUS = {
@@ -2144,15 +2176,34 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   passed: 'Passed',
   failed: 'Failed',
   skipped: 'Skipped',
-  needReperform: 'Need Reperform',
+  needReperform: 'Need Reperform'
 };
 
 export const REPAIR_ORDER_TYPE = {
   internal: 'Asset Repair',
-  external: 'Customer Owned Asset Repair',
+  external: 'Customer Owned Asset Repair'
 };
 
 export const REPAIR_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  preWork: 'Pre-Work In-Progress',
+  postWork: 'Post-Work In-Progress',
+  buildingQuote: 'Building Quote',
+  waitingQuote: 'Waiting On Quote',
+  quoteAccepted: 'Quote Accepted',
+  quoteRejected: 'Quote Rejected',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  completed: 'Completed'
+};
+
+export const PRODUCTION_ORDER_TYPE = {
+  internal: 'Asset Repair',
+  external: 'Customer Owned Asset Repair'
+};
+
+export const PRODUCTION_ORDER_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   preWork: 'Pre-Work In-Progress',
@@ -2177,9 +2228,7 @@ export const WORK_ORDER_STATUS = {
   completed: 'Completed'
 };
 
-
 export const convertMsToTime = (milliseconds: any) => {
-
   function padTo2Digits(num) {
     num = num - Math.floor(num) !== 0 ? num.toFixed(1) : num;
     return num.toString().padStart(2, '0');
@@ -2207,4 +2256,4 @@ export const convertMsToTime = (milliseconds: any) => {
     time = `${padTo2Digits(hours / 24)}d`;
   }
   return time;
-}
+};

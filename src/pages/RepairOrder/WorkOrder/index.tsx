@@ -41,7 +41,6 @@ const WorkOrder = ({
   isPostWorkService,
   setCurrentStep
 }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -143,6 +142,28 @@ const WorkOrder = ({
         )
       },
       {
+        accessor: 'productName',
+        Header: 'Product',
+        width: 200,
+        Cell: ({ row }) => (
+          <div className="d-flex gap-2 align-items-center">
+            <p className="text-truncate" title={row.original?.productName}>
+              {row.original?.productName ? (
+                row.original?.productId ? (
+                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
+                    {row.original?.productName}
+                  </a>
+                ) : (
+                  row.original?.productName
+                )
+              ) : (
+                <NoDataCell />
+              )}
+            </p>
+          </div>
+        )
+      },
+      {
         accessor: 'description',
         Header: 'Description',
         width: 200,
@@ -171,28 +192,6 @@ const WorkOrder = ({
           ) : (
             <NoDataCell />
           )
-      },
-      {
-        accessor: 'productName',
-        Header: 'Product',
-        width: 200,
-        Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
-            <p className="text-truncate" title={row.original?.productName}>
-              {row.original?.productName ? (
-                row.original?.productId ? (
-                  <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
-                    {row.original?.productName}
-                  </a>
-                ) : (
-                  row.original?.productName
-                )
-              ) : (
-                <NoDataCell />
-              )}
-            </p>
-          </div>
-        )
       },
       {
         accessor: 'assignedUsers',
@@ -367,7 +366,9 @@ const WorkOrder = ({
             ? parent?.productDetail?.productDesc || ''
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
-              : '';
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDesc || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
@@ -395,8 +396,14 @@ const WorkOrder = ({
         setNextStep(false);
       }
     } else {
-      if (data?.material?.filter((e) => e?.type === 'service' && e?.serviceDetail?.preWork &&
-        [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status))?.length) {
+      if (
+        data?.material?.filter(
+          (e) =>
+            e?.type === 'service' &&
+            e?.serviceDetail?.preWork &&
+            [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress]?.sort()?.includes(e?.status)
+        )?.length
+      ) {
         setNextStep(false);
       } else {
         setNextStep(true);
@@ -448,7 +455,10 @@ const WorkOrder = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    return sortBy(subRows?.filter((e) => e.type !== 'product'), ['type']);
+    return sortBy(
+      subRows?.filter((e) => e.type !== 'product'),
+      ['type']
+    );
   };
 
   const handleAddService = (ids) => {
@@ -495,7 +505,6 @@ const WorkOrder = ({
     setAnchorActionEl(null);
   };
 
-
   const handleArrangeUpdate = (rows: any[], workOrderId) => {
     rows?.forEach((e: any) => {
       delete e.name;
@@ -516,7 +525,6 @@ const WorkOrder = ({
         toastConfig.setToastConfig(err);
       });
   };
-
 
   return (
     <Fragment>
@@ -568,7 +576,9 @@ const WorkOrder = ({
                     setArrangeView(true);
                   }}
                   disabled={
-                    selectedProducts?.length && selectedProducts?.every((d) => d.workOrder?._id === selectedServices[0]?.workOrder?._id) ? false : true
+                    selectedProducts?.length && selectedProducts?.every((d) => d.workOrder?._id === selectedServices[0]?.workOrder?._id)
+                      ? false
+                      : true
                   }
                 >
                   Arrange Services
@@ -590,7 +600,8 @@ const WorkOrder = ({
                         ? false
                         : true
                       : selectedAssets?.length
-                        ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length === selectedAssets?.length
+                        ? selectedAssets?.filter((d) => rowsData?.filter((c) => c?._id === d?._id)?.some((d) => !d?.subRows?.length))?.length ===
+                          selectedAssets?.length
                           ? false
                           : true
                         : true
@@ -608,17 +619,7 @@ const WorkOrder = ({
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
-              }
+              width={stepFullScreen ? '100%' : isTabletScreen ? '100%' : isSmallScreen ? '100%' : showActivity ? '100%' : 'calc(100vw - 103px)'}
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
               <CustomReactTable

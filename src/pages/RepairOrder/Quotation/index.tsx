@@ -1,13 +1,5 @@
 import React, { useState, useEffect, useContext, Fragment, useReducer, useMemo } from 'react';
-import {
-  Box,
-  Button,
-  Typography,
-  Chip,
-  useMediaQuery,
-  Menu,
-  MenuItem,
-} from '@material-ui/core';
+import { Box, Button, Typography, Chip, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -53,7 +45,7 @@ const Quotation = ({
   allowedToDelete,
   setQuotationVersionData,
   updateOrderStatus,
-  invoiceStep,
+  invoiceStep
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -93,7 +85,10 @@ const Quotation = ({
   }, [repairOrderData]);
 
   useEffect(() => {
-    if (invoiceStep && ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)) {
+    if (
+      invoiceStep &&
+      ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
+    ) {
       updateOrderStatus(REPAIR_ORDER_STATUS.readyToInvoice);
     }
   }, [invoiceStep]);
@@ -105,8 +100,7 @@ const Quotation = ({
   }, [currentVersion]);
 
   const fetchFields = async () => {
-
-    setNextStep(false)
+    setNextStep(false);
     setColumns(null);
 
     const quotationResponse = await axiosInstance().get(`${repairOrder.api}/${repairOrderData?._id}/check-create/quotation`);
@@ -164,13 +158,14 @@ const Quotation = ({
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'serializedAsset'
-                    ? routes.serializedAssetDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'serializedAsset'
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'package'
-                        ? routes.packagesDetail.path
-                        : routes.serviceMasterDetail.path
+                      ? routes.packagesDetail.path
+                      : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -205,14 +200,9 @@ const Quotation = ({
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ?
-            <p className="text-truncate">
-              {row.original.description}</p>
-            : (
-              <NoDataCell />
-            )
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
-      },
+      }
       // {
       //   accessor: 'leadTime',
       //   Header: 'Lead Time (Days)',
@@ -226,8 +216,14 @@ const Quotation = ({
       // }
     ];
     data.forEach((element) => {
-      let isEditable= Boolean(![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-        quotationInfo?.versions[tempCurrentVersion]?.status ) && !invoiceStep && allowedToEdit && element?.isColumnEditable)
+      let isEditable = Boolean(
+        ![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+          quotationInfo?.versions[tempCurrentVersion]?.status
+        ) &&
+          !invoiceStep &&
+          allowedToEdit &&
+          element?.isColumnEditable
+      );
       if (element.type === 'date') {
         coloum.push({
           accessor: element.fieldName,
@@ -353,37 +349,40 @@ const Quotation = ({
 
   const fetchProductInventory = async () => {
     var data: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`);
+    const response = await axiosInstance().get(
+      `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
+    );
     data = response?.data?.data;
 
     setMaterial(JSON.parse(JSON.stringify(data.material)));
 
     data?.material?.forEach((e: any) => {
-      if (e.type === "service") {
+      if (e.type === 'service') {
         e.preWork = e?.serviceDetail?.preWork;
       }
-    })
+    });
 
     const rows = data.material.filter((e) => e.parentId === null);
 
     rows?.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
@@ -398,27 +397,31 @@ const Quotation = ({
   };
 
   const generateNestedData = (material, parent) => {
-
-    var subRows: any = orderBy(material?.filter((e) => e.parentId === parent._id), ['preWork'], ['desc']);
+    var subRows: any = orderBy(
+      material?.filter((e) => e.parentId === parent._id),
+      ['preWork'],
+      ['desc']
+    );
 
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDesc || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -435,15 +438,6 @@ const Quotation = ({
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
-  };
-
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
   };
 
   const openActions = (event) => {
@@ -663,7 +657,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)
@@ -709,18 +703,18 @@ const Quotation = ({
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                  <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    disabled={selectedProducts.length === 0}
-                  >
-                    Actions
-                    <ExpandMore />
-                  </Button>
-                )}
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedProducts.length === 0}
+                >
+                  Actions
+                  <ExpandMore />
+                </Button>
+              )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -771,9 +765,7 @@ const Quotation = ({
           <Box
             p="6px"
             zIndex={5}
-            width={
-              stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
-            }
+            width={stepFullScreen ? '100%' : isTabletScreen ? '100%' : isSmallScreen ? '100%' : showActivity ? '100%' : 'calc(100vw - 100px)'}
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
           >
             <CustomReactTable

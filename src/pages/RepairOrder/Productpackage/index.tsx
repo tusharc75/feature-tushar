@@ -35,7 +35,7 @@ const Productpackage = ({
   stepFullScreen,
   allowedToEdit,
   allowedToDelete,
-  setHasAssetsAdded,
+  setHasAssetsAdded
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -102,12 +102,12 @@ const Productpackage = ({
             <Chip
               className="ml-1"
               label={`${row.original.type === 'service'
-                ? 'Service'
-                : row.original.type === 'product'
-                  ? 'Product'
-                  : row.original.type === 'serializedAsset'
-                    ? 'Asset'
-                    : 'Package'
+                  ? 'Service'
+                  : row.original.type === 'product'
+                    ? 'Product'
+                    : row.original.type === 'serializedAsset'
+                      ? 'Asset'
+                      : 'Package'
                 }`}
               size="small"
               color="primary"
@@ -134,14 +134,17 @@ const Productpackage = ({
         Cell: ({ row }) => (
           <div className="d-flex gap-2 align-items-center">
             <p className="text-truncate" title={row.original?.productName}>
-              {row.original?.productName ?
-                row.original?.productId ?
+              {row.original?.productName ? (
+                row.original?.productId ? (
                   <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
                     {row.original?.productName}
                   </a>
-                  : row.original?.productName
-                :
-                <NoDataCell />}
+                ) : (
+                  row.original?.productName
+                )
+              ) : (
+                <NoDataCell />
+              )}
             </p>
           </div>
         )
@@ -151,12 +154,7 @@ const Productpackage = ({
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ?
-            <p className="text-truncate">
-              {row.original.description}</p>
-            : (
-              <NoDataCell />
-            )
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       },
       {
@@ -219,12 +217,12 @@ const Productpackage = ({
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail = `${parent.type === 'service'
-        ? parent.serviceDetail?.serviceName
-        : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.assetNumber
-            : parent.packageDetail?.packageName
+          ? parent.serviceDetail?.serviceName
+          : parent.type === 'product'
+            ? parent.productDetail?.productName
+            : parent.type === 'serializedAsset'
+              ? parent.serializedAssetDetail.assetNumber
+              : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'service'
@@ -233,7 +231,9 @@ const Productpackage = ({
             ? parent?.productDetail?.productDesc || ''
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
-              : '';
+              : parent.type === 'serializedAsset'
+                ? parent?.serializedAssetDetail?.product?.productDesc || ''
+                : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
@@ -241,12 +241,12 @@ const Productpackage = ({
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
       parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
-          ? parent?.productDetail?.status
-          : parent.type === 'serializedAsset'
-            ? parent?.serializedAssetDetail?.status
-            : parent.packageDetail?.status
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
+            ? parent?.productDetail?.status
+            : parent.type === 'serializedAsset'
+              ? parent?.serializedAssetDetail?.status
+              : parent.packageDetail?.status
         }`;
     });
 
@@ -272,12 +272,12 @@ const Productpackage = ({
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
       _subRow.detail = `${_subRow.type === 'service'
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'serializedAsset'
-            ? _subRow.serializedAssetDetail.assetNumber
-            : _subRow.packageDetail?.packageName
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === 'product'
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'serializedAsset'
+              ? _subRow.serializedAssetDetail.assetNumber
+              : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === 'service'
@@ -295,12 +295,12 @@ const Productpackage = ({
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
       parent.status = `${parent.type === 'service'
-        ? parent.serviceDetail?.status
-        : parent.type === 'product'
-          ? parent.productDetail?.status
-          : parent.type === 'serializedAsset'
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
+          ? parent.serviceDetail?.status
+          : parent.type === 'product'
+            ? parent.productDetail?.status
+            : parent.type === 'serializedAsset'
+              ? parent.serializedAssetDetail.status
+              : parent.packageDetail?.status
         }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
@@ -518,17 +518,7 @@ const Productpackage = ({
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                    ? 'calc(100vw)'
-                    : isSmallScreen
-                      ? 'calc(100vw)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
-              }
+              width={stepFullScreen ? '100%' : isTabletScreen ? '100%' : isSmallScreen ? '100%' : showActivity ? '100%' : 'calc(100vw - 103px)'}
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
               <CustomReactTable
