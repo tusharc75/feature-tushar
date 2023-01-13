@@ -1,21 +1,23 @@
-import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import FormTypes from 'src/components/Helpers/FormTypes';
 import InputField from 'src/components/Helpers/InputField';
-import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition, isFieldNotTouched, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
-const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
     state: { user }
   }: any = useData();
@@ -24,11 +26,13 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
   const [loading, setLoading] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
-  const [cloneHeading, setCloneHeading] = useState('')
+  const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [formsData, setFormsData] = useState([]);
+  const [formValues, setFormValues] = useState({});
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+
   const ref = useRef(null);
-
-
 
   useEffect(() => {
     fetchFields();
@@ -37,36 +41,40 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
   const fetchFields = async () => {
     try {
       let data;
-      const response = await axiosInstance().get('/field?resource=Frequently Asked Question');
+      const response = await axiosInstance().get('/field?resource=Contact Us');
       data = response?.data?.data;
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
-        axiosInstance().get(`/frequently-asked-question/${id}`).then(({ data: { data } }) => {
-          let fields = fieldsDataForUpdate
-          let tempData = data
-          if (isClone) {
-            fields = fieldsDataForCreate
-            const { label, ...rest } = data
-            setCloneHeading(label);
-            tempData = { ...rest, label }
-          }
-          setInitialData({
-            fields: fields,
-            values: getObjKeysWithValues(tempData, fields),
+        axiosInstance()
+          .get(`/contact-us/${id}`)
+          .then(({ data: { data } }) => {
+            let fields = fieldsDataForUpdate;
+            let tempData = data;
+            if (isClone) {
+              fields = fieldsDataForCreate;
+              const { label, ...rest } = data;
+              setCloneHeading(label);
+              tempData = { ...rest, label };
+            }
+            setInitialData({
+              fields: fields,
+              values: getObjKeysWithValues(tempData, fields)
+            });
+            setFormsData(setFieldsInAscendingOrder(fields));
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-        }).catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
         });
+        setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate));
       }
-
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -75,44 +83,52 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (id && !isClone) {
-      values._id = id
-      axiosInstance().put(`/frequently-asked-question`, values).then(({ data }) => {
-        setSubmitting(false);
-        onSuccess()
-        toastConfig.setToastConfig({
-          open: true,
-          type: "success",
-          message: data.message,
+      values._id = id;
+      axiosInstance()
+        .put(`/contact-us`, values)
+        .then(({ data }) => {
+          setSubmitting(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
       axiosInstance()
-        .post(`/frequently-asked-question`, values)
-        .then(({ data: { data } }) => {
+        .post(`/contact-us`, values)
+        .then(({ data }) => {
           setLoading(false);
           onSuccess(data);
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
-            type: "success",
-            message: data.message,
+            type: 'success',
+            message: 'Submitted Successfully'
           });
         })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
-          toastConfig.setToastConfig(error);
-        })
+        });
     }
   };
-
   function validate(values) {
     const errors = {};
     return errors;
   }
+
+  const handleValuesChange = (data) => {
+    setFormValues((prevState) => ({
+      ...prevState,
+      ...data
+    }));
+  };
 
   return (
     <Dialog
@@ -126,6 +142,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
         if (reason !== 'backdropClick') {
           setShowConfirmDialog(true);
         }
+        onClose();
       }}
     >
       {initialData.fields.length ? (
@@ -137,7 +154,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
           innerRef={ref}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
-            <Fragment>
+            <>
               <CustomDialogHeader
                 onClose={() => {
                   if (!isEqual(ref.current.values, initialData.values)) {
@@ -146,12 +163,13 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
                     onClose();
                   }
                 }}
-                title={`${id
+                title={`${
+                  id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
-                    : `Create Frequently Asked Question`
-                  }`}
+                    : `Contact Us`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -159,16 +177,56 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
                 showManimizeMaximize={true}
               />
               <CustomDialogContent>
-                <Form autoComplete="off" autoCorrect="off" noValidate >
-                  <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                  />
+                <Form>
+                  {formsData &&
+                    formsData.map((form, i) => {
+                      return (
+                        form.name && (
+                          <div key={i}>
+                            <div className={'detail-box-content'}>
+                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                            </div>
+                            <Box marginY={2}>
+                              <Grid spacing={3} container>
+                                {form.sectionFields.map((field) => (
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <FormTypes
+                                      {...field}
+                                      fieldData={field}
+                                      disabled={field.disabled}
+                                      values={values}
+                                      errors={errors}
+                                      touched={touched}
+                                      label={field.fieldLabel}
+                                      name={field.fieldName}
+                                      type={field.type}
+                                      options={field.option}
+                                      setFieldValue={(name, value) => {
+                                        handleValuesChange({ [name]: value });
+                                        setFieldValue(name, value);
+                                      }}
+                                      required={field.required}
+                                      fullWidth
+                                      isTooltip={field?.isTooltip || false}
+                                      tooltipMessage={field?.tooltipMessage}
+                                      size="small"
+                                      imageOrFileUploadCompletePercentage={
+                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                          ? (completePercentage) => {
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
+                                          : null
+                                      }
+                                    />
+                                  </Grid>
+                                ))}
+                              </Grid>
+                            </Box>
+                          </div>
+                        )
+                      );
+                    })}
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -185,7 +243,8 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
                         },
                         values
                       )
-                    ) onClose();
+                    )
+                      onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
@@ -217,7 +276,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
                   }}
                 />
               ) : null}
-            </Fragment>
+            </>
           )}
         </Formik>
       ) : (
@@ -229,4 +288,4 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
   );
 };
 
-export default ManageFrequentlyAskedQuestion;
+export default ManageBlog;

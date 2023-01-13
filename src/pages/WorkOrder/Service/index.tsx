@@ -8,7 +8,8 @@ import {
   REPAIR_ORDER_TYPE,
   workOrder,
   WORKORDER_SERVICE_STATUS,
-  WORKORDER_SERVICE_STEP_STATUS
+  WORKORDER_SERVICE_STEP_STATUS,
+  WORK_ORDER_STATUS
 } from 'src/constants/helpers';
 import { Badge, Box, Chip, Dialog, Divider, Grid, IconButton, Menu, MenuItem, Paper, TextField, useMediaQuery } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -92,7 +93,7 @@ const RenderTotalTime = ({ stepTimes }: any) => {
   );
 };
 
-const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
+const Service = ({ workOrderId, allowedToEdit, workOrderData, completed, fetchWorkOrderData }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -209,12 +210,19 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
             })
           }
         }
-
-        setSelectedService(services[pendingServiceIndex]);
+        if (selectedService) {
+          setSelectedService(services?.find((e) => e?.uniqueId === selectedService?.uniqueId) || null);
+        }
+        else {
+          setSelectedService(services[pendingServiceIndex]);
+        }
       }
-
       setServiceSteps(services);
-
+      if ((services.filter((e) => e.type === 'service'
+        && e.status === WORKORDER_SERVICE_STATUS.completed)?.length === services.filter((e) => e.type === 'service')?.length)
+        && workOrderData?.status !== WORK_ORDER_STATUS.completed) {
+        fetchWorkOrderData()
+      }
     } else {
       setServiceSteps([]);
     }
@@ -969,6 +977,7 @@ const Service = ({ workOrderId, allowedToEdit, workOrderData, completed }) => {
         <ConsumablesDialog
           onSuccess={() => {
             setConsumablesDialog(false);
+            fetchRepairOrderData();
           }}
           handleClose={() => {
             setConsumablesDialog(false);

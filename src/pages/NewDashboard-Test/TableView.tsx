@@ -14,7 +14,6 @@ interface Props {
 }
 
 const TableView = ({ id, chartData, isScreenSmall, isCurrency, currency, selectedDashboard }: Props) => {
-  console.log(isCurrency);
   const [tableData, setTableData] = useState([]);
   useEffect(() => {
     if (!chartData || chartData.length === 0) return;

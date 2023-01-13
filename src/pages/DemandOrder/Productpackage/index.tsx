@@ -35,16 +35,16 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import moment from 'moment';
-import { quotation, dateFormat, pricingCondition, formatAmountWithCurrency, supplierContact, invoice } from '../../../constants/helpers';
+import { dateFormat, pricingCondition, formatAmountWithCurrency, demandOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { isMobile } from 'react-device-detect';
-import { ExpandMore, KeyboardArrowDown } from '@material-ui/icons';
+import { ExpandMore } from '@material-ui/icons';
 import { capitalize } from 'lodash';
 import DateRangeIcon from '@material-ui/icons/DateRange';
-import InvoiceQtyDialog from './InvoiceQtyDialog';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
+import SalesOrderQtyDialog from './DemandOrderQtyDialog';
+import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import LeadTimeDialog from './LeadTimeDialog';
 
 const useStyles = makeStyles((theme) => ({
@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, updateJobStatus }) => {
+const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
   const {
@@ -86,21 +86,15 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [isRateRequired, setIsRateRequired] = useState(false);
-  const [requestDialog, setRequestDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
-  const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
-  const [supplierContactData, setSupplierContactData] = useState([]);
-  const [selectedType, setSelectedType] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchFields();
   }, []);
 
   const fetchFields = async () => {
-    let data = await fetch_invoice_product_fields(invoiceData?.currency);
+    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
       {
@@ -160,9 +154,6 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
       }
     ];
     data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
       if (element.type === 'date') {
         coloum.push({
           accessor: element.fieldName,
@@ -203,7 +194,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
                 Header: fieldLabel,
                 Cell: ({ row }) =>
                   row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                    <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                   ) : (
                     <NoDataCell />
                   )
@@ -219,7 +210,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
               Header: fieldLabel,
               Cell: ({ row }) =>
                 row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(invoiceData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
+                  <p>{formatAmountWithCurrency(salesOrderData?.currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
                 ) : (
                   <NoDataCell />
                 )
@@ -251,16 +242,18 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
           canDrag: false,
           Cell: ({ row }) =>
             !row.original.hideSelection && (
-              <IconButton
-                size="small"
-                aria-label="Details"
-                onClick={() => {
-                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                  setDeleteData(obj);
-                }}
-              >
-                <DeleteIcon fontSize="small" color="error" />
-              </IconButton>
+              <Grid container spacing={1}>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    setDeleteData(obj);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
+              </Grid>
             )
         })
       );
@@ -277,20 +270,11 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
             .reduce((sum, row) => row.values[element.accessor] + sum, 0);
           return <>{qtyTotal}</>;
         };
-      } else if (element.accessor.includes('finalPrice')) {
-        element['Footer'] = (info) => {
-          const total = info.rows
-            .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
-            .reduce((sum, row) => row.values[element.accessor] + sum, 0);
-          return (
-            <>
-              {currencySymbol} {formatAmountWithCurrency(invoiceData?.currency, total)?.amountWithouCurrencyCode ?? total}
-            </>
-          );
-        };
       }
     });
-    setColumns(coloum);
+    const showColumn = ['Detail', 'Qty', 'Unit'];
+    const purifyColumn = coloum.filter((e) => showColumn?.includes(e.Header) || e.accessor === 'action');
+    setColumns(purifyColumn);
     fetchProductInventory();
   };
 
@@ -298,14 +282,14 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     setNextStep(false);
     var data: any = [];
     var inventory: any = [];
-    const response = await axiosInstance().get(`${invoice.api}/productpackage/${invoiceData._id}`);
+    const response = await axiosInstance().get(`${demandOrder.api}/productpackage/${salesOrderData._id}`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.detail = `${
-        parent.type === 'asset'
+        parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
           ? parent.productDetail?.productName
@@ -313,10 +297,8 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
       }`;
-      parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
-      parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : false;
+      parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
       parent.subRows = generateNestedData(data.material, inventory, parent);
@@ -334,7 +316,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${
-        _subRow.type === 'asset'
+        _subRow.type === 'serializedAsset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
@@ -342,10 +324,8 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
       }`;
-      _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
-      _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
-      _subRow.isValid = _subRow['finalPrice_' + invoiceData?.currency?.toLowerCase()] ? true : false;
+      _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
       _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
@@ -359,20 +339,13 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     return subRows;
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
-  const openAddMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeAddMenu = () => {
-    setAnchorEl(null);
+  const getNestedSubRows = (obj, original) => {
+    if (original?.subRows?.length) {
+      original?.subRows.forEach((element) => {
+        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
+        getNestedSubRows(obj, element);
+      });
+    }
   };
 
   const handleAdd = async (rows) => {
@@ -398,7 +371,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
           e.pricingMethod === element.pricingMethod
       );
       if (rateResult.length && rateResult[0].mrp) {
-        const priceFieldName = `price_${invoiceData?.currency?.toLowerCase()}`;
+        const priceFieldName = `price_${salesOrderData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
         const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
         Object.assign(element, calValues);
@@ -406,14 +379,11 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     });
 
     axiosInstance()
-      .post(`${invoice.api}/productpackage/${invoiceData._id}`, { material })
+      .post(`${demandOrder.api}/productpackage/${salesOrderData._id}`, { material })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchProductInventory();
         setAddingProducts(false);
-        if (currentStep === 0 && invoiceData?.status !== 'In-Progress') {
-          updateJobStatus('In-Progress');
-        }
       })
       .catch((error) => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
@@ -439,7 +409,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     });
     setUpdating(true);
     axiosInstance()
-      .put(`${invoice.api}/productpackage/${invoiceData._id}`, { material: rows })
+      .put(`${demandOrder.api}/productpackage/${salesOrderData._id}`, { material: rows })
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
@@ -454,7 +424,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${invoice.api}/productpackage/${invoiceData?._id}/delete`, { ids: rows })
+      .put(`${demandOrder.api}/productpackage/${salesOrderData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();
@@ -473,7 +443,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
   };
 
   const calculatePrice = (arr: any[]) => {
-    if (invoiceData) {
+    if (salesOrderData) {
       const data: any = {};
       data.conditionType = ['Rent'];
       data.material = arr.map((ele) => ({
@@ -482,11 +452,11 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
         qty: ele?.qty,
         pricingMethod: ele?.pricingMethod,
         unit: ele?.unit,
-        currency: invoiceData?.currency
+        currency: salesOrderData?.currency
       }));
       data.supplier = [];
-      data.customer = [invoiceData?.customerAccount?.optionValue];
-      data.warehouse = [invoiceData?.warehouse?.optionValue];
+      data.customer = [salesOrderData?.customerAccount?.optionValue];
+      data.warehouse = [salesOrderData?.warehouse?.optionValue];
       return new Promise((resolve, reject) => {
         axiosInstance()
           .post(pricingCondition.api + `/calculatePrice`, data)
@@ -500,95 +470,68 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
     }
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1}>
         <Box display="flex" alignItems="center">
-          <Button variant="contained" color="primary" size="small" onClick={openAddMenu} endIcon={<KeyboardArrowDown fontSize="small" />}>
-            Add
-          </Button>
-          <Menu
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            anchorEl={anchorEl}
-            keepMounted
-            open={Boolean(anchorEl)}
-            onClose={closeAddMenu}
-          >
-            {permissions?.product?.isRead && (
-              <MenuItem
-                color="primary"
-                onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
-                  closeAddMenu();
-                }}
-              >
-                {`Add ${routes.product.title}`}
-              </MenuItem>
-            )}
-
-            {permissions?.packages?.isRead && (
-              <MenuItem
-                color="primary"
-                onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-                  closeAddMenu();
-                }}
-              >
-                {`Add ${routes.packages.title}`}
-              </MenuItem>
-            )}
-            {permissions?.serviceMaster?.isRead && (
-              <MenuItem
-                color="primary"
-                onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-                  closeAddMenu();
-                }}
-              >
-                {`Add ${routes.serviceMaster.title}`}
-              </MenuItem>
-            )}
-          </Menu>
-        </Box>
-        <Box display="flex">
-          <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-            <span>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                onClick={openActions}
-                endIcon={<KeyboardArrowDown fontSize="small" />}
-              >
-                Actions
-              </Button>
-            </span>
-          </HtmlTooltip>
-          <Menu
-            anchorEl={anchorActionEl}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left'
-            }}
-            open={Boolean(anchorActionEl)}
-            onClose={closeActions}
-          >
-            <MenuItem
+          {permissions?.product?.isRead && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
               onClick={() => {
-                setIsProductEdit({ open: true, isBulkedit: true });
-                closeActions();
+                setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
               }}
             >
-              Bulk Edit
-            </MenuItem>
-
+              {`Add ${routes.product.title}`}
+            </Button>
+          )}
+          <Box mx={1} />
+          {permissions?.packages?.isRead && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() => {
+                setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+              }}
+            >
+              {`Add ${routes.packages.title}`}
+            </Button>
+          )}
+          <Box mx={1} />
+        </Box>
+        <Box display="flex">
+          <Button
+            disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+            variant={isMobile ? 'text' : 'outlined'}
+            color="default"
+            size="small"
+            onClick={openActions}
+            aria-controls="action-menu"
+          >
+            {isMobile ? '' : 'Actions'} <ExpandMore />
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            getContentAnchorEl={null}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="action-menu"
+            open={Boolean(anchorEl)}
+            onClose={closeActions}
+          >
             <MenuItem
               onClick={() => {
                 const dataToDelete =
@@ -605,78 +548,37 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
                 setDeleteData(dataToDelete);
                 closeActions();
               }}
+              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
             >
               Delete
             </MenuItem>
           </Menu>
-          {/* <div className="d-flex gap-2">
-                        <span>
-                            <Button variant={'outlined'} color="default" size="small" onClick={openActions} aria-controls="action-menu">
-                                {' '}
-                                {'Actions'} <ExpandMore />
-                            </Button>
-                        </span>
-                        <Menu
-                            anchorEl={anchorEl}
-                            keepMounted
-                            getContentAnchorEl={null}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left'
-                            }}
-                            id="action-menu"
-                            open={Boolean(anchorEl)}
-                            onClose={closeActions}
-                        >
-                            <MenuItem
-                                disabled={selectedProducts.length === 0}
-                                onClick={() => {
-                                    let tempSupplierAccountId = [];
-                                    selectedProducts?.forEach((element) => {
-                                        element?.supplierAccount?.forEach((e) => {
-                                            if (tempSupplierAccountId.findIndex((d) => d === e?.optionValue) === -1) {
-                                                tempSupplierAccountId.push(e?.optionValue);
-                                            }
-                                        });
-                                    });
-                                    axiosInstance()
-                                        .get(
-                                            `${supplierContact.contactApi}?filterById=${JSON.stringify([
-                                                { field: 'accountName', term: { $in: tempSupplierAccountId } }
-                                            ])}&filterType=and`
-                                        )
-                                        .then(({ data: { data, count } }) => {
-                                            setSupplierContactData(data);
-                                            setAskSupplierPriceDialog(true);
-                                        })
-                                        .catch((error) => {
-                                            toastConfig.setToastConfig(error);
-                                        });
-                                    closeActions();
-                                }}
-                            >
-                                Ask Supplier to Quote
-                            </MenuItem>
-                            <MenuItem
-                                onClick={() => {
-                                    setSelectedType('Supplier');
-                                    setRequestDialog(true);
-                                    closeActions();
-                                }}
-                            >
-                                View Supplier Quote
-                            </MenuItem>
-                            {/* <MenuItem
-                onClick={() => {
-                  setSelectedType('Customer');
-                  setRequestDialog(true);
-                  closeActions();
-                }}
-              >
-                View Customer Price
-              </MenuItem> 
-                        </Menu>
-                    </div> */}
+          {/* <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length) || isDeleting}
+              onClick={() => {
+                const dataToDelete =
+                  selectedProducts &&
+                  selectedProducts
+                    .filter((e) => !e.hideSelection)
+                    .map((rec: any) => {
+                      const obj: any = {};
+                      obj.id = rec._id;
+                      obj.type = rec?.type;
+                      obj.materialId = rec?.materialId;
+                      return obj;
+                    });
+                setDeleteData(dataToDelete);
+              }}
+              endIcon={isDeleting && <CircularProgress size={20} color="primary" />}
+            >
+              Delete
+            </Button>
+          </HtmlTooltip> */}
+          <Box mx={1} />
         </Box>
       </Box>
       {columns && rowsData ? (
@@ -697,7 +599,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
               onSelect={setSelectedProducts}
               childrenProperty="subRows"
               uniqueKey="_id"
-              renderedFrom="invoice_product_package"
+              renderedFrom="sales_order_product_package"
               isClientSideGrid={true}
             />
           </Box>
@@ -717,7 +619,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
         />
       )}
       {isProductEdit.open && (
-        <InvoiceQtyDialog
+        <SalesOrderQtyDialog
           calculatePrice={calculatePrice}
           onClose={() => {
             setIsProductEdit({ open: false, isBulkedit: false });
@@ -728,7 +630,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
           rowData={recordToUpdate}
           material={material}
           selectedProducts={selectedProducts}
-          invoiceData={invoiceData}
+          salesOrderData={salesOrderData}
         />
       )}
       {addExistingProductDialog.open && (
@@ -797,7 +699,7 @@ const Productpackage = ({ invoiceData, setNextStep, currentStep, currencySymbol,
       )}
       {leadTimeDialog.open && (
         <LeadTimeDialog
-          invoiceId={invoiceData._id}
+          salesOrderId={salesOrderData._id}
           data={leadTimeDialog?.data}
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });

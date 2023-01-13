@@ -10,12 +10,13 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
-import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition, generateUniqueIdOnly, isFieldNotTouched } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
-const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null}) => {
+
+const ManageSupportTicket = ({onClose, onSuccess, isClone = false, id = null}) => {
     const {
         state: { user }
       }: any = useData();
@@ -35,20 +36,20 @@ const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null}) => {
       const fetchFields = async () => {
         try {
           let data;
-          const response = await axiosInstance().get('/field?resource=Surveys');
+          const response = await axiosInstance().get('/field?resource=Support Ticket');
           data = response?.data?.data;
           let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
           const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
     
           if (id) {
-            axiosInstance().get(`/surveys/${id}`).then(({ data: { data } }) => {
+            axiosInstance().get(`/support-ticket/${id}`).then(({ data: { data } }) => {
               let fields = fieldsDataForUpdate
               let tempData = data
               if (isClone) {
                 fields = fieldsDataForCreate
-                const { surveyName, ...rest } = data
-                setCloneHeading(surveyName);
-                tempData = { ...rest, surveyName }
+                const { supportTicketNumber, ...rest } = data
+                setCloneHeading(supportTicketNumber);
+                tempData = { ...rest, supportTicketNumber }
               }
               setInitialData({
                 fields: fields,
@@ -59,6 +60,8 @@ const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null}) => {
             });
           } else {
             const tempInitialData = getObjKeys('', fieldsDataForCreate);
+            tempInitialData['supportTicketNumber'] = `ST_${generateUniqueIdOnly()}`;
+            tempInitialData['images'] = [];
             setInitialData({
               fields: fieldsDataForCreate,
               values: tempInitialData
@@ -74,7 +77,7 @@ const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null}) => {
         setSubmitting(true);
         if (id && !isClone) {
           values._id = id
-          axiosInstance().put(`/surveys`, values).then(({ data }) => {
+          axiosInstance().put(`/support-ticket`, values).then(({ data }) => {
             setSubmitting(false);
             onSuccess()
             toastConfig.setToastConfig({
@@ -88,7 +91,7 @@ const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null}) => {
           });
         } else {
           axiosInstance()
-            .post(`/surveys`, values)
+            .post(`/support-ticket`, values)
             .then(({ data }) => {
               setLoading(false);
              onSuccess(data.data);
@@ -147,8 +150,8 @@ const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null}) => {
               title={`${id
                   ? isClone
                     ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
-                  : `Create Survey`
+                    : `Update ${initialData.values?.supportTicketNumber ? `(${initialData.values?.supportTicketNumber})` : ''}`
+                  : `Create Support Ticket`
                 }`}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -227,4 +230,4 @@ const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null}) => {
   )
 }
 
-export default ManageSurveys
+export default ManageSupportTicket
