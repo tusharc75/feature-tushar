@@ -388,7 +388,7 @@ export default function CustomReactTable({
   };
   // Render the UI for your table
   return (
-    <>
+    <div style={{ position: 'relative' }}>
       {displayCustomReactTableHeaderOptions && (
         <CustomReactTableHeaderOptions
           columns={allColumns}
@@ -568,6 +568,6 @@ export default function CustomReactTable({
                 }}
                 rowsPerPageOptions={gridPageSizes}
             /> */}
-    </>
+    </div>
   );
 }

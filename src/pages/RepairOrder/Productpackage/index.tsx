@@ -138,8 +138,6 @@ const Productpackage = ({
             <p className="text-truncate" title={row.original?.productName}>
               {row.original?.productName ? (
                 row.original?.productId ? (
-              {row.original?.productName ? (
-                row.original?.productId ? (
                   <a className="link text-truncate" href={`${routes.productDetail.path}/${row.original?.productId}`} target="_blank">
                     {row.original?.productName}
                   </a>
@@ -171,8 +169,8 @@ const Productpackage = ({
     coloum.push({
       accessor: 'action',
       Header: '',
-      minWidth: 70,
-      width: 70,
+      minWidth: 100,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
@@ -233,26 +231,27 @@ const Productpackage = ({
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDesc || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
-                ? parent?.serializedAssetDetail?.product?.productDesc || ''
-                : '';
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.product?.productDesc || ''
+          : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.status = `${parent.type === 'service'
+      parent.status = `${
+        parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-            ? parent?.productDetail?.status
-            : parent.type === 'serializedAsset'
-              ? parent?.serializedAssetDetail?.status
-              : parent.packageDetail?.status
-        }`;
+          ? parent?.productDetail?.status
+          : parent.type === 'serializedAsset'
+          ? parent?.serializedAssetDetail?.status
+          : parent.packageDetail?.status
+      }`;
     });
 
     if (rows.length !== 0) {
@@ -276,14 +275,15 @@ const Productpackage = ({
     let serviceIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
-      _subRow.detail = `${_subRow.type === 'service'
+      _subRow.detail = `${
+        _subRow.type === 'service'
           ? _subRow.serviceDetail?.serviceName
           : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.serializedAssetDetail.assetNumber
-              : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail.assetNumber
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -299,14 +299,15 @@ const Productpackage = ({
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
-      parent.status = `${parent.type === 'service'
+      parent.status = `${
+        parent.type === 'service'
           ? parent.serviceDetail?.status
           : parent.type === 'product'
-            ? parent.productDetail?.status
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail.status
-              : parent.packageDetail?.status
-        }`;
+          ? parent.productDetail?.status
+          : parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail.status
+          : parent.packageDetail?.status
+      }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;

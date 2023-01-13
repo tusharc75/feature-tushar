@@ -163,6 +163,10 @@
   .mainConainer {
     display: flex;
     padding-block: 10px;
+    padding-inline: 3% !important;
+    @media all and (max-width: 900px) {
+      padding-inline: 24px;
+    }
     // max-width: 1482px;
     // padding-inline: 24px;
     // margin-inline: auto;

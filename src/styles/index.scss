@@ -684,9 +684,7 @@ body::-webkit-scrollbar-thumb {
 }
 
 .main-container {
-  min-height: calc(100vh - 99px);
-  position: relative;
-  overflow: auto;
+  min-height: calc(100vh - 150px);
   z-index: 1;
   margin: 10px;
   top: 36px;
@@ -708,77 +706,117 @@ canvas {
   z-index: 11;
   margin-top: 5px !important;
 }
-.detail-container-new-v1 {
-  overflow-x: hidden;
-  margin-top: 5px !important;
-  position: relative;
-}
-.main-container-new-v1 {
-  padding: 10px;
-  @media all and (min-width: 768px) {
-    padding: 14px 20px 15px;
-  }
-  @media all and (min-width: 1024px) {
-    padding: 14px 30px 15px;
-  }
-  background-color: #f8fffe;
-}
-.control-buttons-new-v1 {
-  display: flex;
-  gap: 15px;
-  @media all and (max-width: 708px) {
-    width: 100%;
-    justify-content: center;
-  }
-  button {
-    & > span {
-      padding: 5px 11px;
-      line-height: 16px;
-    }
-  }
-}
-.controls-new-v1 {
-  @media all and (max-width: 708px) {
-    width: 100%;
-    justify-content: center;
-  }
-}
-.activity-new-v1 {
-  @media all and (min-width: 500px) {
-    --width: 500px;
-  }
-  @media all and (min-width: 768px) {
-    --top: 56px;
-  }
-  position: fixed;
-  width: var(--width, 100vw);
-  right: calc(var(--width, 100vw) * -1);
-  transition: right 0.3s ease-in-out;
-  z-index: 9;
-  top: var(--top, 109px);
-  bottom: 0;
-  overflow: auto;
 
-  .close-icon-v1 {
-    position: absolute;
-    top: 0;
-    right: 0;
-    @media all and (max-width: 1024px) {
-      padding: 9px;
+.custom-react-table {
+  min-height: 400px;
+}
+
+.main-container-new-v1 {
+  @media all and (min-width: 768px) {
+    --header-mb: 35px;
+    --container-padding: 42px 35.1609px 50px;
+  }
+
+  padding-block: 44px;
+
+  .headerbox-new-v1 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--header-mb, 16px);
+  }
+
+  .detail-container-new-v1 {
+    position: relative;
+    padding: var(--container-padding, 30px 15px);
+    background: #ffffff;
+    box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    min-height: 600px;
+  }
+  .control-buttons-new-v1 {
+    display: flex;
+    gap: 15px;
+    @media all and (max-width: 708px) {
+      width: 100%;
+      justify-content: center;
+    }
+    button {
+      & > span {
+        padding: 5px 11px;
+        line-height: 16px;
+      }
     }
   }
-}
-.backdrop-new-v1 {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.3);
-  z-index: 6;
-}
-.show-activity-v1 {
-  right: 0;
-}
-.detail-box-new-v1 {
-  padding: 10px 0 0;
+  .controls-new-v1 {
+    @media all and (max-width: 708px) {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  .activity-new-v1 {
+    @media all and (min-width: 500px) {
+      --width: 500px;
+    }
+    @media all and (min-width: 768px) {
+      --top: 56px;
+    }
+    position: fixed;
+    width: var(--width, 100vw);
+    right: calc(var(--width, 100vw) * -1);
+    transition: right 0.3s ease-in-out;
+    z-index: 9;
+    top: var(--top, 109px);
+    bottom: 0;
+    overflow: auto;
+
+    .close-icon-v1 {
+      position: absolute;
+      top: 0;
+      right: 0;
+      @media all and (max-width: 1024px) {
+        padding: 9px;
+      }
+    }
+  }
+  .backdrop-new-v1 {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 6;
+  }
+  .show-activity-v1 {
+    right: 0;
+  }
+  .detail-box-new-v1 {
+    padding: 10px 0 0;
+  }
+
+  .new-tab-container-v1 {
+    min-height: unset;
+    border-bottom: 1px solid #cecece;
+    .tabLayout {
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 16px;
+      color: #5b5b5b;
+      padding: 10px 34px !important;
+      border: 0 !important;
+
+      background: #efefef;
+      border-radius: 6px 0px 0px 6px !important;
+
+      &.Mui-selected {
+        background: #ffffff;
+
+        border-bottom: 3px solid #298b88 !important;
+        box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.12);
+        border-radius: 0px 6px 6px 0px !important;
+      }
+    }
+  }
 }
 
 .fixedBoardHeader {

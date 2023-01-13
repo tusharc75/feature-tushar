@@ -15,20 +15,24 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
     width: '100%',
     overflow: 'hidden',
-    minHeight: 'calc(100vh - 55px)',
+    minHeight: 'calc(100vh - 64px)',
     ['@media (max-width:768px)']: {
       minHeight: 'calc(100vh - 108px)'
     },
-    backgroundColor: 'white'
+    backgroundColor: '#f8fffe'
   },
   layout: {
     flexGrow: 1,
-    width: '100%',
-    overflowX: 'hidden',
-    overflowY: 'auto',
+    width: 'calc(100% - 6%)',
+    marginInline: 'auto',
+
     height: '100%',
     backgroundColor: '#f8fffe',
-    zIndex: 1
+    zIndex: 1,
+    ['@media (max-width:900px)']: {
+      paddingInline: '24px',
+      width: '100%'
+    }
   }
 }));
 
