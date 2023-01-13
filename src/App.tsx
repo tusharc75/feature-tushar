@@ -164,6 +164,8 @@ import BlogDetail from './pages/Blog/BlogDetail';
 import EcommerceHome from './pages/EcommerceHome';
 import Survey from './pages/Surveys';
 import SurveysDetail from './pages/Surveys/SurveysDetail';
+import ProductionOrder from './pages/ProductionOrder';
+import ProductionOrderDetails from './pages/ProductionOrder/ProductionOrderDetails';
 import ContactUs from './pages/ContactUs';
 import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
 import SupportTicket from './components/SupportTicket';
@@ -817,6 +819,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.repairOrderDetail.path}/:id`}>
               <RepairOrderDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.productionOrder.path}>
+              <ProductionOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.productionOrderDetail.path}/:id`}>
+              <ProductionOrderDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.workOrder.path}>
               <WorkOrder />

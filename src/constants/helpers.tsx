@@ -202,6 +202,7 @@ export const sidebarResource = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -282,6 +283,7 @@ export const resourceNames = {
   productAuction: 'Product Auction',
   quotation: 'Quotation',
   repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -375,6 +377,7 @@ export const RESOURCE_LABEL = {
   serviceMaster: 'Service Master',
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
+  productionOrder: 'Production Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -463,6 +466,11 @@ export const repairJob = {
 export const repairOrder = {
   resource: 'repairOrder',
   api: '/repair-order'
+};
+
+export const productionOrder = {
+  resource: 'productionOrder',
+  api: '/production-order'
 };
 
 export const salesOrder = {
@@ -1888,6 +1896,7 @@ export const ACTIVITY_RESOURCE = {
   transferInventory: 'transferInventory',
   quotation: 'quotation',
   repairOrder: 'repairOrder',
+  productionOrder: 'productionOrder',
   workOrder: 'workOrder'
 };
 
@@ -2176,6 +2185,25 @@ export const REPAIR_ORDER_TYPE = {
 };
 
 export const REPAIR_ORDER_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
+  preWork: 'Pre-Work In-Progress',
+  postWork: 'Post-Work In-Progress',
+  buildingQuote: 'Building Quote',
+  waitingQuote: 'Waiting On Quote',
+  quoteAccepted: 'Quote Accepted',
+  quoteRejected: 'Quote Rejected',
+  readyToInvoice: 'Ready to Invoice',
+  invoiced: 'Invoiced',
+  completed: 'Completed'
+};
+
+export const PRODUCTION_ORDER_TYPE = {
+  internal: 'Asset Repair',
+  external: 'Customer Owned Asset Repair'
+};
+
+export const PRODUCTION_ORDER_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   preWork: 'Pre-Work In-Progress',
