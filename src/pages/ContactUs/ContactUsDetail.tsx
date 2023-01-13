@@ -14,15 +14,15 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
+import ManageContactUs from './ManageContactUs';
 
-const FrequencyAskedQuestionDetail = () => {
+const BlogDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [headingLbl, setHeadingLbl] = useState('');
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.frequentlyAskedQuestion]);
-  const [frequentlyAskedQuestionData, setFrequentlyAskedQuestionData] = useState(null);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.contactUs]);
+  const [contactUsData, setContactUsData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -40,7 +40,7 @@ const FrequencyAskedQuestionDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get('/field?resource=Frequently Asked Question')
+      .get('/field?resource=Contact Us')
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -54,10 +54,10 @@ const FrequencyAskedQuestionDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/frequently-asked-question/${id}`);
-      setHeadingLbl(data.label);
-      setFrequentlyAskedQuestionData(data);
-      setCustomizedRoutes([routes.frequentlyAskedQuestion, { title: data?.label }]);
+      } = await axiosInstance().get(`/contact-us/${id}`);
+      setHeadingLbl(data.name);
+      setContactUsData(data);
+      setCustomizedRoutes([routes.contactUs, { title: data?.name }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -66,9 +66,9 @@ const FrequencyAskedQuestionDetail = () => {
 
   const handleDelete = () => {
     if (id) {
-      if (permissions?.frequentlyAskedQuestion?.isDelete) {
+      if (permissions?.blog?.isDelete) {
         axiosInstance()
-          .put(`/frequently-asked-question/remove`, { ids: [id] })
+          .put(`/contact-us/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
 
@@ -101,10 +101,10 @@ const FrequencyAskedQuestionDetail = () => {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
-      <div className="detail-container grid-without-activity">
-        <div>
+      <Grid container spacing={1} className="detail-container">
+        <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
           <Paper>
-            {!frequentlyAskedQuestionData ? (
+            {!contactUsData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
                 <Box display="flex">
@@ -140,16 +140,16 @@ const FrequencyAskedQuestionDetail = () => {
                   <CommonSkeleton lenArray={[...Array(7).keys()]} />
                 </Grid>
               ) : (
-                <DetailsPage data={frequentlyAskedQuestionData} fields={fields} />
+                <DetailsPage data={contactUsData} fields={fields} />
               )}
             </Box>
           </Paper>
-        </div>
-      </div>
+        </Grid>
+      </Grid>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.frequentlyAskedQuestion?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${routes?.contactUs?.title?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -157,7 +157,7 @@ const FrequencyAskedQuestionDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageFrequentlyAskedQuestion
+        <ManageContactUs
           id={id}
           isClone={false}
           onClose={closeUpdateDialog}
@@ -171,4 +171,4 @@ const FrequencyAskedQuestionDetail = () => {
   );
 };
 
-export default FrequencyAskedQuestionDetail;
+export default BlogDetail;

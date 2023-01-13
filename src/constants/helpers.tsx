@@ -64,6 +64,7 @@ export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loa
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
+export const demandOrderSteps = ['Add Products', 'Closed'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -206,7 +207,14 @@ export const sidebarResource = {
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
-  blog: 'Blog'
+  blog: 'Blog',
+  demandOrder: 'Demand Order',
+  surveys: 'Surveys',
+  supportTicket: 'Support Ticket',
+  eCommerceHome: 'e-Commerce Home',
+  contactUs: 'Contact Us',
+  frequentlyAskedQuestion: 'Frequently Asked Question'
+  
 };
 
 export const resourceNames = {
@@ -280,7 +288,11 @@ export const resourceNames = {
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
   freqentlyAskedQuestion: 'Frequently Asked Question',
-  blog: 'Blog'
+  blog: 'Blog',
+  surveys: 'Surveys',
+  supportTicket: 'Support Ticket',
+  eCommerceHome: 'e-Commerce Home',
+  contactUs: 'Contact Us',
 };
 
 export const primaryFields = {
@@ -372,7 +384,10 @@ export const RESOURCE_LABEL = {
   freqentlyAskedQuestion: 'Frequently Asked Question',
   blog: 'Blog',
   eCommerceHome: 'e-Commerce Home',
-  surveys: 'Surveys'
+  surveys: 'Surveys',
+  contactUs: 'Contact Us',
+  supportTicket: 'Support Ticket',
+  demandOrder: 'Demand Order'
 };
 
 export const CHILD_RESOURCE = {
@@ -471,6 +486,11 @@ export const invoice = {
 export const quotation = {
   api: '/quotation',
   resource: 'quotation'
+};
+
+export const demandOrder = {
+  api: '/demand-order',
+  resource: 'demandOrder'
 };
 
 export const packages = {
