@@ -31,9 +31,11 @@ const SurveysDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
 
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
 
   useEffect(() => {
@@ -60,6 +62,9 @@ const SurveysDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/surveys/${id}`);
+      const isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
+      setAllowedToEdit(isAllowedToEdit);
+      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setHeadingLbl(data.surveyName);
       setSurveyData(data);
       setCustomizedRoutes([routes.surveys, { title: data?.surveyName }]);
@@ -106,8 +111,8 @@ const SurveysDetail = () => {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
-      <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+      <div className="detail-container grid-without-activity">
+        <div>
           <Paper>
             {!SurveyData ? (
               <div>
@@ -120,36 +125,33 @@ const SurveysDetail = () => {
               </div>
             ) : (
               <DetailsPageHeader heading={headingLbl} showHeading={true}>
-                <>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-
-                  <Box component="span" marginX={1} />
-
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
-                    onClick={(e) => {
-                      setStepFieldsDialog(true);
-                    }}
-                    style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  >
-                    Fields
-                  </Button>
-
-                  <Box component="span" marginX={1} />
-                  <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
-                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                  </span>
-                </>
+                {permissions.surveys?.isUpdate && allowedToEdit && (
+                  <>
+                    <Button
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      color="primary"
+                      size="small"
+                      onClick={handleOpenUpdateDialog}
+                      style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                    >
+                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                    </Button>
+                    <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    setStepFieldsDialog(true);
+                  }}
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                >
+                  Fields
+                </Button>
+                  </>
+                )}
+                {permissions?.surveys?.isDelete && allowedToDelete && SurveyData?.canDelete && (
+                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                )}
               </DetailsPageHeader>
             )}
             <Tabs
@@ -181,12 +183,10 @@ const SurveysDetail = () => {
                 )}
               </Box>
             )}
-            {tabValue === 1 && (
-              <SurveysData surveyId={id}/>
-            )}
+            {tabValue === 1 && <SurveysData surveyId={id} />}
           </Paper>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
