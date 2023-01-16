@@ -41,9 +41,9 @@ function Dashboard() {
       allData = entityData.resource;
     }
     allData?.forEach((u) => {
-      u['resourceLabel'] = u.resourceLabel ?? u.name;
+      u['resourceLabel'] = u?.homePageLabel || u?.resourceLabel || u?.name;
       u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
-      u['resourceLabelLowerCase'] = u.resourceLabel?.toLowerCase() ?? u.name?.toLowerCase();
+      u['resourceLabelLowerCase'] = u?.homePageLabel?.toLowerCase() || u?.resourceLabel?.toLowerCase() || u?.name?.toLowerCase();
       !arr.includes(u.sectionName) && arr.push(u.sectionName);
     });
 
