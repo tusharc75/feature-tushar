@@ -205,7 +205,7 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
       );
 
       const allStepsDone = isEqual(completedSteps.map((d) => d.stepId).sort(), serviceDetail?.steps?.map((d) => d._id).sort());
-      
+
       setDisableCompleteFail(!allStepsDone);
       setIsAllStepDone(allStepsDone);
 
@@ -739,22 +739,22 @@ const Service = ({ workOrderId, selectedService, serviceSteps, allowedToEdit, se
               </Grid>
             </Box>}
         </div>
-        <StepFieldsDialog
-          isOpen={Boolean(selectedStep)}
-          workOrderId={workOrderId}
-          fieldData={getFields(selectedStep)?.fieldData}
-          isStepValid={getFields(selectedStep)?.isStepValid}
-          handleClose={() => {
-            setSelectedStep(null);
-            fetchServiceData();
-          }}
-          referencType={referencType}
-          handleSubmit={handleSubmit}
-          selectedService={selectedService}
-          allowedToEdit={allowedToEdit}
-          step={selectedStep}
-          stepData={stepState}
-        />
+        {Boolean(selectedStep) ?
+          <StepFieldsDialog
+            workOrderId={workOrderId}
+            fieldData={getFields(selectedStep)?.fieldData}
+            isStepValid={getFields(selectedStep)?.isStepValid}
+            handleClose={() => {
+              setSelectedStep(null);
+              fetchServiceData();
+            }}
+            referencType={referencType}
+            handleSubmit={handleSubmit}
+            selectedService={selectedService}
+            allowedToEdit={allowedToEdit}
+            step={selectedStep}
+            stepData={stepState}
+          /> : null}
         {openCompleteDialog && (
           <CompleteDialog
             serviceName={selectedService?.serviceName}
