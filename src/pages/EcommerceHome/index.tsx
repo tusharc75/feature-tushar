@@ -57,14 +57,14 @@ const EcommerceHome = () => {
   const handleClickSave = async () => {
     try {
       setIsSubmitting(true);
-      console.log(formData);
       let body = {
-        items: formData?.map((i, idx) => {
-          return {
-            ...i,
-            order: idx + 1
-          };
-        })
+        items:
+          formData?.map((i, idx) => {
+            return {
+              ...i,
+              order: idx + 1
+            };
+          }) || []
       };
       await axiosInstance().put('/e-commerce-home', body);
       setIsSubmitting(false);
