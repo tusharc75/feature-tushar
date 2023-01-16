@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, Fragment, useRef } from 'react';
 import { Formik, Form } from 'formik';
 import { Box, Button, Grid, IconButton, Tooltip } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -37,6 +37,8 @@ import AddIcon from '@material-ui/icons/AddCircle';
 import InfoIcon from '@material-ui/icons/Info';
 import ManageAccountDialog from '../../Account/ManageAccount';
 import ManageContactDialog from '../../Contact/ManageContact';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { isEqual } from 'lodash';
 
 const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, onClose, onSuccess, open }) => {
   const history = useHistory();
@@ -71,6 +73,7 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
   const [countrySellToDropDown, setCountrySellToDropDown] = useState([]);
   const [countryBillToMainData, setCountryBillToMainData] = useState([]);
   const [countrySellToMainData, setCountrySellToMainData] = useState([]);
+  const ref = useRef(null);
 
   const updateAccountDropdown = (data) => {
     const entityFields = salesData.fields;
@@ -212,20 +215,20 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
     }
   };
 
-  const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
-    if (Object.keys(errors).length) {
-      salesData.fields.forEach((input) => {
-        if (input.required || values[input.fieldName]) {
-          setTouched(input.fieldName, true);
-        }
-      });
-      setErrors({ ...errors });
-    } else {
-      handleUpdateSalesOrder(values);
-    }
-  };
+  // const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
+  //   if (Object.keys(errors).length) {
+  //     salesData.fields.forEach((input) => {
+  //       if (input.required || values[input.fieldName]) {
+  //         setTouched(input.fieldName, true);
+  //       }
+  //     });
+  //     setErrors({ ...errors });
+  //   } else {
+  //     handleUpdateSalesOrder(values);
+  //   }
+  // };
 
-  const handleUpdateSalesOrder = (values) => {
+  const handleSubmit = (values) => {
     setLoading(true);
     if (salesOrderId && isClone === false) {
       values._id = salesOrderId;
@@ -316,347 +319,87 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
         }}
         open={open}
       >
-        <CustomDialogHeader
-          title={
-            !salesOrderId
-              ? `Create ${routes.demandOrder.title}`
-              : `${isClone ? `Clone - ${cloneHeading}` : `Update ${salesOrderData?.demandOrderNumber}`}`
-          }
-          onClose={(e, reason) => {
-            if (isFieldNotTouched(salesData, formValues)) onClose();
-            else setShowConfirmDialog(true);
-          }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
-          showManimizeMaximize={true}
-        />
-        {!salesData.fields.length ? (
-          <>
-            <CustomDialogContent>
-              <Skeleton width="100%" height="70px" />
-              <Grid container spacing={2}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                  <Grid key={i} item xs={12} sm={6} md={6}>
-                    <Skeleton width="100%" height="60px" />
-                  </Grid>
-                ))}
-              </Grid>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button variant="outlined" size="small" color="primary" disabled>
-                Cancel
-              </Button>
-              <Button variant="contained" size="small" color="primary" disabled>
-                Submit
-              </Button>
-            </CustomDialogFooter>
-          </>
-        ) : (
+        {formsData && formsData.length ? (
           <Formik
+            innerRef={ref}
             initialValues={salesData.initialValues}
             validationSchema={yupSchema(salesData.fields)}
-            // validateOnMount
-            // validate={validate}
-            onSubmit={() => {}}
+            validateOnMount
+            onSubmit={handleSubmit}
           >
-            {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
-              <>
+            {({ values, errors, touched, submitForm, setFieldValue }) => (
+              <Fragment>
+                <CustomDialogHeader
+                  title={
+                    !salesOrderId
+                      ? `Create ${routes.demandOrder.title}`
+                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${salesOrderData?.demandOrderNumber}`}`
+                  }
+                  onClose={() => {
+                    if (!isEqual(ref.current.values, salesData.initialValues)) {
+                      setShowConfirmDialog(true);
+                    } else {
+                      onClose();
+                    }
+                  }}
+                  isMinimized={!fullScreen}
+                  onMinimizeMaximize={() => {
+                    setFullScreen((prevState) => !prevState);
+                  }}
+                  showManimizeMaximize={true}
+                ></CustomDialogHeader>
                 <CustomDialogContent>
-                  <Form>
-                    {formsData &&
-                      formsData.map((form, i) => {
-                        return (
-                          form.name && (
-                            <div key={i}>
-                              <div className={'detail-box-content'}>
-                                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                              </div>
-                              <Box marginY={2}>
-                                <Grid spacing={3} container>
-                                  {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      {field.fieldName == 'customerAccount' ? (
-                                        <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={permissions.customerAccount?.isCreate ? 11 : 11}
-                                            sm={permissions.customerAccount?.isCreate ? 11 : 11}
-                                            md={permissions.customerAccount?.isCreate ? 11 : 11}
-                                          >
-                                            <FormTypes
-                                              {...field}
-                                              isNew={!salesOrderId}
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={accountData}
-                                              disabled={!isClone ? salesOrderId && field.disableOnEdit : false}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field?.isTooltip || false}
-                                              tooltipMessage={field?.tooltipMessage}
-                                              size="small"
-                                              doNotShowInfoTooltip={true}
-                                              onChange={(e, value) => {
-                                                setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                                setFieldValue('customerContact', '');
-                                                setFieldValue('billingAddress', '');
-                                                setFieldValue('shippingAddress', '');
-                                                handleValuesChange({
-                                                  [field.fieldName]: value && value.optionValue ? value.optionValue : '',
-                                                  customerContact: ''
-                                                });
-                                              }}
-                                            />
-                                          </Grid>
-                                          {permissions.customerAccount?.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Create Account" className="mt-1">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setShowAddCustomerAccountDialog(true);
-                                                  }}
-                                                  disabled={!isClone ? salesOrderId && field.disableOnEdit : false}
-                                                  size="small"
-                                                >
-                                                  <AddIcon
-                                                    color={isClone ? 'primary' : salesOrderId && field.disableOnEdit ? 'disabled' : 'primary'}
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )}
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      ) : field.fieldName === 'customerContact' ? (
-                                        <Grid container spacing={1}>
-                                          <Grid
-                                            item
-                                            xs={permissions.customerContact?.isCreate ? 11 : 11}
-                                            sm={permissions.customerContact?.isCreate ? 11 : 11}
-                                            md={permissions.customerContact?.isCreate ? 11 : 11}
-                                          >
-                                            <FormTypes
-                                              {...field}
-                                              isNew={!salesOrderId}
-                                              values={values}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              options={customerContactDataSource}
-                                              doNotShowInfoTooltip={true}
-                                              setFieldValue={(name, value) => {
-                                                handleValuesChange({ [name]: value });
-                                                setFieldValue(name, value);
-                                              }}
-                                              disabled={!isClone ? salesOrderId && field.disableOnEdit : false}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={false}
-                                              size="small"
-                                              onOpen={() => onCustomerContactDropdownOpen(values['customerAccount'])}
-                                              // onChange={(e, value) => {
-                                              //   setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : "");
-
-                                              // }}
-                                            />
-                                          </Grid>
-                                          {permissions.customerContact?.isCreate && (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Create Contact" className="mt-1">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setShowAddCustomerContactDialog(true);
-                                                  }}
-                                                  disabled={!isClone ? salesOrderId && field.disableOnEdit : false}
-                                                  size="small"
-                                                >
-                                                  <AddIcon
-                                                    color={isClone ? 'primary' : salesOrderId && field.disableOnEdit ? 'disabled' : 'primary'}
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Grid>
-                                          )}
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip className="mt-2" title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </Tooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      ) : field.fieldName === 'owner' ? (
-                                        <FormTypes
-                                          salesOrderId={salesOrderId}
-                                          {...field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={ownerData}
-                                          onChange={(e, val) => {
-                                            setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                            handleValuesChange({ [field.fieldName]: val && val.optionValue ? val.optionValue : '' });
-
-                                            if (val && val.optionValue !== user?.user?._id) {
-                                              const checkOwnerAddedInCollaborator = values['collaborator'].find(
-                                                (d) => d?.optionValue === user?.user?._id
-                                              );
-                                              if (!checkOwnerAddedInCollaborator) {
-                                                setFieldValue('collaborator', [
-                                                  ...values['collaborator'],
-                                                  collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                ]);
-                                                handleValuesChange({
-                                                  collaborator: collaboratorData.find((d) => d?.optionValue === user?.user?._id).optionValue
-                                                });
-                                              }
-                                            }
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          disabled={!salesOrderId && field.disableOnEdit}
-                                          onOpen={() => {
-                                            onOwnerDropdownOpen(values['collaborator']);
-                                          }}
-                                        />
-                                      ) : field.fieldName === 'collaborator' ? (
-                                        <FormTypes
-                                          salesOrderId={salesOrderId}
-                                          {...field}
-                                          disabled={!salesOrderId && field.disableOnEdit}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={collaboratorData}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onOpen={() => {
-                                            onCollabOwnerMultiselectOpen(values['owner']);
-                                          }}
-                                        />
-                                      ) : field.fieldName === 'billingAddress' ? (
-                                        <FormTypes
-                                          {...field}
-                                          disabled={Boolean(salesOrderId) && field.disableOnEdit && !isClone}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={countryBillToDropDown}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onOpen={() => onCountryBillToDropDownOpen(values['customerAccount'])}
-                                        />
-                                      ) : field.fieldName === 'shippingAddress' ? (
-                                        <FormTypes
-                                          {...field}
-                                          disabled={Boolean(salesOrderId) && field.disableOnEdit && !isClone}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={countrySellToDropDown}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          onOpen={() => onCountrySellToDropDownOpen(values['customerAccount'])}
-                                        />
-                                      ) : (
-                                        <FormTypes
-                                          salesOrderId={salesOrderId}
-                                          {...field}
-                                          fieldData={field}
-                                          disabled={field.fieldName === 'demandOrderNumber' || (field.disableOnEdit && !isClone)}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            handleValuesChange({ [name]: value });
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
-                                              : null
-                                          }
-                                        />
-                                      )}
-                                    </Grid>
-                                  ))}
+                  <Form autoComplete="off" autoCorrect="off" noValidate>
+                    {formsData.length > 0 &&
+                      formsData.map((form, i) => (
+                        <div key={i}>
+                          <div className={'detail-box-content'}>
+                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                          </div>
+                          <Box marginY={2}>
+                            <Grid spacing={3} container>
+                              {form.sectionFields.map((field, index2) => (
+                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                  <FormTypes
+                                    isNew={Boolean(salesOrderId)}
+                                    {...field}
+                                    fieldData={field}
+                                    disabled={!isClone ? salesOrderId && field.disableOnEdit : false}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                  />
                                 </Grid>
-                              </Box>
-                            </div>
-                          )
-                        );
-                      })}
+                              ))}
+                            </Grid>
+                          </Box>
+                        </div>
+                      ))}
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   <Button
-                    type="button"
-                    variant="outlined"
-                    color="primary"
                     size="small"
+                    color="primary"
                     onClick={() => {
-                      if (isFieldNotTouched(salesData, values)) onClose();
-                      else setShowConfirmDialog(true);
+                      if (!isEqual(ref.current.values, salesData.initialValues)) {
+                        setShowConfirmDialog(true);
+                      } else {
+                        onClose();
+                      }
                     }}
                   >
                     Cancel
@@ -665,29 +408,26 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={
-                      // loading || Object.keys(errors).length > 0 ? true : false
-                      uploadingImageOrFileProgress > 0 ||
-                      // isFieldNotTouched(salesData, values) ||
-                      loading
-                    }
+                    type="submit"
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
                     }}
+                    disabled={loading}
                   >
+                    {' '}
                     Save
                   </CustomButton>
                 </CustomDialogFooter>
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
+                    close={() => setShowConfirmDialog(false)}
                     open={showConfirmDialog}
                     onSave={() => {
                       setShowConfirmDialog(false);
                       handleScroll(errors);
-
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
+                      submitForm();
                     }}
                     onClose={() => {
                       setShowConfirmDialog(false);
@@ -695,51 +435,13 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
                     }}
                   />
                 ) : null}
-                {showAddCustomerAccountDialog && (
-                  <ManageAccountDialog
-                    open={showAddCustomerAccountDialog}
-                    onClose={() => {
-                      setShowAddCustomerAccountDialog(false);
-                    }}
-                    id={null}
-                    accountResource={customerAccount.accountResource}
-                    accountApi={customerAccount.accountApi}
-                    isGetAccountData={true}
-                    onGetAddedAccount={({ data }) => {
-                      setNewAddedAccountId(data._id);
-                      updateAccountDropdown(data);
-
-                      setFieldValue('customerAccount', data._id);
-                      setFieldValue('customerContact', '');
-                    }}
-                    isRedirectToDetailPage={false}
-                  />
-                )}
-                {showAddCustomerContactDialog && (
-                  <ManageContactDialog
-                    open={showAddCustomerContactDialog}
-                    onClose={() => setShowAddCustomerContactDialog(false)}
-                    onSuccess={(obj) => {
-                      if (obj) {
-                        setShowAddCustomerContactDialog(false);
-                        updateContactDropdown(obj.data.data);
-
-                        setFieldValue('customerContact', obj.id);
-                      }
-                    }}
-                    accountId={values['customerAccount']}
-                    contactResource={customerContact.contactResource}
-                    contactApi={customerContact.contactApi}
-                    isRedirectToDetailPage={false}
-                    collaborators={collaboratorData}
-                    owner={ownerData}
-                    account={customerAccount}
-                    isAccountFieldDisable={true}
-                  />
-                )}
-              </>
+              </Fragment>
             )}
           </Formik>
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
       </Dialog>
     </>
