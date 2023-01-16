@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Grid, Typography } from '@material-ui/core';
 import React, { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -12,6 +12,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DropBox from './DropBox';
 import update from 'immutability-helper';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ECOM_SECTIONS } from 'src/constants/helpers';
 
 const useClasses = makeStyles(() => ({
   root: {
@@ -30,36 +31,13 @@ const useClasses = makeStyles(() => ({
   },
 }));
 
-const fields = [
-  {
-    name: 'image',
-    label: 'Image',
-  },
-  {
-    name: 'imageSlider',
-    label: 'Image Slider',
-  },
-  {
-    name: 'productCategory  ',
-    label: 'Product Category  ',
-  },
-  {
-    name: 'productList',
-    label: 'Product List',
-  },
-  {
-    name: 'menu',
-    label: 'Menu',
-  },
-];
-
 const EcommerceHome = () => {
+
   const classes = useClasses();
   const [formData, setFormData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [oldData, setOldData] = useState([]);
-  const [column] = useState("12");
   const toastConfig = useContext(CustomToastContext);
 
   const fetchData = async () => {
@@ -179,8 +157,12 @@ const EcommerceHome = () => {
               <Grid item xs={12} md={3} sm={4}>
                 <Box bgcolor="white" p={3} style={{ height: '80vh' }}>
                   <Grid container spacing={1}>
-                    {fields?.map((i, index) => (
-                      <DragBox key={index} name={i.name} label={i.label}  column={column} formData={formData} setFormData={setFormData} />
+                    {ECOM_SECTIONS?.map((i, index) => (
+                      <DragBox
+                        key={index}
+                        type={i.type}
+                        label={i.label}
+                        setFormData={setFormData} />
                     ))}
                   </Grid>
                 </Box>
@@ -192,13 +174,13 @@ const EcommerceHome = () => {
                   </Box>
                 ) : (
                   <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={classes.screenHeightAuto} >
-                    <DropBox 
-                    formData={formData} 
-                    setFormData={setFormData} 
-                    handleRemove={handleRemove} 
-                    findCard={findCard} 
-                    moveCard={moveCard}
-                     />
+                    <DropBox
+                      formData={formData}
+                      setFormData={setFormData}
+                      handleRemove={handleRemove}
+                      findCard={findCard}
+                      moveCard={moveCard}
+                    />
                   </Box>
                 )}
               </Grid>
