@@ -21,16 +21,15 @@ const FormBuilder = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
-  //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
   const { dataRows, rowCount, loading, page, limit, pageSizes } = state;
   const [arrangeViewOpen, setArrangeViewOpen] = useState(false);
   const [resource, setResource] = useState([]);
 
-  // const [showGridFilters, setShowGridFilters] = useState(true)
   const columns = [
     { field: 'resourceLabel', headerName: 'Resource Label', show: true, disabled: true, cellRenderer: 'resourceRenderer' },
+    { field: 'homePageLabel', headerName: 'Home Page Label', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     { field: 'resource', headerName: 'Resource', show: true, disabled: true, cellRenderer: 'commonRenderer' },
     {
       field: 'section',
@@ -39,7 +38,6 @@ const FormBuilder = () => {
       disabled: true
     }
   ];
-  //  Grid Variables - End
 
   const ResourceRenderer = (params) => (
     <Link className="link" to={'/form-builder/' + params.data.resource}>
@@ -91,25 +89,6 @@ const FormBuilder = () => {
         </Grid>
       </Grid>
       <CustomContainer>
-        {/* <Box>
-          <Grid container justifyContent="space-between">
-            <Grid item xs={12} container justify="flex-end">
-              <Grid style={{ display: 'flex', gap: '5px' }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    // setArrangeViewOpen(true);
-                  }}
-                >
-                  Arrange View
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Box> */}
-
         <Grid className={styles.filter_side_container} container>
           <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
             <div className="d-flex align-items-center">

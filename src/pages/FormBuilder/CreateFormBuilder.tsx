@@ -89,6 +89,7 @@ const CreateFormBuilder = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [resourceLabel, setResourceLabel] = useState('');
+  const [homePageLabel, setHomePageLabel] = useState('');
   const [sectionName, setsectionName] = useState('');
 
   const sectionNameList = ['CRM +', 'ROM', 'Accounts', 'Product Setup', 'Activities', 'Admin Portal'];
@@ -132,6 +133,7 @@ const CreateFormBuilder = () => {
         setSection(data.section);
         setsectionName(data.sectionName || '');
         setResourceLabel(data.resourceLabel);
+        setHomePageLabel(data?.homePageLabel || '');
         setOriSection(JSON.parse(JSON.stringify(data.section)));
       })
       .catch((error) => {
@@ -197,6 +199,7 @@ const CreateFormBuilder = () => {
     sendData.sectionName = sectionName;
     sendData.deleteField = deleteField;
     sendData.resourceLabel = resourceLabel;
+    sendData.homePageLabel = homePageLabel;
     setIsUpdating(true);
     axiosInstance()
       .put(`/sa-formbuilder/resourcedata`, sendData)
@@ -285,7 +288,6 @@ const CreateFormBuilder = () => {
               </label>
             </MenuItem>
             <MenuItem onClick={handleExportFields}>Export Fields</MenuItem>
-            {/* <MenuItem>Email a Link</MenuItem> */}
           </Menu>
           {isMobile && (
             <IconButton onClick={handleClick} className={classes.menuButtonList}>
@@ -299,7 +301,7 @@ const CreateFormBuilder = () => {
           <Fragment>
             <Box p={1} pb={0} ml={1} bgcolor="white">
               <Grid container spacing={1}>
-                <Grid item xs={3}>
+                <Grid item xs={2}>
                   <Typography variant="caption">Resource</Typography>
                   <Typography variant="body1">{resource}</Typography>
                 </Grid>
@@ -319,6 +321,20 @@ const CreateFormBuilder = () => {
                   />
                 </Grid>
                 <Grid item xs={3}>
+                  <TextField
+                    variant="outlined"
+                    type="text"
+                    label="Home Page Label"
+                    name="homePageLabel"
+                    fullWidth
+                    margin="dense"
+                    value={homePageLabel}
+                    onChange={(e) => {
+                      setHomePageLabel(e.target.value.trimStart());
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={2}>
                   <Autocomplete
                     id="section-name"
                     freeSolo
@@ -338,7 +354,7 @@ const CreateFormBuilder = () => {
                     }}
                   />
                 </Grid>
-                <Grid item xs={3} container justifyContent="flex-end">
+                <Grid item xs={2} container justifyContent="flex-end">
                   <Box>
                     {formBuilderPermissions.isUpdate && (
                       <Button

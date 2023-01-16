@@ -225,51 +225,7 @@ const DemandOrderDetails = () => {
                       </Button>
                     )}
 
-                    {permissions?.demandOrder?.isDelete && ['Invoiced', 'Closed'].indexOf(salesOrderData?.status) === -1 && (
-                      <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                    )}
-
-                    {permissions?.demandOrder?.isUpdate && ['Ready to Invoice', 'Invoiced'].includes(salesOrderData?.status) && (
-                      <>
-                        <Button
-                          variant="outlined"
-                          color="default"
-                          size="small"
-                          onClick={openActions}
-                          aria-controls="action-menu"
-                          endIcon={isMobile ? <ExpandMore style={{ width: '12px', height: '12px' }} /> : <ExpandMore />}
-                        >
-                          {isMobile ? <GrStatusInfo size={20} /> : 'Change Status'}
-                        </Button>
-                        <Menu
-                          anchorEl={anchorEl}
-                          keepMounted
-                          getContentAnchorEl={null}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
-                          }}
-                          id="action-menu"
-                          open={Boolean(anchorEl)}
-                          onClose={closeActions}
-                        >
-                          {statusOptions?.map((o, index) => {
-                            return (
-                              <MenuItem
-                                disabled={index <= statusOptions.findIndex((d) => d.optionLabel === salesOrderData?.status)}
-                                onClick={() => {
-                                  closeActions();
-                                  handleStatusChange(o);
-                                }}
-                                value={o}
-                              >
-                                {o?.optionLabel}
-                              </MenuItem>
-                            );
-                          })}
-                        </Menu>
-                      </>
-                    )}
+                    {permissions?.demandOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                   </DetailsPageHeader>
                 )}
 
@@ -364,7 +320,9 @@ const DemandOrderDetails = () => {
           onClose={() => {
             setShowConfirmBox(false);
           }}
-          onOk={handleDelete}
+          onOk={() => {
+            handleDelete();
+          }}
         />
       )}
       {openUpdateDialog && (
