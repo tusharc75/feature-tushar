@@ -66,7 +66,6 @@ const FrequencyAskedQuestionDetail = () => {
 
   const handleDelete = () => {
     if (id) {
-      if (permissions?.frequentlyAskedQuestion?.isDelete) {
         axiosInstance()
           .put(`/frequently-asked-question/remove`, { ids: [id] })
           .then(({ data }) => {
@@ -82,7 +81,6 @@ const FrequencyAskedQuestionDetail = () => {
           .catch((err) => {
             setShowConfirmBox(false);
           });
-      }
     } else {
       setShowConfirmBox(false);
     }
@@ -115,7 +113,7 @@ const FrequencyAskedQuestionDetail = () => {
               </div>
             ) : (
               <DetailsPageHeader heading={headingLbl} showHeading={true}>
-                <>
+                {permissions?.freqentlyAskedQuestion?.isUpdate &&
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
@@ -125,13 +123,10 @@ const FrequencyAskedQuestionDetail = () => {
                   >
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
-
-                  <Box component="span" marginX={1} />
-
-                  <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
+                  } 
+                 {permissions?.freqentlyAskedQuestion?.isDelete &&
                     <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                  </span>
-                </>
+                  }
               </DetailsPageHeader>
             )}
             <Box>

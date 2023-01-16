@@ -34,6 +34,7 @@ import DeleteButton from 'src/components/Helpers/DeleteButton';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
 import ManageProductionOrder from './ManageProductionOrder';
+import Productpackage from './Productpackage';
 
 function a11yProps(index: any) {
   return {
@@ -67,9 +68,10 @@ const ProductionOrderDetails = () => {
   const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
-  const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState([]);
+  const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(['Add']);
   const [anchorEl, setAnchorEl] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -330,7 +332,33 @@ const ProductionOrderDetails = () => {
                 </Box>
               </TabPanel>
               <TabPanel value={tabValue} index={1}>
-              
+                <Paper>
+                  <Steps
+                    isNextStep={false}
+                    nextStep={nextStep}
+                    steps={productionOrderProcessSteps}
+                    currentStep={currentStep}
+                    setCurrentStep={setCurrentStep}
+                    isStepEnded={[PRODUCTION_ORDER_STATUS.completed].includes(productionOrderData?.status)}
+                    setStepFullScreen={() => setStepFullScreen(true)}
+                  />
+                  <ContentFullScreen title={productionOrderProcessSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                    {productionOrderProcessSteps[currentStep] === 'Add' && productionOrderData && (
+                      <Productpackage
+                        fetchProductionOrderData={fetchProductionOrderData}
+                        productionOrderData={productionOrderData}
+                        setNextStep={setNextStep}
+                        isSmallScreen={isSmallScreen}
+                        isTabletScreen={isTabletScreen}
+                        showActivity={showActivity}
+                        renderedFrom={`${renderedFrom}_grid-1`}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={true}
+                        allowedToDelete={allowedToDelete}
+                      />
+                    )}
+                  </ContentFullScreen>
+                </Paper>
               </TabPanel>
             </Paper>
           </div>
