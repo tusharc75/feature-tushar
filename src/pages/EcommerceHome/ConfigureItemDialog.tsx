@@ -6,14 +6,10 @@ import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, isFieldNotTou
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { FaDiceOne } from 'react-icons/fa';
 import { Skeleton } from '@material-ui/lab';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
@@ -202,8 +198,8 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
         {
             "fieldData": {
                 "_id": "62d103f69be8b23c5e3fba17",
-                "fieldLabel": itemData?.name?.includes("imageSlider") ? "Images" : "Image",
-                "type": itemData?.name?.includes("imageSlider") ? "multiImageUpload" : "imageUpload",
+                "fieldLabel": itemData?.type?.includes("imageSlider") ? "Images" : "Image",
+                "type": itemData?.type?.includes("imageSlider") ? "multiImageUpload" : "imageUpload",
                 "option": [],
                 "isTooltip": false,
                 "tooltipMessage": "",
@@ -221,7 +217,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                 "isWarningTooltip": false,
                 "warningTooltipMessage": "",
                 "defaultValue": "",
-                "fieldName": itemData?.name?.includes("imageSlider") ? "images" : "image",
+                "fieldName": itemData?.type?.includes("imageSlider") ? "images" : "image",
                 "sectionName": "Image Information",
                 "resource": "Product",
             },
@@ -231,8 +227,8 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
         },
     ]
 
-    const imageFields = ['column', 'url', 'images', 'image',]
-    const productCategoryFields = ['column', 'title',]
+    const imageFields = ['column', 'url', 'images', 'image']
+    const productCategoryFields = ['column', 'title']
     const productListFields = ['column', 'title', 'kpi']
     const menuFields = ['column', 'title',]
     const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -245,13 +241,13 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
     const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
-        var fieldsDataForCreate = itemData?.name?.includes("image") ?
+        var fieldsDataForCreate = itemData?.type?.includes("image") ?
             fieldData?.filter(d => imageFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-            : itemData?.name?.includes("productCategory") ?
+            : itemData?.type?.includes("productCategory") ?
                 fieldData?.filter(d => productCategoryFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-                : itemData?.name?.includes("productList") ?
+                : itemData?.type?.includes("productList") ?
                     fieldData?.filter(d => productListFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-                    : itemData?.name?.includes("menu") ?
+                    : itemData?.type?.includes("menu") ?
                         fieldData?.filter(d => menuFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData) : [];
         setDigitalData({
             fields: fieldsDataForCreate,
@@ -283,7 +279,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
 
     const handleSave = (data: any) => {
         setFormData((prevState) => {
-            let tempData = prevState.filter((i) => (i._id ? i._id !== itemData?._id : i.name !== itemData?.name))
+            let tempData = prevState.filter((i) => (i._id ? i._id !== itemData?._id : i.type !== itemData?.type))
             return [...tempData, { ...itemData, ...data }];
         })
         onClose()
@@ -366,57 +362,52 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                                 <CustomDialogContent>
                                     <Form>
                                         {formsData && formsData.map((form, i) => {
-                                            return (
-                                                form.name && (
-                                                    <div key={i}>
-                                                        {/* <div className={"detail-box-content"}>
-                                                            <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
-                                                            <h2 className={`${"form-label-style"} ${"form-label-quotes"}`}>{form.name}</h2>
-                                                        </div> */}
-                                                        <Box marginY={2}>
-                                                            <Grid spacing={3} container>
-                                                                {form.sectionFields.map((field) => (
-                                                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
-                                                                        <FormTypes
-                                                                            {...field}
-                                                                            fieldData={field}
-                                                                            disabled={field.disabled}
-                                                                            values={values}
-                                                                            errors={errors}
-                                                                            touched={touched}
-                                                                            label={field.fieldLabel}
-                                                                            name={field.fieldName}
-                                                                            type={field.type}
-                                                                            options={field.option}
-                                                                            setFieldValue={(name, value) => {
-                                                                                handleValuesChange({ [name]: value })
-                                                                                setFieldValue(name, value)
-                                                                            }}
-                                                                            required={field.required}
-                                                                            fullWidth
-                                                                            isMultipleUpload={true}
-                                                                            isTooltip={field?.isTooltip || false}
-                                                                            tooltipMessage={field?.tooltipMessage}
-                                                                            size="small"
-                                                                            imageOrFileUploadCompletePercentage={
-                                                                                ["imageUpload", "fileUpload"].some(
-                                                                                    (s) => s === field.type
-                                                                                )
-                                                                                    ? (completePercentage) => {
-                                                                                        setUploadingImageOrFileProgress(
-                                                                                            completePercentage
-                                                                                        );
-                                                                                    }
-                                                                                    : null
-                                                                            }
-                                                                            row={true}
-                                                                        />
-                                                                    </Grid>
-                                                                ))}
-                                                            </Grid>
-                                                        </Box>
-                                                    </div>
-                                                )
+                                            return (form.name && (
+                                                <div key={i}>
+                                                    <Box marginY={2}>
+                                                        <Grid spacing={3} container>
+                                                            {form.sectionFields.map((field) => (
+                                                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}   >
+                                                                    <FormTypes
+                                                                        {...field}
+                                                                        fieldData={field}
+                                                                        disabled={field.disabled}
+                                                                        values={values}
+                                                                        errors={errors}
+                                                                        touched={touched}
+                                                                        label={field.fieldLabel}
+                                                                        name={field.fieldName}
+                                                                        type={field.type}
+                                                                        options={field.option}
+                                                                        setFieldValue={(name, value) => {
+                                                                            handleValuesChange({ [name]: value })
+                                                                            setFieldValue(name, value)
+                                                                        }}
+                                                                        required={field.required}
+                                                                        fullWidth
+                                                                        isMultipleUpload={true}
+                                                                        isTooltip={field?.isTooltip || false}
+                                                                        tooltipMessage={field?.tooltipMessage}
+                                                                        size="small"
+                                                                        imageOrFileUploadCompletePercentage={
+                                                                            ["imageUpload", "fileUpload"].some(
+                                                                                (s) => s === field.type
+                                                                            )
+                                                                                ? (completePercentage) => {
+                                                                                    setUploadingImageOrFileProgress(
+                                                                                        completePercentage
+                                                                                    );
+                                                                                }
+                                                                                : null
+                                                                        }
+                                                                        row={true}
+                                                                    />
+                                                                </Grid>
+                                                            ))}
+                                                        </Grid>
+                                                    </Box>
+                                                </div>
+                                            )
                                             );
                                         })}
                                     </Form>
@@ -461,27 +452,26 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                                         Save
                                     </CustomButton>
                                 </CustomDialogFooter>
-                                {
-                                    showConfirmDialog ?
-                                        <ConfirmCancelDialog
-                                            open={showConfirmDialog}
-                                            onSave={() => {
-                                                setShowConfirmDialog(false)
+                                {showConfirmDialog ?
+                                    <ConfirmCancelDialog
+                                        open={showConfirmDialog}
+                                        onSave={() => {
+                                            setShowConfirmDialog(false)
 
-                                                handleSubmit(
-                                                    errors,
-                                                    setFieldTouched,
-                                                    values,
-                                                    setValues,
-                                                    setErrors
-                                                );
-                                            }}
-                                            close={() => setShowConfirmDialog(false)}
-                                            onClose={() => {
-                                                setShowConfirmDialog(false)
-                                                onClose()
-                                            }}
-                                        /> : null
+                                            handleSubmit(
+                                                errors,
+                                                setFieldTouched,
+                                                values,
+                                                setValues,
+                                                setErrors
+                                            );
+                                        }}
+                                        close={() => setShowConfirmDialog(false)}
+                                        onClose={() => {
+                                            setShowConfirmDialog(false)
+                                            onClose()
+                                        }}
+                                    /> : null
                                 }
                             </>
                         )}

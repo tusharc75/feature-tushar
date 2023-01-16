@@ -123,9 +123,9 @@ const FrequentlyAskedQuestion = () => {
         let count = data?.count
         let rows = data?.data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = permissions?.frequentlyAskedQuestion.isDelete;
+          finalObject['canDelete'] = permissions?.frequentlyAskedQuestion?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.frequentlyAskedQuestion.isUpdate;
+          finalObject['allowedToEdit'] = permissions?.frequentlyAskedQuestion?.isUpdate;
          
           return {
             ...finalObject
@@ -225,7 +225,6 @@ const FrequentlyAskedQuestion = () => {
           </IconButton>
         </Tooltip>
         )}
-       
     </Fragment>
   );
 
@@ -317,7 +316,7 @@ const FrequentlyAskedQuestion = () => {
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
             permissions={permissions.freqentlyAskedQuestion}
-            module="frequently asked question"
+            module="frequentlyAskedQuestion"
             api={'frequently-asked-question'}
             afterImportCompleted={() => {
               fetchFrequentlyAskedQuestionData();
@@ -397,7 +396,7 @@ const FrequentlyAskedQuestion = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!permissions?.frequentlyAskedQuestion.isDelete}
+                      disabled={!permissions?.frequentlyAskedQuestion?.isDelete}
                       onClick={() => {
                         closeActions();
                         // eslint-disable-next-line no-lone-blocks
