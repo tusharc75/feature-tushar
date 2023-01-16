@@ -2198,10 +2198,6 @@ export const REPAIR_ORDER_STATUS = {
   completed: 'Completed'
 };
 
-export const PRODUCTION_ORDER_TYPE = {
-  internal: 'Asset Repair',
-  external: 'Customer Owned Asset Repair'
-};
 
 export const PRODUCTION_ORDER_STATUS = {
   new: 'New',
