@@ -14,7 +14,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, workOrderId, stepData, isStepValid, referencType, allowedToEdit, selectedService = null }) => {
+const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, workOrderId, stepData, isStepValid, referencType, allowedToEdit, selectedService = null }) => {
 
   const [isEditing, setEditing] = React.useState(false);
   const [viewStep, setViewStep] = React.useState(false);
@@ -88,7 +88,7 @@ const StepFieldsDialog = ({ handleClose, handleSubmit, fieldData, step, isOpen, 
 
   return (
     <>
-      <div className={`${styles.sidebarContainer} ${isOpen && styles.active}`}>
+      <div className={`${styles.sidebarContainer} ${styles.active}`}>
         <div className={styles.headersection}>
           <Typography variant="h6" color="inherit" style={{ fontSize: '1rem' }}>
             {step?.stepName}
