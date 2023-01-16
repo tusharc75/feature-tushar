@@ -177,6 +177,7 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
 
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, demandOrderNumber, updatedBy, ...rest } = data;
+            rest.demandOrderNumber = `DO_${generateUniqueIdOnly()}`;
             setCloneHeading(demandOrderNumber);
             setSalesData({
               fields: fieldsDataForCreate,
@@ -198,6 +199,7 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
+        initialData['demandOrderNumber'] = `DO_${generateUniqueIdOnly()}`;
         setSalesData({
           fields: fieldsDataForCreate,
           initialValues: initialData
@@ -610,17 +612,7 @@ const ManageDemandOrderDialog = ({ isClone, salesOrderId, salesOrderData = null,
                                           salesOrderId={salesOrderId}
                                           {...field}
                                           fieldData={field}
-                                          disabled={
-                                            field.fieldName === 'currency'
-                                              ? salesDetails && salesDetails?.material?.length
-                                                ? true
-                                                : false
-                                              : field.fieldName === 'warehouse'
-                                              ? salesDetails && salesDetails?.productInventory?.length
-                                                ? true
-                                                : false
-                                              : salesOrderId && field.disableOnEdit && !isClone
-                                          }
+                                          disabled={field.fieldName === 'demandOrderNumber' || (field.disableOnEdit && !isClone)}
                                           values={values}
                                           errors={errors}
                                           touched={touched}
