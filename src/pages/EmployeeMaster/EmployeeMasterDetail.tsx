@@ -59,7 +59,7 @@ const EmployeeMasterDetail = () => {
         } = await axiosInstance().get(`${routes?.employeeMaster?.path}/${id}`);
         setHeadingLbl(data.employeeNumber);
         setEmployeeMasterData(data);
-        setCustomizedRoutes([routes.employeeMaster, { title: data?.employeeMaster }]);
+        setCustomizedRoutes([routes.employeeMaster, { title: data?.employeeNumber }]);
         setLoading(false);
       } catch (error) {
         toastConfig.setToastConfig(error);
