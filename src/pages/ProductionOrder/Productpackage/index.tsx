@@ -19,8 +19,9 @@ import { isMobile, isTablet } from 'react-device-detect';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';
-import { sortBy } from 'lodash';
+import { sortBy, startCase } from 'lodash';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import ProductionOrderQty from './ProductionOrderQty';
 
 
 const Productpackage = ({
@@ -43,7 +44,7 @@ const Productpackage = ({
   const [isUpdating, setUpdating] = useState(false);
 
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [isProductEdit, setIsProductEdit] = useState({ open: false, isBulkedit: false });
+  const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null });
   const [isAddingProducts, setAddingProducts] = useState(false);
 
   const [recordToUpdate, setRecordToUpdate] = useState(null);
@@ -81,7 +82,32 @@ const Productpackage = ({
           return <>Total</>;
         }
       },
-
+      {
+        accessor: 'type',
+        Header: 'Type',
+        disableFilters: true,
+        sticky: isMobile ? 'none' : 'left',
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+              {/* {row.original['type'] === 'product'
+                ? row.original?.productDetail?.serializedProduct
+                  ? '(Serialized)'
+                  : '(Non-Serialized)'
+                : row.original?.type === 'package'
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''} */}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
       {
         accessor: 'detail',
         Header: ' Details',
@@ -90,48 +116,24 @@ const Productpackage = ({
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {!allowedToEdit ? <p>{row.original.detail}</p> : <p title={row.original.detail}>{row.original.detail}</p>}
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-              </Box>
-            }
-            <Chip
-              className="ml-1"
-              label={`${row.original.type === 'service'
-                ? 'Service'
-                : row.original.type === 'product'
-                  ? 'Product'
-                  : row.original.type === 'serializedAsset'
-                    ? 'Asset'
-                    : 'Package'
-                }`}
-              size="small"
-              color="primary"
+            <p
               onClick={() => {
-                window.open(
-                  `${row.original.type === 'service'
-                    ? routes.serviceMasterDetail.path
-                    : row.original.type === 'product'
-                      ? routes.productDetail.path
-                      : row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : routes.packagesDetail.path
-                  }/${row.original.materialId}`
-                );
+                setIsProductEdit({ open: true, data: row.original });
               }}
-            />
+              className="link text-truncate"
+              title={row.original.detail}
+            >
+              {row.original.detail}
+            </p>
           </div>
         )
       },
       {
-        accessor: 'description',
-        Header: 'Description',
+        accessor: 'unit',
+        Header: 'Unit',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          return row.original['unit'] ? <p className="text-truncate">{row.original.unit}</p> : <NoDataCell />;
         }
       },
       {
@@ -143,12 +145,6 @@ const Productpackage = ({
         },
         editable: true
       },
-      {
-        accessor: 'status',
-        Header: 'Status',
-        width: 100,
-        Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
-      }
     ];
     coloum.push({
       accessor: 'action',
@@ -402,7 +398,7 @@ const Productpackage = ({
       .put(`${productionOrder.api}/${productionOrderData?._id}/material`, { material: rows })
       .then(() => {
         setUpdating(false);
-        setIsProductEdit({ open: false, isBulkedit: false });
+        setIsProductEdit({ open: false, data: null });
         fetchData();
       })
       .catch((error) => {
@@ -432,7 +428,7 @@ const Productpackage = ({
                       {`Create ${routes.serializedAsset.title}`}
                     </Button>
                     <Box ml={1} /> */}
-                    <Button
+                    {/* <Button
                       color="primary"
                       size="small"
                       variant={isMobile && !isTablet ? 'outlined' : 'contained'}
@@ -441,9 +437,9 @@ const Productpackage = ({
                         setAddExistingProductDialog({ open: true, type: 'serializedAsset', parentId: null, existing: true });
                       }}
                     >
-                      {`Add Existing ${routes.serializedAsset.title}`}
+                      {`Add  ${routes.serializedAsset.title}`}
                     </Button>
-                    <Box ml={1} />
+                    <Box ml={1} /> */}
                     <Button
                       color="primary"
                       size="small"
@@ -453,7 +449,7 @@ const Productpackage = ({
                         setAddExistingProductDialog({ open: true, type: 'product', parentId: null, existing: true });
                       }}
                     >
-                      {`Add Existing ${routes.product.title}`}
+                      {`Add ${routes.product.title}`}
                     </Button>
                     <Box ml={1} />
                     <Button
@@ -465,7 +461,7 @@ const Productpackage = ({
                         setAddExistingProductDialog({ open: true, type: 'packages', parentId: null, existing: true });
                       }}
                     >
-                      {`Add Existing ${routes.packages.title}`}
+                      {`Add ${routes.packages.title}`}
                     </Button>
                   </>
                 )}
@@ -585,6 +581,14 @@ const Productpackage = ({
           }}
           handleSucess={handleAdd}
         />
+      )}
+      {isProductEdit.open && (
+        <ProductionOrderQty
+          onClose={() => {
+            setIsProductEdit({ open: false, data: null });
+          }}
+          productionOrderData={isProductEdit.data}
+          handleSave={handleSaveData} />
       )}
     </Fragment>
   );
