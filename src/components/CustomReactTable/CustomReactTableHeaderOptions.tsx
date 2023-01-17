@@ -120,6 +120,7 @@ export default function CustomReactTableHeaderOptions({
         style={{
           zIndex: '2',
           width: '38px',
+          height: '42px',
           position: 'absolute',
           background: 'white',
           right: '1px',

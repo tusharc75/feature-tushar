@@ -237,7 +237,7 @@ const WorkOrder = ({
         accessor: 'action',
         Header: 'Action',
         minWidth: 100,
-        width: 100,
+        width: 135,
         sticky: 'right',
         disableFilters: true,
         canDrag: false,

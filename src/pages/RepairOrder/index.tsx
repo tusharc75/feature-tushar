@@ -393,7 +393,7 @@ const RepairOrder = () => {
 
   return (
     <Fragment>
-      <Grid container className="headerbox">
+      <Grid container className="headerbox" style={{ marginBlock: '15px' }}>
         <Grid item md={4} sm={11} xs={10}>
           <CustomBreadCrumbs routes={[routes.repairOrder]} />
         </Grid>

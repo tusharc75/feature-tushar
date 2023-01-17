@@ -170,7 +170,7 @@ const Productpackage = ({
       accessor: 'action',
       Header: '',
       minWidth: 100,
-      width: 100,
+      width: 135,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,

@@ -372,7 +372,12 @@ const RepairOrderDetails = () => {
                       // color="primary"
                       onClick={() => setOpenUpdateDialog(true)}
                       className={isMobile && !isTablet ? accountClass.mobile_button_layout : ''}
-                      style={isMobile && !isTablet ? { color: '#43aeaa' } : { color: 'rgb(62, 62, 62) ', background: 'white' }}
+                      style={{
+                        color: isMobile && !isTablet ? '#43aeaa' : 'rgb(62, 62, 62) ',
+                        background: 'white',
+                        boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)',
+                        border: '1px solid #E2E2E2'
+                      }}
                     >
                       {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
@@ -388,7 +393,7 @@ const RepairOrderDetails = () => {
               endIcon={<ArrowForwardIcon />}
               variant="contained"
               onClick={() => setActivityShow(!showActivity)}
-              style={{ background: 'var(--new_theme_color)', color: 'white' }}
+              style={{ background: 'var(--new_theme_color)', color: 'white', boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)' }}
             >
               Activities
             </Button>

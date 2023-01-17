@@ -88,7 +88,7 @@ function DefaultColumnFilter({
             setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
           }}
           autoComplete="off"
-          placeholder="Search"
+          placeholder="Search..."
           type="text"
           id="search"
           aria-hidden={!isOpen}
