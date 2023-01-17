@@ -203,6 +203,7 @@ export const sidebarResource = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
+  serviceOrder: 'Service Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -284,6 +285,7 @@ export const resourceNames = {
   quotation: 'Quotation',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
+  serviceOrder: 'Service Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -378,6 +380,7 @@ export const RESOURCE_LABEL = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
+  serviceOrder: 'Service Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -471,6 +474,11 @@ export const repairOrder = {
 export const productionOrder = {
   resource: 'productionOrder',
   api: '/production-order'
+};
+
+export const serviceOrder = {
+  resource: 'serviceOrder',
+  api: '/service-order'
 };
 
 export const salesOrder = {
@@ -1897,6 +1905,7 @@ export const ACTIVITY_RESOURCE = {
   quotation: 'quotation',
   repairOrder: 'repairOrder',
   productionOrder: 'productionOrder',
+  serviceOrder: 'serviceOrder',
   workOrder: 'workOrder'
 };
 

@@ -172,6 +172,8 @@ import SupportTicket from './components/SupportTicket';
 import SupportTicketDetail from './components/SupportTicket/SupportTicketDetail';
 import DemandOrder from './pages/DemandOrder';
 import DemandOrderDetails from './pages/DemandOrder/DemandOrderDetails';
+import ServiceOrder from './pages/ServiceOrder';
+import ServiceOrderDetailsPage from './pages/ServiceOrder/ServiceOrderDetailsPage';
 
 var notificationInterval: any = null;
 
@@ -277,7 +279,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -825,6 +827,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.productionOrderDetail.path}/:id`}>
               <ProductionOrderDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.serviceOrder.path}>
+              <ServiceOrder />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serviceOrderDetail.path}/:id`}>
+              <ServiceOrderDetailsPage />
             </PrivateRoute>
             <PrivateRoute exact path={routes.workOrder.path}>
               <WorkOrder />
