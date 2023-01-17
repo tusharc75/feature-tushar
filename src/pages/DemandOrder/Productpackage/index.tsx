@@ -83,7 +83,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
   const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
@@ -91,7 +90,28 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
   }, []);
 
   const fetchFields = async () => {
+
     const fieldsToShow = [
+      {
+        _id: '630dbe1e9ec41861052354a3',
+        fieldLabel: 'Qty',
+        type: 'decimal',
+        option: [],
+        required: false,
+        isTooltip: false,
+        tooltipMessage: '',
+        editAble: true,
+        order: 2,
+        decimalPlaces: 2,
+        sectionName: 'Quantity Information',
+        fieldName: 'qty',
+        resource: 'Sales Order Product',
+        brand: '630dbe1e9ec418610523529c',
+        createdBy: {
+          user: '61b84437885fdf02d9104cb0',
+          date: '2022-08-30T07:37:02.237Z'
+        }
+      },
       {
         _id: '630dbe1e9ec41861052354a4',
         fieldLabel: 'Unit',
@@ -115,28 +135,9 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
           user: '61b84437885fdf02d9104cb0',
           date: '2022-08-30T07:37:02.237Z'
         }
-      },
-      {
-        _id: '630dbe1e9ec41861052354a3',
-        fieldLabel: 'Qty',
-        type: 'decimal',
-        option: [],
-        required: false,
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        order: 2,
-        decimalPlaces: 2,
-        sectionName: 'Quantity Information',
-        fieldName: 'qty',
-        resource: 'Sales Order Product',
-        brand: '630dbe1e9ec418610523529c',
-        createdBy: {
-          user: '61b84437885fdf02d9104cb0',
-          date: '2022-08-30T07:37:02.237Z'
-        }
       }
     ];
+
     var data = fieldsToShow || [];
     setAllFields(JSON.parse(JSON.stringify(data)));
     const coloum: any = [
