@@ -308,7 +308,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
         element['Footer'] = () => {
           return <>Total</>;
         };
-      } else if (element.accessor === 'qtyDisplay') {
+      } else if (element.accessor === 'qty') {
         element['Footer'] = (info) => {
           const qtyTotal = info.rows
             .filter((f) => f.original.parentId === null && f.values.hasOwnProperty(element.accessor) && !isNaN(f.values[element.accessor]))
