@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React, { useContext, useState, useEffect, Fragment } from 'react';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from '../../../axios/axiosInstance';
-import { COLOUR_MASTER, transferAsset, deliveryTicket, resourceNames, DELIVERY_TICKET_STATUS } from '../../../constants/helpers';
+import { COLOUR_MASTER, transferAsset, deliveryTicket, DELIVERY_TICKET_STATUS, sidebarResource } from '../../../constants/helpers';
 import routes from '../../../components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -53,7 +53,7 @@ const TransferAssetViews = (props) => {
       // const viewsData = await axiosInstance().get(`${rentalManagement.api}/views/${rentalId}`);
       const assets = await axiosInstance().get(`${transferAsset.api}/get-asset/${tAId}`);
       const loadingTicket = await axiosInstance().get(
-        `${deliveryTicket.api}/typewise?refrenceType=${resourceNames.transferAsset}&refrenceId=${tAId}`
+        `${deliveryTicket.api}/typewise?refrenceType=${sidebarResource.transferAsset}&refrenceId=${tAId}`
       );
       const allAssets = assets?.data?.data?.assets || [];
       const allLoadingTicket = loadingTicket?.data?.data || [];

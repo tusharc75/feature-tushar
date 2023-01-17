@@ -72,7 +72,7 @@ const setDataBySectionName = (secName) => {
       text = 'Repair and Maintain your product and services at ease.';
       break;
     case 'Service Management':
-      text = 'Build your own Template, Manage Roles and Entities.';
+      text = 'Fulfill Service Orders Faster.';
       break;
     default:
       text = '';
