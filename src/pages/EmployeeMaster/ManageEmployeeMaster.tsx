@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, isFieldNotTouched } from 'src/constants/helpers';
+import { CustomDialogTransition, isFieldNotTouched, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -36,7 +36,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
   const fetchFields = async () => {
     try {
       let data;
-      const response = await axiosInstance().get(`/field?resource=${routes?.employeeMaster?.title}`);
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.employeeMaster}`);
       data = response?.data?.data;
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);

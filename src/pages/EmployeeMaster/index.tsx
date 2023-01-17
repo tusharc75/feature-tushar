@@ -17,7 +17,7 @@ import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
+import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -51,7 +51,7 @@ const EmployeeMaster = () => {
   const fetchGridColumns = () => {
 
     axiosInstance()
-      .get(`/field?resource=${routes.employeeMaster.title}`)
+      .get(`/field?resource=${sidebarResource?.employeeMaster}`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
