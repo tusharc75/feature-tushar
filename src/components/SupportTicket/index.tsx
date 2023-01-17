@@ -57,7 +57,7 @@ const SupportTicket = () => {
               if (o?.fieldData?.primaryField === true) {
                 columns = [
                   ...columns,
-                  { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
+                  { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer', primaryField: true }
                 ];
               } else {
                 let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.supportTicket.path);
