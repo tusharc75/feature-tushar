@@ -15,6 +15,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
+import { sidebarResource } from 'src/constants/helpers';
 
 
 const EmployeeMasterDetail = () => {
@@ -41,7 +42,7 @@ const EmployeeMasterDetail = () => {
   
     const fetchFields = async () => {
       axiosInstance()
-        .get(`/field?resource=${routes?.employeeMaster?.title}`)
+        .get(`/field?resource=${sidebarResource?.employeeMaster}`)
         .then(({ data }) => {
           setFields(data.data?.filter((field) => field.isRead));
         })
