@@ -214,7 +214,7 @@ export const sidebarResource = {
   supportTicket: 'Support Ticket',
   eCommerceHome: 'e-Commerce Home',
   contactUs: 'Contact Us',
-  frequentlyAskedQuestion: 'Frequently Asked Question',
+  employeeMaster: 'Employee Master',
   competencyMaster: 'Competency Master',
 };
 
@@ -295,7 +295,7 @@ export const resourceNames = {
   supportTicket: 'Support Ticket',
   eCommerceHome: 'e-Commerce Home',
   contactUs: 'Contact Us',
-  frequentlyAskedQuestion: 'Frequently Asked Question'
+  employeeMaster: 'Employee Master'
 };
 
 export const primaryFields = {
@@ -392,6 +392,7 @@ export const RESOURCE_LABEL = {
   contactUs: 'Contact Us',
   supportTicket: 'Support Ticket',
   demandOrder: 'Demand Order',
+  employeeMaster: 'Employee Master',
   competencyMaster: 'Competency Master',
 };
 
