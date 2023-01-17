@@ -48,7 +48,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
   const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
-  const pathName = pathnames.join('');
+  const pathName = pathnames.join(' ');
 
   const renderIcon = (sectionName: string) => {
     let icon = <FaReact size={20} className={styles.sidebarIcon} />;
@@ -327,7 +327,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                   <React.Fragment key={i}>
                     <Tooltip title={!toggleDrawer ? listItem.section : ''}>
                       <ListItem
-                        className={`${styles.listItem} dropdown-items ${items.includes(pathName) && styles.activeList}`}
+                        className={`${styles.listItem} dropdown-items ${items.some((item) => pathName.includes(item)) && styles.activeList}`}
                         button
                         key={listItem.section + '' + i}
                         onClick={() => {
@@ -337,7 +337,7 @@ function SideBar({ toggleDrawer, setToggleDrawer, location }) {
                           }
                         }}
                       >
-                        {items.includes(pathName) && (
+                        {items.some((item) => pathName.includes(item)) && (
                           <>
                             <i />
                             <i />
