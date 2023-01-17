@@ -263,12 +263,13 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
         }
       } else {
         if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
+          element.fieldName = 'qty';
         }
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />),
+          editable: element.fieldName === 'qty' ? true : false
         });
       }
     });
@@ -341,7 +342,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
           ? parent.serviceDetail?.serviceName
           : parent.packageDetail?.packageName
       }`;
-      parent.qtyDisplay = parent.qty;
+      parent.qty = parent.qty;
       parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
@@ -370,7 +371,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
       }`;
-      _subRow.qtyDisplay = _subRow.qty;
+      _subRow.qty = _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
       _subRow.hideSelection = inventory.filter((e) => e._id === _subRow._id).length ? true : false;
       _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
@@ -458,7 +459,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    console.log(material);
     const rowData = material.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qty')) {
       inputField['qty'] = inputField['qty'];
