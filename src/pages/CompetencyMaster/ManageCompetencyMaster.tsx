@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import {  useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -16,7 +16,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
-const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageCompetencyMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
     state: { user }
   }: any = useData();
@@ -29,7 +29,6 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const [formValues, setFormValues] = useState({});
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
 
   const ref = useRef(null);
 
@@ -40,14 +39,14 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const fetchFields = async () => {
     try {
       let data;
-      const response = await axiosInstance().get('/field?resource=Blog');
+      const response = await axiosInstance().get('/field?resource=Competency Master');
       data = response?.data?.data;
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
         axiosInstance()
-          .get(`/blog/${id}`)
+          .get(`/competency-master/${id}`)
           .then(({ data: { data } }) => {
             let fields = fieldsDataForUpdate;
             let tempData = data;
@@ -84,7 +83,7 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
     if (id && !isClone) {
       values._id = id;
       axiosInstance()
-        .put(`/blog`, values)
+        .put(`/competency-master`, values)
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();
@@ -100,7 +99,7 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
         });
     } else {
       axiosInstance()
-        .post(`/blog`, values)
+        .post(`/competency-master`, values)
         .then(({ data: { data } }) => {
           setLoading(false);
           onSuccess(data);
@@ -166,7 +165,7 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
-                    : `Create New Blog`
+                    : `Create New Competency`
                 }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -209,13 +208,6 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
                                       isTooltip={field?.isTooltip || false}
                                       tooltipMessage={field?.tooltipMessage}
                                       size="small"
-                                      imageOrFileUploadCompletePercentage={
-                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                          ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
-                                          : null
-                                      }
                                     />
                                   </Grid>
                                 ))}
@@ -286,4 +278,4 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
   );
 };
 
-export default ManageBlog;
+export default ManageCompetencyMaster;

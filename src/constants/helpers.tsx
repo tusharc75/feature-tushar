@@ -214,7 +214,8 @@ export const sidebarResource = {
   supportTicket: 'Support Ticket',
   eCommerceHome: 'e-Commerce Home',
   contactUs: 'Contact Us',
-  frequentlyAskedQuestion: 'Frequently Asked Question'
+  frequentlyAskedQuestion: 'Frequently Asked Question',
+  competencyMaster: 'Competency Master',
 
 };
 
@@ -390,7 +391,8 @@ export const RESOURCE_LABEL = {
   surveys: 'Surveys',
   contactUs: 'Contact Us',
   supportTicket: 'Support Ticket',
-  demandOrder: 'Demand Order'
+  demandOrder: 'Demand Order',
+  competencyMaster: 'Competency Master',
 };
 
 export const CHILD_RESOURCE = {
