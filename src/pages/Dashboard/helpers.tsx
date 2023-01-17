@@ -87,8 +87,7 @@ const setDataBySectionName = (secName) => {
       icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColors} />;
       break;
     case 'Service Management':
-      text = 'Build your own Template, Manage Roles and Entities.';
-      icon = <DashboardIcons.SERVICE_MANAGEMENT colors={iconColors} />;
+      text = 'Fulfill Service Orders Faster.';
       break;
     default:
       text = '';

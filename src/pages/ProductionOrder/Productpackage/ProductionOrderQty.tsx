@@ -19,226 +19,119 @@ import { Skeleton } from '@material-ui/lab';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
-  const fieldData = [
-    {
-      fieldData: {
-        _id: '62d103f69be8b23c5e3fba17',
-        fieldLabel: 'URL',
-        type: 'singleLine',
-        option: [],
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        deletAble: true,
-        order: 3,
-        hiddenField: false,
-        isDefaultValue: false,
-        disableOnEdit: false,
-        unique: true,
-        lookup: false,
-        lookupResource: '',
-        entityWiseLookup: false,
-        isDropdown: false,
-        isWarningTooltip: false,
-        warningTooltipMessage: '',
-        defaultValue: '',
-        fieldName: 'url',
-        sectionName: 'Image Information',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
+const ProductionOrderQty = ({ onClose, productionOrderData, handleSave }) => {
+  const fieldData = [{
+    "_id": "630dbe1e9ec418610523533e",
+    "fieldLabel": "Qty",
+    "type": "decimal",
+    "option": [],
+    "required": true,
+    "isTooltip": false,
+    "tooltipMessage": "",
+    "editAble": true,
+    "order": 1,
+    "decimalPlaces": 2,
+    "sectionName": "Quantity Information",
+    "fieldName": "qty",
+    "resource": "Rental Management Product",
+    "defaultValue": "",
+    "disableOnEdit": false,
+    "hiddenField": false,
+    "isDefaultValue": false,
+    "isDropdown": false,
+    "isWarningTooltip": false,
+    "lookup": false,
+    "lookupResource": "",
+    "warningTooltipMessage": "",
+    "brand": "630dbe1e9ec418610523529c",
+    "createdBy": {
+      "user": "61b84437885fdf02d9104cb0",
+      "date": "2022-08-30T07:37:02.237Z"
     },
-    {
-      fieldData: {
-        _id: '62d103f69be8b23c5e1fba17',
-        fieldLabel: 'Title',
-        type: 'singleLine',
-        option: [],
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        deletAble: true,
-        order: 2,
-        hiddenField: false,
-        isDefaultValue: false,
-        disableOnEdit: false,
-        unique: true,
-        lookup: false,
-        lookupResource: '',
-        entityWiseLookup: false,
-        isDropdown: false,
-        isWarningTooltip: false,
-        warningTooltipMessage: '',
-        defaultValue: '',
-        fieldName: 'title',
-        sectionName: 'Image Information',
-        resource: 'Product'
+    "roleType": 0,
+    "entityWiseLookup": false,
+    "isColumnEditable": true,
+    "isMinMaxValue": false,
+    "isSystemGenerate": false,
+    "maxValue": 0,
+    "maxValueServiceAdd": "",
+    "minValue": 0,
+    "minValueServiceAdd": ""
+  },
+  {
+    "_id": "630dbe1e9ec418610523533f",
+    "fieldLabel": "Unit",
+    "type": "dropDown",
+    "option": [
+      {
+        "optionLabel": "Piece",
+        "optionValue": "Piece",
+        "order": 1,
+        "default": false
       },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
+      {
+        "optionLabel": "One Well Pad",
+        "optionValue": "One Well Pad",
+        "order": 2,
+        "default": false
+      },
+      {
+        "optionLabel": "Two Well Pad",
+        "optionValue": "Two Well Pad",
+        "order": 3,
+        "default": false
+      },
+      {
+        "optionLabel": "Three Well Pad",
+        "optionValue": "Three Well Pad",
+        "order": 4,
+        "default": false
+      },
+      {
+        "optionLabel": "Four Well Pad",
+        "optionValue": "Four Well Pad",
+        "order": 5,
+        "default": false
+      },
+      {
+        "optionLabel": "Five Well Pad",
+        "optionValue": "Five Well Pad",
+        "order": 6,
+        "default": false
+      },
+      {
+        "optionLabel": "Six Well Pad",
+        "optionValue": "Six Well Pad",
+        "order": 7,
+        "default": false
+      }
+    ],
+    "required": true,
+    "isTooltip": false,
+    "tooltipMessage": "",
+    "editAble": true,
+    "order": 2,
+    "hiddenField": false,
+    "isDefaultValue": false,
+    "disableOnEdit": false,
+    "addManualOptionInExcel": false,
+    "addAdditionalOption": false,
+    "lookup": false,
+    "lookupResource": "",
+    "isDropdown": false,
+    "isWarningTooltip": false,
+    "warningTooltipMessage": "",
+    "defaultValue": "",
+    "sectionName": "Quantity Information",
+    "fieldName": "unit",
+    "resource": "Rental Management Product",
+    "brand": "630dbe1e9ec418610523529c",
+    "createdBy": {
+      "user": "61b84437885fdf02d9104cb0",
+      "date": "2022-08-30T07:37:02.237Z"
     },
-    {
-      fieldData: {
-        _id: '62d103f69be8b23c5e3fba111',
-        fieldLabel: 'Detail',
-        type: 'multiLine',
-        option: [],
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        deletAble: true,
-        order: 2,
-        hiddenField: false,
-        isDefaultValue: false,
-        disableOnEdit: false,
-        unique: true,
-        lookup: false,
-        lookupResource: '',
-        entityWiseLookup: false,
-        isDropdown: false,
-        isWarningTooltip: false,
-        warningTooltipMessage: '',
-        defaultValue: '',
-        fieldName: 'detail',
-        sectionName: 'Image Information',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
-    },
-    {
-      fieldData: {
-        _id: '631599890d0b6e3f87381b8a',
-        fieldLabel: 'KPI',
-        type: 'dropDown',
-        option: [
-          {
-            optionLabel: 'Deals of The Day',
-            optionValue: 'dealsofTheDay',
-            order: 1,
-            default: false
-          },
-          {
-            optionLabel: 'Popular Listings',
-            optionValue: 'popularListings',
-            order: 2,
-            default: false
-          },
-          {
-            optionLabel: 'Top Offers On',
-            optionValue: 'topOffers',
-            order: 3,
-            default: false
-          },
-          {
-            optionLabel: 'Inspired By your Browsing History',
-            optionValue: 'browsingHistory',
-            order: 4,
-            default: false
-          }
-        ],
-        required: true,
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        hiddenField: false,
-        isDefaultValue: false,
-        disableOnEdit: false,
-        addManualOptionInExcel: false,
-        addAdditionalOption: false,
-        lookup: false,
-        lookupResource: '',
-        isDropdown: false,
-        isWarningTooltip: false,
-        warningTooltipMessage: '',
-        defaultValue: '',
-        sectionName: 'Image Information',
-        fieldName: 'kpi',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
-    },
-    {
-      fieldData: {
-        _id: '62d103f69be8b23c5e3fba18',
-        fieldLabel: 'Column ',
-        type: 'radio',
-        option: [
-          {
-            optionLabel: '3',
-            optionValue: '3',
-            order: 1,
-            default: true
-          },
-          {
-            optionLabel: '6',
-            optionValue: '6',
-            order: 2,
-            default: false
-          },
-          {
-            optionLabel: '12',
-            optionValue: '12',
-            order: 3,
-            default: false
-          }
-        ],
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        deletAble: true,
-        order: 1,
-        fieldName: 'column',
-        sectionName: 'Image Information',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
-    },
-    {
-      fieldData: {
-        _id: '62d103f69be8b23c5e3fba17',
-        fieldLabel: itemData?.type?.includes('imageSlider') ? 'Images' : 'Image',
-        type: itemData?.type?.includes('imageSlider') ? 'multiImageUpload' : 'imageUpload',
-        option: [],
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        deletAble: true,
-        order: 2,
-        hiddenField: false,
-        isDefaultValue: false,
-        disableOnEdit: false,
-        unique: true,
-        lookup: false,
-        lookupResource: '',
-        entityWiseLookup: false,
-        isDropdown: false,
-        isWarningTooltip: false,
-        warningTooltipMessage: '',
-        defaultValue: '',
-        fieldName: itemData?.type?.includes('imageSlider') ? 'images' : 'image',
-        sectionName: 'Image Information',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
-    }
-  ];
-
-  const imageFields = ['column', 'url', 'images', 'image'];
-  const productCategoryFields = ['column', 'title'];
-  const productListFields = ['column', 'title', 'kpi'];
-  const menuFields = ['column', 'title'];
+    "roleType": 0
+  }];
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [digitalData, setDigitalData] = useState({ fields: [], initialValues: {} });
   const [formsData, setFormsData] = useState([]);
@@ -249,20 +142,11 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    var fieldsDataForCreate = itemData?.type?.includes('image')
-      ? fieldData?.filter((d) => imageFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-      : itemData?.type?.includes('productCategory')
-      ? fieldData?.filter((d) => productCategoryFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-      : itemData?.type?.includes('productList')
-      ? fieldData?.filter((d) => productListFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-      : itemData?.type?.includes('menu')
-      ? fieldData?.filter((d) => menuFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-      : [];
     setDigitalData({
-      fields: fieldsDataForCreate,
-      initialValues: getObjKeysWithValues(itemData, fieldsDataForCreate)
+      fields: fieldData,
+      initialValues: getObjKeysWithValues(productionOrderData, fieldData)
     });
-    setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate));
+    setFormsData(setFieldsInAscendingOrder(fieldData));
   }, []);
 
   const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
@@ -274,16 +158,8 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
       });
       setErrors({ ...errors });
     } else {
-      handleSave(values);
+      handleSave([{ ...productionOrderData, ...values }]);
     }
-  };
-
-  const handleSave = (data: any) => {
-    setFormData((prevState) => {
-      let tempData = prevState.filter((i) => (i._id ? i._id !== itemData?._id : i.type !== itemData?.type));
-      return [...tempData, { ...itemData, ...data }];
-    });
-    onClose();
   };
 
   const handleValuesChange = (data) => {
@@ -306,10 +182,10 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
             setShowConfirmDialog(true);
           }
         }}
-        open={open}
+        open={true}
       >
         <CustomDialogHeader
-          title={`Edit ${itemData?.label || ''}`}
+          title={`Edit ${productionOrderData?.detail || ''}`}
           onClose={(e, reason) => {
             if (isFieldNotTouched(digitalData, formValues)) onClose();
             else setShowConfirmDialog(true);
@@ -347,7 +223,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
             validationSchema={yupSchema(digitalData.fields)}
             validateOnMount
             // validate={validate}
-            onSubmit={() => {}}
+            onSubmit={() => { }}
           >
             {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
               <>
@@ -386,8 +262,8 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                             : null
                                         }
                                         row={true}
@@ -422,11 +298,6 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                     disabled={uploadingImageOrFileProgress > 0 || loading}
                     onClick={(e) => {
                       e.preventDefault();
-                      if (values['type'] === 'key') {
-                        delete errors['file'];
-                      } else {
-                        delete errors['key'];
-                      }
                       handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
                     }}
                   >
@@ -457,4 +328,4 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
   );
 };
 
-export default ConfigureItemDialog;
+export default ProductionOrderQty;

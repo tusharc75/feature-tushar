@@ -18,23 +18,23 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
 import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage } from 'src/constants/helpers';
-import ManageBlog from './ManageBlog';
+import ManageCompetencyMaster from './ManageCompetencyMaster';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
-const Blog = () => {
-  const renderedFrom = camelCase(routes?.blog.title);
+const CompetencyMaster = () => {
+  const renderedFrom = camelCase(routes?.competencyMaster.title);
   const {
     state: { permissions, selectedEntity }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-  const [blogPermission, setBlogPermission] = useState({
-    isCreate: permissions.blog?.isCreate,
-    isUpdate: permissions.blog?.isUpdate,
-    isRead: permissions.blog?.isRead,
-    isDelete: permissions.blog?.isDelete
+  const [competencyMasterPermission, setCompetencyMasterPermission] = useState({
+    isCreate: permissions.competencyMaster?.isCreate,
+    isUpdate: permissions.competencyMaster?.isUpdate,
+    isRead: permissions.competencyMaster?.isRead,
+    isDelete: permissions.competencyMaster?.isDelete
   });
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
@@ -52,7 +52,7 @@ const Blog = () => {
   const [open, setOpen] = useState({ open: false, isClone: false });
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
-  const [blogId, setBlogId] = useState(null);
+  const [competencyMasterId, setCompetencyMasterId] = useState(null);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -64,18 +64,18 @@ const Blog = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get('/field?resource=Blog')
+      .get('/field?resource=Competency Master')
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          if (['title'].find((d) => d === o?.fieldData?.fieldName)) {
+          if (['competencyName'].find((d) => d === o?.fieldData?.fieldName)) {
             columns = [
               ...columns,
               {
                 disabled: false,
-                field: 'title',
-                headerName: 'Title',
+                field: 'competencyName',
+                headerName: 'Competency Name',
                 pivotIndex: 0,
                 show: true,
                 cellRenderer: 'nameRenderer',
@@ -89,7 +89,7 @@ const Blog = () => {
                 { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer' }
               ];
             } else {
-              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.blog.path);
+              let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.competencyMaster.path);
 
               if (currentColumn !== null) {
                 columns = [...columns, currentColumn?.columnData];
@@ -112,7 +112,7 @@ const Blog = () => {
       });
   };
 
-  const fetchBlogData = () => {
+  const fetchCompetencyMasterData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -121,14 +121,14 @@ const Blog = () => {
     }
 
     axiosInstance()
-      .get(`/blog${queryString}`)
+      .get(`/competency-master${queryString}`)
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = blogPermission.isDelete;
+          finalObject['canDelete'] = competencyMasterPermission.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = blogPermission.isUpdate;
+          finalObject['allowedToEdit'] = competencyMasterPermission.isUpdate;
 
           return {
             ...finalObject
@@ -179,7 +179,7 @@ const Blog = () => {
   const NameRenderer = (params) => {
     return (
       <span className=" d-flex gap-2 align-items-center">
-        <Link className="link" to={`${routes.blogDetail.path}/${params.data._id}`}>
+        <Link className="link" to={`${routes.competencyMasterDetail.path}/${params.data._id}`}>
           {params.value}
         </Link>
       </span>
@@ -193,7 +193,7 @@ const Blog = () => {
           size="small"
           aria-label="Clone"
           onClick={() => {
-            setBlogId(params?.data?.id);
+            setCompetencyMasterId(params?.data?.id);
             setOpen({ open: true, isClone: true });
           }}
         >
@@ -266,10 +266,10 @@ const Blog = () => {
       ids = selectedRecords.map((m) => m._id);
     }
     axiosInstance()
-      .put(`/blog/remove`, { ids: ids })
+      .put(`/competency-master/remove`, { ids: ids })
       .then(({ data }) => {
         removeLocalStorage(localStorageSelectedRecords);
-        fetchBlogData();
+        fetchCompetencyMasterData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         toastConfig.setToastConfig({
@@ -288,12 +288,12 @@ const Blog = () => {
   }, []);
 
   useEffect(() => {
-    fetchBlogData();
+    fetchCompetencyMasterData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   useEffect(() => {
-    if (permissions && permissions.blog) {
-      setBlogPermission(permissions.blog);
+    if (permissions && permissions.competencyMaster) {
+      setCompetencyMasterPermission(permissions.competencyMaster);
     }
   }, [permissions]);
 
@@ -301,15 +301,15 @@ const Blog = () => {
     <Fragment>
       <Grid container className="headerbox">
         <Grid item md={4} sm={11} xs={10}>
-          <CustomBreadCrumbs routes={[{ title: routes.blog.title }]} />
+          <CustomBreadCrumbs routes={[{ title: routes.competencyMaster.title }]} />
         </Grid>
         <Grid item md={8} sm={1} xs={2}>
           <ImportExportLinks
-            permissions={permissions.blog}
-            module="Blog"
-            api={'blog'}
+            permissions={permissions.competencyMaster}
+            module="Competency Master"
+            api={'competency-master'}
             afterImportCompleted={() => {
-              fetchBlogData();
+              fetchCompetencyMasterData();
             }}
             isExportAllOrSomeFeature={true}
             total={rowCount}
@@ -321,7 +321,7 @@ const Blog = () => {
             }
             onExportToExcelSuccess={() => {
               if (gridApi) gridApi.deselectAll();
-              else fetchBlogData();
+              else fetchCompetencyMasterData();
             }}
             additionalParams={getQueryString(true)}
           />
@@ -332,8 +332,7 @@ const Blog = () => {
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
-                <FaBlogger size={20} style={{ paddingBottom: '3px' }} />
-                <span className="listingHeader">{routes.blog.title}</span>
+                <span className="listingHeader">{routes.competencyMaster.title}</span>
               </div>
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
@@ -352,7 +351,7 @@ const Blog = () => {
                   <Button
                     className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                     onClick={() => {
-                      setBlogId(null);
+                      setCompetencyMasterId(null);
                       setOpen({ open: true, isClone: false });
                     }}
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -386,7 +385,7 @@ const Blog = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!blogPermission?.isDelete}
+                      disabled={!competencyMasterPermission?.isDelete}
                       onClick={() => {
                         closeActions();
                         // eslint-disable-next-line no-lone-blocks
@@ -409,17 +408,17 @@ const Blog = () => {
             <CustomSwipableList
               allowSelection={true}
               allowSwipe={true}
-              permissions={permissions.blog}
+              permissions={permissions.competencyMaster}
               primaryField={columns?.find((d) => d.primaryField)}
               onClick={(data) => {
-                setBlogId(data._id);
+                setCompetencyMasterId(data._id);
                 setOpen({ open: true, isClone: false });
               }}
               dataRows={dataRows}
               selectedRecords={selectedRecords}
               dispatch={dispatch}
               onEdit={(data) => {
-                setBlogId(data.id);
+                setCompetencyMasterId(data.id);
                 setOpen({ open: true, isClone: false });
               }}
               extraParamsToCheckDelete={true}
@@ -435,7 +434,7 @@ const Blog = () => {
               onCreate={false}
               showClone={true}
               onClone={(data) => {
-                setBlogId(data.id);
+                setCompetencyMasterId(data.id);
                 setOpen({ open: true, isClone: true });
               }}
               chips={[]}
@@ -455,7 +454,7 @@ const Blog = () => {
               allowAction={true}
               loading={loading}
               renderedFrom={renderedFrom}
-              refreshGrid={fetchBlogData}
+              refreshGrid={fetchCompetencyMasterData}
               showOnlyShowFilteredRecordSwitch={true}
             />
           )
@@ -463,7 +462,7 @@ const Blog = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.blog?.title?.toLowerCase()}  ${deleteRecord?.name || ''} ?`}
+            message={`Are you sure you want to delete ${routes?.competencyMaster?.title?.toLowerCase()}  ${deleteRecord?.name || ''} ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -473,13 +472,13 @@ const Blog = () => {
         )}
 
         {open?.open && (
-          <ManageBlog
-            id={blogId}
+          <ManageCompetencyMaster
+            id={competencyMasterId}
             isClone={open?.isClone}
             onClose={() => setOpen({ open: false, isClone: false })}
             onSuccess={() => {
               setOpen({ open: false, isClone: false });
-              fetchBlogData();
+              fetchCompetencyMasterData();
             }}
           />
         )}
@@ -488,4 +487,4 @@ const Blog = () => {
   );
 };
 
-export default Blog;
+export default CompetencyMaster;

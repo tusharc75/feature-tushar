@@ -14,15 +14,15 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
+import ManageCompetencyMaster from './ManageCompetencyMaster';
 
-const FrequencyAskedQuestionDetail = () => {
+const CompetencyMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [headingLbl, setHeadingLbl] = useState('');
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.frequentlyAskedQuestion]);
-  const [frequentlyAskedQuestionData, setFrequentlyAskedQuestionData] = useState(null);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.blog]);
+  const [competencyMasterData, setCompetencyMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -35,12 +35,13 @@ const FrequencyAskedQuestionDetail = () => {
     if (id) {
       fetchFields();
       fetchData();
+      console.log('permissions', permissions)
     }
   }, [id]);
 
   const fetchFields = async () => {
     axiosInstance()
-      .get('/field?resource=Frequently Asked Question')
+      .get('/field?resource=Competency Master')
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -54,10 +55,11 @@ const FrequencyAskedQuestionDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/frequently-asked-question/${id}`);
-      setHeadingLbl(data.label);
-      setFrequentlyAskedQuestionData(data);
-      setCustomizedRoutes([routes.frequentlyAskedQuestion, { title: data?.label }]);
+      } = await axiosInstance().get(`/competency-master/${id}`);
+      console.log(data);
+      setHeadingLbl(data.competencyName);
+      setCompetencyMasterData(data);
+      setCustomizedRoutes([routes.competencyMaster, { title: data?.competencyName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -66,8 +68,9 @@ const FrequencyAskedQuestionDetail = () => {
 
   const handleDelete = () => {
     if (id) {
+      if (permissions?.competencyMaster?.isDelete) {
         axiosInstance()
-          .put(`/frequently-asked-question/remove`, { ids: [id] })
+          .put(`/competency-master/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
 
@@ -81,6 +84,7 @@ const FrequencyAskedQuestionDetail = () => {
           .catch((err) => {
             setShowConfirmBox(false);
           });
+      }
     } else {
       setShowConfirmBox(false);
     }
@@ -102,7 +106,7 @@ const FrequencyAskedQuestionDetail = () => {
       <div className="detail-container grid-without-activity">
         <div>
           <Paper>
-            {!frequentlyAskedQuestionData ? (
+            {!competencyMasterData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
                 <Box display="flex">
@@ -113,7 +117,7 @@ const FrequencyAskedQuestionDetail = () => {
               </div>
             ) : (
               <DetailsPageHeader heading={headingLbl} showHeading={true}>
-                {permissions?.freqentlyAskedQuestion?.isUpdate &&
+                {permissions?.competencyMaster?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
@@ -123,10 +127,8 @@ const FrequencyAskedQuestionDetail = () => {
                   >
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
-                  } 
-                 {permissions?.freqentlyAskedQuestion?.isDelete &&
-                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                  }
+                )}
+                {permissions?.competencyMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </DetailsPageHeader>
             )}
             <Box>
@@ -135,7 +137,7 @@ const FrequencyAskedQuestionDetail = () => {
                   <CommonSkeleton lenArray={[...Array(7).keys()]} />
                 </Grid>
               ) : (
-                <DetailsPage data={frequentlyAskedQuestionData} fields={fields} />
+                <DetailsPage data={competencyMasterData} fields={fields} />
               )}
             </Box>
           </Paper>
@@ -144,7 +146,7 @@ const FrequencyAskedQuestionDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.frequentlyAskedQuestion?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${routes?.competencyMaster?.title?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -152,7 +154,7 @@ const FrequencyAskedQuestionDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageFrequentlyAskedQuestion
+        <ManageCompetencyMaster
           id={id}
           isClone={false}
           onClose={closeUpdateDialog}
@@ -166,4 +168,4 @@ const FrequencyAskedQuestionDetail = () => {
   );
 };
 
-export default FrequencyAskedQuestionDetail;
+export default CompetencyMasterDetail;

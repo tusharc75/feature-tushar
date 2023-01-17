@@ -101,8 +101,8 @@ const BlogDetail = () => {
       <Grid container className="headerbox">
         <CustomBreadCrumbs routes={customizedRoutes} />
       </Grid>
-      <Grid container spacing={1} className="detail-container">
-        <Grid item xs={12} sm={12} md={8} lg={8} spacing={2}>
+      <div className="detail-container grid-without-activity">
+        <div>
           <Paper>
             {!blogData ? (
               <div>
@@ -115,7 +115,7 @@ const BlogDetail = () => {
               </div>
             ) : (
               <DetailsPageHeader heading={headingLbl} showHeading={true}>
-                <>
+                {permissions?.blog?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
@@ -125,13 +125,8 @@ const BlogDetail = () => {
                   >
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
-
-                  <Box component="span" marginX={1} />
-
-                  <span title={id ? "Primarily selected  can't be deleted" : 'Permanently delete'}>
-                    <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                  </span>
-                </>
+                )}
+                {permissions?.blog?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </DetailsPageHeader>
             )}
             <Box>
@@ -144,8 +139,8 @@ const BlogDetail = () => {
               )}
             </Box>
           </Paper>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
