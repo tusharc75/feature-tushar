@@ -632,6 +632,14 @@ const routes = {
     title: storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title ? storedRoutes.productionOrder?.title : RESOURCE_LABEL.productionOrder,
     path: '/production-order/detail'
   },
+  serviceOrder: {
+    title: storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+    path: '/service-order'
+  },
+  serviceOrderDetail: {
+    title: storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+    path: '/service-order/detail'
+  },
   workOrder: {
     title: storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title ? storedRoutes.workOrder?.title : RESOURCE_LABEL.workOrder,
     path: '/work-order'
