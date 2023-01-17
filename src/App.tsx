@@ -174,6 +174,8 @@ import DemandOrder from './pages/DemandOrder';
 import DemandOrderDetails from './pages/DemandOrder/DemandOrderDetails';
 import ServiceOrder from './pages/ServiceOrder';
 import ServiceOrderDetailsPage from './pages/ServiceOrder/ServiceOrderDetailsPage';
+import CompetencyMaster from './pages/CompetencyMaster';
+import CompetencyMasterDetail from './pages/CompetencyMaster/CompetencyMasterDetail';
 
 var notificationInterval: any = null;
 
@@ -884,6 +886,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
               <DemandOrderDetails />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competencyMaster.path}`}>
+              <CompetencyMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competencyMasterDetail.path}/:id`}>
+              <CompetencyMasterDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
