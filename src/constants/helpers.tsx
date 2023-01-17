@@ -64,7 +64,7 @@ export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loa
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
-export const demandOrderSteps = ['Add Products', 'Closed'];
+export const demandOrderSteps = ['Add Products'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -203,6 +203,7 @@ export const sidebarResource = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
+  serviceOrder: 'Service Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -213,86 +214,8 @@ export const sidebarResource = {
   supportTicket: 'Support Ticket',
   eCommerceHome: 'e-Commerce Home',
   contactUs: 'Contact Us',
-  frequentlyAskedQuestion: 'Frequently Asked Question'
-
-};
-
-export const resourceNames = {
-  customerAccount: 'Customer Account',
-  user: 'User',
-  customerContact: 'Customer Contact',
-  brand: 'Brand',
-  entity: 'Entity',
-  role: 'Role',
-  lead: 'Lead',
-  opportunity: 'Opportunity',
-  field: 'Field',
-  productCategory: 'Product Category',
-  productInventory: 'Product Inventory',
-  serializedAsset: 'Serialized Asset',
-  priceTemplate: 'Price Template',
-  product: 'Product',
-  productTemplate: 'Product Template',
-  doa: 'DOA',
-  termsAndConditions: 'Terms & Conditions',
-  equiptmentRentalMaster: 'Equiptment Rental Master',
-  productBuilder: 'Product Builder',
-  formBuilder: 'Form Builder',
-  currencyConverter: 'Currency Converter',
-  quoteBuilder: 'Quotes',
-  PNQBuilder: 'PNQ Builder',
-  DOARequest: 'DOA Request',
-  task: 'Task',
-  case: 'Case',
-  note: 'Note',
-  event: 'Event',
-  email: 'Email',
-  attachment: 'Attachment',
-  reminder: 'Reminder',
-  calendar: 'Calendar',
-  dashboard: 'Dashboard',
-  budget: 'Budget',
-  marketSegment: 'Market Segment',
-  quotePdfTemplate: 'Quote Pdf Template',
-  warehouse: 'Plant',
-  rentalManagement: 'Rental Management',
-  deliveryTicket: 'Delivery Ticket',
-  pricingCondition: 'Pricing Condition',
-  repairJob: 'Repair Job',
-  salesOrder: 'Sales Order',
-  invoice: 'Invoice',
-  eCommercePolicy: 'e-Commerce Policy',
-  packages: 'Packages',
-  supplierContact: 'Supplier Contact',
-  supplierAccount: 'Supplier Account',
-  pricing: 'Pricing',
-  priceBuilder: 'Price Builder',
-  flags: 'Flags',
-  projectSales: 'Project Sales',
-  purchaseOrder: 'Purchase Order',
-  transferAsset: 'Transfer Asset',
-  sublease: 'Sublease',
-  transferInventory: 'Transfer Inventory',
-  wellMaster: 'Well Master',
-  bulkAssetCreation: 'Bulk Asset Creation',
-  pos: 'Pos',
-  report: 'Report',
-  scheduleReport: 'Schedule Report',
-  resourceCalendar: 'Resource Calendar',
-  cageManagement: 'Cage Management',
-  productAuction: 'Product Auction',
-  quotation: 'Quotation',
-  repairOrder: 'Repair Order',
-  productionOrder: 'Production Order',
-  workOrder: 'Work Order',
-  workOrderSupervisor: 'Work Order Supervisor',
-  workOrderTechnician: 'Work Order Technician',
-  freqentlyAskedQuestion: 'Frequently Asked Question',
-  blog: 'Blog',
-  surveys: 'Surveys',
-  supportTicket: 'Support Ticket',
-  eCommerceHome: 'e-Commerce Home',
-  contactUs: 'Contact Us',
+  employeeMaster: 'Employee Master',
+  competencyMaster: 'Competency Master',
 };
 
 export const primaryFields = {
@@ -378,6 +301,7 @@ export const RESOURCE_LABEL = {
   leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
+  serviceOrder: 'Service Order',
   workOrder: 'Work Order',
   workOrderSupervisor: 'Work Order Supervisor',
   workOrderTechnician: 'Work Order Technician',
@@ -387,7 +311,9 @@ export const RESOURCE_LABEL = {
   surveys: 'Surveys',
   contactUs: 'Contact Us',
   supportTicket: 'Support Ticket',
-  demandOrder: 'Demand Order'
+  demandOrder: 'Demand Order',
+  employeeMaster: 'Employee Master',
+  competencyMaster: 'Competency Master',
 };
 
 export const CHILD_RESOURCE = {
@@ -471,6 +397,11 @@ export const repairOrder = {
 export const productionOrder = {
   resource: 'productionOrder',
   api: '/production-order'
+};
+
+export const serviceOrder = {
+  resource: 'serviceOrder',
+  api: '/service-order'
 };
 
 export const salesOrder = {
@@ -1897,6 +1828,7 @@ export const ACTIVITY_RESOURCE = {
   quotation: 'quotation',
   repairOrder: 'repairOrder',
   productionOrder: 'productionOrder',
+  serviceOrder: 'serviceOrder',
   workOrder: 'workOrder'
 };
 
@@ -1921,20 +1853,23 @@ export const RESOURCE_CALENDAR = [
 ];
 
 export const PDF_RESOURCE_LIST = [
-  { title: sidebarResource.quoteBuilder, value: resourceNames.quoteBuilder, key: 'quoteBuilder' },
-  { title: sidebarResource.quotation, value: resourceNames.quotation, key: 'quotation' },
-  { title: sidebarResource.rentalManagement, value: resourceNames.rentalManagement, key: 'rentalManagement' },
-  { title: sidebarResource.repairJob, value: resourceNames.repairJob, key: 'repairJob' },
-  { title: sidebarResource.purchaseOrder, value: resourceNames.purchaseOrder, key: 'purchaseOrder' },
-  { title: sidebarResource.deliveryTicket, value: resourceNames.deliveryTicket, key: 'deliveryTicket' },
-  { title: sidebarResource.transferAsset, value: resourceNames.transferAsset, key: 'transferAsset' },
-  { title: sidebarResource.sublease, value: resourceNames.sublease, key: 'sublease' },
-  { title: sidebarResource.bulkAssetCreation, value: resourceNames.bulkAssetCreation, key: 'bulkAssetCreation' },
-  { title: sidebarResource.transferInventory, value: resourceNames.transferInventory, key: 'transferInventory' },
-  { title: sidebarResource.salesOrder, value: resourceNames.salesOrder, key: 'salesOrder' },
-  { title: sidebarResource.repairOrder, value: resourceNames.repairOrder, key: 'repairOrder' },
-  { title: sidebarResource.workOrder, value: resourceNames.workOrder, key: 'workOrder' },
-  { title: sidebarResource.invoice, value: resourceNames.invoice, key: 'invoice' }
+  { title: sidebarResource.quoteBuilder, value: sidebarResource.quoteBuilder, key: 'quoteBuilder' },
+  { title: sidebarResource.quotation, value: sidebarResource.quotation, key: 'quotation' },
+  { title: sidebarResource.rentalManagement, value: sidebarResource.rentalManagement, key: 'rentalManagement' },
+  { title: sidebarResource.repairJob, value: sidebarResource.repairJob, key: 'repairJob' },
+  { title: sidebarResource.purchaseOrder, value: sidebarResource.purchaseOrder, key: 'purchaseOrder' },
+  { title: sidebarResource.deliveryTicket, value: sidebarResource.deliveryTicket, key: 'deliveryTicket' },
+  { title: sidebarResource.transferAsset, value: sidebarResource.transferAsset, key: 'transferAsset' },
+  { title: sidebarResource.sublease, value: sidebarResource.sublease, key: 'sublease' },
+  { title: sidebarResource.bulkAssetCreation, value: sidebarResource.bulkAssetCreation, key: 'bulkAssetCreation' },
+  { title: sidebarResource.transferInventory, value: sidebarResource.transferInventory, key: 'transferInventory' },
+  { title: sidebarResource.salesOrder, value: sidebarResource.salesOrder, key: 'salesOrder' },
+  { title: sidebarResource.repairOrder, value: sidebarResource.repairOrder, key: 'repairOrder' },
+  { title: sidebarResource.workOrder, value: sidebarResource.workOrder, key: 'workOrder' },
+  { title: sidebarResource.invoice, value: sidebarResource.invoice, key: 'invoice' },
+  { title: sidebarResource.demandOrder, value: sidebarResource.demandOrder, key: 'demandOrder' },
+  { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
+  { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' },
 ];
 
 export const getApi = (resource: string) => {

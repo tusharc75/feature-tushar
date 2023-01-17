@@ -632,6 +632,14 @@ const routes = {
     title: storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title ? storedRoutes.productionOrder?.title : RESOURCE_LABEL.productionOrder,
     path: '/production-order/detail'
   },
+  serviceOrder: {
+    title: storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+    path: '/service-order'
+  },
+  serviceOrderDetail: {
+    title: storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+    path: '/service-order/detail'
+  },
   workOrder: {
     title: storedRoutes && storedRoutes.workOrder && storedRoutes.workOrder.title ? storedRoutes.workOrder?.title : RESOURCE_LABEL.workOrder,
     path: '/work-order'
@@ -728,7 +736,29 @@ const routes = {
   demandOrderDetail: {
     title: storedRoutes && storedRoutes.demandOrder && storedRoutes.demandOrder.title ? storedRoutes.demandOrder?.title : RESOURCE_LABEL.demandOrder,
     path: '/demand-order/detail'
-  }
+  },
+  employeeMaster: {
+    title:
+      storedRoutes && storedRoutes.employeeMaster && storedRoutes.employeeMaster.title
+        ? storedRoutes.employeeMaster?.title
+        : RESOURCE_LABEL?.employeeMaster,
+    path: '/employee-master'
+  },
+  employeeMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.employeeMaster && storedRoutes.employeeMaster.title
+        ? storedRoutes.employeeMaster?.title
+        : RESOURCE_LABEL?.employeeMaster,
+    path: '/employee-master/detail'
+  },
+  competencyMaster: {
+    title: storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title ? storedRoutes.competencyMaster?.title : RESOURCE_LABEL.competencyMaster,
+    path: '/competency-master'
+  },
+  competencyMasterDetail: {
+    title: storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title ? storedRoutes.competencyMaster?.title : RESOURCE_LABEL.competencyMaster,
+    path: '/competency-master/detail'
+  },
 };
 
 export default routes;

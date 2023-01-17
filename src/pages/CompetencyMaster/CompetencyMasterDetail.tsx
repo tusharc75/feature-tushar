@@ -14,15 +14,15 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import ManageBlog from './ManageBlog';
+import ManageCompetencyMaster from './ManageCompetencyMaster';
 
-const BlogDetail = () => {
+const CompetencyMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.blog]);
-  const [blogData, setBlogData] = useState(null);
+  const [competencyMasterData, setCompetencyMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -35,12 +35,13 @@ const BlogDetail = () => {
     if (id) {
       fetchFields();
       fetchData();
+      console.log('permissions', permissions)
     }
   }, [id]);
 
   const fetchFields = async () => {
     axiosInstance()
-      .get('/field?resource=Blog')
+      .get('/field?resource=Competency Master')
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -54,10 +55,11 @@ const BlogDetail = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/blog/${id}`);
-      setHeadingLbl(data.title);
-      setBlogData(data);
-      setCustomizedRoutes([routes.blog, { title: data?.title }]);
+      } = await axiosInstance().get(`/competency-master/${id}`);
+      console.log(data);
+      setHeadingLbl(data.competencyName);
+      setCompetencyMasterData(data);
+      setCustomizedRoutes([routes.competencyMaster, { title: data?.competencyName }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -66,9 +68,9 @@ const BlogDetail = () => {
 
   const handleDelete = () => {
     if (id) {
-      if (permissions?.blog?.isDelete) {
+      if (permissions?.competencyMaster?.isDelete) {
         axiosInstance()
-          .put(`/blog/remove`, { ids: [id] })
+          .put(`/competency-master/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
 
@@ -104,7 +106,7 @@ const BlogDetail = () => {
       <div className="detail-container grid-without-activity">
         <div>
           <Paper>
-            {!blogData ? (
+            {!competencyMasterData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
                 <Box display="flex">
@@ -115,7 +117,7 @@ const BlogDetail = () => {
               </div>
             ) : (
               <DetailsPageHeader heading={headingLbl} showHeading={true}>
-                {permissions?.blog?.isUpdate && (
+                {permissions?.competencyMaster?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
                     color="primary"
@@ -126,7 +128,7 @@ const BlogDetail = () => {
                     {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
                   </Button>
                 )}
-                {permissions?.blog?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {permissions?.competencyMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </DetailsPageHeader>
             )}
             <Box>
@@ -135,7 +137,7 @@ const BlogDetail = () => {
                   <CommonSkeleton lenArray={[...Array(7).keys()]} />
                 </Grid>
               ) : (
-                <DetailsPage data={blogData} fields={fields} />
+                <DetailsPage data={competencyMasterData} fields={fields} />
               )}
             </Box>
           </Paper>
@@ -144,7 +146,7 @@ const BlogDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.blog?.title?.toLowerCase()} ?`}
+          message={`Are you sure you want to delete ${routes?.competencyMaster?.title?.toLowerCase()} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -152,7 +154,7 @@ const BlogDetail = () => {
         />
       )}
       {openUpdateDialog && (
-        <ManageBlog
+        <ManageCompetencyMaster
           id={id}
           isClone={false}
           onClose={closeUpdateDialog}
@@ -166,4 +168,4 @@ const BlogDetail = () => {
   );
 };
 
-export default BlogDetail;
+export default CompetencyMasterDetail;
