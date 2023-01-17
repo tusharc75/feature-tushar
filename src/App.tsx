@@ -176,6 +176,8 @@ import ServiceOrder from './pages/ServiceOrder';
 import ServiceOrderDetailsPage from './pages/ServiceOrder/ServiceOrderDetailsPage';
 import EmployeeMaster from './pages/EmployeeMaster';
 import EmployeeMasterDetail from './pages/EmployeeMaster/EmployeeMasterDetail';
+import CompetencyMaster from './pages/CompetencyMaster';
+import CompetencyMasterDetail from './pages/CompetencyMaster/CompetencyMasterDetail';
 
 var notificationInterval: any = null;
 
@@ -892,6 +894,11 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.employeeMasterDetail.path}/:id`}>
               <EmployeeMasterDetail />
+            <PrivateRoute exact path={`${routes.competencyMaster.path}`}>
+              <CompetencyMaster />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.competencyMasterDetail.path}/:id`}>
+              <CompetencyMasterDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

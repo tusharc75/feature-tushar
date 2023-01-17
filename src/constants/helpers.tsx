@@ -64,7 +64,7 @@ export const transferInventorySteps = ['Add Products', 'Serialized Assets', 'Loa
 export const subleaseSteps = ['Add Products', 'Start Sublease', 'End Sublease'];
 export const bulkAssetCreationSteps = ['Add Products', 'Serialized Asset'];
 export const repairOrderSteps = ['Add Assets', 'Work Order', 'Quotation', 'Post Work Service', 'Loading Ticket', 'Invoice'];
-export const demandOrderSteps = ['Add Products', 'Closed'];
+export const demandOrderSteps = ['Add Products'];
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';
@@ -214,8 +214,8 @@ export const sidebarResource = {
   supportTicket: 'Support Ticket',
   eCommerceHome: 'e-Commerce Home',
   contactUs: 'Contact Us',
-  employeeMaster: 'Employee Master'
-
+  employeeMaster: 'Employee Master',
+  competencyMaster: 'Competency Master',
 };
 
 export const resourceNames = {
@@ -393,6 +393,7 @@ export const RESOURCE_LABEL = {
   supportTicket: 'Support Ticket',
   demandOrder: 'Demand Order',
   employeeMaster: 'Employee Master',
+  competencyMaster: 'Competency Master',
 };
 
 export const CHILD_RESOURCE = {
@@ -1932,20 +1933,23 @@ export const RESOURCE_CALENDAR = [
 ];
 
 export const PDF_RESOURCE_LIST = [
-  { title: sidebarResource.quoteBuilder, value: resourceNames.quoteBuilder, key: 'quoteBuilder' },
-  { title: sidebarResource.quotation, value: resourceNames.quotation, key: 'quotation' },
-  { title: sidebarResource.rentalManagement, value: resourceNames.rentalManagement, key: 'rentalManagement' },
-  { title: sidebarResource.repairJob, value: resourceNames.repairJob, key: 'repairJob' },
-  { title: sidebarResource.purchaseOrder, value: resourceNames.purchaseOrder, key: 'purchaseOrder' },
-  { title: sidebarResource.deliveryTicket, value: resourceNames.deliveryTicket, key: 'deliveryTicket' },
-  { title: sidebarResource.transferAsset, value: resourceNames.transferAsset, key: 'transferAsset' },
-  { title: sidebarResource.sublease, value: resourceNames.sublease, key: 'sublease' },
-  { title: sidebarResource.bulkAssetCreation, value: resourceNames.bulkAssetCreation, key: 'bulkAssetCreation' },
-  { title: sidebarResource.transferInventory, value: resourceNames.transferInventory, key: 'transferInventory' },
-  { title: sidebarResource.salesOrder, value: resourceNames.salesOrder, key: 'salesOrder' },
-  { title: sidebarResource.repairOrder, value: resourceNames.repairOrder, key: 'repairOrder' },
-  { title: sidebarResource.workOrder, value: resourceNames.workOrder, key: 'workOrder' },
-  { title: sidebarResource.invoice, value: resourceNames.invoice, key: 'invoice' }
+  { title: sidebarResource.quoteBuilder, value: sidebarResource.quoteBuilder, key: 'quoteBuilder' },
+  { title: sidebarResource.quotation, value: sidebarResource.quotation, key: 'quotation' },
+  { title: sidebarResource.rentalManagement, value: sidebarResource.rentalManagement, key: 'rentalManagement' },
+  { title: sidebarResource.repairJob, value: sidebarResource.repairJob, key: 'repairJob' },
+  { title: sidebarResource.purchaseOrder, value: sidebarResource.purchaseOrder, key: 'purchaseOrder' },
+  { title: sidebarResource.deliveryTicket, value: sidebarResource.deliveryTicket, key: 'deliveryTicket' },
+  { title: sidebarResource.transferAsset, value: sidebarResource.transferAsset, key: 'transferAsset' },
+  { title: sidebarResource.sublease, value: sidebarResource.sublease, key: 'sublease' },
+  { title: sidebarResource.bulkAssetCreation, value: sidebarResource.bulkAssetCreation, key: 'bulkAssetCreation' },
+  { title: sidebarResource.transferInventory, value: sidebarResource.transferInventory, key: 'transferInventory' },
+  { title: sidebarResource.salesOrder, value: sidebarResource.salesOrder, key: 'salesOrder' },
+  { title: sidebarResource.repairOrder, value: sidebarResource.repairOrder, key: 'repairOrder' },
+  { title: sidebarResource.workOrder, value: sidebarResource.workOrder, key: 'workOrder' },
+  { title: sidebarResource.invoice, value: sidebarResource.invoice, key: 'invoice' },
+  { title: sidebarResource.demandOrder, value: sidebarResource.demandOrder, key: 'demandOrder' },
+  { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
+  { title: sidebarResource.serviceOrder, value: sidebarResource.serviceOrder, key: 'serviceOrder' },
 ];
 
 export const getApi = (resource: string) => {

@@ -751,6 +751,14 @@ const routes = {
         : RESOURCE_LABEL?.employeeMaster,
     path: '/employee-master/detail'
   },
+  competencyMaster: {
+    title: storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title ? storedRoutes.competencyMaster?.title : RESOURCE_LABEL.competencyMaster,
+    path: '/competency-master'
+  },
+  competencyMasterDetail: {
+    title: storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title ? storedRoutes.competencyMaster?.title : RESOURCE_LABEL.competencyMaster,
+    path: '/competency-master/detail'
+  },
 };
 
 export default routes;
