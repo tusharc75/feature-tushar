@@ -313,8 +313,8 @@ const Quotation = ({
     coloum.push({
       accessor: 'action',
       Header: '',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      width: 135,
       sticky: 'right',
       disableFilters: true,
       canDrag: false,
@@ -610,9 +610,9 @@ const Quotation = ({
   return (
     <Fragment>
       <Box
+        my={2}
         display="flex"
         justifyContent="space-between"
-        m={1}
         className={`flex-wrap`}
         style={{ gap: isMobileScreen ? '5px' : 0, justifyContent: isMobileScreen ? 'center' : 'space-between' }}
       >
@@ -670,7 +670,7 @@ const Quotation = ({
                   onClick={handleSendToCustomer}
                   variant="outlined"
                   size="small"
-                  className="mx-1"
+                  className="mx-1 repair-order-btn-v1"
                   color="primary"
                 >
                   Send to customer
@@ -682,7 +682,7 @@ const Quotation = ({
                   }}
                   variant="outlined"
                   size="small"
-                  className="mx-1"
+                  className="mx-1 repair-order-btn-v1"
                   color="primary"
                 >
                   Accept / Reject
@@ -694,7 +694,7 @@ const Quotation = ({
                   }}
                   variant="outlined"
                   size="small"
-                  className="mx-1"
+                  className="mx-1 repair-order-btn-v1"
                   color="primary"
                 >
                   Create New Version
@@ -765,11 +765,14 @@ const Quotation = ({
           <Box
             p="6px"
             zIndex={5}
-            width={stepFullScreen ? '100%' : isTabletScreen ? '100%' : isSmallScreen ? '100%' : showActivity ? '100%' : 'calc(100vw - 100px)'}
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+            width={
+              '100%'
+              // stepFullScreen ? '100%' : isTabletScreen ? 'calc(100vw)' : isSmallScreen ? 'calc(100vw)' : showActivity ? '100%' : 'calc(100vw - 100px)'
+            }
+            minHeight={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
           >
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
