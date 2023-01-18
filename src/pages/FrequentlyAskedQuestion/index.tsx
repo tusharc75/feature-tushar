@@ -48,8 +48,6 @@ const FrequentlyAskedQuestion = () => {
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const [freqentlyAskedQuestionId, setFrequentlyAskedQuestionId] = useState(null)
-  
-
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -359,20 +357,24 @@ const FrequentlyAskedQuestion = () => {
                   />
                 </Grid>
                 <Grid style={{ display: 'flex', gap: '5px' }}>
+                  {permissions?.freqentlyAskedQuestion?.isCreate && (
                     <Button
-                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                      onClick={() => {
-                        setFrequentlyAskedQuestionId(null)
-                        setOpen({ open: true, isClone: false });
-                      }}
-                      variant={isMobile && !isTablet ? 'text' : 'contained'}
-                      size="small"
-                      color="primary"
-                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                    >
-                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                    </Button>
-                    <Button
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                    onClick={() => {
+                      setFrequentlyAskedQuestionId(null)
+                      setOpen({ open: true, isClone: false });
+                    }}
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    color="primary"
+                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                  >
+                    {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                  </Button>
+                  )}
+                  {permissions?.freqentlyAskedQuestion?.isDelete && (
+                      <>
+                         <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       color="default"
                       size="small"
@@ -396,7 +398,6 @@ const FrequentlyAskedQuestion = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
-                      disabled={!permissions?.frequentlyAskedQuestion?.isDelete}
                       onClick={() => {
                         closeActions();
                         // eslint-disable-next-line no-lone-blocks
@@ -409,6 +410,8 @@ const FrequentlyAskedQuestion = () => {
                       Delete
                     </MenuItem>
                   </Menu>
+                      </>
+                  )}
                 </Grid>
               </Box>
             </Grid>
