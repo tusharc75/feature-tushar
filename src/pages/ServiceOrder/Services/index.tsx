@@ -10,7 +10,6 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -20,9 +19,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { startCase } from 'lodash';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { genrateCustomTableColumns } from 'src/constants/columns';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/ProductionOrderQty';
 
 const Services = ({
@@ -47,7 +44,6 @@ const Services = ({
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null });
   const [isAddingProducts, setAddingProducts] = useState(false);
 
-  const [recordToUpdate, setRecordToUpdate] = useState(null);
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -57,8 +53,6 @@ const Services = ({
   const [columns, setColumns] = useState(null);
   const [rowsData, setRowsData] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [isRateRequired, setIsRateRequired] = useState(false);
-  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields();
@@ -69,7 +63,6 @@ const Services = ({
   }, [columns]);
 
   const fetchFields = async () => {
-    setColumns(null);
     const column: any = [
       {
         accessor: 'srno',
@@ -182,11 +175,10 @@ const Services = ({
     var data: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
+
     const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    inventory = data.inventory?.filter((e) => !e.isReplaced);
-    nonSerializeAsset = data.nonSerializeAsset;
     let rows = data.material.filter((e) => e.parentId === null);
     rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
@@ -206,7 +198,7 @@ const Services = ({
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
-      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+      parent.subRows = generateNestedData(data.material, parent);
     });
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
@@ -221,7 +213,7 @@ const Services = ({
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
+  const generateNestedData = (material, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
@@ -240,7 +232,7 @@ const Services = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
+      _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
@@ -251,16 +243,7 @@ const Services = ({
     return subRows;
   };
 
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
-  };
-
-  const handleAdd =  (rows) => {
+  const handleAdd = (rows) => {
     setAddingProducts(true);
     const material: any = [];
     rows.forEach((d) => {
@@ -271,7 +254,6 @@ const Services = ({
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addExistingProductDialog.parentId;
-      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
       material.push(element);
     });
     axiosInstance()
@@ -365,7 +347,7 @@ const Services = ({
     rows = await calculateRowsField(material, inputField, allFields, updatedData);
     handleSaveData(rows);
   };
-  
+
   return (
     <Fragment>
       <Grid container spacing={2}>
@@ -377,7 +359,6 @@ const Services = ({
                   <Button
                     color="primary"
                     size="small"
-                    disabled={isOffline}
                     variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                     style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
                     onClick={() => {
@@ -394,7 +375,6 @@ const Services = ({
                     size="small"
                     variant={isMobile && !isTablet ? 'outlined' : 'contained'}
                     style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-                    disabled={isOffline}
                     onClick={() => {
                       setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
                     }}
@@ -464,7 +444,7 @@ const Services = ({
                 onSelect={setSelectedProducts}
                 childrenProperty="subRows"
                 uniqueKey="_id"
-                hideSelection={isOffline || !allowedToEdit}
+                hideSelection={!allowedToEdit}
                 renderedFrom={`${renderedFrom}_sevices_1`}
                 onSaveEdit={onSaveInlineEdit}
                 material={material}
