@@ -22,7 +22,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { genrateCustomTableColumns } from 'src/constants/columns';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/ProductionOrderQty';
 import AddIcon from "@material-ui/icons/Add";
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
@@ -38,40 +38,28 @@ const Technician = ({
     stepFullScreen,
     allowedToEdit
 }: any) => {
-    const toastConfig = useContext(CustomToastContext);
-    const {
-        state: { user, permissions }
-    }: any = useData();
 
-    const [isUpdating, setUpdating] = useState(false);
+    const toastConfig = useContext(CustomToastContext);
+    const { state: { user, permissions } }: any = useData();
+
 
     const [selectedProducts, setSelectedProducts] = useState([]);
-    const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null });
-    const [isAddingProducts, setAddingProducts] = useState(false);
-
-    const [recordToUpdate, setRecordToUpdate] = useState(null);
-
     const [deleteData, setDeleteData] = useState(null);
     const [isDeleting, setDeleting] = useState(false);
 
-    const [material, setMaterial] = useState([]);
-    const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
+    const [addEmployeeMasterDialog, setAddEmployeeMasterDialog] = useState({ open: false });
     const [columns, setColumns] = useState(null);
     const [rowsData, setRowsData] = useState(null);
-    const [allFields, setAllFields] = useState([]);
-    const [isRateRequired, setIsRateRequired] = useState(false);
-    const { isOffline } = useContext(CustomOfflineContext);
 
     useEffect(() => {
         fetchFields();
     }, [allowedToEdit]);
 
     useEffect(() => {
-        fetchProductInventory();
+        fetchData();
     }, [columns]);
 
     const fetchFields = async () => {
-        setColumns(null);
         const column: any = [
             {
                 accessor: 'srno',
@@ -79,9 +67,6 @@ const Technician = ({
                 width: 70,
                 sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row }) => <p className="text-truncate">{row.original.srno}</p>,
-                Footer: () => {
-                    return <>Total</>;
-                }
             },
             {
                 accessor: 'type',
@@ -106,15 +91,7 @@ const Technician = ({
                 sticky: isMobile ? 'none' : 'left',
                 Cell: ({ row }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <p
-                            onClick={() => {
-                                setIsProductEdit({ open: true, data: row.original });
-                            }}
-                            className="link text-truncate"
-                            title={row.original.detail}
-                        >
-                            {row.original.detail}
-                        </p>
+                        {row.original.detail}
                     </div>
                 )
             },
@@ -125,7 +102,6 @@ const Technician = ({
                 Cell: ({ row }) => {
                     return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
                 },
-                editable: true
             },
             {
                 accessor: 'unit',
@@ -145,57 +121,35 @@ const Technician = ({
             disableFilters: true,
             canDrag: false,
             Cell: ({ row }) => {
-                return allowedToEdit ? (
-                    row.original.type === 'service' ? (
-                        <HtmlTooltip title={`Add ${routes.employeeMaster.title}`}>
-                            <span>
-                                <IconButton
-                                    size="small"
-                                    aria-label="Details"
-                                    onClick={() => {
-                                        setAddExistingProductDialog({ open: true, type: 'service', parentId:  row.original._id });
-                                    }}
-                                >
-                                    <AddIcon fontSize="small" />
-                                </IconButton>
-                            </span>
-                        </HtmlTooltip>
-                    ) : (
-                        <HtmlTooltip title={'Delete'}>
-                            <span>
-                                <IconButton
-                                    size="small"
-                                    aria-label="Details"
-                                    onClick={() => {
-                                        const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                                        getNestedSubRows(obj, row.original);
-                                        setDeleteData(obj);
-                                    }}
-                                >
-                                    <DeleteIcon fontSize="small" color={'error'} />
-                                </IconButton>
-                            </span>
-                        </HtmlTooltip>
-                    )
-                ) : (
-                    ''
-                );
+                return allowedToEdit && row.original.type === 'technician' ? (
+                    <HtmlTooltip title={'Delete'}>
+                        <span>
+                            <IconButton
+                                size="small"
+                                aria-label="Details"
+                                onClick={() => {
+                                    const obj: any = [{ _id: row.original._id, technician: row.original?.technician }];
+                                    setDeleteData(obj);
+                                }}
+                            >
+                                <DeleteIcon fontSize="small" color={'error'} />
+                            </IconButton>
+                        </span>
+                    </HtmlTooltip>
+                ) : null
             }
         });
         setColumns(column);
     };
 
-    const fetchProductInventory = async () => {
-        setNextStep(false);
+    const fetchData = async () => {
         var data: any = [];
-        var inventory: any = [];
-        var nonSerializeAsset: any = [];
         const response = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/material`);
+
         const responseTechnician = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/technician`);
+        const technician = responseTechnician?.data?.data;
+
         data = response?.data?.data;
-        setMaterial(JSON.parse(JSON.stringify(data.material)));
-        inventory = data.inventory?.filter((e) => !e.isReplaced);
-        nonSerializeAsset = data.nonSerializeAsset;
         let rows = data.material.filter((e) => e.parentId === null);
         rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
@@ -207,30 +161,25 @@ const Technician = ({
                     : parent.type === 'service'
                         ? parent?.serviceDetail?.serviceName
                         : parent?.packageDetail?.packageName;
-            parent.description =
-                parent.type === 'service'
-                    ? parent?.serviceDetail?.serviceDescription || ''
-                    : parent.type === 'product'
-                        ? parent?.productDetail?.productDesc || ''
-                        : parent.type === 'package'
-                            ? parent?.packageDetail?.packageDescription || ''
-                            : '';
-            parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent);
+            parent.subRows = generateNestedData(data.material, technician, parent);
         });
-
-        if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-            setNextStep(false);
-        } else {
-            setNextStep(true);
-        }
-        if (rows?.length === 0) {
-            setNextStep(true);
-        }
         setRowsData(rows);
         setSelectedProducts([]);
     };
 
-    const generateNestedData = (material, inventory, nonSerializeAsset, parent) => {
+    const generateNestedData = (material, technician, parent) => {
+
+        const subRowsTechnician: any = [];
+        technician.filter((e) => e._id === parent._id)?.forEach((element, i) => {
+            const obj: any = {};
+            obj._id = parent._id;
+            obj.srno = parent.srno + '.' + (i + 1);
+            obj.detail = element?.technician?.optionLabel
+            obj.technician = element?.technician?.optionValue
+            obj.type = "technician"
+            subRowsTechnician.push(obj)
+        });
+
         const subRows: any = material.filter((e) => e.parentId === parent._id);
         subRows.forEach((_subRow, j) => {
             _subRow.srno = parent.srno + '.' + (j + 1);
@@ -240,78 +189,23 @@ const Technician = ({
                     : _subRow.type === 'service'
                         ? _subRow?.serviceDetail?.serviceName
                         : _subRow?.packageDetail?.packageName;
-            _subRow.description =
-                _subRow.type === 'service'
-                    ? _subRow?.serviceDetail?.serviceDescription || ''
-                    : _subRow.type === 'product'
-                        ? _subRow?.productDetail?.productDesc || ''
-                        : _subRow.type === 'package'
-                            ? _subRow?.packageDetail?.packageDescription || ''
-                            : '';
-            _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-            _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow);
+            _subRow.subRows = generateNestedData(material, technician, _subRow);
         });
-        if (subRows.length === 0 && parent.type === 'package') {
-            parent.isValid = false;
-        }
-        if (parent.type === 'package') {
-            parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-        }
-        return subRows;
+
+        return [...subRowsTechnician, ...subRows];
     };
 
-    const getNestedSubRows = (obj, original) => {
-        if (original?.subRows?.length) {
-            original?.subRows.forEach((element) => {
-                obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-                getNestedSubRows(obj, element);
-            });
-        }
-    };
-
-    const handleAdd = async (rows) => {
-        setAddingProducts(true);
-        const material: any = [];
-        rows.forEach((d) => {
-            const element: any = {};
-            element.materialId = d._id;
-            element.type = addExistingProductDialog.type;
-            element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : d.unit ? d.unit : '';
-            element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
-            element.qty = d.qty ? parseFloat(d.qty) : 1;
-            element.parentId = addExistingProductDialog.parentId;
-            const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-            element.estimateJobDuration = 1;
-            material.push(element);
-        });
-    };
-
-    const handleSaveData = async (rows: any) => {
-        rows.forEach((element) => {
-            delete element.srno;
-            delete element.detail;
-            delete element.serializedProduct;
-            delete element.qtyDisplay;
-            delete element.pricingConditionDisplay;
-            delete element.isValid;
-            delete element.hideSelection;
-            delete element.assetQty;
-            delete element.productDetail;
-            delete element.packageDetail;
-            delete element.serviceDetail;
-            delete element.parentName;
-            delete element.subRows;
-        });
-        setUpdating(true);
-        axiosInstance()
-            .put(`${serviceOrder.api}/${serviceOrderData._id}/material`, { material: rows })
+    const handleAssignTechnician = async (rows) => {
+        const sendData: any = [];
+        rows?.forEach((e) => {
+            sendData.push({ _id: selectedProducts[0]?._id, service: selectedProducts[0]?.materialId, technician: e?._id })
+        })
+        axiosInstance().post(`${serviceOrder.api}/${serviceOrderData._id}/technician`, sendData)
             .then(() => {
-                setUpdating(false);
-                setIsProductEdit({ open: false, data: null });
-                fetchProductInventory();
+                setAddEmployeeMasterDialog({ open: false });
+                fetchData()
             })
             .catch((error) => {
-                setUpdating(false);
                 toastConfig.setToastConfig(error);
             });
     };
@@ -319,40 +213,17 @@ const Technician = ({
     const handleDelete = (rows) => {
         setDeleting(true);
         axiosInstance()
-            .put(`${serviceOrder.api}/${serviceOrderData?._id}/material/delete`, { ids: rows })
+            .put(`${serviceOrder.api}/${serviceOrderData?._id}/technician/delete`, rows)
             .then(() => {
+                fetchData();
                 setDeleting(false);
-                fetchProductInventory();
                 setDeleteData(null);
             })
             .catch((error) => {
                 setDeleting(false);
-                toastConfig.setToastConfig(error);
                 setDeleteData(null);
+                toastConfig.setToastConfig(error);
             });
-    };
-
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const open = Boolean(anchorEl);
-
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-
-    const handleDeleteMultiple = () => {
-        const obj: any = [];
-        const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
-        dataToDelete?.forEach((ele) => {
-            obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
-        });
-        dataToDelete?.forEach((ele) => {
-            getNestedSubRows(obj, ele);
-        });
-        setDeleteData(obj);
     };
 
     return (
@@ -361,41 +232,20 @@ const Technician = ({
                 {allowedToEdit && (
                     <Grid item xs={12} md={12} sm={12}>
                         <Box display="flex" justifyContent="space-between" m={1} mb={0}>
-                            <Box display="flex">
-                            </Box>
+                            <Box display="flex"></Box>
                             <Box display="flex">
                                 <Button
-                                    variant={'outlined'}
+                                    variant="contained"
                                     color="primary"
+                                    type="button"
                                     size="small"
-                                    onClick={handleClick}
-                                    disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
-                                    endIcon={<BiChevronDown />}
-                                >
-                                    Actions
-                                </Button>
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    open={open}
-                                    getContentAnchorEl={null}
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'left'
+                                    disabled={selectedProducts?.length === 1 ? false : true}
+                                    onClick={() => {
+                                        setAddEmployeeMasterDialog({ open: true });
                                     }}
-                                    onClose={handleClose}
                                 >
-                                    <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
-                                        <MenuItem
-                                            disabled={isDeleting}
-                                            onClick={() => {
-                                                handleDeleteMultiple();
-                                                handleClose();
-                                            }}
-                                        >
-                                            Delete
-                                        </MenuItem>
-                                    </HtmlTooltip>
-                                </Menu>
+                                    {`Assign Technician`}
+                                </Button>
                             </Box>
                         </Box>
                     </Grid>
@@ -424,7 +274,7 @@ const Technician = ({
                                 onSelect={setSelectedProducts}
                                 childrenProperty="subRows"
                                 uniqueKey="_id"
-                                hideSelection={isOffline || !allowedToEdit}
+                                hideSelection={!allowedToEdit}
                                 renderedFrom={`${renderedFrom}_technician`}
                                 isClientSideGrid={true}
                             />
@@ -445,14 +295,14 @@ const Technician = ({
                     okBtnLoading={isDeleting}
                 />
             )}
-            {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
+            {addEmployeeMasterDialog.open && (
                 <AssignEmployeeDialog
                     reference={'service'}
                     onSuccess={(data) => {
-                        handleAdd(data);
+                        handleAssignTechnician(data);
                     }}
                     handleClose={() => {
-                        setAddExistingProductDialog({ open: false, type: '', parentId: null });
+                        setAddEmployeeMasterDialog({ open: false });
                     }}
                     ids={[]}
                 />
