@@ -30,7 +30,7 @@ import { camelCase } from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
-    padding: '0px 4px 1.6px 10px',
+    padding: theme.spacing(0, 0.5, 0.2, 1),
     borderRadius: 4,
     cursor: 'normal',
     textOverflow: 'ellipsis',
@@ -66,14 +66,14 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'nowrap'
   },
   dataValue: {
-    fontWeight: 400,
-    color: '#5E5E5E'
+    fontWeight: 500,
+    color: theme.palette.primary.main
   },
   detailLabel: {
-    padding: '4px 10px 4px 10px',
-    fontWeight: 600,
-    fontSize: '0.875rem',
-    color: '#272727'
+    padding: '4px 10px 4px 4px',
+    fontSize: '0.9rem',
+    fontWeight: 'bold',
+    color: '#656464'
   },
   approvalIcon: {
     position: 'relative',
@@ -361,33 +361,33 @@ const Details = (props: DetailProps) => {
         return (
           form.name && (
             <React.Fragment key={form.name}>
-              <div className="detail-box-new-v1" style={containerPadding ? { padding: containerPadding } : {}}>
+              <div className="detail-box" style={containerPadding ? { padding: containerPadding } : {}}>
                 <div className={'detail-box-content'}>
-                  {/* <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} /> */}
+                  <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                   <h3 className="form-label-style" title={form.name}>
                     {form.name}
                   </h3>
                 </div>
-                <Grid container className={'new-details-v1'}>
+                <Grid container style={{ paddingTop: '6px' }}>
                   {form.sectionFields.map((field, i) => (
                     <Grid
                       key={i}
                       item
                       xs={12}
                       sm={gridSize ?? dynamicSize(6, field.fieldData.type)}
-                      md={gridSize ?? dynamicSize(4, field.fieldData.type)}
+                      md={gridSize ?? dynamicSize(6, field.fieldData.type)}
                     >
-                      <Grid container alignItems="center" style={{ border: '0.810868px solid #E2E2E2' }}>
+                      <Grid container alignItems="center" style={{ border: '1px solid #EDEDED' }}>
                         <Grid
                           item
                           xs={dynamicSize(6, field.fieldData.type)}
                           sm={dynamicSize(5, field.fieldData.type)}
                           md={dynamicSize(5, field.fieldData.type)}
                         >
-                          <div className="d-flex align-items-center pr-1" style={{ borderRight: '0.810868px solid #E2E2E2', padding: '3px 2px' }}>
-                            <Typography variant={'h6'} title={field.fieldData.fieldLabel} className={`text-truncate ${classes.detailLabel}`}>
+                          <div className="d-flex align-items-center pr-1" style={{ backgroundColor: '#F5F5F5', padding: '3px 0' }}>
+                            <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${classes.detailLabel}`}>
                               {field.fieldData.fieldLabel}
-                            </Typography>
+                            </h4>
                             {field.fieldData.isTooltip && (
                               <HtmlTooltip title={field.fieldData.tooltipMessage}>
                                 <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />

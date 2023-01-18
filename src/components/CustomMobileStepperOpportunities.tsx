@@ -1,30 +1,29 @@
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from "@material-ui/core";
 
 const useStyles = makeStyles(() => ({
   mobileStep: {
-    backgroundColor: '#DEE2E6'
+    backgroundColor: "#DEE2E6",
   },
   createLayout: {
-    minHeight: '45px',
-    backgroundColor: '#DEE2E6',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    position: 'fixed',
-    width: '100%',
+    minHeight: "45px",
+    backgroundColor: "#DEE2E6",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    position: "fixed",
+    width: "100%",
     bottom: -3,
-    zIndex: 123,
-    left: 0,
-    right: 0
+    zIndex: 123
   },
   stepLayout: {
-    paddingTop: '3px',
+    paddingTop: "3px",
     fontWeight: 600,
-    color: 'var(--primary-light)'
+    color: "var(--primary-light)"
   }
 }));
 
 export default function CustomMobileStepperOpportunities({ nextButton, backButton, stepName }) {
+
   const classes = useStyles();
 
   return (
@@ -59,6 +58,9 @@ export default function CustomMobileStepperOpportunities({ nextButton, backButto
                   hello
                   </Button> */}
       {nextButton}
+
     </div>
-  );
+
+
+  )
 }

@@ -73,29 +73,19 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     margin: '2px',
-    // borderRadius: '12px 40px 40px 50px',
-    borderRadius: '0px 46.3853px 46.3853px 65px',
+    borderRadius: '12px 40px 40px 50px',
     border: '1px solid #d6d5d5',
     [theme.breakpoints.down('xs')]: {
       width: '50%',
       padding: '2px'
-    },
-    '& .MuiStepLabel-label': {
-      fontWeight: '600'
     }
   },
   inActive: {
     flex: '1',
     background: '#E5E5E5',
-    // border: '2px solid #258C89',
-    border: '1px solid #B5B5B5',
+    border: '2px solid #258C89',
     '& .MuiStepLabel-label': {
-      color: '#5B5B5B !important'
-    },
-    '& .MuiStepLabel-iconContainer': {
-      '& svg': {
-        color: '#5B5B5B'
-      }
+      color: '#000 !important'
     }
   },
   currentStep: {
@@ -105,18 +95,13 @@ const useStyles = makeStyles((theme) => ({
     color: '#FFF',
     fontWeight: 600,
     '& .MuiStepLabel-label': {
-      color: '#3B3B3B !important',
+      color: '#000 !important',
       fontWeight: '600'
     },
-    '& .MuiStepLabel-iconContainer': {
+    '& .MuiIconButton-label': {
       '& svg': {
-        border: '1px solid #298B88',
-        borderRadius: '100vmax',
-        fill: 'transparent',
-        stroke: '#298B88',
-        '& circle': {
-          display: 'none'
-        }
+        fill: '#258C89',
+        stroke: '#258C89'
       }
     },
     '& svg': {
@@ -379,7 +364,7 @@ const Steps = (props) => {
                         [classes.inActive]: currentStep !== i
                       })}
                     >
-                      <StepLabel style={{ color: '#5B5B5B' }} className={'currentStepColor'}>
+                      <StepLabel style={{ color: '#555' }} className={'currentStepColor'}>
                         {label}
                         {!isStepEnded && setStepFullScreen && currentStep === i && (
                           <HtmlTooltip title={`Full Screen`}>

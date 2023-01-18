@@ -79,9 +79,32 @@ function Dashboard() {
 
   return (
     <Fragment>
-      <div className={` ${styles.contentWrapper}`}>
+      <div className={`content-wrapper ${styles.contentWrapper}`}>
         <div className={styles.main}>
           <div className={styles.leftContainer}>
+            {/* <div className={`${styles.search_section}`}>
+              <div className={`${styles.search_input}`}>
+                <input
+                  type="text"
+                  value={search}
+                  placeholder="Search"
+                  onChange={(e) => {
+                    const searchedValue = e.target.value;
+                    searchedValue.length > 0 ? setShowCloseButton(true) : setShowCloseButton(false);
+                    setSearch(searchedValue);
+                    handleSearch(searchedValue);
+                  }}
+                />
+                <div className={styles.searchIcon}>
+                  <Search color="disabled" />
+                </div>
+                {showCloseButton && (
+                  <div className={styles.clear_icon}>
+                    <ClearIcon onClick={() => clearSearch()} />
+                  </div>
+                )}
+              </div>
+            </div> */}
             {search.trim() !== '' ? (
               <SearchResult filteredData={filteredData} history={history} handleRoutes={handleRoutes} />
             ) : (
@@ -347,11 +370,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
   return (
     <>
       {colabData ? (
-        <button
-          style={style}
-          className={`${styles.rightInner} ${mode === 'Setups' && styles.setHeight}`}
-          onClick={() => setModalContent({ items: colabData, title: mode })}
-        >
+        <button style={style} className={styles.rightInner} onClick={() => setModalContent({ items: colabData, title: mode })}>
           <img src={SVGImages(mode)} alt={`${mode} Logo`} className={styles.colabLogo} />
           <Typography component={'h2'}>{mode}</Typography>
           <Typography component={'p'}>{description}</Typography>

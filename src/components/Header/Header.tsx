@@ -21,7 +21,7 @@ import {
 } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
-import { MoreVert as MoreIcon, Clear as ClearIcon, Notifications, HelpOutline, ExpandMore, Brightness1 } from '@material-ui/icons';
+import { Menu as MenuIcon, MoreVert as MoreIcon, Clear as ClearIcon, Notifications, HelpOutline, ExpandMore, Brightness1 } from '@material-ui/icons';
 import SyncIcon from '@material-ui/icons/Sync';
 import io, { Socket } from 'socket.io-client';
 import { useHistory, Link, useLocation } from 'react-router-dom';
@@ -51,9 +51,6 @@ import { useScrollDirection } from 'src/hooks/useScroll';
 import useClickdOutside from 'src/hooks/useClickOutside';
 import usePathname from 'src/hooks/usePathName';
 import styles from './Header.module.scss';
-import { HiOutlineMenuAlt1 } from 'react-icons/hi';
-import { IoMdNotificationsOutline } from 'react-icons/io';
-import { FiMessageSquare } from 'react-icons/fi';
 import AzureInstance from 'src/AzureInstance';
 
 const useStyles = makeStyles((theme) => ({
@@ -61,9 +58,92 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1
   },
   appBar: {
-    zIndex: theme.zIndex.drawer
+    zIndex: theme.zIndex.drawer + 1
+  },
+  toolbar: {
+    // [theme.breakpoints.down('xs')]: {
+    //   paddingLeft: '16px',
+    //   paddingRight: '16px'
+    // }
+  },
+  menuButton: {
+    marginRight: theme.spacing(2)
   },
 
+  logo: {
+    paddingTop: '8px',
+    width: '120px'
+  },
+
+  search: {
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.common.white, 0.25)
+    },
+    margin: theme.spacing(0, 2),
+    width: '100%',
+    display: 'none',
+    [theme.breakpoints.up('md')]: {
+      display: 'block'
+    }
+  },
+
+  searchIcon: {
+    padding: theme.spacing(0, 2),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  inputRoot: {
+    color: 'inherit'
+  },
+  inputInput: {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
+    transition: theme.transitions.create('width'),
+    width: '100%'
+  },
+
+  sectionDesktop: {
+    display: 'none',
+    [theme.breakpoints.up('sm')]: {
+      display: 'flex',
+      alignItems: 'center'
+      // gap: '5px'
+    }
+  },
+  sectionMobile: {
+    display: 'flex',
+    [theme.breakpoints.up('md')]: {
+      display: 'none'
+    }
+  },
+  servicesButton: {
+    display: 'flex',
+    [theme.breakpoints.down('xs')]: {
+      display: 'none'
+    }
+  },
+  brandLogo: {
+    maxWidth: '10%',
+    height: '40px',
+    borderRadius: '4px',
+    marginRight: '5px'
+  },
+  entitySelect: {
+    fontSize: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    maxWidth: '195px',
+    padding: theme.spacing(1, 0, 1, 1)
+  },
   entityName: {
     maxWidth: '200px',
     textOverflow: 'ellipsis',
@@ -98,7 +178,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Header = ({ toggleDrawer, isDrawerOpen }) => {
+const Header = ({ toggleDrawer }) => {
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
 
@@ -110,9 +190,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const classes = useStyles();
   const history = useHistory();
   const { pathname } = useLocation();
-  const isMobile = useMediaQuery('(max-width:959.95px)');
-  const is768 = useMediaQuery('(max-width: 768px)');
-
+  const isMobile = useMediaQuery('(max-width:599px)');
   const [isSearch, setIsSearch] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
   const [supportAnchorEl, setSupportAnchorEl] = useState(null);
@@ -149,7 +227,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
   const saveEntity = () => {
     axiosInstance()
       .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -417,8 +495,8 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     id === selectedEntity
       ? history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
       : hasAccessToEntity(id)
-      ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
-      : '';
+        ? handleEntityChange(id) && history.push(resourceId ? `${resourcePath}/${resourceId}` : resourcePath)
+        : '';
 
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
@@ -541,7 +619,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => {})
+                      .then(() => { })
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -661,7 +739,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                         toggle: true,
                         notificationId: d.notificationId
                       })
-                      .then(() => {})
+                      .then(() => { })
                       .catch((error) => {
                         toastConfig.setToastConfig(error);
                       });
@@ -723,20 +801,20 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
     >
       {user?.entity && user.entity.length
         ? user.entity.map((curEntity) => (
-            <MenuItem
-              title={curEntity.entityName}
-              key={curEntity._id}
-              selected={selectedEntity === curEntity._id}
-              onClick={() => {
-                handleSelectedEnity(curEntity._id);
-                closeEntitiesMenu();
-              }}
-            >
-              <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
-              <Box component="span" marginX={1} />
-              {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
-            </MenuItem>
-          ))
+          <MenuItem
+            title={curEntity.entityName}
+            key={curEntity._id}
+            selected={selectedEntity === curEntity._id}
+            onClick={() => {
+              handleSelectedEnity(curEntity._id);
+              closeEntitiesMenu();
+            }}
+          >
+            <Typography className={classes.entityName}>{curEntity.entityName}</Typography>
+            <Box component="span" marginX={1} />
+            {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
+          </MenuItem>
+        ))
         : null}
     </Menu>
   );
@@ -767,15 +845,9 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => {}}>
-        <Badge
-          variant="dot"
-          overlap="circular"
-          badgeContent={chatNotification ? chatNotification.count : 0}
-          color="secondary"
-          aria-describedby={mobileScreenChatNotificationId}
-        >
-          <FiMessageSquare style={{ maxWidth: 19 }} />
+      <MenuItem onClick={mobileScreenChatNotificationAnchorEl === null ? handleMobileScreenChatNotificationClick : () => { }}>
+        <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary" aria-describedby={mobileScreenChatNotificationId}>
+          <ChatIcon />
         </Badge>
         <Box component="span" mx={1} />
         <p>Chat Notifications</p>
@@ -804,15 +876,9 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
         </Popover>
       </MenuItem>
 
-      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => {}}>
-        <Badge
-          variant="dot"
-          overlap="circular"
-          badgeContent={notification ? notification.count : 0}
-          color="secondary"
-          aria-describedby={mobileScreenNotificationId}
-        >
-          <IoMdNotificationsOutline style={{ maxWidth: 19 }} />
+      <MenuItem onClick={mobileScreenNotificationAnchorEl === null ? handleMobileScreenNotificationClick : () => { }}>
+        <Badge badgeContent={notification ? notification.count : 0} color="secondary" aria-describedby={mobileScreenNotificationId}>
+          <Notifications />
         </Badge>
         <Box component="span" mx={1} />
         <p>Notifications</p>
@@ -842,7 +908,7 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
       </MenuItem>
 
       <MenuItem>
-        <HelpOutline style={{ maxWidth: 19 }} />
+        <HelpOutline />
         <Box component="span" mx={1} my={2} />
         <p>Help</p>
       </MenuItem>
@@ -936,37 +1002,32 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
 
   return (
     <div>
-      <div className={styles.filler}></div>
+      {scrollPos?.scrolled && <div className={styles.filler}></div>}
       <AppBar
         position="relative"
-        className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`}
-        style={{ backgroundColor: '#fff' }}
+        className={`${classes.appBar} ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`}
+        style={{ backgroundColor: '#162d40' }}
       >
-        <Toolbar className={` ${styles.mainConainer}`}>
-          <Box
-            component="div"
-            className={`${isDrawerOpen ? styles.drawerOpen : styles.drawerClosed} ${styles.leftContent} ${styles.flexAlignCenter}`}
-            flexGrow
-          >
-            <div className={` ${styles.toggleButton}`}>
-              <IconButton aria-label="help" color="inherit" title="Menu" onClick={toggleDrawer}>
-                <HiOutlineMenuAlt1 />
+        <Toolbar className={`${classes.toolbar} ${styles.mainConainer}`}>
+          <Box component="div" display="flex" alignItems="center" flexGrow={1}>
+            <div className={classes.sectionMobile}>
+              <IconButton aria-label="help" color="inherit" title="Menu" onClick={toggleDrawer} style={{ marginLeft: '-11px' }}>
+                <MenuIcon />
               </IconButton>
             </div>
-            {/* Searchbar */}
-            {!is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
-
-            {/* <Link to="/">
+            <Link to="/">
               <img className={classes.logo} src={SVG('LogoNew')} alt="equip logo" title="eQuipt Logo" />
-            </Link> */}
-          </Box>
-
-          {/* Brand Logo */}
-          {user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={`${styles.brandLogo}`} /> : null}
-
-          {/* Select entity */}
-          {!isMobile && (
-            <Box className={`${styles.entity}`}>
+            </Link>
+            <Box marginLeft={2} className={classes.servicesButton}>
+              {/* <Button
+                aria-controls={servicesMenuId}
+                color="inherit"
+                onClick={openServicesMenu}
+                title="Services"
+                className={classes.sectionDesktop}
+              >
+                Services <ExpandMore />
+              </Button> */}
               {selectedEntity && (
                 <ButtonBase id="entitySelect">
                   <Box
@@ -974,124 +1035,166 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
                     color="inherit"
                     onClick={openEntitiesMenu}
                     title={curEntity && `Selected entity - ${curEntity.entityName}`}
-                    className={`${styles.flexAlignCenter} `}
+                    className={classes.entitySelect}
                   >
-                    <span className={''}>{curEntity && curEntity.entityName}</span>
+                    <span className={classes.entityName}>{curEntity && curEntity.entityName}</span>
                     <Box component="span" mr={1} />
                     <ExpandMore />
                   </Box>
                 </ButtonBase>
               )}
             </Box>
-          )}
-
-          {!isMobile && (
-            <div className={`${styles.flexAlignCenter}`}>
-              <div>
-                {isOffline && (
-                  <IconButton>
-                    <Tooltip title="You are working offline right now">
-                      <Brightness1 color="error" className="blink" />
-                    </Tooltip>
-                  </IconButton>
-                )}
-                {isSynch && (
-                  <IconButton color="inherit">
-                    <Tooltip title="Synchronizing offline data">
-                      <SyncIcon className="rotate" />
-                    </Tooltip>
-                  </IconButton>
-                )}
-
-                <IconButton
-                  id="notificationButton"
-                  aria-describedby={fullScreenNotificationId}
-                  aria-label="settings"
-                  color="inherit"
-                  title="Notifications"
-                  onClick={handleFullScreenNotificationClick}
-                  className={styles.showIconLayout}
-                >
-                  <Badge variant="dot" overlap="circular" badgeContent={notification ? notification.count : 0} color="secondary">
-                    <IoMdNotificationsOutline className="setIcon" style={{ maxWidth: 19 }} />
-                  </Badge>
-                </IconButton>
-                <Popover
-                  className="mr-2"
-                  id={fullScreenNotificationId}
-                  open={fullScreenNotificationOpen}
-                  anchorEl={fullScreenNotificationAnchorEl}
-                  onClose={handleFullScreenNotificationClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center'
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center'
-                  }}
-                >
-                  {loadingNotifications ? (
-                    <Typography className="m-3">Loading Notifications...</Typography>
-                  ) : notificationList.length === 0 ? (
-                    <Typography className="m-3">No Notifications found</Typography>
-                  ) : (
-                    <NotificationContent data={notificationList} />
-                  )}
-                </Popover>
+            {/* <div className={classes.search}>
+              <div className={classes.searchIcon}>
+                <Search />
               </div>
-
-              {/* Remove below false to show chat notification icon */}
-
-              <div>
-                <IconButton
-                  id="chatNotificationButton"
-                  aria-describedby={fullScreenChatNotificationId}
-                  aria-label="settings"
-                  color="inherit"
-                  title="Chats"
-                  onClick={handleFullScreenChatNotificationClick}
-                  className={styles.showIconLayout}
-                >
-                  <Badge variant="dot" overlap="circular" badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
-                    <FiMessageSquare className="setIcon" style={{ maxWidth: 19 }} />
-                  </Badge>
-                </IconButton>
-
-                <Popover
-                  className="mr-2"
-                  id={fullScreenChatNotificationId}
-                  open={fullScreenChatNotificationOpen}
-                  anchorEl={fullScreenChatNotificationAnchorEl}
-                  onClose={handleFullScreenChatNotificationClose}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center'
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center'
-                  }}
-                >
-                  {loadingChatNotifications ? (
-                    <Typography className="m-3">Loading Chat Notifications...</Typography>
-                  ) : chatNotificationList.length === 0 ? (
-                    <Typography className="m-3">No Chat Notifications found</Typography>
-                  ) : (
-                    <ChatNotificationContent data={chatNotificationList} />
-                  )}
-                </Popover>
-              </div>
-
-              <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour} className={styles.showIconLayout} title="Help">
-                <HelpOutline className="setIcon" style={{ maxWidth: 19 }} />
-              </IconButton>
-            </div>
-          )}
-
-          <Box className={styles.profile}>
-            <UserProfile anchorRef={anchorRef} open={open} onToggle={handleToggle} onClose={handleClose} onListKeyDown={handleListKeyDown} />
+              <InputBase
+                fullWidth
+                placeholder="Search…"
+                type="search"
+                classes={{
+                  root: classes.inputRoot,
+                  input: classes.inputInput,
+                }}
+                inputProps={{ "aria-label": "search" }}
+              />
+            </div> */}
           </Box>
+
+          {/* <div className={classes.sectionDesktop}>
+            <Button
+              aria-controls={supportMenuId}
+              color="inherit"
+              onClick={openSupportMenu}
+              title="Support"
+            >
+              Support <ExpandMore />
+            </Button>
+          </div> */}
+          {user?.brandLogo ? <img src={user.brandLogo} alt="brand" className={classes.brandLogo} /> : null}
+          <div className={styles.searchBar}>
+            <SearchBar user={user} selectedEntity={selectedEntity} history={history} />
+          </div>
+          <div className={classes.sectionDesktop}>
+            <div>
+              {isOffline && (
+                <IconButton>
+                  <Tooltip title="You are working offline right now">
+                    <Brightness1 color="error" className="blink" />
+                  </Tooltip>
+                </IconButton>
+              )}
+              {isSynch && (
+                <IconButton color="inherit">
+                  <Tooltip title="Synchronizing offline data">
+                    <SyncIcon className="rotate" />
+                  </Tooltip>
+                </IconButton>
+              )}
+
+              <IconButton
+                id="notificationButton"
+                aria-describedby={fullScreenNotificationId}
+                aria-label="settings"
+                color="inherit"
+                title="Notifications"
+                onClick={handleFullScreenNotificationClick}
+                className={styles.showIconLayout}
+              >
+                <Badge badgeContent={notification ? notification.count : 0} color="secondary">
+                  <Notifications className="setIcon" />
+                </Badge>
+              </IconButton>
+              <Popover
+                className="mr-2"
+                id={fullScreenNotificationId}
+                open={fullScreenNotificationOpen}
+                anchorEl={fullScreenNotificationAnchorEl}
+                onClose={handleFullScreenNotificationClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center'
+                }}
+              >
+                {loadingNotifications ? (
+                  <Typography className="m-3">Loading Notifications...</Typography>
+                ) : notificationList.length === 0 ? (
+                  <Typography className="m-3">No Notifications found</Typography>
+                ) : (
+                  <NotificationContent data={notificationList} />
+                )}
+              </Popover>
+            </div>
+
+            {/* Remove below false to show chat notification icon */}
+
+            <div>
+              <IconButton
+                id="chatNotificationButton"
+                aria-describedby={fullScreenChatNotificationId}
+                aria-label="settings"
+                color="inherit"
+                title="Chats"
+                onClick={handleFullScreenChatNotificationClick}
+                className={styles.showIconLayout}
+              >
+                <Badge badgeContent={chatNotification ? chatNotification.count : 0} color="secondary">
+                  <ChatIcon className="setIcon" />
+                </Badge>
+              </IconButton>
+
+              <Popover
+                className="mr-2"
+                id={fullScreenChatNotificationId}
+                open={fullScreenChatNotificationOpen}
+                anchorEl={fullScreenChatNotificationAnchorEl}
+                onClose={handleFullScreenChatNotificationClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center'
+                }}
+              >
+                {loadingChatNotifications ? (
+                  <Typography className="m-3">Loading Chat Notifications...</Typography>
+                ) : chatNotificationList.length === 0 ? (
+                  <Typography className="m-3">No Chat Notifications found</Typography>
+                ) : (
+                  <ChatNotificationContent data={chatNotificationList} />
+                )}
+              </Popover>
+            </div>
+
+            {/* <IconButton aria-label="settings" color="inherit">
+              <Badge badgeContent={1} color="secondary">
+                <Notifications />
+              </Badge>
+            </IconButton> */}
+
+            <IconButton id="helpButton" aria-label="help" color="inherit" onClick={startTour} className={styles.showIconLayout} title="Help">
+              <HelpOutline className="setIcon" />
+            </IconButton>
+          </div>
+
+          {/* <div className={classes.sectionMobile}>
+            <IconButton
+              aria-label="search"
+              onClick={() => setIsSearch(true)}
+              color="inherit"
+              title="Search"
+            >
+              <Search />
+            </IconButton>
+          </div> */}
+
+          <UserProfile anchorRef={anchorRef} open={open} onToggle={handleToggle} onClose={handleClose} onListKeyDown={handleListKeyDown} />
 
           {isMobile && (
             <IconButton
@@ -1101,12 +1204,10 @@ const Header = ({ toggleDrawer, isDrawerOpen }) => {
               onClick={handleMobileMenuOpen}
               color="inherit"
               title="More"
-              className={styles.moreIcons}
             >
               <MoreIcon />
             </IconButton>
           )}
-          {is768 && <SearchBar user={user} selectedEntity={selectedEntity} history={history} />}
         </Toolbar>
       </AppBar>
       {renderMobileMenu}
@@ -1276,18 +1377,18 @@ const SearchBar = ({ user, selectedEntity, history }) => {
           }}
           style={{ borderRadius: showCloseButton ? '4px 4px 0 0' : '4px' }}
         />
-        <IconButton className={styles.searchIcon}>
+        <div className={styles.searchIcon}>
           <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
-            <path d="M11.4233 11.5286L14.7983 14.9036" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M11.4233 11.5286L14.7983 14.9036" stroke="#7E818C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
             <path
               d="M7.20459 12.6536C10.1559 12.6536 12.5483 10.2611 12.5483 7.30981C12.5483 4.35854 10.1559 1.96606 7.20459 1.96606C4.25332 1.96606 1.86084 4.35854 1.86084 7.30981C1.86084 10.2611 4.25332 12.6536 7.20459 12.6536Z"
-              stroke="#fff"
+              stroke="#7E818C"
               stroke-width="3"
               stroke-linecap="round"
               stroke-linejoin="round"
             />
           </svg>
-        </IconButton>
+        </div>
         {showCloseButton && (
           <div className={styles.clear_icon}>
             <ClearIcon onClick={() => clearSearch()} />
