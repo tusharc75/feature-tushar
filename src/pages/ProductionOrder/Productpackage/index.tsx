@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Grid, Box, Button, IconButton, CircularProgress, Menu, MenuItem, Chip, MenuList, ListItemIcon, ListItemText } from '@material-ui/core';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -226,7 +225,6 @@ const Productpackage = ({
       _subRow.isValid = true;
       _subRow.hideSelection = true;
       _subRow.subRows = generateNestedData(material, _subRow);
-      _subRow.type === productIndex++;
     });
     if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
