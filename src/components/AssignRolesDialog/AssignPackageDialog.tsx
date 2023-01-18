@@ -176,6 +176,16 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
                   onClick={() => {
                     setAssigning(true);
+                    if (referenceType === routes.productionOrder.title) {
+                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+                    }
+                    else {
+                      if (packageType === 'service') {
+                        onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service'))
+                      }
+                      else {
+                        onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id))
+                      }
                     if (packageType === 'service') {
                       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service'));
                     } else if (referenceType === 'demandOrder') {
@@ -190,7 +200,7 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
                     } else {
                       onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id));
                     }
-                  }}
+                  }}}
                   color="primary"
                   size="small"
                   variant="contained"
