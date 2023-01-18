@@ -14,7 +14,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, transferInventory, setFieldsInAscendingOrder, generateUniqueIdOnly } from 'src/constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues, resourceNames } from 'src/constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, simplifyValues } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';
@@ -222,8 +222,8 @@ const ManageTransferInventory: FC<Props> = (props) => {
                   transferInventoryId
                     ? isClone
                       ? `Clone - ${cloneHeading}`
-                      : `Update ${resourceNames.transferInventory} (${number})`
-                    : 'Create ' + resourceNames.transferInventory
+                      : `Update ${routes.transferInventory.title} (${number})`
+                    : 'Create ' + routes.transferInventory.title
                 }
                 onClose={() => {
                   if (isFieldNotTouched(initialData, values)) onClose();

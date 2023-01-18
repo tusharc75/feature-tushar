@@ -113,14 +113,6 @@ const Productpackage = ({
         )
       },
       {
-        accessor: 'unit',
-        Header: 'Unit',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['unit'] ? <p className="text-truncate">{row.original.unit}</p> : <NoDataCell />;
-        }
-      },
-      {
         accessor: 'qty',
         Header: 'Qty',
         width: 200,
@@ -128,6 +120,14 @@ const Productpackage = ({
           return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
         },
         editable: true
+      },
+      {
+        accessor: 'unit',
+        Header: 'Unit',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['unit'] ? <p className="text-truncate">{row.original.unit}</p> : <NoDataCell />;
+        }
       },
     ];
     coloum.push({

@@ -736,7 +736,29 @@ const routes = {
   demandOrderDetail: {
     title: storedRoutes && storedRoutes.demandOrder && storedRoutes.demandOrder.title ? storedRoutes.demandOrder?.title : RESOURCE_LABEL.demandOrder,
     path: '/demand-order/detail'
-  }
+  },
+  employeeMaster: {
+    title:
+      storedRoutes && storedRoutes.employeeMaster && storedRoutes.employeeMaster.title
+        ? storedRoutes.employeeMaster?.title
+        : RESOURCE_LABEL?.employeeMaster,
+    path: '/employee-master'
+  },
+  employeeMasterDetail: {
+    title:
+      storedRoutes && storedRoutes.employeeMaster && storedRoutes.employeeMaster.title
+        ? storedRoutes.employeeMaster?.title
+        : RESOURCE_LABEL?.employeeMaster,
+    path: '/employee-master/detail'
+  },
+  competencyMaster: {
+    title: storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title ? storedRoutes.competencyMaster?.title : RESOURCE_LABEL.competencyMaster,
+    path: '/competency-master'
+  },
+  competencyMasterDetail: {
+    title: storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title ? storedRoutes.competencyMaster?.title : RESOURCE_LABEL.competencyMaster,
+    path: '/competency-master/detail'
+  },
 };
 
 export default routes;
