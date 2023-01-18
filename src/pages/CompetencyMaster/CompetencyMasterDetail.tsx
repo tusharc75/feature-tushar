@@ -35,7 +35,7 @@ const CompetencyMasterDetail = () => {
     if (id) {
       fetchFields();
       fetchData();
-      console.log('permissions', permissions);
+      console.log('permissions', permissions)
     }
   }, [id]);
 
@@ -56,7 +56,7 @@ const CompetencyMasterDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/competency-master/${id}`);
-
+      console.log(data);
       setHeadingLbl(data.competencyName);
       setCompetencyMasterData(data);
       setCustomizedRoutes([routes.competencyMaster, { title: data?.competencyName }]);

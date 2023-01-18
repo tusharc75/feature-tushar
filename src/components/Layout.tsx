@@ -15,24 +15,20 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
     width: '100%',
     overflow: 'hidden',
-    minHeight: 'calc(100vh - 64px)',
+    minHeight: 'calc(100vh - 55px)',
     ['@media (max-width:768px)']: {
       minHeight: 'calc(100vh - 108px)'
     },
-    backgroundColor: '#f8fffe'
+    backgroundColor: 'white'
   },
   layout: {
     flexGrow: 1,
-    width: 'calc(100% - 6%)',
-    marginInline: 'auto',
-
+    width: '100%',
+    overflowX: 'hidden',
+    overflowY: 'auto',
     height: '100%',
-    backgroundColor: '#f8fffe',
-    zIndex: 1,
-    ['@media (max-width:900px)']: {
-      paddingInline: '24px',
-      width: '100%'
-    }
+
+    zIndex: 1
   }
 }));
 
@@ -218,7 +214,7 @@ const Layout = ({ children, width }) => {
       <Sidebar toggleDrawer={toggleDrawer} setToggleDrawer={setToggleDrawer} />
       <Toolbar />
       <Box display="flex">
-        {!mobileWidths.includes(width) && <Toolbar style={{ width: '66px' }} />}
+        {!mobileWidths.includes(width) && <Toolbar style={{ width: '48px' }} />}
         <motion.div
           animate={{ opacity: 1 }}
           initial={{ opacity: 0 }}
