@@ -1,282 +1,73 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, Dialog, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import {
-  CustomDialogTransition,
-  getObjKeys,
-  getObjKeysWithValues,
-  isFieldNotTouched,
-  setFieldsInAscendingOrder,
-  yupSchema
-} from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { Skeleton } from '@material-ui/lab';
+import { Autocomplete, Skeleton } from '@material-ui/lab';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
-  const fieldData = [
+  const imageField: any = {
+    _id: '62d103f69be8b23c5e3fba17',
+    fieldLabel: itemData?.type?.includes('imageSlider') ? 'Images' : 'Image',
+    type: itemData?.type?.includes('imageSlider') ? 'multiImageUpload' : 'imageUpload',
+    option: [],
+    isTooltip: false,
+    tooltipMessage: '',
+    editAble: true,
+    deletAble: true,
+    order: 2,
+    hiddenField: false,
+    isDefaultValue: false,
+    disableOnEdit: false,
+    unique: true,
+    lookup: false,
+    lookupResource: '',
+    entityWiseLookup: false,
+    isDropdown: false,
+    isWarningTooltip: false,
+    warningTooltipMessage: '',
+    defaultValue: '',
+    fieldName: itemData?.type?.includes('imageSlider') ? 'images' : 'image',
+    sectionName: 'Image Information',
+    resource: 'Product'
+  };
+
+  const kpiValue = [
     {
-      fieldData: {
-        _id: '62d103f69be8b23c5e3fba17',
-        fieldLabel: 'URL',
-        type: 'singleLine',
-        option: [],
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        deletAble: true,
-        order: 3,
-        hiddenField: false,
-        isDefaultValue: false,
-        disableOnEdit: false,
-        unique: true,
-        lookup: false,
-        lookupResource: '',
-        entityWiseLookup: false,
-        isDropdown: false,
-        isWarningTooltip: false,
-        warningTooltipMessage: '',
-        defaultValue: '',
-        fieldName: 'url',
-        sectionName: 'Image Information',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
+      optionLabel: 'Deals of The Day',
+      optionValue: 'dealsofTheDay'
     },
     {
-      fieldData: {
-        _id: '62d103f69be8b23c5e1fba17',
-        fieldLabel: 'Title',
-        type: 'singleLine',
-        option: [],
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        deletAble: true,
-        order: 2,
-        hiddenField: false,
-        isDefaultValue: false,
-        disableOnEdit: false,
-        unique: true,
-        lookup: false,
-        lookupResource: '',
-        entityWiseLookup: false,
-        isDropdown: false,
-        isWarningTooltip: false,
-        warningTooltipMessage: '',
-        defaultValue: '',
-        fieldName: 'title',
-        sectionName: 'Image Information',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
+      optionLabel: 'Popular Listings',
+      optionValue: 'popularListings'
     },
     {
-      fieldData: {
-        _id: '62d103f69be8b23c5e3fba111',
-        fieldLabel: 'Detail',
-        type: 'multiLine',
-        option: [],
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        deletAble: true,
-        order: 2,
-        hiddenField: false,
-        isDefaultValue: false,
-        disableOnEdit: false,
-        unique: true,
-        lookup: false,
-        lookupResource: '',
-        entityWiseLookup: false,
-        isDropdown: false,
-        isWarningTooltip: false,
-        warningTooltipMessage: '',
-        defaultValue: '',
-        fieldName: 'detail',
-        sectionName: 'Image Information',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
+      optionLabel: 'Top Offers On',
+      optionValue: 'topOffers'
     },
     {
-      fieldData: {
-        _id: '631599890d0b6e3f87381b8a',
-        fieldLabel: 'KPI',
-        type: 'dropDown',
-        option: [
-          {
-            optionLabel: 'Deals of The Day',
-            optionValue: 'dealsofTheDay',
-            order: 1,
-            default: false
-          },
-          {
-            optionLabel: 'Popular Listings',
-            optionValue: 'popularListings',
-            order: 2,
-            default: false
-          },
-          {
-            optionLabel: 'Top Offers On',
-            optionValue: 'topOffers',
-            order: 3,
-            default: false
-          },
-          {
-            optionLabel: 'Inspired By your Browsing History',
-            optionValue: 'browsingHistory',
-            order: 4,
-            default: false
-          }
-        ],
-        required: true,
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        hiddenField: false,
-        isDefaultValue: false,
-        disableOnEdit: false,
-        addManualOptionInExcel: false,
-        addAdditionalOption: false,
-        lookup: false,
-        lookupResource: '',
-        isDropdown: false,
-        isWarningTooltip: false,
-        warningTooltipMessage: '',
-        defaultValue: '',
-        sectionName: 'Image Information',
-        fieldName: 'kpi',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
-    },
-    {
-      fieldData: {
-        _id: '62d103f69be8b23c5e3fba18',
-        fieldLabel: 'Column ',
-        type: 'radio',
-        option: [
-          {
-            optionLabel: '3',
-            optionValue: '3',
-            order: 1,
-            default: true
-          },
-          {
-            optionLabel: '6',
-            optionValue: '6',
-            order: 2,
-            default: false
-          },
-          {
-            optionLabel: '12',
-            optionValue: '12',
-            order: 3,
-            default: false
-          }
-        ],
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        deletAble: true,
-        order: 1,
-        fieldName: 'column',
-        sectionName: 'Image Information',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
-    },
-    {
-      fieldData: {
-        _id: '62d103f69be8b23c5e3fba17',
-        fieldLabel: itemData?.type?.includes('imageSlider') ? 'Images' : 'Image',
-        type: itemData?.type?.includes('imageSlider') ? 'multiImageUpload' : 'imageUpload',
-        option: [],
-        isTooltip: false,
-        tooltipMessage: '',
-        editAble: true,
-        deletAble: true,
-        order: 2,
-        hiddenField: false,
-        isDefaultValue: false,
-        disableOnEdit: false,
-        unique: true,
-        lookup: false,
-        lookupResource: '',
-        entityWiseLookup: false,
-        isDropdown: false,
-        isWarningTooltip: false,
-        warningTooltipMessage: '',
-        defaultValue: '',
-        fieldName: itemData?.type?.includes('imageSlider') ? 'images' : 'image',
-        sectionName: 'Image Information',
-        resource: 'Product'
-      },
-      isCreate: true,
-      isRead: true,
-      isUpdate: true
+      optionLabel: 'Inspired By your Browsing History',
+      optionValue: 'browsingHistory'
     }
   ];
 
-  const imageFields = ['column', 'url', 'images', 'image'];
-  const productCategoryFields = ['column', 'title'];
-  const productListFields = ['column', 'title', 'kpi'];
-  const menuFields = ['column', 'title'];
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [digitalData, setDigitalData] = useState({ fields: [], initialValues: {} });
-  const [formsData, setFormsData] = useState([]);
-  const [formValues, setFormValues] = useState({});
+  const [digitalData, setDigitalData] = useState(itemData);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    var fieldsDataForCreate = itemData?.type?.includes('image')
-      ? fieldData?.filter((d) => imageFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-      : itemData?.type?.includes('productCategory')
-      ? fieldData?.filter((d) => productCategoryFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-      : itemData?.type?.includes('productList')
-      ? fieldData?.filter((d) => productListFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-      : itemData?.type?.includes('menu')
-      ? fieldData?.filter((d) => menuFields.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData)
-      : [];
-    setDigitalData({
-      fields: fieldsDataForCreate,
-      initialValues: getObjKeysWithValues(itemData, fieldsDataForCreate)
-    });
-    setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate));
-  }, []);
-
-  const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
-    if (Object.keys(errors).length) {
-      digitalData.fields.forEach((input) => {
-        if (input.required || values[input.fieldName]) {
-          setTouched(input.fieldName, true);
-        }
-      });
-      setErrors({ ...errors });
-    } else {
-      handleSave(values);
-    }
-  };
+    setDigitalData(itemData);
+  }, [itemData]);
 
   const handleSave = (data: any) => {
     setFormData((prevState) => {
@@ -286,11 +77,32 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
     onClose();
   };
 
-  const handleValuesChange = (data) => {
-    setFormValues((prevState) => ({
-      ...prevState,
-      ...data
-    }));
+  const validate = (values) => {
+    const errors = {};
+    if (!values?.column || values?.column === '') {
+      errors['column'] = 'Required';
+    }
+    if ((!values?.title || values.title === '') && ['productCategory', 'menu'].includes(values?.type)) {
+      errors['title'] = 'Title is required';
+    }
+    if (!values?.kpi && ['productList'].includes(values?.type)) {
+      errors['kpi'] = 'KPI is required';
+    }
+    if (!values?.multiImageUpload && !values?.multiImageUpload?.length && ['imageSlider'].includes(values?.type)) {
+      errors['multiImageUpload'] = 'Images are required';
+    }
+    if (!values?.imageUpload && !values?.imageUpload?.length && ['image'].includes(values?.type)) {
+      errors['imageUpload'] = 'Image is required';
+    }
+
+    if (!values?.url && ['imageSlider', 'image'].includes(values?.type)) {
+      errors['url'] = 'URL is Required';
+    }
+    if (!values?.detail && ['imageSlider', 'image'].includes(values?.type)) {
+      errors['detail'] = 'Detail is Required';
+    }
+
+    return errors;
   };
 
   return (
@@ -310,17 +122,14 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
       >
         <CustomDialogHeader
           title={`Edit ${itemData?.label || ''}`}
-          onClose={(e, reason) => {
-            if (isFieldNotTouched(digitalData, formValues)) onClose();
-            else setShowConfirmDialog(true);
-          }}
+          onClose={onClose}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
             setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
         />
-        {!digitalData.fields.length ? (
+        {!digitalData ? (
           <>
             <CustomDialogContent>
               <Skeleton width="100%" height="70px" />
@@ -342,64 +151,136 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
             </CustomDialogFooter>
           </>
         ) : (
-          <Formik
-            initialValues={digitalData.initialValues}
-            validationSchema={yupSchema(digitalData.fields)}
-            validateOnMount
-            // validate={validate}
-            onSubmit={() => {}}
-          >
-            {({ values, errors, touched, setFieldValue, setFieldTouched, setErrors, setValues }) => (
+          <Formik initialValues={digitalData} validateOnMount validate={validate} onSubmit={handleSave}>
+            {({ values, errors, touched, setFieldValue, submitForm }) => (
               <>
                 <CustomDialogContent>
                   <Form>
-                    {formsData &&
-                      formsData.map((form, i) => {
-                        return (
-                          form.name && (
-                            <div key={i}>
-                              <Box marginY={2}>
-                                <Grid spacing={3} container>
-                                  {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      <FormTypes
-                                        {...field}
-                                        fieldData={field}
-                                        disabled={field.disabled}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          handleValuesChange({ [name]: value });
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isMultipleUpload={true}
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                            : null
-                                        }
-                                        row={true}
-                                      />
-                                    </Grid>
-                                  ))}
-                                </Grid>
-                              </Box>
-                            </div>
-                          )
-                        );
-                      })}
+                    <Box marginY={2}>
+                      <Grid spacing={3} container>
+                        <Grid item xs={12} sm={6} md={6}>
+                          <FormControl component="fieldset" required error={Boolean(errors['column'])}>
+                            <FormLabel component="legend">Column</FormLabel>
+                            <RadioGroup row name={'column'} value={values['column'] || ''} onChange={(e) => setFieldValue('column', e.target.value)}>
+                              {['3', '6', '12'].map((opt) => (
+                                <FormControlLabel key={opt} value={opt} control={<Radio />} label={opt} />
+                              ))}
+                            </RadioGroup>
+                          </FormControl>
+                        </Grid>
+                        {['menu', 'productCategory', 'productList'].includes(itemData.type) && (
+                          <Grid item xs={12} sm={6} md={6}>
+                            <TextField
+                              variant="outlined"
+                              type="text"
+                              size="small"
+                              fullWidth
+                              label={'Title'}
+                              required={true}
+                              name={'title'}
+                              value={values['title'] || ''}
+                              error={Boolean(errors['title'])}
+                              helperText={errors['title']}
+                              onChange={(e) => setFieldValue('title', e.target.value.trimStart())}
+                            />
+                          </Grid>
+                        )}
+                        {['imageSlider', 'image'].includes(itemData?.type) && (
+                          <>
+                            <Grid item xs={12} sm={6} md={6}>
+                              <FormTypes
+                                fieldData={imageField}
+                                values={values}
+                                errors={errors}
+                                touched={true}
+                                label={imageField.fieldLabel}
+                                name={imageField.fieldName}
+                                type={imageField.type}
+                                setFieldValue={(name, value) => {
+                                  setFieldValue(name, value);
+                                }}
+                                required={imageField.required}
+                                fullWidth
+                                size="small"
+                                imageOrFileUploadCompletePercentage={
+                                  ['imageUpload', 'fileUpload'].some((s) => s === imageField.type)
+                                    ? (completePercentage) => {
+                                        setUploadingImageOrFileProgress(completePercentage);
+                                      }
+                                    : null
+                                }
+                                row={true}
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={6}>
+                              <TextField
+                                variant="outlined"
+                                type="text"
+                                size="small"
+                                fullWidth
+                                label={'Url'}
+                                required={true}
+                                name={'url'}
+                                value={values['url'] || ''}
+                                error={Boolean(errors['url'])}
+                                helperText={errors['url']}
+                                onChange={(e) => setFieldValue('url', e.target.value.trimStart())}
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={6}>
+                              <TextField
+                                variant="outlined"
+                                type="text"
+                                size="small"
+                                fullWidth
+                                label={'Detail'}
+                                required={true}
+                                name={'detail'}
+                                value={values['detail'] || ''}
+                                error={Boolean(errors['detail'])}
+                                helperText={errors['detail']}
+                                onChange={(e) => setFieldValue('detail', e.target.value.trimStart())}
+                              />
+                            </Grid>
+                          </>
+                        )}
+                        {itemData.type === 'productList' && (
+                          <Grid item xs={12} sm={6} md={6}>
+                            <Autocomplete
+                              options={kpiValue}
+                              freeSolo
+                              selectOnFocus
+                              clearOnBlur
+                              handleHomeEndKeys
+                              forcePopupIcon={true}
+                              getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                              getOptionSelected={(option: any, val) => option.optionValue === val}
+                              value={
+                                kpiValue?.filter((v) => v.optionValue === values['kpi']).length
+                                  ? kpiValue.filter((data) => data.optionValue === values['kpi'])[0]
+                                  : '' || ''
+                              }
+                              onChange={(e, val) => {
+                                setFieldValue('kpi', val?.optionValue || '');
+                              }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  variant="outlined"
+                                  size="small"
+                                  fullWidth
+                                  label={'KPI'}
+                                  required
+                                  name={'kpi'}
+                                  error={Boolean(errors['kpi'])}
+                                  helperText={errors['kpi']}
+                                />
+                              )}
+                            />
+                          </Grid>
+                        )}
+                      </Grid>
+                    </Box>
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
@@ -409,8 +290,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                     color="primary"
                     size="small"
                     onClick={() => {
-                      if (isFieldNotTouched(digitalData, values)) onClose();
-                      else setShowConfirmDialog(true);
+                      onClose();
                     }}
                   >
                     Cancel
@@ -420,15 +300,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                     variant="contained"
                     color="primary"
                     disabled={uploadingImageOrFileProgress > 0 || loading}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (values['type'] === 'key') {
-                        delete errors['file'];
-                      } else {
-                        delete errors['key'];
-                      }
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
-                    }}
+                    onClick={submitForm}
                   >
                     Save
                   </CustomButton>
@@ -436,11 +308,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                 {showConfirmDialog ? (
                   <ConfirmCancelDialog
                     open={showConfirmDialog}
-                    onSave={() => {
-                      setShowConfirmDialog(false);
-
-                      handleSubmit(errors, setFieldTouched, values, setValues, setErrors);
-                    }}
+                    onSave={submitForm}
                     close={() => setShowConfirmDialog(false)}
                     onClose={() => {
                       setShowConfirmDialog(false);
