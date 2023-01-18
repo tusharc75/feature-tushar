@@ -1943,7 +1943,8 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.salesOrder, value: resourceNames.salesOrder, key: 'salesOrder' },
   { title: sidebarResource.repairOrder, value: resourceNames.repairOrder, key: 'repairOrder' },
   { title: sidebarResource.workOrder, value: resourceNames.workOrder, key: 'workOrder' },
-  { title: sidebarResource.invoice, value: resourceNames.invoice, key: 'invoice' }
+  { title: sidebarResource.invoice, value: resourceNames.invoice, key: 'invoice' },
+  { title: sidebarResource.serviceOrder, value: resourceNames.serviceOrder, key: 'serviceOrder' },
 ];
 
 export const getApi = (resource: string) => {

@@ -181,12 +181,18 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                  onClick={() => { 
+                  onClick={() => {
                     setAssigning(true);
-                    if(packageType === 'service'){
-                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service')) 
-                    } else {
-                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id)) 
+                    if (referenceType === routes.productionOrder.title) {
+                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
+                    }
+                    else {
+                      if (packageType === 'service') {
+                        onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service'))
+                      }
+                      else {
+                        onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id))
+                      }
                     }
                   }}
                   color="primary"
