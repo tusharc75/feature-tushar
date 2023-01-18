@@ -404,6 +404,11 @@ export const serviceOrder = {
   api: '/service-order'
 };
 
+export const employeeMaster = {
+  resource: 'employeeMaster',
+  api: '/employee-master'
+};
+
 export const salesOrder = {
   api: '/sales-order',
   resource: 'sales-order'
