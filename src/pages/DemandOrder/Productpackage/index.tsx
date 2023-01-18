@@ -30,7 +30,6 @@ import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
-import AddExistingProductInventory from './AddExistingProductInventory';
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
@@ -43,6 +42,8 @@ import { ExpandMore } from '@material-ui/icons';
 import { capitalize, startCase } from 'lodash';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import DemandOrderQTYDialog from './DemandOrderDetailDialog';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -90,7 +91,6 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
   }, []);
 
   const fetchFields = async () => {
-
     const fieldsToShow = [
       {
         _id: '630dbe1e9ec41861052354a3',
@@ -403,7 +403,7 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
       const element: any = {};
       element.materialId = d._id;
       element.type = addExistingProductDialog.type;
-      element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
+      element.unit = d?.unit;
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addExistingProductDialog.parentId;
       material.push(element);
@@ -628,23 +628,53 @@ const Productpackage = ({ salesOrderData, setNextStep, currencySymbol, showActiv
           handleSave={handleSaveData}
         />
       )}
-      {addExistingProductDialog.open && (
-        <AddExistingProductInventory
-          renderedFrom={
-            addExistingProductDialog.type === 'product'
-              ? `${renderedFrom}-product`
-              : addExistingProductDialog.type === 'service'
-              ? `${renderedFrom}-service`
-              : `${renderedFrom}-package`
-          }
-          isAddingProducts={isAddingProducts}
-          addProductInventory={handleAdd}
-          handleProductInventoryClose={() => {
-            setAddExistingProductDialog({ open: false, type: '', parentId: null });
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+        <AssignProductDialog
+          reference="demandOrder"
+          serialized={null}
+          productsDialogOpen={addExistingProductDialog.open}
+          productId={null}
+          handleCloseDialog={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          assignedProducts={rowsData?.map((e) => e?.materialId)}
+          renderedFrom={`${renderedFrom}_sub-1`}
+          onSuccess={(d) => {
+            handleAdd(d);
           }}
-          type={addExistingProductDialog.type}
-          refrenceType={'Quotation'}
-          ignoreIds={rowsData?.map((e) => e?.materialId)}
+        />
+        // <AddExistingProductInventory
+        //   renderedFrom={
+        //     addExistingProductDialog.type === 'product'
+        //       ? `${renderedFrom}-product`
+        //       : addExistingProductDialog.type === 'service'
+        //       ? `${renderedFrom}-service`
+        //       : `${renderedFrom}-package`
+        //   }
+        //   isAddingProducts={isAddingProducts}
+        //   addProductInventory={handleAdd}
+        //   handleProductInventoryClose={() => {
+        //     setAddExistingProductDialog({ open: false, type: '', parentId: null });
+        //   }}
+        //   type={addExistingProductDialog.type}
+        //   refrenceType={'Quotation'}
+        //   ignoreIds={rowsData?.map((e) => e?.materialId)}
+        // />
+      )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
+        <AssignPackageDialog
+          referenceType="demandOrder"
+          handleClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
+          ids={rowsData?.map((e) => e?.materialId)}
+          onSuccess={(d) => {
+            handleAdd(
+              d?.map((e) => {
+                return {
+                  ...e,
+                  qty: 1
+                };
+              })
+            );
+          }}
+          packageType={null}
         />
       )}
     </Fragment>

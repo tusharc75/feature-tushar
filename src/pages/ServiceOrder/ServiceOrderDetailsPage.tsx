@@ -14,6 +14,7 @@ import {
     serviceOrder,
     defaultActivityShow,
     ACTIVITY_RESOURCE,
+    getUniqueCurrencies,
 } from '../../constants/helpers';
 import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import Activity from '../../components/Activity';
@@ -26,6 +27,10 @@ import TabPanel from '../../components/TabPanel';
 import { isMobile } from 'react-device-detect';
 import { camelCase } from 'lodash';
 import ManageServiceOrderDialog from './ManageServiceOrder';
+import Steps from '../RentalManagement/Steps';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import Services from './Services';
+import Technician from './Technician';
 
 const ServiceOrderDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -40,6 +45,7 @@ const ServiceOrderDetailsPage = () => {
         state: { user, permissions }
     }: any = useData();
     const isSmallScreen = useMediaQuery('(max-width:1300px)');
+    const isTabletScreen = useMediaQuery('(max-width:960px)');
     const [loadingDetails, setLoadingDetails] = useState(true);
     const [serviceOrderData, setServiceOrderData] = useState(null);
 
@@ -53,6 +59,11 @@ const ServiceOrderDetailsPage = () => {
     const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
     const [locationKeys, setLocationKeys] = useState([]);
     const [allowedToDelete, setAllowedToDelete] = useState(false);
+    const [stepFullScreen, setStepFullScreen] = useState(false);
+    const [nextStep, setNextStep] = useState(false);
+    const [serviceSteps, setServiceSteps] = useState(['Add Services','Assign Technician']);
+    const [currencySymbol, setCurrencySymbol] = useState(null);
+    const [currentStep, setCurrentStep] = useState(null);
 
     useEffect(() => {
         return history.listen((location) => {
@@ -122,6 +133,8 @@ const ServiceOrderDetailsPage = () => {
             setAllowedToEdit(isAllowedToEdit);
             setAllowedToDelete(data.owner.optionValue === user?.user?._id);
             setServiceOrderData(data);
+            setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
+            setCurrentStep(serviceSteps.indexOf(data?.processStatus) !== -1 ? serviceSteps.indexOf(data?.processStatus) : 0);
             if (isAllowedToEdit && openEdit === 'true') {
                 setOpenUpdateDialog(true);
                 const params = new URLSearchParams();
@@ -272,7 +285,45 @@ const ServiceOrderDetailsPage = () => {
                                 </Box>
                             </TabPanel>
                             <TabPanel value={tabValue} index={1}>
-
+                                <Paper>
+                                    <Steps
+                                        isNextStep={false}
+                                        nextStep={nextStep}
+                                        steps={serviceSteps}
+                                        currentStep={currentStep}
+                                        setCurrentStep={setCurrentStep}
+                                        isStepEnded={false}
+                                        setStepFullScreen={() => setStepFullScreen(true)}
+                                    />
+                                    <ContentFullScreen title={serviceSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                                        {serviceSteps[currentStep] === 'Add Services' && serviceOrderData && (
+                                            <Services
+                                                serviceOrderData={serviceOrderData}
+                                                setNextStep={setNextStep}
+                                                currencySymbol={currencySymbol}
+                                                isSmallScreen={isSmallScreen}
+                                                isTabletScreen={isTabletScreen}
+                                                showActivity={showActivity}
+                                                renderedFrom={`${renderedFrom}_grid-1`}
+                                                stepFullScreen={stepFullScreen}
+                                                allowedToEdit={true}
+                                            />
+                                        )}
+                                        {serviceSteps[currentStep] === 'Assign Technician' && serviceOrderData && (
+                                            <Technician
+                                                serviceOrderData={serviceOrderData}
+                                                setNextStep={setNextStep}
+                                                currencySymbol={currencySymbol}
+                                                isSmallScreen={isSmallScreen}
+                                                isTabletScreen={isTabletScreen}
+                                                showActivity={showActivity}
+                                                renderedFrom={`${renderedFrom}_grid-2`}
+                                                stepFullScreen={stepFullScreen}
+                                                allowedToEdit={true}
+                                            />
+                                        )}
+                                    </ContentFullScreen>
+                                </Paper>
                             </TabPanel>
                             <TabPanel value={tabValue} index={2}>
                                 <Box>

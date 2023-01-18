@@ -5,7 +5,16 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import SearchBox from '../Helpers/SearchBox';
-import { gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, getLocalStorageArrayData, serviceMaster } from 'src/constants/helpers';
+import {
+  gridLoadingTimeout,
+  isObjectEmpty,
+  packages,
+  prepareDataForGrid,
+  getLocalStorageArrayData,
+  workOrder,
+  employeeMaster,
+  sidebarResource
+} from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import routes from '../Helpers/Routes';
 import styles from 'src/pages/Leads/Header.module.scss';
@@ -15,8 +24,8 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 
 let searchTimeout;
 
-const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageType, ids }) => {
-  const renderedFrom = `${routes.packages.title}_${referenceType}_selected`;
+const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, extraStaticFilter = [] }) => {
+  const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const {
@@ -40,6 +49,10 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
   }, []);
 
   useEffect(() => {
+    setDisableSaveButton([...getLocalStorageArrayData(localStorageSelectedRecords)].some((d) => d.qty === 0));
+  }, [selectedRecords]);
+
+  useEffect(() => {
     let millisec = Object.keys(search).length > 0 ? 600 : 5;
     if (searchTimeout) {
       clearTimeout(searchTimeout);
@@ -51,12 +64,12 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get('/field?resource=Packages&view=true')
+      .get(`/field?resource=${sidebarResource?.employeeMaster}&view=true`)
       .then(({ data: { data } }) => {
         let columns = [];
         let rendererNames = [];
         data.forEach((o) => {
-          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.packagesDetail.path);
+          let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.employeeMasterDetail.path);
           if (currentColumn !== null) {
             columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
@@ -70,7 +83,7 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
         };
         setFrameWorkComponent({ ...tempFrameworkComponent });
         columns = [...columns, ...getStaticFields()];
-        setColumns([...columns]);
+        setColumns(columns);
       });
   };
 
@@ -81,9 +94,9 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
     }
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${packages.api}${queryString}`)
+      .get(`${employeeMaster.api}${queryString}`)
       .then(({ data }) => {
-        let rows = data.data.map((u) => {
+        let rows = data.data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = false;
           finalObject['id'] = u._id;
@@ -117,10 +130,9 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
       deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     const updatedFilters = [];
-    if (packageType) {
-      updatedFilters.push({
-        field: 'packageType',
-        term: packageType
+    if (extraStaticFilter?.length) {
+      extraStaticFilter?.forEach((e) => {
+        updatedFilters.push(e);
       });
     }
     if (!isObjectEmpty(filters)) {
@@ -141,6 +153,10 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
       deepFilter = `${deepFilter}&search=${search}`;
     }
     return deepFilter;
+  };
+
+  const handleSubmit = async () => {
+    onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
   };
 
   const handleSearch = (e) => {
@@ -164,7 +180,12 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
 
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
-      <CustomDialogHeader title={`Assign ${routes.packages.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
+      <CustomDialogHeader
+        title={`Assign ${routes.employeeMaster.title}`}
+        showManimizeMaximize={false}
+        showRequiredLabel={false}
+        onClose={handleClose}
+      />
       <CustomDialogContent>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
@@ -174,33 +195,7 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
                 <SearchBox onSearch={handleSearch} searchbox={styles.search_box_input} width="242px" size="small" value={search} />
                 <Button
                   disabled={isAssigning || disableSaveButton || [...getLocalStorageArrayData(localStorageSelectedRecords)].length === 0}
-                  onClick={() => {
-                    setAssigning(true);
-                    if (referenceType === routes.productionOrder.title) {
-                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]);
-                    }
-                    else {
-                      if (packageType === 'service') {
-                        onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service'))
-                      }
-                      else {
-                        onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id))
-                      }
-                    if (packageType === 'service') {
-                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.filter((e) => e.packageType === 'Service'));
-                    } else if (referenceType === 'demandOrder') {
-                      onSuccess(
-                        [...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => {
-                          return {
-                            _id: e._id,
-                            unit: e.unit
-                          };
-                        })
-                      );
-                    } else {
-                      onSuccess([...getLocalStorageArrayData(localStorageSelectedRecords)]?.map((e) => e._id));
-                    }
-                  }}}
+                  onClick={handleSubmit}
                   color="primary"
                   size="small"
                   variant="contained"
@@ -244,4 +239,4 @@ const AssignPackageDialog = ({ referenceType, onSuccess, handleClose, packageTyp
   );
 };
 
-export default AssignPackageDialog;
+export default AssignEmployeeDialog;
