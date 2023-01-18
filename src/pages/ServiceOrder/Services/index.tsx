@@ -260,7 +260,7 @@ const Services = ({
     }
   };
 
-  const handleAdd = async (rows) => {
+  const handleAdd =  (rows) => {
     setAddingProducts(true);
     const material: any = [];
     rows.forEach((d) => {
@@ -272,9 +272,19 @@ const Services = ({
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addExistingProductDialog.parentId;
       const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      element.estimateJobDuration = 1;
       material.push(element);
     });
+    axiosInstance()
+      .post(`${serviceOrder.api}/${serviceOrderData._id}/material`, { material: material })
+      .then(() => {
+        setUpdating(false);
+        setAddExistingProductDialog({ open: false, type: '', parentId: null });
+        fetchProductInventory();
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleSaveData = async (rows: any) => {
@@ -310,7 +320,7 @@ const Services = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${serviceOrder.api}/${serviceOrderData?._id}/material/delete`, { ids: rows })
+      .put(`${serviceOrder.api}/${serviceOrderData?._id}/material/delete `, { ids: rows.map(d => d.id) })
       .then(() => {
         setDeleting(false);
         fetchProductInventory();

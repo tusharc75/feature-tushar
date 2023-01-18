@@ -30,6 +30,7 @@ import ManageServiceOrderDialog from './ManageServiceOrder';
 import Steps from '../RentalManagement/Steps';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Services from './Services';
+import Technician from './Technician';
 
 const ServiceOrderDetailsPage = () => {
     const toastConfig = useContext(CustomToastContext);
@@ -60,7 +61,7 @@ const ServiceOrderDetailsPage = () => {
     const [allowedToDelete, setAllowedToDelete] = useState(false);
     const [stepFullScreen, setStepFullScreen] = useState(false);
     const [nextStep, setNextStep] = useState(false);
-    const [serviceSteps, setServiceSteps] = useState(['Add Services']);
+    const [serviceSteps, setServiceSteps] = useState(['Add Services','Assign Technician']);
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [currentStep, setCurrentStep] = useState(null);
 
@@ -304,6 +305,19 @@ const ServiceOrderDetailsPage = () => {
                                                 isTabletScreen={isTabletScreen}
                                                 showActivity={showActivity}
                                                 renderedFrom={`${renderedFrom}_grid-1`}
+                                                stepFullScreen={stepFullScreen}
+                                                allowedToEdit={true}
+                                            />
+                                        )}
+                                        {serviceSteps[currentStep] === 'Assign Technician' && serviceOrderData && (
+                                            <Technician
+                                                serviceOrderData={serviceOrderData}
+                                                setNextStep={setNextStep}
+                                                currencySymbol={currencySymbol}
+                                                isSmallScreen={isSmallScreen}
+                                                isTabletScreen={isTabletScreen}
+                                                showActivity={showActivity}
+                                                renderedFrom={`${renderedFrom}_grid-2`}
                                                 stepFullScreen={stepFullScreen}
                                                 allowedToEdit={true}
                                             />
