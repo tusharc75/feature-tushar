@@ -18,8 +18,9 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { Skeleton } from '@material-ui/lab';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import routes from 'src/components/Helpers/Routes';
 
-const ProductionOrderQty = ({ onClose, productionOrderData, handleSave }) => {
+const ProductionOrderQty = ({ onClose, productionOrderData, handleSave, from = null }) => {
   const fieldData = [{
     "_id": "630dbe1e9ec418610523533e",
     "fieldLabel": "Qty",
@@ -248,7 +249,14 @@ const ProductionOrderQty = ({ onClose, productionOrderData, handleSave }) => {
                                         label={field.fieldLabel}
                                         name={field.fieldName}
                                         type={field.type}
-                                        options={field.option}
+                                        options={from === routes.serviceOrder.title && field.fieldName === "unit" ? productionOrderData?.serviceDetail?.unit?.map((d, index) => {
+                                          return {
+                                            "optionLabel": d,
+                                            "optionValue": d,
+                                            "order": index + 1,
+                                            "default": false
+                                          }
+                                        }) : field.option}
                                         setFieldValue={(name, value) => {
                                           handleValuesChange({ [name]: value });
                                           setFieldValue(name, value);

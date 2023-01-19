@@ -21,8 +21,7 @@ import { BiChevronDown } from 'react-icons/bi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { genrateCustomTableColumns } from 'src/constants/columns';
-import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
+import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/ProductionOrderQty';
 import AddIcon from "@material-ui/icons/Add";
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
@@ -92,6 +91,18 @@ const Technician = ({
                 Cell: ({ row }) => (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         {row.original.detail}
+                        <IconButton
+                            size="small"
+                            onClick={() => {
+                                if (row.original.type === 'service') {
+                                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                                } else {
+                                    window.open(`${routes.employeeMasterDetail.path}/${row.original.technician}`);
+                                }
+                            }}
+                        >
+                            <OpenInNewIcon fontSize="small" color="primary" />
+                        </IconButton>
                     </div>
                 )
             },
@@ -226,6 +237,29 @@ const Technician = ({
             });
     };
 
+    const handleDeleteMultiple = () => {
+        const obj: any = [];
+        const dataToDelete = selectedProducts && selectedProducts.filter((e) => e.type === 'technician');
+        dataToDelete?.forEach((ele) => {
+            obj.push({ _id: ele._id, technician: ele?.technician });
+        });
+        dataToDelete?.forEach((ele) => {
+            getNestedSubRows(obj, ele);
+        });
+        setDeleteData(obj);
+    };
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
     return (
         <Fragment>
             <Grid container spacing={2}>
@@ -246,6 +280,39 @@ const Technician = ({
                                 >
                                     {`Assign Technician`}
                                 </Button>
+                                <Box mx={isMobile ? 0.5 : 1} />
+                                <Button
+                                    variant={'outlined'}
+                                    color="primary"
+                                    size="small"
+                                    onClick={handleClick}
+                                    disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => e.type === 'technician').length)}
+                                    endIcon={<BiChevronDown />}
+                                >
+                                    Actions
+                                </Button>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={open}
+                                    getContentAnchorEl={null}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'left'
+                                    }}
+                                    onClose={handleClose}
+                                >
+                                    <HtmlTooltip title={Boolean(selectedProducts && selectedProducts.length) ? 'Delete selected records' : 'Select records to delete'}>
+                                        <MenuItem
+                                            disabled={isDeleting}
+                                            onClick={() => {
+                                                handleDeleteMultiple();
+                                                handleClose();
+                                            }}
+                                        >
+                                            Delete
+                                        </MenuItem>
+                                    </HtmlTooltip>
+                                </Menu>
                             </Box>
                         </Box>
                     </Grid>

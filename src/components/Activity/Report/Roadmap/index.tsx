@@ -45,8 +45,6 @@ function Roadmap({ type, filter }) {
   const today = new Date();
   let startDate = moment(today).subtract(365, 'days');
   let endDate = moment(today).add(365, 'days');
-  console.log('startdate', startDate);
-  console.log('enddate', endDate);
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
