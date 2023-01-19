@@ -3,20 +3,18 @@ import PropTypes from 'prop-types';
 import { Typography, Box, Button, ButtonGroup } from '@material-ui/core';
 import { Map } from '@material-ui/icons';
 import moment from 'moment';
-
-// import { GetRoadmap } from '../../../../axios/activity';
-
-// import Calander from './Calander';
-// import ActivityList from './ActivityList';
-// import CalanderList from './CalanderList';
-// import Loader from '../../../../components/Loader';
 import { isMobile, isTablet } from 'react-device-detect';
-import ActivityList from 'src/components/Activity/Report/Roadmap/ActivityList';
-import Calander from 'src/components/Activity/Report/Roadmap/Calander';
-import CalanderList from 'src/components/Activity/Report/Roadmap/CalanderList';
+// import ActivityList from 'src/components/Activity/Report/Roadmap/ActivityList';
+// import Calander from 'src/components/Activity/Report/Roadmap/Calander';
+// import CalanderList from 'src/components/Activity/Report/Roadmap/CalanderList';
 import Loader from 'src/components/Loader';
+import api from 'src/constants/api';
+import axiosInstance from 'src/axios/axiosInstance';
+import ActivityList from './ActivityList';
+import Calander from './Calander';
+import CalanderList from './CalanderList';
 
-function Roadmap({ type, filter }) {
+function Roadmap({ filter }) {
   const scrollRef = React.useRef(null);
   const executeScroll = () => {
     var pageElement = document.getElementById('dayLiner');
@@ -30,27 +28,51 @@ function Roadmap({ type, filter }) {
   const [calendarType, setCalendarType] = useState('week');
   const [activity, setActivity] = useState(null);
   const [treeList, setTreeList] = useState(null);
+  const [serviceOrders, setServiceOrders] = useState([]);
 
   useEffect(() => {
-    fetchRoadmap();
+    filter.view === 'Technician View' && fetchRoadmap();
+
+    filter.view === 'Order View' && fetchServiceOrders();
   }, [filter]);
 
+  const fetchServiceOrders = async () => {
+    await axiosInstance()
+      .get(`/technician-scheduler/service-order?serviceOrders=63c787c9270a816a9c47c7d4`)
+      .then(({ data }) => {
+        const activityMap = data?.data?.map((item) => {
+          return {
+            ...item,
+            name: item?.serviceDetail?.optionLabel
+          };
+        });
+        setActivity(activityMap);
+        setTreeList(activityMap);
+      })
+      .catch((err) => {});
+  };
+
   const fetchRoadmap = async () => {
-    // await GetRoadmap(type, JSON.stringify(filter))
-    //   .then(({ data }) => {
-    setActivity([]);
-    setTreeList([]);
-    //     executeScroll();
-    //   })
-    //   .catch((err) => {});
+    await axiosInstance()
+      .get(`/technician-scheduler/get-schedule`)
+      .then(({ data }) => {
+        const activityMap = data?.data?.map((item) => {
+          return {
+            ...item,
+            name: item?.technicianDetail?.optionLabel
+          };
+        });
+        setActivity(activityMap);
+        setTreeList(activityMap);
+        executeScroll();
+      })
+      .catch((err) => {});
   };
 
   let height = window.innerHeight - 250;
   const today = new Date();
   let startDate = moment(today).subtract(365, 'days');
   let endDate = moment(today).add(365, 'days');
-  console.log('startdate', startDate);
-  console.log('enddate', endDate);
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
@@ -110,7 +132,6 @@ function Roadmap({ type, filter }) {
               <Box>
                 <ActivityList
                   fetchRoadmap={fetchRoadmap}
-                  type={type}
                   activity={activity}
                   treeList={treeList}
                   expanded={expanded}
@@ -129,7 +150,6 @@ function Roadmap({ type, filter }) {
               <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
                 <CalanderList
                   fetchRoadmap={fetchRoadmap}
-                  type={type}
                   activity={activity}
                   expanded={expanded}
                   selected={selected}

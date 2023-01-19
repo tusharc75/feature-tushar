@@ -79,7 +79,7 @@ function TechnicianScheduler() {
             </Grid>
           </Box>
           <Box className={classes.activityContainer}>
-            <Roadmap type={null} filter={filter} />
+            <Roadmap filter={filter} />
           </Box>
         </Fragment>
       </CustomContainer>
