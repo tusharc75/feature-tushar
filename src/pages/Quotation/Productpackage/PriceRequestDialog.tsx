@@ -216,7 +216,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                                         </Grid>}
                                         <Box
                                             p="10px"
-
+                                            width={'100%'}
                                         >
                                             <CustomReactTable
                                                 columns={columns}

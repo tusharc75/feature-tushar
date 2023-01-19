@@ -414,13 +414,7 @@ const SerializedAsset = ({ salesOrderData, isTabletScreen, isSmallScreen, setNex
         {columns && rowsData ?
           <Box
             zIndex={5}
-            width={
-              isTabletScreen
-                ? "calc(100vw)"
-                : isSmallScreen
-                  ? "calc(100vw)"
-                  : showActivity ? "100%" : "calc(100vw - 100px)"
-            }
+            width={'100%'}
             height="calc(100vh - 350px)"
           >
             <CustomReactTable

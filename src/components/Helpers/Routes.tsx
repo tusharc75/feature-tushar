@@ -625,19 +625,27 @@ const routes = {
     path: '/repair-order/detail'
   },
   productionOrder: {
-    title: storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title ? storedRoutes.productionOrder?.title : RESOURCE_LABEL.productionOrder,
+    title:
+      storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title
+        ? storedRoutes.productionOrder?.title
+        : RESOURCE_LABEL.productionOrder,
     path: '/production-order'
   },
   productionOrderDetail: {
-    title: storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title ? storedRoutes.productionOrder?.title : RESOURCE_LABEL.productionOrder,
+    title:
+      storedRoutes && storedRoutes.productionOrder && storedRoutes.productionOrder.title
+        ? storedRoutes.productionOrder?.title
+        : RESOURCE_LABEL.productionOrder,
     path: '/production-order/detail'
   },
   serviceOrder: {
-    title: storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+    title:
+      storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
     path: '/service-order'
   },
   serviceOrderDetail: {
-    title: storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
+    title:
+      storedRoutes && storedRoutes.serviceOrder && storedRoutes.serviceOrder.title ? storedRoutes.serviceOrder?.title : RESOURCE_LABEL.serviceOrder,
     path: '/service-order/detail'
   },
   workOrder: {
@@ -752,13 +760,26 @@ const routes = {
     path: '/employee-master/detail'
   },
   competencyMaster: {
-    title: storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title ? storedRoutes.competencyMaster?.title : RESOURCE_LABEL.competencyMaster,
+    title:
+      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
+        ? storedRoutes.competencyMaster?.title
+        : RESOURCE_LABEL.competencyMaster,
     path: '/competency-master'
   },
   competencyMasterDetail: {
-    title: storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title ? storedRoutes.competencyMaster?.title : RESOURCE_LABEL.competencyMaster,
+    title:
+      storedRoutes && storedRoutes.competencyMaster && storedRoutes.competencyMaster.title
+        ? storedRoutes.competencyMaster?.title
+        : RESOURCE_LABEL.competencyMaster,
     path: '/competency-master/detail'
   },
+  technicianScheduler: {
+    title:
+      storedRoutes && storedRoutes.technicianScheduler && storedRoutes.technicianScheduler.title
+        ? storedRoutes.technicianScheduler?.title
+        : RESOURCE_LABEL.technicianScheduler,
+    path: '/technician-scheduler'
+  }
 };
 
 export default routes;

@@ -215,9 +215,13 @@
       display: grid;
       background-color: var(--bg_color, #ffefee);
       border: 1.92532px solid #ebebeb;
-      box-shadow: 0px 3.85064px 38.5064px rgba(0, 0, 0, 0.08);
+      box-shadow: 0px 3.85064px 38.5064px rgba(0, 0, 0, 0.02);
       border-radius: 5.77596px;
       padding: var(--card-padding, 15px);
+      @media all and (min-width: 1600px) {
+        min-height: 240px;
+      }
+
       cursor: pointer;
       &:hover {
         .viewAll svg {
@@ -331,6 +335,11 @@
   }
 }
 .rightInner {
+  &.setHeight {
+    @media all and (min-width: 1600px) {
+      min-height: 506px;
+    }
+  }
   @media all and (min-width: 548px) {
     --hor-gap: 18px;
   }
@@ -479,4 +488,7 @@
   display: grid;
   grid-template-columns: var(--columns, 1fr);
   gap: var(--gap, 20px);
+  @media all and(min-width: 900px) {
+    padding-inline: 2%;
+  }
 }
