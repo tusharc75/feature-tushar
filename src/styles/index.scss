@@ -340,6 +340,7 @@ body::-webkit-scrollbar-thumb {
   text-overflow: ellipsis;
   line-height: 36px;
   -webkit-appearance: none;
+  appearance: none;
 }
 
 .select-search__input::-webkit-search-decoration,
@@ -688,7 +689,7 @@ body::-webkit-scrollbar-thumb {
   position: relative;
   overflow: auto;
   z-index: 1;
-  margin: 10px;
+  margin-block: 10px;
   top: 36px;
   background: white;
   border-radius: 6px 6px 0 0;
@@ -2441,6 +2442,45 @@ svg.MuiSvgIcon-root {
   @media all and (max-width: 600px) {
     & {
       padding: 0.3rem !important;
+    }
+  }
+}
+
+.headerbox {
+  position: fixed;
+  width: unset !important;
+  height: 140px;
+  left: 0;
+  @media all and (min-width: 960px) {
+    left: 66px;
+  }
+
+  right: 0;
+  top: 64px;
+  padding: 10px;
+  z-index: 1;
+  background: var(--primary);
+  background-blend-mode: overlay;
+  padding-inline: 3%;
+  @media all and (max-width: 900) {
+    padding-inline: 24px;
+  }
+  ol {
+    li {
+      color: var(--tertiary-light) !important;
+      a {
+        margin: 0px 4px;
+        &:first-of-type {
+          margin: 0;
+        }
+        font-size: 1rem;
+        color: var(--tertiary-light) !important;
+      }
+      p {
+        margin: 0px 4px;
+        font-size: 1rem;
+        color: var(--tertiary-light) !important;
+      }
     }
   }
 }
