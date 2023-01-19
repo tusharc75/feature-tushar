@@ -23,7 +23,7 @@ const useStyles = makeStyles(() => ({
   },
   layout: {
     flexGrow: 1,
-    width: 'calc(100% - 6%)',
+    width: 'calc(100% - 2%)',
     marginInline: 'auto',
 
     height: '100%',
