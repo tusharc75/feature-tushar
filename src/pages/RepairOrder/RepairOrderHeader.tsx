@@ -206,9 +206,9 @@ function RepairOrderHeader(props) {
                     size="small"
                     onClick={openActions}
                     aria-controls="action-menu"
-                    className={isMobile ? "mobile_button" : styles.action_submit_btn}
+                    className={isMobile && !isTablet ? "mobile_button" : styles.action_submit_btn}
                   >
-                    {isMobile ? "" :  "Actions" } <ExpandMore/>
+                    {isMobile && !isTablet  ? "" :  "Actions" } <ExpandMore/>
                   </Button>
                   <Menu
                     anchorEl={anchorEl}
