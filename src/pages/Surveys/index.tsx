@@ -380,6 +380,7 @@ const Survey = () => {
                     onClose={closeActions}
                   >
                     <MenuItem
+                    disabled={((selectedRecords?.length > 0 && selectedRecords?.filter((e)=>e?.canDelete === true)?.length) === selectedRecords?.length)}
                       onClick={() => {
                         closeActions();
                         // eslint-disable-next-line no-lone-blocks
@@ -390,7 +391,7 @@ const Survey = () => {
                       }}
                     >
                       Delete
-                    </MenuItem>
+                    </MenuItem> 
                   </Menu>
                       </>
                   )}
