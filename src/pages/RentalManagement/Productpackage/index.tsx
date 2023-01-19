@@ -648,21 +648,7 @@ const Productpackage = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={
-                stepFullScreen
-                  ? '100%'
-                  : isTabletScreen
-                    ? 'calc(100vw -30px)'
-                    : isSmallScreen
-                      ? 'calc(100vw -30px)'
-                      : showActivity
-                        ? '100%'
-                        : 'calc(100vw - 103px)'
-              }
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            >
+            <Box zIndex={5} width={'100%'} height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}  >
               <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}

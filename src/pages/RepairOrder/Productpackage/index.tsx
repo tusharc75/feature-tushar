@@ -103,12 +103,12 @@ const Productpackage = ({
             <Chip
               className="ml-1"
               label={`${row.original.type === 'service'
-                  ? 'Service'
-                  : row.original.type === 'product'
-                    ? 'Product'
-                    : row.original.type === 'serializedAsset'
-                      ? 'Asset'
-                      : 'Package'
+                ? 'Service'
+                : row.original.type === 'product'
+                  ? 'Product'
+                  : row.original.type === 'serializedAsset'
+                    ? 'Asset'
+                    : 'Package'
                 }`}
               size="small"
               color="primary"
@@ -218,12 +218,12 @@ const Productpackage = ({
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
       parent.detail = `${parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail.assetNumber
-              : parent.packageDetail?.packageName
+        ? parent.serviceDetail?.serviceName
+        : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'serializedAsset'
+            ? parent.serializedAssetDetail.assetNumber
+            : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'service'
@@ -242,12 +242,12 @@ const Productpackage = ({
       parent.allowedToDelete = parent.workOrder ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
       parent.status = `${parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
-            ? parent?.productDetail?.status
-            : parent.type === 'serializedAsset'
-              ? parent?.serializedAssetDetail?.status
-              : parent.packageDetail?.status
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
+          ? parent?.productDetail?.status
+          : parent.type === 'serializedAsset'
+            ? parent?.serializedAssetDetail?.status
+            : parent.packageDetail?.status
         }`;
     });
 
@@ -273,12 +273,12 @@ const Productpackage = ({
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + `${_subRow.type === 'service' ? alphabet[serviceIndex] : productIndex + 1}`;
       _subRow.detail = `${_subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'serializedAsset'
-              ? _subRow.serializedAssetDetail.assetNumber
-              : _subRow.packageDetail?.packageName
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'serializedAsset'
+            ? _subRow.serializedAssetDetail.assetNumber
+            : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === 'service'
@@ -296,12 +296,12 @@ const Productpackage = ({
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === 'service' ? serviceIndex++ : productIndex++;
       parent.status = `${parent.type === 'service'
-          ? parent.serviceDetail?.status
-          : parent.type === 'product'
-            ? parent.productDetail?.status
-            : parent.type === 'serializedAsset'
-              ? parent.serializedAssetDetail.status
-              : parent.packageDetail?.status
+        ? parent.serviceDetail?.status
+        : parent.type === 'product'
+          ? parent.productDetail?.status
+          : parent.type === 'serializedAsset'
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
         }`;
     });
     if (subRows.length === 0 && parent.type === 'package') {
@@ -510,7 +510,7 @@ const Productpackage = ({
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={stepFullScreen ? '100%' : isTabletScreen ? '100%' : isSmallScreen ? '100%' : showActivity ? '100%' : 'calc(100vw - 103px)'}
+              width={'100%'}
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
               <CustomReactTable

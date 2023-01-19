@@ -801,17 +801,7 @@ const Quotation = ({
           <Box
             p="6px"
             zIndex={5}
-            width={
-              stepFullScreen
-                ? '100%'
-                : isTabletScreen
-                ? 'calc(100vw -30px)'
-                : isSmallScreen
-                ? 'calc(100vw -30px)'
-                : showActivity
-                ? '100%'
-                : 'calc(100vw - 100px)'
-            }
+            width={'100%'}
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
           >
             <CustomReactTable

@@ -158,14 +158,13 @@ const Quotation = ({
               color="primary"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
+                  `${row.original.type === 'serializedAsset'
+                    ? routes.serializedAssetDetail.path
+                    : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'package'
-                      ? routes.packagesDetail.path
-                      : routes.serviceMasterDetail.path
+                        ? routes.packagesDetail.path
+                        : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -220,9 +219,9 @@ const Quotation = ({
         ![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
           quotationInfo?.versions[tempCurrentVersion]?.status
         ) &&
-          !invoiceStep &&
-          allowedToEdit &&
-          element?.isColumnEditable
+        !invoiceStep &&
+        allowedToEdit &&
+        element?.isColumnEditable
       );
       if (element.type === 'date') {
         coloum.push({
@@ -366,23 +365,22 @@ const Quotation = ({
 
     rows?.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDesc || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDesc || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
@@ -405,23 +403,22 @@ const Quotation = ({
 
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-      }`;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDesc || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDesc || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -657,7 +654,7 @@ const Quotation = ({
           {allowedToEdit && (
             <div>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                 <Button
                   disabled={material
                     .filter((e) => e.parentId === null)
@@ -703,18 +700,18 @@ const Quotation = ({
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  aria-controls="action-menu"
-                  disabled={selectedProducts.length === 0}
-                >
-                  Actions
-                  <ExpandMore />
-                </Button>
-              )}
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    aria-controls="action-menu"
+                    disabled={selectedProducts.length === 0}
+                  >
+                    Actions
+                    <ExpandMore />
+                  </Button>
+                )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -765,7 +762,7 @@ const Quotation = ({
           <Box
             p="6px"
             zIndex={5}
-            width={stepFullScreen ? '100%' : isTabletScreen ? '100%' : isSmallScreen ? '100%' : showActivity ? '100%' : 'calc(100vw - 100px)'}
+            width={'100%'}
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
           >
             <CustomReactTable

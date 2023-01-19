@@ -202,8 +202,8 @@ const Technician = ({
             const obj: any = {};
             obj._id = parent._id;
             obj.srno = parent.srno + '.' + (i + 1);
-            obj.detail = element?.technician?.optionLabel
-            obj.technician = element?.technician?.optionValue
+            obj.detail = `${element?.technician?.firstName} ${element?.technician?.lastName} - (${element?.technician?.firstName})`
+            obj.technician = element?.technician?._id
             obj.type = "technician"
             obj.estimateStartDate = element?.estimateStartDate
             obj.estimateEndDate = element?.estimateEndDate
@@ -346,17 +346,7 @@ const Technician = ({
                     {columns && rowsData ? (
                         <Box
                             zIndex={5}
-                            width={
-                                stepFullScreen
-                                    ? '100%'
-                                    : isTabletScreen
-                                        ? 'calc(100vw -30px)'
-                                        : isSmallScreen
-                                            ? 'calc(100vw -30px)'
-                                            : showActivity
-                                                ? '100%'
-                                                : 'calc(100vw - 103px)'
-                            }
+                            width={'100%'}
                             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                         >
                             <CustomReactTable

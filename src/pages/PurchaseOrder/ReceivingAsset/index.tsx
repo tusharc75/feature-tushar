@@ -384,7 +384,7 @@ const ReceivingAsset = ({
       </Box>
       <Grid item xs={12} md={12} sm={12}>
         {columns && rowsData ? (
-          <Box zIndex={5} width={isMobileScreen ? '100vw' : stepFullScreen || showActivity || isTabletScreen ? '100%' : 'calc(100vw - 103px)'}>
+          <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
               columns={columns}

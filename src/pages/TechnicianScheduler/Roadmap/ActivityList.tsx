@@ -47,12 +47,10 @@ export default function ActivityList(props) {
               sizes="small"
               style={{ height: 45, width: 45 }}
               alt="Remy Sharp"
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/768px-Google_%22G%22_Logo.svg.png"
-            />{' '}
+              src={data?.technicianDetail?.photo}
+            />
             <Box ml={2} flex style={{ flexDirection: 'column' }}>
-              <Typography
-                style={{ fontWeight: 'bolder', fontSize: '1rem' }}
-              >{`${data?.technicianDetail?.firstName} ${data?.technicianDetail?.lastName}`}</Typography>
+              <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}  >{`${data?.technicianDetail?.firstName} ${data?.technicianDetail?.lastName}`}</Typography>
               <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.technicianDetail?.employeeNumber}`}</p>
             </Box>
           </Box>

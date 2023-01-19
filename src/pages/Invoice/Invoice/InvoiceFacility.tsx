@@ -33,7 +33,6 @@ import CustomAgGridEditable from '../../../components/AgGridComponents/CustomAgG
 import { Link } from 'react-router-dom';
 import { startCase } from 'lodash';
 import { fetch_invoice_product_fields } from '../../../components/Invoice/helper';
-import CustomReactTable from 'src/components/CustomReactTable/CustomReactTable';
 
 const InvoiceFacility = ({ invoiceData }) => {
   const toastConfig = useContext(CustomToastContext);
