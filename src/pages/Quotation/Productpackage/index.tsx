@@ -250,7 +250,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell:({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
         });
       }
     });
@@ -340,7 +340,6 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
       parent.assetQty = inventory.filter((e) => e._id === parent._id).length;
       parent.subRows = generateNestedData(data.material, inventory, parent);
-
     });
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(true);
@@ -435,6 +434,7 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       delete element.productDetail;
       delete element.packageDetail;
       delete element.serviceDetail;
+      delete element.serializedAssetDetail;
       delete element.subRows;
       delete element.leadTime;
       delete element.leadTimeData;
