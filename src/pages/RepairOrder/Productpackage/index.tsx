@@ -21,6 +21,7 @@ import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAss
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { ExpandMore } from '@material-ui/icons';
 import { sortBy } from 'lodash';
+import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -310,15 +311,6 @@ const Productpackage = ({
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return sortBy(subRows, ['type']);
-  };
-
-  const getNestedSubRows = (obj, original) => {
-    if (original?.subRows?.length) {
-      original?.subRows.forEach((element) => {
-        obj.push({ id: element._id, type: element.type, materialId: element.materialId });
-        getNestedSubRows(obj, element);
-      });
-    }
   };
 
   const handleAdd = async (rows) => {
