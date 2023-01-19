@@ -16,6 +16,7 @@ import {
 import { formatAmountWithCurrency, sidebarResourceObjectFromValues } from './helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { getRenderer } from 'src/components/CustomReactTable/CustomTableRenderer';
+import { flatMapDeep } from 'lodash';
 
 const permissions: any = {};
 
@@ -208,12 +209,12 @@ export const getColumnData = (title, field, detailScreenRoute = null, hasPopup =
         pathName = detailPagePath[joinedFieldName]
           ? detailPagePath[joinedFieldName]
           : field?.lookupResource && routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-          ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
-          : routes[joinedFieldName]?.path
-          ? routes[joinedFieldName]?.path
-          : routes[`${joinedFieldName}Detail`]?.path
-          ? routes[`${joinedFieldName}Detail`]?.path
-          : '';
+            ? routes[`${camelCase(field?.lookupResource)}Detail`]?.path
+            : routes[joinedFieldName]?.path
+              ? routes[joinedFieldName]?.path
+              : routes[`${joinedFieldName}Detail`]?.path
+                ? routes[`${joinedFieldName}Detail`]?.path
+                : '';
       }
       return {
         columnData: {
@@ -498,7 +499,8 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, curre
             editable: Boolean(ele?.isColumnEditable)
           });
         });
-      } else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
+      }
+      else if (ele.type === 'currencyAmount' && (ele.type === 'converter' || ele.isConverter === true)) {
         ele.displayUnits.forEach((_unit) => {
           ele.displayCurrency.forEach((_currency) => {
             let fieldName = ele.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
@@ -517,7 +519,8 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, curre
             });
           });
         });
-      } else if (ele.type === 'currencyAmount') {
+      }
+      else if (ele.type === 'currencyAmount') {
         ele.displayCurrency.forEach((_currency) => {
           let fieldName = ele.fieldName + '_' + _currency.toLowerCase();
           let fieldLabel = ele.fieldLabel + ' ' + _currency;
@@ -545,15 +548,10 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, curre
           });
         });
       }
-    } else {
+    }
+    else {
       if (column.filter((_c) => _c.accessor === ele.fieldName && _c.Header === ele.fieldLabel).length === 0) {
-        let currentColumn: any = getCustomColumnData(
-          renderedFrom ? renderedFrom : routes.productBuilder.title,
-          ele,
-          routes.productBuilder.path,
-          true
-        );
-
+        let currentColumn: any = getCustomColumnData(renderedFrom ? renderedFrom : routes.productBuilder.title, ele, routes.productBuilder.path, true);
         if (currentColumn.accessor === 'qty') {
           currentColumn.accessor = 'qtyDisplay';
           currentColumn.Footer = (info) => {
@@ -575,3 +573,16 @@ export const genrateCustomTableColumns = (fields: any[], currency: string, curre
 
   return column;
 };
+
+const getMembers = (mem) => {
+  const member = { ...mem };
+  delete member.subRows;
+  if (!mem.subRows || !mem.subRows.length) {
+    return member;
+  }
+  return [member, flatMapDeep(mem.subRows, getMembers)];
+}
+
+export function flattenArray(array) {
+  return flatMapDeep(array, getMembers)
+}

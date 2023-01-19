@@ -36,39 +36,6 @@ interface EditDialogProps {
   isInlineEdit?: Boolean
 }
 
-// export const resetValueZero = (rows, allFields) => {
-//   const resetFields = []
-//   allFields.forEach((element) => {
-//     if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
-//       if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-//         element.displayUnits.forEach((_unit) => {
-//           resetFields.push(element.fieldName + "_" + _unit.toLowerCase())
-//         })
-//       }
-//       else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
-//         element.displayUnits.forEach((_unit) => {
-//           element.displayCurrency.forEach((_currency) => {
-//             resetFields.push(element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase())
-//           })
-//         })
-//       }
-//       else if (element.type === "currencyAmount") {
-//         element.displayCurrency.forEach((_currency) => {
-//           resetFields.push(element.fieldName + "_" + _currency.toLowerCase())
-//         })
-//       }
-//     }
-//     else if (element.type === "percent") {
-//       resetFields.push(element.fieldName)
-//     }
-//   })
-//   rows.forEach((row) => {
-//     resetFields.forEach((fieldName) => {
-//       row[fieldName] = 0;
-//     })
-//   })
-// }
-
 export const sumOnParent = (packages, product, allFields, currency) => {
   const resetFields = []
   allFields.forEach((element) => {
