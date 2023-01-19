@@ -420,7 +420,7 @@ const Productpackage = ({
           {columns && rowsData ? (
             <Box
               zIndex={5}
-              width={stepFullScreen ? '100%' : isTabletScreen ? '100%' : isSmallScreen ? '100%' : showActivity ? '100%' : 'calc(100vw - 103px)'}
+              width={'100%'}
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
             >
               <CustomReactTable
