@@ -11,7 +11,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import CustomReactTable from '../../../components/CustomReactTable/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { serviceOrder } from '../../../constants/helpers';
+import { dateTimeFormat, serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -20,8 +20,9 @@ import { BiChevronDown } from 'react-icons/bi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { startCase } from 'lodash';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
-import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/ProductionOrderQty';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import ServiceOrderQty from './ServiceOrderQty';
+import moment from 'moment';
 
 const Services = ({
   serviceOrderData,
@@ -139,6 +140,22 @@ const Services = ({
           return row.original['unit'] ? <p className="text-truncate">{row.original.unit}</p> : <NoDataCell />;
         }
       },
+      {
+        accessor: 'estimateStartDate',
+        Header: 'Estimate Start Date',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['estimateStartDate'] ? <p>{moment(row.original['estimateStartDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'estimateEndDate',
+        Header: 'Estimate End Date',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['estimateEndDate'] ? <p>{moment(row.original['estimateEndDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
+        }
+      },
     ];
     column.push({
       accessor: 'action',
@@ -214,7 +231,9 @@ const Services = ({
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
-      parent.canDelete = technician.some(d => d._id === parent._id) ? false : true
+      parent.canDelete = technician.some(d => d._id === parent._id) ? false : true;
+      parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate
+      parent.estimateEndDate = parent.estimateEndDate ? parent.estimateEndDate : serviceOrderData?.estimateEndDate
       parent.subRows = generateNestedData(data.material, parent, technician);
     });
 
@@ -248,7 +267,9 @@ const Services = ({
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
-      _subRow.canDelete = technician.some(d => d.service.optionValue === _subRow._id) ? false : true
+      _subRow.canDelete = technician.some(d => d.service.optionValue === _subRow._id) ? false : true;
+      _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate
+      _subRow.estimateEndDate = _subRow.estimateEndDate ? _subRow.estimateEndDate : serviceOrderData?.estimateEndDate
       _subRow.subRows = generateNestedData(material, _subRow, technician);
     });
     return subRows;
@@ -265,6 +286,8 @@ const Services = ({
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addExistingProductDialog.parentId;
+      element.estimateStartDate = serviceOrderData?.estimateStartDate
+      element.estimateEndDate = serviceOrderData?.estimateEndDate
       material.push(element);
     });
     axiosInstance()
@@ -492,11 +515,11 @@ const Services = ({
         />
       )}
       {isProductEdit.open && (
-        <ProductionOrderQty
+        <ServiceOrderQty
           onClose={() => {
             setIsProductEdit({ open: false, data: null });
           }}
-          productionOrderData={isProductEdit.data}
+          serviceData={isProductEdit.data}
           from={routes.serviceOrder.title}
           handleSave={handleSaveData} />
       )}
