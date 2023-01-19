@@ -1,14 +1,10 @@
 import { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Box, Button, Dialog } from '@material-ui/core';
+import { Typography, Box, Button, Dialog, Avatar } from '@material-ui/core';
 import { TreeView, TreeItem } from '@material-ui/lab';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import AddIcon from '@material-ui/icons/Add';
-import { isMobile, isTablet } from 'react-device-detect';
-import { useData } from 'src/StateProvider/Provider';
-import ActivityModelHandler from 'src/components/Activity/ActivityModelHandler';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import moment from 'moment';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,14 +29,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ActivityList(props) {
   const classes = useStyles();
-  const { type, fetchRoadmap, activity, expanded, selected, handleToggle, handleSelect } = props;
-  console.log(activity);
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
-  const [activityData, setActivityData] = useState(null);
+  const { activity, expanded, selected, handleToggle, handleSelect } = props;
 
   const getTreeNodes = (treeList) => {
     return treeList.map((data, index) => {
@@ -51,12 +40,20 @@ export default function ActivityList(props) {
       }
 
       let label = (
-        <Box width={'100%'} height={30} className="d-flex align-items-center">
-          <Box width={'100%'} style={{ position: 'absolute' }}>
-            <Box onClick={() => setActivityData({ id: data._id, type })}>
-              <Typography variant="body2" className="text-truncate">
-                {data.name}
-              </Typography>
+        <Box width={'100%'} height={50} className="d-flex align-items-center">
+          <Box width={'100%'} className="d-flex align-items-center">
+            <Avatar
+              variant="circle"
+              sizes="small"
+              style={{ height: 45, width: 45 }}
+              alt="Remy Sharp"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/768px-Google_%22G%22_Logo.svg.png"
+            />{' '}
+            <Box ml={2} flex style={{ flexDirection: 'column' }}>
+              <Typography
+                style={{ fontWeight: 'bolder', fontSize: '1rem' }}
+              >{`${data?.technicianDetail?.firstName} ${data?.technicianDetail?.lastName}`}</Typography>
+              <p style={{ fontSize: '0.6rem', color: 'grey' }}>{`${data?.technicianDetail?.employeeNumber}`}</p>
             </Box>
           </Box>
         </Box>
@@ -91,15 +88,6 @@ export default function ActivityList(props) {
           return node;
         })}
       </TreeView>
-
-      {activityData && (
-        <ActivityModelHandler
-          fetchBoard={fetchRoadmap}
-          setActivityData={setActivityData}
-          activityType={activityData.type}
-          activityId={activityData.id}
-        />
-      )}
     </>
   );
 }

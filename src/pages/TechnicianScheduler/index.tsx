@@ -26,10 +26,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function TechnicianScheduler() {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const classes = useStyles();
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [filter, setFilter] = useState({ view: '', resource: '' });
+  const [filter, setFilter] = useState({ view: '', resource: '', serviceOrder: '' });
 
   return (
     <Fragment>
@@ -42,7 +40,7 @@ function TechnicianScheduler() {
         <Fragment>
           <Box p={1}>
             <Grid container xs={12} md={12} sm={12} spacing={2}>
-              <Grid item xs={12} md={6} sm={6}>
+              <Grid item xs={12} md={4} sm={4}>
                 <Autocomplete
                   size="small"
                   fullWidth
@@ -51,7 +49,7 @@ function TechnicianScheduler() {
                   getOptionLabel={(option) => option}
                   value={filter.view || ''}
                   onChange={(event, newValue) => {
-                    setFilter({ ...filter, view: newValue });
+                    setFilter({ view: newValue, resource: '', serviceOrder: '' });
                   }}
                   renderInput={(params) => (
                     <TextField {...params} label="Select View" size="small" variant="outlined" className={isMobile ? 'serchBox' : ''} />
@@ -59,7 +57,7 @@ function TechnicianScheduler() {
                 />
               </Grid>
               {filter?.view === 'Order View' && (
-                <Grid item xs={12} md={6} sm={6}>
+                <Grid item xs={12} md={4} sm={4}>
                   <Autocomplete
                     size="small"
                     fullWidth
@@ -68,7 +66,25 @@ function TechnicianScheduler() {
                     getOptionLabel={(option: any) => option}
                     value={filter.resource || ''}
                     onChange={(event, newValue) => {
-                      setFilter({ ...filter, resource: newValue });
+                      setFilter({ ...filter, resource: newValue, serviceOrder: '' });
+                    }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Select Resource" size="small" variant="outlined" className={isMobile ? 'serchBox' : ''} />
+                    )}
+                  />
+                </Grid>
+              )}
+              {filter?.resource === 'Service Order' && (
+                <Grid item xs={12} md={4} sm={4}>
+                  <Autocomplete
+                    size="small"
+                    fullWidth
+                    freeSolo
+                    options={['Service Order', 'Work Order']}
+                    getOptionLabel={(option: any) => option}
+                    value={filter.resource || ''}
+                    onChange={(event, newValue) => {
+                      setFilter({ ...filter, serviceOrder: newValue });
                     }}
                     renderInput={(params) => (
                       <TextField {...params} label="Select Resource" size="small" variant="outlined" className={isMobile ? 'serchBox' : ''} />

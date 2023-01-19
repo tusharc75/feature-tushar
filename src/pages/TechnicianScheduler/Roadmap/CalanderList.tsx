@@ -2,11 +2,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Box, Tooltip } from '@material-ui/core';
 import { TreeView, TreeItem } from '@material-ui/lab';
 import moment from 'moment';
-import { useState } from 'react';
 import { displayDate } from 'src/constants/helpers';
-import ActivityModelHandler from 'src/components/Activity/ActivityModelHandler';
-// import ActivityModelHandler from "../../ActivityModelHandler";
-// import { displayDate } from "../../../../constants/helpers"
 
 const useStyles = makeStyles((theme) => ({
   label: {
@@ -30,9 +26,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function CalanderList(props) {
-  const { activity, expanded, selected, handleSelect, startDate, endDate, totalDay, calendarType, type, fetchRoadmap } = props;
+  const { activity, expanded, selected, handleSelect, startDate, endDate, totalDay, calendarType } = props;
   const classes = useStyles();
-  const [activityData, setActivityData] = useState(null);
 
   const getTreeNodes = (activity) => {
     return activity.map((data, index) => {
@@ -43,12 +38,11 @@ export default function CalanderList(props) {
       }
 
       let label = (
-        <Box width={'100%'} height={30} className="d-flex align-items-center">
+        <Box width={'100%'} height={50} className="d-flex align-items-center">
           <Tooltip title={data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)} placement="right">
             <Box
-              onClick={() => setActivityData({ id: data._id, type })}
               minWidth={calendarType !== 'week' ? '100px' : ''}
-              height={20}
+              height={45}
               borderRadius="borderRadius"
               display="flex"
               style={{
@@ -87,14 +81,6 @@ export default function CalanderList(props) {
           return node;
         })}
       </TreeView>
-      {activityData && (
-        <ActivityModelHandler
-          fetchBoard={fetchRoadmap}
-          setActivityData={setActivityData}
-          activityType={activityData.type}
-          activityId={activityData.id}
-        />
-      )}
     </>
   );
 }

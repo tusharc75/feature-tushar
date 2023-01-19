@@ -4,11 +4,7 @@ import { Typography, Box, Button, ButtonGroup } from '@material-ui/core';
 import { Map } from '@material-ui/icons';
 import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
-// import ActivityList from 'src/components/Activity/Report/Roadmap/ActivityList';
-// import Calander from 'src/components/Activity/Report/Roadmap/Calander';
-// import CalanderList from 'src/components/Activity/Report/Roadmap/CalanderList';
 import Loader from 'src/components/Loader';
-import api from 'src/constants/api';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityList from './ActivityList';
 import Calander from './Calander';
@@ -20,53 +16,45 @@ function Roadmap({ filter }) {
     var pageElement = document.getElementById('dayLiner');
     var LeftPos = pageElement.offsetLeft;
     document.getElementById('scrollDayLiner').scrollLeft = LeftPos - 200;
-    // if (scrollRef.current) {
-    //     scrollRef.current.scrollIntoView({ inline: "center" })
-    // }
   };
 
   const [calendarType, setCalendarType] = useState('week');
-  const [activity, setActivity] = useState(null);
-  const [treeList, setTreeList] = useState(null);
-  const [serviceOrders, setServiceOrders] = useState([]);
+  const [activity, setActivity] = useState([]);
+  const [treeList, setTreeList] = useState([]);
+  const [loadingRoadmap, setLoadingRoadmap] = useState(false);
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
-
     filter.view === 'Order View' && fetchServiceOrders();
   }, [filter]);
 
   const fetchServiceOrders = async () => {
+    setLoadingRoadmap(true);
     await axiosInstance()
       .get(`/technician-scheduler/service-order?serviceOrders=63c787c9270a816a9c47c7d4`)
       .then(({ data }) => {
-        const activityMap = data?.data?.map((item) => {
-          return {
-            ...item,
-            name: item?.serviceDetail?.optionLabel
-          };
-        });
-        setActivity(activityMap);
-        setTreeList(activityMap);
+        setActivity(data?.data);
+        setTreeList(data?.data);
+        setLoadingRoadmap(false);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setLoadingRoadmap(false);
+      });
   };
 
   const fetchRoadmap = async () => {
+    setLoadingRoadmap(true);
     await axiosInstance()
       .get(`/technician-scheduler/get-schedule`)
       .then(({ data }) => {
-        const activityMap = data?.data?.map((item) => {
-          return {
-            ...item,
-            name: item?.technicianDetail?.optionLabel
-          };
-        });
-        setActivity(activityMap);
-        setTreeList(activityMap);
+        setActivity(data?.data);
+        setTreeList(data?.data);
+        setLoadingRoadmap(false);
         executeScroll();
       })
-      .catch((err) => {});
+      .catch((err) => {
+        setLoadingRoadmap(false);
+      });
   };
 
   let height = window.innerHeight - 250;
@@ -106,7 +94,7 @@ function Roadmap({ filter }) {
     setSelected(nodeIds);
   };
 
-  return activity ? (
+  return !loadingRoadmap ? (
     <Box bgcolor="white">
       <Box border={1} borderColor="grey.300" display="flex" height={height} style={{ position: 'relative' }}>
         <Box display="flex" width="100%" height="100%" style={{ position: 'absolute' }}>
@@ -198,9 +186,4 @@ function Roadmap({ filter }) {
   );
 }
 
-Roadmap.propTypes = {
-  type: PropTypes.any,
-  filter: PropTypes.any,
-  activityId: PropTypes.any
-};
-export default memo(Roadmap);
+export default Roadmap;
