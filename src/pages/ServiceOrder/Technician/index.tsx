@@ -21,7 +21,7 @@ import { BiChevronDown } from 'react-icons/bi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { startCase } from 'lodash';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/ProductionOrderQty';
 import AddIcon from "@material-ui/icons/Add";
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
