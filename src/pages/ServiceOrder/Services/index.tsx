@@ -21,6 +21,7 @@ import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceD
 import { startCase } from 'lodash';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/ProductionOrderQty';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const Services = ({
   serviceOrderData,
@@ -106,6 +107,18 @@ const Services = ({
             >
               {row.original.detail}
             </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === 'service') {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
           </div>
         )
       },
@@ -137,7 +150,7 @@ const Services = ({
       canDrag: false,
       Cell: ({ row }) => {
         return allowedToEdit ? (
-          row.original.hideSelection ? (
+          (!row.original.canDelete) ? (
             <HtmlTooltip title={'Asset is already assigned'}>
               <span>
                 <IconButton size="small" aria-label="Details" disabled={true}>
@@ -180,6 +193,9 @@ const Services = ({
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     let rows = data.material.filter((e) => e.parentId === null);
+    const responseTechnician = await axiosInstance().get(`${serviceOrder.api}/${serviceOrderData._id}/technician`);
+    const technician = responseTechnician?.data?.data;
+
     rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
     rows.forEach((parent, i) => {
@@ -198,7 +214,8 @@ const Services = ({
             : parent.type === 'package'
               ? parent?.packageDetail?.packageDescription || ''
               : '';
-      parent.subRows = generateNestedData(data.material, parent);
+      parent.canDelete = technician.some(d => d._id === parent._id) ? false : true
+      parent.subRows = generateNestedData(data.material, parent, technician);
     });
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
@@ -213,7 +230,7 @@ const Services = ({
     setSelectedProducts([]);
   };
 
-  const generateNestedData = (material, parent) => {
+  const generateNestedData = (material, parent, technician) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + (j + 1);
@@ -231,15 +248,9 @@ const Services = ({
             : _subRow.type === 'package'
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
-      _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
-      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.canDelete = technician.some(d => d.service.optionValue === _subRow._id) ? false : true
+      _subRow.subRows = generateNestedData(material, _subRow, technician);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
-      parent.isValid = false;
-    }
-    if (parent.type === 'package') {
-      parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
-    }
     return subRows;
   };
 
@@ -277,7 +288,7 @@ const Services = ({
       delete element.qtyDisplay;
       delete element.pricingConditionDisplay;
       delete element.isValid;
-      delete element.hideSelection;
+      delete element.canDelete;
       delete element.assetQty;
       delete element.productDetail;
       delete element.packageDetail;
@@ -328,7 +339,7 @@ const Services = ({
 
   const handleDeleteMultiple = () => {
     const obj: any = [];
-    const dataToDelete = selectedProducts && selectedProducts.filter((e) => !e.hideSelection);
+    const dataToDelete = selectedProducts && selectedProducts.filter((e) => e.canDelete);
     dataToDelete?.forEach((ele) => {
       obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
     });
@@ -389,7 +400,7 @@ const Services = ({
                   color="primary"
                   size="small"
                   onClick={handleClick}
-                  disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => !e.hideSelection).length)}
+                  disabled={!Boolean(selectedProducts && selectedProducts.filter((e) => e.canDelete).length)}
                   endIcon={<BiChevronDown />}
                 >
                   Actions
@@ -486,6 +497,7 @@ const Services = ({
             setIsProductEdit({ open: false, data: null });
           }}
           productionOrderData={isProductEdit.data}
+          from={routes.serviceOrder.title}
           handleSave={handleSaveData} />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
