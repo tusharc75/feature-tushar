@@ -12,7 +12,7 @@ import CustomReactTable from '../../../components/CustomReactTable/CustomReactTa
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { serviceOrder } from '../../../constants/helpers';
+import { dateTimeFormat, serviceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -26,6 +26,7 @@ import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManag
 import ProductionOrderQty from 'src/pages/ProductionOrder/Productpackage/ProductionOrderQty';
 import AddIcon from "@material-ui/icons/Add";
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
+import moment from 'moment';
 
 const Technician = ({
     serviceOrderData,
@@ -123,6 +124,22 @@ const Technician = ({
                     return row.original['unit'] ? <p className="text-truncate">{row.original.unit}</p> : <NoDataCell />;
                 }
             },
+            {
+                accessor: 'estimateStartDate',
+                Header: 'Estimate Start Date',
+                width: 200,
+                Cell: ({ row }) => {
+                    return row.original['estimateStartDate'] ? <p>{moment(row.original['estimateStartDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
+                }
+            },
+            {
+                accessor: 'estimateEndDate',
+                Header: 'Estimate End Date',
+                width: 200,
+                Cell: ({ row }) => {
+                    return row.original['estimateEndDate'] ? <p>{moment(row.original['estimateEndDate']).format(dateTimeFormat)}</p> : <NoDataCell />;
+                }
+            },
         ];
         column.push({
             accessor: 'action',
@@ -189,6 +206,8 @@ const Technician = ({
             obj.detail = element?.technician?.optionLabel
             obj.technician = element?.technician?.optionValue
             obj.type = "technician"
+            obj.estimateStartDate = element?.estimateStartDate
+            obj.estimateEndDate = element?.estimateEndDate
             subRowsTechnician.push(obj)
         });
 
@@ -210,7 +229,13 @@ const Technician = ({
     const handleAssignTechnician = async (rows) => {
         const sendData: any = [];
         rows?.forEach((e) => {
-            sendData.push({ _id: selectedProducts[0]?._id, service: selectedProducts[0]?.materialId, technician: e?._id })
+            sendData.push({
+                _id: selectedProducts[0]?._id,
+                service: selectedProducts[0]?.materialId,
+                technician: e?._id,
+                estimateStartDate: selectedProducts[0]?.estimateStartDate,
+                estimateEndDate: selectedProducts[0]?.estimateEndDate
+            })
         })
         axiosInstance().post(`${serviceOrder.api}/${serviceOrderData._id}/technician`, sendData)
             .then(() => {
