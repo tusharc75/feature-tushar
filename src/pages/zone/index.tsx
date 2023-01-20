@@ -356,10 +356,6 @@ const Zone = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <GiFireZone size={20} style={{ paddingBottom: '3px' }} />
-                <span className="listingHeader">{routes.zone.title}</span>
-              </div>
               {isMobile && (
                 <>
                   <Grid style={{ display: 'inline-flex' }}>

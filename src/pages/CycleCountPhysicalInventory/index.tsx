@@ -137,10 +137,6 @@ const CycleCountPInventory = () => {
         <div className="header-panel">
           <Grid container>
             <Grid item xs={12} md={6} sm={12} className={'d-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <FaRecycle />
-                <span className="listingHeader">{routes.cycleCountPhysicalInventory.title}</span>
-              </div>
             </Grid>
             <Grid item md={6} sm={12} xs={12} className={styles.filter_side}>
               <Grid style={{ display: "flex", gap: "5px" }}>

@@ -275,10 +275,7 @@ const InventoryCycle = () => {
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <GiCycle size={20} style={{ paddingBottom: '3px' }} />
-                <span className="listingHeader">{routes.inventoryCycle.title}</span>
-              </div>
+            
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
