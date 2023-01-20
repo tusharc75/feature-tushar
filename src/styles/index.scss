@@ -630,6 +630,9 @@ body::-webkit-scrollbar-thumb {
   & .headerLogo {
     display: none;
   }
+  & div[role='group'] {
+    margin-left: 0 !important;
+  }
 }
 
 .listingHeader {
