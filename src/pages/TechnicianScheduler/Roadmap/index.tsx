@@ -107,25 +107,7 @@ function Roadmap({ filter }) {
         latitude: 25.8391492,
         longitude: 77.5541247
       },
-      _id: 'asdfasdfasl'
-    },
-    {
-      count: 2,
-      location: {
-        concatedName: 'hello',
-        latitude: 25.8391492,
-        longitude: 78.5541247
-      },
-      _id: 'b'
-    },
-    {
-      count: 3,
-      location: {
-        concatedName: 'hello',
-        latitude: 25.8391492,
-        longitude: 76.5541247
-      },
-      _id: 'c'
+      _id: 'sdfsdf'
     }
   ];
 
@@ -204,7 +186,7 @@ function Roadmap({ filter }) {
             </Box>
           ) : (
             <Box border={1} width={'100%'} height={'100%'} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
-              <MapView data={mapViewData} onClose={() => setShowMap({ showMap: false, data: [] })} />
+              <MapView data={mapViewData} technician={selected} onClose={() => setShowMap({ showMap: false, data: [] })} />
               <IconButton
                 onClick={() => setShowMap({ showMap: false, data: [] })}
                 style={{
