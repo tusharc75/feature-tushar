@@ -86,6 +86,13 @@ const ServiceOrderDetailsPage = () => {
         });
     }, [locationKeys]);
 
+    useEffect(() => {
+        if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
+            fetchServiceOrderData();
+            updateProcessStatus(serviceSteps[currentStep]);
+        }
+    }, [currentStep]);
+
     const handleActivityHideShow = () => {
         setActivityShow(!showActivity);
     };
@@ -146,6 +153,13 @@ const ServiceOrderDetailsPage = () => {
             setLoadingDetails(false);
             toastConfig.setToastConfig(error);
         }
+    };
+
+    const updateProcessStatus = async (processStatus) => {
+        axiosInstance()
+            .put(`${serviceOrder.api}/${id}/process-status`, { processStatus: processStatus })
+            .then(({ data }) => { })
+            .catch((error) => { });
     };
 
     const getServiceOrderFields = async () => {

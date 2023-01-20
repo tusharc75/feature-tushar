@@ -19,9 +19,10 @@ import { Skeleton } from '@material-ui/lab';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import routes from 'src/components/Helpers/Routes';
-import axiosInstance from 'src/axios/axiosInstance';
+import { FaDiceOne } from 'react-icons/fa';
+import { fetch_service_order_detail_fields } from 'src/components/ServiceOrder/helper';
 
-const ServiceOrderQty = ({ onClose, serviceData, handleSave, from = null }) => {
+const ServiceOrderQty = ({ onClose, serviceData, handleSave, from = null, currency }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [digitalData, setDigitalData] = useState({ fields: [], initialValues: {} });
@@ -37,10 +38,7 @@ const ServiceOrderQty = ({ onClose, serviceData, handleSave, from = null }) => {
   }, []);
 
   const fetchFields = async () => {
-    let fieldData;
-    const response: any = await axiosInstance().get("/field?resource=Service Order Detail");
-    fieldData = response?.data?.data;
-    fieldData = fieldData?.map((d: any) => d.fieldData);
+    const fieldData: any = await fetch_service_order_detail_fields(currency);
     setDigitalData({
       fields: fieldData,
       initialValues: getObjKeysWithValues(serviceData, fieldData)
@@ -133,6 +131,14 @@ const ServiceOrderQty = ({ onClose, serviceData, handleSave, from = null }) => {
                         return (
                           form.name && (
                             <div key={i}>
+                              <div className={"detail-box-content detail-product-box"}>
+                                <div className={"product-form-layout"}>
+                                  <FaDiceOne size={16} color={"var(--white)"} style={{ marginRight: "5px" }} />
+                                  <h2 className={`${"form-label-style"} ${"form-label-product"}`} >
+                                    {form.name}
+                                  </h2>
+                                </div>
+                              </div>
                               <Box marginY={2}>
                                 <Grid spacing={3} container>
                                   {form.sectionFields.map((field) => (
