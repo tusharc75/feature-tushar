@@ -338,7 +338,7 @@ const ContactUs = () => {
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ width: '100%', display: 'flex' }}>
+                <Grid>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}

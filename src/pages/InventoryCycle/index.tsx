@@ -22,12 +22,11 @@ import { isObjectEmpty, gridLoadingTimeout, getLocalStorageArrayData, removeLoca
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import ManageInventoryCycle from './ManageInventoryCycle';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import CustomSwipableList from "../../components/SwipableListComponents/CustomSwipableList";
-import { useHistory } from "react-router-dom";
-import CommonSkeleton from "../../components/Helpers/CommonSkeleton";
+import CustomSwipableList from '../../components/SwipableListComponents/CustomSwipableList';
+import { useHistory } from 'react-router-dom';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 
 const InventoryCycle = () => {
-
   const renderedFrom = camelCase(`${routes.inventoryCycle.title}`);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
@@ -35,7 +34,9 @@ const InventoryCycle = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const { getColumnData } = useColumns();
-  const { state: { user, permissions, selectedEntity } }: any = useData();
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
 
   const [gridApi, setGridApi] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -58,32 +59,31 @@ const InventoryCycle = () => {
     axiosInstance()
       .get(`/field?resource=Inventory Cycle`)
       .then(({ data: { data } }) => {
-        let columns = []
-        let rendererNames = []
-        data.forEach(o => {
-          let currentColumn = getColumnData(routes.inventoryCycle.title, o?.fieldData, routes.inventoryCycleDetail.path)
+        let columns = [];
+        let rendererNames = [];
+        data.forEach((o) => {
+          let currentColumn = getColumnData(routes.inventoryCycle.title, o?.fieldData, routes.inventoryCycleDetail.path);
           if (currentColumn !== null) {
-            columns = [...columns, currentColumn?.columnData]
+            columns = [...columns, currentColumn?.columnData];
             if (currentColumn?.rendererName && rendererNames.indexOf(currentColumn?.rendererName) < 0) {
-              rendererNames.push(currentColumn?.rendererName)
+              rendererNames.push(currentColumn?.rendererName);
             }
           }
-        })
-        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true)
+        });
+        let tempFrameworkComponent = getFrameworkComponents(rendererNames, true);
         tempFrameworkComponent = {
           ...tempFrameworkComponent,
           actionsRenderer: ActionsRenderer
-        }
-        setFrameWorkComponent({ ...tempFrameworkComponent })
-        columns = [...columns, ...getStaticFields()]
-        setColumns([...columns])
-      })
-  }
+        };
+        setFrameWorkComponent({ ...tempFrameworkComponent });
+        columns = [...columns, ...getStaticFields()];
+        setColumns([...columns]);
+      });
+  };
 
   useEffect(() => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
-
 
   const handleDelete = () => {
     let ids = [];
@@ -95,7 +95,7 @@ const InventoryCycle = () => {
     axiosInstance()
       .put(`/inventory-cycle/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords)
+        removeLocalStorage(localStorageSelectedRecords);
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -235,188 +235,199 @@ const InventoryCycle = () => {
     setAnchorEl(null);
   };
 
-  return (<Fragment>
-    <Grid container className="headerbox">
-      <Grid item md={4} sm={11} xs={10}>
-        <CustomBreadCrumbs routes={[routes.inventoryCycle]} />
-      </Grid>
-      <Grid item md={8} sm={1} xs={2}>
-        <Grid container direction="row">
-          <Grid item xs={12} sm={12}>
-            <Grid container justify="flex-end">
-              <ImportExportLinks
-                permissions={permissions?.inventoryCycle}
-                module="inventoryCycles"
-                api={'/inventory-cycle'}
-                afterImportCompleted={() => {
-                  fetchData();
-                }}
-                isExportAllOrSomeFeature={true}
-                total={rowCount}
-                recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-                ids={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id) : []}
-                onExportToExcelSuccess={() => {
-                  if (gridApi) gridApi.deselectAll();
-                  else fetchData();
-                }}
-                additionalParams={getQueryString(true)}
-              />
+  return (
+    <Fragment>
+      <Grid container className="headerbox">
+        <Grid item md={4} sm={11} xs={10}>
+          <CustomBreadCrumbs routes={[routes.inventoryCycle]} />
+        </Grid>
+        <Grid item md={8} sm={1} xs={2}>
+          <Grid container direction="row">
+            <Grid item xs={12} sm={12}>
+              <Grid container justify="flex-end">
+                <ImportExportLinks
+                  permissions={permissions?.inventoryCycle}
+                  module="inventoryCycles"
+                  api={'/inventory-cycle'}
+                  afterImportCompleted={() => {
+                    fetchData();
+                  }}
+                  isExportAllOrSomeFeature={true}
+                  total={rowCount}
+                  recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+                  ids={
+                    getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                      ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                      : []
+                  }
+                  onExportToExcelSuccess={() => {
+                    if (gridApi) gridApi.deselectAll();
+                    else fetchData();
+                  }}
+                  additionalParams={getQueryString(true)}
+                />
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
       </Grid>
-    </Grid>
-    <CustomContainer>
-      <div className="header-panel">
-        <Grid container className={styles.filter_side_container}>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-            <div className="d-flex align-items-center">
-              <GiCycle size={20} style={{ paddingBottom: '3px' }} />
-              <span className="listingHeader">{routes.inventoryCycle.title}</span>
-            </div>
-          </Grid>
-          <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
-            <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-              <Grid style={{ width: '100%', display: 'flex' }}>
-                <SearchBox
-                  onSearch={handleSearch}
-                  searchbox={styles.search_box_input}
-                  width={isMobile ? '200px' : '242px'}
-                  style={isMobile ? { flex: 1 } : {}}
-                  size="small"
-                  value={search}
-                />
-              </Grid>
-              <Grid style={{ display: 'flex', gap: '5px' }}>
-                <Button
-                  className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                  onClick={() => {
-                    setInventoryCycleId(null);
-                    setOpen({ open: true, isClone: false });
-                  }}
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  size="small"
-                  color="primary"
-                  startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                >
-                  {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                </Button>
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
-                  aria-controls="action-menu"
-                  className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                >
-                  {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    disabled={!permissions?.inventoryCycle.isDelete}
+      <CustomContainer>
+        <div className="header-panel">
+          <Grid container className={styles.filter_side_container}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              <div className="d-flex align-items-center">
+                <GiCycle size={20} style={{ paddingBottom: '3px' }} />
+                <span className="listingHeader">{routes.inventoryCycle.title}</span>
+              </div>
+            </Grid>
+            <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
+              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                <Grid>
+                  <SearchBox
+                    onSearch={handleSearch}
+                    searchbox={styles.search_box_input}
+                    width={isMobile ? '200px' : '242px'}
+                    style={isMobile ? { flex: 1 } : {}}
+                    size="small"
+                    value={search}
+                  />
+                </Grid>
+                <Grid style={{ display: 'flex', gap: '5px' }}>
+                  <Button
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
                     onClick={() => {
-                      closeActions();
-                      setShowDeleteConfirmBox(true);
+                      setInventoryCycleId(null);
+                      setOpen({ open: true, isClone: false });
                     }}
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    size="small"
+                    color="primary"
+                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
                   >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </Grid>
-            </Box>
+                    {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                  </Button>
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    color="default"
+                    size="small"
+                    onClick={openActions}
+                    disabled={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length ? false : true}
+                    aria-controls="action-menu"
+                    className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                  >
+                    {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                  </Button>
+                  <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="action-menu"
+                    open={Boolean(anchorEl)}
+                    onClose={closeActions}
+                  >
+                    <MenuItem
+                      disabled={!permissions?.inventoryCycle.isDelete}
+                      onClick={() => {
+                        closeActions();
+                        setShowDeleteConfirmBox(true);
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                  </Menu>
+                </Grid>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-      </div>
-      {columns ? Object.keys(frameWorkComponent).length > 0 ?
-        isMobile && !isTablet ?
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
-            permissions={permissions.inventoryCycle}
-            primaryField={columns?.find(d => d.primaryField)}
-            onClick={(data) => {
-              history.push(`${routes.inventoryCycleDetail.path}/${data._id}`)
+        </div>
+        {columns ? (
+          Object.keys(frameWorkComponent).length > 0 ? (
+            isMobile && !isTablet ? (
+              <CustomSwipableList
+                allowSelection={true}
+                allowSwipe={true}
+                permissions={permissions.inventoryCycle}
+                primaryField={columns?.find((d) => d.primaryField)}
+                onClick={(data) => {
+                  history.push(`${routes.inventoryCycleDetail.path}/${data._id}`);
+                }}
+                dataRows={dataRows}
+                selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
+                dispatch={dispatch}
+                onEdit={(data) => {
+                  history.push(`${routes.inventoryCycleDetail.path}/${data._id}?openEdit=true`);
+                }}
+                extraParamsToCheckDelete={true}
+                onDelete={(data) => {
+                  setDeleteRecord(data);
+                  setShowDeleteConfirmBox(true);
+                }}
+                rowCount={rowCount}
+                page={page}
+                loading={loading}
+                additionalDetails={[]}
+                chips={[]}
+                onCreate={false}
+                showClone={true}
+                onClone={(data) => {
+                  setInventoryCycleId(data._id);
+                  setOpen({ open: true, isClone: true });
+                }}
+                renderedFrom={renderedFrom}
+              />
+            ) : (
+              <CustomAgGrid
+                columns={columns}
+                dataRows={dataRows}
+                frameworkComponents={frameWorkComponent}
+                setGridApi={setGridApi}
+                dispatch={dispatch}
+                rowCount={rowCount}
+                limit={limit}
+                pageSizes={pageSizes}
+                page={page}
+                actionWidth={150}
+                loading={loading}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                showOnlyShowFilteredRecordSwitch={true}
+              />
+            )
+          ) : null
+        ) : (
+          <Box p={2} height={500} bgcolor="white">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+        {open?.open && (
+          <ManageInventoryCycle
+            isUpdateDisabled={false}
+            inventoryCycleId={inventoryCycleId}
+            isClone={open?.isClone}
+            onClose={() => setOpen({ open: false, isClone: false })}
+            onSuccess={() => {
+              setOpen({ open: false, isClone: false });
+              fetchData();
             }}
-            dataRows={dataRows}
-            selectedRecords={getLocalStorageArrayData(`${localStorageSelectedRecords}`)}
-            dispatch={dispatch}
-            onEdit={(data) => {
-              history.push(`${routes.inventoryCycleDetail.path}/${data._id}?openEdit=true`)
+          />
+        )}
+        {showDeleteConfirmBox && (
+          <ConfirmationDialog
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete Inventory Cycle  ${deleteRecord?._id ? deleteRecord?.cycleCode : ''}?`}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
             }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              setDeleteRecord(data);
-              setShowDeleteConfirmBox(true)
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[]}
-            chips={[]}
-            onCreate={false}
-            showClone={true}
-            onClone={(data) => {
-              setInventoryCycleId(data._id);
-              setOpen({ open: true, isClone: true });
-            }}
-            renderedFrom={renderedFrom}
-          /> :
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            actionWidth={150}
-            loading={loading}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
-          /> : null
-        : <Box p={2} height={500} bgcolor="white">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} /></Box>}
-      {open?.open && (
-        <ManageInventoryCycle
-          isUpdateDisabled={false}
-          inventoryCycleId={inventoryCycleId}
-          isClone={open?.isClone}
-          onClose={() => setOpen({ open: false, isClone: false })}
-          onSuccess={() => {
-            setOpen({ open: false, isClone: false });
-            fetchData();
-          }}
-        />
-      )}
-      {showDeleteConfirmBox && (
-        <ConfirmationDialog
-          open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete Inventory Cycle  ${deleteRecord?._id ? deleteRecord?.cycleCode : ''}?`}
-          onClose={() => {
-            setDeleteRecord(null);
-            setShowDeleteConfirmBox(false);
-          }}
-          onOk={handleDelete}
-        />
-      )}
-    </CustomContainer>
-  </Fragment>
-
+            onOk={handleDelete}
+          />
+        )}
+      </CustomContainer>
+    </Fragment>
   );
 };
 
