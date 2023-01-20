@@ -228,10 +228,6 @@ const ProductBuilder = () => {
         <div className="header-panel">
           <Grid container>
             <Grid item xs={6} className="d-flex align-items-center gap-1">
-              <RiPriceTag2Fill size={22} style={{ paddingBottom: "3px" }} />{" "}
-              <span className="listingHeader">
-                {routes.productBuilder.title}
-              </span>
             </Grid>
             <Grid item xs={6} className="d-flex justify-content-end">
               {permission?.isCreate && (

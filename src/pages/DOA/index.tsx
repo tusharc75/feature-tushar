@@ -188,10 +188,6 @@ const DOARequest = () => {
         <div className="header-panel">
           <Grid container>
             <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-              <div className="d-flex align-items-center">
-                <GiAbstract055 />{" "}
-                <span className="listingHeader">{routes.DOARequest.title}</span>
-              </div>
               {isMobile && (
                 <>
                   <Grid style={{ display: 'inline-flex' }}>

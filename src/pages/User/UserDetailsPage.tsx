@@ -1297,69 +1297,6 @@ const UserDetailsPage = () => {
             </Paper>
           </div>
           <div className="position-relative">
-            {/* {showActivity ?
-              <Paper className="fixedRightPanel">
-                {!isMobile && !isTablet && <span className="activityHide cursor-pointer" onClick={handleActivityHideShow}>
-                  <IoIosArrowDropright className="icon" />
-                </span>}
-                <Box className="detailHeader">
-                  <h2 className="listingHeader single">Approval Process</h2>
-                </Box>
-                <Box padding={2}>
-                  <FormControl component="fieldset" fullWidth>
-                    <FormGroup>
-                      {loading ? (
-                        [1, 2, 3, 4].map((i) => (
-                          <Box
-                            padding={1}
-                            marginBottom={2}
-                            display="flex"
-                            key={i}
-                          >
-                            <Skeleton
-                              style={{ borderRadius: 16 }}
-                              width="30px"
-                              height="30px"
-                            />
-                            <Box marginX={1} />
-                            <Skeleton
-                              variant="text"
-                              width="80%"
-                              height="30px"
-                            />
-                          </Box>
-
-                        ))
-                      ) : userPermissions ? (
-                        Object.keys(userPermissions).map((key) => (
-                          <Tooltip title={!hasPermissionToUpdateApprovalProcess ? `You do not have permission to update ${startCase(key)}` : ""}>
-                            <FormControlLabel
-                              key={key}
-                              control={
-                                <Switch
-                                  checked={userPermissions[key]}
-                                  name={key}
-                                  disabled={!hasPermissionToUpdateApprovalProcess}
-                                  onChange={handleChangePermissions}
-                                />
-                              }
-                              label={key === "doaSetup" ? "DOA Setup" : startCase(key)}
-                            />
-                          </Tooltip>
-                        ))
-                      ) : (
-                        <Typography>There are no permissions</Typography>
-                      )}
-                    </FormGroup>
-                  </FormControl>
-                </Box>
-                <QuickLinks quickLinks={quickLinks} />
-              </Paper>
-              :
-              !isMobile && !isTablet && <span className="activityShow cursor-pointer" onClick={handleActivityHideShow}>
-                <IoIosArrowDropleft className="icon" />
-              </span>} */}
-
             <Paper className={`${!isSmallScreen ? 'fixedRightPanel' : null}`}>
               {!isSmallScreen && (
                 <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
