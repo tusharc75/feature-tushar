@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Typography, Box, Button, ButtonGroup } from '@material-ui/core';
-import { Map } from '@material-ui/icons';
+import { Typography, Box, Button, ButtonGroup, IconButton } from '@material-ui/core';
+import { Close, Map } from '@material-ui/icons';
 import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
 import Loader from 'src/components/Loader';
@@ -9,6 +9,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityList from './ActivityList';
 import Calander from './Calander';
 import CalanderList from './CalanderList';
+import MapView from '../Map';
 
 function Roadmap({ filter }) {
   const scrollRef = React.useRef(null);
@@ -25,13 +26,16 @@ function Roadmap({ filter }) {
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
-    filter.view === 'Order View' && fetchServiceOrders();
-  }, [filter]);
+  }, [filter.view]);
 
-  const fetchServiceOrders = async () => {
+  useEffect(() => {
+    filter.serviceOrder !== '' && fetchServiceOrders(filter.serviceOrder);
+  }, [filter.serviceOrder]);
+
+  const fetchServiceOrders = async (orderId) => {
     setLoadingRoadmap(true);
     await axiosInstance()
-      .get(`/technician-scheduler/service-order?serviceOrders=63c787c9270a816a9c47c7d4`)
+      .get(`/technician-scheduler/service-order?serviceOrders=${orderId}`)
       .then(({ data }) => {
         setActivity(data?.data);
         setTreeList(data?.data);
@@ -85,6 +89,7 @@ function Roadmap({ filter }) {
 
   const [expanded, setExpanded] = React.useState([]);
   const [selected, setSelected] = React.useState([]);
+  const [showMap, setShowMap] = useState({ showMap: false, data: [] });
 
   const handleToggle = (event, nodeIds) => {
     setExpanded(nodeIds);
@@ -93,6 +98,36 @@ function Roadmap({ filter }) {
   const handleSelect = (event, nodeIds) => {
     setSelected(nodeIds);
   };
+
+  const mapViewData = [
+    {
+      count: 1,
+      location: {
+        concatedName: 'hello',
+        latitude: 25.8391492,
+        longitude: 77.5541247
+      },
+      _id: 'asdfasdfasl'
+    },
+    {
+      count: 2,
+      location: {
+        concatedName: 'hello',
+        latitude: 25.8391492,
+        longitude: 78.5541247
+      },
+      _id: 'b'
+    },
+    {
+      count: 3,
+      location: {
+        concatedName: 'hello',
+        latitude: 25.8391492,
+        longitude: 76.5541247
+      },
+      _id: 'c'
+    }
+  ];
 
   return !loadingRoadmap ? (
     <Box bgcolor="white">
@@ -126,44 +161,63 @@ function Roadmap({ filter }) {
                   selected={selected}
                   handleToggle={handleToggle}
                   handleSelect={handleSelect}
+                  setShowMap={setShowMap}
                 />
                 <Box height={20}></Box>
               </Box>
             </div>
           </Box>
-          <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
-            <Calander calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
-            <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
-              <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
-                <CalanderList
-                  fetchRoadmap={fetchRoadmap}
-                  activity={activity}
-                  expanded={expanded}
-                  selected={selected}
-                  handleSelect={handleSelect}
-                  startDate={startDate}
-                  endDate={endDate}
-                  totalDay={totalDay}
-                  calendarType={calendarType}
-                />
+
+          {!showMap.showMap ? (
+            <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
+              <Calander calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
+              <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
+                <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
+                  <CalanderList
+                    fetchRoadmap={fetchRoadmap}
+                    activity={activity}
+                    expanded={expanded}
+                    selected={selected}
+                    handleSelect={handleSelect}
+                    startDate={startDate}
+                    endDate={endDate}
+                    totalDay={totalDay}
+                    calendarType={calendarType}
+                  />
+                </Box>
+              </Box>
+              <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
+                <div ref={scrollRef}>
+                  <Box
+                    id="dayLiner"
+                    height={'100%'}
+                    style={{
+                      position: 'absolute',
+                      left: (100 * moment().diff(startDate, 'days')) / totalDay + '%',
+                      width: dayPixel
+                    }}
+                  >
+                    <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="secondary.main" height={'100%'}></Box>
+                  </Box>
+                </div>
               </Box>
             </Box>
-            <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
-              <div ref={scrollRef}>
-                <Box
-                  id="dayLiner"
-                  height={'100%'}
-                  style={{
-                    position: 'absolute',
-                    left: (100 * moment().diff(startDate, 'days')) / totalDay + '%',
-                    width: dayPixel
-                  }}
-                >
-                  <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="secondary.main" height={'100%'}></Box>
-                </Box>
-              </div>
+          ) : (
+            <Box border={1} width={'100%'} height={'100%'} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
+              <MapView data={mapViewData} onClose={() => setShowMap({ showMap: false, data: [] })} />
+              <IconButton
+                onClick={() => setShowMap({ showMap: false, data: [] })}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  zIndex: 1
+                }}
+              >
+                <Close />
+              </IconButton>
             </Box>
-          </Box>
+          )}
         </Box>
       </Box>
       <Box display="flex" justifyContent="flex-end" className="mt-2">
