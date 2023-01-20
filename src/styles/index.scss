@@ -42,6 +42,7 @@
   --colorAccount: red;
   --colorProject: yellow;
   --new_theme_color: #329592;
+  --ag-odd-row-background-color: #f6fafa;
 }
 
 @import '~ag-grid-community/dist/styles/ag-theme-material/sass/_ag-theme-material-mixin.scss';
@@ -521,14 +522,18 @@ body::-webkit-scrollbar-thumb {
 
 .agPagination {
   margin: 0px;
-  background: #f7f7f7;
-  border: 1px solid #e9e8e8;
+  background: transparent;
 }
 
 .ag-grid-listing-grid-header-options {
-  background: #f0f2f3 !important;
+  background: transparent !important;
+  margin-bottom: 15px;
 }
-
+.ag-horizontal-right-spacer,
+.ag-horizontal-left-spacer {
+  border: 0 !important;
+  overflow: auto;
+}
 .product-builder-edit-grid {
   height: calc(100vh - 430px);
 }
@@ -590,9 +595,12 @@ body::-webkit-scrollbar-thumb {
 }
 
 .header-panel {
+  @media all and (min-width: 600px) {
+    --padding: 0 0 18px;
+  }
   color: var(--secondary);
   background-color: #ffffff !important;
-  padding: 8px 10px;
+  padding: var(--padding, 0 0 15px);
   border-radius: 6px 6px 0 0;
   row-gap: 5px;
 
@@ -602,11 +610,22 @@ body::-webkit-scrollbar-thumb {
 
   & .MuiToggleButton-sizeSmall {
     padding: 4px 8px !important;
+    background: #effbf9;
+    color: #298b88 !important;
+    border: 1px solid #effbf9;
+    border-radius: 6px !important;
+    margin-left: 10px !important;
+    &:first-of-type {
+      margin-left: 0 !important;
+    }
   }
 
   & .MuiOutlinedInput-inputMarginDense {
     padding-top: 7.5px;
     padding-bottom: 7.5px;
+  }
+  & > div > div > div {
+    display: none;
   }
 }
 
@@ -685,16 +704,29 @@ body::-webkit-scrollbar-thumb {
 }
 
 .main-container {
+  @media all and (min-width: 600px) {
+    --padding: 18px 18px 0;
+  }
+  @media all and (min-width: 900px) {
+    --padding: 18px 18px 0;
+  }
+  @media all and (min-width: 1200px) {
+    --padding: 20px 20px 0;
+  }
+  @media all and (max-width: 768px) {
+    min-height: 600px;
+  }
   min-height: calc(100vh - 99px);
   position: relative;
   overflow: auto;
   z-index: 1;
-  margin-block: 10px;
-  top: 36px;
+  margin-block-end: 10px;
   background: white;
   border-radius: 6px 6px 0 0;
-  box-shadow: 0 3px 5px #6f6d6d;
+  box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
   overflow-y: hidden;
+
+  padding: var(--padding, 15px 15px 0);
 }
 
 .detail-container {
@@ -2447,40 +2479,64 @@ svg.MuiSvgIcon-root {
 }
 
 .headerbox {
-  position: fixed;
-  width: unset !important;
-  height: 140px;
+  align-items: center;
   left: 0;
   @media all and (min-width: 960px) {
     left: 66px;
   }
-
-  right: 0;
-  top: 64px;
-  padding: 10px;
   z-index: 1;
-  background: var(--primary);
-  background-blend-mode: overlay;
-  padding-inline: 1%;
-  @media all and (max-width: 900) {
-    padding-inline: 24px;
-  }
+  // background: var(--primary);
+  // background-blend-mode: overlay;
+  padding-block: 5px;
+  padding-inline: 0;
+
   ol {
     li {
-      color: var(--tertiary-light) !important;
+      color: #298b88 !important;
       a {
         margin: 0px 4px;
         &:first-of-type {
           margin: 0;
         }
         font-size: 1rem;
-        color: var(--tertiary-light) !important;
+        color: #298b88 !important;
+        font-weight: 600;
       }
       p {
         margin: 0px 4px;
         font-size: 1rem;
-        color: var(--tertiary-light) !important;
+        color: #909090 !important;
+        font-weight: 400;
       }
     }
   }
+  .new-headerbox-button-v1 {
+    @media all and (min-width: 1200px) {
+      --padding: 9px 11px;
+      --spacing: 18px;
+    }
+    font-weight: 400;
+    font-size: 12.5185px;
+    line-height: 113%;
+    color: #3e3e3e;
+    padding: var(--padding, 8px 10px);
+    background: #ffffff;
+    border: 0.907407px solid #e2e2e2;
+    box-shadow: 0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06);
+    border-radius: 3.62963px;
+    margin-right: 18px;
+    &:last-of-type {
+      margin-right: 0;
+    }
+    transition: all 0.3s;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+  .expand-icon-v1 {
+    padding: 3px;
+  }
+}
+.new-headerbox-button-v1 {
+  cursor: pointer;
 }

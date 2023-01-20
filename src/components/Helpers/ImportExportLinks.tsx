@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Divider, IconButton, makeStyles, useMediaQuery, Menu, MenuItem } from '@material-ui/core';
+import { Divider, IconButton, makeStyles, useMediaQuery, Menu, MenuItem, Button } from '@material-ui/core';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
@@ -20,35 +20,35 @@ const useStyles = makeStyles((theme) => ({
       display: 'none'
     }
   },
-  links: {
-    color: theme.palette.info.light, //  textDark
-    fontSize: 15
-  },
-  darkLinks: {
-    color: theme.palette.info.dark, //  textDark
-    fontSize: 15
-  },
-  linkDivider: {
-    backgroundColor: '#ffffff42', //  darkBg
-    margin: '0 10px'
-  },
-  darkLinkDivider: {
-    backgroundColor: 'grey', //  darkBg
-    margin: '0 10px'
-  },
+  // links: {
+  //   color: theme.palette.info.light, //  textDark
+  //   fontSize: 15
+  // },
+  // darkLinks: {
+  //   color: theme.palette.info.dark, //  textDark
+  //   fontSize: 15
+  // },
+  // linkDivider: {
+  //   backgroundColor: '#ffffff42', //  darkBg
+  //   margin: '0 10px'
+  // },
+  // darkLinkDivider: {
+  //   backgroundColor: 'grey', //  darkBg
+  //   margin: '0 10px'
+  // },
   delBtn: {
     color: 'red'
-  },
-  expandIcon: {
-    position: 'absolute',
-    right: '0',
-    color: 'white'
-  },
-  darkExpandIcon: {
-    position: 'absolute',
-    right: '0',
-    color: theme.palette.info.dark
   }
+  // expandIcon: {
+  //   position: 'absolute',
+  //   right: '0',
+  //   color: 'white'
+  // },
+  // darkExpandIcon: {
+  //   position: 'absolute',
+  //   right: '0',
+  //   color: theme.palette.info.dark
+  // }
 }));
 
 export default function ImportExportLinks({
@@ -72,6 +72,7 @@ export default function ImportExportLinks({
   const isMobile = useMediaQuery('(max-width: 960px)');
   const toastConfig = useContext(CustomToastContext);
   const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -220,21 +221,21 @@ export default function ImportExportLinks({
         <div className={classes.linksContainer}>
           {permissions?.isCreate && (
             <>
-              <label htmlFor="importFromExcel" className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+              <label htmlFor="importFromExcel" className={` new-headerbox-button-v1`}>
                 {ImportInput}
                 Import from Excel
               </label>
-              <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
+              {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
             </>
           )}
-          <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+          <label onClick={exportToExcel} className={` new-headerbox-button-v1`}>
             Export to Excel{' '}
             {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
           </label>
           {isDownloadExcel && (
             <>
-              <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} />
-              <label onClick={downloadTemplate} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+              {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
+              <label onClick={downloadTemplate} className={` new-headerbox-button-v1`}>
                 Download Template
               </label>
             </>
@@ -246,16 +247,16 @@ export default function ImportExportLinks({
         />
         <label
           onClick={(e) => e.preventDefault()}
-          className={`${classes.links} cursor-pointer`}
+          className={`${classes.links} new-headerbox-button-v1`}
         >
           Email a Link
         </label> */}
         </div>
       ) : (
-        <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+        <Menu id="import-export-links" anchorEl={anchorEl} keepMounted={false} open={open} onClose={handleClose}>
           {permissions?.isCreate && (
             <MenuItem>
-              <label htmlFor="importFromExcel" className="cursor-pointer">
+              <label htmlFor="importFromExcel" className="new-headerbox-button-v1">
                 {ImportInput}
                 Import from Excel
               </label>
@@ -283,8 +284,8 @@ export default function ImportExportLinks({
         </Menu>
       )}
       {(isMobile || isDropDownIconShow) && (
-        <IconButton onClick={handleClick}>
-          <IoIosArrowDropdown className={isBackgroundWhite ? classes.darkExpandIcon : classes.expandIcon} />
+        <IconButton onClick={handleClick} className={`expand-icon-v1`}>
+          <IoIosArrowDropdown />
         </IconButton>
       )}
     </div>
@@ -292,13 +293,14 @@ export default function ImportExportLinks({
     <div id="importExportLinks" className={!isDropDownIconShow && `${classes.root}`}>
       {!isDropDownIconShow ? (
         <div className={classes.linksContainer}>
-          <label onClick={exportToExcel} className={`${isBackgroundWhite ? classes.darkLinks : classes.links} cursor-pointer`}>
+          <label onClick={exportToExcel} className={` new-headerbox-button-v1`}>
             Export to Excel{' '}
             {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
           </label>
         </div>
       ) : (
-        <Menu id="import-export-links" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+        <Menu id="import-export-links" anchorEl={anchorEl} keepMounted={false} open={open} onClose={handleClose}>
+          {console.log('hi')}
           <MenuItem
             onClick={() => {
               exportToExcel();
@@ -310,8 +312,8 @@ export default function ImportExportLinks({
         </Menu>
       )}
       {(isMobile || isDropDownIconShow) && (
-        <IconButton onClick={handleClick}>
-          <IoIosArrowDropdown className={isBackgroundWhite ? classes.darkExpandIcon : classes.expandIcon} />
+        <IconButton onClick={handleClick} className={`expand-icon-v1`}>
+          <IoIosArrowDropdown />
         </IconButton>
       )}
     </div>
