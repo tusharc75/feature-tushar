@@ -6,7 +6,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPageHeader from 'src/components/DetailsPageHeader';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -22,19 +21,16 @@ import {
   WORKORDER_SERVICE_STATUS
 } from 'src/constants/helpers';
 import Activity from 'src/components/Activity';
-import { IoIosArrowDropright, IoIosArrowDropleft } from 'react-icons/io';
 import ManageRepairOrder from './ManageRepairOrder';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
 import HideWhenOffline from 'src/components/HideWhenOffline';
-import { defaultActivityShow } from 'src/constants/helpers';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { isMobile, isTablet } from 'react-device-detect';
-import accountClass from '../Account/account.module.scss';
 import DeleteButton from 'src/components/Helpers/DeleteButton';
 import Productpackage from './Productpackage';
 import Quotation from './Quotation';
@@ -42,8 +38,8 @@ import WorkOrder from './WorkOrder';
 import LoadingTicket from './LoadingTicket';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
-import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import CloseIcon from '@material-ui/icons/Close';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 function a11yProps(index: any) {
   return {
@@ -53,10 +49,10 @@ function a11yProps(index: any) {
 }
 
 const RepairOrderDetails = () => {
+
   const renderedFrom = camelCase(routes?.repairOrder.title);
   const toastConfig = useContext(CustomToastContext);
-  const isSmallScreen = useMediaQuery('(max-width:1300px)');
-  const isTabletScreen = useMediaQuery('(max-width:960px)');
+  
   const { id } = useParams();
   const history = useHistory();
 
@@ -75,7 +71,6 @@ const RepairOrderDetails = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [showActivity, setActivityShow] = useState(defaultActivityShow);
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
@@ -215,8 +210,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -278,21 +273,10 @@ const RepairOrderDetails = () => {
     setAnchorEl(null);
   };
 
-  useEffect(() => {
-    if (isSmallScreen && tabValue === 0) {
-      setActivityShow(true);
-    } else {
-      setActivityShow(false);
-    }
-  }, [isSmallScreen, tabValue]);
-
   return (
     <Box className="main-container-new-v1">
       <Box className="headerbox-new-v1" mb={2}>
         <Box className="nav-new-v1">
-          {/* <Typography variant="h5" style={{ color: '#2A3042', fontWeight: '700', fontSize: '1.875rem', marginBottom: '.4rem' }}>
-            Repair Order
-          </Typography> */}
           <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
         </Box>
         <Box className="controls-new-v1">
@@ -382,14 +366,10 @@ const RepairOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <Button
-              endIcon={<ArrowForwardIcon />}
-              variant="contained"
-              onClick={() => setActivityShow(!showActivity)}
-              style={{ background: 'var(--new_theme_color)', color: 'white', boxShadow: '0px 5.44444px 27.2222px rgba(0, 0, 0, 0.06)' }}
-            >
-              Activities
-            </Button>
+            <ActivityButton
+              referenceId={repairOrderData?._id}
+              resource={ACTIVITY_RESOURCE.repairOrder}
+            />
           </Box>
         </Box>
       </Box>
@@ -467,9 +447,6 @@ const RepairOrderDetails = () => {
                 fetchRepairOrderData={fetchRepairOrderData}
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
-                isSmallScreen={isSmallScreen}
-                isTabletScreen={isTabletScreen}
-                showActivity={showActivity}
                 renderedFrom={`${renderedFrom}_grid-1`}
                 stepFullScreen={stepFullScreen}
                 setHasAssetsAdded={setHasAssetsAdded}
@@ -488,18 +465,15 @@ const RepairOrderDetails = () => {
                 <WorkOrder
                   repairOrderData={repairOrderData}
                   setNextStep={setNextStep}
-                  isSmallScreen={isSmallScreen}
-                  isTabletScreen={isTabletScreen}
-                  showActivity={showActivity}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={
                     currentStep === 3
                       ? allowedToEdit
                       : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        )
-                      ? false
-                      : allowedToEdit
+                        quotationVersionData?.status
+                      )
+                        ? false
+                        : allowedToEdit
                   }
                   allowedToDelete={allowedToDelete}
                   isPostWorkService={Boolean(currentStep === 3)}
@@ -511,7 +485,6 @@ const RepairOrderDetails = () => {
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
-                showActivity={showActivity}
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
@@ -534,7 +507,6 @@ const RepairOrderDetails = () => {
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
                 currencySymbol={currencySymbol}
-                showActivity={showActivity}
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={false}
@@ -546,42 +518,6 @@ const RepairOrderDetails = () => {
             )}
           </ContentFullScreen>
         </TabPanel>
-        <div className="position-relative">
-          <HideWhenOffline>
-            {showActivity && <div className="backdrop-new-v1" onClick={() => setActivityShow(false)}></div>}
-            <div className={`activity-new-v1 ${showActivity ? 'show-activity-v1' : 'hide-activity-v1'}`}>
-              <IconButton onClick={() => setActivityShow(false)} className="close-icon-v1">
-                <CloseIcon />
-              </IconButton>
-              <Grid container>
-                <Grid item xs={12}>
-                  {repairOrderData && (
-                    <div>
-                      <Activity
-                        resourceId={repairOrderData._id}
-                        resource={ACTIVITY_RESOURCE.repairOrder}
-                        restrictedAddActivities={
-                          permissions && permissions[`${ACTIVITY_RESOURCE.repairOrder}`] && permissions[`${ACTIVITY_RESOURCE.repairOrder}`].isUpdate
-                            ? []
-                            : ['Attachment', 'Case']
-                        }
-                        relatedTo={[
-                          {
-                            type: ACTIVITY_RESOURCE.repairOrder,
-                            referenceId: repairOrderData._id,
-                            access: true
-                          }
-                        ]}
-                        handleActivityRefresh={() => {}}
-                        emails={[]}
-                      />
-                    </div>
-                  )}
-                </Grid>
-              </Grid>
-            </div>
-          </HideWhenOffline>
-        </div>
       </div>
       {showConfirmBox && (
         <ConfirmationDialog
