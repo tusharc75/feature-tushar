@@ -38,7 +38,6 @@ const Quotation = ({
   repairOrderData,
   setNextStep,
   currencySymbol,
-  showActivity,
   renderedFrom,
   stepFullScreen,
   allowedToEdit,

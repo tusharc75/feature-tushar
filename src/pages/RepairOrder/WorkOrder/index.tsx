@@ -32,9 +32,6 @@ const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm
 const WorkOrder = ({
   repairOrderData,
   setNextStep,
-  isTabletScreen,
-  isSmallScreen,
-  showActivity,
   stepFullScreen,
   allowedToEdit,
   allowedToDelete,
