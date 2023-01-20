@@ -2548,6 +2548,7 @@ svg.MuiSvgIcon-root {
     --header-mb: 35px;
     --container-padding: 26px;
   }
+  margin-bottom: 20px;
 
   .new-content-head-v1 {
     max-width: 100%;
@@ -2590,7 +2591,8 @@ svg.MuiSvgIcon-root {
 
   .detail-container-new-v1 {
     position: relative;
-    padding: var(--container-padding, 20px 15px);
+    // padding: var(--container-padding, 20px 15px);
+    padding: 10px;
     background: #ffffff;
     box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
     border-radius: 10px;
