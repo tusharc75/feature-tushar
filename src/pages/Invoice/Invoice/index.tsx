@@ -185,14 +185,15 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${parent.type === 'asset'
+      parent.detail = `${
+        parent.type === 'asset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'service'
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
-        }`;
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -212,14 +213,15 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'asset'
+      _subRow.detail = `${
+        _subRow.type === 'asset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'service'
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -243,19 +245,14 @@ const Invoice = ({ invoiceData, setNextStep, currencySymbol, updateJobStatus, st
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns && rowsData ? (
           <>
-            <Box
-              p="6px"
-              zIndex={5}
-              width={'100%'}
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-            >
+            <Box p="6px" zIndex={5}>
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
                 hideSelection={true}
-                onSelect={() => { }}
+                onSelect={() => {}}
                 childrenProperty="subRows"
                 uniqueKey="_id"
                 renderedFrom="invoice_product_package"
