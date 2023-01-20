@@ -2543,7 +2543,7 @@ svg.MuiSvgIcon-root {
   cursor: pointer;
 }
 
-.main-container-new-v1 {
+.main-container-v1 {
   @media all and (min-width: 768px) {
     --header-mb: 35px;
     --container-padding: 26px;
@@ -2568,7 +2568,7 @@ svg.MuiSvgIcon-root {
     }
   }
 
-  .headerbox-new-v1 {
+  .headerbox-v1 {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
@@ -2589,7 +2589,7 @@ svg.MuiSvgIcon-root {
     }
   }
 
-  .detail-container-new-v1 {
+  .detail-container-v1 {
     position: relative;
     // padding: var(--container-padding, 20px 15px);
     padding: 10px;
@@ -2612,7 +2612,7 @@ svg.MuiSvgIcon-root {
       }
     }
   }
-  .controls-new-v1 {
+  .controls-v1 {
     @media all and (max-width: 708px) {
       width: 100%;
       justify-content: center;

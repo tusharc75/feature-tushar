@@ -20,13 +20,11 @@ import {
   QUOTATION_STATUS,
   WORKORDER_SERVICE_STATUS
 } from 'src/constants/helpers';
-import Activity from 'src/components/Activity';
 import ManageRepairOrder from './ManageRepairOrder';
 import queryString from 'query-string';
 import { BiEdit, BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import TabPanel from 'src/components/TabPanel';
-import HideWhenOffline from 'src/components/HideWhenOffline';
 import Steps from '../RentalManagement/Steps';
 import { camelCase } from 'lodash';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -38,7 +36,6 @@ import WorkOrder from './WorkOrder';
 import LoadingTicket from './LoadingTicket';
 import { ExpandMore } from '@material-ui/icons';
 import { GrStatusInfo } from 'react-icons/gr';
-import CloseIcon from '@material-ui/icons/Close';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 
 function a11yProps(index: any) {
@@ -209,8 +206,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -273,12 +270,12 @@ const RepairOrderDetails = () => {
   };
 
   return (
-    <Box className="main-container-new-v1">
-      <Box className="headerbox-new-v1" mb={2}>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
         <Box className="nav-new-v1">
           <CustomBreadCrumbs routes={[routes.repairOrder, { title: repairOrderData?.repairOrderNumber }]} />
         </Box>
-        <Box className="controls-new-v1">
+        <Box className="controls-v1">
           <Box className="control-buttons-new-v1">
             {repairOrderData ? (
               <>
@@ -370,7 +367,7 @@ const RepairOrderDetails = () => {
           </Box>
         </Box>
       </Box>
-      <div className={`detail-container-new-v1 `}>
+      <div className={`detail-container-v1 `}>
         <Tabs
           className="new-tab-container-v1"
           value={tabValue}
@@ -467,10 +464,10 @@ const RepairOrderDetails = () => {
                     currentStep === 3
                       ? allowedToEdit
                       : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        )
-                      ? false
-                      : allowedToEdit
+                        quotationVersionData?.status
+                      )
+                        ? false
+                        : allowedToEdit
                   }
                   allowedToDelete={allowedToDelete}
                   isPostWorkService={Boolean(currentStep === 3)}
