@@ -108,6 +108,24 @@ function Roadmap({ filter }) {
         longitude: 77.5541247
       },
       _id: 'asdfasdfasl'
+    },
+    {
+      count: 2,
+      location: {
+        concatedName: 'hello',
+        latitude: 25.8391492,
+        longitude: 78.5541247
+      },
+      _id: 'b'
+    },
+    {
+      count: 3,
+      location: {
+        concatedName: 'hello',
+        latitude: 25.8391492,
+        longitude: 76.5541247
+      },
+      _id: 'c'
     }
   ];
 
