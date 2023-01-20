@@ -34,13 +34,12 @@ import CustomSwipableList from '../../components/SwipableListComponents/CustomSw
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
 import { FaSuitcase } from 'react-icons/fa';
-import MobileSortDialog from "../../components/MobileSortDialog"
-import MobileFilterDialog from "../../components/MobileFilterDialog"
+import MobileSortDialog from '../../components/MobileSortDialog';
+import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
 
-
 const ProductCategory = () => {
-  const renderedFrom = camelCase(routes?.productCategory.title)
+  const renderedFrom = camelCase(routes?.productCategory.title);
   const history = useHistory();
   const location = useLocation();
   const toastConfig = useContext(CustomToastContext);
@@ -70,14 +69,15 @@ const ProductCategory = () => {
   //  Grid Variables - Start
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [isAllChecked, setIsAllChecked] = useState(false);
   const [clonedData, setClonedData] = useState([]);
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
-  const [isOpenDialog, setisOpenDialog] = useState(false)
+  const [isOpenDialog, setisOpenDialog] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   if (columnState) {
@@ -112,7 +112,6 @@ const ProductCategory = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
-
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -166,13 +165,12 @@ const ProductCategory = () => {
 
   const NameRenderer = (params) => (
     <span className="d-flex gap-2 align-items-center">
-
       {productCategoryPermissions.isUpdate ? (
         <Link to={`${routes.productCategoryDetail.path}/${params.data._id}`}>
           <Chip
             className="ml-3 link"
             style={{ backgroundColor: `${params.data.chipColour}` }}
-            label={<p style={{ color: params.data.isLowContrast ? "white" : "black" }}>{params.value}</p>}
+            label={<p style={{ color: params.data.isLowContrast ? 'white' : 'black' }}>{params.value}</p>}
             onClick={() => {
               setProductCategoryId(params.data.id);
               // setOpen({ open: true, isClone: false });
@@ -184,43 +182,31 @@ const ProductCategory = () => {
           <Chip className="ml-3" style={{ backgroundColor: `${params.data.chipColour}` }} label={`${params.value}`} />
         </Link>
       )}
-
     </span>
   );
 
   const ActionsRenderer = (params) => (
     <Fragment>
-      {
-        productCategoryPermissions.isCreate ?
-          (
-            <Tooltip
-              title='Clone'
-            >
-              <IconButton
-                size="small"
-                aria-label="Clone"
-                onClick={() => {
-                  setProductCategoryId(params.data.id);
-                  setOpen({ open: true, isClone: true });
-                }}
-              >
-                <FileCopyIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Tooltip>) :
-          (
-            <Tooltip
-              className='cursor-stop'
-              title='You do not have permission to clone/create'
-            >
-              <IconButton
-                size="small"
-                aria-label="Clone"
-              >
-                <FileCopyIcon fontSize="small" color="disabled" />
-              </IconButton>
-            </Tooltip>
-          )
-      }
+      {productCategoryPermissions.isCreate ? (
+        <Tooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setProductCategoryId(params.data.id);
+              setOpen({ open: true, isClone: true });
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton size="small" aria-label="Clone">
+            <FileCopyIcon fontSize="small" color="disabled" />
+          </IconButton>
+        </Tooltip>
+      )}
       {productCategoryPermissions.isDelete ? (
         <Tooltip title="Delete">
           <IconButton
@@ -283,7 +269,7 @@ const ProductCategory = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -291,9 +277,7 @@ const ProductCategory = () => {
   function luminance(r, g, b) {
     var a = [r, g, b].map(function (v) {
       v /= 255;
-      return v <= 0.03928
-        ? v / 12.92
-        : Math.pow((v + 0.055) / 1.055, 2.4);
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
     });
     return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
   }
@@ -303,8 +287,7 @@ const ProductCategory = () => {
     var lum2 = luminance(rgb2[0], rgb2[1], rgb2[2]);
     var brightest = Math.max(lum1, lum2);
     var darkest = Math.min(lum1, lum2);
-    return (brightest + 0.05)
-      / (darkest + 0.05);
+    return (brightest + 0.05) / (darkest + 0.05);
   }
 
   function hexToRgb(hex) {
@@ -313,7 +296,7 @@ const ProductCategory = () => {
       var r = parseInt(result[1], 16);
       var g = parseInt(result[2], 16);
       var b = parseInt(result[3], 16);
-      return r + "," + g + "," + b;//return 23,14,45 -> reformat if needed 
+      return r + ',' + g + ',' + b; //return 23,14,45 -> reformat if needed
     }
     return null;
   }
@@ -321,20 +304,18 @@ const ProductCategory = () => {
   const isContrastRatioLow = (hexColor) => {
     try {
       let rgb = hexToRgb(hexColor?.length === 0 || hexColor?.length === undefined ? '#E0E0E0' : hexColor);
-      let splitRgb = rgb?.split(",");
+      let splitRgb = rgb?.split(',');
       let rgbNum = splitRgb?.map(function (x) {
         return parseInt(x, 10);
       });
       let contrastRatio = contrast(rgbNum, [0, 0, 238]);
       if (contrastRatio < 3) {
-        return true
+        return true;
       } else {
-        return false
+        return false;
       }
-    }
-    catch (e) {
-    }
-  }
+    } catch (e) {}
+  };
 
   const fetchProductCategory = () => {
     dispatch({ type: 'loading', loading: true });
@@ -343,7 +324,6 @@ const ProductCategory = () => {
     if (gridApi) {
       gridApi.setRowData([]);
     }
-
 
     axiosInstance()
       .get(`/product-category${queryString}`)
@@ -410,7 +390,7 @@ const ProductCategory = () => {
     axiosInstance()
       .put(`/product-category/remove`, { ids: ids })
       .then(() => {
-        removeLocalStorage(localStorageSelectedRecords)
+        removeLocalStorage(localStorageSelectedRecords);
         fetchProductCategory();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -442,13 +422,11 @@ const ProductCategory = () => {
 
   const handleClickClose = () => {
     setSortOpen(false);
-
   };
 
   const handleFilterClose = () => {
     setisOpenDialog(false);
   };
-
 
   return (
     <Fragment>
@@ -483,7 +461,7 @@ const ProductCategory = () => {
       <CustomContainer>
         <div className="header-panel">
           <Grid container className={styles.filter_side_container}>
-            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : "d-flex align-items-center gap-1"}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
               <div className="d-flex align-items-center">
                 <FaThemeisle size={20} style={{ paddingBottom: '3px' }} />
                 <span className="listingHeader">{routes.productCategory.title}</span>
@@ -545,7 +523,7 @@ const ProductCategory = () => {
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                <Grid style={{ width: '100%', display: 'flex' }}>
+                <Grid>
                   <SearchBox
                     onSearch={handleSearch}
                     searchbox={styles.search_box_input}
@@ -601,7 +579,9 @@ const ProductCategory = () => {
                       disabled={!productCategoryPermissions?.isDelete}
                       onClick={() => {
                         closeActions();
-                        { selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]); }
+                        {
+                          selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                        }
                         setShowDeleteConfirmBox(true);
                       }}
                     >
@@ -686,8 +666,8 @@ const ProductCategory = () => {
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${routes?.productCategory?.title?.toLowerCase()}  ${deleteRecord?.name || ''} ?`}
             onClose={() => {
-              setDeleteRecord(null)
-              setShowDeleteConfirmBox(false)
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
             }}
             onOk={handleDelete}
           />
