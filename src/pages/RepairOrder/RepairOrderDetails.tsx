@@ -49,10 +49,9 @@ function a11yProps(index: any) {
 }
 
 const RepairOrderDetails = () => {
-
   const renderedFrom = camelCase(routes?.repairOrder.title);
   const toastConfig = useContext(CustomToastContext);
-  
+
   const { id } = useParams();
   const history = useHistory();
 
@@ -210,8 +209,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -344,6 +343,7 @@ const RepairOrderDetails = () => {
                       Create New Version
                     </Button>
                   )}
+
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
                   !(
@@ -366,10 +366,7 @@ const RepairOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton
-              referenceId={repairOrderData?._id}
-              resource={ACTIVITY_RESOURCE.repairOrder}
-            />
+            <ActivityButton referenceId={repairOrderData?._id} resource={ACTIVITY_RESOURCE.repairOrder} />
           </Box>
         </Box>
       </Box>
@@ -470,10 +467,10 @@ const RepairOrderDetails = () => {
                     currentStep === 3
                       ? allowedToEdit
                       : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                        quotationVersionData?.status
-                      )
-                        ? false
-                        : allowedToEdit
+                          quotationVersionData?.status
+                        )
+                      ? false
+                      : allowedToEdit
                   }
                   allowedToDelete={allowedToDelete}
                   isPostWorkService={Boolean(currentStep === 3)}
