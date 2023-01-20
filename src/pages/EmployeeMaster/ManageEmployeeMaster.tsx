@@ -27,6 +27,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -167,6 +168,9 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
                   fieldsData={initialData.fields}
                   size="small"
                   fullWidth
+                  onImageUploadCompletePercentage={(completePercentage)=>{
+                    setUploadingImageOrFileProgress(completePercentage)
+                  }}
                 />
               </Form>
             </CustomDialogContent>
@@ -191,7 +195,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
                 Cancel
               </Button>
               <Button
-                disabled={loading || submitting}
+                disabled={loading || submitting || uploadingImageOrFileProgress > 0}
                 variant="contained"
                 color="primary"
                 type="submit"

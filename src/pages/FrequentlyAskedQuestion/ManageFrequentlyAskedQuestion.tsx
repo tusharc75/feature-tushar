@@ -91,7 +91,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
     } else {
       axiosInstance()
         .post(`/frequently-asked-question`, values)
-        .then(({ data: { data } }) => {
+        .then(({ data }) => {
           setLoading(false);
           onSuccess(data);
           setSubmitting(true);
