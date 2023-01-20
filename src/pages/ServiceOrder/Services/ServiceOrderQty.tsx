@@ -19,186 +19,10 @@ import { Skeleton } from '@material-ui/lab';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import routes from 'src/components/Helpers/Routes';
+import axiosInstance from 'src/axios/axiosInstance';
 
 const ServiceOrderQty = ({ onClose, serviceData, handleSave, from = null }) => {
-  const fieldData = [{
-    "_id": "630dbe1e9ec418610523533e",
-    "fieldLabel": "Qty",
-    "type": "decimal",
-    "option": [],
-    "required": true,
-    "isTooltip": false,
-    "tooltipMessage": "",
-    "editAble": true,
-    "order": 1,
-    "decimalPlaces": 2,
-    "sectionName": "Quantity Information",
-    "fieldName": "qty",
-    "resource": "Service Order",
-    "defaultValue": "",
-    "disableOnEdit": false,
-    "hiddenField": false,
-    "isDefaultValue": false,
-    "isDropdown": false,
-    "isWarningTooltip": false,
-    "lookup": false,
-    "lookupResource": "",
-    "warningTooltipMessage": "",
-    "brand": "630dbe1e9ec418610523529c",
-    "createdBy": {
-      "user": "61b84437885fdf02d9104cb0",
-      "date": "2022-08-30T07:37:02.237Z"
-    },
-    "roleType": 0,
-    "entityWiseLookup": false,
-    "isColumnEditable": true,
-    "isMinMaxValue": false,
-    "isSystemGenerate": false,
-    "maxValue": 0,
-    "maxValueServiceAdd": "",
-    "minValue": 0,
-    "minValueServiceAdd": ""
-  },
-  {
-    "_id": "630dbe1e9ec418610523533f",
-    "fieldLabel": "Unit",
-    "type": "dropDown",
-    "option": [
-      {
-        "optionLabel": "Piece",
-        "optionValue": "Piece",
-        "order": 1,
-        "default": false
-      },
-      {
-        "optionLabel": "One Well Pad",
-        "optionValue": "One Well Pad",
-        "order": 2,
-        "default": false
-      },
-      {
-        "optionLabel": "Two Well Pad",
-        "optionValue": "Two Well Pad",
-        "order": 3,
-        "default": false
-      },
-      {
-        "optionLabel": "Three Well Pad",
-        "optionValue": "Three Well Pad",
-        "order": 4,
-        "default": false
-      },
-      {
-        "optionLabel": "Four Well Pad",
-        "optionValue": "Four Well Pad",
-        "order": 5,
-        "default": false
-      },
-      {
-        "optionLabel": "Five Well Pad",
-        "optionValue": "Five Well Pad",
-        "order": 6,
-        "default": false
-      },
-      {
-        "optionLabel": "Six Well Pad",
-        "optionValue": "Six Well Pad",
-        "order": 7,
-        "default": false
-      }
-    ],
-    "required": true,
-    "isTooltip": false,
-    "tooltipMessage": "",
-    "editAble": true,
-    "order": 2,
-    "hiddenField": false,
-    "isDefaultValue": false,
-    "disableOnEdit": false,
-    "addManualOptionInExcel": false,
-    "addAdditionalOption": false,
-    "lookup": false,
-    "lookupResource": "",
-    "isDropdown": false,
-    "isWarningTooltip": false,
-    "warningTooltipMessage": "",
-    "defaultValue": "",
-    "sectionName": "Quantity Information",
-    "fieldName": "unit",
-    "resource": "Service Order",
-    "brand": "630dbe1e9ec418610523529c",
-    "createdBy": {
-      "user": "61b84437885fdf02d9104cb0",
-      "date": "2022-08-30T07:37:02.237Z"
-    },
-    "roleType": 0
-  },
-  {
-    "_id": "63c8e3d1afbb98da8bb62154",
-    "fieldLabel": "Estimate Start Date",
-    "type": "dateTime",
-    "option": [],
-    "required": true,
-    "isTooltip": false,
-    "tooltipMessage": "",
-    "editAble": true,
-    "deletAble": true,
-    "order": 8,
-    "hiddenField": false,
-    "isDefaultValue": false,
-    "disableOnEdit": false,
-    "lookup": false,
-    "lookupResource": "",
-    "entityWiseLookup": false,
-    "isMinMaxValue": false,
-    "minValue": 0,
-    "maxValue": 0,
-    "minValueServiceAdd": "",
-    "maxValueServiceAdd": "",
-    "isDropdown": false,
-    "isSystemGenerate": false,
-    "isColumnEditable": false,
-    "isWarningTooltip": false,
-    "warningTooltipMessage": "",
-    "defaultValue": "",
-    "fieldName": "estimateStartDate",
-    "sectionName": "Service Order Information",
-    "resource": "Service Order",
-    "brand": "630dbe1e9ec418610523529c"
-  },
-  {
-    "_id": "63c8e3d1afbb98da8bb62155",
-    "fieldLabel": "Estimate End Date",
-    "type": "dateTime",
-    "option": [],
-    "required": true,
-    "isTooltip": false,
-    "tooltipMessage": "",
-    "editAble": true,
-    "deletAble": true,
-    "order": 9,
-    "hiddenField": false,
-    "isDefaultValue": false,
-    "disableOnEdit": false,
-    "lookup": false,
-    "lookupResource": "",
-    "entityWiseLookup": false,
-    "isMinMaxValue": false,
-    "minValue": 0,
-    "maxValue": 0,
-    "minValueServiceAdd": "",
-    "maxValueServiceAdd": "",
-    "isDropdown": false,
-    "isSystemGenerate": false,
-    "isColumnEditable": false,
-    "isWarningTooltip": false,
-    "warningTooltipMessage": "",
-    "defaultValue": "",
-    "fieldName": "estimateEndDate",
-    "sectionName": "Service Order Information",
-    "resource": "Service Order",
-    "brand": "630dbe1e9ec418610523529c"
-  }];
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [digitalData, setDigitalData] = useState({ fields: [], initialValues: {} });
   const [formsData, setFormsData] = useState([]);
@@ -209,12 +33,20 @@ const ServiceOrderQty = ({ onClose, serviceData, handleSave, from = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
+    fetchFields()
+  }, []);
+
+  const fetchFields = async () => {
+    let fieldData;
+    const response: any = await axiosInstance().get("/field?resource=Service Order Detail");
+    fieldData = response?.data?.data;
+    fieldData = fieldData?.map((d: any) => d.fieldData);
     setDigitalData({
       fields: fieldData,
       initialValues: getObjKeysWithValues(serviceData, fieldData)
     });
     setFormsData(setFieldsInAscendingOrder(fieldData));
-  }, []);
+  }
 
   const handleSubmit = async (errors, setTouched, values, setValues, setErrors) => {
     if (Object.keys(errors).length) {

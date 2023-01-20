@@ -54,7 +54,7 @@ const TechnicianDispatch = ({
 
     useEffect(() => {
         fetchFields();
-    }, [allowedToEdit]);
+    }, []);
 
     useEffect(() => {
         fetchData();

@@ -62,7 +62,7 @@ const ServiceOrderDetailsPage = () => {
     const [allowedToDelete, setAllowedToDelete] = useState(false);
     const [stepFullScreen, setStepFullScreen] = useState(false);
     const [nextStep, setNextStep] = useState(false);
-    const [serviceSteps, setServiceSteps] = useState(['Add Services', 'Assign Technician', 'Technician Dispatch']);
+    const [serviceSteps, setServiceSteps] = useState(['Add Services', 'Assign Technician', 'Technician Dispatch', 'Invoice']);
     const [currencySymbol, setCurrencySymbol] = useState(null);
     const [currentStep, setCurrentStep] = useState(null);
 
@@ -333,7 +333,20 @@ const ServiceOrderDetailsPage = () => {
                                                 showActivity={showActivity}
                                                 renderedFrom={`${renderedFrom}_grid-3`}
                                                 stepFullScreen={stepFullScreen}
-                                                allowedToEdit={true}
+                                                allowedToEdit={serviceSteps[currentStep] === 'Invoice' ? false : true}
+                                            />
+                                        )}
+                                        {serviceSteps[currentStep] === 'Invoice' && serviceOrderData && (
+                                            <TechnicianDispatch
+                                                serviceOrderData={serviceOrderData}
+                                                setNextStep={setNextStep}
+                                                currencySymbol={currencySymbol}
+                                                isSmallScreen={isSmallScreen}
+                                                isTabletScreen={isTabletScreen}
+                                                showActivity={showActivity}
+                                                renderedFrom={`${renderedFrom}_grid-4`}
+                                                stepFullScreen={stepFullScreen}
+                                                allowedToEdit={false}
                                             />
                                         )}
                                     </ContentFullScreen>
