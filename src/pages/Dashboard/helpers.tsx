@@ -17,81 +17,68 @@ export const groupByKey = (arr = [], keyGetter) => {
 // CREATE LIST FROM OBJECT SEPATATED BY KEY SECTIONNAME AND ASSGIN ICON, DESCRIPTOIN, AND COLOR
 export const assignIconAndText = (groupedData) => {
   let dataList = [];
+  let index = 0;
   for (const [key, values] of Object.entries(groupedData)) {
     if (key !== '') {
-      let obj: any = { ...setDataBySectionName(key) };
+      let obj: any = { ...setDataBySectionName(key, index) };
       obj.head = key;
       obj.items = values;
       dataList.push(obj);
+      index++;
     }
   }
   return dataList;
 };
 
 // CHECK SECTION NAME AND RETURN ICON, COLOR, AND DESCRIPTION
-const setDataBySectionName = (secName) => {
-  let icon = <img src={SVGImages(secName)} alt="Form Logo" width={IMAGE_WIDTH} height={IMAGE_HEIGHT} />;
-  // let icon = <DashboardIcons[secName]/>
+const setDataBySectionName = (secName, index) => {
+
+  const iconColour = colourCodes[index]?.icon || ['#FFA800', '#E35200']
+  let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
-  let color = colorPalette[secName] || '#FFEFEE';
-  const iconColors = getIconColor(color);
+  let color = colourCodes[index]?.main || '#FFF7F2'
 
-  switch (secName) {
-    case 'Product Setup':
-      text = 'Product and Category Setup.';
-      icon = <DashboardIcons.PRODUCT_SETUP colors={iconColors} />;
-      break;
-    case 'Admin Portal':
-      text = 'Build your own Template, Manage Roles and Entities.';
-      icon = <DashboardIcons.ADMIN_PORTAL colors={iconColors} />;
-      break;
-    case 'CRM +':
-      text = 'Convert leads and close sales deals faster.';
-      icon = <DashboardIcons.CRM colors={iconColors} />;
-      break;
-    case 'ROM':
-      text = 'Fulfill Rental Orders Faster.';
-      icon = <DashboardIcons.ROM colors={iconColors} />;
-      break;
-    case 'Accounts':
-      text = 'Customer and Supplier Account Management at your fingertips.';
-      icon = <DashboardIcons.ACCOUNTS colors={iconColors} />;
-      break;
-    case 'Activities':
-      text = 'Assign and Access Activities related to an Order.';
-      icon = <DashboardIcons.ACTIVITIES colors={iconColors} />;
-      break;
-    case 'Dynamic Forms':
-      text = 'Setup Dynamic Forms & Templates';
-      icon = <DashboardIcons.FORM_ICON colors={iconColors} />;
-      break;
-    case 'Inventory Management':
-      text = 'Manage Inventory and Purchases Smartly.';
-      icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColors} />;
-      break;
-
-    case 'Sales Management':
-      text = 'Convert leads and close sales deals faster.';
-      icon = <DashboardIcons.SALES_MANAGEMENT colors={iconColors} />;
-      break;
-    case 'Rental Management':
-      text = 'Fulfill Rental Orders Faster.';
-      icon = <DashboardIcons.RENTAL_MANAGEMENT colors={iconColors} />;
-      break;
-    case 'eCommerce':
-      text = 'Simplified eCommerce functionalities to smoothen your lives.';
-      icon = <DashboardIcons.ECOMMERCE colors={iconColors} />;
-      break;
-    case 'Repair & Maintenance Management':
-      text = 'Repair and Maintain your product and services at ease.';
-      icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColors} />;
-      break;
-    case 'Service Management':
-      text = 'Fulfill Service Orders Faster.';
-      break;
-    default:
-      text = '';
+  if (["CRM +", "Sales Management"].includes(secName)) {
+    text = 'Convert leads and close sales deals faster.';
+    icon = <DashboardIcons.CRM colors={iconColour} />;
   }
+  else if (["eCommerce"].includes(secName)) {
+    text = 'Simplified eCommerce functionalities to smoothen your lives.';
+    icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
+  }
+  else if (["Inventory Management"].includes(secName)) {
+    text = 'Manage Inventory and Purchases Smartly.';
+    icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
+  }
+  else if (["Rental Operations Management", "ROM"].includes(secName)) {
+    text = 'Fulfill Rental Orders Faster.';
+    icon = <DashboardIcons.ROM colors={iconColour} />;
+  }
+  else if (["Field Service Operations"].includes(secName)) {
+    text = 'Fulfill Service Orders Faster.';
+    icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
+  }
+  else if (["Repair and Maintenance Management"].includes(secName)) {
+    text = 'Repair and Maintain your product and services at ease.';
+    icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
+  }
+  else if (["Admin Portal"].includes(secName)) {
+    text = 'Build your own Template, Manage Roles and Entities.';
+    icon = <DashboardIcons.ADMIN_PORTAL colors={iconColour} />;
+  }
+  else if (["Accounts"].includes(secName)) {
+    text = 'Customer and Supplier Account Management at your fingertips.';
+    icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
+  }
+  else if (["Product Setup"].includes(secName)) {
+    text = 'Product and Category Setup.';
+    icon = <DashboardIcons.PRODUCT_SETUP colors={iconColour} />;
+  }
+  else if (["Dynamic Forms"].includes(secName)) {
+    text = 'Setup Dynamic Forms & Templates';
+    icon = <DashboardIcons.FORM_ICON colors={iconColour} />;
+  }
+  
   return {
     icon: icon,
     text: text,
@@ -99,47 +86,29 @@ const setDataBySectionName = (secName) => {
   };
 };
 
-// SET ICON COLORS BY CARD BACKGROUND COLOR
-const getIconColor = (mainColor: string) => {
-  let colors = ['#FC5757', '#C60707'];
-  switch (mainColor) {
-    case '#FFEFEE':
-      colors = ['#FC5757', '#C60707'];
-      break;
-    case '#F3F8FF':
-      colors = ['#577BFC', '#1608BD'];
-      break;
-    case '#FFF7F2':
-      colors = ['#FFA800', '#E35200'];
-      break;
-    case '#F9FDEC':
-      colors = ['#3BE961', '#058D12'];
-      break;
-    case '#FFFAEC':
-      colors = ['#FAC94B', '#FF9B04'];
-      break;
-    case '#F6F1FF':
-      colors = ['#AD14F5', '#6203AC'];
-      break;
-    default:
-      break;
+const colourCodes = [
+  {
+    main: '#FFEFEE',
+    icon: ['#FC5757', '#C60707']
+  },
+  {
+    main: '#F3F8FF',
+    icon: ['#577BFC', '#1608BD']
+  },
+  {
+    main: '#FFF7F2',
+    icon: ['#FFA800', '#E35200']
+  },
+  {
+    main: '#F9FDEC',
+    icon: ['#3BE961', '#058D12']
+  },
+  {
+    main: '#FFFAEC',
+    icon: ['#FAC94B', '#FF9B04']
+  },
+  {
+    main: '#F6F1FF',
+    icon: ['#AD14F5', '#6203AC']
   }
-  return colors;
-};
-
-// COLOR PALATTE BY SECTION NAME
-const colorPalette = {
-  'Product Setup': '#FFEFEE',
-  'Admin Portal': '#F3F8FF',
-  'CRM +': '#FFF7F2',
-  ROM: '#F9FDEC',
-  Accounts: '#FFFAEC',
-  Activities: '#F6F1FF',
-  'Dynamic Forms': '#FFEFEE',
-  'Inventory Management': '#FFF7F2',
-  'Sales Management': '#FFEFEE',
-  'Rental Management': '#F3F8FF',
-  eCommerce: '#F9FDEC',
-  'Repair & Maintenance Management': '#FFFAEC',
-  'Service Management': '#F6F1FF'
-};
+]
