@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Typography, Box, Button, ButtonGroup } from '@material-ui/core';
-import { Map } from '@material-ui/icons';
+import { Typography, Box, Button, ButtonGroup, IconButton } from '@material-ui/core';
+import { Close, Map } from '@material-ui/icons';
 import moment from 'moment';
 import { isMobile, isTablet } from 'react-device-detect';
 import Loader from 'src/components/Loader';
@@ -99,6 +99,18 @@ function Roadmap({ filter }) {
     setSelected(nodeIds);
   };
 
+  const mapViewData = [
+    {
+      count: 1,
+      location: {
+        concatedName: 'hello',
+        latitude: 25.8391492,
+        longitude: 77.5541247
+      },
+      _id: 'asdfasdfasl'
+    }
+  ];
+
   return !loadingRoadmap ? (
     <Box bgcolor="white">
       <Box border={1} borderColor="grey.300" display="flex" height={height} style={{ position: 'relative' }}>
@@ -174,7 +186,18 @@ function Roadmap({ filter }) {
             </Box>
           ) : (
             <Box border={1} width={'100%'} height={'100%'} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
-              <MapView smallScreen={true} data={[]} loading={false} />
+              <MapView data={mapViewData} onClose={() => setShowMap({ showMap: false, data: [] })} />
+              <IconButton
+                onClick={() => setShowMap({ showMap: false, data: [] })}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  zIndex: 1
+                }}
+              >
+                <Close />
+              </IconButton>
             </Box>
           )}
         </Box>

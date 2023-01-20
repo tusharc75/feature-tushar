@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, CircularProgress } from '@material-ui/core';
-import { GoogleMap, Marker, MarkerClusterer, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, Marker, MarkerClusterer, InfoWindow, Polyline } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
 
 type locationType = {
@@ -15,12 +15,11 @@ type locationType = {
 
 interface MapViewProps {
   data: any[];
-  loading?: boolean;
-  smallScreen?: boolean;
+  onClose: () => void;
 }
 
 const MapView = (props: MapViewProps) => {
-  const { data, smallScreen } = props;
+  const { data, onClose } = props;
   const [isFetching, setFetching] = React.useState(false);
   const [center, setCenter] = React.useState(null);
   const [selectedAsset, setSelectedAsset] = React.useState([]);
@@ -81,33 +80,48 @@ const MapView = (props: MapViewProps) => {
           gestureHandling: 'cooperative'
         }}
         mapContainerStyle={containerStyle}
-        center={center || { lat: 37.09, lng: -95.713 }}
-        zoom={4}
+        center={center || { lat: 25.8391492, lng: 77.5541247 }}
+        // zoom={4}
       >
-        {/* <MarkerClusterer>
-          {(clusterer) =>
-            data.map(
-              (asset: locationType) =>
-                asset?._id && (
-                  <Marker
-                    key={asset._id}
-                    label={{
-                      text: asset.count.toString(),
-                      fontWeight: 'bold',
-                      color: 'white',
-                      fontSize: '14px'
-                    }}
-                    onClick={() => {
-                      setCenter(new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude));
-                      fetchLocationData(asset._id, asset);
-                    }}
-                    position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
-                    clusterer={clusterer}
-                  />
-                )
-            )
-          }
-        </MarkerClusterer> */}
+        <MarkerClusterer>
+          {(clusterer) => (
+            <>
+              {data.map(
+                (asset: locationType) =>
+                  asset?._id && (
+                    <Marker
+                      key={asset._id}
+                      label={{
+                        text: asset.count.toString(),
+                        fontWeight: 'bold',
+                        color: 'white',
+                        fontSize: '14px'
+                      }}
+                      // onClick={() => {
+                      //   //   setCenter(new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude));
+                      //   //   fetchLocationData(asset._id, asset);
+                      // }}
+                      position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
+                      clusterer={clusterer}
+                    />
+                  )
+              )}
+              <Polyline
+                key={clusterer.batchSize}
+                path={data.map((asset) => new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude))}
+                options={{
+                  strokeColor: '#0000FF',
+                  strokeOpacity: 0.8,
+                  strokeWeight: 1,
+                  icons: [
+                    { icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 4 }, offset: '0', repeat: '20px' },
+                    { icon: { path: 'M -2,-2 2,0 M 2,-2 -2,0', strokeOpacity: 1, scale: 1 }, offset: '50%' }
+                  ]
+                }}
+              />
+            </>
+          )}
+        </MarkerClusterer>
 
         {/* {selectedBase && (
           <InfoWindow
