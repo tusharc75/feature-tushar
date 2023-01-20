@@ -17,7 +17,14 @@ import { camelCase } from 'lodash';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import useColumns, { getStaticFields, getFrameworkComponents } from '../../constants/useColumns';
-import { getLocalStorageArrayData, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, removeLocalStorage, sidebarResource } from 'src/constants/helpers';
+import {
+  getLocalStorageArrayData,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  removeLocalStorage,
+  sidebarResource
+} from 'src/constants/helpers';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -25,16 +32,18 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const EmployeeMaster = () => {
-
   const renderedFrom = camelCase(routes?.employeeMaster.title);
-  const {state: { permissions, selectedEntity }}: any = useData();
+  const {
+    state: { permissions, selectedEntity }
+  }: any = useData();
   const toastConfig = useContext(CustomToastContext);
 
   //  Grid Variables - Start
 
   const [gridApi, setGridApi] = useState(null);
   const [state, dispatch] = useReducer(reducer, intialState);
-  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } = state;
+  const { dataRows, rowCount, loading, page, limit, pageSizes, search, filters, sorting, selectedRecords, appendRows, showFilteredRecordsOnly } =
+    state;
   const { getColumnData } = useColumns();
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
   const [anchorEl, setAnchorEl] = useState(null);
@@ -49,7 +58,6 @@ const EmployeeMaster = () => {
   const [employeeMasterId, setEmployeeMasterId] = useState(null);
 
   const fetchGridColumns = () => {
-
     axiosInstance()
       .get(`/field?resource=${sidebarResource?.employeeMaster}`)
       .then(({ data: { data } }) => {
@@ -59,10 +67,16 @@ const EmployeeMaster = () => {
           if (o?.fieldData?.primaryField === true) {
             columns = [
               ...columns,
-              { field: o?.fieldData?.fieldName, headerName: o?.fieldData?.fieldLabel, show: true, disabled: true, cellRenderer: 'nameRenderer', primaryField: true}
+              {
+                field: o?.fieldData?.fieldName,
+                headerName: o?.fieldData?.fieldLabel,
+                show: true,
+                disabled: true,
+                cellRenderer: 'nameRenderer',
+                primaryField: true
+              }
             ];
           } else {
-
             let currentColumn = getColumnData(renderedFrom, o?.fieldData, routes.employeeMaster.path);
 
             if (currentColumn !== null) {
@@ -86,7 +100,6 @@ const EmployeeMaster = () => {
   };
 
   const fetchEmployeeMasterData = () => {
-
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
@@ -98,7 +111,7 @@ const EmployeeMaster = () => {
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data.map((u: any) => {
-          let finalObject:any = prepareDataForGrid(u);
+          let finalObject: any = prepareDataForGrid(u);
 
           finalObject['canDelete'] = permissions?.employeeMaster?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s?._id === u?._id);
@@ -107,7 +120,6 @@ const EmployeeMaster = () => {
           return {
             ...finalObject
           };
-
         });
         setIsAllChecked(false);
         setClonedData(data);
@@ -192,7 +204,6 @@ const EmployeeMaster = () => {
     return deepFilter;
   };
 
-
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -217,28 +228,28 @@ const EmployeeMaster = () => {
 
   const ActionsRenderer = (params) => (
     <Fragment>
-    {permissions?.employeeMaster?.isCreate ? (
-      <Tooltip title="Clone">
-        <IconButton
-          size="small"
-          aria-label="Clone"
-          onClick={() => {
-            setEmployeeMasterId(params.data.id);
-            setOpen({ open: true, isClone: true });
-          }}
-        >
-          <FileCopyIcon fontSize="small" color="primary" />
-        </IconButton>
-      </Tooltip>
-    ) : (
-      <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
-        <IconButton aria-label="Clone" size="small">
-          <FileCopyIcon fontSize="small"  />
-        </IconButton>
-      </Tooltip>
-    )}
+      {permissions?.employeeMaster?.isCreate ? (
+        <Tooltip title="Clone">
+          <IconButton
+            size="small"
+            aria-label="Clone"
+            onClick={() => {
+              setEmployeeMasterId(params.data.id);
+              setOpen({ open: true, isClone: true });
+            }}
+          >
+            <FileCopyIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <IconButton aria-label="Clone" size="small">
+            <FileCopyIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
 
-    {params?.data?.canDelete ? (
+      {params?.data?.canDelete ? (
         <Tooltip title="Delete">
           <IconButton
             aria-label="Delete"
@@ -253,12 +264,12 @@ const EmployeeMaster = () => {
       ) : (
         <Tooltip className="cursor-stop" title="You do not have permission to delete">
           <IconButton aria-label="Delete" size="small">
-            <DeleteIcon fontSize="small"/>
+            <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       )}
     </Fragment>
-  )
+  );
 
   const handleDelete = () => {
     let ids = [];
@@ -293,203 +304,200 @@ const EmployeeMaster = () => {
     fetchEmployeeMasterData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-
   return (
     <Fragment>
-    <Grid container className="headerbox">
-      <Grid item md={4} sm={11} xs={10}>
-        <CustomBreadCrumbs routes={[{ title: routes.employeeMaster.title }]} />
-      </Grid>
-      <Grid item md={8} sm={1} xs={2}>
-        <ImportExportLinks
-          permissions={permissions.employeeMaster}
-          module="employeeMaster"
-          api={'employee-master'}
-          afterImportCompleted={() => {
-            fetchEmployeeMasterData();
-          }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
-          ids={
-            getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
-              ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
-              : []
-          }
-          onExportToExcelSuccess={() => {
-            if (gridApi) gridApi.deselectAll();
-            else fetchEmployeeMasterData();
-          }}
-          additionalParams={getQueryString(true)}
-        />
-      </Grid>
-    </Grid>
-    <CustomContainer>
-      <div className="header-panel">
-        <Grid container className={styles.filter_side_container}>
-          <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
-            <div className="d-flex align-items-center">
-              <IoIosPeople size={20} style={{ paddingBottom: '3px' }} />
-              <span className="listingHeader">{routes.employeeMaster.title}</span>
-            </div>
-          </Grid>
-          <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
-            <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-              <Grid style={{ width: '100%', display: 'flex' }}>
-                <SearchBox
-                  onSearch={handleSearch}
-                  searchbox={styles.search_box_input}
-                  width={isMobile ? '200px' : '242px'}
-                  style={isMobile ? { flex: 1 } : {}}
-                  size="small"
-                  value={search}
-                />
-              </Grid>
-              <Grid style={{ display: 'flex', gap: '5px' }}>
-                {permissions.employeeMaster.isCreate && (
-                  <Button
-                    className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
-                    onClick={() => {
-                      setEmployeeMasterId(null);
-                      setOpen({ open: true, isClone: false });
-                    }}
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    size="small"
-                    color="primary"
-                    startIcon={isMobile && !isTablet ? null : <AddOutlined />}
-                  >
-                    {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
-                  </Button>
-                )}
-                {permissions?.employeeMaster?.isDelete && (
-                    <>
-                     <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  color="default"
-                  size="small"
-                  onClick={openActions}
-                  disabled={selectedRecords.length ? false : true}
-                  aria-controls="action-menu"
-                  className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
-                >
-                  {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
-                </Button>
-                <Menu
-                  anchorEl={anchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="action-menu"
-                  open={Boolean(anchorEl)}
-                  onClose={closeActions}
-                >
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      // eslint-disable-next-line no-lone-blocks
-                      {
-                        selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-                      }
-                      setShowDeleteConfirmBox(true);
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-                    </>
-                )}
-               
-              </Grid>
-            </Box>
-          </Grid>
+      <Grid container className="headerbox">
+        <Grid item md={4} sm={11} xs={10}>
+          <CustomBreadCrumbs routes={[{ title: routes.employeeMaster.title }]} />
         </Grid>
-      </div>
-      {Object.keys(frameWorkComponent).length > 0 ? (
-        isMobile && !isTablet ? (
-          <CustomSwipableList
-            allowSelection={true}
-            allowSwipe={true}
+        <Grid item md={8} sm={1} xs={2}>
+          <ImportExportLinks
             permissions={permissions.employeeMaster}
-            primaryField={columns?.find((d) => d.primaryField)}
-            onClick={(data) => {
-              setEmployeeMasterId(data.id);
-              setOpen({ open: true, isClone: false });
+            module="employeeMaster"
+            api={'employee-master'}
+            afterImportCompleted={() => {
+              fetchEmployeeMasterData();
             }}
-            dataRows={dataRows}
-            selectedRecords={selectedRecords}
-            dispatch={dispatch}
-            onEdit={(data) => {
-              setEmployeeMasterId(data.id);
-              setOpen({ open: true, isClone: false });
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length}
+            ids={
+              getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.length
+                ? getLocalStorageArrayData(`${localStorageSelectedRecords}`)?.map((obj) => obj._id)
+                : []
+            }
+            onExportToExcelSuccess={() => {
+              if (gridApi) gridApi.deselectAll();
+              else fetchEmployeeMasterData();
             }}
-            extraParamsToCheckDelete={true}
-            onDelete={(data) => {
-              setDeleteRecord(data);
-              setShowDeleteConfirmBox(true);
-            }}
-            rowCount={rowCount}
-            page={page}
-            loading={loading}
-            additionalDetails={[]}
-            owerCollaboratorInitialsOrImages=""
-            onCreate={false}
-            showClone={true}
-            onClone={(data) => {
-              setEmployeeMasterId(data.id);
-              setOpen({ open: true, isClone: true });
-            }}
-            chips={[]}
-            renderedFrom={renderedFrom}
+            additionalParams={getQueryString(true)}
           />
-        ) : (
-          <CustomAgGrid
-            columns={columns}
-            dataRows={dataRows}
-            frameworkComponents={frameWorkComponent}
-            setGridApi={setGridApi}
-            dispatch={dispatch}
-            rowCount={rowCount}
-            limit={limit}
-            pageSizes={pageSizes}
-            page={page}
-            allowAction={true}
-            loading={loading}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchEmployeeMasterData}
-            showOnlyShowFilteredRecordSwitch={true}
+        </Grid>
+      </Grid>
+      <CustomContainer>
+        <div className="header-panel">
+          <Grid container className={styles.filter_side_container}>
+            <Grid item xs={12} md={6} sm={12} className={isMobile ? styles.mobile_panel : 'd-flex align-items-center gap-1'}>
+              <div className="d-flex align-items-center">
+                <IoIosPeople size={20} style={{ paddingBottom: '3px' }} />
+                <span className="listingHeader">{routes.employeeMaster.title}</span>
+              </div>
+            </Grid>
+            <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
+              <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                <Grid>
+                  <SearchBox
+                    onSearch={handleSearch}
+                    searchbox={styles.search_box_input}
+                    width={isMobile ? '200px' : '242px'}
+                    style={isMobile ? { flex: 1 } : {}}
+                    size="small"
+                    value={search}
+                  />
+                </Grid>
+                <Grid style={{ display: 'flex', gap: '5px' }}>
+                  {permissions.employeeMaster.isCreate && (
+                    <Button
+                      className={isMobile && !isTablet ? 'mobile_button' : styles.add_submit_btn}
+                      onClick={() => {
+                        setEmployeeMasterId(null);
+                        setOpen({ open: true, isClone: false });
+                      }}
+                      variant={isMobile && !isTablet ? 'text' : 'contained'}
+                      size="small"
+                      color="primary"
+                      startIcon={isMobile && !isTablet ? null : <AddOutlined />}
+                    >
+                      {isMobile && !isTablet ? <MdAdd size={23} /> : 'Add'}
+                    </Button>
+                  )}
+                  {permissions?.employeeMaster?.isDelete && (
+                    <>
+                      <Button
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        color="default"
+                        size="small"
+                        onClick={openActions}
+                        disabled={selectedRecords.length ? false : true}
+                        aria-controls="action-menu"
+                        className={isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn}
+                      >
+                        {isMobile && !isTablet ? '' : 'Actions'} <ExpandMore />
+                      </Button>
+                      <Menu
+                        anchorEl={anchorEl}
+                        keepMounted
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        id="action-menu"
+                        open={Boolean(anchorEl)}
+                        onClose={closeActions}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            closeActions();
+                            // eslint-disable-next-line no-lone-blocks
+                            {
+                              selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+                            }
+                            setShowDeleteConfirmBox(true);
+                          }}
+                        >
+                          Delete
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  )}
+                </Grid>
+              </Box>
+            </Grid>
+          </Grid>
+        </div>
+        {Object.keys(frameWorkComponent).length > 0 ? (
+          isMobile && !isTablet ? (
+            <CustomSwipableList
+              allowSelection={true}
+              allowSwipe={true}
+              permissions={permissions.employeeMaster}
+              primaryField={columns?.find((d) => d.primaryField)}
+              onClick={(data) => {
+                setEmployeeMasterId(data.id);
+                setOpen({ open: true, isClone: false });
+              }}
+              dataRows={dataRows}
+              selectedRecords={selectedRecords}
+              dispatch={dispatch}
+              onEdit={(data) => {
+                setEmployeeMasterId(data.id);
+                setOpen({ open: true, isClone: false });
+              }}
+              extraParamsToCheckDelete={true}
+              onDelete={(data) => {
+                setDeleteRecord(data);
+                setShowDeleteConfirmBox(true);
+              }}
+              rowCount={rowCount}
+              page={page}
+              loading={loading}
+              additionalDetails={[]}
+              owerCollaboratorInitialsOrImages=""
+              onCreate={false}
+              showClone={true}
+              onClone={(data) => {
+                setEmployeeMasterId(data.id);
+                setOpen({ open: true, isClone: true });
+              }}
+              chips={[]}
+              renderedFrom={renderedFrom}
+            />
+          ) : (
+            <CustomAgGrid
+              columns={columns}
+              dataRows={dataRows}
+              frameworkComponents={frameWorkComponent}
+              setGridApi={setGridApi}
+              dispatch={dispatch}
+              rowCount={rowCount}
+              limit={limit}
+              pageSizes={pageSizes}
+              page={page}
+              allowAction={true}
+              loading={loading}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchEmployeeMasterData}
+              showOnlyShowFilteredRecordSwitch={true}
+            />
+          )
+        ) : null}
+        {showDeleteConfirmBox && (
+          <ConfirmationDialog
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete Employe Master  ${deleteRecord?.employeeNumber || ''} ?`}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
+            }}
+            onOk={handleDelete}
           />
-        )
-      ) : null}
-      {showDeleteConfirmBox && (
-        <ConfirmationDialog
-          open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete Employe Master  ${deleteRecord?.employeeNumber || ''} ?`}
-          onClose={() => {
-            setDeleteRecord(null);
-            setShowDeleteConfirmBox(false);
-          }}
-          onOk={handleDelete}
-        />
-      )}
+        )}
 
-      {open?.open && (
-        <ManageEmployeeMaster
-          id={employeeMasterId}
-          isClone={open?.isClone}
-          onClose={() => setOpen({ open: false, isClone: false })}
-          onSuccess={() => {
-            setOpen({ open: false, isClone: false });
-            fetchEmployeeMasterData();
-          }}
-        />
-      )}
-    </CustomContainer>
-  </Fragment>
-
-  )
+        {open?.open && (
+          <ManageEmployeeMaster
+            id={employeeMasterId}
+            isClone={open?.isClone}
+            onClose={() => setOpen({ open: false, isClone: false })}
+            onSuccess={() => {
+              setOpen({ open: false, isClone: false });
+              fetchEmployeeMasterData();
+            }}
+          />
+        )}
+      </CustomContainer>
+    </Fragment>
+  );
 };
 
 export default EmployeeMaster;
