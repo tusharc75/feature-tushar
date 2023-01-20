@@ -1,4 +1,4 @@
-.MuiStepLabel-label{
+.MuiStepLabel-label {
   font-size: 12px !important;
 }
 .nameLink {
@@ -24,74 +24,76 @@
   & .MuiStepLabel-iconContainer {
     color: #378280 !important;
     opacity: 1;
-    font-Size: 12px;
-    .MuiStepIcon-root.MuiStepIcon-active{
+    font-size: 12px;
+    .MuiStepIcon-root.MuiStepIcon-active {
       font-size: 18px !important;
-      color: #378280 !important
+      color: #378280 !important;
     }
 
-
-      active{
-        color: #378280 !important;
-      }
+    active {
+      color: #378280 !important;
+    }
   }
   & .MuiStepLabel-label {
     color: #378280 !important;
-    font-Size: 12px
+    font-size: 12px;
   }
-
 }
-.MuiStepLabel-label.MuiStepLabel-completed{
+.MuiStepLabel-label.MuiStepLabel-completed {
   color: var(--secondary) !important;
 }
 
 .MuiTab-textColorPrimary.Mui-selected {
-      border-radius: 0;
-      background: white;
-      color: var(--primary) !important;
-      border: 1px solid lightgray;
-  border-top: 4px solid #1B7D1C !important;
+  border-radius: 0;
+  background: white;
+  color: var(--primary) !important;
+  border: 1px solid lightgray;
+  border-top: 4px solid #1b7d1c !important;
   border-bottom: 0px !important;
 
-      //border-top-right-radius: 12px;
-      //border-top-left-radius: 12px;
+  //border-top-right-radius: 12px;
+  //border-top-left-radius: 12px;
 }
-.MuiTab-textColorPrimary{
+.MuiTab-textColorPrimary {
   border: 1px solid grey !important;
   border-radius: 0px !important;
 }
-.tab-font{
+.tab-font {
   font-size: 14px;
 }
-.stepperButton{
+.stepperButton {
   padding: 0px !important;
   margin-left: 20px !important;
   color: #418887 !important;
 }
-.stepperButtonNext{
+.stepperButtonNext {
   padding: 0px !important;
   margin-right: 20px !important;
   color: #418887 !important;
 }
-.MuiButtonBase-root.Mui-disabled{
+.MuiButtonBase-root.Mui-disabled {
   color: grey !important;
 }
-.buttonIconMobile{
+.MuiButtonBase-root.Mui-disabled.MuiButton-containedPrimary {
+  color: white !important;
+  opacity: 0.5 !important;
+}
+.buttonIconMobile {
   min-width: 40px !important;
 }
-.setIconForMobile{
+.setIconForMobile {
   min-width: 40px !important;
 }
 
-.MuiStepIcon-root.MuiStepIcon-completed{
+.MuiStepIcon-root.MuiStepIcon-completed {
   color: var(--secondary) !important;
   font-size: 18px !important;
 }
-.MuiStepIcon-root{
+.MuiStepIcon-root {
   font-size: 18px !important;
 }
-@media (max-width: 760px){
-  .MuiStepLabel-label{
+@media (max-width: 760px) {
+  .MuiStepLabel-label {
     font-size: 10px !important;
   }
 }

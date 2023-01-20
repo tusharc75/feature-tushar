@@ -55,14 +55,14 @@ import CloseIcon from '@material-ui/icons/Close';
 const useStyles = makeStyles((theme) => ({
   paper: {
     width: '80%',
-    maxHeight: 435,
+    maxHeight: 435
   },
   closeButton: {
     position: 'absolute',
     right: theme.spacing(1),
     top: theme.spacing(1),
-    color: theme.palette.grey[500],
-  },
+    color: theme.palette.grey[500]
+  }
 }));
 
 const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivity, renderedFrom, stepFullScreen, version }) => {
@@ -128,22 +128,19 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
               </p>
             }
 
-            {(
+            {
               <Box ml={1} className="d-flex align-items-center">
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
                 <HtmlTooltip title="Add ">
                   <IconButton
-                    onClick={(event) =>
-                      setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })
-                    }
+                    onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
                     size="small"
                   >
                     <Add color="disabled" fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
-
               </Box>
-            )}
+            }
 
             <Chip
               className="ml-1"
@@ -152,13 +149,14 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
               color="primary"
               onClick={() => {
                 window.open(
-                  `${row.original.type === 'serializedAsset'
-                    ? routes.serializedAssetDetail.path
-                    : row.original.type === 'product'
+                  `${
+                    row.original.type === 'serializedAsset'
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === 'product'
                       ? routes.productDetail.path
                       : row.original.type === 'package'
-                        ? routes.packagesDetail.path
-                        : routes.serviceMasterDetail.path
+                      ? routes.packagesDetail.path
+                      : routes.serviceMasterDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -332,7 +330,15 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
     inventory = data?.inventory ? data?.inventory : [];
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
-      parent.detail = `${parent.type === 'serializedAsset' ? parent.serializedAssetDetail?.assetNumber : parent.type === 'product' ? parent.productDetail?.productName : parent.type === 'service' ? parent.serviceDetail?.serviceName : parent.packageDetail?.packageName}`;
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -353,7 +359,15 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
   const generateNestedData = (material, inventory, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
-      _subRow.detail = `${_subRow.type === 'serializedAsset' ? _subRow.serializedAssetDetail?.assetNumber : _subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.type === 'service' ? _subRow.serviceDetail?.serviceName : _subRow.packageDetail?.packageName}`;
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -362,14 +376,14 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
     });
-    if (subRows.length === 0 && parent.type === "package") {
+    if (subRows.length === 0 && parent.type === 'package') {
       parent.isValid = false;
     }
-    if (parent.type === "package") {
+    if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
-  }
+  };
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -689,14 +703,9 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
       </Box>
       {columns && rowsData ? (
         <>
-          <Box
-            p="6px"
-            zIndex={5}
-            width={'100%'}
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-          >
+          <Box p="6px" zIndex={5} width={'100%'}>
             <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
               columns={columns}
               data={rowsData}
               setWholeRowsCellColor={(rowData) => (!rowData.isValid ? '' : '')}
@@ -743,8 +752,8 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
             addExistingProductDialog.type === 'product'
               ? `${renderedFrom}-product`
               : addExistingProductDialog.type === 'service'
-                ? `${renderedFrom}-service`
-                : `${renderedFrom}-package`
+              ? `${renderedFrom}-service`
+              : `${renderedFrom}-package`
           }
           isAddingProducts={isAddingProducts}
           addProductInventory={handleAdd}
@@ -791,52 +800,51 @@ const Productpackage = ({ quotationData, setNextStep, currencySymbol, showActivi
           }}
         />
       )}
-      {addchildDialog.open &&
+      {addchildDialog.open && (
         <Popover
           anchorReference="anchorPosition"
           anchorPosition={{ top: addchildDialog.top, left: addchildDialog.bottom }}
           anchorOrigin={{
             vertical: 'center',
-            horizontal: 'left',
+            horizontal: 'left'
           }}
           transformOrigin={{
             vertical: 'top',
-            horizontal: 'left',
+            horizontal: 'left'
           }}
           open={addchildDialog.open}
-          onClose={() => { setAddchildDialog({ open: false, parentId: null, top: null, bottom: null }) }}
+          onClose={() => {
+            setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+          }}
         >
           <MenuList>
             <MenuItem
               onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId })
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
-              }
-              }
+                setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              }}
             >
               Product
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId })
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
-              }
-              }
+                setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              }}
             >
               Package
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId })
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
-              }
-              }
+                setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              }}
             >
               Services
             </MenuItem>
           </MenuList>
         </Popover>
-      }
+      )}
     </Fragment>
   );
 };

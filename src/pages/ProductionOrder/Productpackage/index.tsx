@@ -19,7 +19,6 @@ import ProductionOrderQty from './ProductionOrderQty';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
-
 const Productpackage = ({
   fetchProductionOrderData,
   productionOrderData,
@@ -30,7 +29,7 @@ const Productpackage = ({
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
-  allowedToDelete,
+  allowedToDelete
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -82,14 +81,7 @@ const Productpackage = ({
         disableFilters: true,
         sticky: isMobile ? 'none' : 'left',
         width: 200,
-        Cell: ({ row }) =>
-          row.original['type'] ? (
-            <p>
-              {`${startCase(row.original?.type)} `}
-            </p>
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },
       {
         accessor: 'detail',
@@ -127,7 +119,7 @@ const Productpackage = ({
         Cell: ({ row }) => {
           return row.original['unit'] ? <p className="text-truncate">{row.original.unit}</p> : <NoDataCell />;
         }
-      },
+      }
     ];
     coloum.push({
       accessor: 'action',
@@ -181,13 +173,13 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.srno = i + 1;
-      parent.detail = `${parent.type === 'product'
-        ? parent.productDetail?.productName : parent.packageDetail?.packageName
-        }`;
-      parent.description = parent.type === 'product'
-        ? parent?.productDetail?.productDesc || ''
-        : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || '' : '';
+      parent.detail = `${parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName}`;
+      parent.description =
+        parent.type === 'product'
+          ? parent?.productDetail?.productDesc || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.allowedToDelete = parent.workOrder ? true : false;
@@ -212,13 +204,11 @@ const Productpackage = ({
     let productIndex = 0;
     subRows.forEach((_subRow, j) => {
       _subRow.srno = parent.srno + '.' + `${productIndex + 1}`;
-      _subRow.detail = `${_subRow.type === 'product'
-        ? _subRow.productDetail?.productName
-        : _subRow.packageDetail?.packageName
-        }`;
-      _subRow.description = _subRow.type === 'product'
-        ? _subRow?.productDetail?.productDesc || ''
-        : _subRow.type === 'package'
+      _subRow.detail = `${_subRow.type === 'product' ? _subRow.productDetail?.productName : _subRow.packageDetail?.packageName}`;
+      _subRow.description =
+        _subRow.type === 'product'
+          ? _subRow?.productDetail?.productDesc || ''
+          : _subRow.type === 'package'
           ? _subRow?.packageDetail?.packageDescription || ''
           : '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
@@ -234,7 +224,6 @@ const Productpackage = ({
     }
     return sortBy(subRows, ['type']);
   };
-
 
   const handleAdd = async (rows) => {
     setAddingProducts(true);
@@ -262,7 +251,6 @@ const Productpackage = ({
         setAddingProducts(false);
       });
   };
-
 
   const handleDelete = (rows) => {
     setDeleting(true);
@@ -418,13 +406,9 @@ const Productpackage = ({
         )}
         <Grid item xs={12} md={12} sm={12}>
           {columns && rowsData ? (
-            <Box
-              zIndex={5}
-              width={'100%'}
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
-            >
+            <Box zIndex={5} width={'100%'}>
               <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 345px)'}
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
                 columns={columns}
                 data={rowsData}
                 setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
@@ -464,7 +448,8 @@ const Productpackage = ({
             setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
           }}
           assignedProducts={[]}
-          renderedFrom={`${renderedFrom}-product`} />
+          renderedFrom={`${renderedFrom}-product`}
+        />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'packages' && (
         <AssignPackageDialog
@@ -474,7 +459,8 @@ const Productpackage = ({
             setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false });
           }}
           packageType={'Product'}
-          ids={[]} />
+          ids={[]}
+        />
       )}
       {isProductEdit.open && (
         <ProductionOrderQty
@@ -482,7 +468,8 @@ const Productpackage = ({
             setIsProductEdit({ open: false, data: null });
           }}
           productionOrderData={isProductEdit.data}
-          handleSave={handleSaveData} />
+          handleSave={handleSaveData}
+        />
       )}
     </Fragment>
   );
