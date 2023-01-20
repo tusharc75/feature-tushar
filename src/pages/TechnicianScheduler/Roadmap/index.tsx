@@ -9,6 +9,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityList from './ActivityList';
 import Calander from './Calander';
 import CalanderList from './CalanderList';
+import MapView from '../Map';
 
 function Roadmap({ filter }) {
   const scrollRef = React.useRef(null);
@@ -85,6 +86,7 @@ function Roadmap({ filter }) {
 
   const [expanded, setExpanded] = React.useState([]);
   const [selected, setSelected] = React.useState([]);
+  const [showMap, setShowMap] = useState({ showMap: false, data: [] });
 
   const handleToggle = (event, nodeIds) => {
     setExpanded(nodeIds);
@@ -93,6 +95,10 @@ function Roadmap({ filter }) {
   const handleSelect = (event, nodeIds) => {
     setSelected(nodeIds);
   };
+
+  useEffect(() => {
+    console.log(selected);
+  }, [selected]);
 
   return !loadingRoadmap ? (
     <Box bgcolor="white">
@@ -126,44 +132,52 @@ function Roadmap({ filter }) {
                   selected={selected}
                   handleToggle={handleToggle}
                   handleSelect={handleSelect}
+                  setShowMap={setShowMap}
                 />
                 <Box height={20}></Box>
               </Box>
             </div>
           </Box>
-          <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
-            <Calander calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
-            <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
-              <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
-                <CalanderList
-                  fetchRoadmap={fetchRoadmap}
-                  activity={activity}
-                  expanded={expanded}
-                  selected={selected}
-                  handleSelect={handleSelect}
-                  startDate={startDate}
-                  endDate={endDate}
-                  totalDay={totalDay}
-                  calendarType={calendarType}
-                />
+
+          {!showMap.showMap ? (
+            <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
+              <Calander calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
+              <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
+                <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
+                  <CalanderList
+                    fetchRoadmap={fetchRoadmap}
+                    activity={activity}
+                    expanded={expanded}
+                    selected={selected}
+                    handleSelect={handleSelect}
+                    startDate={startDate}
+                    endDate={endDate}
+                    totalDay={totalDay}
+                    calendarType={calendarType}
+                  />
+                </Box>
+              </Box>
+              <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
+                <div ref={scrollRef}>
+                  <Box
+                    id="dayLiner"
+                    height={'100%'}
+                    style={{
+                      position: 'absolute',
+                      left: (100 * moment().diff(startDate, 'days')) / totalDay + '%',
+                      width: dayPixel
+                    }}
+                  >
+                    <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="secondary.main" height={'100%'}></Box>
+                  </Box>
+                </div>
               </Box>
             </Box>
-            <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
-              <div ref={scrollRef}>
-                <Box
-                  id="dayLiner"
-                  height={'100%'}
-                  style={{
-                    position: 'absolute',
-                    left: (100 * moment().diff(startDate, 'days')) / totalDay + '%',
-                    width: dayPixel
-                  }}
-                >
-                  <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="secondary.main" height={'100%'}></Box>
-                </Box>
-              </div>
+          ) : (
+            <Box border={1} width={'100%'} height={'100%'} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
+              <MapView smallScreen={true} data={[]} loading={false} />
             </Box>
-          </Box>
+          )}
         </Box>
       </Box>
       <Box display="flex" justifyContent="flex-end" className="mt-2">
