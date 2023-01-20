@@ -26,13 +26,16 @@ function Roadmap({ filter }) {
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
-    filter.view === 'Order View' && fetchServiceOrders();
-  }, [filter]);
+  }, [filter.view]);
 
-  const fetchServiceOrders = async () => {
+  useEffect(() => {
+    filter.serviceOrder !== '' && fetchServiceOrders(filter.serviceOrder);
+  }, [filter.serviceOrder]);
+
+  const fetchServiceOrders = async (orderId) => {
     setLoadingRoadmap(true);
     await axiosInstance()
-      .get(`/technician-scheduler/service-order?serviceOrders=63c787c9270a816a9c47c7d4`)
+      .get(`/technician-scheduler/service-order?serviceOrders=${orderId}`)
       .then(({ data }) => {
         setActivity(data?.data);
         setTreeList(data?.data);
@@ -95,10 +98,6 @@ function Roadmap({ filter }) {
   const handleSelect = (event, nodeIds) => {
     setSelected(nodeIds);
   };
-
-  useEffect(() => {
-    console.log(selected);
-  }, [selected]);
 
   return !loadingRoadmap ? (
     <Box bgcolor="white">
