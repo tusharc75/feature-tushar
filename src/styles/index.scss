@@ -624,7 +624,10 @@ body::-webkit-scrollbar-thumb {
     padding-top: 7.5px;
     padding-bottom: 7.5px;
   }
-  & > div > div > div {
+  & .listingHeader {
+    display: none;
+  }
+  & .headerLogo {
     display: none;
   }
 }
