@@ -61,7 +61,7 @@ function Roadmap({ filter }) {
       });
   };
 
-  let height = window.innerHeight - 250;
+  let height = window.innerHeight - 220;
   const today = new Date();
   let startDate = moment(today).subtract(365, 'days');
   let endDate = moment(today).add(365, 'days');
@@ -88,8 +88,7 @@ function Roadmap({ filter }) {
   };
 
   const [expanded, setExpanded] = React.useState([]);
-  const [selected, setSelected] = React.useState([]);
-  const [showMap, setShowMap] = useState({ showMap: false, data: [] });
+  const [selected, setSelected] = React.useState(null);
 
   const handleToggle = (event, nodeIds) => {
     setExpanded(nodeIds);
@@ -98,18 +97,6 @@ function Roadmap({ filter }) {
   const handleSelect = (event, nodeIds) => {
     setSelected(nodeIds);
   };
-
-  const mapViewData = [
-    {
-      count: 1,
-      location: {
-        concatedName: 'hello',
-        latitude: 25.8391492,
-        longitude: 77.5541247
-      },
-      _id: 'sdfsdf'
-    }
-  ];
 
   return !loadingRoadmap ? (
     <Box bgcolor="white">
@@ -143,14 +130,12 @@ function Roadmap({ filter }) {
                   selected={selected}
                   handleToggle={handleToggle}
                   handleSelect={handleSelect}
-                  setShowMap={setShowMap}
                 />
                 <Box height={20}></Box>
               </Box>
             </div>
           </Box>
-
-          {!showMap.showMap ? (
+          {!selected ? (
             <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
               <Calander calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
               <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
@@ -186,9 +171,11 @@ function Roadmap({ filter }) {
             </Box>
           ) : (
             <Box border={1} width={'100%'} height={'100%'} borderColor="grey.300" style={{ position: 'relative', overflow: 'auto' }}>
-              <MapView data={mapViewData} technician={selected} onClose={() => setShowMap({ showMap: false, data: [] })} />
+              <MapView
+                technician={selected}
+                onClose={() => setSelected(null)} />
               <IconButton
-                onClick={() => setShowMap({ showMap: false, data: [] })}
+                onClick={() => setSelected(null)}
                 style={{
                   position: 'absolute',
                   top: 0,
