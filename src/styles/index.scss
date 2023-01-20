@@ -2597,6 +2597,7 @@ svg.MuiSvgIcon-root {
     box-shadow: 0px 3.90676px 39.0676px rgba(0, 0, 0, 0.08);
     border-radius: 10px;
     min-height: 600px;
+    height: calc(100vh - 136px);
   }
   .control-buttons-new-v1 {
     display: flex;
@@ -2787,6 +2788,20 @@ svg.MuiSvgIcon-root {
 .btn-outline-v1 {
   background: #ffffff !important;
   border: 1px solid #e2e2e2 !important;
+  box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
+  border-radius: 3px !important;
+  &:disabled {
+    opacity: 0.5;
+  }
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
+}
+
+.btn-outline-red-v1 {
+  background: #ffffff !important;
+  border: 1px solid #f44336 !important;
+  color: #f44336 !important;
   box-shadow: 0px 4.90784px 24.5392px rgba(0, 0, 0, 0.06) !important;
   border-radius: 3px !important;
   &:disabled {
