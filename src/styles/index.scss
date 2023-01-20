@@ -626,9 +626,15 @@ body::-webkit-scrollbar-thumb {
   }
   & .listingHeader {
     display: none;
+    & ~ svg {
+      display: none;
+    }
   }
   & .headerLogo {
     display: none;
+    & ~ span {
+      display: none;
+    }
   }
   & div[role='group'] {
     margin-left: 0 !important;
