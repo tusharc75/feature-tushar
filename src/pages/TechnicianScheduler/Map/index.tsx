@@ -81,7 +81,7 @@ const MapView = (props: MapViewProps) => {
         }}
         mapContainerStyle={containerStyle}
         center={center || { lat: 25.8391492, lng: 77.5541247 }}
-        // zoom={4}
+        zoom={4}
       >
         <MarkerClusterer>
           {(clusterer) => (
@@ -107,7 +107,7 @@ const MapView = (props: MapViewProps) => {
                   )
               )}
               <Polyline
-                key={clusterer.batchSize}
+                // key={clusterer.batchSize}
                 path={data.map((asset) => new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude))}
                 options={{
                   strokeColor: '#0000FF',
