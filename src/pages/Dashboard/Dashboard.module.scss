@@ -488,7 +488,4 @@
   display: grid;
   grid-template-columns: var(--columns, 1fr);
   gap: var(--gap, 20px);
-  @media all and(min-width: 900px) {
-    padding-inline: 2%;
-  }
 }
