@@ -285,7 +285,7 @@ const SalesOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.repairOrder} />
+            <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.salesOrder} />
           </Box>
         </Box>
       </Box>
