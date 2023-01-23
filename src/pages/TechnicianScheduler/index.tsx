@@ -4,7 +4,6 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import { serviceOrder } from 'src/constants/helpers';
 import Roadmap from './Roadmap';
@@ -45,14 +44,14 @@ function TechnicianScheduler() {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid item xs={12}>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
           <CustomBreadCrumbs routes={[{ title: capitalize(routes.technicianScheduler.title) }]} />
-        </Grid>
-      </Grid>
-      <CustomContainer>
-        <Box p={1} pt={2}>
+        </Box>
+      </Box>
+      <Box className="detail-container-v1">
+        <Box p={1}>
           <Grid container xs={12} md={12} sm={12} spacing={2}>
             <Grid item xs={12} md={4} sm={4}>
               <Autocomplete
@@ -111,8 +110,8 @@ function TechnicianScheduler() {
         <Box className={classes.activityContainer}>
           <Roadmap filter={filter} />
         </Box>
-      </CustomContainer>
-    </Fragment>
+      </Box>
+    </Box>
   );
 }
 
