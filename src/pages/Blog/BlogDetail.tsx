@@ -20,7 +20,6 @@ const BlogDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [headingLbl, setHeadingLbl] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.blog]);
   const [blogData, setBlogData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -55,7 +54,6 @@ const BlogDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/blog/${id}`);
-      setHeadingLbl(data.title);
       setBlogData(data);
       setCustomizedRoutes([routes.blog, { title: data?.title }]);
       setLoading(false);
@@ -97,13 +95,13 @@ const BlogDetail = () => {
   };
 
   return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <div className="detail-container grid-without-activity">
-        <div>
-          <Paper>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
             {!blogData ? (
               <div>
                 <Skeleton variant="text" width="150px" height="40px" />
@@ -114,12 +112,11 @@ const BlogDetail = () => {
                 </Box>
               </div>
             ) : (
-              <DetailsPageHeader heading={headingLbl} showHeading={true}>
+              <>
                 {permissions?.blog?.isUpdate && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    color="primary"
-                    size="small"
+                    className="btn-outline-v1"
                     onClick={handleOpenUpdateDialog}
                     style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                   >
@@ -127,8 +124,12 @@ const BlogDetail = () => {
                   </Button>
                 )}
                 {permissions?.blog?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              </DetailsPageHeader>
+              </>
             )}
+          </Box>
+        </Box>
+      </Box>
+      <Box className="detail-container-v1">
             <Box>
               {loading || !fields?.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -138,9 +139,7 @@ const BlogDetail = () => {
                 <DetailsPage data={blogData} fields={fields} />
               )}
             </Box>
-          </Paper>
-        </div>
-      </div>
+      </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
@@ -162,7 +161,7 @@ const BlogDetail = () => {
           }}
         />
       )}
-    </Fragment>
+    </Box>
   );
 };
 
