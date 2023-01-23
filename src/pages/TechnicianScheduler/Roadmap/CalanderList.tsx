@@ -39,7 +39,7 @@ export default function CalanderList(props) {
 
       let label = (
         <Box width={'100%'} height={50} className="d-flex align-items-center">
-          <Tooltip title={data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)} placement="right">
+          <Tooltip title={data.firstName + ' ' + data.lastName + ' - ' + displayDate(data.createDate)} placement="right">
             <Box
               minWidth={calendarType !== 'week' ? '100px' : ''}
               height={45}
