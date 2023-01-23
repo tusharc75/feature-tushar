@@ -88,7 +88,6 @@ const ServiceOrderDetailsPage = () => {
 
     useEffect(() => {
         if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
-            fetchServiceOrderData();
             updateProcessStatus(serviceSteps[currentStep]);
         }
     }, [currentStep]);
@@ -158,7 +157,9 @@ const ServiceOrderDetailsPage = () => {
     const updateProcessStatus = async (processStatus) => {
         axiosInstance()
             .put(`${serviceOrder.api}/${id}/process-status`, { processStatus: processStatus })
-            .then(({ data }) => { })
+            .then(({ data }) => {
+                fetchServiceOrderData()
+            })
             .catch((error) => { });
     };
 
