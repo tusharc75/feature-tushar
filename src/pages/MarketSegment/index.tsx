@@ -34,6 +34,7 @@ import { FaSuitcase, IoIosCreate } from 'react-icons/all';
 import MobileSortDialog from '../../components/MobileSortDialog';
 import MobileFilterDialog from '../../components/MobileFilterDialog';
 import { camelCase } from 'lodash';
+import { Link } from 'react-router-dom';
 
 const MarketSegment = () => {
   const renderedFrom = camelCase(routes?.marketSegment.title);
@@ -62,8 +63,7 @@ const MarketSegment = () => {
 
   // const [showGridFilters, setShowGridFilters] = useState(true)
   const columnState = JSON.parse(localStorage.getItem(renderedFrom));
-  const localStorageSelectedRecords = `${renderedFrom}_selected`
-
+  const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const handleOpen = () => {
     setisOpenDialog(true);
@@ -138,21 +138,15 @@ const MarketSegment = () => {
             });
           });
         }
-
         setColumns([...columns]);
       });
   };
 
   const NameRenderer = (params) => (
-    <span className="d-flex gap-2 align-items-center">
-      <span
-        className="link"
-        onClick={() => {
-          setOpen({ open: true, isClone: false, idToClone: params.data.id });
-        }}
-      >
-        <CustomRenderCell value={params.value} />
-      </span>
+    <span className=" d-flex gap-2 align-items-center">
+      <Link className="link" to={`${routes.marketSegment.path}/detail/${params.data._id}`}>
+        {params.value}
+      </Link>
     </span>
   );
 
@@ -234,7 +228,7 @@ const MarketSegment = () => {
     }
     if (showFilteredRecordsOnly) {
       const savedRecords = localStorage.getItem(localStorageSelectedRecords) ? JSON.parse(localStorage.getItem(localStorageSelectedRecords)) : [];
-      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map(m => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(savedRecords.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -386,7 +380,6 @@ const MarketSegment = () => {
                   </Grid>
                 </>
               )}
-
             </Grid>
             <Grid md={6} sm={12} xs={12} container className={styles.filter_side}>
               <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
@@ -473,24 +466,24 @@ const MarketSegment = () => {
             additionalDetails={[
               {
                 icon: <FaSuitcase size={18} />,
-                field: "parentMarketSegment"
+                field: 'parentMarketSegment'
               }
             ]}
             chips={[
               {
                 icon: <IoIosCreate />,
-                label: "CreatedBy: ",
-                field: "createdBy",
+                label: 'CreatedBy: ',
+                field: 'createdBy'
               },
               {
-                label: "UpdatedBy: ",
-                field: "updatedBy",
+                label: 'UpdatedBy: ',
+                field: 'updatedBy'
               }
             ]}
             owerCollaboratorInitialsOrImages=""
             onCreate={() => setOpen({ open: true, idToClone: null, isClone: null })}
             showClone={false}
-            onClone={() => { }}
+            onClone={() => {}}
             renderedFrom={renderedFrom}
           />
         ) : Object.keys(frameWorkComponent).length > 0 ? (
@@ -517,8 +510,8 @@ const MarketSegment = () => {
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${routes?.marketSegment?.title?.toLowerCase()} ${deleteRecord?.name || ''}?`}
             onClose={() => {
-              setDeleteRecord(null)
-              setShowDeleteConfirmBox(false)
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
             }}
             onOk={handleDelete}
           />
