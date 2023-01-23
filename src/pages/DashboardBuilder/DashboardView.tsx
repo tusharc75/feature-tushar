@@ -9,7 +9,7 @@ import DashboardItem from './DashboardItem';
 const useClasses = makeStyles((theme: ThemeOptions) => ({
   chartViews: {
     overflowY: 'auto',
-    maxHeight: 'calc(80vh + 10px)',
+    maxHeight: 'calc(75vh)',
     transition: '500ms all ease-in-out'
   }
 }));

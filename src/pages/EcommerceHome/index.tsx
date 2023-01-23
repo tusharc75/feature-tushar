@@ -109,83 +109,71 @@ const EcommerceHome = () => {
     [findCard, formData, setFormData]
   );
 
-  const handleImport = () => {};
-  const handleExportField = () => {};
+  const handleImport = () => { };
+  const handleExportField = () => { };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  return (
-    <div>
-      <div className="headerbox">
-        <Grid container justifyContent="space-between">
-          <Grid item xs={6}>
-            <CustomBreadCrumbs routes={[{ title: routes?.eCommerceHome?.title }]} />
-          </Grid>
-          <Grid item xs={6}>
-            <Box display="flex" justifyContent="flex-end">
-              <Box mr={2}>
-                <Typography className="link cursor-pointer" style={{ color: 'var(--tertiary-light)' }} onClick={handleExportField}>
-                  Export
-                </Typography>
-              </Box>
-              <Box mr={1}>
-                <input accept="json" style={{ display: 'none' }} onChange={handleImport} id="import-file" multiple={false} type="file" />
-                <label htmlFor="import-file">
-                  <Typography className="cursor-pointer" style={{ color: 'var(--tertiary-light)' }}>
-                    Import
-                  </Typography>
-                </label>
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-      </div>
-      <div className="detail-container">
-        <Box bgcolor={'white'} p={1.2} display="flex" justifyContent="flex-end">
-          <Box py={'6px'}>
-            <Button
-              color="primary"
-              variant="contained"
-              size="small"
-              disableRipple
-              disabled={isSubmitting || loading || oldData === formData}
-              onClick={handleClickSave}
-              startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
-            >
-              Save
-            </Button>
-          </Box>
+  return (<Box className="main-container-v1">
+    <Box className="headerbox-v1">
+      <Box className="nav-v1">
+        <CustomBreadCrumbs routes={[{ title: routes?.eCommerceHome?.title }]} />
+      </Box>
+      <Box className="controls-v1">
+        <Box className="control-buttons-v1">
+          {/* <label className={`new-headerbox-button-v1`} onClick={handleExportField}>
+            Export
+          </label>
+          <input accept="json" style={{ display: 'none' }} onChange={handleImport} id="import-file" multiple={false} type="file" />
+          <label htmlFor="import-file" className={`new-headerbox-button-v1`}>
+            <Typography >
+              Import
+            </Typography>
+          </label> */}
+          <Button
+            color="primary"
+            variant="contained"
+            size="small"
+            disabled={isSubmitting || loading || oldData === formData}
+            onClick={handleClickSave}
+            startIcon={isSubmitting && <CircularProgress size={18} color="inherit" />}
+          >
+            Save
+          </Button>
         </Box>
-        <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-          <Box bgcolor="#f5f5f5" p={1}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={3} sm={4}>
-                <Box bgcolor="white" p={3} style={{ height: '80vh' }}>
-                  <Grid container spacing={1}>
-                    {ECOM_SECTIONS?.map((i, index) => (
-                      <DragBox key={index} type={i.type} label={i.label} setFormData={setFormData} />
-                    ))}
-                  </Grid>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={9} sm={8}>
-                {loading ? (
-                  <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
-                    <CircularProgress size={30} color="inherit" />
-                  </Box>
-                ) : (
-                  <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={classes.screenHeightAuto}>
-                    <DropBox formData={formData} setFormData={setFormData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
-                  </Box>
-                )}
-              </Grid>
+      </Box>
+    </Box>
+    <Box className={`detail-container-v1`}>
+      <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+        <Box bgcolor="#f5f5f5" p={1}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={3} sm={4}>
+              <Box bgcolor="white" p={3} style={{ height: '80vh' }}>
+                <Grid container spacing={1}>
+                  {ECOM_SECTIONS?.map((i, index) => (
+                    <DragBox key={index} type={i.type} label={i.label} setFormData={setFormData} />
+                  ))}
+                </Grid>
+              </Box>
             </Grid>
-          </Box>
-        </DndProvider>
-      </div>
-    </div>
+            <Grid item xs={12} md={9} sm={8}>
+              {loading ? (
+                <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
+                  <CircularProgress size={30} color="inherit" />
+                </Box>
+              ) : (
+                <Box border={1} p={2} bgcolor="grey.100" borderColor="grey.300" className={classes.screenHeightAuto}>
+                  <DropBox formData={formData} setFormData={setFormData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
+                </Box>
+              )}
+            </Grid>
+          </Grid>
+        </Box>
+      </DndProvider>
+    </Box>
+  </Box>
   );
 };
 
