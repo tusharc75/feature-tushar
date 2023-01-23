@@ -25,6 +25,7 @@ import { GrDrag } from 'react-icons/gr';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const Steps = ({ serviceId }) => {
+
   const renderedFrom = `${camelCase(routes?.serviceMaster?.title)}_stps`;
 
   const [stepDialog, setStepDialog] = useState({ open: false, stepId: '' });
@@ -196,7 +197,7 @@ const Steps = ({ serviceId }) => {
       {permissions?.serviceMaster?.isUpdate && (
         <Box p={1}>
           <Grid container>
-            <Grid item xs={6} md={6} sm={6}>
+            <Grid item xs={3} md={3} sm={3}>
               <Button
                 size="small"
                 variant="contained"
@@ -208,7 +209,7 @@ const Steps = ({ serviceId }) => {
                 Add Step
               </Button>
             </Grid>
-            <Grid item xs={6} md={6} sm={6}>
+            <Grid item xs={9} md={9} sm={9}>
               <Box display={'flex'} justifyContent={'flex-end'}>
                 <Button
                   variant="outlined"
@@ -249,7 +250,6 @@ const Steps = ({ serviceId }) => {
                     Delete
                   </MenuItem>
                 </Menu>
-
                 <Box ml={1} />
                 {dataRows?.length ? (
                   <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
@@ -258,7 +258,7 @@ const Steps = ({ serviceId }) => {
                   </Button>
                 ) : null}
                 <Box ml={1} />
-                <ImportExportLinks
+                {/* <ImportExportLinks
                   permissions={permissions?.serviceMaster}
                   module="Service Master Steps"
                   api={`${serviceMaster.api}/steps/${serviceId}`}
@@ -279,7 +279,7 @@ const Steps = ({ serviceId }) => {
                   }}
                   isDropDownIconShow={true}
                   isBackgroundWhite={true}
-                />
+                /> */}
               </Box>
             </Grid>
           </Grid>

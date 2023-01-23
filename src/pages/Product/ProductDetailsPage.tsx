@@ -65,7 +65,6 @@ const ProductDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [productFields, setProductFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [inventoriesData, setInventoriesData] = useState([]);
   const [inventoriesWarehouse, setWarehouseInventories] = useState([]);
@@ -111,12 +110,6 @@ const ProductDetailsPage = () => {
     }
   }, [selectedWarehouse]);
 
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    mainPoint['Quantity'] = data?.qty || '';
-    setMainPoints(mainPoint);
-  };
-
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
@@ -151,7 +144,6 @@ const ProductDetailsPage = () => {
               newField.push({ fieldData: _f });
             });
             setProductFields(newField.filter((d) => !ignoreField.includes(d?.fieldData?.fieldName)));
-            handleMainPoints(data.productData);
             setHeadingLabel(
               data.productData?.productNumber
                 ? `${data.productData?.productName} - ${data.productData?.productNumber}`
@@ -257,24 +249,18 @@ const ProductDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {productData ? (
-              <>
-                {permissions?.product?.isUpdate && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={handleOpenUpdateDialog}
-                  >
-                    {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
-                  </Button>
-                )}
-                {permissions?.product?.isDelete && (
-                  <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
-                )}
-              </>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
+            {permissions?.product?.isUpdate && (
+              <Button
+                variant={isMobile && !isTablet ? 'text' : 'contained'}
+                className={'btn-outline-v1'}
+                size="small"
+                onClick={handleOpenUpdateDialog}
+              >
+                {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+              </Button>
+            )}
+            {permissions?.product?.isDelete && (
+              <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
           </Box>
         </Box>
@@ -282,18 +268,6 @@ const ProductDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <Grid container spacing={1}>
           <Grid item xs={12} sm={12} md={8} lg={8}>
-            {!productData ? (
-              <div>
-                <Skeleton variant="text" width="150px" height="40px" />
-                <Box display="flex">
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                  <Box marginX={1} />
-                  <Skeleton style={{ borderRadius: 6 }} width="120px" height="80px" />
-                </Box>
-              </div>
-            ) : (
-              <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}></DetailsPageHeader>
-            )}
             <Tabs
               className="new-tab-container-v1"
               variant="scrollable"
@@ -309,42 +283,42 @@ const ProductDetailsPage = () => {
                 }
               }}
             >
-              <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
+              <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
 
               {permissions?.serializedAsset && (
-                <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Child Product</div>} {...a11yProps(1)} />
+                <Tab className={'tabLayout'} value={1} label={<div className="d-flex align-items-center tab-font">Child Product</div>} {...a11yProps(1)} />
               )}
 
               {permissions?.serviceMaster && (
-                <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Services</div>} {...a11yProps(2)} />
+                <Tab className={'tabLayout'} value={2} label={<div className="d-flex align-items-center tab-font">Services</div>} {...a11yProps(2)} />
               )}
 
               {permissions?.serviceMaster && (
-                <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Service Packages</div>} {...a11yProps(8)} />
+                <Tab className={'tabLayout'} value={3} label={<div className="d-flex align-items-center tab-font">Service Packages</div>} {...a11yProps(3)} />
               )}
 
               {permissions?.repairType && (
-                <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Repair Types</div>} {...a11yProps(3)} />
+                <Tab className={'tabLayout'} value={4} label={<div className="d-flex align-items-center tab-font">Repair Types</div>} {...a11yProps(4)} />
               )}
 
               {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && (
-                <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Product Images</div>} {...a11yProps(4)} />
+                <Tab className={'tabLayout'} value={5} label={<div className="d-flex align-items-center tab-font">Product Images</div>} {...a11yProps(5)} />
               )}
 
               {permissions?.packages && (
-                <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Product Packages</div>} {...a11yProps(5)} />
+                <Tab className={'tabLayout'} value={6} label={<div className="d-flex align-items-center tab-font">Product Packages</div>} {...a11yProps(6)} />
               )}
 
               {permissions?.serializedAsset && (
-                <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Parent Product</div>} {...a11yProps(6)} />
+                <Tab className={'tabLayout'} value={7} label={<div className="d-flex align-items-center tab-font">Parent Product</div>} {...a11yProps(7)} />
               )}
 
               {permissions?.productInventory?.isRead && (
-                <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">History</div>} {...a11yProps(7)} />
+                <Tab className={'tabLayout'} value={8} label={<div className="d-flex align-items-center tab-font">History</div>} {...a11yProps(8)} />
               )}
 
               {productData?.digitalProduct && (
-                <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Digital</div>} {...a11yProps(9)} />
+                <Tab className={'tabLayout'} value={9} label={<div className="d-flex align-items-center tab-font">Digital</div>} {...a11yProps(9)} />
               )}
             </Tabs>
             {tabValue === 0 && (
@@ -362,19 +336,19 @@ const ProductDetailsPage = () => {
             )}
             {tabValue === 1 && <Parts id={id} />}
             {tabValue === 2 && <ServiceMaster id={id} renderedFrom={`${renderedFrom}_grid-2`} />}
-            {tabValue === 3 && <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-3`} />}
-            {tabValue === 4 && (
+            {tabValue === 3 && <ServicePackage renderedFrom={`${renderedFrom}_grid-3`} productId={id} />}
+            {tabValue === 4 && <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-4`} />}
+            {tabValue === 5 && (
               <ProductConfiguration
                 productFields={productFields.map((_f: any) => _f.fieldData)}
                 productData={productData}
                 id={id}
-                renderedFrom={`${renderedFrom}_grid-4`}
+                renderedFrom={`${renderedFrom}_grid-5`}
               />
             )}
-            {tabValue === 5 && <Package renderedFrom={`${renderedFrom}_grid-5`} productId={id} />}
-            {tabValue === 6 && <ParentProduct renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
-            {tabValue === 7 && <InventoryHistory id={id} />}
-            {tabValue === 8 && <ServicePackage renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
+            {tabValue === 6 && <Package renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
+            {tabValue === 7 && <ParentProduct renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
+            {tabValue === 8 && <InventoryHistory id={id} />}
             {tabValue === 9 && <Digital renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4}>
@@ -611,7 +585,6 @@ const ProductDetailsPage = () => {
           </Grid>
         </Grid>
       </Box>
-
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
