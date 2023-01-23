@@ -31,6 +31,8 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import Steps from 'src/pages/RentalManagement/Steps';
 import { RiFlowChart } from 'react-icons/ri';
 import TransferAssetViews from './RoadMapViews';
+import { isMobile, isTablet } from 'react-device-detect';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const transferSteps = ['Add Assets', 'Loading Ticket'];
 const transferSteps1 = ['Add Assets', 'Loading Ticket', 'Receiving Ticket'];
@@ -190,8 +192,8 @@ const TransferAssetDetailPage = () => {
           data?.transferType === 'Internal'
             ? data?.transfertoPlant?.entity
             : data?.transferType === 'External Customer'
-            ? data?.transfertoCustomer?.entity
-            : data?.transfertoSupplier?.entity;
+              ? data?.transfertoCustomer?.entity
+              : data?.transfertoSupplier?.entity;
 
         if (warehouseEntity?.length) {
           const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;
@@ -339,14 +341,14 @@ const TransferAssetDetailPage = () => {
   }, [isSmallScreen, tabValue]);
 
   return (
-    <>
-      <Grid container className="headerbox">
-        <CustomBreadCrumbs routes={customizedRoutes} />
-      </Grid>
-      <div className={`detail-container ${showActivity ? 'grid-with-activity' : 'grid-without-activity'}`}>
-        <div>
-          <div>
-            <Paper>
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            <>
               {!transferAssetData ? (
                 <div>
                   <Skeleton variant="text" width="150px" height="40px" />
@@ -357,119 +359,101 @@ const TransferAssetDetailPage = () => {
                   </Box>
                 </div>
               ) : (
-                <DetailsPageHeader heading={headingLabel} mainPoints={mainPoints} showHeading={true}>
-                  {permissions?.transferAsset?.isUpdate && !isTransferEnded && (
-                    <Button className="buttonStyleBigScreen" variant="contained" color="primary" size="small" onClick={handleOpenUpdateDialog}>
-                      Edit
-                    </Button>
-                  )}
-                  {permissions?.transferAsset?.isUpdate && !isTransferEnded && (
-                    <IconButton className="buttonStyleSmallScreen" style={{ color: '#43aeaa' }} size="small" onClick={handleOpenUpdateDialog}>
-                      <BiEdit size={20} />
-                    </IconButton>
-                  )}
-                  {/* <HideWhenOffline>
-                  {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
-                    <DeleteButton
-                      disabled={transferAssetData?.status !== 'New'}
-                      text="Delete"
-                      className="buttonDeleteBigScreen"
-                      onClick={() => setShowConfirmBox(true)}
-                    />
-                  ) : null}
-                </HideWhenOffline> */}
-                  {/* <HideWhenOffline>
-                  {permissions?.transferAsset?.isDelete && transferAssetData?.user === user?.user._id ? (
-                    <Button
-                      disabled={transferAssetData?.status !== 'New'}
-                      className="buttonDeleteSmallScreen"
-                      onClick={() => setShowConfirmBox(true)}
-                    >
-                      <MdDelete size={24} />
-                    </Button>
-                  ) : null}
-                </HideWhenOffline> */}
-                </DetailsPageHeader>
+                permissions?.transferAsset?.isUpdate && !isTransferEnded && (
+                  <Button
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    onClick={handleOpenUpdateDialog}
+                    className={'btn-outline-v1'}
+                  >
+                    {isMobile ? <BiEdit size={20} /> : 'Edit'}
+                  </Button>
+                )
               )}
 
-              <Tabs
-                className="quote-tab"
-                value={tabValue}
-                onChange={handleMainTabChange}
-                textColor="primary"
-                TabIndicatorProps={{
-                  style: {
-                    display: 'none'
-                  }
-                }}
-              >
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: '',
-                    color: tabValue === 1 ? '#163340' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                    </div>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: '',
-                    color: '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                    </div>
-                  }
-                  {...a11yProps(1)}
-                />
-                <Tab
-                  className={'tabLayout'}
-                  style={{
-                    background: '',
-                    color: tabValue === 2 ? 'blue' : '#163340'
-                  }}
-                  label={
-                    <div className="d-flex align-items-center tab-font">
-                      <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                    </div>
-                  }
-                  {...a11yProps(2)}
-                />
-                <div className={'uio'}> </div>
-              </Tabs>
+              <ActivityButton referenceId={transferAssetData?._id} resource={ACTIVITY_RESOURCE.transferAsset} />
+            </>
+          </Box>
+        </Box>
+      </Box>
+      <Box className={`detail-container-v1`}>
+        <Tabs
+          className="new-tab-container-v1"
+          value={tabValue}
+          onChange={handleMainTabChange}
+          textColor="primary"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
+        >
+          <Tab
+            className={'tabLayout'}
+            style={{
+              background: '',
+              color: tabValue === 1 ? '#163340' : '#163340'
+            }}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <FaWpforms className="mr-1" fontSize="inherit" /> Header
+              </div>
+            }
+            {...a11yProps(0)}
+          />
+          <Tab
+            className={'tabLayout'}
+            style={{
+              background: '',
+              color: '#163340'
+            }}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+              </div>
+            }
+            {...a11yProps(1)}
+          />
+          <Tab
+            className={'tabLayout'}
+            style={{
+              background: '',
+              color: tabValue === 2 ? 'blue' : '#163340'
+            }}
+            label={
+              <div className="d-flex align-items-center tab-font">
+                <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+              </div>
+            }
+            {...a11yProps(2)}
+          />
+          <div className={'uio'}> </div>
+        </Tabs>
 
-              <TabPanel value={tabValue} index={0}>
-                <Box>
-                  {loading || !transferAssetData ? (
-                    <Grid container spacing={2} style={{ padding: '8px' }}>
-                      <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                    </Grid>
-                  ) : (
-                    <DetailsPage data={transferAssetData} fields={transferAssetFields} />
-                  )}
-                </Box>
-              </TabPanel>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {loading || !transferAssetData ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <DetailsPage data={transferAssetData} fields={transferAssetFields} />
+            )}
+          </Box>
+        </TabPanel>
 
-              <TabPanel value={tabValue} index={1}>
-                <Box my={2}>
-                  <Steps
-                    isNextStep={false}
-                    nextStep={isNextStep}
-                    steps={transferAssetData?.transferType === 'Internal' ? transferSteps : transferSteps1}
-                    currentStep={currentStep}
-                    setCurrentStep={setCurrentStep}
-                    isStepEnded={isTransferEnded}
-                    setStepFullScreen={() => setStepFullScreen(true)}
-                    updateStatus={updateStatus}
-                  />
-                  {/* <TransferStepper
+        <TabPanel value={tabValue} index={1}>
+          <Box my={2}>
+            <Steps
+              isNextStep={false}
+              nextStep={isNextStep}
+              steps={transferAssetData?.transferType === 'Internal' ? transferSteps : transferSteps1}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              isStepEnded={isTransferEnded}
+              setStepFullScreen={() => setStepFullScreen(true)}
+              updateStatus={updateStatus}
+            />
+            {/* <TransferStepper
                     isInternal={transferAssetData?.transferType === 'Internal'}
                     hasAssets={existingAssets.length > 0}
                     isTransferEnded={isTransferEnded}
@@ -482,151 +466,108 @@ const TransferAssetDetailPage = () => {
                     setStepFullScreen={() => setStepFullScreen(true)}
                   /> */}
 
-                  <ContentFullScreen
-                    title={transferAssetData?.transferType === 'Internal' ? transferSteps[currentStep] : transferSteps1[currentStep]}
-                    fullScreen={stepFullScreen}
-                    setFullScreen={setStepFullScreen}
-                  >
-                    {currentStep === 0 && (
-                      <AssetsGrid
-                        fetchAssets={fetchAssets}
-                        currentStep={currentStep}
-                        permissions={permissions}
-                        user={user}
-                        setNextStep={setNextStep}
-                        updateTransferStatus={updateTransferStatus}
-                        transferAssetData={transferAssetData}
-                        handleViewPdf={handleViewPdf}
-                        fileDownloading={fileDownloading}
-                        renderedFrom={`${renderedFrom}_grid-1`}
-                        allowedToEdit={allowedToEdit}
-                      />
-                    )}
-                    {currentStep === 1 && (
-                      <LoadingTicketGrid
-                        setTickets={setLoadingTickets}
-                        currentStep={currentStep}
-                        setPrevStep={setPrevStep}
-                        transferAssetId={id}
-                        transferAssetData={transferAssetData}
-                        permissions={permissions}
-                        setNextStep={setNextStep}
-                        setExistingAssets={setExistingAssets}
-                        setTransferIsEnded={setTransferIsEnded}
-                        updateTransferStatus={updateTransferStatus}
-                        handleViewPdf={handleViewPdf}
-                        fileDownloading={fileDownloading}
-                        isTransferEnded={isTransferEnded}
-                        renderedFrom={`${renderedFrom}_grid-2`}
-                        allowedToEdit={allowedToEdit || isProcessor}
-                        canReceive={canReceive}
-                      />
-                    )}
-                    {currentStep === 2 && (
-                      <ReceivingTicketGrid
-                        setTickets={setReceivingTickets}
-                        currentStep={currentStep}
-                        setPrevStep={setPrevStep}
-                        transferAssetId={id}
-                        transferAssetData={transferAssetData}
-                        fetchAssets={fetchAssets}
-                        permissions={permissions}
-                        setNextStep={setNextStep}
-                        setTransferIsEnded={setTransferIsEnded}
-                        updateTransferStatus={updateTransferStatus}
-                        handleViewPdf={handleViewPdf}
-                        fileDownloading={fileDownloading}
-                        isTransferEnded={isTransferEnded}
-                        renderedFrom={`${renderedFrom}_grid-3`}
-                        allowedToEdit={allowedToEdit || isProcessor}
-                      />
-                    )}
-                  </ContentFullScreen>
-                </Box>
-              </TabPanel>
-              <TabPanel value={tabValue} index={2}>
-                <Box>
-                  <TransferAssetViews tANumber={transferAssetData?.transferAssetNumber} tAId={id} />
-                </Box>
-              </TabPanel>
-            </Paper>
-          </div>
-          <Box my={1} />
-        </div>
-
-        <div className="position-relative">
-          <HideWhenOffline>
-            <Paper>
-              {!isSmallScreen && (
-                <span className={`${showActivity ? 'activityHide' : 'activityShow'} cursor-pointer`} onClick={handleActivityHideShow}>
-                  {showActivity ? <IoIosArrowDropright className="icon" /> : <IoIosArrowDropleft className="icon" />}
-                </span>
+            <ContentFullScreen
+              title={transferAssetData?.transferType === 'Internal' ? transferSteps[currentStep] : transferSteps1[currentStep]}
+              fullScreen={stepFullScreen}
+              setFullScreen={setStepFullScreen}
+            >
+              {currentStep === 0 && (
+                <AssetsGrid
+                  fetchAssets={fetchAssets}
+                  currentStep={currentStep}
+                  permissions={permissions}
+                  user={user}
+                  setNextStep={setNextStep}
+                  updateTransferStatus={updateTransferStatus}
+                  transferAssetData={transferAssetData}
+                  handleViewPdf={handleViewPdf}
+                  fileDownloading={fileDownloading}
+                  renderedFrom={`${renderedFrom}_grid-1`}
+                  allowedToEdit={allowedToEdit}
+                />
               )}
-
-              <div style={{ display: showActivity ? 'block' : 'none' }}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    {transferAssetData && (
-                      <div>
-                        <Activity
-                          resourceId={transferAssetData?._id}
-                          resource={ACTIVITY_RESOURCE.transferAsset}
-                          // restrictedAddActivities={
-                          //   permissions && permissions['transferAsset'] && permissions['rentalManagement'].isUpdate
-                          //   ? []
-                          //   : ['Attachment', 'Case']
-                          // }
-                          relatedTo={[
-                            {
-                              access: true,
-                              referenceId: transferAssetData?._id,
-                              type: ACTIVITY_RESOURCE.transferAsset
-                            }
-                          ]}
-                          handleActivityRefresh={() => {}}
-                          emails={[]}
-                        />
-                      </div>
-                    )}
-                  </Grid>
-                </Grid>
-              </div>
-            </Paper>
-          </HideWhenOffline>
-        </div>
-      </div>
-
+              {currentStep === 1 && (
+                <LoadingTicketGrid
+                  setTickets={setLoadingTickets}
+                  currentStep={currentStep}
+                  setPrevStep={setPrevStep}
+                  transferAssetId={id}
+                  transferAssetData={transferAssetData}
+                  permissions={permissions}
+                  setNextStep={setNextStep}
+                  setExistingAssets={setExistingAssets}
+                  setTransferIsEnded={setTransferIsEnded}
+                  updateTransferStatus={updateTransferStatus}
+                  handleViewPdf={handleViewPdf}
+                  fileDownloading={fileDownloading}
+                  isTransferEnded={isTransferEnded}
+                  renderedFrom={`${renderedFrom}_grid-2`}
+                  allowedToEdit={allowedToEdit || isProcessor}
+                  canReceive={canReceive}
+                />
+              )}
+              {currentStep === 2 && (
+                <ReceivingTicketGrid
+                  setTickets={setReceivingTickets}
+                  currentStep={currentStep}
+                  setPrevStep={setPrevStep}
+                  transferAssetId={id}
+                  transferAssetData={transferAssetData}
+                  fetchAssets={fetchAssets}
+                  permissions={permissions}
+                  setNextStep={setNextStep}
+                  setTransferIsEnded={setTransferIsEnded}
+                  updateTransferStatus={updateTransferStatus}
+                  handleViewPdf={handleViewPdf}
+                  fileDownloading={fileDownloading}
+                  isTransferEnded={isTransferEnded}
+                  renderedFrom={`${renderedFrom}_grid-3`}
+                  allowedToEdit={allowedToEdit || isProcessor}
+                />
+              )}
+            </ContentFullScreen>
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Box>
+            <TransferAssetViews tANumber={transferAssetData?.transferAssetNumber} tAId={id} />
+          </Box>
+        </TabPanel>
+      </Box>
       {/* Confirm Delete Dialog */}
-      {showConfirmBox && (
-        <ConfirmationDialog
-          okBtnLoading={isDeleting}
-          open={showConfirmBox}
-          message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          onOk={handleDelete}
-        />
-      )}
+      {
+        showConfirmBox && (
+          <ConfirmationDialog
+            okBtnLoading={isDeleting}
+            open={showConfirmBox}
+            message={`Are you sure you want to delete this transfer asset: ${headingLabel} ?`}
+            onClose={() => {
+              setShowConfirmBox(false);
+            }}
+            onOk={handleDelete}
+          />
+        )
+      }
       {/* Manage Transfer Asset Data */}
-      {openUpdateDialog && (
-        <ManageTransferAsset
-          isEditable={existingAssets.length > 0}
-          isMainInfoEditable={currentStep >= 1 && (loadingTickets.length > 0 || receivingTickets.length > 0)}
-          number={transferAssetData?.transferAssetNumber}
-          isClone={false}
-          transferAssetId={id}
-          onClose={() => {
-            setOpenUpdateDialog(false);
-          }}
-          onSuccess={() => {
-            fetchTransferAssetData();
-            setOpenUpdateDialog(false);
-          }}
-        />
-      )}
-    </>
+      {
+        openUpdateDialog && (
+          <ManageTransferAsset
+            isEditable={existingAssets.length > 0}
+            isMainInfoEditable={currentStep >= 1 && (loadingTickets.length > 0 || receivingTickets.length > 0)}
+            number={transferAssetData?.transferAssetNumber}
+            isClone={false}
+            transferAssetId={id}
+            onClose={() => {
+              setOpenUpdateDialog(false);
+            }}
+            onSuccess={() => {
+              fetchTransferAssetData();
+              setOpenUpdateDialog(false);
+            }}
+          />
+        )
+      }
+    </Box>
   );
 };
-
 export default TransferAssetDetailPage;
