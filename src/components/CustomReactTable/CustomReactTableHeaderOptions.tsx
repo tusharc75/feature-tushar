@@ -10,6 +10,8 @@ import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import ArrangeViewDialog from './ArrangeViewDialog';
 import ReportArrangeView from './ReportArrangeView';
 
+import { BsArrowLeftRight } from 'react-icons/bs';
+
 let timeout;
 export default function CustomReactTableHeaderOptions({
   columns,
@@ -110,9 +112,37 @@ export default function CustomReactTableHeaderOptions({
 
   return (
     <>
-      <Box className="ag-grid-listing-grid-header-options py-1 d-flex gap-2 justify-content-space-between">
-        <div className="d-flex gap-2">
-          <Button
+      <Tooltip title="Arrange View" placement="top">
+        <IconButton
+          aria-describedby="columnSelection"
+          size="small"
+          className="px-2"
+          color="primary"
+          style={{
+            zIndex: '2',
+            width: '38px',
+            height: '42px',
+            position: 'absolute',
+            background: 'white',
+            right: '1px',
+            top: showOnlyShowFilteredRecordSwitch ? '35px' : '1px',
+            padding: '11px',
+            boxShadow: '0px 3.92655px 39.2655px rgb(0 0 0, 0.8)',
+            borderLeft: '1px solid #E5E5E5',
+            borderRadius: '0'
+          }}
+          onClick={(event) => {
+            setOpenColumnSelection(true);
+            setOpenColumnSelectionAnchorEl(event.currentTarget);
+          }}
+        >
+          <BsArrowLeftRight />
+        </IconButton>
+      </Tooltip>
+      {showOnlyShowFilteredRecordSwitch && (
+        <Box className="ag-grid-listing-grid-header-options border px-2 py-1 d-flex gap-2 justify-content-space-between">
+          <div className="d-flex gap-2">
+            {/* <Button
             aria-describedby="columnSelection"
             size="small"
             className="px-2"
@@ -125,35 +155,33 @@ export default function CustomReactTableHeaderOptions({
             }}
           >
             Arrange View
-          </Button>
-          {showOnlyShowFilteredRecordSwitch && (
-            <>
-              <Divider orientation="vertical" flexItem className="mr-2" />
+          </Button> */}
+            {showOnlyShowFilteredRecordSwitch && (
+              <>
+                <FormControlLabel
+                  value={checked}
+                  checked={checked}
+                  onChange={() => {
+                    setChecked(!checked);
 
-              <FormControlLabel
-                value={checked}
-                checked={checked}
-                onChange={() => {
-                  setChecked(!checked);
+                    // if (gridDispatch) {
+                    //     gridDispatch({
+                    //         type: 'showFilteredRecordsOnly',
+                    //         // showFilteredRecordsOnly: columnApi.getColumnState().filter((d) => ['asc', 'desc'].some((s) => s === d.sort))
+                    //     });
+                    // }
+                  }}
+                  control={<Switch size="small" color="primary" disabled={disableSelectionSwitch} />}
+                  style={{ fontSize: '0.8rem', marginLeft: '5px' }}
+                  label="Show Only Selected"
+                  labelPlacement="end"
+                />
+              </>
+            )}
+          </div>
 
-                  // if (gridDispatch) {
-                  //     gridDispatch({
-                  //         type: 'showFilteredRecordsOnly',
-                  //         // showFilteredRecordsOnly: columnApi.getColumnState().filter((d) => ['asc', 'desc'].some((s) => s === d.sort))
-                  //     });
-                  // }
-                }}
-                control={<Switch size="small" color="primary" disabled={disableSelectionSwitch} />}
-                style={{ fontSize: '0.8rem' }}
-                label="Show Only Selected"
-                labelPlacement="end"
-              />
-            </>
-          )}
-        </div>
-
-        <div>
-          {/* {refreshGrid && (
+          <div>
+            {/* {refreshGrid && (
                         <>
                             <Tooltip title="Refresh">
                                 <IconButton
@@ -173,8 +201,9 @@ export default function CustomReactTableHeaderOptions({
                             </Tooltip>
                         </>
                     )} */}
-        </div>
-      </Box>
+          </div>
+        </Box>
+      )}
 
       {openColumnSelection && (
         <>
