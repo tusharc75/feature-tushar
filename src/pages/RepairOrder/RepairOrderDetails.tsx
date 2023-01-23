@@ -353,7 +353,7 @@ const RepairOrderDetails = () => {
                       onClick={() => setOpenUpdateDialog(true)}
                       className={'btn-outline-v1'}
                     >
-                      {isMobile && !isTablet ? <BiEdit size={20} /> : 'Edit'}
+                      {isMobile ? <BiEdit size={20} /> : 'Edit'}
                     </Button>
                   )}
                 {permissions?.repairOrder?.isDelete && allowedToDelete && repairOrderData?.canDelete && (
